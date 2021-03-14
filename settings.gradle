@@ -1,0 +1,4 @@
+include 'api', 'app', 'services'
+
+rootProject.name='jd-gui-bundle'
+
