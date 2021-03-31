@@ -7,22 +7,33 @@
 
 package org.jdv1.gui.service.sourcesaver;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.service.sourcesaver.AbstractSourceSaverProvider;
 import org.jd.gui.spi.SourceSaver;
-import org.jd.gui.util.exception.ExceptionUtil;
 
 public class DirectorySourceSaverProvider extends AbstractSourceSaverProvider {
 
     @Override public String[] getSelectors() { return appendSelectors("*:dir:*"); }
 
-    @Override public String getSourcePath(Container.Entry entry) { return entry.getPath() + ".src.zip"; }
+    @Override public String getSourcePath(Container.Entry entry) {
+    	File file = new File(entry.getUri()); 
+    	Pattern jarPattern = Pattern.compile("\\.jar$");
+    	Matcher jarMatcher = jarPattern.matcher(file.getAbsolutePath());
+    	if(jarMatcher.find()) {
+    		return jarMatcher.replaceFirst("-sources.jar"); 
+    	}
+    	return entry.getPath() + ".src.zip";
+    }
 
     @Override public int getFileCount(API api, Container.Entry entry) { return getFileCount(api, entry.getChildren()); }
 
