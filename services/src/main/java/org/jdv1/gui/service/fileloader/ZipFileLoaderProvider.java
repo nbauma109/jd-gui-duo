@@ -20,7 +20,7 @@ import java.util.Iterator;
 
 import org.jd.gui.api.API;
 import org.jd.gui.service.fileloader.AbstractFileLoaderProvider;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 
 public class ZipFileLoaderProvider extends AbstractFileLoaderProvider {
     protected static final String[] EXTENSIONS = { "zip" };

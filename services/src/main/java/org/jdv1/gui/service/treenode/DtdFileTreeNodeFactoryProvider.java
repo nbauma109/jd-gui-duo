@@ -35,14 +35,24 @@ public class DtdFileTreeNodeFactoryProvider extends TextFileTreeNodeFactoryProvi
     }
 
     protected static class TreeNode extends TextFileTreeNodeFactoryProvider.TreeNode {
-        public TreeNode(Container.Entry entry, Object userObject) { super(entry, userObject); }
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		public TreeNode(Container.Entry entry, Object userObject) { super(entry, userObject); }
 
         // --- PageCreator --- //
         @Override
         @SuppressWarnings("unchecked")
         public <T extends JComponent & UriGettable> T createPage(API api) {
             return (T)new TextFileTreeNodeFactoryProvider.Page(entry) {
-                @Override public String getSyntaxStyle() { return SyntaxConstants.SYNTAX_STYLE_DTD; }
+                /**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				@Override public String getSyntaxStyle() { return SyntaxConstants.SYNTAX_STYLE_DTD; }
             };
         }
     }

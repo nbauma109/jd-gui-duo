@@ -19,7 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
 
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 
 public class ExtensionService {
     protected static final ExtensionService EXTENSION_SERVICE = new ExtensionService();

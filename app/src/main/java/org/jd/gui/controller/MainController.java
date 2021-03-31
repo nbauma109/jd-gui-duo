@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -43,6 +42,8 @@ import javax.swing.TransferHandler;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContentCopyable;
 import org.jd.gui.api.feature.ContentIndexable;
 import org.jd.gui.api.feature.ContentSavable;
@@ -77,11 +78,9 @@ import org.jd.gui.spi.SourceSaver;
 import org.jd.gui.spi.TreeNodeFactory;
 import org.jd.gui.spi.TypeFactory;
 import org.jd.gui.spi.UriLoader;
-import org.jd.gui.util.exception.ExceptionUtil;
 import org.jd.gui.util.net.UriUtil;
 import org.jd.gui.util.swing.SwingUtil;
 import org.jd.gui.view.MainView;
-import org.jd.gui.api.API;
 import org.jdv1.gui.api.feature.IndexesChangeListener;
 import org.jdv1.gui.service.fileloader.FileLoaderService;
 import org.jdv1.gui.service.sourceloader.SourceLoaderService;
@@ -281,7 +280,7 @@ public class MainController implements API {
                 JFileChooser chooser = new JFileChooser();
                 JFrame mainFrame = mainView.getMainFrame();
 
-                chooser.setSelectedFile(new File(configuration.getRecentSaveDirectory(), sourcesSavable.getSourceFileName()));
+                chooser.setSelectedFile(new File(sourcesSavable.getSourceFileName()));
 
                 if (chooser.showSaveDialog(mainFrame) == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = chooser.getSelectedFile();
@@ -441,7 +440,6 @@ public class MainController implements API {
             Map<String, String> preferences = configuration.getPreferences();
             Integer currentHashcode = Integer.valueOf(preferences.hashCode());
             Integer lastHashcode = (Integer)page.getClientProperty("preferences-hashCode");
-
             if (!currentHashcode.equals(lastHashcode)) {
                 ((PreferencesChangeListener)page).preferencesChanged(preferences);
                 page.putClientProperty("preferences-hashCode", currentHashcode);

@@ -23,7 +23,7 @@ import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.PageCreator;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.util.io.TextReader;
 import org.jd.gui.view.component.TextPage;
 import org.jd.gui.view.data.TreeNodeBean;
@@ -55,7 +55,12 @@ public class TextFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvider
     }
 
     protected static class TreeNode extends FileTreeNodeFactoryProvider.TreeNode implements PageCreator {
-        public TreeNode(Container.Entry entry, Object userObject) { super(entry, userObject); }
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		public TreeNode(Container.Entry entry, Object userObject) { super(entry, userObject); }
 
         // --- PageCreator --- //
         @Override
@@ -66,7 +71,11 @@ public class TextFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvider
     }
 
     protected static class Page extends TextPage implements UriGettable {
-        protected Container.Entry entry;
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		protected Container.Entry entry;
 
         public Page(Container.Entry entry) {
             this.entry = entry;

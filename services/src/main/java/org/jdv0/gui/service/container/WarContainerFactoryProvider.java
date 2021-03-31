@@ -15,7 +15,7 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.model.container.WarContainer;
 import org.jd.gui.spi.ContainerFactory;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 
 public class WarContainerFactoryProvider implements ContainerFactory {
 

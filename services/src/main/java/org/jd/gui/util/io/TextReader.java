@@ -7,7 +7,7 @@
 
 package org.jd.gui.util.io;
 
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 
 import java.io.*;
 

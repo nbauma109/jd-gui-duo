@@ -18,7 +18,11 @@ import javax.swing.JPanel;
 import org.jd.gui.spi.PreferencesPanel;
 
 public class ClassFileSaverPreferencesProvider extends JPanel implements PreferencesPanel {
-    protected static final String WRITE_LINE_NUMBERS = "ClassFileSaverPreferences.writeLineNumbers";
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	protected static final String WRITE_LINE_NUMBERS = "ClassFileSaverPreferences.writeLineNumbers";
     protected static final String WRITE_METADATA = "ClassFileSaverPreferences.writeMetadata";
 
     protected JCheckBox writeLineNumbersCheckBox;

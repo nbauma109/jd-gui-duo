@@ -33,7 +33,7 @@ import javax.xml.stream.XMLStreamWriter;
 import org.jd.gui.Constants;
 import org.jd.gui.model.configuration.Configuration;
 import org.jd.gui.service.platform.PlatformService;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 
 public class ConfigurationXmlPersisterProvider implements ConfigurationPersister {
     protected static final String ERROR_BACKGROUND_COLOR = "JdGuiPreferences.errorBackgroundColor";

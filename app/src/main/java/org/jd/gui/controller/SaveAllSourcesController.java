@@ -9,7 +9,7 @@ package org.jd.gui.controller;
 
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.SourcesSavable;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.view.SaveAllSourcesView;
 
 import javax.swing.*;

@@ -65,7 +65,12 @@ public class PackageTreeNodeFactoryProvider extends DirectoryTreeNodeFactoryProv
     @Override public ImageIcon getOpenIcon() { return null; }
 
     protected static class TreeNode extends DirectoryTreeNodeFactoryProvider.TreeNode {
-        public TreeNode(Container.Entry entry, Object userObject) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		public TreeNode(Container.Entry entry, Object userObject) {
             super(entry, userObject);
         }
 

@@ -8,7 +8,7 @@
 package org.jd.gui.service.sourcesaver;
 
 import org.jd.gui.spi.SourceSaver;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 
 import java.io.IOException;
 import java.io.InputStream;

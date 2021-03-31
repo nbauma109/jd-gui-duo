@@ -18,7 +18,7 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.service.indexer.AbstractIndexerProvider;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ModuleVisitor;
@@ -37,7 +37,6 @@ public class JavaModuleInfoFileIndexerProvider extends AbstractIndexerProvider {
     @Override public String[] getSelectors() { return appendSelectors("jmod:file:classes/module-info.class"); }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void index(API api, Container.Entry entry, Indexes indexes) {
         // Cleaning sets...
         javaModuleDeclarationSet.clear();

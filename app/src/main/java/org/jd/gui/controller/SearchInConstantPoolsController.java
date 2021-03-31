@@ -29,7 +29,7 @@ import org.jd.gui.api.model.Indexes;
 import org.jd.gui.api.model.Type;
 import org.jd.gui.service.type.TypeFactoryService;
 import org.jd.gui.spi.TypeFactory;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.util.function.TriConsumer;
 import org.jd.gui.view.SearchInConstantPoolsView;
 import org.jd.gui.api.API;
@@ -67,7 +67,12 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
         );
         // Create result cache
         this.cache = new LinkedHashMap<String, Map<String, Collection>>(CACHE_MAX_ENTRIES*3/2, 0.7f, true) {
-            @Override
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			@Override
             protected boolean removeEldestEntry(Map.Entry<String, Map<String, Collection>> eldest) {
                 return size() > CACHE_MAX_ENTRIES;
             }

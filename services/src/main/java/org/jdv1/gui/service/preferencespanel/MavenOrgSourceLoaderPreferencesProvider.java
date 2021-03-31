@@ -25,10 +25,13 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import org.jd.gui.spi.PreferencesPanel;
-import org.jd.gui.spi.PreferencesPanel.PreferencesPanelChangeListener;
 
 public class MavenOrgSourceLoaderPreferencesProvider extends JPanel implements PreferencesPanel, DocumentListener, ActionListener {
-    public static final String ACTIVATED = "MavenOrgSourceLoaderPreferencesProvider.activated";
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	public static final String ACTIVATED = "MavenOrgSourceLoaderPreferencesProvider.activated";
     public static final String FILTERS = "MavenOrgSourceLoaderPreferencesProvider.filters";
 
     public static final String DEFAULT_FILTERS_VALUE =
@@ -57,7 +60,12 @@ public class MavenOrgSourceLoaderPreferencesProvider extends JPanel implements P
         filtersTextArea.getDocument().addDocumentListener(this);
         defaultBackgroundColor = filtersTextArea.getBackground();
 
-        JComponent spacer = new JComponent() {};
+        JComponent spacer = new JComponent() {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;};
         JScrollPane scrollPane = new JScrollPane(filtersTextArea);
 
         String osName = System.getProperty("os.name").toLowerCase();

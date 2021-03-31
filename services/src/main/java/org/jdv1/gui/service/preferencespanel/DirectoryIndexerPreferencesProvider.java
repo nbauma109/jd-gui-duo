@@ -8,7 +8,7 @@
 package org.jdv1.gui.service.preferencespanel;
 
 import org.jd.gui.spi.PreferencesPanel;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -17,7 +17,11 @@ import java.awt.*;
 import java.util.Map;
 
 public class DirectoryIndexerPreferencesProvider extends JPanel implements PreferencesPanel, DocumentListener {
-    protected static final int MAX_VALUE = 30;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	protected static final int MAX_VALUE = 30;
     protected static final String MAXIMUM_DEPTH_KEY = "DirectoryIndexerPreferences.maximumDepth";
 
     protected PreferencesPanel.PreferencesPanelChangeListener listener = null;

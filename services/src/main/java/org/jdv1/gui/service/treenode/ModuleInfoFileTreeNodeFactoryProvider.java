@@ -21,7 +21,7 @@ import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Type;
 import org.jd.gui.spi.TypeFactory;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.view.data.TreeNodeBean;
 import org.jdv1.gui.view.component.ModuleInfoFilePage;
 
@@ -51,7 +51,12 @@ public class ModuleInfoFileTreeNodeFactoryProvider extends ClassFileTreeNodeFact
     }
 
     protected static class ModuleInfoFileTreeNode extends FileTreeNode {
-        public ModuleInfoFileTreeNode(Container.Entry entry, Object userObject, PageAndTipFactory pageAndTipFactory) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		public ModuleInfoFileTreeNode(Container.Entry entry, Object userObject, PageAndTipFactory pageAndTipFactory) {
             super(entry, null, userObject, pageAndTipFactory);
         }
 

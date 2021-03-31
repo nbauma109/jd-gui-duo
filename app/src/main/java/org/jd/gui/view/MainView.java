@@ -7,7 +7,10 @@
 
 package org.jd.gui.view;
 
-import static org.jd.gui.util.swing.SwingUtil.*;
+import static org.jd.gui.util.swing.SwingUtil.getImage;
+import static org.jd.gui.util.swing.SwingUtil.invokeLater;
+import static org.jd.gui.util.swing.SwingUtil.newAction;
+import static org.jd.gui.util.swing.SwingUtil.newImageIcon;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -51,7 +54,9 @@ import javax.swing.event.ChangeListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.Constants;
+import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContentCopyable;
 import org.jd.gui.api.feature.ContentSavable;
 import org.jd.gui.api.feature.ContentSearchable;
@@ -67,9 +72,7 @@ import org.jd.gui.api.feature.UriOpenable;
 import org.jd.gui.model.configuration.Configuration;
 import org.jd.gui.model.history.History;
 import org.jd.gui.service.platform.PlatformService;
-import org.jd.gui.util.exception.ExceptionUtil;
 import org.jd.gui.view.component.IconButton;
-import org.jd.gui.api.API;
 import org.jd.gui.view.component.panel.MainTabbedPanel;
 
 @SuppressWarnings("unchecked")

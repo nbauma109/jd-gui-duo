@@ -59,8 +59,13 @@ public class DirectoryTreeNodeFactoryProvider extends AbstractTreeNodeFactoryPro
     public ImageIcon getOpenIcon() { return OPEN_ICON; }
 
     protected static class TreeNode extends DefaultMutableTreeNode implements ContainerEntryGettable, UriGettable, TreeNodeExpandable {
-        Container.Entry entry;
-        boolean initialized;
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		
+		protected Container.Entry entry;
+		protected boolean initialized;
 
         public TreeNode(Container.Entry entry, Object userObject) {
             super(userObject);

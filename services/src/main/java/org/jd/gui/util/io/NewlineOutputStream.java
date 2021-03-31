@@ -10,7 +10,7 @@ package org.jd.gui.util.io;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public class NewlineOutputStream extends FilterOutputStream {
     private static byte[] lineSeparator;
@@ -24,7 +24,7 @@ public class NewlineOutputStream extends FilterOutputStream {
             if ((s == null) || (s.length() <= 0))
                 s = "\n";
 
-            lineSeparator = s.getBytes(Charset.forName("UTF-8"));
+            lineSeparator = s.getBytes(StandardCharsets.UTF_8);
         }
     }
 

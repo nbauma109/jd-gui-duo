@@ -27,7 +27,7 @@ import org.jd.gui.spi.ContainerFactory;
 import org.jd.gui.spi.FileLoader;
 import org.jd.gui.spi.PanelFactory;
 import org.jd.gui.spi.TreeNodeFactory;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 
 public abstract class AbstractFileLoaderProvider implements FileLoader {

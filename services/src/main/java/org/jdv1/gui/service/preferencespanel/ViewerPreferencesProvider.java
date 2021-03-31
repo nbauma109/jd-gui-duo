@@ -10,7 +10,7 @@ package org.jdv1.gui.service.preferencespanel;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.Theme;
 import org.jd.gui.spi.PreferencesPanel;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -20,7 +20,11 @@ import java.io.IOException;
 import java.util.Map;
 
 public class ViewerPreferencesProvider extends JPanel implements PreferencesPanel, DocumentListener {
-    protected static final int MIN_VALUE = 2;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	protected static final int MIN_VALUE = 2;
     protected static final int MAX_VALUE = 40;
     protected static final String FONT_SIZE_KEY = "ViewerPreferences.fontSize";
 

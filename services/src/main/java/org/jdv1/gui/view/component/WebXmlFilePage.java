@@ -22,8 +22,9 @@ import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.util.io.TextReader;
+import org.jd.gui.util.parser.jdt.core.HyperlinkData;
 import org.jd.gui.util.xml.AbstractXmlPathFinder;
 import org.jd.gui.view.component.TypeReferencePage;
 import org.jd.gui.api.API;
@@ -31,7 +32,10 @@ import org.jdv1.gui.api.feature.IndexesChangeListener;
 import org.jdv1.gui.util.index.IndexesUtil;
 
 public class WebXmlFilePage extends TypeReferencePage implements UriGettable, IndexesChangeListener {
-    protected API api;
+
+	private static final long serialVersionUID = 1L;
+	
+	protected API api;
     protected Container.Entry entry;
     protected Collection<Future<Indexes>> collectionOfFutureIndexes;
 

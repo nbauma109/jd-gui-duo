@@ -14,7 +14,7 @@ import java.nio.file.Path;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.model.container.EarContainer;
 import org.jd.gui.spi.ContainerFactory;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 
 public class EarContainerFactoryProvider implements ContainerFactory {

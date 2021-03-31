@@ -16,7 +16,7 @@ import javax.swing.JComponent;
 
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.UriOpenable;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 
 public abstract class AbstractTypeFileLoaderProvider extends AbstractFileLoaderProvider {
     protected boolean load(API api, File file, String pathInFile) {

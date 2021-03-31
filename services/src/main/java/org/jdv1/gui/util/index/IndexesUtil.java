@@ -15,14 +15,13 @@ import java.util.concurrent.Future;
 
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 
 public class IndexesUtil {
     public static boolean containsInternalTypeName(Collection<Future<Indexes>> collectionOfFutureIndexes, String internalTypeName) {
         return contains(collectionOfFutureIndexes, "typeDeclarations", internalTypeName);
     }
 
-    @SuppressWarnings("unchecked")
     public static List<Container.Entry> findInternalTypeName(Collection<Future<Indexes>> collectionOfFutureIndexes, String internalTypeName) {
         return find(collectionOfFutureIndexes, "typeDeclarations", internalTypeName);
     }

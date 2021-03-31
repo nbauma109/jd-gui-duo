@@ -15,7 +15,7 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 import org.jd.gui.spi.TreeNodeFactory;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 
 public abstract class AbstractTreeNodeFactoryProvider implements TreeNodeFactory {
     protected List<String> externalSelectors;
@@ -26,7 +26,7 @@ public abstract class AbstractTreeNodeFactoryProvider implements TreeNodeFactory
      */
     public AbstractTreeNodeFactoryProvider() {
         Properties properties = new Properties();
-        Class clazz = this.getClass();
+        Class<?> clazz = this.getClass();
 
         try (InputStream is = clazz.getClassLoader().getResourceAsStream(clazz.getName().replace('.', '/') + ".properties")) {
             if (is != null) {

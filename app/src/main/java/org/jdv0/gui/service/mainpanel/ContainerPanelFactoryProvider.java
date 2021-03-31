@@ -35,7 +35,7 @@ import org.jd.gui.spi.Indexer;
 import org.jd.gui.spi.PanelFactory;
 import org.jd.gui.spi.SourceSaver;
 import org.jd.gui.spi.TreeNodeFactory;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.view.component.panel.TreeTabbedPanel;
 
 public class ContainerPanelFactoryProvider implements PanelFactory {
@@ -50,7 +50,11 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
 	}
 
     protected class ContainerPanel extends TreeTabbedPanel implements ContentIndexable, SourcesSavable {
-        protected Container.Entry entry;
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		protected Container.Entry entry;
 
         public ContainerPanel(API api, Container container) {
             super(api, container.getRoot().getParent().getUri());

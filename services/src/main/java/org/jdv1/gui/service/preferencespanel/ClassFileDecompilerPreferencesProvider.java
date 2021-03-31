@@ -18,7 +18,11 @@ import javax.swing.JPanel;
 import org.jd.gui.spi.PreferencesPanel;
 
 public class ClassFileDecompilerPreferencesProvider extends JPanel implements PreferencesPanel {
-    protected static final String ESCAPE_UNICODE_CHARACTERS = "ClassFileDecompilerPreferences.escapeUnicodeCharacters";
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	protected static final String ESCAPE_UNICODE_CHARACTERS = "ClassFileDecompilerPreferences.escapeUnicodeCharacters";
     protected static final String REALIGN_LINE_NUMBERS = "ClassFileDecompilerPreferences.realignLineNumbers";
 
     protected PreferencesPanel.PreferencesPanelChangeListener listener = null;

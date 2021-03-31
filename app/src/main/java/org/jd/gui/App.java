@@ -19,7 +19,7 @@ import org.jd.gui.controller.MainController;
 import org.jd.gui.model.configuration.Configuration;
 import org.jd.gui.service.configuration.ConfigurationPersister;
 import org.jd.gui.service.configuration.ConfigurationPersisterService;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.util.net.InterProcessCommunicationUtil;
 
 public class App {

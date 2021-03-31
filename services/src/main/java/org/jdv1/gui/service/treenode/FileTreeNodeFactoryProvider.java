@@ -34,7 +34,11 @@ public class FileTreeNodeFactoryProvider extends AbstractTreeNodeFactoryProvider
     }
 
     protected static class TreeNode extends DefaultMutableTreeNode implements ContainerEntryGettable, UriGettable {
-        protected Container.Entry entry;
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		protected Container.Entry entry;
 
         public TreeNode(Container.Entry entry, Object userObject) {
             super(userObject);

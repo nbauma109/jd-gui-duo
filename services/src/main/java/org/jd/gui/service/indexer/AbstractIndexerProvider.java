@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 
 import org.jd.gui.api.model.Container;
 import org.jd.gui.spi.Indexer;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.model.Indexes;
 
 public abstract class AbstractIndexerProvider implements Indexer {

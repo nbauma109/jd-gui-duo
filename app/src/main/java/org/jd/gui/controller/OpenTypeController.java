@@ -23,10 +23,10 @@ import java.util.regex.Pattern;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
-import org.jd.gui.util.exception.ExceptionUtil;
 import org.jd.gui.util.net.UriUtil;
 import org.jd.gui.view.OpenTypeView;
 import org.jdv1.gui.api.feature.IndexesChangeListener;
@@ -55,7 +55,12 @@ public class OpenTypeController implements IndexesChangeListener {
         selectLocationController = new SelectLocationController(api, mainFrame);
         // Create result cache
         cache = new LinkedHashMap<String, Map<String, Collection>>(CACHE_MAX_ENTRIES*3/2, 0.7f, true) {
-            @Override
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			@Override
             protected boolean removeEldestEntry(Map.Entry<String, Map<String, Collection>> eldest) {
                 return size() > CACHE_MAX_ENTRIES;
             }

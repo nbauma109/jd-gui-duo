@@ -22,7 +22,7 @@ import javax.swing.ImageIcon;
 
 import org.jd.gui.api.model.Type;
 import org.jd.gui.spi.TypeFactory;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jdv1.gui.service.type.ClassFileTypeFactoryProvider;
 
 public abstract class AbstractTypeFactoryProvider implements TypeFactory {

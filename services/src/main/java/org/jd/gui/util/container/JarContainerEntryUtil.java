@@ -9,7 +9,7 @@ package org.jd.gui.util.container;
 
 import org.jd.gui.api.model.Container;
 import org.jd.gui.model.container.ContainerEntryComparator;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;

@@ -25,19 +25,17 @@ import javax.swing.JComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContentIndexable;
 import org.jd.gui.api.feature.SourcesSavable;
-import org.jd.gui.api.feature.SourcesSavable.Controller;
-import org.jd.gui.api.feature.SourcesSavable.Listener;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
+import org.jd.gui.api.model.Indexes;
 import org.jd.gui.spi.Indexer;
 import org.jd.gui.spi.PanelFactory;
 import org.jd.gui.spi.SourceSaver;
 import org.jd.gui.spi.TreeNodeFactory;
-import org.jd.gui.util.exception.ExceptionUtil;
-import org.jd.gui.api.API;
-import org.jd.gui.api.model.Indexes;
 import org.jd.gui.view.component.panel.TreeTabbedPanel;
 
 public class ContainerPanelFactoryProvider implements PanelFactory {
@@ -95,11 +93,8 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
         @Override
         public String getSourceFileName() {
             SourceSaver saver = api.getSourceSaver(entry);
-
             if (saver != null) {
-                String path = saver.getSourcePath(entry);
-                int index = path.lastIndexOf('/');
-                return path.substring(index+1);
+                return saver.getSourcePath(entry);
             } else {
                 return null;
             }

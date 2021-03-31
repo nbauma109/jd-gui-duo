@@ -21,7 +21,7 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Type;
 import org.jd.gui.service.type.AbstractTypeFactoryProvider;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
@@ -140,7 +140,6 @@ public class ClassFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
         protected List<Type.Field> fields = new ArrayList<>();
         protected List<Type.Method> methods = new ArrayList<>();
 
-        @SuppressWarnings("unchecked")
         protected JavaType(Container.Entry entry, ClassReader classReader, final int outerAccess) {
             this.entry = entry;
 
@@ -246,7 +245,6 @@ public class ClassFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
             classReader.accept(fieldsAndMethodsVisitor, ClassReader.SKIP_CODE|ClassReader.SKIP_DEBUG|ClassReader.SKIP_FRAMES);
         }
 
-        @SuppressWarnings("unchecked")
         protected String getDisplayTypeName(String name, int packageLength) {
             int indexDollar = name.lastIndexOf('$');
 

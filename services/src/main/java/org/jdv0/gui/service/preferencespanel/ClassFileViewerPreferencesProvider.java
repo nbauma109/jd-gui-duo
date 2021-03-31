@@ -18,7 +18,11 @@ import javax.swing.JPanel;
 import org.jd.gui.spi.PreferencesPanel;
 
 public class ClassFileViewerPreferencesProvider extends JPanel implements PreferencesPanel {
-    protected static final String ESCAPE_UNICODE_CHARACTERS = "ClassFileViewerPreferences.escapeUnicodeCharacters";
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	protected static final String ESCAPE_UNICODE_CHARACTERS = "ClassFileViewerPreferences.escapeUnicodeCharacters";
     protected static final String OMIT_THIS_PREFIX = "ClassFileViewerPreferences.omitThisPrefix";
     protected static final String REALIGN_LINE_NUMBERS = "ClassFileViewerPreferences.realignLineNumbers";
     protected static final String DISPLAY_DEFAULT_CONSTRUCTOR = "ClassFileViewerPreferences.displayDefaultConstructor";

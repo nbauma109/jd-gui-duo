@@ -26,7 +26,7 @@ import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.PageCreator;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.view.data.TreeNodeBean;
 
 public class ImageFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvider {
@@ -44,7 +44,12 @@ public class ImageFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvide
     }
 
     protected static class TreeNode extends FileTreeNodeFactoryProvider.TreeNode implements PageCreator {
-        public TreeNode(Container.Entry entry, Object userObject) { super(entry, userObject); }
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		public TreeNode(Container.Entry entry, Object userObject) { super(entry, userObject); }
 
         // --- PageCreator --- //
         @Override
@@ -55,7 +60,11 @@ public class ImageFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvide
     }
 
     protected static class ImagePage extends JPanel implements UriGettable {
-        protected Container.Entry entry;
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		protected Container.Entry entry;
 
         public ImagePage(Container.Entry entry) {
             super(new BorderLayout());

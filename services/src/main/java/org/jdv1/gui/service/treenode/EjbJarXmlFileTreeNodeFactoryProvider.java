@@ -34,7 +34,12 @@ public class EjbJarXmlFileTreeNodeFactoryProvider extends FileTreeNodeFactoryPro
     }
 
     protected static class TreeNode extends FileTreeNodeFactoryProvider.TreeNode implements PageCreator {
-        public TreeNode(Container.Entry entry, Object userObject) { super(entry, userObject); }
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		public TreeNode(Container.Entry entry, Object userObject) { super(entry, userObject); }
 
         // --- PageCreator --- //
         @Override

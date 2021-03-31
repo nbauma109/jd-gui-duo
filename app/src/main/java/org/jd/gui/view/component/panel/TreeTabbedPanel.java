@@ -44,13 +44,17 @@ import org.jd.gui.api.feature.TreeNodeExpandable;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.feature.UriOpenable;
 import org.jd.gui.api.model.TreeNodeData;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.view.component.Tree;
 import org.jd.gui.view.renderer.TreeNodeRenderer;
 import org.jd.gui.api.API;
 
 public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> extends JPanel implements UriGettable, UriOpenable, PageChangeable, PageClosable, PreferencesChangeListener {
-    protected API api;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	protected API api;
     protected URI uri;
     protected Tree tree;
     protected TabbedPanel tabbedPanel;

@@ -36,7 +36,11 @@ import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextAreaUI;
 
 public abstract class CustomLineNumbersPage extends HyperlinkPage {
-    protected Color errorForeground = Color.RED;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	protected Color errorForeground = Color.RED;
     protected boolean showMisalignment = true;
 
     public void setErrorForeground(Color color) {
@@ -128,7 +132,12 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
 	}
 
 	public class SourceSyntaxTextArea extends HyperlinkSyntaxTextArea {
-        @Override protected RTextAreaUI createRTextAreaUI() { return new SourceSyntaxTextAreaUI(this); }
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		@Override protected RTextAreaUI createRTextAreaUI() { return new SourceSyntaxTextAreaUI(this); }
     }
 
     /**
@@ -141,14 +150,23 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
     }
 
     public class SourceSyntaxTextAreaEditorKit extends RSyntaxTextAreaEditorKit {
-        @Override public LineNumberList createLineNumberList(RTextArea textArea) { return new SourceLineNumberList(textArea); }
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		@Override public LineNumberList createLineNumberList(RTextArea textArea) { return new SourceLineNumberList(textArea); }
     }
 
     /**
      * Why 'LineNumberList' is so unexpandable ? Too many private fields & methods and too many package scope.
      */
     public class SourceLineNumberList extends LineNumberList {
-        protected RTextArea rTextArea;
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		protected RTextArea rTextArea;
         protected Map<?,?> aaHints;
         protected Rectangle visibleRect;
         protected Insets textAreaInsets;

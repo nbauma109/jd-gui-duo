@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,15 +45,17 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 import org.fife.ui.rtextarea.SearchResult;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.feature.ContentSearchable;
 import org.jd.gui.api.feature.LineNumberNavigable;
 import org.jd.gui.api.feature.PreferencesChangeListener;
 import org.jd.gui.api.feature.UriOpenable;
-import org.jd.gui.util.exception.ExceptionUtil;
-import org.jd.gui.view.component.RoundMarkErrorStrip;
 
 public class AbstractTextPage extends JPanel implements LineNumberNavigable, ContentSearchable, UriOpenable, PreferencesChangeListener {
-    protected static final String FONT_SIZE_KEY = "ViewerPreferences.fontSize";
+
+	private static final long serialVersionUID = 1L;
+
+	protected static final String FONT_SIZE_KEY = "ViewerPreferences.fontSize";
 
     protected static final ImageIcon COLLAPSED_ICON = new ImageIcon(AbstractTextPage.class.getClassLoader().getResource("org/jd/gui/images/plus.png"));
     protected static final ImageIcon EXPANDED_ICON = new ImageIcon(AbstractTextPage.class.getClassLoader().getResource("org/jd/gui/images/minus.png"));
@@ -391,12 +394,13 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
             for (String param : query.split("&")) {
                 int index = param.indexOf('=');
 
-                if (index == -1) {
-                    parameters.put(URLDecoder.decode(param, "UTF-8"), "");
+                String enc = StandardCharsets.UTF_8.name();
+				if (index == -1) {
+                    parameters.put(URLDecoder.decode(param, enc), "");
                 } else {
                     String key = param.substring(0, index);
                     String value = param.substring(index + 1);
-                    parameters.put(URLDecoder.decode(key, "UTF-8"), URLDecoder.decode(value, "UTF-8"));
+                    parameters.put(URLDecoder.decode(key, enc), URLDecoder.decode(value, enc));
                 }
             }
         } catch (UnsupportedEncodingException e) {
