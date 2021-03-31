@@ -13,22 +13,25 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.Proxy;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.service.sourcesaver.AbstractSourceSaverProvider;
-import org.jd.gui.util.exception.ExceptionUtil;
-import org.jd.gui.util.io.NewlineOutputStream;
-import org.jdv0.gui.util.decompiler.ContainerLoader;
-import org.jdv0.gui.util.decompiler.GuiPreferences;
+import org.jd.gui.util.decompiler.ContainerLoader;
+import org.jd.gui.util.decompiler.GuiPreferences;
+import org.jd.gui.util.decompiler.postprocess.impl.LineNumberRealigner;
 import org.jdv0.gui.util.decompiler.PlainTextPrinter;
 
 import jd.core.CoreConstants;
 import jd.core.Decompiler;
+import jd.core.loader.Loader;
 import jd.core.process.DecompilerImpl;
 
 public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
@@ -93,12 +96,13 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
 
             // Init printer
             baos.reset();
-            PrintStream ps = new PrintStream(baos, true, "UTF-8");
+            PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name());
             printer.setPrintStream(ps);
             printer.setPreferences(preferences);
 
             // Decompile class file
-            DECOMPILER.decompile(preferences, loader, printer, entry.getPath());
+			Loader proxyLoader = (Loader) Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] {Loader.class}, loader);
+            DECOMPILER.decompile(preferences, proxyLoader, printer, entry.getPath());
 
             // Metadata
             if (getPreferenceValue(p, WRITE_METADATA, true)) {
@@ -132,11 +136,12 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
                 ps.print(CoreConstants.JD_CORE_VERSION);
                 ps.print("\n */");
             }
-
-            try (OutputStream os = new NewlineOutputStream(Files.newOutputStream(path))) {
-                baos.writeTo(os);
+            LineNumberRealigner lineNumberRealigner = new LineNumberRealigner();
+            String realigned = lineNumberRealigner.process(new String(baos.toByteArray(), StandardCharsets.UTF_8));
+            try (OutputStream os = Files.newOutputStream(path)) {
+            	os.write(realigned.getBytes(StandardCharsets.UTF_8));
             } catch (IOException e) {
-                assert ExceptionUtil.printStackTrace(e);
+            	assert ExceptionUtil.printStackTrace(e);
             }
         } catch (Throwable t) {
             assert ExceptionUtil.printStackTrace(t);

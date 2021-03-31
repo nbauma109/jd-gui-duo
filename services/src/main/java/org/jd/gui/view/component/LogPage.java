@@ -7,6 +7,8 @@
 
 package org.jd.gui.view.component;
 
+import static org.jd.gui.util.Key.key;
+
 import java.awt.Point;
 import java.net.URI;
 import java.util.Collection;
@@ -15,17 +17,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.api.API;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
-import org.jd.gui.util.exception.ExceptionUtil;
-import org.jd.gui.view.component.HyperlinkPage;
-import org.jd.gui.api.API;
+import org.jd.gui.util.parser.jdt.core.HyperlinkData;
 import org.jdv1.gui.api.feature.IndexesChangeListener;
 import org.jdv1.gui.util.index.IndexesUtil;
 
 public class LogPage extends HyperlinkPage implements UriGettable, IndexesChangeListener {
-    protected API api;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	protected API api;
     protected URI uri;
     protected Collection<Future<Indexes>> collectionOfFutureIndexes = Collections.emptyList();
 
@@ -59,9 +65,11 @@ public class LogPage extends HyperlinkPage implements UriGettable, IndexesChange
         }
     }
 
-    protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return ((LogHyperlinkData)hyperlinkData).enabled; }
+    @Override
+	protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return ((LogHyperlinkData)hyperlinkData).enabled; }
 
-    protected void openHyperlink(int x, int y, HyperlinkData hyperlinkData) {
+    @Override
+	protected void openHyperlink(int x, int y, HyperlinkData hyperlinkData) {
         LogHyperlinkData logHyperlinkData = (LogHyperlinkData)hyperlinkData;
 
         if (logHyperlinkData.enabled) {
@@ -73,12 +81,12 @@ public class LogPage extends HyperlinkPage implements UriGettable, IndexesChange
 
                 // Open link
                 String text = getText();
-                String typeAndMethodNames = text.substring(hyperlinkData.startPosition, hyperlinkData.endPosition);
+                String typeAndMethodNames = text.substring(hyperlinkData.getStartPosition(), hyperlinkData.getEndPosition());
                 int lastDotIndex = typeAndMethodNames.lastIndexOf('.');
                 String methodName = typeAndMethodNames.substring(lastDotIndex + 1);
                 String internalTypeName = typeAndMethodNames.substring(0, lastDotIndex).replace('.', '/');
                 List<Container.Entry> entries = IndexesUtil.findInternalTypeName(collectionOfFutureIndexes, internalTypeName);
-                int leftParenthesisIndex = hyperlinkData.endPosition + 1;
+                int leftParenthesisIndex = hyperlinkData.getEndPosition() + 1;
                 int rightParenthesisIndex = text.indexOf(')', leftParenthesisIndex);
                 String lineNumberOrNativeMethodFlag = text.substring(leftParenthesisIndex, rightParenthesisIndex);
 
@@ -86,7 +94,7 @@ public class LogPage extends HyperlinkPage implements UriGettable, IndexesChange
                     // Example: at java.security.AccessController.doPrivileged(Native Method)
                     lastDotIndex = internalTypeName.lastIndexOf('/');
                     String shortTypeName = internalTypeName.substring(lastDotIndex + 1);
-                    api.openURI(x, y, entries, null, shortTypeName + '-' + methodName + "-(*)?");
+                    api.openURI(x, y, entries, null, key(shortTypeName, methodName, "(*)?"));
                 } else {
                     // Example: at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:294)
                     int colonIndex = lineNumberOrNativeMethodFlag.indexOf(':');
@@ -100,17 +108,20 @@ public class LogPage extends HyperlinkPage implements UriGettable, IndexesChange
     }
 
     // --- UriGettable --- //
-    public URI getUri() { return uri; }
+    @Override
+	public URI getUri() { return uri; }
 
     // --- ContentSavable --- //
-    public String getFileName() {
+    @Override
+	public String getFileName() {
         String path = uri.getPath();
         int index = path.lastIndexOf('/');
         return path.substring(index + 1);
     }
 
     // --- IndexesChangeListener --- //
-    public void indexesChanged(Collection<Future<Indexes>> collectionOfFutureIndexes) {
+    @Override
+	public void indexesChanged(Collection<Future<Indexes>> collectionOfFutureIndexes) {
         // Update the list of containers
         this.collectionOfFutureIndexes = collectionOfFutureIndexes;
         // Refresh links
@@ -119,7 +130,7 @@ public class LogPage extends HyperlinkPage implements UriGettable, IndexesChange
 
         for (Map.Entry<Integer, HyperlinkData> entry : hyperlinks.entrySet()) {
             LogHyperlinkData entryData = (LogHyperlinkData)entry.getValue();
-            String typeAndMethodNames = text.substring(entryData.startPosition, entryData.endPosition);
+            String typeAndMethodNames = text.substring(entryData.getStartPosition(), entryData.getEndPosition());
             int lastDotIndex = typeAndMethodNames.lastIndexOf('.');
             String internalTypeName = typeAndMethodNames.substring(0, lastDotIndex).replace('.', '/');
             boolean enabled = IndexesUtil.containsInternalTypeName(collectionOfFutureIndexes, internalTypeName);

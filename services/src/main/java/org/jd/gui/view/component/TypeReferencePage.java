@@ -7,23 +7,30 @@
 
 package org.jd.gui.view.component;
 
-import org.fife.ui.rsyntaxtextarea.DocumentRange;
-import org.fife.ui.rtextarea.Marker;
-import org.jd.gui.util.exception.ExceptionUtil;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.fife.ui.rsyntaxtextarea.DocumentRange;
+import org.fife.ui.rtextarea.Marker;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.util.parser.jdt.core.HyperlinkData;
+
 /**
  * Page containing type references (Hyperlinks to pages of type)
  */
 public abstract class TypeReferencePage extends HyperlinkPage {
 
-    // --- UriOpenable --- //
-    public boolean openUri(URI uri) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	// --- UriOpenable --- //
+    @Override
+	public boolean openUri(URI uri) {
         ArrayList<DocumentRange> ranges = new ArrayList<>();
         String query = uri.getQuery();
 
@@ -78,7 +85,7 @@ public abstract class TypeReferencePage extends HyperlinkPage {
                             String name = getMostInnerTypeName(hyperlink.internalTypeName);
 
                             if (pattern.matcher(name).matches()) {
-                                ranges.add(new DocumentRange(hyperlink.startPosition, hyperlink.endPosition));
+                                ranges.add(new DocumentRange(hyperlink.getStartPosition(), hyperlink.getEndPosition()));
                             }
                         }
                     }

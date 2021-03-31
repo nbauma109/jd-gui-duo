@@ -32,16 +32,23 @@ import org.fife.ui.rsyntaxtextarea.Token;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.TokenMap;
 import org.fife.ui.rtextarea.Marker;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
-import org.jd.gui.util.exception.ExceptionUtil;
-import org.jd.gui.api.API;
-import org.jdv1.gui.util.decompiler.ContainerLoader;
+import org.jd.gui.util.decompiler.ContainerLoader;
+import org.jd.gui.util.parser.jdt.core.DeclarationData;
+import org.jd.gui.util.parser.jdt.core.HyperlinkData;
+import org.jd.gui.util.parser.jdt.core.HyperlinkReferenceData;
+import org.jd.gui.util.parser.jdt.core.ReferenceData;
 import org.jdv1.gui.util.decompiler.StringBuilderPrinter;
 import org.jdv1.gui.util.index.IndexesUtil;
 
 public class ModuleInfoFilePage extends ClassFilePage {
-    public static final String SYNTAX_STYLE_JAVA_MODULE = "text/java-module";
+
+	private static final long serialVersionUID = 1L;
+	
+	public static final String SYNTAX_STYLE_JAVA_MODULE = "text/java-module";
 
     static {
         // Add a new token maker for Java 9+ module
@@ -59,7 +66,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
             // Clear ...
             clearHyperlinks();
             clearLineNumbers();
-            typeDeclarations.clear();
+            listener.getTypeDeclarations().clear();
 
             // Init preferences
             boolean unicodeEscape = getPreferenceValue(preferences, ESCAPE_UNICODE_CHARACTERS, false);
@@ -91,7 +98,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
     protected void openHyperlink(int x, int y, HyperlinkData hyperlinkData) {
         HyperlinkReferenceData hyperlinkReferenceData = (HyperlinkReferenceData)hyperlinkData;
 
-        if (hyperlinkReferenceData.reference.enabled) {
+        if (hyperlinkReferenceData.getReference().isEnabled()) {
             try {
                 // Save current position in history
                 Point location = textArea.getLocationOnScreen();
@@ -100,21 +107,21 @@ public class ModuleInfoFilePage extends ClassFilePage {
                 api.addURI(new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), "position=" + offset, null));
 
                 // Open link
-                ModuleInfoReferenceData moduleInfoReferenceData = (ModuleInfoReferenceData)hyperlinkReferenceData.reference;
+                ModuleInfoReferenceData moduleInfoReferenceData = (ModuleInfoReferenceData)hyperlinkReferenceData.getReference();
                 List<Container.Entry> entries;
                 String fragment;
 
                 switch (moduleInfoReferenceData.type) {
                     case TYPE:
-                        entries = IndexesUtil.findInternalTypeName(collectionOfFutureIndexes, fragment = moduleInfoReferenceData.typeName);
+                        entries = IndexesUtil.findInternalTypeName(collectionOfFutureIndexes, fragment = moduleInfoReferenceData.getTypeName());
                         break;
                     case PACKAGE:
-                        entries = IndexesUtil.find(collectionOfFutureIndexes, "packageDeclarations", moduleInfoReferenceData.typeName);
+                        entries = IndexesUtil.find(collectionOfFutureIndexes, "packageDeclarations", moduleInfoReferenceData.getTypeName());
                         fragment = null;
                         break;
                     default: // MODULE
-                        entries = IndexesUtil.find(collectionOfFutureIndexes, "javaModuleDeclarations", moduleInfoReferenceData.name);
-                        fragment = moduleInfoReferenceData.typeName;
+                        entries = IndexesUtil.find(collectionOfFutureIndexes, "javaModuleDeclarations", moduleInfoReferenceData.getName());
+                        fragment = moduleInfoReferenceData.getTypeName();
                         break;
                 }
 
@@ -151,11 +158,11 @@ public class ModuleInfoFilePage extends ClassFilePage {
 
         Marker.clearMarkAllHighlights(textArea);
 
-        if ((fragment != null) && (declarations.size() == 1)) {
-            DeclarationData declaration = declarations.entrySet().iterator().next().getValue();
+        if ((fragment != null) && (listener.getDeclarations().size() == 1)) {
+            DeclarationData declaration = listener.getDeclarations().entrySet().iterator().next().getValue();
 
-            if (fragment.equals(declaration.typeName)) {
-                ranges.add(new DocumentRange(declaration.startPosition, declaration.endPosition));
+            if (fragment.equals(declaration.getTypeName())) {
+                ranges.add(new DocumentRange(declaration.getStartPosition(), declaration.getEndPosition()));
             }
         }
 
@@ -174,11 +181,11 @@ public class ModuleInfoFilePage extends ClassFilePage {
 
                 if (highlightFlags.indexOf('d') != -1) {
                     // Highlight declarations
-                    for (Map.Entry<String, DeclarationData> entry : declarations.entrySet()) {
+                    for (Map.Entry<String, DeclarationData> entry : listener.getDeclarations().entrySet()) {
                         DeclarationData declaration = entry.getValue();
 
                         if (M) {
-                            matchAndAddDocumentRange(pattern, declaration.name, declaration.startPosition, declaration.endPosition, ranges);
+                            matchAndAddDocumentRange(pattern, declaration.getName(), declaration.getStartPosition(), declaration.getEndPosition(), ranges);
                         }
                     }
                 }
@@ -187,14 +194,14 @@ public class ModuleInfoFilePage extends ClassFilePage {
                     // Highlight references
                     for (Map.Entry<Integer, HyperlinkData> entry : hyperlinks.entrySet()) {
                         HyperlinkData hyperlink = entry.getValue();
-                        ReferenceData reference = ((HyperlinkReferenceData)hyperlink).reference;
+                        ReferenceData reference = ((HyperlinkReferenceData)hyperlink).getReference();
                         ModuleInfoReferenceData moduleInfoReferenceData = (ModuleInfoReferenceData)reference;
 
                         if (t && (moduleInfoReferenceData.type == TYPE)) {
-                            matchAndAddDocumentRange(pattern, getMostInnerTypeName(moduleInfoReferenceData.typeName), hyperlink.startPosition, hyperlink.endPosition, ranges);
+                            matchAndAddDocumentRange(pattern, getMostInnerTypeName(moduleInfoReferenceData.getTypeName()), hyperlink.getStartPosition(), hyperlink.getEndPosition(), ranges);
                         }
                         if (M && (moduleInfoReferenceData.type == MODULE)) {
-                            matchAndAddDocumentRange(pattern, moduleInfoReferenceData.name, hyperlink.startPosition, hyperlink.endPosition, ranges);
+                            matchAndAddDocumentRange(pattern, moduleInfoReferenceData.getName(), hyperlink.getStartPosition(), hyperlink.getEndPosition(), ranges);
                         }
                     }
                 }
@@ -219,7 +226,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
         // Refresh links
         boolean refresh = false;
 
-        for (ReferenceData reference : references) {
+        for (ReferenceData reference : listener.getReferences()) {
             ModuleInfoReferenceData moduleInfoReferenceData = (ModuleInfoReferenceData)reference;
             boolean enabled = false;
 
@@ -232,15 +239,15 @@ public class ModuleInfoFilePage extends ClassFilePage {
                         switch (moduleInfoReferenceData.type) {
                             case TYPE:
                                 index = futureIndexes.get().getIndex("typeDeclarations");
-                                key = reference.typeName;
+                                key = reference.getTypeName();
                                 break;
                             case PACKAGE:
                                 index = futureIndexes.get().getIndex("packageDeclarations");
-                                key = reference.typeName;
+                                key = reference.getTypeName();
                                 break;
                             default: // MODULE
                                 index = futureIndexes.get().getIndex("javaModuleDeclarations");
-                                key = reference.name;
+                                key = reference.getName();
                                 break;
                         }
 
@@ -254,8 +261,8 @@ public class ModuleInfoFilePage extends ClassFilePage {
                 assert ExceptionUtil.printStackTrace(e);
             }
 
-            if (reference.enabled != enabled) {
-                reference.enabled = enabled;
+            if (reference.isEnabled() != enabled) {
+                reference.setEnabled(enabled);
                 refresh = true;
             }
         }
@@ -288,7 +295,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
 
         @Override
         public void printDeclaration(int type, String internalTypeName, String name, String descriptor) {
-            declarations.put(internalTypeName, new TypePage.DeclarationData(stringBuffer.length(), name.length(), internalTypeName, name, descriptor));
+            listener.addDeclaration(internalTypeName, new DeclarationData(stringBuffer.length(), name.length(), internalTypeName, name, descriptor));
             super.printDeclaration(type, internalTypeName, name, descriptor);
         }
 
@@ -300,7 +307,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
             if (reference == null) {
                 reference = new ModuleInfoReferenceData(type, internalTypeName, name, descriptor, ownerInternalName);
                 referencesCache.put(key, reference);
-                references.add(reference);
+                listener.getReferences().add(reference);
             }
 
             addHyperlink(new HyperlinkReferenceData(stringBuffer.length(), name.length(), reference));

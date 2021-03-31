@@ -35,7 +35,7 @@ import javax.swing.JRootPane;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.util.swing.SwingUtil;
 
 public class AboutView {
@@ -106,7 +106,7 @@ public class AboutView {
                 assert ExceptionUtil.printStackTrace(e);
             }
 
-            subsubpanel.add(new JLabel("JD-GUI"));
+            subsubpanel.add(new JLabel("JD-GUI-BUNDLE"));
             subsubpanel.add(new JLabel("version " + jdGuiVersion));
             subsubpanel.add(new JLabel("JD-Core"));
             subsubpanel.add(new JLabel("version " + jdCoreVersion));
@@ -114,10 +114,10 @@ public class AboutView {
             hbox.add(Box.createHorizontalGlue());
 
             hbox = Box.createHorizontalBox();
-            hbox.add(new JLabel("Copyright © 2008-2019 Emmanuel Dupuy"));
+            hbox.add(new JLabel("Copyright \u00A9 2008-2019 Emmanuel Dupuy"));
             hbox.add(Box.createHorizontalGlue());
             subvbox.add(hbox);
-
+            
             vbox.add(Box.createVerticalStrut(10));
 
             hbox = Box.createHorizontalBox();
@@ -125,7 +125,12 @@ public class AboutView {
             hbox.add(Box.createHorizontalGlue());
             aboutOkButton = new JButton("    Ok    ");
             Action aboutOkActionListener = new AbstractAction() {
-                @Override public void actionPerformed(ActionEvent actionEvent) { aboutDialog.setVisible(false); }
+                /**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				@Override public void actionPerformed(ActionEvent actionEvent) { aboutDialog.setVisible(false); }
             };
             aboutOkButton.addActionListener(aboutOkActionListener);
             hbox.add(aboutOkButton);

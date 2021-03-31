@@ -17,18 +17,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.api.API;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
-import org.jd.gui.util.exception.ExceptionUtil;
 import org.jd.gui.util.io.TextReader;
+import org.jd.gui.util.parser.jdt.core.HyperlinkData;
 import org.jd.gui.view.component.HyperlinkPage;
-import org.jd.gui.api.API;
 import org.jdv1.gui.api.feature.IndexesChangeListener;
 import org.jdv1.gui.util.index.IndexesUtil;
 
 public class ManifestFilePage extends HyperlinkPage implements UriGettable, IndexesChangeListener {
-    protected API api;
+
+	private static final long serialVersionUID = 1L;
+
+	protected API api;
     protected Container.Entry entry;
     protected Collection<Future<Indexes>> collectionOfFutureIndexes = Collections.emptyList();
 
@@ -119,9 +123,11 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
         return index;
     }
 
-    protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return ((ManifestHyperlinkData)hyperlinkData).enabled; }
+    @Override
+	protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return ((ManifestHyperlinkData)hyperlinkData).enabled; }
 
-    protected void openHyperlink(int x, int y, HyperlinkData hyperlinkData) {
+    @Override
+	protected void openHyperlink(int x, int y, HyperlinkData hyperlinkData) {
         ManifestHyperlinkData data = (ManifestHyperlinkData)hyperlinkData;
 
         if (data.enabled) {
@@ -133,7 +139,7 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
                 api.addURI(new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), "position=" + offset, null));
                 // Open link
                 String text = getText();
-                String textLink = getValue(text, hyperlinkData.startPosition, hyperlinkData.endPosition);
+                String textLink = getValue(text, hyperlinkData.getStartPosition(), hyperlinkData.getEndPosition());
                 String internalTypeName = textLink.replace('.', '/');
                 List<Container.Entry> entries = IndexesUtil.findInternalTypeName(collectionOfFutureIndexes, internalTypeName);
                 String rootUri = entry.getContainer().getRoot().getUri().toString();
@@ -157,17 +163,20 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
     }
 
     // --- UriGettable --- //
-    public URI getUri() { return entry.getUri(); }
+    @Override
+	public URI getUri() { return entry.getUri(); }
 
     // --- ContentSavable --- //
-    public String getFileName() {
+    @Override
+	public String getFileName() {
         String path = entry.getPath();
         int index = path.lastIndexOf('/');
         return path.substring(index+1);
     }
 
     // --- IndexesChangeListener --- //
-    public void indexesChanged(Collection<Future<Indexes>> collectionOfFutureIndexes) {
+    @Override
+	public void indexesChanged(Collection<Future<Indexes>> collectionOfFutureIndexes) {
         // Update the list of containers
         this.collectionOfFutureIndexes = collectionOfFutureIndexes;
         // Refresh links
@@ -176,7 +185,7 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
 
         for (Map.Entry<Integer, HyperlinkData> entry : hyperlinks.entrySet()) {
             ManifestHyperlinkData entryData = (ManifestHyperlinkData)entry.getValue();
-            String textLink = getValue(text, entryData.startPosition, entryData.endPosition);
+            String textLink = getValue(text, entryData.getStartPosition(), entryData.getEndPosition());
             String internalTypeName = textLink.replace('.', '/');
             boolean enabled = IndexesUtil.containsInternalTypeName(collectionOfFutureIndexes, internalTypeName);
 

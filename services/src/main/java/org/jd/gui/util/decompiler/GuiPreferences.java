@@ -5,7 +5,7 @@
  * copy and modify the code freely for non-commercial purposes.
  */
 
-package org.jdv0.gui.util.decompiler;
+package org.jd.gui.util.decompiler;
 
 import jd.core.preferences.Preferences;
 

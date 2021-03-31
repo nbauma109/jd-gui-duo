@@ -3,7 +3,7 @@ apply plugin: 'java'
 dependencies {
     provided 'com.yuvimasory:orange-extensions:1.3.0'   // OSX support
     compile project(':api')
-    runtime project(':services')
+    compile project(':services')
 }
 
 version = parent.version

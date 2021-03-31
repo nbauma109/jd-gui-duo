@@ -9,7 +9,6 @@ package org.jdv1.gui.service.sourceloader;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -17,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.Collection;
@@ -31,10 +31,11 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
 
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.spi.SourceLoader;
-import org.jd.gui.util.exception.ExceptionUtil;
+import org.jd.gui.util.IOUtils;
 import org.jdv1.gui.service.preferencespanel.MavenOrgSourceLoaderPreferencesProvider;
 
 public class MavenOrgSourceLoaderProvider implements SourceLoader {
@@ -92,7 +93,6 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
 
     protected String searchSource(Container.Entry entry, File sourceJarFile) {
         if (sourceJarFile != null) {
-            byte[] buffer = new byte[1024 * 2];
 
             try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(sourceJarFile)))) {
                 ZipEntry ze = zis.getNextEntry();
@@ -102,15 +102,7 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
 
                 while (ze != null) {
                     if (ze.getName().equals(name)) {
-                        ByteArrayOutputStream out = new ByteArrayOutputStream();
-                        int read = zis.read(buffer);
-
-                        while (read > 0) {
-                            out.write(buffer, 0, read);
-                            read = zis.read(buffer);
-                        }
-
-                        return new String(out.toByteArray(), "UTF-8");
+                        return IOUtils.toString(zis, StandardCharsets.UTF_8);
                     }
 
                     ze = zis.getNextEntry();
@@ -137,7 +129,9 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
                 byte[] buffer = new byte[1024 * 2];
 
                 try (DigestInputStream is = new DigestInputStream(entry.getInputStream(), messageDigest)) {
-                    while (is.read(buffer) > -1);
+                    while (is.read(buffer) > -1) {
+						;
+					}
                 }
 
                 byte[] array = messageDigest.digest();
@@ -221,13 +215,8 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
                     tmpFile.deleteOnExit();
 
                     try (InputStream is = new BufferedInputStream(loadUrl.openStream()); OutputStream os = new BufferedOutputStream(new FileOutputStream(tmpFile))) {
-                        int read = is.read(buffer);
-                        while (read > 0) {
-                            os.write(buffer, 0, read);
-                            read = is.read(buffer);
-                        }
+                    	IOUtils.copy(is, os);
                     }
-
                     cache.put(entry, tmpFile);
                     return tmpFile;
                 }

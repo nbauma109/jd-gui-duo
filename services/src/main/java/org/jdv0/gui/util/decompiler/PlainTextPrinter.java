@@ -9,6 +9,8 @@ package org.jdv0.gui.util.decompiler;
 
 import java.io.PrintStream;
 
+import org.jd.gui.util.decompiler.GuiPreferences;
+
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.printer.Printer;
 

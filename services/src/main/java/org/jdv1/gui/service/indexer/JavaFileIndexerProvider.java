@@ -7,326 +7,260 @@
 
 package org.jdv1.gui.service.indexer;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.TerminalNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.jd.core.v1.api.loader.LoaderException;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.service.indexer.AbstractIndexerProvider;
-import org.jd.gui.util.exception.ExceptionUtil;
-import org.jd.gui.util.parser.antlr.ANTLRJavaParser;
-import org.jd.gui.util.parser.antlr.AbstractJavaListener;
-import org.jd.gui.util.parser.antlr.JavaParser;
+import org.jd.gui.util.parser.jdt.ASTParserFactory;
+import org.jd.gui.util.parser.jdt.core.AbstractJavaListener;
 
 /**
  * Unsafe thread implementation of java file indexer.
  */
 public class JavaFileIndexerProvider extends AbstractIndexerProvider {
 
-    static {
-        // Early class loading
-        ANTLRJavaParser.parse(new ANTLRInputStream("class EarlyLoading{}"), new Listener(null));
-    }
+	@Override
+	public String[] getSelectors() {
+		return appendSelectors("*:file:*.java");
+	}
 
-    @Override public String[] getSelectors() { return appendSelectors("*:file:*.java"); }
+	@Override
+	@SuppressWarnings("unchecked")
+	public void index(API api, Container.Entry entry, Indexes indexes) {
+		Listener listener = new Listener(entry);
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public void index(API api, Container.Entry entry, Indexes indexes) {
-        try (InputStream inputStream = entry.getInputStream()) {
-            Listener listener = new Listener(entry);
-            ANTLRJavaParser.parse(new ANTLRInputStream(inputStream), listener);
+		try {
+			ASTParserFactory.getInstance().newASTParser(entry, listener);
+		} catch (LoaderException e) {
+			assert ExceptionUtil.printStackTrace(e);
+		}
 
-            // Append sets to indexes
-            addToIndexes(indexes, "typeDeclarations", listener.getTypeDeclarationSet(), entry);
-            addToIndexes(indexes, "constructorDeclarations", listener.getConstructorDeclarationSet(), entry);
-            addToIndexes(indexes, "methodDeclarations", listener.getMethodDeclarationSet(), entry);
-            addToIndexes(indexes, "fieldDeclarations", listener.getFieldDeclarationSet(), entry);
-            addToIndexes(indexes, "typeReferences", listener.getTypeReferenceSet(), entry);
-            addToIndexes(indexes, "constructorReferences", listener.getConstructorReferenceSet(), entry);
-            addToIndexes(indexes, "methodReferences", listener.getMethodReferenceSet(), entry);
-            addToIndexes(indexes, "fieldReferences", listener.getFieldReferenceSet(), entry);
-            addToIndexes(indexes, "strings", listener.getStringSet(), entry);
+		// Append sets to indexes
+		addToIndexes(indexes, "typeDeclarations", listener.getTypeDeclarationSet(), entry);
+		addToIndexes(indexes, "constructorDeclarations", listener.getConstructorDeclarationSet(), entry);
+		addToIndexes(indexes, "methodDeclarations", listener.getMethodDeclarationSet(), entry);
+		addToIndexes(indexes, "fieldDeclarations", listener.getFieldDeclarationSet(), entry);
+		addToIndexes(indexes, "typeReferences", listener.getTypeReferenceSet(), entry);
+		addToIndexes(indexes, "constructorReferences", listener.getConstructorReferenceSet(), entry);
+		addToIndexes(indexes, "methodReferences", listener.getMethodReferenceSet(), entry);
+		addToIndexes(indexes, "fieldReferences", listener.getFieldReferenceSet(), entry);
+		addToIndexes(indexes, "strings", listener.getStringSet(), entry);
 
-            // Populate map [super type name : [sub type name]]
-            Map<String, Collection> index = indexes.getIndex("subTypeNames");
+		// Populate map [super type name : [sub type name]]
+		Map<String, Collection> index = indexes.getIndex("subTypeNames");
 
-            for (Map.Entry<String, HashSet<String>> e : listener.getSuperTypeNamesMap().entrySet()) {
-                String typeName = e.getKey();
+		for (Map.Entry<String, HashSet<String>> e : listener.getSuperTypeNamesMap().entrySet()) {
+			String typeName = e.getKey();
 
-                for (String superTypeName : e.getValue()) {
-                    index.get(superTypeName).add(typeName);
-                }
-            }
-        } catch (IOException e) {
-            assert ExceptionUtil.printStackTrace(e);
-        }
-    }
+			for (String superTypeName : e.getValue()) {
+				index.get(superTypeName).add(typeName);
+			}
+		}
+	}
 
-    protected static class Listener extends AbstractJavaListener {
+	protected static class Listener extends AbstractJavaListener {
 
-        protected HashSet<String> typeDeclarationSet = new HashSet<>();
-        protected HashSet<String> constructorDeclarationSet = new HashSet<>();
-        protected HashSet<String> methodDeclarationSet = new HashSet<>();
-        protected HashSet<String> fieldDeclarationSet = new HashSet<>();
-        protected HashSet<String> typeReferenceSet = new HashSet<>();
-        protected HashSet<String> constructorReferenceSet = new HashSet<>();
-        protected HashSet<String> methodReferenceSet = new HashSet<>();
-        protected HashSet<String> fieldReferenceSet = new HashSet<>();
-        protected HashSet<String> stringSet = new HashSet<>();
-        protected HashMap<String, HashSet<String>> superTypeNamesMap = new HashMap<>();
+		protected HashSet<String> typeDeclarationSet = new HashSet<>();
+		protected HashSet<String> constructorDeclarationSet = new HashSet<>();
+		protected HashSet<String> methodDeclarationSet = new HashSet<>();
+		protected HashSet<String> fieldDeclarationSet = new HashSet<>();
+		protected HashSet<String> typeReferenceSet = new HashSet<>();
+		protected HashSet<String> constructorReferenceSet = new HashSet<>();
+		protected HashSet<String> methodReferenceSet = new HashSet<>();
+		protected HashSet<String> fieldReferenceSet = new HashSet<>();
+		protected HashSet<String> stringSet = new HashSet<>();
+		protected HashMap<String, HashSet<String>> superTypeNamesMap = new HashMap<>();
 
-        protected StringBuilder sbTypeDeclaration = new StringBuilder();
+		protected StringBuilder sbTypeDeclaration = new StringBuilder();
 
-        public Listener(Container.Entry entry) {
-            super(entry);
-        }
+		public Listener(Container.Entry entry) {
+			super(entry);
+		}
 
-        public HashSet<String> getTypeDeclarationSet() { return typeDeclarationSet; }
-        public HashSet<String> getConstructorDeclarationSet() { return constructorDeclarationSet; }
-        public HashSet<String> getMethodDeclarationSet() { return methodDeclarationSet; }
-        public HashSet<String> getFieldDeclarationSet() { return fieldDeclarationSet; }
-        public HashSet<String> getTypeReferenceSet() { return typeReferenceSet; }
-        public HashSet<String> getConstructorReferenceSet() { return constructorReferenceSet; }
-        public HashSet<String> getMethodReferenceSet() { return methodReferenceSet; }
-        public HashSet<String> getFieldReferenceSet() { return fieldReferenceSet; }
-        public HashSet<String> getStringSet() { return stringSet; }
-        public HashMap<String, HashSet<String>> getSuperTypeNamesMap() { return superTypeNamesMap; }
+		public HashSet<String> getTypeDeclarationSet() {
+			return typeDeclarationSet;
+		}
 
-        // --- ANTLR Listener --- //
+		public HashSet<String> getConstructorDeclarationSet() {
+			return constructorDeclarationSet;
+		}
 
-        public void enterPackageDeclaration(JavaParser.PackageDeclarationContext ctx) {
-            super.enterPackageDeclaration(ctx);
+		public HashSet<String> getMethodDeclarationSet() {
+			return methodDeclarationSet;
+		}
 
-            if (! packageName.isEmpty()) {
-                sbTypeDeclaration.append(packageName).append('/');
-            }
-        }
+		public HashSet<String> getFieldDeclarationSet() {
+			return fieldDeclarationSet;
+		}
 
-        public void enterClassDeclaration(JavaParser.ClassDeclarationContext ctx) { enterTypeDeclaration(ctx); }
-        public void exitClassDeclaration(JavaParser.ClassDeclarationContext ctx) { exitTypeDeclaration(); }
+		public HashSet<String> getTypeReferenceSet() {
+			return typeReferenceSet;
+		}
 
-        public void enterEnumDeclaration(JavaParser.EnumDeclarationContext ctx) { enterTypeDeclaration(ctx); }
-        public void exitEnumDeclaration(JavaParser.EnumDeclarationContext ctx) { exitTypeDeclaration(); }
+		public HashSet<String> getConstructorReferenceSet() {
+			return constructorReferenceSet;
+		}
 
-        public void enterInterfaceDeclaration(JavaParser.InterfaceDeclarationContext ctx) { enterTypeDeclaration(ctx); }
-        public void exitInterfaceDeclaration(JavaParser.InterfaceDeclarationContext ctx) { exitTypeDeclaration(); }
+		public HashSet<String> getMethodReferenceSet() {
+			return methodReferenceSet;
+		}
 
-        public void enterAnnotationTypeDeclaration(JavaParser.AnnotationTypeDeclarationContext ctx) { enterTypeDeclaration(ctx); }
-        public void exitAnnotationTypeDeclaration(JavaParser.AnnotationTypeDeclarationContext ctx) { exitTypeDeclaration(); }
+		public HashSet<String> getFieldReferenceSet() {
+			return fieldReferenceSet;
+		}
 
-        protected void enterTypeDeclaration(ParserRuleContext ctx) {
-            // Add type declaration
-            TerminalNode identifier = ctx.getToken(JavaParser.Identifier, 0);
+		public HashSet<String> getStringSet() {
+			return stringSet;
+		}
 
-            if (identifier != null) {
-                String typeName = identifier.getText();
-                int length = sbTypeDeclaration.length();
+		public HashMap<String, HashSet<String>> getSuperTypeNamesMap() {
+			return superTypeNamesMap;
+		}
 
-                if ((length == 0) || (sbTypeDeclaration.charAt(length - 1) == '/')) {
-                    sbTypeDeclaration.append(typeName);
-                } else {
-                    sbTypeDeclaration.append('$').append(typeName);
-                }
+		// --- AST Listener --- //
 
-                String internalTypeName = sbTypeDeclaration.toString();
-                typeDeclarationSet.add(internalTypeName);
-                nameToInternalTypeName.put(typeName, internalTypeName);
+		@Override
+		public boolean visit(PackageDeclaration node) {
+			if (super.visit(node)) {
+				if (!packageName.isEmpty()) {
+					sbTypeDeclaration.append(packageName).append('/');
+				}
+			}
+			return true;
+		}
 
-                HashSet<String> superInternalTypeNameSet = new HashSet<>();
+		@Override
+		protected boolean enterTypeDeclaration(AbstractTypeDeclaration node, int flag) {
+			// Add type declaration
+			String typeName = node.getName().getIdentifier();
+			int length = sbTypeDeclaration.length();
 
-                // Add super type reference
-                JavaParser.TypeContext superType = ctx.getRuleContext(JavaParser.TypeContext.class, 0);
-                if (superType != null) {
-                    String superQualifiedTypeName = resolveInternalTypeName(superType.classOrInterfaceType().Identifier());
+			if ((length == 0) || (sbTypeDeclaration.charAt(length - 1) == '/')) {
+				sbTypeDeclaration.append(typeName);
+			} else {
+				sbTypeDeclaration.append('$').append(typeName);
+			}
 
-                    if (superQualifiedTypeName.charAt(0) != '*')
-                        superInternalTypeNameSet.add(superQualifiedTypeName);
-                }
+			String internalTypeName = sbTypeDeclaration.toString();
+			typeDeclarationSet.add(internalTypeName);
+			nameToInternalTypeName.put(typeName, internalTypeName);
 
-                // Add implementation references
-                JavaParser.TypeListContext superInterfaces = ctx.getRuleContext(JavaParser.TypeListContext.class, 0);
-                if (superInterfaces != null) {
-                    for (JavaParser.TypeContext superInterface : superInterfaces.type()) {
-                        String superQualifiedInterfaceName = resolveInternalTypeName(superInterface.classOrInterfaceType().Identifier());
+			HashSet<String> superInternalTypeNameSet = new HashSet<>();
 
-                        if (superQualifiedInterfaceName.charAt(0) != '*')
-                            superInternalTypeNameSet.add(superQualifiedInterfaceName);
-                    }
-                }
+			// Add super type reference
+			Type superTypeIdentifier = getSuperType(node);
+			if (superTypeIdentifier != null) {
+				String superQualifiedTypeName = resolveInternalTypeName(superTypeIdentifier);
+				if (superQualifiedTypeName.charAt(0) != '*') {
+					superInternalTypeNameSet.add(superQualifiedTypeName);
+				}
+			}
+			if (node instanceof TypeDeclaration) {
+				TypeDeclaration typeDeclaration = (TypeDeclaration) node;
+				List<Type> superInterfaces = typeDeclaration.superInterfaceTypes();
+				for (Type superInteface : superInterfaces) {
+					String superQualifiedInterfaceName = resolveInternalTypeName(superInteface);
+					if (superQualifiedInterfaceName.charAt(0) != '*') {
+						superInternalTypeNameSet.add(superQualifiedInterfaceName);
+					}
+				}
+			}
+			if (!superInternalTypeNameSet.isEmpty()) {
+				superTypeNamesMap.put(internalTypeName, superInternalTypeNameSet);
+			}
+			return true;
+		}
 
-                if (!superInternalTypeNameSet.isEmpty()) {
-                    superTypeNamesMap.put(internalTypeName, superInternalTypeNameSet);
-                }
-            }
-        }
+		@Override
+		public void exitTypeDeclaration() {
+			int index = sbTypeDeclaration.lastIndexOf("$");
 
-        protected void exitTypeDeclaration() {
-            int index = sbTypeDeclaration.lastIndexOf("$");
+			if (index == -1) {
+				index = sbTypeDeclaration.lastIndexOf("/") + 1;
+			}
 
-            if (index == -1) {
-                index = sbTypeDeclaration.lastIndexOf("/") + 1;
-            }
+			if (index == -1) {
+				sbTypeDeclaration.setLength(0);
+			} else {
+				sbTypeDeclaration.setLength(index);
+			}
+		}
 
-            if (index == -1) {
-                sbTypeDeclaration.setLength(0);
-            } else {
-                sbTypeDeclaration.setLength(index);
-            }
-        }
+		@Override
+		public boolean visit(SimpleType node) {
+			// Add type reference
+			String internalTypeName = resolveInternalTypeName(node);
 
-        public void enterType(JavaParser.TypeContext ctx) {
-            // Add type reference
-            JavaParser.ClassOrInterfaceTypeContext classOrInterfaceType = ctx.classOrInterfaceType();
+			if (internalTypeName.charAt(0) != '*') {
+				typeReferenceSet.add(internalTypeName);
+			}
+			return true;
+		}
 
-            if (classOrInterfaceType != null) {
-                String internalTypeName = resolveInternalTypeName(classOrInterfaceType.Identifier());
+		@Override
+		public boolean visit(FieldDeclaration node) {
+			List<VariableDeclarationFragment> fragments = node.fragments();
+			for (VariableDeclarationFragment fragment : fragments) {
+				fieldDeclarationSet.add(fragment.getName().getIdentifier());
+			}
+			return true;
+		}
 
-                if (internalTypeName.charAt(0) != '*')
-                    typeReferenceSet.add(internalTypeName);
-            }
-        }
+		@Override
+		public boolean visit(MethodDeclaration node) {
+			if (node.isConstructor()) {
+				constructorDeclarationSet.add(node.getName().getIdentifier());
+			} else {
+				methodDeclarationSet.add(node.getName().getIdentifier());
+			}
+			return true;
+		}
 
-        public void enterConstDeclaration(JavaParser.ConstDeclarationContext ctx) {
-            for (JavaParser.ConstantDeclaratorContext constantDeclaratorContext : ctx.constantDeclarator()) {
-                String name = constantDeclaratorContext.Identifier().getText();
-                fieldDeclarationSet.add(name);
-            }
-        }
+		@Override
+		public boolean visit(ClassInstanceCreation node) {
+			Type type = node.getType();
+			String typeString = typeToString(type);
+			constructorReferenceSet.add(typeString);
+			return true;
+		}
 
-        public void enterFieldDeclaration(JavaParser.FieldDeclarationContext ctx) {
-            for (JavaParser.VariableDeclaratorContext declaration : ctx.variableDeclarators().variableDeclarator()) {
-                TerminalNode identifier = declaration.variableDeclaratorId().Identifier();
+		@Override
+		public boolean visit(FieldAccess node) {
+			fieldReferenceSet.add(node.getName().getIdentifier());
+			return true;
+		}
 
-                if (identifier != null) {
-                    String name = identifier.getText();
-                    fieldDeclarationSet.add(name);
-                }
-            }
-        }
+		@Override
+		public boolean visit(MethodInvocation node) {
+			methodReferenceSet.add(node.getName().getIdentifier());
+			return true;
+		}
 
-        public void enterMethodDeclaration(JavaParser.MethodDeclarationContext ctx) {
-            TerminalNode identifier = ctx.Identifier();
+		@Override
+		public boolean visit(StringLiteral node) {
+			stringSet.add(node.getLiteralValue());
+			return true;
+		}
 
-            if (identifier != null) {
-                String name = identifier.getText();
-                methodDeclarationSet.add(name);
-            }
-        }
-
-        public void enterInterfaceMethodDeclaration(JavaParser.InterfaceMethodDeclarationContext ctx) {
-            TerminalNode identifier = ctx.Identifier();
-
-            if (identifier != null) {
-                String name = identifier.getText();
-                methodDeclarationSet.add(name);
-            }
-        }
-
-        public void enterConstructorDeclaration(JavaParser.ConstructorDeclarationContext ctx) {
-            String name = ctx.Identifier().getText();
-            constructorDeclarationSet.add(name);
-        }
-
-        public void enterCreatedName(JavaParser.CreatedNameContext ctx) {
-            String internalTypeName = resolveInternalTypeName(ctx.Identifier());
-
-            if ((internalTypeName != null) && (internalTypeName.charAt(0) != '*'))
-                constructorReferenceSet.add(internalTypeName);
-        }
-
-        public void enterExpression(JavaParser.ExpressionContext ctx) {
-            switch (ctx.getChildCount()) {
-                case 3:
-                    if (getToken(ctx.children, 1, JavaParser.DOT) != null) {
-                        // Search "expression '.' Identifier" : field
-                        TerminalNode identifier3 = getToken(ctx.children, 2, JavaParser.Identifier);
-
-                        if (identifier3 != null) {
-                            String fieldName = identifier3.getText();
-                            fieldReferenceSet.add(fieldName);
-                        }
-                    } else if (getToken(ctx.children, 1, JavaParser.LPAREN) != null) {
-                        // Search "expression '(' ')'" : method
-                        if (getToken(ctx.children, 2, JavaParser.RPAREN) != null) {
-                            TerminalNode identifier0 = getRightTerminalNode(ctx.children.get(0));
-
-                            if (identifier0 != null) {
-                                String methodName = identifier0.getText();
-                                methodReferenceSet.add(methodName);
-                            }
-                        }
-                    }
-                    break;
-                case 4:
-                    if (getToken(ctx.children, 1, JavaParser.LPAREN) != null) {
-                        // Search "expression '(' expressionList ')'" : method
-                        if (getToken(ctx.children, 3, JavaParser.RPAREN) != null) {
-                            JavaParser.ExpressionListContext expressionListContext = ctx.expressionList();
-
-                            if ((expressionListContext != null) && (expressionListContext == ctx.children.get(2))) {
-                                TerminalNode identifier0 = getRightTerminalNode(ctx.children.get(0));
-
-                                if (identifier0 != null) {
-                                    String methodName = identifier0.getText();
-                                    methodReferenceSet.add(methodName);
-                                }
-                            }
-                        }
-                    }
-                    break;
-            }
-        }
-
-        protected TerminalNode getToken(List<ParseTree> children, int i, int type) {
-            ParseTree pt = children.get(i);
-
-            if (pt instanceof TerminalNode) {
-                if (((TerminalNode)pt).getSymbol().getType() == type) {
-                    return (TerminalNode)pt;
-                }
-            }
-
-            return null;
-        }
-
-        protected TerminalNode getRightTerminalNode(ParseTree pt) {
-            if (pt instanceof ParserRuleContext) {
-                List<ParseTree> children = ((ParserRuleContext)pt).children;
-
-                if (children != null) {
-                    int size = children.size();
-
-                    if (size > 0) {
-                        ParseTree last = children.get(size - 1);
-
-                        if (last instanceof TerminalNode) {
-                            return (TerminalNode) last;
-                        } else {
-                            return getRightTerminalNode(last);
-                        }
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        public void enterLiteral(JavaParser.LiteralContext ctx) {
-            TerminalNode stringLiteral = ctx.StringLiteral();
-            if (stringLiteral != null) {
-                stringSet.add(stringLiteral.getSymbol().getText());
-            }
-        }
-    }
+	}
 }

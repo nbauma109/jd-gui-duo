@@ -40,7 +40,10 @@ public class DynamicPage
                    IndexesChangeListener, LineNumberNavigable, PreferencesChangeListener, UriGettable, UriOpenable,
                    API.LoadSourceListener
 {
-    protected API api;
+
+	private static final long serialVersionUID = 1L;
+	
+	protected API api;
     protected Container.Entry entry;
     protected TypePage page;
     protected URI lastOpenedUri;
@@ -51,6 +54,10 @@ public class DynamicPage
         this.api = api;
         this.entry = entry;
 
+        Map<String, String> preferences = api.getPreferences();
+        Integer currentHashcode = Integer.valueOf(preferences.hashCode());
+        putClientProperty("preferences-hashCode", currentHashcode);
+        
         String source = api.getSource(entry);
 
         if (source == null) {

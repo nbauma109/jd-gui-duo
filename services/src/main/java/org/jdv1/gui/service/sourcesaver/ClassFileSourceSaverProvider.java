@@ -7,23 +7,22 @@
 
 package org.jdv1.gui.service.sourcesaver;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.nio.charset.Charset;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.service.sourcesaver.AbstractSourceSaverProvider;
-import org.jd.gui.util.exception.ExceptionUtil;
-import org.jd.gui.util.io.NewlineOutputStream;
-import org.jdv1.gui.util.decompiler.ContainerLoader;
+import org.jd.gui.util.decompiler.ContainerLoader;
+import org.jd.gui.util.decompiler.postprocess.impl.LineNumberRealigner;
 import org.jdv1.gui.util.decompiler.LineNumberStringBuilderPrinter;
 
 public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
@@ -134,8 +133,12 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
                 stringBuffer.append("\n */");
             }
 
-            try (PrintStream ps = new PrintStream(new NewlineOutputStream(Files.newOutputStream(path)), true, "UTF-8")) {
-                ps.print(stringBuffer.toString());
+//            ByteCodeReplacer byteCodeReplacer = new ByteCodeReplacer();
+//            byteCodeReplacer.process(stringBuffer.toString(), entry.getUri());
+            LineNumberRealigner lineNumberRealigner = new LineNumberRealigner();
+            String realigned = lineNumberRealigner.process(stringBuffer.toString());
+            try (OutputStream os = Files.newOutputStream(path)) {
+            	os.write(realigned.getBytes(StandardCharsets.UTF_8));
             } catch (IOException e) {
                 assert ExceptionUtil.printStackTrace(e);
             }
