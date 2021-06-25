@@ -9,17 +9,23 @@ package org.jd.gui.util.swing;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+import javax.swing.*;
+
 /**
  * See: https://www.ailis.de/~k/archives/67-Workaround-for-borderless-Java-Swing-menus-on-Linux.html
  */
 public class SwingUtil {
+
+    private SwingUtil() {
+    }
+
     /*
      * This is free and unencumbered software released into the public domain.
      *
@@ -54,6 +60,7 @@ public class SwingUtil {
      * style objects of Swing so popup menu borders have a minimum thickness of
      * 1 and menu separators have a minimum vertical thickness of 1.
      */
+    @SuppressWarnings("all")
     public static void installGtkPopupBugWorkaround() {
         // Get current look-and-feel implementation class
         LookAndFeel laf = UIManager.getLookAndFeel();
@@ -97,6 +104,7 @@ public class SwingUtil {
      * @throws Exception
      *             When reflection fails.
      */
+    @SuppressWarnings("all")
     private static void fixGtkThickness(Object style, String fieldName) throws Exception {
         Field field = style.getClass().getDeclaredField(fieldName);
         boolean accessible = field.isAccessible();
@@ -119,6 +127,7 @@ public class SwingUtil {
      * @throws Exception
      *             When reflection fails.
      */
+    @SuppressWarnings("all")
     private static Object getGtkStyle(Object styleFactory, JComponent component, String regionName) throws Exception {
         // Create the region object
         Class<?> regionClass = Class.forName("javax.swing.plaf.synth.Region");
@@ -153,6 +162,9 @@ public class SwingUtil {
 
     public static Action newAction(String name, boolean enable, ActionListener listener) {
         Action action = new AbstractAction(name) {
+
+            private static final long serialVersionUID = 1L;
+
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 listener.actionPerformed(actionEvent);

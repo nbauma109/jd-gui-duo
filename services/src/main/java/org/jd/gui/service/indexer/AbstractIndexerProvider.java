@@ -7,20 +7,15 @@
 
 package org.jd.gui.service.indexer;
 
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.api.model.Container;
+import org.jd.gui.api.model.Indexes;
+import org.jd.gui.spi.Indexer;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
-
-import org.jd.gui.api.model.Container;
-import org.jd.gui.spi.Indexer;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
-import org.jd.gui.api.model.Indexes;
 
 public abstract class AbstractIndexerProvider implements Indexer {
     protected List<String> externalSelectors;
@@ -29,11 +24,9 @@ public abstract class AbstractIndexerProvider implements Indexer {
     /**
      * Initialize "selectors" and "pathPattern" with optional external properties file
      */
-    public AbstractIndexerProvider() {
+    protected AbstractIndexerProvider() {
         Properties properties = new Properties();
-        Class clazz = this.getClass();
-
-        try (InputStream is = clazz.getClassLoader().getResourceAsStream(clazz.getName().replace('.', '/') + ".properties")) {
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(getClass().getName().replace('.', '/') + ".properties")) {
             if (is != null) {
                 properties.load(is);
             }
@@ -61,32 +54,31 @@ public abstract class AbstractIndexerProvider implements Indexer {
     protected String[] appendSelectors(String selector) {
         if (externalSelectors == null) {
             return new String[] { selector };
-        } else {
-            int size = externalSelectors.size();
-            String[] array = new String[size+1];
-            externalSelectors.toArray(array);
-            array[size] = selector;
-            return array;
         }
+        int size = externalSelectors.size();
+        String[] array = new String[size+1];
+        externalSelectors.toArray(array);
+        array[size] = selector;
+        return array;
     }
 
     protected String[] appendSelectors(String... selectors) {
         if (externalSelectors == null) {
             return selectors;
-        } else {
-            int size = externalSelectors.size();
-            String[] array = new String[size+selectors.length];
-            externalSelectors.toArray(array);
-            System.arraycopy(selectors, 0, array, size, selectors.length);
-            return array;
         }
+        int size = externalSelectors.size();
+        String[] array = new String[size+selectors.length];
+        externalSelectors.toArray(array);
+        System.arraycopy(selectors, 0, array, size, selectors.length);
+        return array;
     }
 
-    @Override public Pattern getPathPattern() { return externalPathPattern; }
+    @Override
+    public Pattern getPathPattern() { return externalPathPattern; }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "rawtypes" })
     protected static void addToIndexes(Indexes indexes, String indexName, Set<String> set, Container.Entry entry) {
-        if (set.size() > 0) {
+        if (!set.isEmpty()) {
             Map<String, Collection> index = indexes.getIndex(indexName);
 
             for (String key : set) {

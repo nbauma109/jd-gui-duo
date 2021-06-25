@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.gui.view.component;
 
 import org.fife.ui.rsyntaxtextarea.DocumentRange;
@@ -14,18 +13,24 @@ import org.fife.ui.rsyntaxtextarea.parser.ParserNotice;
 import org.fife.ui.rsyntaxtextarea.parser.TaskTagParser.TaskNotice;
 import org.fife.ui.rtextarea.RTextArea;
 
-import javax.swing.*;
-import javax.swing.event.CaretEvent;
-import javax.swing.event.CaretListener;
-import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+
+import javax.swing.JComponent;
+import javax.swing.ToolTipManager;
+import javax.swing.UIManager;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
+import javax.swing.text.BadLocationException;
 
 /*
  * 'private' access prohibit all changes ==> Copy "ErrorStrip" to JD-GUI project just to change the marker.
@@ -81,21 +86,13 @@ import java.util.List;
  *       are now "empty").
  */
 public class RoundMarkErrorStrip extends JComponent {
+    private static final long serialVersionUID = 1L;
 
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
-	/**
-     * The text area.
-     */
+    /** The text area. */
     private RSyntaxTextArea textArea;
 
-    /**
-     * Listens for events in this component.
-     */
-    private Listener listener;
+    /** Listens for events in this component. */
+    private transient Listener listener;
 
     /**
      * Whether "marked occurrences" in the text area should be shown in this
@@ -129,33 +126,22 @@ public class RoundMarkErrorStrip extends JComponent {
      */
     private ParserNotice.Level levelThreshold;
 
-    /**
-     * Whether the caret marker's location should be rendered.
-     */
+    /** Whether the caret marker's location should be rendered. */
     private boolean followCaret;
 
-    /**
-     * The color to use for the caret marker.
-     */
+    /** The color to use for the caret marker. */
     private Color caretMarkerColor;
 
-    /**
-     * Where we paint the caret marker.
-     */
+    /** Where we paint the caret marker. */
     private int caretLineY;
 
-    /**
-     * The last location of the caret marker.
-     */
+    /** The last location of the caret marker. */
     private int lastLineY;
 
-    /**
-     * The preferred width of this component.
-     */
+    /** The preferred width of this component. */
     private static final int PREFERRED_WIDTH = 14;
 
-    private static final String MSG = "org.fife.ui.rsyntaxtextarea.ErrorStrip";
-    private static final ResourceBundle msg = ResourceBundle.getBundle(MSG);
+    private static final ResourceBundle msg = ResourceBundle.getBundle("org.fife.ui.rsyntaxtextarea.ErrorStrip");
 
     /**
      * Constructor.
@@ -175,7 +161,6 @@ public class RoundMarkErrorStrip extends JComponent {
         setCaretMarkerColor(new Color(0x96c5fe));
     }
 
-
     /**
      * Overridden so we only start listening for parser notices when this
      * component (and presumably the text area) are visible.
@@ -191,23 +176,20 @@ public class RoundMarkErrorStrip extends JComponent {
         textArea.addPropertyChangeListener(
                 RSyntaxTextArea.MARKED_OCCURRENCES_CHANGED_PROPERTY, listener);
         textArea.addPropertyChangeListener(
-                RSyntaxTextArea.MARK_ALL_OCCURRENCES_CHANGED_PROPERTY, listener);
+                RTextArea.MARK_ALL_OCCURRENCES_CHANGED_PROPERTY, listener);
         refreshMarkers();
     }
 
-
-    /**
-     * Manually manages layout since this component uses no layout manager.
-     */
+    /** Manually manages layout since this component uses no layout manager. */
     @Override
     public void doLayout() {
+        Marker m;
         for (int i=0; i<getComponentCount(); i++) {
-            Marker m = (Marker)getComponent(i);
+            m = (Marker)getComponent(i);
             m.updateLocation();
         }
         listener.caretUpdate(null); // Force recalculation of caret line pos
     }
-
 
     /**
      * Returns a "brighter" color.
@@ -217,21 +199,17 @@ public class RoundMarkErrorStrip extends JComponent {
      */
     private Color getBrighterColor(Color c) {
         if (brighterColors==null) {
-            brighterColors = new HashMap<Color, Color>(5); // Usually small
+            brighterColors = new HashMap<>(5); // Usually small
         }
-        Color brighter = brighterColors.get(c);
-        if (brighter==null) {
+        return brighterColors.computeIfAbsent(c, k-> {
             // Don't use c.brighter() as it doesn't work well for blue, and
             // also doesn't return something brighter "enough."
             int r = possiblyBrighter(c.getRed());
             int g = possiblyBrighter(c.getGreen());
             int b = possiblyBrighter(c.getBlue());
-            brighter = new Color(r, g, b);
-            brighterColors.put(c, brighter);
-        }
-        return brighter;
+            return new Color(r, g, b);
+        });
     }
-
 
     /**
      * Added for JD-GUI.
@@ -243,24 +221,20 @@ public class RoundMarkErrorStrip extends JComponent {
      */
     private Color getDarkerColor(Color c) {
         if (darkerColors==null) {
-            darkerColors = new HashMap<Color, Color>(5); // Usually small
+            darkerColors = new HashMap<>(5); // Usually small
         }
-        Color darker = darkerColors.get(c);
-        if (darker==null) {
+        return darkerColors.computeIfAbsent(c, k -> {
             // Don't use c.brighter() as it doesn't work well for blue, and
             // also doesn't return something brighter "enough."
             int r = possiblyDarker(c.getRed());
             int g = possiblyDarker(c.getGreen());
             int b = possiblyDarker(c.getBlue());
-            darker = new Color(r, g, b);
-            darkerColors.put(c, darker);
-        }
-        return darker;
+            return new Color(r, g, b);
+        });
     }
 
-
     /**
-     * returns the color to use when painting the caret marker.
+     * Returns the color to use when painting the caret marker.
      *
      * @return The caret marker color.
      * @see #setCaretMarkerColor(Color)
@@ -268,7 +242,6 @@ public class RoundMarkErrorStrip extends JComponent {
     public Color getCaretMarkerColor() {
         return caretMarkerColor;
     }
-
 
     /**
      * Returns whether the caret's position should be drawn.
@@ -280,7 +253,6 @@ public class RoundMarkErrorStrip extends JComponent {
         return followCaret;
     }
 
-
     /**
      * {@inheritDoc}
      */
@@ -289,7 +261,6 @@ public class RoundMarkErrorStrip extends JComponent {
         int height = textArea.getPreferredScrollableViewportSize().height;
         return new Dimension(PREFERRED_WIDTH, height);
     }
-
 
     /**
      * Returns the minimum severity a parser notice must be for it to be
@@ -303,7 +274,6 @@ public class RoundMarkErrorStrip extends JComponent {
         return levelThreshold;
     }
 
-
     /**
      * Returns whether "mark all" highlights are shown in this error strip.
      *
@@ -314,7 +284,6 @@ public class RoundMarkErrorStrip extends JComponent {
         return showMarkAll;
     }
 
-
     /**
      * Returns whether marked occurrences are shown in this error strip.
      *
@@ -324,7 +293,6 @@ public class RoundMarkErrorStrip extends JComponent {
     public boolean getShowMarkedOccurrences() {
         return showMarkedOccurrences;
     }
-
 
     /**
      * {@inheritDoc}
@@ -340,7 +308,6 @@ public class RoundMarkErrorStrip extends JComponent {
         return text;
     }
 
-
     /**
      * Returns the y-offset in this component corresponding to a line in the
      * text component.
@@ -354,7 +321,6 @@ public class RoundMarkErrorStrip extends JComponent {
         float lineCount = textArea.getLineCount();
         return (int)(((line-1)/(lineCount-1)) * h) - 2;
     }
-
 
     /**
      * Overridden to (possibly) draw the caret's position.
@@ -370,20 +336,18 @@ public class RoundMarkErrorStrip extends JComponent {
         }
     }
 
-
     /**
      * Returns a possibly brighter component for a color.
      *
      * @param i An RGB component for a color (0-255).
      * @return A possibly brighter value for the component.
      */
-    private static final int possiblyBrighter(int i) {
+    private static int possiblyBrighter(int i) {
         if (i<255) {
-            i += (int)((255-i)*0.6f);
+            i += (int)((255-i)*0.6F);
         }
         return i;
     }
-
 
     /**
      * Returns a possibly darker component for a color.
@@ -391,24 +355,20 @@ public class RoundMarkErrorStrip extends JComponent {
      * @param i An RGB component for a color (0-255).
      * @return A possibly brighter value for the component.
      */
-    private static final int possiblyDarker(int i) {
-        return i -= (int)(i*0.4f);
+    private static int possiblyDarker(int i) {
+        return i - (int)(i*0.4F);
     }
 
-
-    /**
-     * Refreshes the markers displayed in this error strip.
-     */
+    /** Refreshes the markers displayed in this error strip. */
     private void refreshMarkers() {
-
         removeAll(); // listener is removed in Marker.removeNotify()
-        Map<Integer, Marker> markerMap = new HashMap<Integer, Marker>();
+        Map<Integer, Marker> markerMap = new HashMap<>();
 
         List<ParserNotice> notices = textArea.getParserNotices();
         for (ParserNotice notice : notices) {
             if (notice.getLevel().isEqualToOrWorseThan(levelThreshold) ||
-                    (notice instanceof TaskNotice)) {
-                Integer key = Integer.valueOf(notice.getLine());
+                    notice instanceof TaskNotice) {
+                Integer key = notice.getLine();
                 Marker m = markerMap.get(key);
                 if (m==null) {
                     m = new Marker(notice);
@@ -427,7 +387,7 @@ public class RoundMarkErrorStrip extends JComponent {
             addMarkersForRanges(occurrences, markerMap, textArea.getMarkOccurrencesColor());
         }
 
-        if (getShowMarkAll() /*&& textArea.getMarkAll()*/) {
+        if (getShowMarkAll() /* && textArea.getMarkAll() */) {
             Color markAllColor = textArea.getMarkAllHighlightColor();
             List<DocumentRange> ranges = textArea.getMarkAllHighlightRanges();
             addMarkersForRanges(ranges, markerMap, markAllColor);
@@ -435,9 +395,7 @@ public class RoundMarkErrorStrip extends JComponent {
 
         revalidate();
         repaint();
-
     }
-
 
     /**
      * Adds markers for a list of ranges in the document.
@@ -448,30 +406,30 @@ public class RoundMarkErrorStrip extends JComponent {
      */
     private void addMarkersForRanges(List<DocumentRange> ranges,
                                      Map<Integer, Marker> markerMap, Color color) {
+        int line;
+        ParserNotice notice;
+        Integer key;
+        Marker m;
         for (DocumentRange range : ranges) {
-            int line = 0;
+            line = 0;
             try {
                 line = textArea.getLineOfOffset(range.getStartOffset());
             } catch (BadLocationException ble) { // Never happens
                 continue;
             }
-            ParserNotice notice = new MarkedOccurrenceNotice(range, color);
-            Integer key = Integer.valueOf(line);
-            Marker m = markerMap.get(key);
+            notice = new MarkedOccurrenceNotice(range, color);
+            key = line;
+            m = markerMap.get(key);
             if (m==null) {
                 m = new Marker(notice);
                 m.addMouseListener(listener);
                 markerMap.put(key, m);
                 add(m);
-            }
-            else {
-                if (!m.containsMarkedOccurence()) {
-                    m.addNotice(notice);
-                }
+            } else if (!m.containsMarkedOccurence()) {
+                m.addNotice(notice);
             }
         }
     }
-
 
     /**
      * {@inheritDoc}
@@ -487,9 +445,8 @@ public class RoundMarkErrorStrip extends JComponent {
         textArea.removePropertyChangeListener(
                 RSyntaxTextArea.MARKED_OCCURRENCES_CHANGED_PROPERTY, listener);
         textArea.removePropertyChangeListener(
-                RSyntaxTextArea.MARK_ALL_OCCURRENCES_CHANGED_PROPERTY, listener);
+                RTextArea.MARK_ALL_OCCURRENCES_CHANGED_PROPERTY, listener);
     }
-
 
     /**
      * Sets the color to use when painting the caret marker.
@@ -503,7 +460,6 @@ public class RoundMarkErrorStrip extends JComponent {
             listener.caretUpdate(null); // Force repaint
         }
     }
-
 
     /**
      * Toggles whether the caret's current location should be drawn.
@@ -523,7 +479,6 @@ public class RoundMarkErrorStrip extends JComponent {
         }
     }
 
-
     /**
      * Sets the minimum severity a parser notice must be for it to be displayed
      * in this error strip.  This should be one of the constants defined in
@@ -541,7 +496,6 @@ public class RoundMarkErrorStrip extends JComponent {
         }
     }
 
-
     /**
      * Sets whether "mark all" highlights are shown in this error strip.
      *
@@ -556,7 +510,6 @@ public class RoundMarkErrorStrip extends JComponent {
             }
         }
     }
-
 
     /**
      * Sets whether marked occurrences are shown in this error strip.
@@ -573,7 +526,6 @@ public class RoundMarkErrorStrip extends JComponent {
         }
     }
 
-
     /**
      * Returns the line in the text area corresponding to a y-offset in this
      * component.
@@ -582,7 +534,7 @@ public class RoundMarkErrorStrip extends JComponent {
      * @return The line.
      * @see #lineToY(int)
      */
-    private final int yToLine(int y) {
+    private int yToLine(int y) {
         int line = -1;
         int h = textArea.getVisibleRect().height;
         if (y<h) {
@@ -592,15 +544,12 @@ public class RoundMarkErrorStrip extends JComponent {
         return line;
     }
 
-
-    /**
-     * Listens for events in the error strip and its markers.
-     */
+    /** Listens for events in the error strip and its markers. */
     private class Listener extends MouseAdapter
             implements PropertyChangeListener, CaretListener {
-
         private Rectangle visibleRect = new Rectangle();
 
+        @Override
         public void caretUpdate(CaretEvent e) {
             if (getFollowCaret()) {
                 int line = textArea.getCaretLineNumber();
@@ -617,10 +566,9 @@ public class RoundMarkErrorStrip extends JComponent {
 
         @Override
         public void mouseClicked(MouseEvent e) {
-
             Component source = (Component)e.getSource();
             if (source instanceof Marker) {
-                ((Marker)source).mouseClicked(e);
+                ((Marker)source).mouseClicked();
                 return;
             }
 
@@ -633,11 +581,10 @@ public class RoundMarkErrorStrip extends JComponent {
                     UIManager.getLookAndFeel().provideErrorFeedback(textArea);
                 }
             }
-
         }
 
+        @Override
         public void propertyChange(PropertyChangeEvent e) {
-
             String propName = e.getPropertyName();
 
             // If they change whether marked occurrences are visible in editor
@@ -661,26 +608,17 @@ public class RoundMarkErrorStrip extends JComponent {
                     refreshMarkers();
                 }
             }
-
             // If "mark all" occurrences changed.
             // TODO: Only update "mark all" markers, not all of them.
             else if (RTextArea.MARK_ALL_OCCURRENCES_CHANGED_PROPERTY.
-                    equals(propName)) {
-                if (getShowMarkAll()) {
-                    refreshMarkers();
-                }
+                    equals(propName) && getShowMarkAll()) {
+                refreshMarkers();
             }
-
         }
-
     }
 
-
-    /**
-     * A notice that wraps a "marked occurrence."
-     */
+    /** A notice that wraps a "marked occurrence." */
     private class MarkedOccurrenceNotice implements ParserNotice {
-
         private DocumentRange range;
         private Color color;
 
@@ -689,10 +627,12 @@ public class RoundMarkErrorStrip extends JComponent {
             this.color = color;
         }
 
+        @Override
         public int compareTo(ParserNotice other) {
             return 0; // Value doesn't matter
         }
 
+        @Override
         public boolean containsPosition(int pos) {
             return pos>=range.getStartOffset() && pos<range.getEndOffset();
         }
@@ -700,12 +640,10 @@ public class RoundMarkErrorStrip extends JComponent {
         @Override
         public boolean equals(Object o) {
             // FindBugs - Define equals() when defining compareTo()
-            if (!(o instanceof ParserNotice)) {
-                return false;
-            }
-            return compareTo((ParserNotice)o)==0;
+            return o instanceof ParserNotice && compareTo((ParserNotice)o)==0;
         }
 
+        @Override
         public Color getColor() {
             return color;
         }
@@ -713,18 +651,22 @@ public class RoundMarkErrorStrip extends JComponent {
         /**
          * {@inheritDoc}
          */
+        @Override
         public boolean getKnowsOffsetAndLength() {
             return true;
         }
 
+        @Override
         public int getLength() {
             return range.getEndOffset() - range.getStartOffset();
         }
 
+        @Override
         public Level getLevel() {
             return Level.INFO; // Won't matter
         }
 
+        @Override
         public int getLine() {
             try {
                 return textArea.getLineOfOffset(range.getStartOffset())+1;
@@ -733,6 +675,7 @@ public class RoundMarkErrorStrip extends JComponent {
             }
         }
 
+        @Override
         public String getMessage() {
             String text = null;
             try {
@@ -746,18 +689,22 @@ public class RoundMarkErrorStrip extends JComponent {
             return text;
         }
 
+        @Override
         public int getOffset() {
             return range.getStartOffset();
         }
 
+        @Override
         public Parser getParser() {
             return null;
         }
 
+        @Override
         public boolean getShowInEditor() {
             return false; // Value doesn't matter
         }
 
+        @Override
         public String getToolTipText() {
             return null;
         }
@@ -766,23 +713,15 @@ public class RoundMarkErrorStrip extends JComponent {
         public int hashCode() { // FindBugs, since we override equals()
             return 0; // Value doesn't matter for us.
         }
-
     }
 
-
-    /**
-     * A "marker" in this error strip, representing one or more notices.
-     */
+    /** A "marker" in this error strip, representing one or more notices. */
     private class Marker extends JComponent {
-
-        /**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-		private List<ParserNotice> notices;
+        private static final long serialVersionUID = 1L;
+        private transient List<ParserNotice> notices;
 
         public Marker(ParserNotice notice) {
-            notices = new ArrayList<ParserNotice>(1); // Usually just 1
+            notices = new ArrayList<>(1); // Usually just 1
             addNotice(notice);
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             setSize(getPreferredSize());
@@ -825,7 +764,6 @@ public class RoundMarkErrorStrip extends JComponent {
 
         @Override
         public String getToolTipText() {
-
             String text = null;
 
             if (notices.size()==1) {
@@ -835,8 +773,9 @@ public class RoundMarkErrorStrip extends JComponent {
                 StringBuilder sb = new StringBuilder("<html>");
                 sb.append(msg.getString("MultipleMarkers"));
                 sb.append("<br>");
+                ParserNotice pn;
                 for (int i=0; i<notices.size(); i++) {
-                    ParserNotice pn = notices.get(i);
+                    pn = notices.get(i);
                     sb.append("&nbsp;&nbsp;&nbsp;- ");
                     sb.append(pn.getMessage());
                     sb.append("<br>");
@@ -845,10 +784,9 @@ public class RoundMarkErrorStrip extends JComponent {
             }
 
             return text;
-
         }
 
-        protected void mouseClicked(MouseEvent e) {
+        protected void mouseClicked() {
             ParserNotice pn = notices.get(0);
             int offs = pn.getOffset();
             int len = pn.getLength();
@@ -869,7 +807,6 @@ public class RoundMarkErrorStrip extends JComponent {
 
         @Override
         protected void paintComponent(Graphics g) {
-
             // TODO: Give "priorities" and always pick color of a notice with
             // highest priority (e.g. parsing errors will usually be red).
 
@@ -913,8 +850,5 @@ public class RoundMarkErrorStrip extends JComponent {
             int y = lineToY(line);
             setLocation(2, y);
         }
-
     }
-
-
 }

@@ -1,8 +1,10 @@
 package org.jd.gui.util.parser.jdt.core;
 
+import org.jd.core.v1.util.StringConstants;
+
 public class ReferenceData {
-	
-	private String typeName;
+
+    private String typeName;
     /**
      * Field or method name or null for type
      */
@@ -31,34 +33,33 @@ public class ReferenceData {
     public boolean isAType() { return getName() == null; }
     public boolean isAField() { return (getDescriptor() != null) && getDescriptor().charAt(0) != '('; }
     public boolean isAMethod() { return (getDescriptor() != null) && getDescriptor().charAt(0) == '('; }
-    public boolean isAConstructor() { return "<init>".equals(getName()); }
+    public boolean isAConstructor() { return StringConstants.INSTANCE_CONSTRUCTOR.equals(getName()); }
 
-	public void setTypeName(String typeName) {
-		this.typeName = typeName;
-	}
-	
-	public String getTypeName() {
-		return typeName;
-	}
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getTypeName() {
+        return typeName;
+    }
 
-	public String getDescriptor() {
-		return descriptor;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String getOwner() {
-		return owner;
-	}
+    public String getDescriptor() {
+        return descriptor;
+    }
 
-	public boolean isEnabled() {
-		return enabled;
-	}
+    public String getOwner() {
+        return owner;
+    }
 
-	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
-	}
+    public boolean isEnabled() {
+        return enabled;
+    }
 
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 }

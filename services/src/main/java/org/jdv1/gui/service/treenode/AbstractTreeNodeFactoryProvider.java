@@ -7,15 +7,15 @@
 
 package org.jdv1.gui.service.treenode;
 
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.spi.TreeNodeFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
-
-import org.jd.gui.spi.TreeNodeFactory;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 
 public abstract class AbstractTreeNodeFactoryProvider implements TreeNodeFactory {
     protected List<String> externalSelectors;
@@ -24,7 +24,7 @@ public abstract class AbstractTreeNodeFactoryProvider implements TreeNodeFactory
     /**
      * Initialize "selectors" and "pathPattern" with optional external properties file
      */
-    public AbstractTreeNodeFactoryProvider() {
+    protected AbstractTreeNodeFactoryProvider() {
         Properties properties = new Properties();
         Class<?> clazz = this.getClass();
 
@@ -56,26 +56,25 @@ public abstract class AbstractTreeNodeFactoryProvider implements TreeNodeFactory
     protected String[] appendSelectors(String selector) {
         if (externalSelectors == null) {
             return new String[] { selector };
-        } else {
-            int size = externalSelectors.size();
-            String[] array = new String[size+1];
-            externalSelectors.toArray(array);
-            array[size] = selector;
-            return array;
         }
+        int size = externalSelectors.size();
+        String[] array = new String[size+1];
+        externalSelectors.toArray(array);
+        array[size] = selector;
+        return array;
     }
 
     protected String[] appendSelectors(String... selectors) {
         if (externalSelectors == null) {
             return selectors;
-        } else {
-            int size = externalSelectors.size();
-            String[] array = new String[size+selectors.length];
-            externalSelectors.toArray(array);
-            System.arraycopy(selectors, 0, array, size, selectors.length);
-            return array;
         }
+        int size = externalSelectors.size();
+        String[] array = new String[size+selectors.length];
+        externalSelectors.toArray(array);
+        System.arraycopy(selectors, 0, array, size, selectors.length);
+        return array;
     }
 
-    @Override public Pattern getPathPattern() { return externalPathPattern; }
+    @Override
+    public Pattern getPathPattern() { return externalPathPattern; }
 }

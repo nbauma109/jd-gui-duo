@@ -7,44 +7,6 @@
 
 package org.jd.gui.view;
 
-import java.awt.BorderLayout;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Future;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JRootPane;
-import javax.swing.JScrollPane;
-import javax.swing.KeyStroke;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.event.TreeExpansionEvent;
-import javax.swing.event.TreeExpansionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
-
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
@@ -55,6 +17,22 @@ import org.jd.gui.util.function.TriConsumer;
 import org.jd.gui.util.swing.SwingUtil;
 import org.jd.gui.view.component.Tree;
 import org.jd.gui.view.renderer.TreeNodeRenderer;
+
+import java.awt.*;
+import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Future;
+
+import javax.swing.*;
+import javax.swing.event.TreeExpansionEvent;
+import javax.swing.event.TreeExpansionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 
 public class OpenTypeHierarchyView {
     protected static final ImageIcon ROOT_CLASS_ICON = new ImageIcon(OpenTypeHierarchyView.class.getClassLoader().getResource("org/jd/gui/images/generate_class.png"));
@@ -86,14 +64,16 @@ public class OpenTypeHierarchyView {
             openTypeHierarchyTree.setModel(new DefaultTreeModel(new DefaultMutableTreeNode()));
             openTypeHierarchyTree.setCellRenderer(new TreeNodeRenderer());
             openTypeHierarchyTree.addMouseListener(new MouseAdapter() {
-                @Override public void mouseClicked(MouseEvent e) {
+                @Override
+                public void mouseClicked(MouseEvent e) {
                     if (e.getClickCount() == 2) {
                         onTypeSelected();
                     }
                 }
             });
             openTypeHierarchyTree.addTreeExpansionListener(new TreeExpansionListener() {
-                @Override public void treeExpanded(TreeExpansionEvent e) {
+                @Override
+                public void treeExpanded(TreeExpansionEvent e) {
                     TreeNode node = (TreeNode)e.getPath().getLastPathComponent();
                     // Expand node and find the first leaf
                     while (node.getChildCount() > 0) {
@@ -110,10 +90,12 @@ public class OpenTypeHierarchyView {
                     model.reload((TreeNode)e.getPath().getLastPathComponent());
                     openTypeHierarchyTree.setSelectionPath(new TreePath(node.getPath()));
                 }
-                @Override public void treeCollapsed(TreeExpansionEvent e) {}
+                @Override
+                public void treeCollapsed(TreeExpansionEvent e) {}
             });
             openTypeHierarchyTree.addKeyListener(new KeyAdapter() {
-                @Override public void keyPressed(KeyEvent e) {
+                @Override
+                public void keyPressed(KeyEvent e) {
                     if (e.getKeyCode() == KeyEvent.VK_F4) {
                         TreeNode node = (TreeNode)openTypeHierarchyTree.getLastSelectedPathComponent();
                         if (node != null) {
@@ -143,7 +125,11 @@ public class OpenTypeHierarchyView {
             JButton openTypeHierarchyCancelButton = new JButton("Cancel");
             hbox.add(openTypeHierarchyCancelButton);
             Action openTypeHierarchyCancelActionListener = new AbstractAction() {
-                @Override public void actionPerformed(ActionEvent actionEvent) { openTypeHierarchyDialog.setVisible(false); }
+
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) { openTypeHierarchyDialog.setVisible(false); }
             };
             openTypeHierarchyCancelButton.addActionListener(openTypeHierarchyCancelActionListener);
 
@@ -280,8 +266,6 @@ public class OpenTypeHierarchyView {
                     // Not found -> Choose 1st one
                     superEntry = superEntries.get(0);
                 }
-            } else {
-                superEntry = null;
             }
 
             if (superEntry != null) {
@@ -291,28 +275,26 @@ public class OpenTypeHierarchyView {
                 populateTreeNode(superTreeNode, treeNode);
                 // Recursive call
                 return createParentTreeNode(superTreeNode);
-            } else {
-                // Entry not found --> Most probable hypothesis : Java type entry
-                int lastPackageSeparatorIndex = superTypeName.lastIndexOf('/');
-                String package_ = superTypeName.substring(0, lastPackageSeparatorIndex).replace('/', '.');
-                String name = superTypeName.substring(lastPackageSeparatorIndex + 1).replace('$', '.');
-                String label = (package_ != null) ? name + " - " + package_ : name;
-                Icon icon = ((type.getFlags() & Type.FLAG_INTERFACE) == 0) ? ROOT_CLASS_ICON : ROOT_INTERFACE_ICON;
-                TreeNode rootTreeNode = new TreeNode(null, superTypeName, null, new TreeNodeBean(label, icon));
-
-                if (package_.startsWith("java.")) {
-                    // If root type is a JDK type, do not create a tree node for each child types
-                    rootTreeNode.add(treeNode);
-                } else {
-                    populateTreeNode(rootTreeNode, treeNode);
-                }
-
-                return rootTreeNode;
             }
-        } else {
-            // super type undefined
-            return treeNode;
+            // Entry not found --> Most probable hypothesis : Java type entry
+            int lastPackageSeparatorIndex = superTypeName.lastIndexOf('/');
+            String package_ = superTypeName.substring(0, lastPackageSeparatorIndex).replace('/', '.');
+            String name = superTypeName.substring(lastPackageSeparatorIndex + 1).replace('$', '.');
+            String label = (package_ != null) ? name + " - " + package_ : name;
+            Icon icon = ((type.getFlags() & Type.FLAG_INTERFACE) == 0) ? ROOT_CLASS_ICON : ROOT_INTERFACE_ICON;
+            TreeNode rootTreeNode = new TreeNode(null, superTypeName, null, new TreeNodeBean(label, icon));
+
+            if (package_ != null && package_.startsWith("java.")) {
+                // If root type is a JDK type, do not create a tree node for each child types
+                rootTreeNode.add(treeNode);
+            } else {
+                populateTreeNode(rootTreeNode, treeNode);
+            }
+
+            return rootTreeNode;
         }
+        // super type undefined
+        return treeNode;
     }
 
     /**
@@ -337,7 +319,7 @@ public class OpenTypeHierarchyView {
         }
 
         List<String> subTypeNames = getSubTypeNames(superTreeNode.typeName);
-        ArrayList<TreeNode> treeNodes = new ArrayList<>();
+        List<TreeNode> treeNodes = new ArrayList<>();
 
         for (String subTypeName : subTypeNames) {
             if (subTypeName.equals(activeTypName)) {
@@ -391,9 +373,9 @@ public class OpenTypeHierarchyView {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "rawtypes" })
     protected List<String> getSubTypeNames(String typeName) {
-        ArrayList<String> result = new ArrayList<>();
+        List<String> result = new ArrayList<>();
 
         try {
             for (Future<Indexes> futureIndexes : collectionOfFutureIndexes) {
@@ -411,6 +393,10 @@ public class OpenTypeHierarchyView {
                     }
                 }
             }
+        } catch (InterruptedException e) {
+            assert ExceptionUtil.printStackTrace(e);
+            // Restore interrupted state...
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             assert ExceptionUtil.printStackTrace(e);
         }
@@ -418,9 +404,9 @@ public class OpenTypeHierarchyView {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "rawtypes" })
     protected List<Container.Entry> getEntries(String typeName) {
-        ArrayList<Container.Entry> result = new ArrayList<>();
+        List<Container.Entry> result = new ArrayList<>();
 
         try {
             for (Future<Indexes> futureIndexes : collectionOfFutureIndexes) {
@@ -438,6 +424,10 @@ public class OpenTypeHierarchyView {
                     }
                 }
             }
+        } catch (InterruptedException e) {
+            assert ExceptionUtil.printStackTrace(e);
+            // Restore interrupted state...
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             assert ExceptionUtil.printStackTrace(e);
         }
@@ -446,9 +436,11 @@ public class OpenTypeHierarchyView {
     }
 
     protected static class TreeNode extends DefaultMutableTreeNode {
-        Container.Entry entry;
-        String typeName;
-        List<Container.Entry> entries;
+
+        private static final long serialVersionUID = 1L;
+        private transient Container.Entry entry;
+        private String typeName;
+        private transient List<Container.Entry> entries;
 
         TreeNode(Container.Entry entry, String typeName, List<Container.Entry> entries, Object userObject) {
             super(userObject);
@@ -475,10 +467,14 @@ public class OpenTypeHierarchyView {
             this.icon = icon;
         }
 
-        @Override public String getLabel() { return label; }
-        @Override public String getTip() { return tip; }
-        @Override public Icon getIcon() { return icon; }
-        @Override public Icon getOpenIcon() { return openIcon; }
+        @Override
+        public String getLabel() { return label; }
+        @Override
+        public String getTip() { return tip; }
+        @Override
+        public Icon getIcon() { return icon; }
+        @Override
+        public Icon getOpenIcon() { return openIcon; }
     }
 
     protected static class TreeNodeComparator implements Comparator<TreeNode> {

@@ -7,36 +7,32 @@
 
 package org.jdv1.gui.view.component;
 
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.api.API;
+import org.jd.gui.api.feature.UriGettable;
+import org.jd.gui.api.model.Container;
+import org.jd.gui.api.model.Indexes;
+import org.jd.gui.util.parser.jdt.core.HyperlinkData;
+import org.jd.gui.view.component.TypeReferencePage;
+import org.jdv1.gui.api.feature.IndexesChangeListener;
+import org.jdv1.gui.util.index.IndexesUtil;
+
 import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Future;
-
-import org.jd.gui.api.feature.UriGettable;
-import org.jd.gui.api.model.Container;
-import org.jd.gui.api.model.Indexes;
-import org.jd.gui.util.parser.jdt.core.HyperlinkData;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
-import org.jd.gui.view.component.TypeReferencePage;
-import org.jd.gui.api.API;
-import org.jdv1.gui.api.feature.IndexesChangeListener;
-import org.jdv1.gui.util.index.IndexesUtil;
 
 public class OneTypeReferencePerLinePage extends TypeReferencePage implements UriGettable, IndexesChangeListener {
 
-	private static final long serialVersionUID = 1L;
-	
-	protected API api;
-    protected Container.Entry entry;
-    protected Collection<Future<Indexes>> collectionOfFutureIndexes = Collections.emptyList();
+    private static final long serialVersionUID = 1L;
+
+    protected transient API api;
+    protected transient Container.Entry entry;
+    protected transient Collection<Future<Indexes>> collectionOfFutureIndexes = Collections.emptyList();
 
     public OneTypeReferencePerLinePage(API api, Container.Entry entry) {
         this.api = api;
@@ -51,7 +47,7 @@ public class OneTypeReferencePerLinePage extends TypeReferencePage implements Ur
             while ((line = br.readLine()) != null) {
                 String trim = line.trim();
 
-                if (trim.length() > 0) {
+                if (!trim.isEmpty()) {
                     int startIndex = offset + line.indexOf(trim);
                     int endIndex = startIndex + trim.length();
                     String internalTypeName = trim.replace('.', '/');
@@ -70,8 +66,10 @@ public class OneTypeReferencePerLinePage extends TypeReferencePage implements Ur
         setText(sb.toString());
     }
 
+    @Override
     protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return ((TypeHyperlinkData)hyperlinkData).enabled; }
 
+    @Override
     protected void openHyperlink(int x, int y, HyperlinkData hyperlinkData) {
         TypeHyperlinkData data = (TypeHyperlinkData)hyperlinkData;
 
@@ -87,7 +85,7 @@ public class OneTypeReferencePerLinePage extends TypeReferencePage implements Ur
                 String internalTypeName = data.internalTypeName;
                 List<Container.Entry> entries = IndexesUtil.findInternalTypeName(collectionOfFutureIndexes, internalTypeName);
                 String rootUri = entry.getContainer().getRoot().getUri().toString();
-                ArrayList<Container.Entry> sameContainerEntries = new ArrayList<>();
+                List<Container.Entry> sameContainerEntries = new ArrayList<>();
 
                 for (Container.Entry entry : entries) {
                     if (entry.getUri().toString().startsWith(rootUri)) {
@@ -95,9 +93,9 @@ public class OneTypeReferencePerLinePage extends TypeReferencePage implements Ur
                     }
                 }
 
-                if (sameContainerEntries.size() > 0) {
+                if (!sameContainerEntries.isEmpty()) {
                     api.openURI(x, y, sameContainerEntries, null, data.internalTypeName);
-                } else if (entries.size() > 0) {
+                } else if (!entries.isEmpty()) {
                     api.openURI(x, y, entries, null, data.internalTypeName);
                 }
             } catch (URISyntaxException e) {
@@ -107,9 +105,11 @@ public class OneTypeReferencePerLinePage extends TypeReferencePage implements Ur
     }
 
     // --- UriGettable --- //
+    @Override
     public URI getUri() { return entry.getUri(); }
 
     // --- ContentSavable --- //
+    @Override
     public String getFileName() {
         String path = entry.getPath();
         int index = path.lastIndexOf('/');
@@ -117,6 +117,7 @@ public class OneTypeReferencePerLinePage extends TypeReferencePage implements Ur
     }
 
     // --- IndexesChangeListener --- //
+    @Override
     public void indexesChanged(Collection<Future<Indexes>> collectionOfFutureIndexes) {
         // Update the list of containers
         this.collectionOfFutureIndexes = collectionOfFutureIndexes;

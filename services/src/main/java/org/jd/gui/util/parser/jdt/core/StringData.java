@@ -1,7 +1,7 @@
 package org.jd.gui.util.parser.jdt.core;
 
 public class StringData {
-	
+
     private int startPosition;
     private String text;
     private String owner;
@@ -12,15 +12,15 @@ public class StringData {
         this.owner = owner;
     }
 
-	public String getOwner() {
-		return owner;
-	}
+    public String getOwner() {
+        return owner;
+    }
 
-	public String getText() {
-		return text;
-	}
+    public String getText() {
+        return text;
+    }
 
-	public int getStartPosition() {
-		return startPosition;
-	}
+    public int getStartPosition() {
+        return startPosition;
+    }
 }

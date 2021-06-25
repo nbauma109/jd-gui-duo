@@ -12,8 +12,9 @@ import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.regex.Pattern;
+
+import javax.swing.tree.DefaultMutableTreeNode;
 
 public interface TreeNodeFactory {
     String[] getSelectors();

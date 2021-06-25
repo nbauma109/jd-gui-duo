@@ -11,14 +11,14 @@ import java.util.regex.Pattern;
 
 public class WarPackageTreeNodeFactoryProvider extends PackageTreeNodeFactoryProvider {
 
-    @Override public String[] getSelectors() { return appendSelectors("war:dir:*"); }
+    @Override
+    public String[] getSelectors() { return appendSelectors("war:dir:*"); }
 
     @Override
     public Pattern getPathPattern() {
         if (externalPathPattern == null) {
             return Pattern.compile("WEB-INF\\/classes\\/(?!META-INF)..*");
-        } else {
-            return externalPathPattern;
         }
+        return externalPathPattern;
     }
 }

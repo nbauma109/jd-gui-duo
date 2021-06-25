@@ -9,8 +9,9 @@ package org.jd.gui.view.bean;
 
 import org.jd.gui.api.model.Container;
 
-import javax.swing.*;
 import java.util.Collection;
+
+import javax.swing.Icon;
 
 public class OpenTypeListCellBean {
     public String label;

@@ -11,14 +11,14 @@ import java.util.regex.Pattern;
 
 public class JavaModulePackageTreeNodeFactoryProvider extends PackageTreeNodeFactoryProvider {
 
-    @Override public String[] getSelectors() { return appendSelectors("jmod:dir:*"); }
+    @Override
+    public String[] getSelectors() { return appendSelectors("jmod:dir:*"); }
 
     @Override
     public Pattern getPathPattern() {
         if (externalPathPattern == null) {
             return Pattern.compile("classes\\/(?!META-INF)..*");
-        } else {
-            return externalPathPattern;
         }
+        return externalPathPattern;
     }
 }

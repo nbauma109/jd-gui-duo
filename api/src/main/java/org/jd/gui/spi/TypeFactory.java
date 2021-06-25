@@ -15,19 +15,19 @@ import java.util.Collection;
 import java.util.regex.Pattern;
 
 public interface TypeFactory {
-	String[] getSelectors();
+    String[] getSelectors();
 
     Pattern getPathPattern();
 
-	/**
-	 * @return all root types contains in 'entry'
-	 */
-	Collection<Type> make(API api, Container.Entry entry);
+    /**
+     * @return all root types contains in 'entry'
+     */
+    Collection<Type> make(API api, Container.Entry entry);
 
-	/**
+    /**
      * @param fragment @see jd.gui.api.feature.UriOpenable
-	 * @return if 'fragment' is null, return the main type in 'entry',
-	 *         otherwise, return the type or sub-type matching with 'fragment'
-	 */
-	Type make(API api, Container.Entry entry, String fragment);
+     * @return if 'fragment' is null, return the main type in 'entry',
+     *         otherwise, return the type or sub-type matching with 'fragment'
+     */
+    Type make(API api, Container.Entry entry, String fragment);
 }

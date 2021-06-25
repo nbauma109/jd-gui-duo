@@ -7,40 +7,28 @@
 
 package org.jdv0.gui.service.sourcesaver;
 
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.lang.reflect.Proxy;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Map;
-
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.service.sourcesaver.AbstractSourceSaverProvider;
 import org.jd.gui.util.decompiler.ContainerLoader;
 import org.jd.gui.util.decompiler.GuiPreferences;
-import org.jd.gui.util.decompiler.postprocess.impl.LineNumberRealigner;
 import org.jdv0.gui.util.decompiler.PlainTextPrinter;
+
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Map;
+
+import static org.jd.gui.util.decompiler.GuiPreferences.*;
 
 import jd.core.CoreConstants;
 import jd.core.Decompiler;
-import jd.core.loader.Loader;
 import jd.core.process.DecompilerImpl;
 
 public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
-    protected static final String ESCAPE_UNICODE_CHARACTERS = "ClassFileSaverPreferences.escapeUnicodeCharacters";
-    protected static final String OMIT_THIS_PREFIX = "ClassFileSaverPreferences.omitThisPrefix";
-    protected static final String WRITE_DEFAULT_CONSTRUCTOR = "ClassFileSaverPreferences.writeDefaultConstructor";
-    protected static final String REALIGN_LINE_NUMBERS = "ClassFileSaverPreferences.realignLineNumbers";
-    protected static final String WRITE_LINE_NUMBERS = "ClassFileSaverPreferences.writeLineNumbers";
-    protected static final String WRITE_METADATA = "ClassFileSaverPreferences.writeMetadata";
 
     protected static final Decompiler DECOMPILER = new DecompilerImpl();
 
@@ -49,7 +37,8 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
     protected PlainTextPrinter printer = new PlainTextPrinter();
     protected ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-    @Override public String[] getSelectors() { return appendSelectors("*:file:*.class"); }
+    @Override
+    public String[] getSelectors() { return appendSelectors("*:file:*.class"); }
 
     @Override
     public String getSourcePath(Container.Entry entry) {
@@ -63,9 +52,8 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
     public int getFileCount(API api, Container.Entry entry) {
         if (entry.getPath().indexOf('$') == -1) {
             return 1;
-        } else {
-            return 0;
         }
+        return 0;
     }
 
     @Override
@@ -85,11 +73,12 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
             }
             // Init preferences
             Map<String, String> p = api.getPreferences();
+            boolean showLineNumbers = getPreferenceValue(p, WRITE_LINE_NUMBERS, true);
             preferences.setUnicodeEscape(getPreferenceValue(p, ESCAPE_UNICODE_CHARACTERS, false));
             preferences.setShowPrefixThis(! getPreferenceValue(p, OMIT_THIS_PREFIX, false));
             preferences.setShowDefaultConstructor(getPreferenceValue(p, WRITE_DEFAULT_CONSTRUCTOR, false));
             preferences.setRealignmentLineNumber(getPreferenceValue(p, REALIGN_LINE_NUMBERS, true));
-            preferences.setShowLineNumbers(getPreferenceValue(p, WRITE_LINE_NUMBERS, true));
+            preferences.setShowLineNumbers(showLineNumbers);
 
             // Init loader
             loader.setEntry(entry);
@@ -101,8 +90,7 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
             printer.setPreferences(preferences);
 
             // Decompile class file
-			Loader proxyLoader = (Loader) Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] {Loader.class}, loader);
-            DECOMPILER.decompile(preferences, proxyLoader, printer, entry.getPath());
+            DECOMPILER.decompile(preferences, loader, printer, entry.getPath());
 
             // Metadata
             if (getPreferenceValue(p, WRITE_METADATA, true)) {
@@ -111,13 +99,16 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
                     new File(entry.getUri()).getPath()
                     // Escape "\ u" sequence to prevent "Invalid unicode" errors
                     .replaceAll("(^|[^\\\\])\\\\u", "\\\\\\\\u");
-                ps.print("\n\n/* Location:              ");
+                ps.println();
+                ps.println();
+                ps.print("/* Location:              ");
                 ps.print(location);
                 // Add Java compiler version
                 int majorVersion = printer.getMajorVersion();
 
                 if (majorVersion >= 45) {
-                    ps.print("\n * Java compiler version: ");
+                    ps.println();
+                    ps.print(" * Java compiler version: ");
 
                     if (majorVersion >= 49) {
                         ps.print(majorVersion - (49 - 5));
@@ -132,18 +123,27 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
                     ps.print(')');
                 }
                 // Add JD-Core version
-                ps.print("\n * JD-Core Version:       ");
-                ps.print(CoreConstants.JD_CORE_VERSION);
-                ps.print("\n */");
+                ps.println();
+                ps.print(" * JD-Core Version:       ");
+                ps.println(CoreConstants.JD_CORE_VERSION);
+                ps.print(" */");
             }
-            LineNumberRealigner lineNumberRealigner = new LineNumberRealigner();
-            String realigned = lineNumberRealigner.process(new String(baos.toByteArray(), StandardCharsets.UTF_8));
+            String currentSourceCode = new String(baos.toByteArray(), StandardCharsets.UTF_8);
+            String newSourceCode;
+//			if (currentSourceCode.contains(ByteCodeReplacer.BYTE_CODE)) {
+//				ByteCodeReplacer byteCodeReplacer = new ByteCodeReplacer(entry, showLineNumbers);
+//				newSourceCode = byteCodeReplacer.process(currentSourceCode);
+//			} else {
+                newSourceCode = currentSourceCode;
+//			}
+//            LineNumberRealigner lineNumberRealigner = new LineNumberRealigner();
+//            String realigned = lineNumberRealigner.process(new String(baos.toByteArray(), StandardCharsets.UTF_8));
             try (OutputStream os = Files.newOutputStream(path)) {
-            	os.write(realigned.getBytes(StandardCharsets.UTF_8));
+                os.write(newSourceCode.getBytes(StandardCharsets.UTF_8));
             } catch (IOException e) {
-            	assert ExceptionUtil.printStackTrace(e);
+                assert ExceptionUtil.printStackTrace(e);
             }
-        } catch (Throwable t) {
+        } catch (Exception t) {
             assert ExceptionUtil.printStackTrace(t);
 
             try (BufferedWriter writer = Files.newBufferedWriter(path, Charset.defaultCharset())) {
@@ -159,8 +159,7 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
 
         if (v == null) {
             return defaultValue;
-        } else {
-            return Boolean.valueOf(v);
         }
+        return Boolean.valueOf(v);
     }
 }

@@ -9,12 +9,13 @@ package org.jd.gui.view;
 
 import org.jd.gui.util.swing.SwingUtil;
 
-import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+
+import javax.swing.*;
 
 public class SaveAllSourcesView {
     protected JDialog saveAllSourcesDialog;
@@ -27,7 +28,8 @@ public class SaveAllSourcesView {
             saveAllSourcesDialog = new JDialog(mainFrame, "Save All Sources", false);
             saveAllSourcesDialog.setResizable(false);
             saveAllSourcesDialog.addWindowListener(new WindowAdapter() {
-                @Override public void windowClosing(WindowEvent e) {
+                @Override
+                public void windowClosing(WindowEvent e) {
                     cancelCallback.run();
                 }
             });
@@ -38,13 +40,15 @@ public class SaveAllSourcesView {
 
             // First label "Saving 'file' ..."
             Box hbox = Box.createHorizontalBox();
-            hbox.add(saveAllSourcesLabel = new JLabel());
+            saveAllSourcesLabel = new JLabel();
+            hbox.add(saveAllSourcesLabel);
             hbox.add(Box.createHorizontalGlue());
             vbox.add(hbox);
 
             vbox.add(Box.createVerticalStrut(10));
 
-            vbox.add(saveAllSourcesProgressBar = new JProgressBar());
+            saveAllSourcesProgressBar = new JProgressBar();
+            vbox.add(saveAllSourcesProgressBar);
 
             vbox.add(Box.createVerticalStrut(15));
 
@@ -53,6 +57,10 @@ public class SaveAllSourcesView {
             hbox.add(Box.createHorizontalGlue());
             JButton saveAllSourcesCancelButton = new JButton("Cancel");
             Action saveAllSourcesCancelActionListener = new AbstractAction() {
+
+                private static final long serialVersionUID = 1L;
+
+                @Override
                 public void actionPerformed(ActionEvent actionEvent) {
                     cancelCallback.run();
                     saveAllSourcesDialog.setVisible(false);
@@ -101,15 +109,11 @@ public class SaveAllSourcesView {
     }
 
     public void updateProgressBar(int value) {
-        SwingUtil.invokeLater(() -> {
-            saveAllSourcesProgressBar.setValue(value);
-        });
+        SwingUtil.invokeLater(() -> saveAllSourcesProgressBar.setValue(value));
     }
 
     public void hide() {
-        SwingUtil.invokeLater(() -> {
-            saveAllSourcesDialog.setVisible(false);
-        });
+        SwingUtil.invokeLater(() -> saveAllSourcesDialog.setVisible(false));
     }
 
     public void showActionFailedDialog() {

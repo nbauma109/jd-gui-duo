@@ -7,6 +7,14 @@
 
 package org.jdv1.gui.service.treenode;
 
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.api.API;
+import org.jd.gui.api.feature.ContainerEntryGettable;
+import org.jd.gui.api.feature.PageCreator;
+import org.jd.gui.api.feature.UriGettable;
+import org.jd.gui.api.model.Container;
+import org.jd.gui.view.data.TreeNodeBean;
+
 import java.awt.BorderLayout;
 import java.io.File;
 import java.io.IOException;
@@ -14,25 +22,14 @@ import java.io.InputStream;
 import java.net.URI;
 
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
-
-import org.jd.gui.api.API;
-import org.jd.gui.api.feature.ContainerEntryGettable;
-import org.jd.gui.api.feature.PageCreator;
-import org.jd.gui.api.feature.UriGettable;
-import org.jd.gui.api.model.Container;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
-import org.jd.gui.view.data.TreeNodeBean;
 
 public class ImageFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvider {
     protected static final ImageIcon ICON = new ImageIcon(ImageFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/file-image.gif"));
 
-    @Override public String[] getSelectors() { return appendSelectors("*:file:*.gif", "*:file:*.jpg", "*:file:*.png"); }
+    @Override
+    public String[] getSelectors() { return appendSelectors("*:file:*.gif", "*:file:*.jpg", "*:file:*.png"); }
 
     @Override
     @SuppressWarnings("unchecked")
@@ -44,12 +41,10 @@ public class ImageFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvide
     }
 
     protected static class TreeNode extends FileTreeNodeFactoryProvider.TreeNode implements PageCreator {
-        /**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
 
-		public TreeNode(Container.Entry entry, Object userObject) { super(entry, userObject); }
+        private static final long serialVersionUID = 1L;
+
+        public TreeNode(Container.Entry entry, Object userObject) { super(entry, userObject); }
 
         // --- PageCreator --- //
         @Override
@@ -60,11 +55,9 @@ public class ImageFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvide
     }
 
     protected static class ImagePage extends JPanel implements UriGettable {
-        /**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-		protected Container.Entry entry;
+
+        private static final long serialVersionUID = 1L;
+        protected transient Container.Entry entry;
 
         public ImagePage(Container.Entry entry) {
             super(new BorderLayout());
@@ -84,6 +77,7 @@ public class ImageFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvide
         }
 
         // --- UriGettable --- //
-        @Override public URI getUri() { return entry.getUri(); }
+        @Override
+        public URI getUri() { return entry.getUri(); }
     }
 }

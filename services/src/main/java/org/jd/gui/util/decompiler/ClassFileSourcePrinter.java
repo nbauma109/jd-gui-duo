@@ -27,140 +27,140 @@ public abstract class ClassFileSourcePrinter implements Printer {
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 
     @Override
-	public void print(byte b) { append(String.valueOf(b)); }
+    public void print(byte b) { append(String.valueOf(b)); }
     @Override
-	public void print(int i) { append(String.valueOf(i)); }
+    public void print(int i) { append(String.valueOf(i)); }
 
     @Override
-	public void print(char c) {
+    public void print(char c) {
         if (this.display) {
-			append(c);
-		}
+            append(c);
+        }
     }
 
     @Override
-	public void print(String s) {
+    public void print(String s) {
         if (this.display) {
-			printEscape(s);
-		}
+            printEscape(s);
+        }
     }
 
     @Override
-	public void printNumeric(String s) { append(s); }
+    public void printNumeric(String s) { append(s); }
 
     @Override
-	public void printString(String s, String scopeInternalName)  { append(s); }
+    public void printString(String s, String scopeInternalName)  { append(s); }
 
     @Override
-	public void printKeyword(String s) {
+    public void printKeyword(String s) {
         if (this.display) {
-			append(s);
-		}
+            append(s);
+        }
     }
 
     @Override
-	public void printJavaWord(String s) { append(s); }
+    public void printJavaWord(String s) { append(s); }
 
     @Override
-	public void printType(String internalName, String name, String scopeInternalName) {
+    public void printType(String internalName, String name, String scopeInternalName) {
         if (this.display) {
-			printEscape(name);
-		}
+            printEscape(name);
+        }
     }
 
     @Override
-	public void printTypeDeclaration(String internalName, String name) {
-        printEscape(name);
-    }
-
-    @Override
-	public void printTypeImport(String internalName, String name) {
+    public void printTypeDeclaration(String internalName, String name) {
         printEscape(name);
     }
 
     @Override
-	public void printField(String internalName, String name, String descriptor, String scopeInternalName) {
-        printEscape(name);
-    }
-    @Override
-	public void printFieldDeclaration(String internalName, String name, String descriptor) {
+    public void printTypeImport(String internalName, String name) {
         printEscape(name);
     }
 
     @Override
-	public void printStaticField(String internalName, String name, String descriptor, String scopeInternalName) {
+    public void printField(String internalName, String name, String descriptor, String scopeInternalName) {
         printEscape(name);
     }
     @Override
-	public void printStaticFieldDeclaration(String internalName, String name, String descriptor) {
-        printEscape(name);
-    }
-
-    @Override
-	public void printConstructor(String internalName, String name, String descriptor, String scopeInternalName) {
-        printEscape(name);
-    }
-    @Override
-	public void printConstructorDeclaration(String internalName, String name, String descriptor) {
+    public void printFieldDeclaration(String internalName, String name, String descriptor) {
         printEscape(name);
     }
 
     @Override
-	public void printStaticConstructorDeclaration(String internalName, String name) {
+    public void printStaticField(String internalName, String name, String descriptor, String scopeInternalName) {
+        printEscape(name);
+    }
+    @Override
+    public void printStaticFieldDeclaration(String internalName, String name, String descriptor) {
+        printEscape(name);
+    }
+
+    @Override
+    public void printConstructor(String internalName, String name, String descriptor, String scopeInternalName) {
+        printEscape(name);
+    }
+    @Override
+    public void printConstructorDeclaration(String internalName, String name, String descriptor) {
+        printEscape(name);
+    }
+
+    @Override
+    public void printStaticConstructorDeclaration(String internalName, String name) {
         append(name);
     }
 
     @Override
-	public void printMethod(String internalName, String name, String descriptor, String scopeInternalName) {
+    public void printMethod(String internalName, String name, String descriptor, String scopeInternalName) {
         printEscape(name);
     }
     @Override
-	public void printMethodDeclaration(String internalName, String name, String descriptor) {
-        printEscape(name);
-    }
-
-    @Override
-	public void printStaticMethod(String internalName, String name, String descriptor, String scopeInternalName) {
-        printEscape(name);
-    }
-    @Override
-	public void printStaticMethodDeclaration(String internalName, String name, String descriptor) {
+    public void printMethodDeclaration(String internalName, String name, String descriptor) {
         printEscape(name);
     }
 
     @Override
-	public void start(int maxLineNumber, int majorVersion, int minorVersion) {
+    public void printStaticMethod(String internalName, String name, String descriptor, String scopeInternalName) {
+        printEscape(name);
+    }
+    @Override
+    public void printStaticMethodDeclaration(String internalName, String name, String descriptor) {
+        printEscape(name);
+    }
+
+    @Override
+    public void start(int maxLineNumber, int majorVersion, int minorVersion) {
         this.indentationCount = 0;
         this.display = true;
         this.maxLineNumber = maxLineNumber;
     }
 
     @Override
-	public void end() {}
+    public void end() {}
 
     @Override
-	public void indent() {
+    public void indent() {
         this.indentationCount++;
     }
     @Override
-	public void desindent() {
+    public void desindent() {
         if (this.indentationCount > 0) {
-			this.indentationCount--;
-		}
+            this.indentationCount--;
+        }
     }
 
     @Override
-	public void startOfLine(int lineNumber) {
+    public void startOfLine(int lineNumber) {
         for (int i=0; i<indentationCount; i++) {
-			append(TAB);
-		}
+            append(TAB);
+        }
     }
 
     @Override
-	public void endOfLine() { append(NEWLINE); }
+    public void endOfLine() { append(NEWLINE); }
 
     @Override
-	public void extraLine(int count) {
+    public void extraLine(int count) {
         if (getRealignmentLineNumber()) {
             while (count-- > 0) {
                 append(NEWLINE);
@@ -169,86 +169,86 @@ public abstract class ClassFileSourcePrinter implements Printer {
     }
 
     @Override
-	public void startOfComment() {}
+    public void startOfComment() {}
     @Override
-	public void endOfComment() {}
+    public void endOfComment() {}
 
     @Override
-	public void startOfJavadoc() {}
+    public void startOfJavadoc() {}
     @Override
-	public void endOfJavadoc() {}
+    public void endOfJavadoc() {}
 
     @Override
-	public void startOfXdoclet() {}
+    public void startOfXdoclet() {}
     @Override
-	public void endOfXdoclet() {}
+    public void endOfXdoclet() {}
 
     @Override
-	public void startOfError() {}
+    public void startOfError() {}
     @Override
-	public void endOfError() {}
+    public void endOfError() {}
 
     @Override
-	public void startOfImportStatements() {}
+    public void startOfImportStatements() {}
     @Override
-	public void endOfImportStatements() {}
+    public void endOfImportStatements() {}
 
     @Override
-	public void startOfTypeDeclaration(String internalPath) {}
+    public void startOfTypeDeclaration(String internalPath) {}
     @Override
-	public void endOfTypeDeclaration() {}
+    public void endOfTypeDeclaration() {}
 
     @Override
-	public void startOfAnnotationName() {}
+    public void startOfAnnotationName() {}
     @Override
-	public void endOfAnnotationName() {}
+    public void endOfAnnotationName() {}
 
     @Override
-	public void startOfOptionalPrefix() {
+    public void startOfOptionalPrefix() {
         if (!isShowPrefixThis()) {
-			this.display = false;
-		}
+            this.display = false;
+        }
     }
 
     @Override
-	public void endOfOptionalPrefix() {
+    public void endOfOptionalPrefix() {
         this.display = true;
     }
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 
     @Override
-	public void debugStartOfLayoutBlock() {}
+    public void debugStartOfLayoutBlock() {}
     @Override
-	public void debugEndOfLayoutBlock() {}
+    public void debugEndOfLayoutBlock() {}
 
     @Override
-	public void debugStartOfSeparatorLayoutBlock() {}
+    public void debugStartOfSeparatorLayoutBlock() {}
     @Override
-	public void debugEndOfSeparatorLayoutBlock(int min, int value, int max) {}
+    public void debugEndOfSeparatorLayoutBlock(int min, int value, int max) {}
 
     @Override
-	public void debugStartOfStatementsBlockLayoutBlock() {}
+    public void debugStartOfStatementsBlockLayoutBlock() {}
     @Override
-	public void debugEndOfStatementsBlockLayoutBlock(int min, int value, int max) {}
+    public void debugEndOfStatementsBlockLayoutBlock(int min, int value, int max) {}
 
     @Override
-	public void debugStartOfInstructionBlockLayoutBlock() {}
+    public void debugStartOfInstructionBlockLayoutBlock() {}
     @Override
-	public void debugEndOfInstructionBlockLayoutBlock() {}
+    public void debugEndOfInstructionBlockLayoutBlock() {}
 
     @Override
-	public void debugStartOfCommentDeprecatedLayoutBlock() {}
+    public void debugStartOfCommentDeprecatedLayoutBlock() {}
     @Override
-	public void debugEndOfCommentDeprecatedLayoutBlock() {}
+    public void debugEndOfCommentDeprecatedLayoutBlock() {}
 
     @Override
-	public void debugMarker(String marker) {}
+    public void debugMarker(String marker) {}
 
     @Override
-	public void debugStartOfCaseBlockLayoutBlock() {}
+    public void debugStartOfCaseBlockLayoutBlock() {}
     @Override
-	public void debugEndOfCaseBlockLayoutBlock() {}
+    public void debugEndOfCaseBlockLayoutBlock() {}
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 

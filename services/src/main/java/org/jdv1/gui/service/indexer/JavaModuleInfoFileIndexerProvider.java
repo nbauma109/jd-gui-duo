@@ -7,34 +7,36 @@
 
 package org.jdv1.gui.service.indexer;
 
-import static org.objectweb.asm.ClassReader.SKIP_CODE;
-import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
-import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
-
-import java.io.InputStream;
-import java.util.HashSet;
-
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.service.indexer.AbstractIndexerProvider;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ModuleVisitor;
 import org.objectweb.asm.Opcodes;
 
+import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.objectweb.asm.ClassReader.SKIP_CODE;
+import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
+import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
+
 /**
  * Unsafe thread implementation of class file indexer.
  */
 public class JavaModuleInfoFileIndexerProvider extends AbstractIndexerProvider {
-    protected HashSet<String> javaModuleDeclarationSet = new HashSet<>();
-    protected HashSet<String> javaModuleReferenceSet = new HashSet<>();
-    protected HashSet<String> typeReferenceSet = new HashSet<>();
+    protected Set<String> javaModuleDeclarationSet = new HashSet<>();
+    protected Set<String> javaModuleReferenceSet = new HashSet<>();
+    protected Set<String> typeReferenceSet = new HashSet<>();
 
     protected ClassIndexer classIndexer = new ClassIndexer();
 
-    @Override public String[] getSelectors() { return appendSelectors("jmod:file:classes/module-info.class"); }
+    @Override
+    public String[] getSelectors() { return appendSelectors("jmod:file:classes/module-info.class"); }
 
     @Override
     public void index(API api, Container.Entry entry, Indexes indexes) {
@@ -72,9 +74,12 @@ public class JavaModuleInfoFileIndexerProvider extends AbstractIndexerProvider {
     protected class ModuleIndexer extends ModuleVisitor {
         public ModuleIndexer() { super(Opcodes.ASM7); }
 
-        @Override public void visitMainClass(final String mainClass) { typeReferenceSet.add(mainClass); }
-        @Override public void visitRequire(final String module, final int access, final String version) { javaModuleReferenceSet.add(module); }
-        @Override public void visitUse(final String service) { typeReferenceSet.add(service); }
+        @Override
+        public void visitMainClass(final String mainClass) { typeReferenceSet.add(mainClass); }
+        @Override
+        public void visitRequire(final String module, final int access, final String version) { javaModuleReferenceSet.add(module); }
+        @Override
+        public void visitUse(final String service) { typeReferenceSet.add(service); }
 
         @Override
         public void visitExport(final String packaze, final int access, final String... modules) {

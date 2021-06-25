@@ -1,23 +1,25 @@
 /*
  * Copyright (c) 2008-2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
- * This is a Copyleft license that gives the user the right to use, 
+ * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
 
 package org.jdv1.gui.service.fileloader;
 
-import java.io.File;
-
 import org.jd.gui.api.API;
 import org.jd.gui.util.io.TextReader;
 import org.jd.gui.view.component.LogPage;
 
+import java.io.File;
+
 public class LogFileLoaderProvider extends ZipFileLoaderProvider {
     protected static final String[] EXTENSIONS = { "log" };
 
-    @Override public String[] getExtensions() { return EXTENSIONS; }
-    @Override public String getDescription() { return "Log files (*.log)"; }
+    @Override
+    public String[] getExtensions() { return EXTENSIONS; }
+    @Override
+    public String getDescription() { return "Log files (*.log)"; }
 
     @Override
     public boolean accept(API api, File file) {

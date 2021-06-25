@@ -17,5 +17,6 @@ public class JarContainer extends GenericContainer {
         super(api, parentEntry, rootPath);
     }
 
+    @Override
     public String getType() { return "jar"; }
 }

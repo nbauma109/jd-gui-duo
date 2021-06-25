@@ -12,9 +12,9 @@ import org.jd.gui.api.API;
 import java.net.URI;
 
 public interface UriLoader {
-	String[] getSchemes();
-	
-	boolean accept(API api, URI uri);
-	
-	boolean load(API api, URI uri);
+    String[] getSchemes();
+
+    boolean accept(API api, URI uri);
+
+    boolean load(API api, URI uri);
 }

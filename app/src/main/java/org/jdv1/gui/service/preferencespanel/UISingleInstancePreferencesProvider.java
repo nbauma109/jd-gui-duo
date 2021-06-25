@@ -10,14 +10,21 @@ package org.jdv1.gui.service.preferencespanel;
 import org.jd.gui.service.platform.PlatformService;
 import org.jd.gui.spi.PreferencesPanel;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.GridLayout;
 import java.util.Map;
+
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 
 /**
  * Single instance is the default mode on Mac OSX, so this panel is not activated.
  */
 public class UISingleInstancePreferencesProvider extends JPanel implements PreferencesPanel {
+
+    private static final long serialVersionUID = 1L;
+
     protected static final String SINGLE_INSTANCE = "UIMainWindowPreferencesProvider.singleInstance";
 
     protected JCheckBox singleInstanceTabsCheckBox;
@@ -31,13 +38,18 @@ public class UISingleInstancePreferencesProvider extends JPanel implements Prefe
     }
 
     // --- PreferencesPanel --- //
-    @Override public String getPreferencesGroupTitle() { return "User Interface"; }
-    @Override public String getPreferencesPanelTitle() { return "Main window"; }
-    @Override public JComponent getPanel() { return this; }
+    @Override
+    public String getPreferencesGroupTitle() { return "User Interface"; }
+    @Override
+    public String getPreferencesPanelTitle() { return "Main window"; }
+    @Override
+    public JComponent getPanel() { return this; }
 
-    @Override public void init(Color errorBackgroundColor) {}
+    @Override
+    public void init(Color errorBackgroundColor) {}
 
-    @Override public boolean isActivated() { return !PlatformService.getInstance().isMac(); }
+    @Override
+    public boolean isActivated() { return !PlatformService.getInstance().isMac(); }
 
     @Override
     public void loadPreferences(Map<String, String> preferences) {
@@ -49,7 +61,9 @@ public class UISingleInstancePreferencesProvider extends JPanel implements Prefe
         preferences.put(SINGLE_INSTANCE, Boolean.toString(singleInstanceTabsCheckBox.isSelected()));
     }
 
-    @Override public boolean arePreferencesValid() { return true; }
+    @Override
+    public boolean arePreferencesValid() { return true; }
 
-    @Override public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {}
+    @Override
+    public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {}
 }

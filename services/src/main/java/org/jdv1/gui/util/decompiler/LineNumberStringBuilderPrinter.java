@@ -7,6 +7,20 @@
 
 package org.jdv1.gui.util.decompiler;
 
+import org.jd.core.v1.api.Decompiler;
+import org.jd.core.v1.api.loader.LoaderException;
+
+import org.jd.core.v1.util.StringConstants;
+import org.jd.gui.api.model.Container;
+import org.jd.gui.util.decompiler.ContainerLoader;
+
+import java.io.File;
+import java.io.UTFDataFormatException;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.jd.gui.util.decompiler.GuiPreferences.*;
+
 public class LineNumberStringBuilderPrinter extends StringBuilderPrinter {
     protected boolean showLineNumbers = false;
 
@@ -67,7 +81,8 @@ public class LineNumberStringBuilderPrinter extends StringBuilderPrinter {
         }
     }
 
-    @Override public void startLine(int lineNumber) {
+    @Override
+    public void startLine(int lineNumber) {
         if (maxLineNumber > 0) {
             stringBuffer.append(lineNumberBeginPrefix);
 
@@ -90,7 +105,8 @@ public class LineNumberStringBuilderPrinter extends StringBuilderPrinter {
             stringBuffer.append(TAB);
         }
     }
-    @Override public void extraLine(int count) {
+    @Override
+    public void extraLine(int count) {
         if (realignmentLineNumber) {
             while (count-- > 0) {
                 if (maxLineNumber > 0) {
@@ -102,5 +118,62 @@ public class LineNumberStringBuilderPrinter extends StringBuilderPrinter {
                 stringBuffer.append(NEWLINE);
             }
         }
+    }
+
+    public String buildDecompiledOutput(Map<String, String> preferences, ContainerLoader loader, Container.Entry entry, Decompiler decompiler) throws UTFDataFormatException, LoaderException {
+        // Init preferences
+        boolean realignmentLineNumbers = Boolean.parseBoolean(preferences.getOrDefault(REALIGN_LINE_NUMBERS, Boolean.FALSE.toString()));
+        boolean unicodeEscape = Boolean.parseBoolean(preferences.getOrDefault(ESCAPE_UNICODE_CHARACTERS, Boolean.FALSE.toString()));
+        boolean showLineNumbers = Boolean.parseBoolean(preferences.getOrDefault(WRITE_LINE_NUMBERS, Boolean.TRUE.toString()));
+
+        Map<String, Object> configuration = new HashMap<>();
+        configuration.put("realignLineNumbers", realignmentLineNumbers);
+
+        setRealignmentLineNumber(realignmentLineNumbers);
+        setUnicodeEscape(unicodeEscape);
+        setShowLineNumbers(showLineNumbers);
+
+        // Format internal name
+        String entryPath = entry.getPath();
+        assert entryPath.endsWith(StringConstants.CLASS_FILE_SUFFIX);
+        String entryInternalName = entryPath.substring(0, entryPath.length() - 6); // 6 = ".class".length()
+
+        // Decompile class file
+        decompiler.decompile(loader, this, entryInternalName, configuration);
+
+        StringBuilder stringBuffer = getStringBuffer();
+
+        // Metadata
+        if (Boolean.parseBoolean(preferences.getOrDefault(WRITE_METADATA, Boolean.TRUE.toString()))) {
+            // Add location
+            String location = new File(entry.getUri()).getPath()
+                    // Escape "\ u" sequence to prevent "Invalid unicode" errors
+                    .replaceAll("(^|[^\\\\])\\\\u", "\\\\\\\\u");
+            stringBuffer.append("\n\n/* Location:              ");
+            stringBuffer.append(location);
+            // Add Java compiler version
+            int majorVersion = getMajorVersion();
+
+            if (majorVersion >= 45) {
+                stringBuffer.append("\n * Java compiler version: ");
+
+                if (majorVersion >= 49) {
+                    stringBuffer.append(majorVersion - (49 - 5));
+                } else {
+                    stringBuffer.append(majorVersion - (45 - 1));
+                }
+
+                stringBuffer.append(" (");
+                stringBuffer.append(majorVersion);
+                stringBuffer.append('.');
+                stringBuffer.append(getMinorVersion());
+                stringBuffer.append(')');
+            }
+            // Add JD-Core version
+            stringBuffer.append("\n * JD-Core Version:       ");
+            stringBuffer.append(preferences.get(JD_CORE_VERSION));
+            stringBuffer.append("\n */");
+        }
+        return stringBuffer.toString();
     }
 }

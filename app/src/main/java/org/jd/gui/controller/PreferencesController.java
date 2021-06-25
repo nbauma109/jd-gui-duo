@@ -11,8 +11,9 @@ import org.jd.gui.model.configuration.Configuration;
 import org.jd.gui.spi.PreferencesPanel;
 import org.jd.gui.view.PreferencesView;
 
-import javax.swing.*;
 import java.util.Collection;
+
+import javax.swing.JFrame;
 
 public class PreferencesController {
     protected PreferencesView preferencesView;

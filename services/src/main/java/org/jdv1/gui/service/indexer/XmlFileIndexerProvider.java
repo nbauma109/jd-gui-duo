@@ -7,20 +7,22 @@
 
 package org.jdv1.gui.service.indexer;
 
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.api.API;
+import org.jd.gui.api.model.Container;
+import org.jd.gui.api.model.Indexes;
+import org.jd.gui.service.indexer.AbstractIndexerProvider;
+
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-
-import org.jd.gui.api.API;
-import org.jd.gui.api.model.Container;
-import org.jd.gui.api.model.Indexes;
-import org.jd.gui.service.indexer.AbstractIndexerProvider;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 
 public class XmlFileIndexerProvider extends AbstractIndexerProvider {
     protected XMLInputFactory factory;
@@ -30,17 +32,18 @@ public class XmlFileIndexerProvider extends AbstractIndexerProvider {
         factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
     }
 
-    @Override public String[] getSelectors() { return appendSelectors("*:file:*.xml"); }
+    @Override
+    public String[] getSelectors() { return appendSelectors("*:file:*.xml"); }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void index(API api, Container.Entry entry, Indexes indexes) {
-        HashSet<String> stringSet = new HashSet<>();
-        HashSet<String> typeReferenceSet = new HashSet<>();
+        Set<String> stringSet = new HashSet<>();
+        Set<String> typeReferenceSet = new HashSet<>();
         XMLStreamReader reader = null;
 
-        try {
-            reader = factory.createXMLStreamReader(entry.getInputStream());
+        try (InputStream inputStream = entry.getInputStream()) {
+
+            reader = factory.createXMLStreamReader(inputStream);
 
             stringSet.add(reader.getVersion());
             stringSet.add(reader.getEncoding());
@@ -59,7 +62,7 @@ public class XmlFileIndexerProvider extends AbstractIndexerProvider {
 
                             if (beanFlag && attributeName.equals("class")) {
                                 // String bean reference
-                                typeReferenceSet.add(reader.getAttributeValue(i).replace(".", "/"));
+                                typeReferenceSet.add(reader.getAttributeValue(i).replace('.', '/'));
                             } else {
                                 stringSet.add(reader.getAttributeValue(i));
                             }
@@ -114,7 +117,9 @@ public class XmlFileIndexerProvider extends AbstractIndexerProvider {
             }
         }
 
+        @SuppressWarnings("all")
         Map<String, Collection> stringIndex = indexes.getIndex("strings");
+        @SuppressWarnings("all")
         Map<String, Collection> typeReferenceIndex = indexes.getIndex("typeReferences");
 
         for (String string : stringSet) {

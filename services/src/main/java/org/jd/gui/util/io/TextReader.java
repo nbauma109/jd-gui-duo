@@ -13,9 +13,13 @@ import java.io.*;
 
 public class TextReader {
 
+    private TextReader() {
+        super();
+    }
+
     public static String getText(File file) {
-        try {
-            return getText(new FileInputStream(file));
+        try (FileInputStream is = new FileInputStream(file)) {
+            return getText(is);
         } catch (IOException e) {
             assert ExceptionUtil.printStackTrace(e);
             return "";

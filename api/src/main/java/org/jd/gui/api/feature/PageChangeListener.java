@@ -7,8 +7,8 @@
 
 package org.jd.gui.api.feature;
 
-import javax.swing.*;
+import javax.swing.JComponent;
 
 public interface PageChangeListener {
-    <T extends JComponent & UriGettable> void pageChanged(T page);
+    <U extends JComponent & UriGettable> void pageChanged(U page);
 }

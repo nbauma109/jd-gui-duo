@@ -1,25 +1,27 @@
 /*
  * Copyright (c) 2008-2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
- * This is a Copyleft license that gives the user the right to use, 
+ * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
 
 package org.jdv1.gui.service.fileloader;
 
-import java.io.File;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.jd.gui.api.API;
 import org.jd.gui.service.fileloader.AbstractTypeFileLoaderProvider;
 import org.jd.gui.util.io.TextReader;
 
+import java.io.File;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class JavaFileLoaderProvider extends AbstractTypeFileLoaderProvider {
     protected static final String[] EXTENSIONS = { "java" };
 
-    @Override public String[] getExtensions() { return EXTENSIONS; }
-    @Override public String getDescription() { return "Java files (*.java)"; }
+    @Override
+    public String[] getExtensions() { return EXTENSIONS; }
+    @Override
+    public String getDescription() { return "Java files (*.java)"; }
 
     @Override
     public boolean accept(API api, File file) {
@@ -37,9 +39,8 @@ public class JavaFileLoaderProvider extends AbstractTypeFileLoaderProvider {
             String pathInFile = matcher.group(2).replace(".", File.separator) + File.separator + file.getName();
 
             return load(api, file, pathInFile);
-        } else {
-            // Package name not found
-            return load(api, file, file.getName());
         }
+        // Package name not found
+        return load(api, file, file.getName());
     }
 }

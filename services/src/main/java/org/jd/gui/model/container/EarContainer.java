@@ -7,15 +7,16 @@
 
 package org.jd.gui.model.container;
 
-import java.nio.file.Path;
-
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
+
+import java.nio.file.Path;
 
 public class EarContainer extends GenericContainer {
     public EarContainer(API api, Container.Entry parentEntry, Path rootPath) {
         super(api, parentEntry, rootPath);
     }
 
+    @Override
     public String getType() { return "ear"; }
 }

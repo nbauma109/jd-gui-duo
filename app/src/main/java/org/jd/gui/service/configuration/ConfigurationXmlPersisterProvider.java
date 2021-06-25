@@ -7,38 +7,30 @@
 
 package org.jd.gui.service.configuration;
 
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-import java.util.jar.Manifest;
-
-import javax.swing.UIManager;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamWriter;
-
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.Constants;
 import org.jd.gui.model.configuration.Configuration;
 import org.jd.gui.service.platform.PlatformService;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.io.*;
+import java.net.URL;
+import java.util.*;
+import java.util.jar.Manifest;
+
+import javax.swing.UIManager;
+import javax.xml.XMLConstants;
+import javax.xml.stream.*;
+
+import static org.jd.gui.util.decompiler.GuiPreferences.ERROR_BACKGROUND_COLOR;
+import static org.jd.gui.util.decompiler.GuiPreferences.JD_CORE_VERSION;
 
 public class ConfigurationXmlPersisterProvider implements ConfigurationPersister {
-    protected static final String ERROR_BACKGROUND_COLOR = "JdGuiPreferences.errorBackgroundColor";
-    protected static final String JD_CORE_VERSION = "JdGuiPreferences.jdCoreVersion";
 
+    private static final String NEW_LINE_2_TABS = "\n\t\t";
+    private static final String NEW_LINE_3_TABS = "\n\t\t\t";
     protected static final File FILE = getConfigFile();
 
     protected static File getConfigFile() {
@@ -105,11 +97,14 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
 
         if (FILE.exists()) {
             try (FileInputStream fis = new FileInputStream(FILE)) {
-                XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(fis);
+                XMLInputFactory factory = XMLInputFactory.newInstance();
+                factory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+                factory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+                XMLStreamReader reader = factory.createXMLStreamReader(fis);
 
                 // Load values
                 String name = "";
-                Stack<String> names = new Stack<>();
+                Deque<String> names = new ArrayDeque<>();
                 List<File> recentFiles = new ArrayList<>();
                 boolean maximize = false;
                 Map<String, String> preferences = config.getPreferences();
@@ -232,25 +227,25 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
             writer.writeCharacters("\n\t");
 
             writer.writeStartElement("gui");
-            writer.writeCharacters("\n\t\t");
+            writer.writeCharacters(NEW_LINE_2_TABS);
                 writer.writeStartElement("mainWindow");
-                writer.writeCharacters("\n\t\t\t");
+                writer.writeCharacters(NEW_LINE_3_TABS);
                     writer.writeStartElement("location");
                         writer.writeAttribute("x", String.valueOf(l.x));
                         writer.writeAttribute("y", String.valueOf(l.y));
                     writer.writeEndElement();
-                    writer.writeCharacters("\n\t\t\t");
+                    writer.writeCharacters(NEW_LINE_3_TABS);
                     writer.writeStartElement("size");
                         writer.writeAttribute("w", String.valueOf(s.width));
                         writer.writeAttribute("h", String.valueOf(s.height));
                     writer.writeEndElement();
-                    writer.writeCharacters("\n\t\t\t");
+                    writer.writeCharacters(NEW_LINE_3_TABS);
                     writer.writeStartElement("maximize");
                         writer.writeCharacters(String.valueOf(configuration.isMainWindowMaximize()));
                     writer.writeEndElement();
-                    writer.writeCharacters("\n\t\t");
+                    writer.writeCharacters(NEW_LINE_2_TABS);
                 writer.writeEndElement();
-                writer.writeCharacters("\n\t\t");
+                writer.writeCharacters(NEW_LINE_2_TABS);
                 writer.writeStartElement("lookAndFeel");
                     writer.writeCharacters(configuration.getLookAndFeel());
                 writer.writeEndElement();
@@ -261,7 +256,7 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
             writer.writeStartElement("recentFilePaths");
 
             for (File recentFile : configuration.getRecentFiles()) {
-                writer.writeCharacters("\n\t\t");
+                writer.writeCharacters(NEW_LINE_2_TABS);
                 writer.writeStartElement("filePath");
                     writer.writeCharacters(recentFile.getAbsolutePath());
                 writer.writeEndElement();
@@ -272,11 +267,11 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
             writer.writeCharacters("\n\t");
 
             writer.writeStartElement("recentDirectories");
-            writer.writeCharacters("\n\t\t");
+            writer.writeCharacters(NEW_LINE_2_TABS);
                 writer.writeStartElement("loadPath");
                     writer.writeCharacters(configuration.getRecentLoadDirectory().getAbsolutePath());
                 writer.writeEndElement();
-                writer.writeCharacters("\n\t\t");
+                writer.writeCharacters(NEW_LINE_2_TABS);
                 writer.writeStartElement("savePath");
                     writer.writeCharacters(configuration.getRecentSaveDirectory().getAbsolutePath());
                 writer.writeEndElement();
@@ -287,7 +282,7 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
             writer.writeStartElement("preferences");
 
             for (Map.Entry<String, String> preference : configuration.getPreferences().entrySet()) {
-                writer.writeCharacters("\n\t\t");
+                writer.writeCharacters(NEW_LINE_2_TABS);
                 writer.writeStartElement(preference.getKey());
                     writer.writeCharacters(preference.getValue());
                 writer.writeEndElement();

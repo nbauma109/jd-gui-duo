@@ -13,21 +13,13 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 public class NewlineOutputStream extends FilterOutputStream {
-    private static byte[] lineSeparator;
+    private static byte[] lineSeparator = System.lineSeparator().getBytes(StandardCharsets.UTF_8);
 
     public NewlineOutputStream(OutputStream os) {
         super(os);
-
-        if (lineSeparator == null) {
-            String s = System.getProperty("line.separator");
-
-            if ((s == null) || (s.length() <= 0))
-                s = "\n";
-
-            lineSeparator = s.getBytes(StandardCharsets.UTF_8);
-        }
     }
 
+    @Override
     public void write(int b) throws IOException {
         if (b == '\n') {
             out.write(lineSeparator);
@@ -36,10 +28,12 @@ public class NewlineOutputStream extends FilterOutputStream {
         }
     }
 
+    @Override
     public void write(byte b[]) throws IOException {
         write(b, 0, b.length);
     }
 
+    @Override
     public void write(byte b[], int off, int len) throws IOException {
         int i;
 

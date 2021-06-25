@@ -4,37 +4,32 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.gui.controller;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.regex.Pattern;
-
-import javax.swing.JFrame;
-
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.api.model.Type;
 import org.jd.gui.service.type.TypeFactoryService;
 import org.jd.gui.spi.TypeFactory;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.util.function.TriConsumer;
 import org.jd.gui.view.SearchInConstantPoolsView;
-import org.jd.gui.api.API;
+import org.jd.util.LRUCache;
 import org.jdv1.gui.api.feature.IndexesChangeListener;
 import org.jdv1.gui.model.container.DelegatingFilterContainer;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.*;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.ObjIntConsumer;
+import java.util.regex.Pattern;
+
+import javax.swing.JFrame;
 
 public class SearchInConstantPoolsController implements IndexesChangeListener {
     protected static final int CACHE_MAX_ENTRIES = 5*20*9;
@@ -43,40 +38,30 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
     protected ScheduledExecutorService executor;
 
     protected JFrame mainFrame;
+    @SuppressWarnings("rawtypes")
     protected SearchInConstantPoolsView searchInConstantPoolsView;
+    @SuppressWarnings("rawtypes")
     protected Map<String, Map<String, Collection>> cache;
     protected Set<DelegatingFilterContainer> delegatingFilterContainers = new HashSet<>();
     protected Collection<Future<Indexes>> collectionOfFutureIndexes;
     protected Consumer<URI> openCallback;
-    protected long indexesHashCode = 0L;
+    protected long indexesHashCode;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public SearchInConstantPoolsController(API api, ScheduledExecutorService executor, JFrame mainFrame) {
         this.api = api;
         this.executor = executor;
         this.mainFrame = mainFrame;
         // Create UI
+        ObjIntConsumer<String> changedPatternCallback = this::updateTree;
+        TriConsumer<URI, String, Integer> selectedTypeCallback = this::onTypeSelected;
         this.searchInConstantPoolsView = new SearchInConstantPoolsView(
             api, mainFrame,
-            new BiConsumer<String, Integer>() {
-                @Override public void accept(String pattern, Integer flags) { updateTree(pattern, flags); }
-            },
-            new TriConsumer<URI, String, Integer>() {
-                @Override public void accept(URI uri, String pattern, Integer flags) { onTypeSelected(uri, pattern, flags); }
-            }
+            changedPatternCallback,
+            selectedTypeCallback
         );
         // Create result cache
-        this.cache = new LinkedHashMap<String, Map<String, Collection>>(CACHE_MAX_ENTRIES*3/2, 0.7f, true) {
-            /**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
-
-			@Override
-            protected boolean removeEldestEntry(Map.Entry<String, Map<String, Collection>> eldest) {
-                return size() > CACHE_MAX_ENTRIES;
-            }
-        };
+        this.cache = new LRUCache<>(CACHE_MAX_ENTRIES);
     }
 
     public void show(Collection<Future<Indexes>> collectionOfFutureIndexes, Consumer<URI> openCallback) {
@@ -110,7 +95,7 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
                     for (Future<Indexes> futureIndexes : collectionOfFutureIndexes) {
                         if (futureIndexes.isDone()) {
                             Indexes indexes = futureIndexes.get();
-                            HashSet<Container.Entry> matchingEntries = new HashSet<>();
+                            Set<Container.Entry> matchingEntries = new HashSet<>();
                             // Find matched entries
                             filter(indexes, pattern, flags, matchingEntries);
 
@@ -134,6 +119,10 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
                             }
                         }
                     }
+                } catch (InterruptedException e) {
+                    assert ExceptionUtil.printStackTrace(e);
+                    // Restore interrupted state...
+                    Thread.currentThread().interrupt();
                 } catch (Exception e) {
                     assert ExceptionUtil.printStackTrace(e);
                 }
@@ -146,25 +135,26 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
         });
     }
 
-    protected HashSet<Container.Entry> getOuterEntries(Set<Container.Entry> matchingEntries) {
-        HashMap<Container.Entry, Container.Entry> innerTypeEntryToOuterTypeEntry = new HashMap<>();
-        HashSet<Container.Entry> matchingOuterEntriesSet = new HashSet<>();
+    protected Set<Container.Entry> getOuterEntries(Set<Container.Entry> matchingEntries) {
+        Map<Container.Entry, Container.Entry> innerTypeEntryToOuterTypeEntry = new HashMap<>();
+        Set<Container.Entry> matchingOuterEntriesSet = new HashSet<>();
 
+        TypeFactory typeFactory;
         for (Container.Entry entry : matchingEntries) {
-            TypeFactory typeFactory = TypeFactoryService.getInstance().get(entry);
+            typeFactory = TypeFactoryService.getInstance().get(entry);
 
             if (typeFactory != null) {
                 Type type = typeFactory.make(api, entry, null);
 
-                if ((type != null) && (type.getOuterName() != null)) {
+                if (type != null && type.getOuterName() != null) {
                     Container.Entry outerTypeEntry = innerTypeEntryToOuterTypeEntry.get(entry);
 
                     if (outerTypeEntry == null) {
-                        HashMap<String, Container.Entry> typeNameToEntry = new HashMap<>();
-                        HashMap<String, String> innerTypeNameToOuterTypeName = new HashMap<>();
+                        Map<String, Container.Entry> typeNameToEntry = new HashMap<>();
+                        Map<String, String> innerTypeNameToOuterTypeName = new HashMap<>();
 
                         // Populate "typeNameToEntry" and "innerTypeNameToOuterTypeName"
-                        for (Container.Entry e : entry.getParent().getChildren()) {
+                        for (Container.Entry e : entry.getParent().getChildren().values()) {
                             typeFactory = TypeFactoryService.getInstance().get(e);
 
                             if (typeFactory != null) {
@@ -179,20 +169,21 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
                             }
                         }
 
+                        Container.Entry innerTypeEntry;
                         // Search outer type entries and populate "innerTypeEntryToOuterTypeEntry"
                         for (Map.Entry<String, String> e : innerTypeNameToOuterTypeName.entrySet()) {
-                            Container.Entry innerTypeEntry = typeNameToEntry.get(e.getKey());
+                            innerTypeEntry = typeNameToEntry.get(e.getKey());
 
                             if (innerTypeEntry != null) {
                                 String outerTypeName = e.getValue();
 
+                                String typeName;
                                 for (;;) {
-                                    String typeName = innerTypeNameToOuterTypeName.get(outerTypeName);
-                                    if (typeName != null) {
-                                        outerTypeName = typeName;
-                                    } else {
+                                    typeName = innerTypeNameToOuterTypeName.get(outerTypeName);
+                                    if (typeName == null) {
                                         break;
                                     }
+                                    outerTypeName = typeName;
                                 }
 
                                 outerTypeEntry = typeNameToEntry.get(outerTypeName);
@@ -222,73 +213,82 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
     }
 
     protected void filter(Indexes indexes, String pattern, int flags, Set<Container.Entry> matchingEntries) {
-        boolean declarations = ((flags & SearchInConstantPoolsView.SEARCH_DECLARATION) != 0);
-        boolean references = ((flags & SearchInConstantPoolsView.SEARCH_REFERENCE) != 0);
+        boolean declarations = (flags & SearchInConstantPoolsView.SEARCH_DECLARATION) != 0;
+        boolean references = (flags & SearchInConstantPoolsView.SEARCH_REFERENCE) != 0;
 
         if ((flags & SearchInConstantPoolsView.SEARCH_TYPE) != 0) {
-            if (declarations)
+            if (declarations) {
                 match(indexes, "typeDeclarations", pattern,
                       SearchInConstantPoolsController::matchTypeEntriesWithChar,
                       SearchInConstantPoolsController::matchTypeEntriesWithString, matchingEntries);
-            if (references)
+            }
+            if (references) {
                 match(indexes, "typeReferences", pattern,
                       SearchInConstantPoolsController::matchTypeEntriesWithChar,
                       SearchInConstantPoolsController::matchTypeEntriesWithString, matchingEntries);
+            }
         }
 
         if ((flags & SearchInConstantPoolsView.SEARCH_CONSTRUCTOR) != 0) {
-            if (declarations)
+            if (declarations) {
                 match(indexes, "constructorDeclarations", pattern,
                       SearchInConstantPoolsController::matchTypeEntriesWithChar,
                       SearchInConstantPoolsController::matchTypeEntriesWithString, matchingEntries);
-            if (references)
+            }
+            if (references) {
                 match(indexes, "constructorReferences", pattern,
                       SearchInConstantPoolsController::matchTypeEntriesWithChar,
                       SearchInConstantPoolsController::matchTypeEntriesWithString, matchingEntries);
+            }
         }
 
         if ((flags & SearchInConstantPoolsView.SEARCH_METHOD) != 0) {
-            if (declarations)
+            if (declarations) {
                 match(indexes, "methodDeclarations", pattern,
                       SearchInConstantPoolsController::matchWithChar,
                       SearchInConstantPoolsController::matchWithString, matchingEntries);
-            if (references)
+            }
+            if (references) {
                 match(indexes, "methodReferences", pattern,
                       SearchInConstantPoolsController::matchWithChar,
                       SearchInConstantPoolsController::matchWithString, matchingEntries);
+            }
         }
 
         if ((flags & SearchInConstantPoolsView.SEARCH_FIELD) != 0) {
-            if (declarations)
+            if (declarations) {
                 match(indexes, "fieldDeclarations", pattern,
                       SearchInConstantPoolsController::matchWithChar,
                       SearchInConstantPoolsController::matchWithString, matchingEntries);
-            if (references)
+            }
+            if (references) {
                 match(indexes, "fieldReferences", pattern,
                       SearchInConstantPoolsController::matchWithChar,
                       SearchInConstantPoolsController::matchWithString, matchingEntries);
+            }
         }
 
-        if ((flags & SearchInConstantPoolsView.SEARCH_STRING) != 0) {
-            if (declarations || references)
-                match(indexes, "strings", pattern,
-                      SearchInConstantPoolsController::matchWithChar,
-                      SearchInConstantPoolsController::matchWithString, matchingEntries);
+        if ((flags & SearchInConstantPoolsView.SEARCH_STRING) != 0 && (declarations || references)) {
+            match(indexes, "strings", pattern,
+                  SearchInConstantPoolsController::matchWithChar,
+                  SearchInConstantPoolsController::matchWithString, matchingEntries);
         }
 
         if ((flags & SearchInConstantPoolsView.SEARCH_MODULE) != 0) {
-            if (declarations)
+            if (declarations) {
                 match(indexes, "javaModuleDeclarations", pattern,
                         SearchInConstantPoolsController::matchWithChar,
                         SearchInConstantPoolsController::matchWithString, matchingEntries);
-            if (references)
+            }
+            if (references) {
                 match(indexes, "javaModuleReferences", pattern,
                         SearchInConstantPoolsController::matchWithChar,
                         SearchInConstantPoolsController::matchWithString, matchingEntries);
+            }
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "rawtypes" })
     protected void match(Indexes indexes, String indexName, String pattern,
                          BiFunction<Character, Map<String, Collection>, Map<String, Collection>> matchWithCharFunction,
                          BiFunction<String, Map<String, Collection>, Map<String, Collection>> matchWithStringFunction,
@@ -296,29 +296,23 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
         int patternLength = pattern.length();
 
         if (patternLength > 0) {
-            String key = String.valueOf(indexes.hashCode()) + "***" + indexName + "***" + pattern;
-            Map<String, Collection> matchedEntries = cache.get(key);
-
-            if (matchedEntries == null) {
+            String key = indexes.hashCode() + "***" + indexName + "***" + pattern;
+            Map<String, Collection> matchedEntries = cache.computeIfAbsent(key, k -> {
                 Map<String, Collection> index = indexes.getIndex(indexName);
 
                 if (index != null) {
                     if (patternLength == 1) {
-                        matchedEntries = matchWithCharFunction.apply(pattern.charAt(0), index);
-                    } else {
-                        String lastKey = key.substring(0, key.length() - 1);
-                        Map<String, Collection> lastMatchedTypes = cache.get(lastKey);
-                        if (lastMatchedTypes != null) {
-                            matchedEntries = matchWithStringFunction.apply(pattern, lastMatchedTypes);
-                        } else {
-                            matchedEntries = matchWithStringFunction.apply(pattern, index);
-                        }
+                        return matchWithCharFunction.apply(pattern.charAt(0), index);
                     }
+                    String lastKey = key.substring(0, key.length() - 1);
+                    Map<String, Collection> lastMatchedTypes = cache.get(lastKey);
+                    if (lastMatchedTypes != null) {
+                        return matchWithStringFunction.apply(pattern, lastMatchedTypes);
+                    }
+                    return matchWithStringFunction.apply(pattern, index);
                 }
-
-                // Cache matchingEntries
-                cache.put(key, matchedEntries);
-            }
+                return null;
+            });
 
             if (matchedEntries != null) {
                 for (Collection<Container.Entry> entries : matchedEntries.values()) {
@@ -328,68 +322,84 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     protected static Map<String, Collection> matchTypeEntriesWithChar(char c, Map<String, Collection> index) {
-        if ((c == '*') || (c == '?')) {
+        if (c == '*' || c == '?') {
             return index;
-        } else {
-            Map<String, Collection> map = new HashMap<>();
-
-            for (String typeName : index.keySet()) {
-                // Search last package separator
-                int lastPackageSeparatorIndex = typeName.lastIndexOf('/') + 1;
-                int lastTypeNameSeparatorIndex = typeName.lastIndexOf('$') + 1;
-                int lastIndex = Math.max(lastPackageSeparatorIndex, lastTypeNameSeparatorIndex);
-
-                if ((lastIndex < typeName.length()) && (typeName.charAt(lastIndex) == c)) {
-                    map.put(typeName, index.get(typeName));
-                }
-            }
-
-            return map;
         }
-    }
-
-    protected static Map<String, Collection> matchTypeEntriesWithString(String pattern, Map<String, Collection> index) {
-        Pattern p = createPattern(pattern);
         Map<String, Collection> map = new HashMap<>();
 
-        for (String typeName : index.keySet()) {
+        String typeName;
+        int lastPackageSeparatorIndex;
+        int lastTypeNameSeparatorIndex;
+        int lastIndex;
+        for (Map.Entry<String, Collection> entry : index.entrySet()) {
+            typeName = entry.getKey();
             // Search last package separator
-            int lastPackageSeparatorIndex = typeName.lastIndexOf('/') + 1;
-            int lastTypeNameSeparatorIndex = typeName.lastIndexOf('$') + 1;
-            int lastIndex = Math.max(lastPackageSeparatorIndex, lastTypeNameSeparatorIndex);
+            lastPackageSeparatorIndex = typeName.lastIndexOf('/') + 1;
+            lastTypeNameSeparatorIndex = typeName.lastIndexOf('$') + 1;
+            lastIndex = Math.max(lastPackageSeparatorIndex, lastTypeNameSeparatorIndex);
 
-            if (p.matcher(typeName.substring(lastIndex)).matches()) {
-                map.put(typeName, index.get(typeName));
+            if (lastIndex < typeName.length() && typeName.charAt(lastIndex) == c) {
+                map.put(typeName, entry.getValue());
             }
         }
 
         return map;
     }
 
-    protected static Map<String, Collection> matchWithChar(char c, Map<String, Collection> index) {
-        if ((c == '*') || (c == '?')) {
-            return index;
-        } else {
-            Map<String, Collection> map = new HashMap<>();
+    @SuppressWarnings("rawtypes")
+    protected static Map<String, Collection> matchTypeEntriesWithString(String pattern, Map<String, Collection> index) {
+        Pattern p = createPattern(pattern);
+        Map<String, Collection> map = new HashMap<>();
 
-            for (String key : index.keySet()) {
-                if (!key.isEmpty() && (key.charAt(0) == c)) {
-                    map.put(key, index.get(key));
-                }
+        String typeName;
+        int lastPackageSeparatorIndex;
+        int lastTypeNameSeparatorIndex;
+        int lastIndex;
+        for (Map.Entry<String, Collection> entry : index.entrySet()) {
+            typeName = entry.getKey();
+            // Search last package separator
+            lastPackageSeparatorIndex = typeName.lastIndexOf('/') + 1;
+            lastTypeNameSeparatorIndex = typeName.lastIndexOf('$') + 1;
+            lastIndex = Math.max(lastPackageSeparatorIndex, lastTypeNameSeparatorIndex);
+
+            if (p.matcher(typeName.substring(lastIndex)).matches()) {
+                map.put(typeName, entry.getValue());
             }
-
-            return map;
         }
+
+        return map;
     }
 
+    @SuppressWarnings("rawtypes")
+    protected static Map<String, Collection> matchWithChar(char c, Map<String, Collection> index) {
+        if (c == '*' || c == '?') {
+            return index;
+        }
+        Map<String, Collection> map = new HashMap<>();
+
+        String key;
+        for (Map.Entry<String, Collection> entry : index.entrySet()) {
+            key = entry.getKey();
+            if (!key.isEmpty() && key.charAt(0) == c) {
+                map.put(key, entry.getValue());
+            }
+        }
+
+        return map;
+    }
+
+    @SuppressWarnings("rawtypes")
     protected static Map<String, Collection> matchWithString(String pattern, Map<String, Collection> index) {
         Pattern p = createPattern(pattern);
         Map<String, Collection> map = new HashMap<>();
 
-        for (String key : index.keySet()) {
+        String key;
+        for (Map.Entry<String, Collection> entry : index.entrySet()) {
+            key = entry.getKey();
             if (p.matcher(key).matches()) {
-                map.put(key, index.get(key));
+                map.put(key, entry.getValue());
             }
         }
 
@@ -407,17 +417,23 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
         int patternLength = pattern.length();
         StringBuilder sbPattern = new StringBuilder(patternLength * 2);
 
+        char c;
         for (int i = 0; i < patternLength; i++) {
-            char c = pattern.charAt(i);
+            c = pattern.charAt(i);
 
-            if (c == '*') {
+            switch (c) {
+            case '*':
                 sbPattern.append(".*");
-            } else if (c == '?') {
+                break;
+            case '?':
                 sbPattern.append('.');
-            } else if (c == '.') {
+                break;
+            case '.':
                 sbPattern.append("\\.");
-            } else {
+                break;
+            default:
                 sbPattern.append(c);
+                break;
             }
         }
 
@@ -432,8 +448,9 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
 
         for (DelegatingFilterContainer container : delegatingFilterContainers) {
             entry = container.getEntry(uri);
-            if (entry != null)
+            if (entry != null) {
                 break;
+            }
         }
 
         if (entry != null) {
@@ -443,32 +460,38 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
             sbPattern.append(pattern);
             sbPattern.append("&highlightFlags=");
 
-            if ((flags & SearchInConstantPoolsView.SEARCH_DECLARATION) != 0)
+            if ((flags & SearchInConstantPoolsView.SEARCH_DECLARATION) != 0) {
                 sbPattern.append('d');
-            if ((flags & SearchInConstantPoolsView.SEARCH_REFERENCE) != 0)
+            }
+            if ((flags & SearchInConstantPoolsView.SEARCH_REFERENCE) != 0) {
                 sbPattern.append('r');
-            if ((flags & SearchInConstantPoolsView.SEARCH_TYPE) != 0)
+            }
+            if ((flags & SearchInConstantPoolsView.SEARCH_TYPE) != 0) {
                 sbPattern.append('t');
-            if ((flags & SearchInConstantPoolsView.SEARCH_CONSTRUCTOR) != 0)
+            }
+            if ((flags & SearchInConstantPoolsView.SEARCH_CONSTRUCTOR) != 0) {
                 sbPattern.append('c');
-            if ((flags & SearchInConstantPoolsView.SEARCH_METHOD) != 0)
+            }
+            if ((flags & SearchInConstantPoolsView.SEARCH_METHOD) != 0) {
                 sbPattern.append('m');
-            if ((flags & SearchInConstantPoolsView.SEARCH_FIELD) != 0)
+            }
+            if ((flags & SearchInConstantPoolsView.SEARCH_FIELD) != 0) {
                 sbPattern.append('f');
-            if ((flags & SearchInConstantPoolsView.SEARCH_STRING) != 0)
+            }
+            if ((flags & SearchInConstantPoolsView.SEARCH_STRING) != 0) {
                 sbPattern.append('s');
-            if ((flags & SearchInConstantPoolsView.SEARCH_MODULE) != 0)
+            }
+            if ((flags & SearchInConstantPoolsView.SEARCH_MODULE) != 0) {
                 sbPattern.append('M');
+            }
 
             // TODO In a future release, add 'highlightScope' to display search results in correct type and inner-type
             // def type = TypeFactoryService.instance.get(entry)?.make(api, entry, null)
             // if (type) {
             //     sbPattern.append('&highlightScope=')
             //     sbPattern.append(type.name)
-            //
             //     def query = sbPattern.toString()
             //     def outerPath = UriUtil.getOuterPath(collectionOfFutureIndexes, entry, type)
-            //
             //     openClosure(new URI(entry.uri.scheme, entry.uri.host, outerPath, query, null))
             // } else {
                 String query = sbPattern.toString();
@@ -483,7 +506,7 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
         }
     }
 
-    // --- IndexesChangeListener --- //
+    /** --- IndexesChangeListener --- */
     @Override
     public void indexesChanged(Collection<Future<Indexes>> collectionOfFutureIndexes) {
         if (searchInConstantPoolsView.isVisible()) {

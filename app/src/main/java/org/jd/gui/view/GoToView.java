@@ -9,16 +9,18 @@ package org.jd.gui.view;
 
 import org.jd.gui.api.feature.LineNumberNavigable;
 import org.jd.gui.model.configuration.Configuration;
+import org.jd.gui.util.decompiler.GuiPreferences;
 import org.jd.gui.util.swing.SwingUtil;
 
-import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import java.awt.*;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.function.IntConsumer;
+
+import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 public class GoToView {
     protected JDialog goToDialog;
@@ -41,22 +43,26 @@ public class GoToView {
 
             // First label "Enter line number (1..xxx):"
             Box hbox = Box.createHorizontalBox();
-            hbox.add(goToEnterLineNumberLabel = new JLabel());
+            goToEnterLineNumberLabel = new JLabel();
+            hbox.add(goToEnterLineNumberLabel);
             hbox.add(Box.createHorizontalGlue());
             vbox.add(hbox);
 
             vbox.add(Box.createVerticalStrut(10));
 
             // Text field
-            vbox.add(goToEnterLineNumberTextField = new JTextField(30));
+            goToEnterLineNumberTextField = new JTextField(30);
+            vbox.add(goToEnterLineNumberTextField);
 
             vbox.add(Box.createVerticalStrut(10));
 
             // Error label
             hbox = Box.createHorizontalBox();
-            hbox.add(goToEnterLineNumberErrorLabel = new JLabel(" "));
+            goToEnterLineNumberErrorLabel = new JLabel(" ");
+            hbox.add(goToEnterLineNumberErrorLabel);
             goToEnterLineNumberTextField.addKeyListener(new KeyAdapter() {
-                @Override public void keyTyped(KeyEvent e) {
+                @Override
+                public void keyTyped(KeyEvent e) {
                     if (! Character.isDigit(e.getKeyChar())) {
                         e.consume();
                     }
@@ -81,6 +87,10 @@ public class GoToView {
             JButton goToCancelButton = new JButton("Cancel");
             hbox.add(goToCancelButton);
             Action goToCancelActionListener = new AbstractAction() {
+
+                private static final long serialVersionUID = 1L;
+
+                @Override
                 public void actionPerformed(ActionEvent actionEvent) { goToDialog.setVisible(false); }
             };
             goToCancelButton.addActionListener(goToCancelActionListener);
@@ -97,16 +107,19 @@ public class GoToView {
             // Add main listener
             goToEnterLineNumberTextField.getDocument().addDocumentListener(new DocumentListener() {
                 protected Color backgroundColor = UIManager.getColor("TextField.background");
-                protected Color errorBackgroundColor = Color.decode(configuration.getPreferences().get("JdGuiPreferences.errorBackgroundColor"));
+                protected Color errorBackgroundColor = Color.decode(configuration.getPreferences().get(GuiPreferences.ERROR_BACKGROUND_COLOR));
 
-                @Override public void insertUpdate(DocumentEvent e) { onTextChange(); }
-                @Override public void removeUpdate(DocumentEvent e) { onTextChange(); }
-                @Override public void changedUpdate(DocumentEvent e) { onTextChange(); }
+                @Override
+                public void insertUpdate(DocumentEvent e) { onTextChange(); }
+                @Override
+                public void removeUpdate(DocumentEvent e) { onTextChange(); }
+                @Override
+                public void changedUpdate(DocumentEvent e) { onTextChange(); }
 
                 protected void onTextChange() {
                     String text = goToEnterLineNumberTextField.getText();
 
-                    if (text.length() == 0) {
+                    if (text.isEmpty()) {
                         goToOkButton.setEnabled(false);
                         clearErrorMessage();
                     } else {

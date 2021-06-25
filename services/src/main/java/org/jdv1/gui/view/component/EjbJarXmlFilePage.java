@@ -7,53 +7,57 @@
 
 package org.jdv1.gui.view.component;
 
-import java.awt.Point;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Future;
-
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.api.API;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.util.io.TextReader;
 import org.jd.gui.util.parser.jdt.core.HyperlinkData;
 import org.jd.gui.util.xml.AbstractXmlPathFinder;
 import org.jd.gui.view.component.TypeReferencePage;
-import org.jd.gui.api.API;
 import org.jdv1.gui.api.feature.IndexesChangeListener;
 import org.jdv1.gui.util.index.IndexesUtil;
 
+import java.awt.Point;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.*;
+import java.util.concurrent.Future;
+
 public class EjbJarXmlFilePage extends TypeReferencePage implements UriGettable, IndexesChangeListener {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	protected API api;
-    protected Container.Entry entry;
-    protected Collection<Future<Indexes>> collectionOfFutureIndexes = Collections.emptyList();
+    protected transient API api;
+    protected transient Container.Entry entry;
+    protected transient Collection<Future<Indexes>> collectionOfFutureIndexes = Collections.emptyList();
 
     public EjbJarXmlFilePage(API api, Container.Entry entry) {
         this.api = api;
         this.entry = entry;
-        // Load content file
-        String text = TextReader.getText(entry.getInputStream());
-        // Create hyperlinks
-        new PathFinder().find(text);
-        // Display
-        setText(text);
+        try (InputStream inputStream = entry.getInputStream()) {
+            // Load content file
+            String text = TextReader.getText(inputStream);
+            // Create hyperlinks
+            new PathFinder().find(text);
+            // Display
+            setText(text);
+        } catch (IOException e) {
+            assert ExceptionUtil.printStackTrace(e);
+        }
     }
 
+    @Override
     public String getSyntaxStyle() { return SyntaxConstants.SYNTAX_STYLE_XML; }
 
+    @Override
     protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return ((TypeHyperlinkData)hyperlinkData).enabled; }
 
+    @Override
     protected void openHyperlink(int x, int y, HyperlinkData hyperlinkData) {
         TypeHyperlinkData data = (TypeHyperlinkData)hyperlinkData;
 
@@ -69,7 +73,7 @@ public class EjbJarXmlFilePage extends TypeReferencePage implements UriGettable,
                 String internalTypeName = data.internalTypeName;
                 List<Container.Entry> entries = IndexesUtil.findInternalTypeName(collectionOfFutureIndexes, internalTypeName);
                 String rootUri = entry.getContainer().getRoot().getUri().toString();
-                ArrayList<Container.Entry> sameContainerEntries = new ArrayList<>();
+                List<Container.Entry> sameContainerEntries = new ArrayList<>();
 
                 for (Container.Entry entry : entries) {
                     if (entry.getUri().toString().startsWith(rootUri)) {
@@ -77,9 +81,9 @@ public class EjbJarXmlFilePage extends TypeReferencePage implements UriGettable,
                     }
                 }
 
-                if (sameContainerEntries.size() > 0) {
+                if (!sameContainerEntries.isEmpty()) {
                     api.openURI(x, y, sameContainerEntries, null, data.internalTypeName);
-                } else if (entries.size() > 0) {
+                } else if (!entries.isEmpty()) {
                     api.openURI(x, y, entries, null, data.internalTypeName);
                 }
             } catch (URISyntaxException e) {
@@ -89,9 +93,11 @@ public class EjbJarXmlFilePage extends TypeReferencePage implements UriGettable,
     }
 
     // --- UriGettable --- //
+    @Override
     public URI getUri() { return entry.getUri(); }
 
     // --- ContentSavable --- //
+    @Override
     public String getFileName() {
         String path = entry.getPath();
         int index = path.lastIndexOf('/');
@@ -99,6 +105,7 @@ public class EjbJarXmlFilePage extends TypeReferencePage implements UriGettable,
     }
 
     // --- IndexesChangeListener --- //
+    @Override
     public void indexesChanged(Collection<Future<Indexes>> collectionOfFutureIndexes) {
         // Update the list of containers
         this.collectionOfFutureIndexes = collectionOfFutureIndexes;
@@ -156,12 +163,13 @@ public class EjbJarXmlFilePage extends TypeReferencePage implements UriGettable,
             super(typeHyperlinkPaths);
         }
 
+        @Override
         public void handle(String path, String text, int position) {
             String trim = text.trim();
             if (trim != null) {
                 int startIndex = position + text.indexOf(trim);
                 int endIndex = startIndex + trim.length();
-                String internalTypeName = trim.replace(".", "/");
+                String internalTypeName = trim.replace('.', '/');
                 addHyperlink(new TypeHyperlinkData(startIndex, endIndex, internalTypeName));
             }
         }

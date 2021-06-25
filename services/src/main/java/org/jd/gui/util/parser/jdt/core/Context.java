@@ -1,11 +1,12 @@
 package org.jd.gui.util.parser.jdt.core;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class Context {
     protected Context outerContext;
 
-    protected HashMap<String, String> nameToDescriptor = new HashMap<>();
+    protected Map<String, String> nameToDescriptor = new HashMap<>();
 
     public Context(Context outerContext) {
         this.outerContext = outerContext;
@@ -25,7 +26,7 @@ public class Context {
         return descriptor;
     }
 
-	public String put(String name, String descriptor) {
-		return nameToDescriptor.put(name, descriptor);
-	}
+    public String put(String name, String descriptor) {
+        return nameToDescriptor.put(name, descriptor);
+    }
 }

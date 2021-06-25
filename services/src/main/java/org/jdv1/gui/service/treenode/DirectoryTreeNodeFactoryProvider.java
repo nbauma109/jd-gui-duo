@@ -7,13 +7,6 @@
 
 package org.jdv1.gui.service.treenode;
 
-import java.io.File;
-import java.net.URI;
-import java.util.Collection;
-
-import javax.swing.ImageIcon;
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.TreeNodeExpandable;
@@ -23,31 +16,39 @@ import org.jd.gui.api.model.Container.Entry;
 import org.jd.gui.spi.TreeNodeFactory;
 import org.jd.gui.view.data.TreeNodeBean;
 
+import java.io.File;
+import java.net.URI;
+import java.util.Collection;
+
+import javax.swing.ImageIcon;
+import javax.swing.tree.DefaultMutableTreeNode;
+
 public class DirectoryTreeNodeFactoryProvider extends AbstractTreeNodeFactoryProvider {
     protected static final ImageIcon ICON = new ImageIcon(DirectoryTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/folder.gif"));
     protected static final ImageIcon OPEN_ICON = new ImageIcon(DirectoryTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/folder_open.png"));
 
-    @Override public String[] getSelectors() { return appendSelectors("*:dir:*"); }
+    @Override
+    public String[] getSelectors() { return appendSelectors("*:dir:*"); }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Entry entry) {
         int lastSlashIndex = entry.getPath().lastIndexOf('/');
-        Collection<Entry> entries = entry.getChildren();
+        Collection<Entry> entries = entry.getChildren().values();
 
         // Aggregate directory names
         while (entries.size() == 1) {
             Entry child = entries.iterator().next();
             if (!child.isDirectory() || api.getTreeNodeFactory(child) != this || entry.getContainer() != child.getContainer()) break;
             entry = child;
-            entries = entry.getChildren();
+            entries = entry.getChildren().values();
         }
 
         String label = entry.getPath().substring(lastSlashIndex+1);
         String location = new File(entry.getUri()).getPath();
         TreeNode node = new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, getIcon(), getOpenIcon()));
 
-        if (entries.size() > 0) {
+        if (!entries.isEmpty()) {
             // Add dummy node
             node.add(new DefaultMutableTreeNode());
         }
@@ -58,14 +59,12 @@ public class DirectoryTreeNodeFactoryProvider extends AbstractTreeNodeFactoryPro
     public ImageIcon getIcon() { return ICON; }
     public ImageIcon getOpenIcon() { return OPEN_ICON; }
 
-    protected static class TreeNode extends DefaultMutableTreeNode implements ContainerEntryGettable, UriGettable, TreeNodeExpandable {
-        /**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-		
-		protected Container.Entry entry;
-		protected boolean initialized;
+    protected class TreeNode extends DefaultMutableTreeNode implements ContainerEntryGettable, UriGettable, TreeNodeExpandable {
+
+        private static final long serialVersionUID = 1L;
+
+        protected transient Container.Entry entry;
+        protected boolean initialized;
 
         public TreeNode(Container.Entry entry, Object userObject) {
             super(userObject);
@@ -74,10 +73,12 @@ public class DirectoryTreeNodeFactoryProvider extends AbstractTreeNodeFactoryPro
         }
 
         // --- ContainerEntryGettable --- //
-        @Override public Container.Entry getEntry() { return entry; }
+        @Override
+        public Container.Entry getEntry() { return entry; }
 
         // --- UriGettable --- //
-        @Override public URI getUri() { return entry.getUri(); }
+        @Override
+        public URI getUri() { return entry.getUri(); }
 
         // --- TreeNodeExpandable --- //
         @Override
@@ -89,10 +90,10 @@ public class DirectoryTreeNodeFactoryProvider extends AbstractTreeNodeFactoryPro
 
                 while (entries.size() == 1) {
                     Entry child = entries.iterator().next();
-                    if (!child.isDirectory() || api.getTreeNodeFactory(child) != this) {
+                    if (!child.isDirectory() || api.getTreeNodeFactory(child) != DirectoryTreeNodeFactoryProvider.this) {
                         break;
                     }
-                    entries = child.getChildren();
+                    entries = child.getChildren().values();
                 }
 
                 for (Entry entry : entries) {
@@ -106,6 +107,6 @@ public class DirectoryTreeNodeFactoryProvider extends AbstractTreeNodeFactoryPro
             }
         }
 
-        public Collection<Container.Entry> getChildren() { return entry.getChildren(); }
+        public Collection<Container.Entry> getChildren() { return entry.getChildren().values(); }
     }
 }

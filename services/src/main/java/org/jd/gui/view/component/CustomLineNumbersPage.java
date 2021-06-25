@@ -4,25 +4,7 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.gui.view.component;
-
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Insets;
-import java.awt.Rectangle;
-import java.util.Arrays;
-import java.util.Map;
-
-import javax.swing.JComponent;
-import javax.swing.text.EditorKit;
-import javax.swing.text.Element;
-import javax.swing.text.JTextComponent;
-import javax.swing.text.View;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaEditorKit;
@@ -35,12 +17,19 @@ import org.fife.ui.rtextarea.LineNumberList;
 import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextAreaUI;
 
+import java.awt.*;
+import java.util.Arrays;
+import java.util.Map;
+
+import javax.swing.JComponent;
+import javax.swing.text.EditorKit;
+import javax.swing.text.Element;
+import javax.swing.text.JTextComponent;
+import javax.swing.text.View;
+
 public abstract class CustomLineNumbersPage extends HyperlinkPage {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	protected Color errorForeground = Color.RED;
+    private static final long serialVersionUID = 1L;
+    protected Color errorForeground = Color.RED;
     protected boolean showMisalignment = true;
 
     public void setErrorForeground(Color color) {
@@ -51,11 +40,9 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
         showMisalignment = b;
     }
 
-    /**
-     * Map[textarea line number] = original line number
-     */
-    protected int[] lineNumberMap = null;
-    protected int maxLineNumber = 0;
+    /** Map[textarea line number] = original line number. */
+    protected int[] lineNumberMap;
+    protected int maxLineNumber;
 
     protected void setMaxLineNumber(int maxLineNumber) {
         if (maxLineNumber > 0) {
@@ -112,62 +99,55 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
         int greatestLowerSourceLineNumber = 0;
         int i = getLineNumberMap().length;
 
+        int sln;
         while (i-- > 0) {
-            int sln = getLineNumberMap()[i];
-            if (sln <= originalLineNumber) {
-                if (greatestLowerSourceLineNumber < sln) {
-                    greatestLowerSourceLineNumber = sln;
-                    textAreaLineNumber = i;
-                }
+            sln = getLineNumberMap()[i];
+            if (sln <= originalLineNumber && greatestLowerSourceLineNumber < sln) {
+                greatestLowerSourceLineNumber = sln;
+                textAreaLineNumber = i;
             }
         }
 
         return textAreaLineNumber;
     }
 
-    @Override protected RSyntaxTextArea newSyntaxTextArea() { return new SourceSyntaxTextArea(); }
+    @Override
+    protected RSyntaxTextArea newSyntaxTextArea() { return new SourceSyntaxTextArea(); }
 
     public int[] getLineNumberMap() {
-		return lineNumberMap;
-	}
-
-	public class SourceSyntaxTextArea extends HyperlinkSyntaxTextArea {
-        /**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
-		@Override protected RTextAreaUI createRTextAreaUI() { return new SourceSyntaxTextAreaUI(this); }
+        return lineNumberMap;
     }
 
-    /**
-     * A lot of code to replace the default LineNumberList...
-     */
+    public class SourceSyntaxTextArea extends HyperlinkSyntaxTextArea {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        protected RTextAreaUI createRTextAreaUI() { return new SourceSyntaxTextAreaUI(this); }
+    }
+
+    /** A lot of code to replace the default LineNumberList... */
     public class SourceSyntaxTextAreaUI extends RSyntaxTextAreaUI {
         public SourceSyntaxTextAreaUI(JComponent rSyntaxTextArea) { super(rSyntaxTextArea); }
-        @Override public EditorKit getEditorKit(JTextComponent tc) { return new SourceSyntaxTextAreaEditorKit(); }
-        @Override public Rectangle getVisibleEditorRect() { return super.getVisibleEditorRect(); }
+        @Override
+        public EditorKit getEditorKit(JTextComponent tc) { return new SourceSyntaxTextAreaEditorKit(); }
+        @Override
+        public Rectangle getVisibleEditorRect() { return super.getVisibleEditorRect(); }
     }
 
     public class SourceSyntaxTextAreaEditorKit extends RSyntaxTextAreaEditorKit {
-        /**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-		@Override public LineNumberList createLineNumberList(RTextArea textArea) { return new SourceLineNumberList(textArea); }
+        @Override
+        public LineNumberList createLineNumberList(RTextArea textArea) { return new SourceLineNumberList(textArea); }
     }
 
     /**
      * Why 'LineNumberList' is so unexpandable ? Too many private fields & methods and too many package scope.
      */
     public class SourceLineNumberList extends LineNumberList {
-        /**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-		protected RTextArea rTextArea;
-        protected Map<?,?> aaHints;
+        private static final long serialVersionUID = 1L;
+        protected RTextArea rTextArea;
+        protected transient Map<?,?> aaHints;
         protected Rectangle visibleRect;
         protected Insets textAreaInsets;
         protected Dimension preferredSize;
@@ -250,12 +230,13 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
                     // variable now).
                     if (fm != null) {
                         Fold fold = fm.getFoldForLine(topLine);
-                        if ((fold != null) && fold.isCollapsed()) {
+                        if (fold != null && fold.isCollapsed()) {
                             topLine += fold.getCollapsedLineCount();
                         }
                     }
 
-                    if (++topLine >= lineCount) {
+                    topLine++;
+                    if (topLine >= lineCount) {
                         break;
                     }
                 }
@@ -263,7 +244,7 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
                 textAreaInsets = rTextArea.getInsets(textAreaInsets);
 
                 if (visibleRect.y < textAreaInsets.top) {
-                    visibleRect.height -= (textAreaInsets.top - visibleRect.y);
+                    visibleRect.height -= textAreaInsets.top - visibleRect.y;
                     visibleRect.y = textAreaInsets.top;
                 }
 
@@ -279,25 +260,24 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
 
                 int line = topLine + 1;
 
-                while ((y < visibleRect.y + visibleRect.height + ascent) && (line <= rTextArea.getLineCount())) {
+                while (y < visibleRect.y + visibleRect.height + ascent && line <= rTextArea.getLineCount()) {
                     paintLineNumber(g, metrics, rhs, y, line);
 
                     y += cellHeight;
 
-                    if (fm != null) {
-                        Fold fold = fm.getFoldForLine(line - 1);
-                        // Skip to next line to paint, taking extra care for lines with
-                        // block ends and begins together, e.g. "} else {"
-                        while ((fold != null) && fold.isCollapsed()) {
-                            int hiddenLineCount = fold.getLineCount();
-                            if (hiddenLineCount == 0) {
-                                // Fold parser identified a 0-line fold region... This
-                                // is really a bug, but we'll handle it gracefully.
-                                break;
-                            }
-                            line += hiddenLineCount;
-                            fold = fm.getFoldForLine(line - 1);
+                    Fold fold = fm.getFoldForLine(line - 1);
+                    int hiddenLineCount;
+                    // Skip to next line to paint, taking extra care for lines with
+                    // block ends and begins together, e.g. "} else {"
+                    while (fold != null && fold.isCollapsed()) {
+                        hiddenLineCount = fold.getLineCount();
+                        if (hiddenLineCount == 0) {
+                            // Fold parser identified a 0-line fold region... This
+                            // is really a bug, but we'll handle it gracefully.
+                            break;
                         }
+                        line += hiddenLineCount;
+                        fold = fm.getFoldForLine(line - 1);
                     }
 
                     line++;
@@ -317,7 +297,7 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
             if (originalLineNumber != 0) {
                 String number = Integer.toString(originalLineNumber);
                 int strWidth = metrics.stringWidth(number);
-                g.setColor(showMisalignment && (lineNumber != originalLineNumber) ? errorForeground : getForeground());
+                g.setColor(showMisalignment && lineNumber != originalLineNumber ? errorForeground : getForeground());
                 g.drawString(number, x-strWidth, y);
             }
         }

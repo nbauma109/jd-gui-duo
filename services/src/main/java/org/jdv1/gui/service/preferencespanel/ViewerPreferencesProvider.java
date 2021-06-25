@@ -9,26 +9,31 @@ package org.jdv1.gui.service.preferencespanel;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.Theme;
-import org.jd.gui.spi.PreferencesPanel;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.spi.PreferencesPanel;
 
-import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
-public class ViewerPreferencesProvider extends JPanel implements PreferencesPanel, DocumentListener {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	protected static final int MIN_VALUE = 2;
-    protected static final int MAX_VALUE = 40;
-    protected static final String FONT_SIZE_KEY = "ViewerPreferences.fontSize";
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
-    protected PreferencesPanel.PreferencesPanelChangeListener listener = null;
+import static org.jd.gui.util.decompiler.GuiPreferences.FONT_SIZE_KEY;
+
+public class ViewerPreferencesProvider extends JPanel implements PreferencesPanel, DocumentListener {
+
+    private static final long serialVersionUID = 1L;
+    protected static final int MIN_VALUE = 2;
+    protected static final int MAX_VALUE = 40;
+
+    protected transient PreferencesPanel.PreferencesPanelChangeListener listener = null;
     protected JTextField fontSizeTextField;
     protected Color errorBackgroundColor = Color.RED;
     protected Color defaultBackgroundColor;
@@ -46,15 +51,20 @@ public class ViewerPreferencesProvider extends JPanel implements PreferencesPane
     }
 
     // --- PreferencesPanel --- //
-    @Override public String getPreferencesGroupTitle() { return "Viewer"; }
-    @Override public String getPreferencesPanelTitle() { return "Appearance"; }
-    @Override public JComponent getPanel() { return this; }
+    @Override
+    public String getPreferencesGroupTitle() { return "Viewer"; }
+    @Override
+    public String getPreferencesPanelTitle() { return "Appearance"; }
+    @Override
+    public JComponent getPanel() { return this; }
 
-    @Override public void init(Color errorBackgroundColor) {
+    @Override
+    public void init(Color errorBackgroundColor) {
         this.errorBackgroundColor = errorBackgroundColor;
     }
 
-    @Override public boolean isActivated() { return true; }
+    @Override
+    public boolean isActivated() { return true; }
 
     @Override
     public void loadPreferences(Map<String, String> preferences) {
@@ -64,8 +74,8 @@ public class ViewerPreferencesProvider extends JPanel implements PreferencesPane
             // Search default value for the current platform
             RSyntaxTextArea textArea = new RSyntaxTextArea();
 
-            try {
-                Theme theme = Theme.load(getClass().getClassLoader().getResourceAsStream("rsyntaxtextarea/themes/eclipse.xml"));
+            try (InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("rsyntaxtextarea/themes/eclipse.xml")) {
+                Theme theme = Theme.load(resourceAsStream);
                 theme.apply(textArea);
             } catch (IOException e) {
                 assert ExceptionUtil.printStackTrace(e);
@@ -86,12 +96,16 @@ public class ViewerPreferencesProvider extends JPanel implements PreferencesPane
     @Override
     public boolean arePreferencesValid() {
         try {
-            int i = Integer.valueOf(fontSizeTextField.getText());
-            return (i >= MIN_VALUE) && (i <= MAX_VALUE);
+            String fontSize = fontSizeTextField.getText();
+            if (fontSize != null && fontSize.matches("\\d+")) {
+                int i = Integer.parseInt(fontSize);
+                return (i >= 2) && (i <= 40);
+            }
         } catch (NumberFormatException e) {
             assert ExceptionUtil.printStackTrace(e);
-            return false;
         }
+        return false;
+
     }
 
     @Override
@@ -100,9 +114,12 @@ public class ViewerPreferencesProvider extends JPanel implements PreferencesPane
     }
 
     // --- DocumentListener --- //
-    @Override public void insertUpdate(DocumentEvent e) { onTextChange(); }
-    @Override public void removeUpdate(DocumentEvent e) { onTextChange(); }
-    @Override public void changedUpdate(DocumentEvent e) { onTextChange(); }
+    @Override
+    public void insertUpdate(DocumentEvent e) { onTextChange(); }
+    @Override
+    public void removeUpdate(DocumentEvent e) { onTextChange(); }
+    @Override
+    public void changedUpdate(DocumentEvent e) { onTextChange(); }
 
     public void onTextChange() {
         fontSizeTextField.setBackground(arePreferencesValid() ? defaultBackgroundColor : errorBackgroundColor);

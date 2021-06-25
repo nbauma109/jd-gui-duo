@@ -19,6 +19,11 @@ import java.util.List;
  * - org.jd.gui.view.component.RoundMarkErrorStrip
  */
 public class Marker {
+
+    private Marker() {
+        super();
+    }
+
     public static void markAll(RTextArea textArea, List<DocumentRange> ranges) {
         textArea.markAll(ranges);
     }

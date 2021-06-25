@@ -7,29 +7,38 @@
 
 package org.jdv1.gui.service.indexer;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.util.io.TextReader;
 import org.jd.gui.util.xml.AbstractXmlPathFinder;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
+
 public class EjbJarXmlFileIndexerProvider extends XmlBasedFileIndexerProvider {
 
-    @Override public String[] getSelectors() { return appendSelectors("*:file:META-INF/ejb-jar.xml"); }
+    @Override
+    public String[] getSelectors() { return appendSelectors("*:file:META-INF/ejb-jar.xml"); }
 
     @Override
     public void index(API api, Container.Entry entry, Indexes indexes) {
         super.index(api, entry, indexes);
 
-        new EjbJarXmlPathFinder(entry, indexes).find(TextReader.getText(entry.getInputStream()));
+        try (InputStream inputStream = entry.getInputStream()) {
+            new EjbJarXmlPathFinder(entry, indexes).find(TextReader.getText(inputStream));
+        } catch (IOException e) {
+            assert ExceptionUtil.printStackTrace(e);
+        }
     }
 
     public static class EjbJarXmlPathFinder extends AbstractXmlPathFinder {
         protected Container.Entry entry;
+        @SuppressWarnings("rawtypes")
         protected Map<String, Collection> index;
 
         public EjbJarXmlPathFinder(Container.Entry entry, Indexes indexes) {
@@ -67,9 +76,8 @@ public class EjbJarXmlFileIndexerProvider extends XmlBasedFileIndexerProvider {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public void handle(String path, String text, int position) {
-            index.get(text.replace(".", "/")).add(entry);
+            index.get(text.replace('.', '/')).add(entry);
         }
     }
 }

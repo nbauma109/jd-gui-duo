@@ -9,32 +9,29 @@ package org.jd.gui.util.xml;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 
+import java.io.StringReader;
+import java.util.*;
+
+import javax.xml.XMLConstants;
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import java.io.StringReader;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 
 public abstract class AbstractXmlPathFinder {
-    protected HashMap<String, HashSet<String>> tagNameToPaths = new HashMap<>();
+    protected Map<String, Set<String>> tagNameToPaths = new HashMap<>();
     protected StringBuilder sb = new StringBuilder(200);
 
-    public AbstractXmlPathFinder(Collection<String> paths) {
+    protected AbstractXmlPathFinder(Collection<String> paths) {
         for (String path : paths) {
-            if ((path != null) && (path.length() > 0)) {
+            if ((path != null) && (!path.isEmpty())) {
                 // Normalize path
                 path = '/' + path;
                 int lastIndex = path.lastIndexOf('/');
                 String lastTagName = path.substring(lastIndex+1);
 
                 // Add tag names to map
-                HashSet<String> setOfPaths = tagNameToPaths.get(lastTagName);
-                if (setOfPaths == null) {
-                    tagNameToPaths.put(lastTagName, setOfPaths = new HashSet<>());
-                }
-                setOfPaths.add(path);
+                tagNameToPaths.computeIfAbsent(lastTagName, k ->  new HashSet<>()).add(path);
             }
         }
     }
@@ -44,6 +41,9 @@ public abstract class AbstractXmlPathFinder {
 
         try {
             XMLInputFactory factory = XMLInputFactory.newInstance();
+            factory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            factory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+
             XMLStreamReader reader = factory.createXMLStreamReader(new StringReader(text));
 
             String tagName = "";
@@ -54,15 +54,16 @@ public abstract class AbstractXmlPathFinder {
 
                 switch (reader.getEventType())
                 {
-                case XMLStreamReader.START_ELEMENT:
-                    sb.append('/').append(tagName = reader.getLocalName());
+                case XMLStreamConstants.START_ELEMENT:
+                    tagName = reader.getLocalName();
+                    sb.append('/').append(tagName);
                     offset = reader.getLocation().getCharacterOffset();
                     break;
-                case XMLStreamReader.END_ELEMENT:
+                case XMLStreamConstants.END_ELEMENT:
                     sb.setLength(sb.length() - reader.getLocalName().length() - 1);
                     break;
-                case XMLStreamReader.CHARACTERS:
-                    HashSet<String> setOfPaths = tagNameToPaths.get(tagName);
+                case XMLStreamConstants.CHARACTERS:
+                    Set<String> setOfPaths = tagNameToPaths.get(tagName);
 
                     if (setOfPaths != null) {
                         String path = sb.toString();
@@ -72,9 +73,8 @@ public abstract class AbstractXmlPathFinder {
                             while (offset > 0) {
                                 if (text.charAt(offset) == '>') {
                                     break;
-                                } else {
-                                    offset--;
                                 }
+                                offset--;
                             }
 
                             handle(path.substring(1), reader.getText(), offset+1);

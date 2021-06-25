@@ -7,22 +7,23 @@
 
 package org.jdv1.gui.service.treenode;
 
-import java.io.File;
-import java.net.URI;
-
-import javax.swing.ImageIcon;
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.view.data.TreeNodeBean;
 
+import java.io.File;
+import java.net.URI;
+
+import javax.swing.ImageIcon;
+import javax.swing.tree.DefaultMutableTreeNode;
+
 public class FileTreeNodeFactoryProvider extends AbstractTreeNodeFactoryProvider {
     protected static final ImageIcon ICON = new ImageIcon(FileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/file_plain_obj.png"));
 
-    @Override public String[] getSelectors() { return appendSelectors("*:file:*"); }
+    @Override
+    public String[] getSelectors() { return appendSelectors("*:file:*"); }
 
     @Override
     @SuppressWarnings("unchecked")
@@ -34,11 +35,9 @@ public class FileTreeNodeFactoryProvider extends AbstractTreeNodeFactoryProvider
     }
 
     protected static class TreeNode extends DefaultMutableTreeNode implements ContainerEntryGettable, UriGettable {
-        /**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-		protected Container.Entry entry;
+
+        private static final long serialVersionUID = 1L;
+        protected transient Container.Entry entry;
 
         public TreeNode(Container.Entry entry, Object userObject) {
             super(userObject);
@@ -46,9 +45,11 @@ public class FileTreeNodeFactoryProvider extends AbstractTreeNodeFactoryProvider
         }
 
         // --- ContainerEntryGettable --- //
-        @Override public Container.Entry getEntry() { return entry; }
+        @Override
+        public Container.Entry getEntry() { return entry; }
 
         // --- UriGettable --- //
-        @Override public URI getUri() { return entry.getUri(); }
+        @Override
+        public URI getUri() { return entry.getUri(); }
     }
 }

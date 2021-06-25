@@ -7,12 +7,6 @@
 
 package org.jdv1.gui.service.treenode;
 
-import java.io.File;
-
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.UriGettable;
@@ -20,10 +14,17 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.view.data.TreeNodeBean;
 import org.jdv1.gui.view.component.XmlFilePage;
 
+import java.io.File;
+
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.tree.DefaultMutableTreeNode;
+
 public class XmlFileTreeNodeFactoryProvider extends TextFileTreeNodeFactoryProvider {
     protected static final ImageIcon ICON = new ImageIcon(XmlFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/xml_obj.gif"));
 
-    @Override public String[] getSelectors() { return appendSelectors("*:file:*.xml"); }
+    @Override
+    public String[] getSelectors() { return appendSelectors("*:file:*.xml"); }
 
     @Override
     @SuppressWarnings("unchecked")
@@ -35,12 +36,10 @@ public class XmlFileTreeNodeFactoryProvider extends TextFileTreeNodeFactoryProvi
     }
 
     protected static class TreeNode extends TextFileTreeNodeFactoryProvider.TreeNode {
-        /**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
 
-		public TreeNode(Container.Entry entry, Object userObject) { super(entry, userObject); }
+        private static final long serialVersionUID = 1L;
+
+        public TreeNode(Container.Entry entry, Object userObject) { super(entry, userObject); }
 
         // --- PageCreator --- //
         @Override

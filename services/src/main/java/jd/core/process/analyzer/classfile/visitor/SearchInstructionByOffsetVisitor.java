@@ -1,0 +1,229 @@
+/*******************************************************************************
+ * Copyright (C) 2007-2019 Emmanuel Dupuy GPLv3
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
+package jd.core.process.analyzer.classfile.visitor;
+
+import java.util.List;
+
+import jd.core.model.instruction.bytecode.ByteCodeConstants;
+import jd.core.model.instruction.bytecode.instruction.*;
+
+/*
+ * Utilisé par TernaryOpReconstructor
+ */
+public class SearchInstructionByOffsetVisitor
+{
+    private SearchInstructionByOffsetVisitor() {
+        super();
+    }
+
+    public static Instruction visit(Instruction instruction, int offset)
+    {
+        if (instruction.offset == offset)
+            return instruction;
+
+        switch (instruction.opcode)
+        {
+        case ByteCodeConstants.ARRAYLENGTH:
+            return visit(((ArrayLength)instruction).arrayref, offset);
+        case ByteCodeConstants.AASTORE:
+        case ByteCodeConstants.ARRAYSTORE:
+            return visit(((ArrayStoreInstruction)instruction).arrayref, offset);
+        case ByteCodeConstants.ASSERT:
+            {
+                AssertInstruction ai = (AssertInstruction)instruction;
+                instruction = visit(ai.test, offset);
+                if (instruction != null)
+                    return instruction;
+                if (ai.msg == null)
+                    return null;
+                return visit(ai.msg, offset);
+            }
+        case ByteCodeConstants.ATHROW:
+            return visit(((AThrow)instruction).value, offset);
+        case ByteCodeConstants.UNARYOP:
+            return visit(((UnaryOperatorInstruction)instruction).value, offset);
+        case ByteCodeConstants.BINARYOP:
+        case ByteCodeConstants.ASSIGNMENT:
+            {
+                BinaryOperatorInstruction boi =
+                    (BinaryOperatorInstruction)instruction;
+                instruction = visit(boi.value1, offset);
+                if (instruction != null)
+                    return instruction;
+                return visit(boi.value2, offset);
+            }
+        case ByteCodeConstants.CHECKCAST:
+            return visit(((CheckCast)instruction).objectref, offset);
+        case ByteCodeConstants.STORE:
+        case ByteCodeConstants.ASTORE:
+        case ByteCodeConstants.ISTORE:
+            return visit(((StoreInstruction)instruction).valueref, offset);
+        case ByteCodeConstants.DUPSTORE:
+            return visit(((DupStore)instruction).objectref, offset);
+        case ByteCodeConstants.CONVERT:
+        case ByteCodeConstants.IMPLICITCONVERT:
+            return visit(((ConvertInstruction)instruction).value, offset);
+        case ByteCodeConstants.IFCMP:
+            {
+                IfCmp ifCmp = (IfCmp)instruction;
+                instruction = visit(ifCmp.value1, offset);
+                if (instruction != null)
+                    return instruction;
+                return visit(ifCmp.value2, offset);
+            }
+        case ByteCodeConstants.IF:
+        case ByteCodeConstants.IFXNULL:
+            return visit(((IfInstruction)instruction).value, offset);
+        case ByteCodeConstants.COMPLEXIF:
+            {
+                List<Instruction> branchList =
+                    ((ComplexConditionalBranchInstruction)instruction).instructions;
+                for (int i=branchList.size()-1; i>=0; --i)
+                {
+                    instruction = visit(branchList.get(i), offset);
+                    if (instruction != null)
+                        return instruction;
+                }
+            }
+            break;
+        case ByteCodeConstants.INSTANCEOF:
+            return visit(((InstanceOf)instruction).objectref, offset);
+        case ByteCodeConstants.INVOKEINTERFACE:
+        case ByteCodeConstants.INVOKESPECIAL:
+        case ByteCodeConstants.INVOKEVIRTUAL:
+            {
+                Instruction result = visit(
+                    ((InvokeNoStaticInstruction)instruction).objectref, offset);
+                if (result != null)
+                    return result;
+            }
+            // intended fall through
+        case ByteCodeConstants.INVOKESTATIC:
+        case ByteCodeConstants.INVOKENEW:
+            {
+                List<Instruction> list = ((InvokeInstruction)instruction).args;
+                for (int i=list.size()-1; i>=0; --i)
+                {
+                    instruction = visit(list.get(i), offset);
+                    if (instruction != null)
+                        return instruction;
+                }
+            }
+            break;
+        case ByteCodeConstants.LOOKUPSWITCH:
+            return visit(((LookupSwitch)instruction).key, offset);
+        case ByteCodeConstants.MONITORENTER:
+            return visit(((MonitorEnter)instruction).objectref, offset);
+        case ByteCodeConstants.MONITOREXIT:
+            return visit(((MonitorExit)instruction).objectref, offset);
+        case ByteCodeConstants.MULTIANEWARRAY:
+            {
+                Instruction[] dimensions = ((MultiANewArray)instruction).dimensions;
+                for (int i=dimensions.length-1; i>=0; --i)
+                {
+                    instruction = visit(dimensions[i], offset);
+                    if (instruction != null)
+                        return instruction;
+                }
+            }
+            break;
+        case ByteCodeConstants.NEWARRAY:
+            return visit(((NewArray)instruction).dimension, offset);
+        case ByteCodeConstants.ANEWARRAY:
+            return visit(((ANewArray)instruction).dimension, offset);
+        case ByteCodeConstants.POP:
+            return visit(((Pop)instruction).objectref, offset);
+        case ByteCodeConstants.PUTFIELD:
+            {
+                PutField putField = (PutField)instruction;
+                instruction = visit(putField.objectref, offset);
+                if (instruction != null)
+                    return instruction;
+                return visit(putField.valueref, offset);
+            }
+        case ByteCodeConstants.PUTSTATIC:
+            return visit(((PutStatic)instruction).valueref, offset);
+        case ByteCodeConstants.XRETURN:
+            return visit(((ReturnInstruction)instruction).valueref, offset);
+        case ByteCodeConstants.TABLESWITCH:
+            return visit(((TableSwitch)instruction).key, offset);
+        case ByteCodeConstants.TERNARYOPSTORE:
+            return visit(((TernaryOpStore)instruction).objectref, offset);
+        case ByteCodeConstants.PREINC:
+        case ByteCodeConstants.POSTINC:
+            return visit(((IncInstruction)instruction).value, offset);
+        case ByteCodeConstants.GETFIELD:
+            return visit(((GetField)instruction).objectref, offset);
+        case ByteCodeConstants.INITARRAY:
+        case ByteCodeConstants.NEWANDINITARRAY:
+            {
+                InitArrayInstruction iai = (InitArrayInstruction)instruction;
+                instruction = visit(iai.newArray, offset);
+                if (instruction != null)
+                    return instruction;
+                if (iai.values != null)
+                    return visit(iai.values, offset);
+            }
+            break;
+        case ByteCodeConstants.ACONST_NULL:
+        case ByteCodeConstants.ARRAYLOAD:
+        case ByteCodeConstants.LOAD:
+        case ByteCodeConstants.ALOAD:
+        case ByteCodeConstants.ILOAD:
+        case ByteCodeConstants.BIPUSH:
+        case ByteCodeConstants.ICONST:
+        case ByteCodeConstants.LCONST:
+        case ByteCodeConstants.FCONST:
+        case ByteCodeConstants.DCONST:
+        case ByteCodeConstants.DUPLOAD:
+        case ByteCodeConstants.GETSTATIC:
+        case ByteCodeConstants.OUTERTHIS:
+        case ByteCodeConstants.GOTO:
+        case ByteCodeConstants.IINC:
+        case ByteCodeConstants.JSR:
+        case ByteCodeConstants.LDC:
+        case ByteCodeConstants.LDC2_W:
+        case ByteCodeConstants.NEW:
+        case ByteCodeConstants.NOP:
+        case ByteCodeConstants.SIPUSH:
+        case ByteCodeConstants.RET:
+        case ByteCodeConstants.RETURN:
+        case ByteCodeConstants.EXCEPTIONLOAD:
+        case ByteCodeConstants.RETURNADDRESSLOAD:
+            break;
+        default:
+            System.err.println(
+                    "Can not search instruction in " +
+                    instruction.getClass().getName() +
+                    ", opcode=" + instruction.opcode);
+        }
+
+        return null;
+    }
+
+    private static Instruction visit(List<Instruction> instructions, int offset)
+    {
+        for (int i=instructions.size()-1; i>=0; --i)
+        {
+            Instruction instruction = visit(instructions.get(i), offset);
+            if (instruction != null)
+                return instruction;
+        }
+
+        return null;
+    }
+}

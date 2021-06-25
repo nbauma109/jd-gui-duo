@@ -7,15 +7,20 @@
 
 package org.jdv1.gui.service.indexer;
 
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.service.indexer.AbstractIndexerProvider;
 import org.jd.gui.util.io.TextReader;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 public class TextFileIndexerProvider extends AbstractIndexerProvider {
 
-    @Override public String[] getSelectors() {
+    @Override
+    public String[] getSelectors() {
         return appendSelectors(
                 "*:file:*.txt", "*:file:*.html", "*:file:*.xhtml", "*:file:*.js", "*:file:*.jsp", "*:file:*.jspf",
                 "*:file:*.xml", "*:file:*.xsl", "*:file:*.xslt", "*:file:*.xsd", "*:file:*.properties", "*:file:*.sql",
@@ -23,8 +28,11 @@ public class TextFileIndexerProvider extends AbstractIndexerProvider {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void index(API api, Container.Entry entry, Indexes indexes) {
-        indexes.getIndex("strings").get(TextReader.getText(entry.getInputStream())).add(entry);
+        try (InputStream inputStream = entry.getInputStream()) {
+            indexes.getIndex("strings").get(TextReader.getText(inputStream)).add(entry);
+        } catch (IOException e) {
+            assert ExceptionUtil.printStackTrace(e);
+        }
     }
 }

@@ -4,39 +4,33 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.gui.service.type;
+
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.core.v1.util.StringConstants;
+import org.jd.gui.api.model.Type;
+import org.jd.gui.spi.TypeFactory;
+import org.jdv1.gui.service.type.ClassFileTypeFactoryProvider;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
-
-import org.jd.gui.api.model.Type;
-import org.jd.gui.spi.TypeFactory;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
-import org.jdv1.gui.service.type.ClassFileTypeFactoryProvider;
 
 public abstract class AbstractTypeFactoryProvider implements TypeFactory {
     protected List<String> externalSelectors;
     protected Pattern externalPathPattern;
 
     /**
-     * Initialize "selectors" and "pathPattern" with optional external properties file
+     * Initialize "selectors" and "pathPattern" with optional external properties file.
      */
-    public AbstractTypeFactoryProvider() {
+    protected AbstractTypeFactoryProvider() {
         Properties properties = new Properties();
-        Class clazz = this.getClass();
-
-        try (InputStream is = clazz.getClassLoader().getResourceAsStream(clazz.getName().replace('.', '/') + ".properties")) {
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(getClass().getName().replace('.', '/') + ".properties")) {
             if (is != null) {
                 properties.load(is);
             }
@@ -58,48 +52,46 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
     protected String[] appendSelectors(String selector) {
         if (externalSelectors == null) {
             return new String[] { selector };
-        } else {
-            int size = externalSelectors.size();
-            String[] array = new String[size+1];
-            externalSelectors.toArray(array);
-            array[size] = selector;
-            return array;
         }
+        int size = externalSelectors.size();
+        String[] array = new String[size+1];
+        externalSelectors.toArray(array);
+        array[size] = selector;
+        return array;
     }
 
     protected String[] appendSelectors(String... selectors) {
         if (externalSelectors == null) {
             return selectors;
-        } else {
-            int size = externalSelectors.size();
-            String[] array = new String[size+selectors.length];
-            externalSelectors.toArray(array);
-            System.arraycopy(selectors, 0, array, size, selectors.length);
-            return array;
         }
+        int size = externalSelectors.size();
+        String[] array = new String[size+selectors.length];
+        externalSelectors.toArray(array);
+        System.arraycopy(selectors, 0, array, size, selectors.length);
+        return array;
     }
 
+    @Override
     public Pattern getPathPattern() { return externalPathPattern; }
 
-    // Signature writers
+    /** Signature writers. */
     protected static int writeSignature(StringBuilder sb, String descriptor, int  length, int index, boolean varargsFlag) {
-        while (true) {
+        int dimensionLength;
+        do {
             // Print array : '[[?' ou '[L[?;'
-            int dimensionLength = 0;
+            dimensionLength = 0;
 
             if (descriptor.charAt(index) == '[') {
                 dimensionLength++;
 
                 while (++index < length) {
-                    if ((descriptor.charAt(index) == 'L') && (index+1 < length) && (descriptor.charAt(index+1) == '[')) {
+                    if (descriptor.charAt(index) == 'L' && index+1 < length && descriptor.charAt(index+1) == '[') {
                         index++;
                         length--;
-                        dimensionLength++;
-                    } else if (descriptor.charAt(index) == '[') {
-                        dimensionLength++;
-                    } else {
+                    } else if (descriptor.charAt(index) != '[') {
                         break;
                     }
+                    dimensionLength++;
                 }
             }
 
@@ -108,17 +100,21 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
                 case 'C': sb.append("char"); index++; break;
                 case 'D': sb.append("double"); index++; break;
                 case 'F': sb.append("float"); index++; break;
-                case 'I': sb.append("int"); index++; break;
+                case 'I': case 'X':
+            case 'Y':
+                sb.append("int"); index++; break;
                 case 'J': sb.append("long"); index++; break;
                 case 'L': case '.':
-                    int beginIndex = ++index;
+                index++;
+                int beginIndex = index;
                     char c = '.';
 
                     // Search ; or de <
                     while (index < length) {
                         c = descriptor.charAt(index);
-                        if ((c == ';') || (c == '<'))
+                        if (c == ';' || c == '<') {
                             break;
+                        }
                         index++;
                     }
 
@@ -147,14 +143,16 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
                     }
 
                     // pass ';'
-                    if (descriptor.charAt(index) == ';')
+                    if (descriptor.charAt(index) == ';') {
                         index++;
+                    }
                     break;
                 case 'S': sb.append("short"); index++; break;
                 case 'T':
-                    beginIndex = ++index;
+                index++;
+                beginIndex = index;
                     index = descriptor.substring(beginIndex, length).indexOf(';');
-                    sb.append(descriptor.substring(beginIndex, index));
+                    sb.append(descriptor, beginIndex, index);
                     index++;
                     break;
                 case 'V': sb.append("void"); index++; break;
@@ -168,27 +166,29 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
                     index = writeSignature(sb, descriptor, length, index+1, false);
                     break;
                 case '*': sb.append('?'); index++; break;
-                case 'X': case 'Y': sb.append("int"); index++; break;
-                default:
-                    throw new RuntimeException("SignatureWriter.WriteSignature: invalid signature '" + descriptor + "'");
+            default:
+                    throw new IllegalStateException("SignatureWriter.WriteSignature: invalid signature '" + descriptor + "'");
             }
 
             if (varargsFlag) {
                 if (dimensionLength > 0) {
-                    while (--dimensionLength > 0)
+                    while (--dimensionLength > 0) {
                         sb.append("[]");
+                    }
                     sb.append("...");
                 }
             } else {
-                while (dimensionLength-- > 0)
+                while (dimensionLength-- > 0) {
                     sb.append("[]");
+                }
             }
 
-            if ((index >= length) || (descriptor.charAt(index) != '.'))
+            if (index >= length || descriptor.charAt(index) != '.') {
                 break;
+            }
 
             sb.append('.');
-        }
+        } while (true);
 
         return index;
     }
@@ -196,10 +196,10 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
     protected static void writeMethodSignature(
             StringBuilder sb, int typeAccess, int methodAccess, boolean isInnerClass,
             String constructorName, String methodName, String descriptor) {
-        if (methodName.equals("<clinit>")) {
+        if ("<clinit>".equals(methodName)) {
             sb.append("{...}");
         } else {
-            boolean isAConstructor = methodName.equals("<init>");
+            boolean isAConstructor = StringConstants.INSTANCE_CONSTRUCTOR.equals(methodName);
 
             if (isAConstructor) {
                 sb.append(constructorName);
@@ -211,11 +211,12 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
             int length = descriptor.length();
             int index = 0;
 
-            while ((index < length) && (descriptor.charAt(index) != '('))
+            while (index < length && descriptor.charAt(index) != '(') {
                 index++;
+            }
 
             if (descriptor.charAt(index) != '(') {
-                throw new RuntimeException("Signature format exception: '" + descriptor + "'");
+                throw new IllegalStateException("Signature format exception: '" + descriptor + "'");
             }
 
             sb.append('(');
@@ -224,7 +225,7 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
             index++;
 
             if (descriptor.charAt(index) != ')') {
-                if (isAConstructor && isInnerClass && ((typeAccess & Type.FLAG_STATIC) == 0)) {
+                if (isAConstructor && isInnerClass && (typeAccess & Type.FLAG_STATIC) == 0) {
                     // Skip first parameter
                     int lengthBackup = sb.length();
                     index = writeSignature(sb, descriptor, length, index, false);
@@ -259,7 +260,7 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
 
                     while (descriptor.charAt(index) != ')') {
                         sb.append(", ");
-                        index = writeSignature(sb, descriptor, length, index, (parameterIndex == varargsParameterIndex));
+                        index = writeSignature(sb, descriptor, length, index, parameterIndex == varargsParameterIndex);
                         parameterIndex++;
                     }
                 }
@@ -269,21 +270,24 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
                 sb.append(')');
             } else {
                 sb.append(") : ");
-                writeSignature(sb, descriptor, length, ++index, false);
+                index++;
+                writeSignature(sb, descriptor, length, index, false);
             }
         }
     }
 
-    // Icon getters
+    /** Icon getters. */
     protected static ImageIcon getTypeIcon(int access) {
-        if ((access & Type.FLAG_ANNOTATION) != 0)
+        if ((access & Type.FLAG_ANNOTATION) != 0) {
             return ANNOTATION_ICON;
-        else if ((access & Type.FLAG_INTERFACE) != 0)
+        }
+        if ((access & Type.FLAG_INTERFACE) != 0) {
             return INTERFACE_ICONS[accessToIndex(access)];
-        else if ((access & Type.FLAG_ENUM) != 0)
+        }
+        if ((access & Type.FLAG_ENUM) != 0) {
             return ENUM_ICON;
-        else
-            return CLASS_ICONS[accessToIndex(access)];
+        }
+        return CLASS_ICONS[accessToIndex(access)];
     }
 
     protected static ImageIcon getFieldIcon(int access) {
@@ -297,35 +301,42 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
     protected static int accessToIndex(int access) {
         int index = 0;
 
-        if ((access & Type.FLAG_STATIC) != 0)
+        if ((access & Type.FLAG_STATIC) != 0) {
             index += 4;
+        }
 
-        if ((access & Type.FLAG_FINAL) != 0)
+        if ((access & Type.FLAG_FINAL) != 0) {
             index += 8;
+        }
 
-        if ((access & Type.FLAG_ABSTRACT) != 0)
+        if ((access & Type.FLAG_ABSTRACT) != 0) {
             index += 16;
+        }
 
-        if ((access & Type.FLAG_PUBLIC) != 0)
+        if ((access & Type.FLAG_PUBLIC) != 0) {
             return index + 1;
-        else if ((access & Type.FLAG_PROTECTED) != 0)
+        }
+        if ((access & Type.FLAG_PROTECTED) != 0) {
             return index + 2;
-        else if ((access & Type.FLAG_PRIVATE) != 0)
+        }
+        if ((access & Type.FLAG_PRIVATE) != 0) {
             return index + 3;
-        else
-            return index;
+        }
+        return index;
     }
 
-    // Internal graphic stuff ...
+    /** Internal graphic stuff ... */
     protected static ImageIcon mergeIcons(ImageIcon background, ImageIcon overlay, int x, int y) {
         int w = background.getIconWidth();
         int h = background.getIconHeight();
         BufferedImage image = new BufferedImage(w, h,  BufferedImage.TYPE_INT_ARGB);
 
-        if (x + overlay.getIconWidth() > w)
+        if (x + overlay.getIconWidth() > w) {
             x = w - overlay.getIconWidth();
-        if (y + overlay.getIconHeight() > h)
+        }
+        if (y + overlay.getIconHeight() > h) {
             y = h - overlay.getIconHeight();
+        }
 
         Graphics2D g2 = image.createGraphics();
         g2.drawImage(background.getImage(), 0, 0, null);
@@ -377,7 +388,7 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
     protected static final ImageIcon PROTECTED_METHOD_ICON = new ImageIcon(ClassFileTypeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/methpro_obj.png"));
     protected static final ImageIcon PRIVATE_METHOD_ICON = new ImageIcon(ClassFileTypeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/methpri_obj.png"));
 
-    // Default icon set
+    /** Default icon set. */
     protected static final ImageIcon[] DEFAULT_CLASS_ICONS = {
             CLASS_ICON,
             PUBLIC_CLASS_ICON,
@@ -406,35 +417,21 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
             PRIVATE_METHOD_ICON
     };
 
-    // Add static icon set
+    /** Add static icon set. */
     protected static final ImageIcon[] STATIC_CLASS_ICONS = mergeIcons(DEFAULT_CLASS_ICONS, STATIC_OVERLAY_ICON, 100, 0);
     protected static final ImageIcon[] STATIC_INTERFACE_ICONS = mergeIcons(DEFAULT_INTERFACE_ICONS, STATIC_OVERLAY_ICON, 100, 0);
     protected static final ImageIcon[] STATIC_FIELD_ICONS = mergeIcons(DEFAULT_FIELD_ICONS, STATIC_OVERLAY_ICON, 100, 0);
     protected static final ImageIcon[] STATIC_METHOD_ICONS = mergeIcons(DEFAULT_METHOD_ICONS, STATIC_OVERLAY_ICON, 100, 0);
 
-    // Add final icon set
+    /** Add final icon set. */
     protected static final ImageIcon[] FINAL_STATIC_CLASS_ICONS = mergeIcons(STATIC_CLASS_ICONS, FINAL_OVERLAY_ICON, 0, 0);
     protected static final ImageIcon[] FINAL_STATIC_INTERFACE_ICONS = mergeIcons(STATIC_INTERFACE_ICONS, FINAL_OVERLAY_ICON, 0, 0);
     protected static final ImageIcon[] FINAL_STATIC_FIELD_ICONS = mergeIcons(STATIC_FIELD_ICONS, FINAL_OVERLAY_ICON, 0, 0);
     protected static final ImageIcon[] FINAL_STATIC_METHOD_ICONS = mergeIcons(STATIC_METHOD_ICONS, FINAL_OVERLAY_ICON, 0, 0);
 
-    // Add abstract icon set
+    /** Add abstract icon set. */
     protected static final ImageIcon[] CLASS_ICONS = mergeIcons(FINAL_STATIC_CLASS_ICONS, ABSTRACT_OVERLAY_ICON, 0, 100);
     protected static final ImageIcon[] INTERFACE_ICONS = mergeIcons(FINAL_STATIC_INTERFACE_ICONS, ABSTRACT_OVERLAY_ICON, 0, 100);
     protected static final ImageIcon[] FIELD_ICONS = mergeIcons(FINAL_STATIC_FIELD_ICONS, ABSTRACT_OVERLAY_ICON, 0, 100);
     protected static final ImageIcon[] METHOD_ICONS = mergeIcons(FINAL_STATIC_METHOD_ICONS, ABSTRACT_OVERLAY_ICON, 0, 100);
-
-    // Cache
-    protected static class Cache<K, V> extends LinkedHashMap<K, V> {
-        public static final int CACHE_MAX_ENTRIES = 100;
-
-        public Cache() {
-            super(CACHE_MAX_ENTRIES*3/2, 0.7f, true);
-        }
-
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
-            return size() > CACHE_MAX_ENTRIES;
-        }
-    }
 }

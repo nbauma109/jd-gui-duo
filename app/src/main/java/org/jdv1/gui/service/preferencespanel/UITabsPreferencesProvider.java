@@ -10,15 +10,22 @@ package org.jdv1.gui.service.preferencespanel;
 import org.jd.gui.service.platform.PlatformService;
 import org.jd.gui.spi.PreferencesPanel;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.GridLayout;
 import java.util.Map;
+
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 
 /**
  * JTabbedPane.WRAP_TAB_LAYOUT is not supported by Aqua L&F.
  * This panel is not activated on Mac OSX.
  */
 public class UITabsPreferencesProvider extends JPanel implements PreferencesPanel {
+
+    private static final long serialVersionUID = 1L;
+
     protected static final String TAB_LAYOUT = "UITabsPreferencesProvider.singleLineTabs";
 
     protected JCheckBox singleLineTabsCheckBox;
@@ -32,23 +39,32 @@ public class UITabsPreferencesProvider extends JPanel implements PreferencesPane
     }
 
     // --- PreferencesPanel --- //
-    @Override public String getPreferencesGroupTitle() { return "User Interface"; }
-    @Override public String getPreferencesPanelTitle() { return "Tabs"; }
-    @Override public JComponent getPanel() { return this; }
+    @Override
+    public String getPreferencesGroupTitle() { return "User Interface"; }
+    @Override
+    public String getPreferencesPanelTitle() { return "Tabs"; }
+    @Override
+    public JComponent getPanel() { return this; }
 
-    @Override public void init(Color errorBackgroundColor) {}
+    @Override
+    public void init(Color errorBackgroundColor) {}
 
-    @Override public boolean isActivated() { return !PlatformService.getInstance().isMac(); }
+    @Override
+    public boolean isActivated() { return !PlatformService.getInstance().isMac(); }
 
-    @Override public void loadPreferences(Map<String, String> preferences) {
+    @Override
+    public void loadPreferences(Map<String, String> preferences) {
         singleLineTabsCheckBox.setSelected("true".equals(preferences.get(TAB_LAYOUT)));
     }
 
-    @Override public void savePreferences(Map<String, String> preferences) {
+    @Override
+    public void savePreferences(Map<String, String> preferences) {
         preferences.put(TAB_LAYOUT, Boolean.toString(singleLineTabsCheckBox.isSelected()));
     }
 
-    @Override public boolean arePreferencesValid() { return true; }
+    @Override
+    public boolean arePreferencesValid() { return true; }
 
-    @Override public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {}
+    @Override
+    public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {}
 }

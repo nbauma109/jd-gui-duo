@@ -7,10 +7,10 @@
 
 package org.jd.gui.spi;
 
-import java.io.File;
-
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
+
+import java.io.File;
 
 public interface SourceLoader {
     String getSource(API api, Container.Entry entry);

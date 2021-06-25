@@ -7,14 +7,14 @@
 
 package org.jd.gui.spi;
 
-import javax.swing.JComponent;
-
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 
+import javax.swing.JComponent;
+
 public interface PanelFactory {
-	String[] getTypes();
-	
-	<T extends JComponent & UriGettable> T make(API api, Container container);
+    String[] getTypes();
+
+    <T extends JComponent & UriGettable> T make(API api, Container container);
 }

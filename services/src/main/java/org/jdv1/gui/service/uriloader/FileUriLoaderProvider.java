@@ -17,10 +17,13 @@ import java.net.URI;
 public class FileUriLoaderProvider implements UriLoader {
     protected static final String[] SCHEMES = { "file" };
 
+    @Override
     public String[] getSchemes() { return SCHEMES; }
 
+    @Override
     public boolean accept(API api, URI uri) { return "file".equals(uri.getScheme()); }
 
+    @Override
     public boolean load(API api, URI uri) {
         File file = new File(uri.getPath());
         FileLoader fileLoader = api.getFileLoader(file);

@@ -7,20 +7,24 @@
 
 package org.jd.gui.util.net;
 
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.api.API;
+import org.jd.gui.api.model.Container;
+import org.jd.gui.api.model.Indexes;
+import org.jd.gui.api.model.Type;
+import org.jd.gui.service.type.TypeFactoryService;
+import org.jd.gui.spi.TypeFactory;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.concurrent.Future;
 
-import org.jd.gui.api.model.Container;
-import org.jd.gui.api.model.Type;
-import org.jd.gui.service.type.TypeFactoryService;
-import org.jd.gui.spi.TypeFactory;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
-import org.jd.gui.api.API;
-import org.jd.gui.api.model.Indexes;
-
 public class UriUtil {
+
+    private UriUtil() {
+    }
+
     /*
      * Convert inner entry URI to outer entry uri with a fragment. Example:
      *  file://codebase/a/b/c/D$E.class => file://codebase/a/b/c/D.class#typeDeclaration=D$E
@@ -47,7 +51,6 @@ public class UriUtil {
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected static String getOuterPath(Collection<Future<Indexes>> collectionOfFutureIndexes, Container.Entry entry, Type type) {
         String outerName = type.getOuterName();
 
@@ -66,6 +69,10 @@ public class UriUtil {
                         }
                     }
                 }
+            } catch (InterruptedException e) {
+                assert ExceptionUtil.printStackTrace(e);
+                // Restore interrupted state...
+                Thread.currentThread().interrupt();
             } catch (Exception e) {
                 assert ExceptionUtil.printStackTrace(e);
             }

@@ -7,13 +7,13 @@
 
 package org.jdv1.gui.service.sourceloader;
 
-import java.io.File;
-import java.util.Collection;
-
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.service.extension.ExtensionService;
 import org.jd.gui.spi.SourceLoader;
+
+import java.io.File;
+import java.util.Collection;
 
 public class SourceLoaderService {
     protected static final SourceLoaderService SOURCE_LOADER_SERVICE = new SourceLoaderService();

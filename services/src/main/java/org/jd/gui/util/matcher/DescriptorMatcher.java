@@ -12,6 +12,10 @@ package org.jd.gui.util.matcher;
  */
 public class DescriptorMatcher {
 
+    private DescriptorMatcher() {
+        super();
+    }
+
     public static boolean matchFieldDescriptors(String d1, String d2) {
         return matchDescriptors(new CharBuffer(d1), new CharBuffer(d2));
     }
@@ -20,20 +24,17 @@ public class DescriptorMatcher {
         if (cb1.read() == '?') {
             if (cb2.read() == '?') {
                 return true;
-            } else {
-                cb2.unread();
-                return cb2.skipType();
             }
-        } else {
-            cb1.unread();
-
-            if (cb2.read() == '?') {
-                return cb1.skipType();
-            } else {
-                cb2.unread();
-                return cb1.compareTypeWith(cb2);
-            }
+            cb2.unread();
+            return cb2.skipType();
         }
+        cb1.unread();
+
+        if (cb2.read() == '?') {
+            return cb1.skipType();
+        }
+        cb2.unread();
+        return cb1.compareTypeWith(cb2);
     }
 
     public static boolean matchMethodDescriptors(String d1, String d2) {
@@ -80,24 +81,21 @@ public class DescriptorMatcher {
         public char read() {
             if (offset < length)
                 return buffer[offset++];
-            else
-                return (char)0;
+            return (char)0;
         }
 
         public boolean unread() {
             if (offset > 0) {
                 offset--;
                 return true;
-            } else {
-                return false;
             }
+            return false;
         }
 
         public char get() {
             if (offset < length)
                 return buffer[offset];
-            else
-                return (char)0;
+            return (char)0;
         }
 
         public boolean skipType() {
@@ -182,6 +180,7 @@ public class DescriptorMatcher {
             return false;
         }
 
+        @Override
         public String toString() {
             return new String(buffer, offset, length-offset);
         }

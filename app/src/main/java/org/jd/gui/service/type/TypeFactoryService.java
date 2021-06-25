@@ -33,13 +33,7 @@ public class TypeFactoryService {
 
         for (TypeFactory provider : providers) {
             for (String selector : provider.getSelectors()) {
-                TypeFactories typeFactories = mapProviders.get(selector);
-
-                if (typeFactories == null) {
-                    mapProviders.put(selector, typeFactories=new TypeFactories());
-                }
-
-                typeFactories.add(provider);
+                mapProviders.computeIfAbsent(selector, k -> new TypeFactories()).add(provider);
             }
         }
     }
@@ -95,7 +89,7 @@ public class TypeFactoryService {
     }
 
     protected static class TypeFactories {
-        protected HashMap<String, TypeFactory> factories = new HashMap<>();
+        protected Map<String, TypeFactory> factories = new HashMap<>();
         protected TypeFactory defaultFactory;
 
         public void add(TypeFactory factory) {

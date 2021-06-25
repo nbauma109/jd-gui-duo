@@ -11,7 +11,6 @@ import com.apple.eawt.Application;
 
 public class OsxApp extends App {
 
-    @SuppressWarnings("unchecked")
     public static void main(String[] args) {
         // Create an instance of the mac OSX Application class
         Application application = Application.getApplication();

@@ -7,18 +7,18 @@
 
 package org.jd.gui.view;
 
-import static org.jd.gui.util.swing.SwingUtil.getImage;
-import static org.jd.gui.util.swing.SwingUtil.invokeLater;
-import static org.jd.gui.util.swing.SwingUtil.newAction;
-import static org.jd.gui.util.swing.SwingUtil.newImageIcon;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.Constants;
+import org.jd.gui.api.API;
+import org.jd.gui.api.feature.*;
+import org.jd.gui.model.configuration.Configuration;
+import org.jd.gui.model.history.History;
+import org.jd.gui.service.platform.PlatformService;
+import org.jd.gui.util.decompiler.GuiPreferences;
+import org.jd.gui.view.component.IconButton;
+import org.jd.gui.view.component.panel.MainTabbedPanel;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Desktop;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
@@ -30,53 +30,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import javax.swing.Action;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.Icon;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.JToolBar;
-import javax.swing.KeyStroke;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
-import org.jd.gui.Constants;
-import org.jd.gui.api.API;
-import org.jd.gui.api.feature.ContentCopyable;
-import org.jd.gui.api.feature.ContentSavable;
-import org.jd.gui.api.feature.ContentSearchable;
-import org.jd.gui.api.feature.ContentSelectable;
-import org.jd.gui.api.feature.FocusedTypeGettable;
-import org.jd.gui.api.feature.LineNumberNavigable;
-import org.jd.gui.api.feature.PageChangeListener;
-import org.jd.gui.api.feature.PageClosable;
-import org.jd.gui.api.feature.PreferencesChangeListener;
-import org.jd.gui.api.feature.SourcesSavable;
-import org.jd.gui.api.feature.UriGettable;
-import org.jd.gui.api.feature.UriOpenable;
-import org.jd.gui.model.configuration.Configuration;
-import org.jd.gui.model.history.History;
-import org.jd.gui.service.platform.PlatformService;
-import org.jd.gui.view.component.IconButton;
-import org.jd.gui.view.component.panel.MainTabbedPanel;
+import static org.jd.gui.util.swing.SwingUtil.getImage;
+import static org.jd.gui.util.swing.SwingUtil.invokeLater;
+import static org.jd.gui.util.swing.SwingUtil.newAction;
+import static org.jd.gui.util.swing.SwingUtil.newImageIcon;
 
 @SuppressWarnings("unchecked")
 public class MainView<T extends JComponent & UriGettable> implements UriOpenable, PreferencesChangeListener {
+    private static final String JAVA_DECOMPILER = "Java Decompiler";
     protected History history;
     protected Consumer<File> openFilesCallback;
     protected JFrame mainFrame;
@@ -85,9 +53,10 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     protected Action openTypeAction;
     protected Action backwardAction;
     protected Action forwardAction;
+    @SuppressWarnings("all")
     protected MainTabbedPanel mainTabbedPanel;
     protected Box findPanel;
-    protected JComboBox findComboBox;
+    protected JComboBox<String> findComboBox;
     protected JCheckBox findCaseSensitive;
     protected Color findBackgroundColor;
     protected Color findErrorBackgroundColor;
@@ -125,7 +94,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
         this.openFilesCallback = openFilesCallback;
         // Build GUI
         invokeLater(() -> {
-            mainFrame = new JFrame("Java Decompiler");
+            mainFrame = new JFrame(JAVA_DECOMPILER);
             mainFrame.setIconImages(Arrays.asList(getImage("/org/jd/gui/images/jd_icon_32.png"), getImage("/org/jd/gui/images/jd_icon_64.png"), getImage("/org/jd/gui/images/jd_icon_128.png")));
             mainFrame.setMinimumSize(new Dimension(Constants.MINIMAL_WIDTH, Constants.MINIMAL_HEIGHT));
             mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -135,7 +104,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             findPanel = Box.createHorizontalBox();
             findPanel.setVisible(false);
             findPanel.add(new JLabel("Find: "));
-            findComboBox = new JComboBox();
+            findComboBox = new JComboBox<>();
             findComboBox.setEditable(true);
             JComponent editorComponent = (JComponent)findComboBox.getEditor().getEditorComponent();
             editorComponent.addKeyListener(new KeyAdapter() {
@@ -150,7 +119,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
                         case KeyEvent.VK_ENTER:
                             String str = getFindText();
                             if (str.length() > 1) {
-                                int index = ((DefaultComboBoxModel)findComboBox.getModel()).getIndexOf(str);
+                                int index = ((DefaultComboBoxModel<String>)findComboBox.getModel()).getIndexOf(str);
                                 if(index != -1 ) {
                                     findComboBox.removeItemAt(index);
                                 }
@@ -169,8 +138,9 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
                 }
             });
             editorComponent.setOpaque(true);
-            findComboBox.setBackground(this.findBackgroundColor = editorComponent.getBackground());
-            this.findErrorBackgroundColor = Color.decode(configuration.getPreferences().get("JdGuiPreferences.errorBackgroundColor"));
+            this.findBackgroundColor = editorComponent.getBackground();
+            findComboBox.setBackground(this.findBackgroundColor);
+            this.findErrorBackgroundColor = Color.decode(configuration.getPreferences().get(GuiPreferences.ERROR_BACKGROUND_COLOR));
 
             findPanel.add(findComboBox);
             findPanel.add(Box.createHorizontalStrut(5));
@@ -298,11 +268,12 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             toolBar.add(new IconButton(forwardAction));
             panel.add(toolBar, BorderLayout.PAGE_START);
 
-            mainTabbedPanel = new MainTabbedPanel(api);
+            mainTabbedPanel = new MainTabbedPanel<>(api);
             mainTabbedPanel.getPageChangedListeners().add(new PageChangeListener() {
                 protected JComponent currentPage = null;
 
-                @Override public <U extends JComponent & UriGettable> void pageChanged(U page) {
+                @Override
+                public <U extends JComponent & UriGettable> void pageChanged(U page) {
                     if (currentPage != page) {
                         // Update current page
                         currentPage = page;
@@ -311,7 +282,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
                         invokeLater(() -> {
                             if (page == null) {
                                 // Update title
-                                mainFrame.setTitle("Java Decompiler");
+                                mainFrame.setTitle(JAVA_DECOMPILER);
                                 // Update menu
                                 saveAction.setEnabled(false);
                                 copyAction.setEnabled(false);
@@ -325,7 +296,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
                                 String path = page.getUri().getPath();
                                 int index = path.lastIndexOf('/');
                                 String name = (index == -1) ? path : path.substring(index + 1);
-                                mainFrame.setTitle((name != null) ? name + " - Java Decompiler" : "Java Decompiler");
+                                mainFrame.setTitle((name != null) ? name + " - Java Decompiler" : JAVA_DECOMPILER);
                                 // Update history
                                 history.add(page.getUri());
                                 // Update history actions
@@ -379,7 +350,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             // Set position, resize and show
             mainFrame.setLocation(location);
             mainFrame.setSize(size);
-            mainFrame.setExtendedState(maximize ? JFrame.MAXIMIZED_BOTH : 0);
+            mainFrame.setExtendedState(maximize ? Frame.MAXIMIZED_BOTH : 0);
             mainFrame.setVisible(true);
         });
     }
@@ -396,22 +367,20 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     }
 
     public void setFindBackgroundColor(boolean wasFound) {
-        invokeLater(() -> {
-            findComboBox.getEditor().getEditorComponent().setBackground(wasFound ? findBackgroundColor : findErrorBackgroundColor);
-        });
+        invokeLater(() -> findComboBox.getEditor().getEditorComponent().setBackground(wasFound ? findBackgroundColor : findErrorBackgroundColor));
     }
 
-    public <T extends JComponent & UriGettable> void addMainPanel(String title, Icon icon, String tip, T component) {
+    public void addMainPanel(String title, Icon icon, String tip, T component) {
         invokeLater(() -> {
             mainTabbedPanel.addPage(title, icon, tip, component);
         });
     }
 
-    public <T extends JComponent & UriGettable> List<T> getMainPanels() {
+    public List<T> getMainPanels() {
         return mainTabbedPanel.getPages();
     }
 
-    public <T extends JComponent & UriGettable> T getSelectedMainPanel() {
+    public T getSelectedMainPanel() {
         return (T)mainTabbedPanel.getTabbedPane().getSelectedComponent();
     }
 

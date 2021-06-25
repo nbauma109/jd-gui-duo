@@ -7,9 +7,9 @@
 
 package org.jdv0.gui.api.feature;
 
-import java.util.Collection;
-
 import org.jd.gui.api.model.Indexes;
+
+import java.util.Collection;
 
 public interface IndexesChangeListener {
     void indexesChanged(Collection<Indexes> collectionOfIndexes);

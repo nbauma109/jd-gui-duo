@@ -7,6 +7,11 @@
 
 package org.jd.gui.api;
 
+import org.jd.gui.api.feature.UriGettable;
+import org.jd.gui.api.model.Container;
+import org.jd.gui.api.model.Indexes;
+import org.jd.gui.spi.*;
+
 import java.io.File;
 import java.net.URI;
 import java.nio.file.Path;
@@ -17,18 +22,6 @@ import java.util.concurrent.Future;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JComponent;
-
-import org.jd.gui.api.feature.UriGettable;
-import org.jd.gui.api.model.Container;
-import org.jd.gui.api.model.Indexes;
-import org.jd.gui.spi.ContainerFactory;
-import org.jd.gui.spi.FileLoader;
-import org.jd.gui.spi.Indexer;
-import org.jd.gui.spi.PanelFactory;
-import org.jd.gui.spi.SourceSaver;
-import org.jd.gui.spi.TreeNodeFactory;
-import org.jd.gui.spi.TypeFactory;
-import org.jd.gui.spi.UriLoader;
 
 public interface API {
     boolean openURI(URI uri);
@@ -59,9 +52,9 @@ public interface API {
 
     Map<String, String> getPreferences();
 
-	Collection<Indexes> getCollectionOfIndexes();
+    Collection<Indexes> getCollectionOfIndexes();
 
-	Collection<Future<Indexes>> getCollectionOfFutureIndexes();
+    Collection<Future<Indexes>> getCollectionOfFutureIndexes();
 
     interface LoadSourceListener {
         void sourceLoaded(String source);
@@ -72,5 +65,4 @@ public interface API {
     void loadSource(Container.Entry entry, LoadSourceListener listener);
 
     File loadSourceFile(Container.Entry entry);
-
 }

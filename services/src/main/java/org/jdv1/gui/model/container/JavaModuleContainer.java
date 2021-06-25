@@ -7,16 +7,17 @@
 
 package org.jdv1.gui.model.container;
 
-import java.nio.file.Path;
-
+import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.model.container.GenericContainer;
-import org.jd.gui.api.API;
+
+import java.nio.file.Path;
 
 public class JavaModuleContainer extends GenericContainer {
     public JavaModuleContainer(API api, Container.Entry parentEntry, Path rootPath) {
         super(api, parentEntry, rootPath);
     }
 
+    @Override
     public String getType() { return "jmod"; }
 }

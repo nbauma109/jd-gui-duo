@@ -7,21 +7,22 @@
 
 package org.jdv1.gui.service.treenode;
 
-import java.io.File;
-
-import javax.swing.ImageIcon;
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.view.data.TreeNodeBean;
 
+import java.io.File;
+
+import javax.swing.ImageIcon;
+import javax.swing.tree.DefaultMutableTreeNode;
+
 public class WarFileTreeNodeFactoryProvider extends ZipFileTreeNodeFactoryProvider {
     protected static final ImageIcon ICON = new ImageIcon(JarFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/war_obj.gif"));
 
-    @Override public String[] getSelectors() { return appendSelectors("*:file:*.war"); }
+    @Override
+    public String[] getSelectors() { return appendSelectors("*:file:*.war"); }
 
     @Override
     @SuppressWarnings("unchecked")

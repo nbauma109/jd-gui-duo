@@ -7,18 +7,22 @@
 
 package org.jd.gui.view.component;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Event;
-import java.awt.Insets;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
+import org.fife.ui.rsyntaxtextarea.*;
+import org.fife.ui.rsyntaxtextarea.folding.FoldManager;
+import org.fife.ui.rtextarea.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.api.feature.ContentSearchable;
+import org.jd.gui.api.feature.LineNumberNavigable;
+import org.jd.gui.api.feature.PreferencesChangeListener;
+import org.jd.gui.api.feature.UriOpenable;
+
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelListener;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -26,36 +30,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.ImageIcon;
-import javax.swing.InputMap;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.text.BadLocationException;
 
-import org.fife.ui.rsyntaxtextarea.DocumentRange;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaEditorKit;
-import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.fife.ui.rsyntaxtextarea.Theme;
-import org.fife.ui.rsyntaxtextarea.folding.FoldManager;
-import org.fife.ui.rtextarea.Gutter;
-import org.fife.ui.rtextarea.RTextScrollPane;
-import org.fife.ui.rtextarea.SearchContext;
-import org.fife.ui.rtextarea.SearchEngine;
-import org.fife.ui.rtextarea.SearchResult;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
-import org.jd.gui.api.feature.ContentSearchable;
-import org.jd.gui.api.feature.LineNumberNavigable;
-import org.jd.gui.api.feature.PreferencesChangeListener;
-import org.jd.gui.api.feature.UriOpenable;
+import static org.jd.gui.util.decompiler.GuiPreferences.FONT_SIZE_KEY;
 
 public class AbstractTextPage extends JPanel implements LineNumberNavigable, ContentSearchable, UriOpenable, PreferencesChangeListener {
 
-	private static final long serialVersionUID = 1L;
-
-	protected static final String FONT_SIZE_KEY = "ViewerPreferences.fontSize";
+    private static final long serialVersionUID = 1L;
 
     protected static final ImageIcon COLLAPSED_ICON = new ImageIcon(AbstractTextPage.class.getClassLoader().getResource("org/jd/gui/images/plus.png"));
     protected static final ImageIcon EXPANDED_ICON = new ImageIcon(AbstractTextPage.class.getClassLoader().getResource("org/jd/gui/images/minus.png"));
@@ -70,7 +52,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
     protected RSyntaxTextArea textArea;
     protected RTextScrollPane scrollPane;
 
-    protected Map<String, String> preferences;
+    private Map<String, String> preferences;
 
     public AbstractTextPage() {
         super(new BorderLayout());
@@ -84,6 +66,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
         textArea.setDropTarget(null);
         textArea.setPopupMenu(null);
         textArea.addMouseListener(new MouseAdapter() {
+            @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
                     textArea.setMarkAllHighlightColor(DOUBLE_CLICK_HIGHLIGHT_COLOR);
@@ -100,8 +83,8 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
         inputMap.put(ctrlC, "none");
         inputMap.put(ctrlV, "none");
 
-        try {
-            Theme theme = Theme.load(getClass().getClassLoader().getResourceAsStream("rsyntaxtextarea/themes/eclipse.xml"));
+        try (InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("rsyntaxtextarea/themes/eclipse.xml")) {
+            Theme theme = Theme.load(resourceAsStream);
             theme.apply(textArea);
         } catch (IOException e) {
             assert ExceptionUtil.printStackTrace(e);
@@ -258,6 +241,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
     }
 
     // --- LineNumberNavigable --- //
+    @Override
     public int getMaximumLineNumber() {
         try {
             return textArea.getLineOfOffset(textArea.getDocument().getLength()) + 1;
@@ -267,6 +251,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
         }
     }
 
+    @Override
     public void goToLineNumber(int lineNumber) {
         try {
             textArea.setCaretPosition(textArea.getLineStartOffset(lineNumber-1));
@@ -275,9 +260,11 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
         }
     }
 
+    @Override
     public boolean checkLineNumber(int lineNumber) { return true; }
 
     // --- ContentSearchable --- //
+    @Override
     public boolean highlightText(String text, boolean caseSensitive) {
         if (text.length() > 1) {
             textArea.setMarkAllHighlightColor(SEARCH_HIGHLIGHT_COLOR);
@@ -292,11 +279,11 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
             }
 
             return result.wasFound();
-        } else {
-            return true;
         }
+        return true;
     }
 
+    @Override
     public void findNext(String text, boolean caseSensitive) {
         if (text.length() > 1) {
             textArea.setMarkAllHighlightColor(SEARCH_HIGHLIGHT_COLOR);
@@ -311,6 +298,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
         }
     }
 
+    @Override
     public void findPrevious(String text, boolean caseSensitive) {
         if (text.length() > 1) {
             textArea.setMarkAllHighlightColor(SEARCH_HIGHLIGHT_COLOR);
@@ -335,6 +323,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
     }
 
     // --- UriOpenable --- //
+    @Override
     public boolean openUri(URI uri) {
         String query = uri.getQuery();
 
@@ -387,7 +376,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
     }
 
     protected Map<String, String> parseQuery(String query) {
-        HashMap<String, String> parameters = new HashMap<>();
+        Map<String, String> parameters = new HashMap<>();
 
         // Parse parameters
         try {
@@ -395,7 +384,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
                 int index = param.indexOf('=');
 
                 String enc = StandardCharsets.UTF_8.name();
-				if (index == -1) {
+                if (index == -1) {
                     parameters.put(URLDecoder.decode(param, enc), "");
                 } else {
                     String key = param.substring(0, index);
@@ -439,6 +428,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
     }
 
     // --- PreferencesChangeListener --- //
+    @Override
     public void preferencesChanged(Map<String, String> preferences) {
         String fontSize = preferences.get(FONT_SIZE_KEY);
 

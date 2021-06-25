@@ -9,7 +9,7 @@ public class TypeDeclarationData extends DeclarationData {
         this.superTypeName = superTypeName;
     }
 
-	public String getSuperTypeName() {
-		return superTypeName;
-	}
+    public String getSuperTypeName() {
+        return superTypeName;
+    }
 }

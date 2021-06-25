@@ -7,20 +7,22 @@
 
 package org.jdv1.gui.service.indexer;
 
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.api.API;
+import org.jd.gui.api.model.Container;
+import org.jd.gui.api.model.Indexes;
+import org.jd.gui.service.indexer.AbstractIndexerProvider;
+
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-
-import org.jd.gui.api.API;
-import org.jd.gui.api.model.Container;
-import org.jd.gui.api.model.Indexes;
-import org.jd.gui.service.indexer.AbstractIndexerProvider;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 
 public class XmlBasedFileIndexerProvider extends AbstractIndexerProvider {
     protected XMLInputFactory factory;
@@ -30,16 +32,17 @@ public class XmlBasedFileIndexerProvider extends AbstractIndexerProvider {
         factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
     }
 
-    @Override public String[] getSelectors() { return appendSelectors("*:file:*.xsl", "*:file:*.xslt", "*:file:*.xsd"); }
+    @Override
+    public String[] getSelectors() { return appendSelectors("*:file:*.xsl", "*:file:*.xslt", "*:file:*.xsd"); }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void index(API api, Container.Entry entry, Indexes indexes) {
-        HashSet<String> stringSet = new HashSet<>();
+        Set<String> stringSet = new HashSet<>();
         XMLStreamReader reader = null;
 
-        try {
-            reader = factory.createXMLStreamReader(entry.getInputStream());
+        try (InputStream inputStream = entry.getInputStream()) {
+
+            reader = factory.createXMLStreamReader(inputStream);
 
             stringSet.add(reader.getVersion());
             stringSet.add(reader.getEncoding());
@@ -103,6 +106,7 @@ public class XmlBasedFileIndexerProvider extends AbstractIndexerProvider {
             }
         }
 
+        @SuppressWarnings("all")
         Map<String, Collection> stringIndex = indexes.getIndex("strings");
 
         for (String string : stringSet) {

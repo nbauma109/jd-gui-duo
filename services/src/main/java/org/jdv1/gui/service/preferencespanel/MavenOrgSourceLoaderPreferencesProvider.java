@@ -7,6 +7,8 @@
 
 package org.jdv1.gui.service.preferencespanel;
 
+import org.jd.gui.spi.PreferencesPanel;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -15,30 +17,21 @@ import java.awt.event.ActionListener;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import org.jd.gui.spi.PreferencesPanel;
-
 public class MavenOrgSourceLoaderPreferencesProvider extends JPanel implements PreferencesPanel, DocumentListener, ActionListener {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	public static final String ACTIVATED = "MavenOrgSourceLoaderPreferencesProvider.activated";
+
+    private static final long serialVersionUID = 1L;
+    public static final String ACTIVATED = "MavenOrgSourceLoaderPreferencesProvider.activated";
     public static final String FILTERS = "MavenOrgSourceLoaderPreferencesProvider.filters";
 
     public static final String DEFAULT_FILTERS_VALUE =
             "+org +com.google +com.springsource +com.sun -com +java +javax +sun +sunw " +
             "+spring +springframework +springmodules +tomcat +maven +edu";
 
-    protected static final Pattern CONTROL_PATTERN = Pattern.compile("([+-][a-zA-Z_0-9$_.]+(\\s+[+-][a-zA-Z_0-9$_.]+)*)?\\s*");
+    protected static final Pattern CONTROL_PATTERN = Pattern.compile("([+-][a-zA-Z0-9$_.]+(\\s+[+-][a-zA-Z0-9$_.]+)*)?\\s*");
 
     protected JCheckBox enableCheckBox;
     protected JTextArea filtersTextArea;
@@ -46,7 +39,7 @@ public class MavenOrgSourceLoaderPreferencesProvider extends JPanel implements P
     protected Color errorBackgroundColor = Color.RED;
     protected Color defaultBackgroundColor;
 
-    protected PreferencesPanel.PreferencesPanelChangeListener listener;
+    protected transient PreferencesPanel.PreferencesPanelChangeListener listener;
 
     public MavenOrgSourceLoaderPreferencesProvider() {
         super(new BorderLayout());
@@ -62,10 +55,7 @@ public class MavenOrgSourceLoaderPreferencesProvider extends JPanel implements P
 
         JComponent spacer = new JComponent() {
 
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;};
+            private static final long serialVersionUID = 1L;};
         JScrollPane scrollPane = new JScrollPane(filtersTextArea);
 
         String osName = System.getProperty("os.name").toLowerCase();
@@ -94,16 +84,20 @@ public class MavenOrgSourceLoaderPreferencesProvider extends JPanel implements P
     }
 
     // --- PreferencesPanel --- //
-    @Override public String getPreferencesGroupTitle() { return "Source loader"; }
-    @Override public String getPreferencesPanelTitle() { return "maven.org"; }
-    @Override public JComponent getPanel() { return this; }
+    @Override
+    public String getPreferencesGroupTitle() { return "Source loader"; }
+    @Override
+    public String getPreferencesPanelTitle() { return "maven.org"; }
+    @Override
+    public JComponent getPanel() { return this; }
 
     @Override
     public void init(Color errorBackgroundColor) {
         this.errorBackgroundColor = errorBackgroundColor;
     }
 
-    @Override public boolean isActivated() { return true; }
+    @Override
+    public boolean isActivated() { return true; }
 
     @Override
     public void loadPreferences(Map<String, String> preferences) {
@@ -124,19 +118,23 @@ public class MavenOrgSourceLoaderPreferencesProvider extends JPanel implements P
         preferences.put(FILTERS, filtersTextArea.getText().trim());
     }
 
-    @Override public boolean arePreferencesValid() {
+    @Override
+    public boolean arePreferencesValid() {
         return CONTROL_PATTERN.matcher(filtersTextArea.getText()).matches();
     }
 
-    @Override public void addPreferencesChangeListener(PreferencesPanelChangeListener listener) {
+    @Override
+    public void addPreferencesChangeListener(PreferencesPanelChangeListener listener) {
         this.listener = listener;
     }
 
-
     // --- DocumentListener --- //
-    @Override public void insertUpdate(DocumentEvent e) { onTextChange(); }
-    @Override public void removeUpdate(DocumentEvent e) { onTextChange(); }
-    @Override public void changedUpdate(DocumentEvent e) { onTextChange(); }
+    @Override
+    public void insertUpdate(DocumentEvent e) { onTextChange(); }
+    @Override
+    public void removeUpdate(DocumentEvent e) { onTextChange(); }
+    @Override
+    public void changedUpdate(DocumentEvent e) { onTextChange(); }
 
     protected void onTextChange() {
         filtersTextArea.setBackground(arePreferencesValid() ? defaultBackgroundColor : errorBackgroundColor);

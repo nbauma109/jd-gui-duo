@@ -12,11 +12,11 @@ import org.jd.gui.api.API;
 import java.io.File;
 
 public interface FileLoader {
-	String[] getExtensions();
-	
-	String getDescription();
-	
-	boolean accept(API api, File file);
-	
-	boolean load(API api, File file);
+    String[] getExtensions();
+
+    String getDescription();
+
+    boolean accept(API api, File file);
+
+    boolean load(API api, File file);
 }

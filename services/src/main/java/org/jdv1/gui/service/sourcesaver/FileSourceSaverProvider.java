@@ -7,6 +7,12 @@
 
 package org.jdv1.gui.service.sourcesaver;
 
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.api.API;
+import org.jd.gui.api.model.Container;
+import org.jd.gui.service.sourcesaver.AbstractSourceSaverProvider;
+import org.jd.gui.spi.SourceSaver;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,19 +21,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-import org.jd.gui.api.API;
-import org.jd.gui.api.model.Container;
-import org.jd.gui.service.sourcesaver.AbstractSourceSaverProvider;
-import org.jd.gui.spi.SourceSaver;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
-
 public class FileSourceSaverProvider extends AbstractSourceSaverProvider {
 
-    @Override public String[] getSelectors() { return appendSelectors("*:file:*"); }
+    @Override
+    public String[] getSelectors() { return appendSelectors("*:file:*"); }
 
-    @Override public String getSourcePath(Container.Entry entry) { return entry.getPath(); }
+    @Override
+    public String getSourcePath(Container.Entry entry) { return entry.getPath(); }
 
-    @Override public int getFileCount(API api, Container.Entry entry) { return 1; }
+    @Override
+    public int getFileCount(API api, Container.Entry entry) { return 1; }
 
     @Override
     public void save(API api, SourceSaver.Controller controller, SourceSaver.Listener listener, Path rootPath, Container.Entry entry) {

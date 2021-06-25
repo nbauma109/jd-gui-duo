@@ -1,11 +1,15 @@
 /*
  * Copyright (c) 2008-2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
- * This is a Copyleft license that gives the user the right to use, 
+ * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
 
 package org.jd.gui.service.fileloader;
+
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.api.API;
+import org.jd.gui.api.feature.UriOpenable;
 
 import java.io.File;
 import java.net.URI;
@@ -13,10 +17,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Paths;
 
 import javax.swing.JComponent;
-
-import org.jd.gui.api.API;
-import org.jd.gui.api.feature.UriOpenable;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 
 public abstract class AbstractTypeFileLoaderProvider extends AbstractFileLoaderProvider {
     protected boolean load(API api, File file, String pathInFile) {

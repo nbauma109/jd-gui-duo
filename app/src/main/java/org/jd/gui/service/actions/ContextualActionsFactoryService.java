@@ -7,18 +7,14 @@
 
 package org.jd.gui.service.actions;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-
-import javax.swing.Action;
-
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.service.extension.ExtensionService;
 import org.jd.gui.spi.ContextualActionsFactory;
+
+import java.util.*;
+
+import javax.swing.Action;
 
 public class ContextualActionsFactoryService {
     protected static final ContextualActionsFactoryService CONTEXTUAL_ACTIONS_FACTORY_SERVICE = new ContextualActionsFactoryService();
@@ -30,28 +26,22 @@ public class ContextualActionsFactoryService {
     protected final Collection<ContextualActionsFactory> providers = ExtensionService.getInstance().load(ContextualActionsFactory.class);
 
     public Collection<Action> get(API api, Container.Entry entry, String fragment) {
-        HashMap<String, ArrayList<Action>> mapActions = new HashMap<>();
+        Map<String, List<Action>> mapActions = new HashMap<>();
 
         for (ContextualActionsFactory provider : providers) {
             Collection<Action> actions = provider.make(api, entry, fragment);
 
             for (Action action : actions) {
                 String groupName = (String)action.getValue(ContextualActionsFactory.GROUP_NAME);
-                ArrayList<Action> list = mapActions.get(groupName);
-
-                if (list == null) {
-                    mapActions.put(groupName, list=new ArrayList<>());
-                }
-
-                list.add(action);
+                mapActions.computeIfAbsent(groupName, k -> new ArrayList<>()).add(action);
             }
         }
 
         if (!mapActions.isEmpty()) {
-            ArrayList<Action> result = new ArrayList<>();
+            List<Action> result = new ArrayList<>();
 
             // Sort by group names
-            ArrayList<String> groupNames = new ArrayList<>(mapActions.keySet());
+            List<String> groupNames = new ArrayList<>(mapActions.keySet());
             Collections.sort(groupNames);
 
             for (String groupName : groupNames) {
@@ -60,15 +50,14 @@ public class ContextualActionsFactoryService {
                     result.add(null);
                 }
                 // Sort by names
-                ArrayList<Action> actions = mapActions.get(groupName);
+                List<Action> actions = mapActions.get(groupName);
                 Collections.sort(actions, COMPARATOR);
                 result.addAll(actions);
             }
 
             return result;
-        } else {
-            return Collections.emptyList();
         }
+        return Collections.emptyList();
     }
 
     protected static class ActionNameComparator implements Comparator<Action> {

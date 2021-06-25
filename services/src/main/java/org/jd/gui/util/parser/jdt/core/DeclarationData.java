@@ -1,7 +1,9 @@
 package org.jd.gui.util.parser.jdt.core;
 
+import org.jd.core.v1.util.StringConstants;
+
 public class DeclarationData {
-	
+
     private int startPosition;
     private int endPosition;
     private String typeName;
@@ -22,21 +24,21 @@ public class DeclarationData {
     public boolean isAType() { return getName() == null; }
     public boolean isAField() { return (descriptor != null) && descriptor.charAt(0) != '('; }
     public boolean isAMethod() { return (descriptor != null) && descriptor.charAt(0) == '('; }
-    public boolean isAConstructor() { return "<init>".equals(getName()); }
+    public boolean isAConstructor() { return StringConstants.INSTANCE_CONSTRUCTOR.equals(getName()); }
 
-	public int getStartPosition() {
-		return startPosition;
-	}
+    public int getStartPosition() {
+        return startPosition;
+    }
 
-	public int getEndPosition() {
-		return endPosition;
-	}
+    public int getEndPosition() {
+        return endPosition;
+    }
 
-	public String getTypeName() {
-		return typeName;
-	}
+    public String getTypeName() {
+        return typeName;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 }

@@ -7,17 +7,18 @@
 
 package org.jd.gui.model.container;
 
-import org.jd.gui.api.model.Container;
+import org.jd.gui.api.model.Container.EntryPath;
 
 import java.util.Comparator;
 
 /**
  * Directories before files, sorted by path
  */
-public class ContainerEntryComparator implements Comparator<Container.Entry> {
+public class ContainerEntryComparator implements Comparator<EntryPath> {
     public static final ContainerEntryComparator COMPARATOR = new ContainerEntryComparator();
 
-    public int compare(Container.Entry e1, Container.Entry e2) {
+    @Override
+    public int compare(EntryPath e1, EntryPath e2) {
         if (e1.isDirectory()) {
             if (!e2.isDirectory()) {
                 return -1;

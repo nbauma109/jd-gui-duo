@@ -7,43 +7,38 @@
 
 package org.jd.gui.controller;
 
-import java.awt.Point;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Consumer;
-
-import javax.swing.JFrame;
-
+import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Type;
 import org.jd.gui.service.type.TypeFactoryService;
 import org.jd.gui.spi.TypeFactory;
-import org.jd.gui.api.API;
 import org.jdv1.gui.model.container.DelegatingFilterContainer;
 import org.jdv1.gui.view.SelectLocationView;
+
+import java.awt.Point;
+import java.net.URI;
+import java.util.*;
+import java.util.function.Consumer;
+
+import javax.swing.JFrame;
 
 public class SelectLocationController {
     protected static final ContainerEntryComparator CONTAINER_ENTRY_COMPARATOR = new ContainerEntryComparator();
 
     protected API api;
+    @SuppressWarnings("all")
     protected SelectLocationView selectLocationView;
 
     public SelectLocationController(API api, JFrame mainFrame) {
         this.api = api;
         // Create UI
-        selectLocationView = new SelectLocationView(api, mainFrame);
+        selectLocationView = new SelectLocationView<>(api, mainFrame);
     }
 
     @SuppressWarnings("unchecked")
     public void show(Point location, Collection<Container.Entry> entries, Consumer<Container.Entry> selectedLocationCallback, Runnable closeCallback) {
         // Show UI
-        HashMap<Container, ArrayList<Container.Entry>> map = new HashMap<>();
+        Map<Container, List<Container.Entry>> map = new HashMap<>();
 
         for (Container.Entry entry : entries) {
             Container container = entry.getContainer();
@@ -53,23 +48,16 @@ public class SelectLocationController {
                 Container parentContainer = container.getRoot().getParent().getContainer();
                 if (parentContainer.getRoot() == null) {
                     break;
-                } else {
-                    container = parentContainer;
                 }
+                container = parentContainer;
             }
 
-            ArrayList<Container.Entry> list = map.get(container);
-
-            if (list == null) {
-                map.put(container, list=new ArrayList<>());
-            }
-
-            list.add(entry);
+            map.computeIfAbsent(container, c -> new ArrayList<>()).add(entry);
         }
 
-        HashSet<DelegatingFilterContainer> delegatingFilterContainers = new HashSet<>();
+        Set<DelegatingFilterContainer> delegatingFilterContainers = new HashSet<>();
 
-        for (Map.Entry<Container, ArrayList<Container.Entry>> mapEntry : map.entrySet()) {
+        for (Map.Entry<Container, List<Container.Entry>> mapEntry : map.entrySet()) {
             Container container = mapEntry.getKey();
             // Create a filtered container
             // TODO In a future release, display matching types and inner-types, not only matching files
@@ -82,8 +70,8 @@ public class SelectLocationController {
     }
 
     protected Collection<Container.Entry> getOuterEntries(Collection<Container.Entry> entries) {
-        HashMap<Container.Entry, Container.Entry> innerTypeEntryToOuterTypeEntry = new HashMap<>();
-        HashSet<Container.Entry> outerEntriesSet = new HashSet<>();
+        Map<Container.Entry, Container.Entry> innerTypeEntryToOuterTypeEntry = new HashMap<>();
+        Set<Container.Entry> outerEntriesSet = new HashSet<>();
 
         for (Container.Entry entry : entries) {
             Container.Entry outerTypeEntry = null;
@@ -96,11 +84,11 @@ public class SelectLocationController {
                     outerTypeEntry = innerTypeEntryToOuterTypeEntry.get(entry);
 
                     if (outerTypeEntry == null) {
-                        HashMap<String, Container.Entry> typeNameToEntry = new HashMap<>();
-                        HashMap<String, String> innerTypeNameToOuterTypeName = new HashMap<>();
+                        Map<String, Container.Entry> typeNameToEntry = new HashMap<>();
+                        Map<String, String> innerTypeNameToOuterTypeName = new HashMap<>();
 
                         // Populate "typeNameToEntry" and "innerTypeNameToOuterTypeName"
-                        for (Container.Entry e : entry.getParent().getChildren()) {
+                        for (Container.Entry e : entry.getParent().getChildren().values()) {
                             factory = TypeFactoryService.getInstance().get(e);
 
                             if (factory != null) {
@@ -153,7 +141,7 @@ public class SelectLocationController {
         }
 
         // Return outer type entries sorted by path
-        ArrayList<Container.Entry> result = new ArrayList<>(outerEntriesSet);
+        List<Container.Entry> result = new ArrayList<>(outerEntriesSet);
 
         result.sort(CONTAINER_ENTRY_COMPARATOR);
 

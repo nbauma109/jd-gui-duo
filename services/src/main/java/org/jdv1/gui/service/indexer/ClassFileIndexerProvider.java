@@ -7,63 +7,58 @@
 
 package org.jdv1.gui.service.indexer;
 
-import static org.objectweb.asm.ClassReader.SKIP_CODE;
-import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
-import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.core.v1.util.StringConstants;
+import org.jd.gui.api.API;
+import org.jd.gui.api.model.Container;
+import org.jd.gui.api.model.Indexes;
+import org.jd.gui.service.indexer.AbstractIndexerProvider;
+import org.objectweb.asm.*;
+import org.objectweb.asm.signature.SignatureReader;
+import org.objectweb.asm.signature.SignatureVisitor;
 
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.jd.gui.api.API;
-import org.jd.gui.api.model.Container;
-import org.jd.gui.api.model.Indexes;
-import org.jd.gui.service.indexer.AbstractIndexerProvider;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.TypePath;
-import org.objectweb.asm.signature.SignatureReader;
-import org.objectweb.asm.signature.SignatureVisitor;
+import static org.objectweb.asm.ClassReader.SKIP_CODE;
+import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
+import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 
 /**
  * Unsafe thread implementation of class file indexer.
  */
 public class ClassFileIndexerProvider extends AbstractIndexerProvider {
-    protected HashSet<String> typeDeclarationSet = new HashSet<>();
-    protected HashSet<String> constructorDeclarationSet = new HashSet<>();
-    protected HashSet<String> methodDeclarationSet = new HashSet<>();
-    protected HashSet<String> fieldDeclarationSet = new HashSet<>();
-    protected HashSet<String> typeReferenceSet = new HashSet<>();
-    protected HashSet<String> constructorReferenceSet = new HashSet<>();
-    protected HashSet<String> methodReferenceSet = new HashSet<>();
-    protected HashSet<String> fieldReferenceSet = new HashSet<>();
-    protected HashSet<String> stringSet = new HashSet<>();
-    protected HashSet<String> superTypeNameSet = new HashSet<>();
-    protected HashSet<String> descriptorSet = new HashSet<>();
+    protected Set<String> typeDeclarationSet = new HashSet<>();
+    protected Set<String> constructorDeclarationSet = new HashSet<>();
+    protected Set<String> methodDeclarationSet = new HashSet<>();
+    protected Set<String> fieldDeclarationSet = new HashSet<>();
+    protected Set<String> typeReferenceSet = new HashSet<>();
+    protected Set<String> constructorReferenceSet = new HashSet<>();
+    protected Set<String> methodReferenceSet = new HashSet<>();
+    protected Set<String> fieldReferenceSet = new HashSet<>();
+    protected Set<String> stringSet = new HashSet<>();
+    protected Set<String> superTypeNameSet = new HashSet<>();
+    protected Set<String> descriptorSet = new HashSet<>();
 
     protected ClassIndexer classIndexer = new ClassIndexer();
     protected SignatureIndexer signatureIndexer = new SignatureIndexer();
 
-    @Override public String[] getSelectors() { return appendSelectors("*:file:*.class"); }
+    @Override
+    public String[] getSelectors() { return appendSelectors("*:file:*.class"); }
 
     @Override
     public Pattern getPathPattern() {
         if (externalPathPattern == null) {
             return Pattern.compile("^((?!module-info\\.class).)*$");
-        } else {
-            return externalPathPattern;
         }
+        return externalPathPattern;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void index(API api, Container.Entry entry, Indexes indexes) {
         // Cleaning sets...
         typeDeclarationSet.clear();
@@ -126,7 +121,7 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
                             tag = classReader.readByte(nameAndTypeIndex-1);
                             if (tag == 12) { // CONSTANT_NameAndType
                                 String methodName = classReader.readUTF8(nameAndTypeIndex, buffer);
-                                if ("<init>".equals(methodName)) {
+                                if (StringConstants.INSTANCE_CONSTRUCTOR.equals(methodName)) {
                                     int classItem = classReader.readUnsignedShort(startIndex);
                                     int classIndex = classReader.getItem(classItem);
                                     className = classReader.readUTF8(classIndex, buffer);
@@ -154,7 +149,8 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
             addToIndexes(indexes, "strings", stringSet, entry);
 
             // Populate map [super type name : [sub type name]]
-            if (superTypeNameSet.size() > 0) {
+            if (!superTypeNameSet.isEmpty()) {
+                @SuppressWarnings("rawtypes")
                 Map<String, Collection> index = indexes.getIndex("subTypeNames");
 
                 for (String superTypeName : superTypeNameSet) {
@@ -212,7 +208,7 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
 
         @Override
         public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-            if ("<init>".equals(name)) {
+            if (StringConstants.INSTANCE_CONSTRUCTOR.equals(name)) {
                 constructorDeclarationSet.add(this.name);
             } else if (! "<clinit>".equals(name)) {
                 methodDeclarationSet.add(name);
@@ -232,13 +228,15 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
     protected class SignatureIndexer extends SignatureVisitor {
         SignatureIndexer() { super(Opcodes.ASM7); }
 
-        @Override public void visitClassType(String name) { typeReferenceSet.add(name); }
+        @Override
+        public void visitClassType(String name) { typeReferenceSet.add(name); }
     }
 
     protected class AnnotationIndexer extends AnnotationVisitor {
         public AnnotationIndexer() { super(Opcodes.ASM7); }
 
-        @Override public void visitEnum(String name, String desc, String value) { descriptorSet.add(desc); }
+        @Override
+        public void visitEnum(String name, String desc, String value) { descriptorSet.add(desc); }
 
         @Override
         public AnnotationVisitor visitAnnotation(String name, String desc) {

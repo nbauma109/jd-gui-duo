@@ -7,9 +7,10 @@
 
 package org.jd.gui.spi;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
 import java.util.Map;
+
+import javax.swing.JComponent;
 
 public interface PreferencesPanel {
     String getPreferencesGroupTitle();

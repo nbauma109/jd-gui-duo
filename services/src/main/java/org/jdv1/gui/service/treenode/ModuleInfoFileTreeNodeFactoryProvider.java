@@ -7,6 +7,16 @@
 
 package org.jdv1.gui.service.treenode;
 
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.api.API;
+import org.jd.gui.api.feature.ContainerEntryGettable;
+import org.jd.gui.api.feature.UriGettable;
+import org.jd.gui.api.model.Container;
+import org.jd.gui.api.model.Type;
+import org.jd.gui.spi.TypeFactory;
+import org.jd.gui.view.data.TreeNodeBean;
+import org.jdv1.gui.view.component.ModuleInfoFilePage;
+
 import java.io.File;
 import java.util.Collection;
 import java.util.regex.Pattern;
@@ -14,16 +24,6 @@ import java.util.regex.Pattern;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
-
-import org.jd.gui.api.API;
-import org.jd.gui.api.feature.ContainerEntryGettable;
-import org.jd.gui.api.feature.UriGettable;
-import org.jd.gui.api.model.Container;
-import org.jd.gui.api.model.Type;
-import org.jd.gui.spi.TypeFactory;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
-import org.jd.gui.view.data.TreeNodeBean;
-import org.jdv1.gui.view.component.ModuleInfoFilePage;
 
 public class ModuleInfoFileTreeNodeFactoryProvider extends ClassFileTreeNodeFactoryProvider {
     protected static final ImageIcon MODULE_FILE_ICON = new ImageIcon(ClassFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/module_obj.png"));
@@ -38,9 +38,11 @@ public class ModuleInfoFileTreeNodeFactoryProvider extends ClassFileTreeNodeFact
         }
     }
 
-    @Override public String[] getSelectors() { return appendSelectors("*:file:*/module-info.class"); }
+    @Override
+    public String[] getSelectors() { return appendSelectors("*:file:*/module-info.class"); }
 
-    @Override public Pattern getPathPattern() { return externalPathPattern; }
+    @Override
+    public Pattern getPathPattern() { return externalPathPattern; }
 
     @Override
     @SuppressWarnings("unchecked")
@@ -51,12 +53,10 @@ public class ModuleInfoFileTreeNodeFactoryProvider extends ClassFileTreeNodeFact
     }
 
     protected static class ModuleInfoFileTreeNode extends FileTreeNode {
-        /**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
 
-		public ModuleInfoFileTreeNode(Container.Entry entry, Object userObject, PageAndTipFactory pageAndTipFactory) {
+        private static final long serialVersionUID = 1L;
+
+        public ModuleInfoFileTreeNode(Container.Entry entry, Object userObject, PageAndTipFactory pageAndTipFactory) {
             super(entry, null, userObject, pageAndTipFactory);
         }
 

@@ -7,17 +7,22 @@
 
 package org.jdv1.gui.util.index;
 
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.api.model.Container;
+import org.jd.gui.api.model.Indexes;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-import org.jd.gui.api.model.Container;
-import org.jd.gui.api.model.Indexes;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
-
 public class IndexesUtil {
+
+    private IndexesUtil() {
+        super();
+    }
+
     public static boolean containsInternalTypeName(Collection<Future<Indexes>> collectionOfFutureIndexes, String internalTypeName) {
         return contains(collectionOfFutureIndexes, "typeDeclarations", internalTypeName);
     }
@@ -26,6 +31,7 @@ public class IndexesUtil {
         return find(collectionOfFutureIndexes, "typeDeclarations", internalTypeName);
     }
 
+    @SuppressWarnings("rawtypes")
     public static boolean contains(Collection<Future<Indexes>> collectionOfFutureIndexes, String indexName, String key) {
         try {
             for (Future<Indexes> futureIndexes : collectionOfFutureIndexes) {
@@ -36,6 +42,10 @@ public class IndexesUtil {
                     }
                 }
             }
+        } catch (InterruptedException e) {
+            assert ExceptionUtil.printStackTrace(e);
+            // Restore interrupted state...
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             assert ExceptionUtil.printStackTrace(e);
         }
@@ -43,9 +53,9 @@ public class IndexesUtil {
         return false;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "rawtypes" })
     public static List<Container.Entry> find(Collection<Future<Indexes>> collectionOfFutureIndexes, String indexName, String key) {
-        ArrayList<Container.Entry> entries = new ArrayList<>();
+        List<Container.Entry> entries = new ArrayList<>();
 
         try {
             for (Future<Indexes> futureIndexes : collectionOfFutureIndexes) {
@@ -59,6 +69,10 @@ public class IndexesUtil {
                     }
                 }
             }
+        } catch (InterruptedException e) {
+            assert ExceptionUtil.printStackTrace(e);
+            // Restore interrupted state...
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             assert ExceptionUtil.printStackTrace(e);
         }

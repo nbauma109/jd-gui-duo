@@ -7,40 +7,7 @@
 
 package org.jdv1.gui.view;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Set;
-import java.util.function.Consumer;
-
-import javax.swing.AbstractAction;
-import javax.swing.BorderFactory;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRootPane;
-import javax.swing.KeyStroke;
-import javax.swing.UIManager;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
-
+import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.TreeNodeExpandable;
 import org.jd.gui.api.feature.UriGettable;
@@ -49,8 +16,21 @@ import org.jd.gui.spi.TreeNodeFactory;
 import org.jd.gui.util.swing.SwingUtil;
 import org.jd.gui.view.component.Tree;
 import org.jd.gui.view.renderer.TreeNodeRenderer;
-import org.jd.gui.api.API;
 import org.jdv1.gui.model.container.DelegatingFilterContainer;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.event.*;
+import java.net.URI;
+import java.util.*;
+import java.util.function.Consumer;
+
+import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 
 public class SelectLocationView<T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> {
     protected static final DelegatingFilterContainerComparator DELEGATING_FILTER_CONTAINER_COMPARATOR = new DelegatingFilterContainerComparator();
@@ -64,7 +44,6 @@ public class SelectLocationView<T extends DefaultMutableTreeNode & ContainerEntr
     protected Consumer<URI> selectedEntryCallback;
     protected Runnable closeCallback;
 
-    @SuppressWarnings("unchecked")
     public SelectLocationView(API api, JFrame mainFrame) {
         this.api = api;
         // Build GUI
@@ -72,7 +51,8 @@ public class SelectLocationView<T extends DefaultMutableTreeNode & ContainerEntr
             selectLocationDialog = new JDialog(mainFrame, "", false);
             selectLocationDialog.setUndecorated(true);
             selectLocationDialog.addWindowListener(new WindowAdapter() {
-                @Override public void windowDeactivated(WindowEvent e) { closeCallback.run(); }
+                @Override
+                public void windowDeactivated(WindowEvent e) { closeCallback.run(); }
             });
 
             Color bg = UIManager.getColor("ToolTip.background");
@@ -92,21 +72,24 @@ public class SelectLocationView<T extends DefaultMutableTreeNode & ContainerEntr
             selectLocationTree.setModel(new DefaultTreeModel(new DefaultMutableTreeNode()));
             selectLocationTree.setCellRenderer(new TreeNodeRenderer());
             selectLocationTree.addKeyListener(new KeyAdapter() {
-                @Override public void keyPressed(KeyEvent e) {
+                @Override
+                public void keyPressed(KeyEvent e) {
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                         onSelectedEntry();
                     }
                 }
             });
             selectLocationTree.addMouseListener(new MouseAdapter() {
-                @Override public void mouseClicked(MouseEvent e) {
+                @Override
+                public void mouseClicked(MouseEvent e) {
                     if (e.getClickCount() > 0) {
                         onSelectedEntry();
                     }
                 }
             });
             selectLocationTree.addFocusListener(new FocusAdapter() {
-                @Override public void focusLost(FocusEvent e) { selectLocationDialog.setVisible(false); }
+                @Override
+                public void focusLost(FocusEvent e) { selectLocationDialog.setVisible(false); }
             });
             selectLocationPanel.add(selectLocationTree, BorderLayout.CENTER);
 
@@ -114,7 +97,11 @@ public class SelectLocationView<T extends DefaultMutableTreeNode & ContainerEntr
             JRootPane rootPane = selectLocationDialog.getRootPane();
             rootPane.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "SelectLocationView.cancel");
             rootPane.getActionMap().put("SelectLocationView.cancel", new AbstractAction() {
-                @Override public void actionPerformed(ActionEvent e) { selectLocationDialog.setVisible(false); }
+
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public void actionPerformed(ActionEvent e) { selectLocationDialog.setVisible(false); }
             });
         });
     }
@@ -131,7 +118,7 @@ public class SelectLocationView<T extends DefaultMutableTreeNode & ContainerEntr
             // Reset tree nodes
             root.removeAllChildren();
 
-            ArrayList<DelegatingFilterContainer> sortedContainers = new ArrayList<>(containers);
+            List<DelegatingFilterContainer> sortedContainers = new ArrayList<>(containers);
             sortedContainers.sort(DELEGATING_FILTER_CONTAINER_COMPARATOR);
 
             for (DelegatingFilterContainer container : sortedContainers) {

@@ -7,35 +7,37 @@
 
 package org.jdv1.gui.service.indexer;
 
-import java.util.Collection;
-import java.util.Map;
-
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
+import org.jd.gui.model.container.entry.path.DirectoryEntryPath;
 import org.jd.gui.service.indexer.AbstractIndexerProvider;
 import org.jd.gui.spi.Indexer;
 
+import java.util.Collection;
+import java.util.Map;
+
 public class JavaModuleFileIndexerProvider extends AbstractIndexerProvider {
 
-    @Override public String[] getSelectors() { return appendSelectors("*:file:*.jmod"); }
+    @Override
+    public String[] getSelectors() { return appendSelectors("*:file:*.jmod"); }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void index(API api, Container.Entry entry, Indexes indexes) {
-        for (Container.Entry e : entry.getChildren()) {
-            if (e.isDirectory() && e.getPath().equals("classes")) {
-                Map<String, Collection> packageDeclarationIndex = indexes.getIndex("packageDeclarations");
+        DirectoryEntryPath classesDir = new DirectoryEntryPath("classes");
+        Container.Entry e = entry.getChildren().get(classesDir);
+        if (e != null) {
+            Map<String, Collection> packageDeclarationIndex = indexes.getIndex("packageDeclarations");
 
-                // Index module-info, packages and CLASS files
-                index(api, e, indexes, packageDeclarationIndex);
-                break;
-            }
+            // Index module-info, packages and CLASS files
+            index(api, e, indexes, packageDeclarationIndex);
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "rawtypes" })
     protected static void index(API api, Container.Entry entry, Indexes indexes, Map<String, Collection> packageDeclarationIndex) {
-        for (Container.Entry e : entry.getChildren()) {
+        for (Container.Entry e : entry.getChildren().values()) {
             if (e.isDirectory()) {
                 String path = e.getPath();
 

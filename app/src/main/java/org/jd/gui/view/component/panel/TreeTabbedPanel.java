@@ -7,6 +7,13 @@
 
 package org.jd.gui.view.component.panel;
 
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.api.API;
+import org.jd.gui.api.feature.*;
+import org.jd.gui.api.model.TreeNodeData;
+import org.jd.gui.view.component.Tree;
+import org.jd.gui.view.renderer.TreeNodeRenderer;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -14,19 +21,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Map;
+import java.util.*;
 
-import javax.swing.Action;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTree;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -34,31 +31,15 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
-import org.jd.gui.api.feature.ContainerEntryGettable;
-import org.jd.gui.api.feature.PageChangeListener;
-import org.jd.gui.api.feature.PageChangeable;
-import org.jd.gui.api.feature.PageClosable;
-import org.jd.gui.api.feature.PageCreator;
-import org.jd.gui.api.feature.PreferencesChangeListener;
-import org.jd.gui.api.feature.TreeNodeExpandable;
-import org.jd.gui.api.feature.UriGettable;
-import org.jd.gui.api.feature.UriOpenable;
-import org.jd.gui.api.model.TreeNodeData;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
-import org.jd.gui.view.component.Tree;
-import org.jd.gui.view.renderer.TreeNodeRenderer;
-import org.jd.gui.api.API;
-
 public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> extends JPanel implements UriGettable, UriOpenable, PageChangeable, PageClosable, PreferencesChangeListener {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	protected API api;
+
+    private static final long serialVersionUID = 1L;
+    protected transient API api;
     protected URI uri;
     protected Tree tree;
+    @SuppressWarnings("rawtypes")
     protected TabbedPanel tabbedPanel;
-    protected ArrayList<PageChangeListener> pageChangedListeners = new ArrayList<>();
+    protected transient List<PageChangeListener> pageChangedListeners = new ArrayList<>();
     // Flags to prevent the event cascades
     protected boolean updateTreeMenuEnabled = true;
     protected boolean openUriEnabled = true;
@@ -126,7 +107,7 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
             }
         });
 
-        tabbedPanel = new TabbedPanel(api);
+        tabbedPanel = new TabbedPanel<>(api);
         tabbedPanel.setMinimumSize(new Dimension(150, 10));
         tabbedPanel.tabbedPane.addChangeListener(e -> pageChanged());
 
@@ -138,7 +119,7 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
         add(splitter, BorderLayout.CENTER);
     }
 
-    protected static int createHashCode(Enumeration enumeration) {
+    protected static int createHashCode(@SuppressWarnings("all") Enumeration enumeration) {
         int hashCode = 1;
 
         while (enumeration.hasMoreElements()) {
@@ -245,7 +226,8 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
     }
 
     // --- URIGetter --- //
-    @Override public URI getUri() { return uri; }
+    @Override
+    public URI getUri() { return uri; }
 
     // --- URIOpener --- //
     @Override
@@ -255,35 +237,34 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
 
             if (this.uri.equals(baseUri)) {
                 return true;
-            } else {
-                DefaultMutableTreeNode node = searchTreeNode(baseUri, (DefaultMutableTreeNode) tree.getModel().getRoot());
+            }
+            DefaultMutableTreeNode node = searchTreeNode(baseUri, (DefaultMutableTreeNode) tree.getModel().getRoot());
 
-                if (showPage(uri, baseUri, node)) {
-                    DefaultMutableTreeNode childNode = searchTreeNode(uri, node);
-                    if (childNode != null) {
-                        node = childNode;
-                    }
+            if (showPage(uri, baseUri, node)) {
+                DefaultMutableTreeNode childNode = searchTreeNode(uri, node);
+                if (childNode != null) {
+                    node = childNode;
                 }
+            }
 
-                if (node != null) {
-                    try {
-                        // Disable tree node changed listener
-                        treeNodeChangedEnabled = false;
-                        // Populate and expand node
-                        if (!(node instanceof PageCreator) && (node instanceof TreeNodeExpandable)) {
-                            ((TreeNodeExpandable) node).populateTreeNode(api);
-                            tree.expandPath(new TreePath(node.getPath()));
-                        }
-                        // Select tree node
-                        TreePath treePath = new TreePath(node.getPath());
-                        tree.setSelectionPath(treePath);
-                        tree.scrollPathToVisible(treePath);
-                    } finally {
-                        // Enable tree node changed listener
-                        treeNodeChangedEnabled = true;
+            if (node != null) {
+                try {
+                    // Disable tree node changed listener
+                    treeNodeChangedEnabled = false;
+                    // Populate and expand node
+                    if (!(node instanceof PageCreator) && (node instanceof TreeNodeExpandable)) {
+                        ((TreeNodeExpandable) node).populateTreeNode(api);
+                        tree.expandPath(new TreePath(node.getPath()));
                     }
-                    return true;
+                    // Select tree node
+                    TreePath treePath = new TreePath(node.getPath());
+                    tree.setSelectionPath(treePath);
+                    tree.scrollPathToVisible(treePath);
+                } finally {
+                    // Enable tree node changed listener
+                    treeNodeChangedEnabled = true;
                 }
+                return true;
             }
         } catch (URISyntaxException e) {
             assert ExceptionUtil.printStackTrace(e);
@@ -300,6 +281,7 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
 
         String u = uri.toString();
         T child = null;
+        @SuppressWarnings("all")
         Enumeration enumeration = node.children();
 
         while (enumeration.hasMoreElements()) {
@@ -323,14 +305,12 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
         if (child != null) {
             if (u.equals(child.getUri().toString())) {
                 return child;
-            } else {
-                // Parent tree node found -> Recursive call
-                return searchTreeNode(uri, child);
             }
-        } else {
-            // Not found
-            return null;
+            // Parent tree node found -> Recursive call
+            return searchTreeNode(uri, child);
         }
+        // Not found
+        return null;
     }
 
     // --- PageChanger --- //
@@ -347,14 +327,12 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
         if (component != null) {
             tabbedPanel.removeComponent(component);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     // --- PreferencesChangeListener --- //
     @Override
-    @SuppressWarnings("unchecked")
     public void preferencesChanged(Map<String, String> preferences) {
         tabbedPanel.preferencesChanged(preferences);
     }

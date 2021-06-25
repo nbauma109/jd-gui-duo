@@ -7,11 +7,17 @@
 
 package org.jd.gui.view.component;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 
+import javax.swing.InputMap;
+import javax.swing.JTree;
+import javax.swing.KeyStroke;
+
 public class Tree extends JTree {
+
+    private static final long serialVersionUID = 1L;
+
     public Tree() {
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         KeyStroke ctrlA = KeyStroke.getKeyStroke(KeyEvent.VK_A, toolkit.getMenuShortcutKeyMask());

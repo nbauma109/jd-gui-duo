@@ -7,24 +7,27 @@
 
 package org.jdv1.gui.service.treenode;
 
-import java.io.File;
-import java.util.Collection;
-
-import javax.swing.ImageIcon;
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
+import org.jd.gui.model.container.entry.path.DirectoryEntryPath;
 import org.jd.gui.util.container.JarContainerEntryUtil;
 import org.jd.gui.view.data.TreeNodeBean;
+
+import java.io.File;
+import java.util.Collection;
+import java.util.Map;
+
+import javax.swing.ImageIcon;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 public class JarFileTreeNodeFactoryProvider extends ZipFileTreeNodeFactoryProvider {
     protected static final ImageIcon JAR_FILE_ICON = new ImageIcon(JarFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/jar_obj.png"));
     protected static final ImageIcon EJB_FILE_ICON = new ImageIcon(JarFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/ejbmodule_obj.gif"));
 
-    @Override public String[] getSelectors() { return appendSelectors("*:file:*.jar"); }
+    @Override
+    public String[] getSelectors() { return appendSelectors("*:file:*.jar"); }
 
     @Override
     @SuppressWarnings("unchecked")
@@ -40,25 +43,13 @@ public class JarFileTreeNodeFactoryProvider extends ZipFileTreeNodeFactoryProvid
     }
 
     protected static boolean isAEjbModule(Container.Entry entry) {
-        Collection<Container.Entry> children = entry.getChildren();
-
+        Map<Container.EntryPath, Container.Entry> children = entry.getChildren();
         if (children != null) {
-            Container.Entry metaInf = null;
-
-            for (Container.Entry child : children) {
-                if (child.getPath().equals("META-INF")) {
-                    metaInf = child;
-                    break;
-                }
-            }
-
+            Container.Entry metaInf = children.get(new DirectoryEntryPath("META-INF"));
             if (metaInf != null) {
                 children = metaInf.getChildren();
-
-                for (Container.Entry child : children) {
-                    if (child.getPath().equals("META-INF/ejb-jar.xml")) {
-                        return true;
-                    }
+                if (children.containsKey(new DirectoryEntryPath("META-INF/ejb-jar.xml"))) {
+                    return true;
                 }
             }
         }
@@ -66,13 +57,11 @@ public class JarFileTreeNodeFactoryProvider extends ZipFileTreeNodeFactoryProvid
         return false;
     }
 
-    protected static class TreeNode extends ZipFileTreeNodeFactoryProvider.TreeNode {
-        /**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
+    protected class TreeNode extends ZipFileTreeNodeFactoryProvider.TreeNode {
 
-		public TreeNode(Container.Entry entry, Object userObject) {
+        private static final long serialVersionUID = 1L;
+
+        public TreeNode(Container.Entry entry, Object userObject) {
             super(entry, userObject);
         }
 

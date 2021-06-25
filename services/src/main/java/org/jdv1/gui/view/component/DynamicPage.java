@@ -7,6 +7,12 @@
 
 package org.jdv1.gui.view.component;
 
+import org.jd.gui.api.API;
+import org.jd.gui.api.feature.*;
+import org.jd.gui.api.model.Container;
+import org.jd.gui.api.model.Indexes;
+import org.jdv1.gui.api.feature.IndexesChangeListener;
+
 import java.awt.BorderLayout;
 import java.awt.Point;
 import java.io.ByteArrayInputStream;
@@ -20,20 +26,6 @@ import java.util.concurrent.Future;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import org.jd.gui.api.API;
-import org.jd.gui.api.feature.ContentCopyable;
-import org.jd.gui.api.feature.ContentSavable;
-import org.jd.gui.api.feature.ContentSearchable;
-import org.jd.gui.api.feature.ContentSelectable;
-import org.jd.gui.api.feature.FocusedTypeGettable;
-import org.jd.gui.api.feature.LineNumberNavigable;
-import org.jd.gui.api.feature.PreferencesChangeListener;
-import org.jd.gui.api.feature.UriGettable;
-import org.jd.gui.api.feature.UriOpenable;
-import org.jd.gui.api.model.Container;
-import org.jd.gui.api.model.Indexes;
-import org.jdv1.gui.api.feature.IndexesChangeListener;
-
 public class DynamicPage
         extends JPanel
         implements ContentCopyable, ContentSavable, ContentSearchable, ContentSelectable, FocusedTypeGettable,
@@ -41,13 +33,13 @@ public class DynamicPage
                    API.LoadSourceListener
 {
 
-	private static final long serialVersionUID = 1L;
-	
-	protected API api;
-    protected Container.Entry entry;
+    private static final long serialVersionUID = 1L;
+
+    protected transient API api;
+    protected transient Container.Entry entry;
     protected TypePage page;
     protected URI lastOpenedUri;
-    protected Collection<Future<Indexes>> lastCollectionOfFutureIndexes;
+    protected transient Collection<Future<Indexes>> lastCollectionOfFutureIndexes;
 
     public DynamicPage(API api, Container.Entry entry) {
         super(new BorderLayout());
@@ -57,68 +49,92 @@ public class DynamicPage
         Map<String, String> preferences = api.getPreferences();
         Integer currentHashcode = Integer.valueOf(preferences.hashCode());
         putClientProperty("preferences-hashCode", currentHashcode);
-        
+
         String source = api.getSource(entry);
 
         if (source == null) {
             // Display the decompiled source code
-            add(page = new ClassFilePage(api, entry));
+            page = new ClassFilePage(api, entry);
+            add(page);
             // Try to load source in background
             api.loadSource(entry, this);
         } else {
             // Display original source code
-            add(page = new JavaFilePage(api, new DelegatedEntry(entry, source)));
+            page = new JavaFilePage(api, new DelegatedEntry(entry, source));
+            add(page);
         }
     }
 
     // --- ContentCopyable --- //
-    @Override public void copy() { page.copy(); }
+    @Override
+    public void copy() { page.copy(); }
 
     // --- ContentSavable --- //
-    @Override public String getFileName() { return page.getFileName(); }
-    @Override public void save(org.jd.gui.api.API api, OutputStream outputStream) { page.save(api, outputStream); }
+    @Override
+    public String getFileName() { return page.getFileName(); }
+    @Override
+    public void save(org.jd.gui.api.API api, OutputStream outputStream) { page.save(api, outputStream); }
 
     // --- ContentSearchable --- //
-    @Override public boolean highlightText(String text, boolean caseSensitive) { return page.highlightText(text, caseSensitive); }
-    @Override public void findNext(String text, boolean caseSensitive) { page.findNext(text, caseSensitive); }
-    @Override public void findPrevious(String text, boolean caseSensitive) { page.findPrevious(text, caseSensitive); }
+    @Override
+    public boolean highlightText(String text, boolean caseSensitive) { return page.highlightText(text, caseSensitive); }
+    @Override
+    public void findNext(String text, boolean caseSensitive) { page.findNext(text, caseSensitive); }
+    @Override
+    public void findPrevious(String text, boolean caseSensitive) { page.findPrevious(text, caseSensitive); }
 
     // --- ContentSelectable --- //
-    @Override public void selectAll() { page.selectAll(); }
+    @Override
+    public void selectAll() { page.selectAll(); }
 
     // --- FocusedTypeGettable --- //
-    @Override public String getFocusedTypeName() { return page.getFocusedTypeName(); }
+    @Override
+    public String getFocusedTypeName() { return page.getFocusedTypeName(); }
 
     // --- ContainerEntryGettable --- //
-    @Override public Container.Entry getEntry() { return entry; }
+    @Override
+    public Container.Entry getEntry() { return entry; }
 
     // --- IndexesChangeListener --- //
-    @Override public void indexesChanged(Collection<Future<Indexes>> collectionOfFutureIndexes) {
-        page.indexesChanged(lastCollectionOfFutureIndexes = collectionOfFutureIndexes);
+    @Override
+    public void indexesChanged(Collection<Future<Indexes>> collectionOfFutureIndexes) {
+        lastCollectionOfFutureIndexes = collectionOfFutureIndexes;
+        page.indexesChanged(lastCollectionOfFutureIndexes);
     }
 
     // --- LineNumberNavigable --- //
-    @Override public int getMaximumLineNumber() { return page.getMaximumLineNumber(); }
-    @Override public void goToLineNumber(int lineNumber) { page.goToLineNumber(lineNumber); }
-    @Override public boolean checkLineNumber(int lineNumber) { return page.checkLineNumber(lineNumber); }
+    @Override
+    public int getMaximumLineNumber() { return page.getMaximumLineNumber(); }
+    @Override
+    public void goToLineNumber(int lineNumber) { page.goToLineNumber(lineNumber); }
+    @Override
+    public boolean checkLineNumber(int lineNumber) { return page.checkLineNumber(lineNumber); }
 
     // --- PreferencesChangeListener --- //
-    @Override public void preferencesChanged(Map<String, String> preferences) { page.preferencesChanged(preferences); }
+    @Override
+    public void preferencesChanged(Map<String, String> preferences) { page.preferencesChanged(preferences); }
 
     // --- UriGettable --- //
-    @Override public URI getUri() { return entry.getUri(); }
+    @Override
+    public URI getUri() { return entry.getUri(); }
 
     // --- UriOpenable --- //
-    @Override public boolean openUri(URI uri) { return page.openUri(lastOpenedUri = uri); }
+    @Override
+    public boolean openUri(URI uri) {
+        lastOpenedUri = uri;
+        return page.openUri(lastOpenedUri);
+    }
 
     // --- LoadSourceListener --- //
-    @Override public void sourceLoaded(String source) {
+    @Override
+    public void sourceLoaded(String source) {
         SwingUtilities.invokeLater(() -> {
             // Replace the decompiled source code by the original
             Point viewPosition = page.getScrollPane().getViewport().getViewPosition();
 
             removeAll();
-            add(page = new JavaFilePage(api, new DelegatedEntry(entry, source)));
+            page = new JavaFilePage(api, new DelegatedEntry(entry, source));
+            add(page);
             page.getScrollPane().getViewport().setViewPosition(viewPosition);
 
             if (lastOpenedUri != null) {
@@ -140,13 +156,21 @@ public class DynamicPage
             this.source = source;
         }
 
-        @Override public Container getContainer() { return entry.getContainer(); }
-        @Override public Container.Entry getParent() { return entry.getParent(); }
-        @Override public URI getUri() { return entry.getUri(); }
-        @Override public String getPath() { return entry.getPath(); }
-        @Override public boolean isDirectory() { return entry.isDirectory(); }
-        @Override public long length() { return entry.length(); }
-        @Override public InputStream getInputStream() { return new ByteArrayInputStream(source.getBytes()); }
-        @Override public Collection<Container.Entry> getChildren() { return entry.getChildren(); }
+        @Override
+        public Container getContainer() { return entry.getContainer(); }
+        @Override
+        public Container.Entry getParent() { return entry.getParent(); }
+        @Override
+        public URI getUri() { return entry.getUri(); }
+        @Override
+        public String getPath() { return entry.getPath(); }
+        @Override
+        public boolean isDirectory() { return entry.isDirectory(); }
+        @Override
+        public long length() { return entry.length(); }
+        @Override
+        public InputStream getInputStream() { return new ByteArrayInputStream(source.getBytes()); }
+        @Override
+        public Map<Container.EntryPath, Container.Entry> getChildren() { return entry.getChildren(); }
     }
 }

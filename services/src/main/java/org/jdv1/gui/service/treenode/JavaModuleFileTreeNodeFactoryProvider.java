@@ -7,18 +7,19 @@
 
 package org.jdv1.gui.service.treenode;
 
-import java.io.File;
-
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.view.data.TreeNodeBean;
 
+import java.io.File;
+
+import javax.swing.tree.DefaultMutableTreeNode;
+
 public class JavaModuleFileTreeNodeFactoryProvider extends ZipFileTreeNodeFactoryProvider {
-    @Override public String[] getSelectors() { return appendSelectors("*:file:*.jmod"); }
+    @Override
+    public String[] getSelectors() { return appendSelectors("*:file:*.jmod"); }
 
     @Override
     @SuppressWarnings("unchecked")

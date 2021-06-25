@@ -10,7 +10,8 @@ package org.jdv1.gui.service.treenode;
 import java.util.regex.Pattern;
 
 public class SpiFileTreeNodeFactoryProvider extends TextFileTreeNodeFactoryProvider {
-    @Override public String[] getSelectors() {
+    @Override
+    public String[] getSelectors() {
         return appendSelectors("*:file:*");
     }
 
@@ -18,8 +19,7 @@ public class SpiFileTreeNodeFactoryProvider extends TextFileTreeNodeFactoryProvi
     public Pattern getPathPattern() {
         if (externalPathPattern == null) {
             return Pattern.compile("(.*\\/)?META-INF\\/services\\/.*");
-        } else {
-            return externalPathPattern;
         }
+        return externalPathPattern;
     }
 }

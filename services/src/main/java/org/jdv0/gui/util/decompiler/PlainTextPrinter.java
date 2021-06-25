@@ -7,305 +7,363 @@
 
 package org.jdv0.gui.util.decompiler;
 
-import java.io.PrintStream;
-
 import org.jd.gui.util.decompiler.GuiPreferences;
+
+import java.io.PrintStream;
 
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.printer.Printer;
 
 public class PlainTextPrinter implements Printer {
-	protected static final String TAB = "  ";
-	protected static final String NEWLINE = "\n";
-	
-	protected GuiPreferences preferences = null;
-	protected PrintStream printStream = null;
-	protected int maxLineNumber = 0;
-	protected int majorVersion = 0;
-	protected int minorVersion = 0;
-	protected int digitCount = 0;
+    protected static final String TAB = "  ";
+    protected static final String NEWLINE = System.lineSeparator();
 
-	protected String lineNumberBeginPrefix;
-	protected String lineNumberEndPrefix;
-	protected String unknownLineNumberPrefix;
-	protected int indentationCount;
-	protected boolean display;
+    protected GuiPreferences preferences = null;
+    protected PrintStream printStream = null;
+    protected int maxLineNumber = 0;
+    protected int majorVersion = 0;
+    protected int minorVersion = 0;
+    protected int digitCount = 0;
+
+    protected String lineNumberBeginPrefix;
+    protected String lineNumberEndPrefix;
+    protected String unknownLineNumberPrefix;
+    protected int indentationCount;
+    protected boolean display;
 
     public void setPreferences(GuiPreferences preferences) { this.preferences = preferences; }
     public void setPrintStream(PrintStream printStream) { this.printStream = printStream; }
 
-	public int getMajorVersion() { return majorVersion; }
-	public int getMinorVersion() { return minorVersion; }
+    public int getMajorVersion() { return majorVersion; }
+    public int getMinorVersion() { return minorVersion; }
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 
-	public void print(byte b) { this.printStream.append(String.valueOf(b)); }
-	public void print(int i) { this.printStream.append(String.valueOf(i)); }
+    @Override
+    public void print(byte b) { this.printStream.append(String.valueOf(b)); }
+    @Override
+    public void print(int i) { this.printStream.append(String.valueOf(i)); }
 
-	public void print(char c) {
-		if (this.display)
-			this.printStream.append(String.valueOf(c)); 
-	}
+    @Override
+    public void print(char c) {
+        if (this.display)
+            this.printStream.append(String.valueOf(c));
+    }
 
-	public void print(String s) {
-		if (this.display)
-			printEscape(s); 
-	}
+    @Override
+    public void print(String s) {
+        if (this.display)
+            printEscape(s);
+    }
 
-	public void printNumeric(String s) { this.printStream.append(s); }
-	
-	public void printString(String s, String scopeInternalName)  { this.printStream.append(s); }
-	
-	public void printKeyword(String s) {
-		if (this.display)
-			this.printStream.append(s);	
-	}
-	
-	public void printJavaWord(String s) { this.printStream.append(s); }
+    @Override
+    public void printNumeric(String s) { this.printStream.append(s); }
 
-	public void printType(String internalName, String name, String scopeInternalName) {
-		if (this.display)
-			printEscape(name);  
-	}
-	
-	public void printTypeDeclaration(String internalName, String name) 
-	{ 
-		printEscape(name); 
-	}
-	
-	public void printTypeImport(String internalName, String name) 
-	{ 
-		printEscape(name); 
-	}
+    @Override
+    public void printString(String s, String scopeInternalName)  { this.printStream.append(s); }
 
-	public void printField(String internalName, String name, String descriptor, String scopeInternalName) {
-		printEscape(name); 
-	}
-	public void printFieldDeclaration(String internalName, String name, String descriptor) {
-		printEscape(name); 
-	}
-	
-	public void printStaticField(String internalName, String name, String descriptor, String scopeInternalName) {
-		printEscape(name); 
-	}
-	public void printStaticFieldDeclaration(String internalName, String name, String descriptor) {
-		printEscape(name); 
-	}
-	
-	public void printConstructor(String internalName, String name, String descriptor, String scopeInternalName) {
-		printEscape(name); 
-	}
-	public void printConstructorDeclaration(String internalName, String name, String descriptor) {
-		printEscape(name); 
-	}
-	
-	public void printStaticConstructorDeclaration(String internalName, String name) {
-		this.printStream.append(name);
-	}
-	
-	public void printMethod(String internalName, String name, String descriptor, String scopeInternalName) {
-		printEscape(name); 
-	}
-	public void printMethodDeclaration(String internalName, String name, String descriptor) {
-		printEscape(name); 
-	}
-	
-	public void printStaticMethod(String internalName, String name, String descriptor, String scopeInternalName) {
-		printEscape(name); 
-	}
-	public void printStaticMethodDeclaration(String internalName, String name, String descriptor) {
-		printEscape(name); 
-	}
-	
-	public void start(int maxLineNumber, int majorVersion, int minorVersion) {
-		this.majorVersion = majorVersion;
-		this.minorVersion = minorVersion;
-		this.indentationCount = 0;
-		this.display = true;
-		
-		if (this.preferences.isShowLineNumbers()) {
-			this.maxLineNumber = maxLineNumber;
+    @Override
+    public void printKeyword(String s) {
+        if (this.display)
+            this.printStream.append(s);
+    }
 
-			if (maxLineNumber > 0) {
-				this.digitCount = 1;
-				this.unknownLineNumberPrefix = " ";
-				int maximum = 9;
+    @Override
+    public void printJavaWord(String s) { this.printStream.append(s); }
 
-				while (maximum < maxLineNumber) {
-					this.digitCount++;
-					this.unknownLineNumberPrefix += ' ';
-					maximum = maximum*10 + 9;
-				}
+    @Override
+    public void printType(String internalName, String name, String scopeInternalName) {
+        if (this.display)
+            printEscape(name);
+    }
 
-				this.lineNumberBeginPrefix = "/* ";
-				this.lineNumberEndPrefix = " */ ";
-			} else {
-				this.unknownLineNumberPrefix = "";
-				this.lineNumberBeginPrefix = "";
-				this.lineNumberEndPrefix = "";
-			}
-		} else {
-			this.maxLineNumber = 0;
-			this.unknownLineNumberPrefix = "";
-			this.lineNumberBeginPrefix = "";
-			this.lineNumberEndPrefix = "";
-		}	
-	}
+    @Override
+    public void printTypeDeclaration(String internalName, String name)
+    {
+        printEscape(name);
+    }
 
-	public void end() {}
-	
-	public void indent() {
-		this.indentationCount++;		
-	}
-	public void desindent() {
-		if (this.indentationCount > 0)
-			this.indentationCount--;
-	}
+    @Override
+    public void printTypeImport(String internalName, String name)
+    {
+        printEscape(name);
+    }
 
-	public void startOfLine(int lineNumber) {
-		if (this.maxLineNumber > 0)
-		{
-			this.printStream.append(this.lineNumberBeginPrefix);
+    @Override
+    public void printField(String internalName, String name, String descriptor, String scopeInternalName) {
+        printEscape(name);
+    }
+    @Override
+    public void printFieldDeclaration(String internalName, String name, String descriptor) {
+        printEscape(name);
+    }
 
-			if (lineNumber == Instruction.UNKNOWN_LINE_NUMBER) {
-				this.printStream.append(this.unknownLineNumberPrefix);
-			} else {
-				int left = 0;
+    @Override
+    public void printStaticField(String internalName, String name, String descriptor, String scopeInternalName) {
+        printEscape(name);
+    }
+    @Override
+    public void printStaticFieldDeclaration(String internalName, String name, String descriptor) {
+        printEscape(name);
+    }
 
-				left = printDigit(5, lineNumber, 10000, left);
-				left = printDigit(4, lineNumber,  1000, left);
-				left = printDigit(3, lineNumber,   100, left);
-				left = printDigit(2, lineNumber,    10, left);
-				this.printStream.append((char)('0' + (lineNumber-left)));
-			}
+    @Override
+    public void printConstructor(String internalName, String name, String descriptor, String scopeInternalName) {
+        printEscape(name);
+    }
+    @Override
+    public void printConstructorDeclaration(String internalName, String name, String descriptor) {
+        printEscape(name);
+    }
 
-			this.printStream.append(this.lineNumberEndPrefix);
-		}	
-		
-		for (int i=0; i<indentationCount; i++)
-			this.printStream.append(TAB);
-	}
+    @Override
+    public void printStaticConstructorDeclaration(String internalName, String name) {
+        this.printStream.append(name);
+    }
 
-	public void endOfLine() 
-	{ 
-		this.printStream.append(NEWLINE);
-	}
+    @Override
+    public void printMethod(String internalName, String name, String descriptor, String scopeInternalName) {
+        printEscape(name);
+    }
+    @Override
+    public void printMethodDeclaration(String internalName, String name, String descriptor) {
+        printEscape(name);
+    }
 
-	public void extraLine(int count) {
-		if (this.preferences.getRealignmentLineNumber()) {
-			while (count-- > 0) {
-				if (this.maxLineNumber > 0) {
-					this.printStream.append(this.lineNumberBeginPrefix);
-					this.printStream.append(this.unknownLineNumberPrefix);
-					this.printStream.append(this.lineNumberEndPrefix);
-				}
-				
-				this.printStream.append(NEWLINE); 
-			}
-		}		
-	}
+    @Override
+    public void printStaticMethod(String internalName, String name, String descriptor, String scopeInternalName) {
+        printEscape(name);
+    }
+    @Override
+    public void printStaticMethodDeclaration(String internalName, String name, String descriptor) {
+        printEscape(name);
+    }
 
-	public void startOfComment() {}
-	public void endOfComment() {}
+    @Override
+    public void start(int maxLineNumber, int majorVersion, int minorVersion) {
+        this.majorVersion = majorVersion;
+        this.minorVersion = minorVersion;
+        this.indentationCount = 0;
+        this.display = true;
 
-	public void startOfJavadoc() {}
-	public void endOfJavadoc() {}	
+        if (this.preferences.isShowLineNumbers()) {
+            this.maxLineNumber = maxLineNumber;
 
-	public void startOfXdoclet() {}
-	public void endOfXdoclet() {}
+            if (maxLineNumber > 0) {
+                this.digitCount = 1;
+                this.unknownLineNumberPrefix = " ";
+                int maximum = 9;
 
-	public void startOfError() {}
-	public void endOfError() {}
-	
-	public void startOfImportStatements() {}
-	public void endOfImportStatements() {}
+                while (maximum < maxLineNumber) {
+                    this.digitCount++;
+                    this.unknownLineNumberPrefix += ' ';
+                    maximum = maximum*10 + 9;
+                }
 
-	public void startOfTypeDeclaration(String internalPath) {}
-	public void endOfTypeDeclaration() {}
+                this.lineNumberBeginPrefix = "/* ";
+                this.lineNumberEndPrefix = " */ ";
+            } else {
+                this.unknownLineNumberPrefix = "";
+                this.lineNumberBeginPrefix = "";
+                this.lineNumberEndPrefix = "";
+            }
+        } else {
+            this.maxLineNumber = 0;
+            this.unknownLineNumberPrefix = "";
+            this.lineNumberBeginPrefix = "";
+            this.lineNumberEndPrefix = "";
+        }
+    }
 
-	public void startOfAnnotationName() {}
-	public void endOfAnnotationName() {}
-	
-	public void startOfOptionalPrefix() {
-		if (!this.preferences.isShowPrefixThis())
-			this.display = false;
-	}
-	
-	public void endOfOptionalPrefix() 
-	{
-		this.display = true;
-	}
-	
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
+    @Override
+    public void end() {}
 
-	public void debugStartOfLayoutBlock() {}
-	public void debugEndOfLayoutBlock() {}
-	
-	public void debugStartOfSeparatorLayoutBlock() {}
-	public void debugEndOfSeparatorLayoutBlock(int min, int value, int max) {}
-	
-	public void debugStartOfStatementsBlockLayoutBlock() {}
-	public void debugEndOfStatementsBlockLayoutBlock(int min, int value, int max) {}
+    @Override
+    public void indent() {
+        this.indentationCount++;
+    }
+    @Override
+    public void desindent() {
+        if (this.indentationCount > 0)
+            this.indentationCount--;
+    }
 
-	public void debugStartOfInstructionBlockLayoutBlock() {}
-	public void debugEndOfInstructionBlockLayoutBlock() {}
+    @Override
+    public void startOfLine(int lineNumber) {
+        if (this.maxLineNumber > 0)
+        {
+            this.printStream.append(this.lineNumberBeginPrefix);
 
-	public void debugStartOfCommentDeprecatedLayoutBlock() {}
-	public void debugEndOfCommentDeprecatedLayoutBlock() {}
-	
-	public void debugMarker(String marker) {}
+            if (lineNumber == Instruction.UNKNOWN_LINE_NUMBER) {
+                this.printStream.append(this.unknownLineNumberPrefix);
+            } else {
+                int left = 0;
 
-	public void debugStartOfCaseBlockLayoutBlock() {}
-	public void debugEndOfCaseBlockLayoutBlock() {}
-	
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
-	
-	protected void printEscape(String s) {
-		if (this.preferences.isUnicodeEscape()) {
-			int length = s.length();
-			
-			for (int i=0; i<length; i++) {
-				char c = s.charAt(i);
+                left = printDigit(5, lineNumber, 10000, left);
+                left = printDigit(4, lineNumber,  1000, left);
+                left = printDigit(3, lineNumber,   100, left);
+                left = printDigit(2, lineNumber,    10, left);
+                this.printStream.append((char)('0' + (lineNumber-left)));
+            }
 
-				if (c == '\t') {
-					this.printStream.append(c);
-				} else if (c < 32) {
-					// Write octal format
-					this.printStream.append("\\0");
-					this.printStream.append((char)('0' + (c >> 3)));
-					this.printStream.append((char)('0' + (c & 0x7)));
-				} else if (c > 127) {
-					// Write octal format
-					this.printStream.append("\\u");
+            this.printStream.append(this.lineNumberEndPrefix);
+        }
 
-					int z = (c >> 12);
-					this.printStream.append((char)((z <= 9) ? ('0' + z) : (('A' - 10) + z)));
-					z = ((c >> 8) & 0xF);
-					this.printStream.append((char)((z <= 9) ? ('0' + z) : (('A' - 10) + z)));
-					z = ((c >> 4) & 0xF);
-					this.printStream.append((char)((z <= 9) ? ('0' + z) : (('A' - 10) + z)));
-					z = (c & 0xF);
-					this.printStream.append((char)((z <= 9) ? ('0' + z) : (('A' - 10) + z)));
-				} else {
-					this.printStream.append(c);
-				}
-			}
-		} else {
-			this.printStream.append(s);
-		}
-	}
-	
-	protected int printDigit(int dcv, int lineNumber, int divisor, int left) {
-	   if (this.digitCount >= dcv) {
-	       if (lineNumber < divisor) {
-	    	   this.printStream.append(' ');
-	       } else {
-	           int e = (lineNumber-left) / divisor;
-	           this.printStream.append((char)('0' + e));
-	           left += e*divisor;
-	       }
-	   }
-	   
-	   return left;
-	}
+        for (int i=0; i<indentationCount; i++)
+            this.printStream.append(TAB);
+    }
+
+    @Override
+    public void endOfLine()
+    {
+        this.printStream.append(NEWLINE);
+    }
+
+    @Override
+    public void extraLine(int count) {
+        if (this.preferences.getRealignmentLineNumber()) {
+            while (count-- > 0) {
+                if (this.maxLineNumber > 0) {
+                    this.printStream.append(this.lineNumberBeginPrefix);
+                    this.printStream.append(this.unknownLineNumberPrefix);
+                    this.printStream.append(this.lineNumberEndPrefix);
+                }
+
+                this.printStream.append(NEWLINE);
+            }
+        }
+    }
+
+    @Override
+    public void startOfComment() {}
+    @Override
+    public void endOfComment() {}
+
+    @Override
+    public void startOfJavadoc() {}
+    @Override
+    public void endOfJavadoc() {}
+
+    @Override
+    public void startOfXdoclet() {}
+    @Override
+    public void endOfXdoclet() {}
+
+    @Override
+    public void startOfError() {}
+    @Override
+    public void endOfError() {}
+
+    @Override
+    public void startOfImportStatements() {}
+    @Override
+    public void endOfImportStatements() {}
+
+    @Override
+    public void startOfTypeDeclaration(String internalPath) {}
+    @Override
+    public void endOfTypeDeclaration() {}
+
+    @Override
+    public void startOfAnnotationName() {}
+    @Override
+    public void endOfAnnotationName() {}
+
+    @Override
+    public void startOfOptionalPrefix() {
+        if (!this.preferences.isShowPrefixThis())
+            this.display = false;
+    }
+
+    @Override
+    public void endOfOptionalPrefix()
+    {
+        this.display = true;
+    }
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
+
+    @Override
+    public void debugStartOfLayoutBlock() {}
+    @Override
+    public void debugEndOfLayoutBlock() {}
+
+    @Override
+    public void debugStartOfSeparatorLayoutBlock() {}
+    @Override
+    public void debugEndOfSeparatorLayoutBlock(int min, int value, int max) {}
+
+    @Override
+    public void debugStartOfStatementsBlockLayoutBlock() {}
+    @Override
+    public void debugEndOfStatementsBlockLayoutBlock(int min, int value, int max) {}
+
+    @Override
+    public void debugStartOfInstructionBlockLayoutBlock() {}
+    @Override
+    public void debugEndOfInstructionBlockLayoutBlock() {}
+
+    @Override
+    public void debugStartOfCommentDeprecatedLayoutBlock() {}
+    @Override
+    public void debugEndOfCommentDeprecatedLayoutBlock() {}
+
+    @Override
+    public void debugMarker(String marker) {}
+
+    @Override
+    public void debugStartOfCaseBlockLayoutBlock() {}
+    @Override
+    public void debugEndOfCaseBlockLayoutBlock() {}
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
+
+    protected void printEscape(String s) {
+        if (this.preferences.isUnicodeEscape()) {
+            int length = s.length();
+
+            for (int i=0; i<length; i++) {
+                char c = s.charAt(i);
+
+                if (c == '\t') {
+                    this.printStream.append(c);
+                } else if (c < 32) {
+                    // Write octal format
+                    this.printStream.append("\\0");
+                    this.printStream.append((char)('0' + (c >> 3)));
+                    this.printStream.append((char)('0' + (c & 0x7)));
+                } else if (c > 127) {
+                    // Write octal format
+                    this.printStream.append("\\u");
+
+                    int z = (c >> 12);
+                    this.printStream.append((char)((z <= 9) ? ('0' + z) : (('A' - 10) + z)));
+                    z = ((c >> 8) & 0xF);
+                    this.printStream.append((char)((z <= 9) ? ('0' + z) : (('A' - 10) + z)));
+                    z = ((c >> 4) & 0xF);
+                    this.printStream.append((char)((z <= 9) ? ('0' + z) : (('A' - 10) + z)));
+                    z = (c & 0xF);
+                    this.printStream.append((char)((z <= 9) ? ('0' + z) : (('A' - 10) + z)));
+                } else {
+                    this.printStream.append(c);
+                }
+            }
+        } else {
+            this.printStream.append(s);
+        }
+    }
+
+    protected int printDigit(int dcv, int lineNumber, int divisor, int left) {
+       if (this.digitCount >= dcv) {
+           if (lineNumber < divisor) {
+               this.printStream.append(' ');
+           } else {
+               int e = (lineNumber-left) / divisor;
+               this.printStream.append((char)('0' + e));
+               left += e*divisor;
+           }
+       }
+
+       return left;
+    }
 }

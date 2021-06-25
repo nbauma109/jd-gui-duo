@@ -7,11 +7,6 @@
 
 package org.jdv1.gui.service.treenode;
 
-import java.io.File;
-
-import javax.swing.ImageIcon;
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.UriGettable;
@@ -19,10 +14,16 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.spi.TreeNodeFactory;
 import org.jd.gui.view.data.TreeNodeBean;
 
+import java.io.File;
+
+import javax.swing.ImageIcon;
+import javax.swing.tree.DefaultMutableTreeNode;
+
 public class ZipFileTreeNodeFactoryProvider extends DirectoryTreeNodeFactoryProvider {
     protected static final ImageIcon ICON = new ImageIcon(ZipFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/zip_obj.png"));
 
-    @Override public String[] getSelectors() { return appendSelectors("*:file:*.zip", "*:file:*.aar"); }
+    @Override
+    public String[] getSelectors() { return appendSelectors("*:file:*.zip", "*:file:*.aar"); }
 
     @Override
     @SuppressWarnings("unchecked")
@@ -36,17 +37,16 @@ public class ZipFileTreeNodeFactoryProvider extends DirectoryTreeNodeFactoryProv
         return node;
     }
 
-    protected static class TreeNode extends DirectoryTreeNodeFactoryProvider.TreeNode {
-        /**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
+    protected class TreeNode extends DirectoryTreeNodeFactoryProvider.TreeNode {
 
-		public TreeNode(Container.Entry entry, Object userObject) {
+        private static final long serialVersionUID = 1L;
+
+        public TreeNode(Container.Entry entry, Object userObject) {
             super(entry, userObject);
         }
 
         // --- TreeNodeExpandable --- //
+        @Override
         public void populateTreeNode(API api) {
             if (!initialized) {
                 removeAllChildren();

@@ -1,7 +1,7 @@
 package org.jd.gui.util.parser.jdt.core;
 
 public class HyperlinkReferenceData extends HyperlinkData {
-	
+
     private ReferenceData reference;
 
     public HyperlinkReferenceData(int startPosition, int length, ReferenceData reference) {
@@ -9,7 +9,7 @@ public class HyperlinkReferenceData extends HyperlinkData {
         this.reference = reference;
     }
 
-	public ReferenceData getReference() {
-		return reference;
-	}
+    public ReferenceData getReference() {
+        return reference;
+    }
 }

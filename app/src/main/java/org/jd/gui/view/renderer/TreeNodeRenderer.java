@@ -9,10 +9,14 @@ package org.jd.gui.view.renderer;
 
 import org.jd.gui.api.model.TreeNodeData;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Insets;
+
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeCellRenderer;
-import java.awt.*;
 
 public class TreeNodeRenderer implements TreeCellRenderer {
     protected Color textSelectionColor;
@@ -23,12 +27,13 @@ public class TreeNodeRenderer implements TreeCellRenderer {
     protected Color backgroundDisabledColor;
 
     protected JPanel panel;
-    protected JLabel icon, label;
+    protected JLabel icon = new JLabel();
+    protected JLabel label = new JLabel();
 
     public TreeNodeRenderer() {
         panel = new JPanel(new BorderLayout());
-        panel.add(icon = new JLabel(), BorderLayout.WEST);
-        panel.add(label = new JLabel(), BorderLayout.CENTER);
+        panel.add(icon, BorderLayout.WEST);
+        panel.add(label, BorderLayout.CENTER);
         panel.setOpaque(false);
 
         textSelectionColor = UIManager.getColor("Tree.selectionForeground");

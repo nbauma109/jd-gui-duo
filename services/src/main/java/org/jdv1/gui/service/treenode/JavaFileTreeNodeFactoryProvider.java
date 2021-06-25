@@ -7,12 +7,6 @@
 
 package org.jdv1.gui.service.treenode;
 
-import java.io.File;
-
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.UriGettable;
@@ -20,11 +14,18 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.view.data.TreeNodeBean;
 import org.jdv1.gui.view.component.JavaFilePage;
 
+import java.io.File;
+
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.tree.DefaultMutableTreeNode;
+
 public class JavaFileTreeNodeFactoryProvider extends AbstractTypeFileTreeNodeFactoryProvider {
     protected static final ImageIcon JAVA_FILE_ICON = new ImageIcon(JavaFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/jcu_obj.png"));
     protected static final Factory FACTORY = new Factory();
 
-    @Override public String[] getSelectors() { return appendSelectors("*:file:*.java"); }
+    @Override
+    public String[] getSelectors() { return appendSelectors("*:file:*.java"); }
 
     @Override
     @SuppressWarnings("unchecked")

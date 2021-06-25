@@ -7,31 +7,29 @@
 
 package org.jd.gui.view.component;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.fife.ui.rsyntaxtextarea.DocumentRange;
 import org.fife.ui.rtextarea.Marker;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.util.parser.jdt.core.HyperlinkData;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Page containing type references (Hyperlinks to pages of type)
  */
 public abstract class TypeReferencePage extends HyperlinkPage {
 
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	// --- UriOpenable --- //
+    // --- UriOpenable --- //
     @Override
-	public boolean openUri(URI uri) {
-        ArrayList<DocumentRange> ranges = new ArrayList<>();
+    public boolean openUri(URI uri) {
+        List<DocumentRange> ranges = new ArrayList<>();
         String query = uri.getQuery();
 
         Marker.clearMarkAllHighlights(textArea);
@@ -93,7 +91,7 @@ public abstract class TypeReferencePage extends HyperlinkPage {
             }
         }
 
-        if ((ranges != null) && !ranges.isEmpty()) {
+        if (!ranges.isEmpty()) {
             textArea.setMarkAllHighlightColor(SELECT_HIGHLIGHT_COLOR);
             Marker.markAll(textArea, ranges);
             ranges.sort(null);

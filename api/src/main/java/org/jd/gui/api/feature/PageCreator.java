@@ -7,9 +7,9 @@
 
 package org.jd.gui.api.feature;
 
-import javax.swing.JComponent;
-
 import org.jd.gui.api.API;
+
+import javax.swing.JComponent;
 
 public interface PageCreator {
     <T extends JComponent & UriGettable> T createPage(API api);

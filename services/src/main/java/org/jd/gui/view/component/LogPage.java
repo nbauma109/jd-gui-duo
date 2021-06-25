@@ -7,16 +7,6 @@
 
 package org.jd.gui.view.component;
 
-import static org.jd.gui.util.Key.key;
-
-import java.awt.Point;
-import java.net.URI;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Future;
-
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.UriGettable;
@@ -26,14 +16,22 @@ import org.jd.gui.util.parser.jdt.core.HyperlinkData;
 import org.jdv1.gui.api.feature.IndexesChangeListener;
 import org.jdv1.gui.util.index.IndexesUtil;
 
+import java.awt.Point;
+import java.net.URI;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Future;
+
+import static org.jd.gui.util.Key.key;
+
 public class LogPage extends HyperlinkPage implements UriGettable, IndexesChangeListener {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	protected API api;
+
+    private static final long serialVersionUID = 1L;
+    protected transient API api;
     protected URI uri;
-    protected Collection<Future<Indexes>> collectionOfFutureIndexes = Collections.emptyList();
+    protected transient Collection<Future<Indexes>> collectionOfFutureIndexes = Collections.emptyList();
 
     public LogPage(API api, URI uri, String content) {
         this.api = api;
@@ -66,10 +64,10 @@ public class LogPage extends HyperlinkPage implements UriGettable, IndexesChange
     }
 
     @Override
-	protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return ((LogHyperlinkData)hyperlinkData).enabled; }
+    protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return ((LogHyperlinkData)hyperlinkData).enabled; }
 
     @Override
-	protected void openHyperlink(int x, int y, HyperlinkData hyperlinkData) {
+    protected void openHyperlink(int x, int y, HyperlinkData hyperlinkData) {
         LogHyperlinkData logHyperlinkData = (LogHyperlinkData)hyperlinkData;
 
         if (logHyperlinkData.enabled) {
@@ -109,11 +107,11 @@ public class LogPage extends HyperlinkPage implements UriGettable, IndexesChange
 
     // --- UriGettable --- //
     @Override
-	public URI getUri() { return uri; }
+    public URI getUri() { return uri; }
 
     // --- ContentSavable --- //
     @Override
-	public String getFileName() {
+    public String getFileName() {
         String path = uri.getPath();
         int index = path.lastIndexOf('/');
         return path.substring(index + 1);
@@ -121,7 +119,7 @@ public class LogPage extends HyperlinkPage implements UriGettable, IndexesChange
 
     // --- IndexesChangeListener --- //
     @Override
-	public void indexesChanged(Collection<Future<Indexes>> collectionOfFutureIndexes) {
+    public void indexesChanged(Collection<Future<Indexes>> collectionOfFutureIndexes) {
         // Update the list of containers
         this.collectionOfFutureIndexes = collectionOfFutureIndexes;
         // Refresh links

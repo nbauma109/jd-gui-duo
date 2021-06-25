@@ -7,65 +7,54 @@
 
 package org.jd.gui.view.component.panel;
 
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.net.URI;
-import java.util.Collection;
-import java.util.Map;
-
-import javax.swing.Action;
-import javax.swing.BorderFactory;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JTabbedPane;
-import javax.swing.ToolTipManager;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.PreferencesChangeListener;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.service.platform.PlatformService;
 
+import java.awt.*;
+import java.awt.event.*;
+import java.net.URI;
+import java.util.Collection;
+import java.util.Map;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel implements PreferencesChangeListener {
-	protected static final ImageIcon CLOSE_ICON = new ImageIcon(TabbedPanel.class.getClassLoader().getResource("org/jd/gui/images/close.gif"));
+
+    private static final String PANEL = "panel";
+    private static final long serialVersionUID = 1L;
+    protected static final ImageIcon CLOSE_ICON = new ImageIcon(TabbedPanel.class.getClassLoader().getResource("org/jd/gui/images/close.gif"));
     protected static final ImageIcon  CLOSE_ACTIVE_ICON = new ImageIcon(TabbedPanel.class.getClassLoader().getResource("org/jd/gui/images/close_active.gif"));
 
     protected static final String TAB_LAYOUT = "UITabsPreferencesProvider.singleLineTabs";
 
-    protected API api;
+    protected transient API api;
     protected CardLayout cardLayout;
     protected JTabbedPane tabbedPane;
-    protected Map<String, String> preferences;
+    protected transient Map<String, String> preferences;
 
     public TabbedPanel(API api) {
         this.api = api;
-		create();
-	}
+        create();
+    }
 
     protected void create() {
-		setLayout(cardLayout = new CardLayout());
-		add("panel", new JPanel());
-		add("tabs", tabbedPane = createTabPanel());
-	}
+        cardLayout = new CardLayout();
+        setLayout(cardLayout);
+        add(PANEL, new JPanel());
+        tabbedPane = createTabPanel();
+        add("tabs", tabbedPane);
+    }
 
     protected JTabbedPane createTabPanel() {
         JTabbedPane tabPanel = new JTabbedPane() {
+
+            private static final long serialVersionUID = 1L;
+
             @Override
             public String getToolTipText(MouseEvent e) {
                 int index = indexAtLocation(e.getX(), e.getY());
@@ -77,8 +66,10 @@ public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel impl
         };
         ToolTipManager.sharedInstance().registerComponent(tabPanel);
         tabPanel.addMouseListener(new MouseAdapter() {
-            @Override public void mousePressed(MouseEvent e) { showPopupTabMenu(e); }
-            @Override public void mouseReleased(MouseEvent e) { showPopupTabMenu(e); }
+            @Override
+            public void mousePressed(MouseEvent e) { showPopupTabMenu(e); }
+            @Override
+            public void mouseReleased(MouseEvent e) { showPopupTabMenu(e); }
             protected void showPopupTabMenu(MouseEvent e) {
                 if (e.isPopupTrigger()) {
                     int index = tabPanel.indexAtLocation(e.getX(), e.getY());
@@ -89,43 +80,48 @@ public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel impl
             }
         });
         return tabPanel;
-	}
+    }
 
     protected static Color darker(Color c) {
-		return new Color(
-			Math.max((int)(c.getRed()  *0.85), 0),
-			Math.max((int)(c.getGreen()*0.85), 0),
-			Math.max((int)(c.getBlue() *0.85), 0),
-			c.getAlpha());
-	}
+        return new Color(
+            Math.max((int)(c.getRed()  *0.85), 0),
+            Math.max((int)(c.getGreen()*0.85), 0),
+            Math.max((int)(c.getBlue() *0.85), 0),
+            c.getAlpha());
+    }
 
     public void addPage(String title, Icon icon, String tip, T page) {
         // Add a new tab
         JLabel tabCloseButton = new JLabel(CLOSE_ICON);
         tabCloseButton.setToolTipText("Close this panel");
         tabCloseButton.addMouseListener(new MouseListener() {
-            @Override public void mousePressed(MouseEvent e) {}
-            @Override public void mouseReleased(MouseEvent e) {}
-            @Override public void mouseEntered(MouseEvent e) { ((JLabel)e.getSource()).setIcon(CLOSE_ACTIVE_ICON); }
-            @Override public void mouseExited(MouseEvent e) { ((JLabel)e.getSource()).setIcon(CLOSE_ICON); }
-            @Override public void mouseClicked(MouseEvent e) { removeComponent(page); }
+            @Override
+            public void mousePressed(MouseEvent e) {}
+            @Override
+            public void mouseReleased(MouseEvent e) {}
+            @Override
+            public void mouseEntered(MouseEvent e) { ((JLabel)e.getSource()).setIcon(CLOSE_ACTIVE_ICON); }
+            @Override
+            public void mouseExited(MouseEvent e) { ((JLabel)e.getSource()).setIcon(CLOSE_ICON); }
+            @Override
+            public void mouseClicked(MouseEvent e) { removeComponent(page); }
         });
 
-		JPanel tab = new JPanel(new BorderLayout());
+        JPanel tab = new JPanel(new BorderLayout());
         tab.setBorder(BorderFactory.createEmptyBorder(2, 0, 3, 0));
-		tab.setOpaque(false);
+        tab.setOpaque(false);
         tab.setToolTipText(tip);
-        tab.add(new JLabel(title, icon, JLabel.LEADING), BorderLayout.CENTER);
-		tab.add(tabCloseButton, BorderLayout.EAST);
+        tab.add(new JLabel(title, icon, SwingConstants.LEADING), BorderLayout.CENTER);
+        tab.add(tabCloseButton, BorderLayout.EAST);
         ToolTipManager.sharedInstance().unregisterComponent(tab);
 
-		int index = tabbedPane.getTabCount();
-		tabbedPane.addTab(title, page);
+        int index = tabbedPane.getTabCount();
+        tabbedPane.addTab(title, page);
         tabbedPane.setTabComponentAt(index, tab);
         setSelectedIndex(index);
 
         cardLayout.show(this, "tabs");
-	}
+    }
 
     protected void setSelectedIndex(int index) {
         if (index != -1) {
@@ -161,6 +157,9 @@ public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel impl
     }
 
     protected class PopupTabMenu extends JPopupMenu {
+
+        private static final long serialVersionUID = 1L;
+
         public PopupTabMenu(Component component) {
             // Add default popup menu entries
             JMenuItem menuItem = new JMenuItem("Close", null);
@@ -231,12 +230,11 @@ public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel impl
         }
     }
 
-
     // --- Popup menu actions --- //
     public void removeComponent(Component component) {
         tabbedPane.remove(component);
         if (tabbedPane.getTabCount() == 0) {
-            cardLayout.show(this, "panel");
+            cardLayout.show(this, PANEL);
         }
     }
 
@@ -249,14 +247,14 @@ public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel impl
             }
         }
         if (tabbedPane.getTabCount() == 0) {
-            cardLayout.show(this, "panel");
+            cardLayout.show(this, PANEL);
         }
     }
 
     protected void removeAllComponents() {
         tabbedPane.removeAll();
         if (tabbedPane.getTabCount() == 0) {
-            cardLayout.show(this, "panel");
+            cardLayout.show(this, PANEL);
         }
     }
 

@@ -7,7 +7,7 @@
 
 package org.jd.gui.api.model;
 
-import javax.swing.*;
+import javax.swing.Icon;
 
 public interface TreeNodeData {
     String getLabel();

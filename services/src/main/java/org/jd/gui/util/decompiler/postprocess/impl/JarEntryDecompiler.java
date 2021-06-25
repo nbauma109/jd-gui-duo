@@ -1,5 +1,14 @@
 package org.jd.gui.util.decompiler.postprocess.impl;
 
+import org.jd.core.v1.util.StringConstants;
+
+import com.strobel.assembler.metadata.*;
+import com.strobel.core.StringUtilities;
+import com.strobel.decompiler.DecompilationOptions;
+import com.strobel.decompiler.DecompilerSettings;
+import com.strobel.decompiler.ITextOutput;
+import com.strobel.decompiler.languages.BytecodeLanguage;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -10,114 +19,97 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import com.strobel.assembler.metadata.CompositeTypeLoader;
-import com.strobel.assembler.metadata.DeobfuscationUtilities;
-import com.strobel.assembler.metadata.IMetadataResolver;
-import com.strobel.assembler.metadata.ITypeLoader;
-import com.strobel.assembler.metadata.JarTypeLoader;
-import com.strobel.assembler.metadata.MetadataParser;
-import com.strobel.assembler.metadata.MetadataSystem;
-import com.strobel.assembler.metadata.TypeDefinition;
-import com.strobel.assembler.metadata.TypeReference;
-import com.strobel.core.StringUtilities;
-import com.strobel.decompiler.DecompilationOptions;
-import com.strobel.decompiler.DecompilerSettings;
-import com.strobel.decompiler.ITextOutput;
-import com.strobel.decompiler.languages.BytecodeLanguage;
-
 public class JarEntryDecompiler {
 
-	public List<TypeDefinition> decompileJarEntry(final URI jarFilePath, final String targetedEntry,
-			final DecompilationOptions decompilationOptions, final ITextOutput output) throws IOException {
+    public List<TypeDefinition> decompileJarEntry(final URI jarFilePath, final String targetedEntry,
+            final DecompilationOptions decompilationOptions, final ITextOutput output) throws IOException {
 
-		List<TypeDefinition> types = new ArrayList<>();
-		
-		final File jarFile = new File(jarFilePath);
+        List<TypeDefinition> types = new ArrayList<>();
 
-		if (!jarFile.exists()) {
-			throw new FileNotFoundException("File not found: " + jarFilePath);
-		}
+        final File jarFile = new File(jarFilePath);
 
-		final DecompilerSettings settings = decompilationOptions.getSettings();
-		final JarFile jar = new JarFile(jarFile);
-		final Enumeration<JarEntry> entries = jar.entries();
+        if (!jarFile.exists()) {
+            throw new FileNotFoundException("File not found: " + jarFilePath);
+        }
 
-		final boolean oldShowSyntheticMembers = settings.getShowSyntheticMembers();
-		final ITypeLoader oldTypeLoader = settings.getTypeLoader();
+        final DecompilerSettings settings = decompilationOptions.getSettings();
+        final JarFile jar = new JarFile(jarFile);
+        final Enumeration<JarEntry> entries = jar.entries();
 
-		settings.setShowSyntheticMembers(false);
-		settings.setTypeLoader(new CompositeTypeLoader(new JarTypeLoader(jar), oldTypeLoader));
+        final boolean oldShowSyntheticMembers = settings.getShowSyntheticMembers();
+        final ITypeLoader oldTypeLoader = settings.getTypeLoader();
 
-		try {
-			MetadataSystem metadataSystem = new MetadataSystem(settings.getTypeLoader());
+        settings.setShowSyntheticMembers(false);
+        settings.setTypeLoader(new CompositeTypeLoader(new JarTypeLoader(jar), oldTypeLoader));
 
-			while (entries.hasMoreElements()) {
-				final JarEntry entry = entries.nextElement();
-				final String name = entry.getName();
+        try {
+            MetadataSystem metadataSystem = new MetadataSystem(settings.getTypeLoader());
 
-				if (!name.endsWith(".class")) {
-					continue;
-				}
+            while (entries.hasMoreElements()) {
+                final JarEntry entry = entries.nextElement();
+                final String name = entry.getName();
 
-				final String internalName = StringUtilities.removeRight(name, ".class");
-				final String intargetName = StringUtilities.removeRight(targetedEntry, ".class");
+                if (!name.endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
+                    continue;
+                }
 
-				if (!internalName.equals(intargetName) && !internalName.startsWith(intargetName + '$')) {
-					continue;
-				}
+                final String internalName = StringUtilities.removeRight(name, StringConstants.CLASS_FILE_SUFFIX);
+                final String intargetName = StringUtilities.removeRight(targetedEntry, StringConstants.CLASS_FILE_SUFFIX);
 
-				TypeDefinition type = decompileType(metadataSystem, internalName, decompilationOptions, false, output);
-				if (type != null) {
-					types.add(type);
-				}
-			}
-		} finally {
-			settings.setShowSyntheticMembers(oldShowSyntheticMembers);
-			settings.setTypeLoader(oldTypeLoader);
-		}
-		return types;
-	}
+                if (!internalName.equals(intargetName) && !internalName.startsWith(intargetName + '$')) {
+                    continue;
+                }
 
-	public TypeDefinition decompileType(final MetadataSystem metadataSystem, final String typeName,
-			final DecompilationOptions options, final boolean includeNested, final ITextOutput output)
-			throws IOException {
+                TypeDefinition type = decompileType(metadataSystem, internalName, decompilationOptions, false, output);
+                if (type != null) {
+                    types.add(type);
+                }
+            }
+        } finally {
+            settings.setShowSyntheticMembers(oldShowSyntheticMembers);
+            settings.setTypeLoader(oldTypeLoader);
+        }
+        return types;
+    }
 
-		final TypeReference type;
-		final DecompilerSettings settings = options.getSettings();
+    public TypeDefinition decompileType(final MetadataSystem metadataSystem, final String typeName,
+            final DecompilationOptions options, final boolean includeNested, final ITextOutput output) {
 
-		if (typeName.length() == 1) {
-			//
-			// Hack to get around classes whose descriptors clash with primitive types.
-			//
+        final TypeReference type;
+        final DecompilerSettings settings = options.getSettings();
 
-			final MetadataParser parser = new MetadataParser(IMetadataResolver.EMPTY);
-			final TypeReference reference = parser.parseTypeDescriptor(typeName);
+        if (typeName.length() == 1) {
+            //
+            // Hack to get around classes whose descriptors clash with primitive types.
+            //
 
-			type = metadataSystem.resolve(reference);
-		} else {
-			type = metadataSystem.lookupType(typeName);
-		}
+            final MetadataParser parser = new MetadataParser(IMetadataResolver.EMPTY);
+            final TypeReference reference = parser.parseTypeDescriptor(typeName);
 
-		final TypeDefinition resolvedType;
+            type = metadataSystem.resolve(reference);
+        } else {
+            type = metadataSystem.lookupType(typeName);
+        }
 
-		if (type == null || (resolvedType = type.resolve()) == null) {
-			System.err.printf("!!! ERROR: Failed to load class %s.\n", typeName);
-			return null;
-		}
+        final TypeDefinition resolvedType;
 
-		DeobfuscationUtilities.processType(resolvedType);
+        if (type == null || (resolvedType = type.resolve()) == null) {
+            System.err.printf("!!! ERROR: Failed to load class %s.\n", typeName);
+            return null;
+        }
 
-		if (!includeNested && (resolvedType.isNested() || resolvedType.isAnonymous() || resolvedType.isSynthetic())) {
-			return null;
-		}
+        DeobfuscationUtilities.processType(resolvedType);
 
-		if (settings.getLanguage() instanceof BytecodeLanguage) {
-			output.setIndentToken("  ");
-		}
+        if (!includeNested && (resolvedType.isNested() || resolvedType.isAnonymous() || resolvedType.isSynthetic())) {
+            return null;
+        }
 
-		settings.getLanguage().decompileType(resolvedType, output, options);
+        if (settings.getLanguage() instanceof BytecodeLanguage) {
+            output.setIndentToken("  ");
+        }
 
-		return resolvedType;
-	}
+        settings.getLanguage().decompileType(resolvedType, output, options);
 
+        return resolvedType;
+    }
 }
