@@ -146,7 +146,7 @@ public class DupLocalVariableAnalyzer
 
             list.set(i, new FastDeclaration(
                 FastConstants.DECLARE, dupStore.offset,
-                Instruction.UNKNOWN_LINE_NUMBER, lv.index, dupStore));
+                Instruction.UNKNOWN_LINE_NUMBER, lv, dupStore));
         }
     }
 }

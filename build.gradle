@@ -24,16 +24,16 @@ createExe {
 // Common configuration //
 rootProject.version='1.6.6'
 rootProject.ext.set('jdCoreVersion', '1.1.3')
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+sourceCompatibility = '16'
+targetCompatibility = '16'
 
 allprojects {
     apply plugin: 'eclipse'
     apply plugin: 'idea'
 
     tasks.withType(JavaCompile) {
-        sourceCompatibility = '1.8'
-        targetCompatibility = '1.8'
+        sourceCompatibility = '16'
+        targetCompatibility = '16'
         options.compilerArgs << '-Xlint:deprecation'
         options.compilerArgs << '-Xlint:unchecked'
         options.encoding = 'UTF-8'

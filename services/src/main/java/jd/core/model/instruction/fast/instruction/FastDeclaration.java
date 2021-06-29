@@ -1,4 +1,4 @@
-/*******************************************************************************
+/**
  * Copyright (C) 2007-2019 Emmanuel Dupuy GPLv3
  *
  * This program is free software: you can redistribute it and/or modify
@@ -13,27 +13,28 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- ******************************************************************************/
+ */
 package jd.core.model.instruction.fast.instruction;
 
+import java.util.Objects;
+
 import jd.core.model.classfile.ConstantPool;
+import jd.core.model.classfile.LocalVariable;
 import jd.core.model.classfile.LocalVariables;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 
-/**
- * list & while(true)
- */
+/** List & while(true). */
 public class FastDeclaration extends Instruction
 {
-    public int index;
+    public final LocalVariable lv;
     public Instruction instruction;
 
     public FastDeclaration(
         int opcode, int offset, int lineNumber,
-        int index, Instruction instruction)
+        LocalVariable lv, Instruction instruction)
     {
         super(opcode, offset, lineNumber);
-        this.index = index;
+        this.lv = lv;
         this.instruction = instruction;
     }
 
@@ -43,4 +44,23 @@ public class FastDeclaration extends Instruction
     {
         return null;
     }
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(lv.index, lv.name_index, lv.signature_index);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		FastDeclaration other = (FastDeclaration) obj;
+		return lv.index == other.lv.index 
+            && lv.name_index == other.lv.name_index
+            && lv.signature_index == other.lv.signature_index;
+	}
 }

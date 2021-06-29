@@ -170,7 +170,17 @@ public class LocalVariables
 
         return null;
     }
-
+    
+    public void removeUselessLocalVariables()
+    {
+		for (int i = this.listOfLocalVariables.size() - 1; i >= 0; i--) {
+			LocalVariable lv = this.listOfLocalVariables.get(i);
+			if (lv.isToBeRemoved()) {
+				this.listOfLocalVariables.remove(i);
+			}
+		}
+    }
+    
     public int size()
     {
         return this.listOfLocalVariables.size();

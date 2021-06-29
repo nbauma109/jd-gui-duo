@@ -5,7 +5,7 @@ dependencies {
     implementation 'org.ow2.asm:asm:9.1'
     implementation 'org.bitbucket.mstrobel:procyon-compilertools:0.5.36'
     implementation 'org.benf:cfr:0.151'
-    implementation 'org.eclipse.jdt:org.eclipse.jdt.core:3.25.0'
+    implementation 'org.eclipse.jdt:org.eclipse.jdt.core:3.26.0'
     implementation project(':api')
     testImplementation 'junit:junit:4.12'
 }

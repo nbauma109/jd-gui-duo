@@ -19,7 +19,7 @@ package jd.core.model.classfile;
 public class LocalVariable
     implements Comparable<LocalVariable>
 {
-    public int start_pc;
+	public int start_pc;
     public int length;
     public int name_index;
     public int signature_index;
@@ -33,6 +33,8 @@ public class LocalVariable
     public boolean declarationFlag = false;
 
     public boolean finalFlag = false;
+
+    private boolean toBeRemoved;
 
     public LocalVariable(
             int start_pc, int length, int name_index, int signature_index,
@@ -118,4 +120,12 @@ public class LocalVariable
 
         return this.index - other.index;
     }
+
+	public boolean isToBeRemoved() {
+		return toBeRemoved;
+	}
+
+	public void setToBeRemoved(boolean toBeRemoved) {
+		this.toBeRemoved = toBeRemoved;
+	}
 }

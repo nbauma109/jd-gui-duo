@@ -2349,7 +2349,7 @@ public class SourceWriterVisitor
 
         LocalVariable lv =
             localVariables.getLocalVariableWithIndexAndOffset(
-                fd.index, fd.offset);
+                fd.lv.index, fd.offset);
 
         if (lv == null)
         {

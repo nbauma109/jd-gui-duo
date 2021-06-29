@@ -40,7 +40,8 @@ public class FastCodeExceptionAnalyzer
 {
     private FastCodeExceptionAnalyzer() {
     }
-        public static List<FastCodeException> AggregateCodeExceptions(
+
+    public static List<FastCodeException> AggregateCodeExceptions(
             Method method, List<Instruction> list)
     {
         CodeException[] arrayOfCodeException = method.getCodeExceptions();
@@ -2506,12 +2507,13 @@ public class FastCodeExceptionAnalyzer
 
             if (fastTry.catches != null)
             {
-                // Format catch blockes
+                // Format catch blocks
                 int i = fastTry.catches.size();
                 List<Instruction> catchInstructions;
                 while (i-- > 0)
                 {
                     catchInstructions = fastTry.catches.get(i).instructions;
+                    
                     length = catchInstructions.size();
 
                     switch (catchInstructions.get(length-1).opcode)
@@ -2536,6 +2538,21 @@ public class FastCodeExceptionAnalyzer
                         catchInstructions.remove(0);
                     }
                 }
+            }
+        }
+        if (fastTry.catches != null && !fastTry.catches.isEmpty())
+        {
+            // Format catch blocks
+            int i = fastTry.catches.size();
+            List<Instruction> catchInstructions;
+            while (i-- > 0)
+            {
+                catchInstructions = fastTry.catches.get(i).instructions;
+                
+		        // Remove first catch instruction in each catch block
+		        if (!catchInstructions.isEmpty() && FormatCatch_RemoveFirstCatchInstruction(catchInstructions.get(0))) {
+		            catchInstructions.remove(0);
+		        }
             }
         }
     }
@@ -2580,7 +2597,10 @@ public class FastCodeExceptionAnalyzer
                     {
                         // Remove finally instructions
                         for (int j=0; j<finallyInstructionsSize && index>0; index--,++j) {
-                            instructions.remove(index-1);
+                        	Instruction instr = instructions.get(index-1);
+                        	if (instr.lineNumber >= finallyInstructionsLineNumber) {
+                        		instructions.remove(index-1);
+                        	}
                         }
                     }
 
@@ -2977,7 +2997,7 @@ public class FastCodeExceptionAnalyzer
                 tryIter.remove();
             }
         }
-                Instruction catchInstr;
+        Instruction catchInstr;
         // Remove catch instructions that are out of bounds and should be found in finally instructions
         for (FastCatch fastCatch : fastTry.catches) {
             for (Iterator<Instruction> catchIter = fastCatch.instructions.iterator(); catchIter.hasNext();) {
