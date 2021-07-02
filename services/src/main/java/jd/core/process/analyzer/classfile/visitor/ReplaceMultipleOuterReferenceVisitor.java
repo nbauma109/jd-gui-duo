@@ -16,11 +16,12 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.visitor;
 
+import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
+import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
+
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.Field;
-import jd.core.model.classfile.constant.ConstantFieldref;
-import jd.core.model.classfile.constant.ConstantNameAndType;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.ALoad;
 import jd.core.model.instruction.bytecode.instruction.GetField;
@@ -58,14 +59,13 @@ public class ReplaceMultipleOuterReferenceVisitor
                 if (field == null)
                     return null;
                 ConstantPool constants = classFile.getConstantPool();
-                ConstantFieldref cfr =
-                    constants.getConstantFieldref(gf.index);
-                if (cfr.class_index != classFile.getThisClassIndex())
+                ConstantFieldref cfr = constants.getConstantFieldref(gf.index);
+                if (cfr.getClassIndex() != classFile.getThisClassIndex())
                     return null;
                 ConstantNameAndType cnat =
-                    constants.getConstantNameAndType(cfr.name_and_type_index);
-                if ((field.name_index != cnat.name_index) ||
-                    (field.descriptor_index != cnat.descriptor_index))
+                    constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
+                if ((field.getNameIndex() != cnat.getNameIndex()) ||
+                    (field.getDescriptorIndex() != cnat.getDescriptorIndex()))
                     return null;
                 return this.classFile.getOuterClass();
             }
@@ -73,10 +73,9 @@ public class ReplaceMultipleOuterReferenceVisitor
             {
                 ConstantPool constants = this.classFile.getConstantPool();
                 GetStatic gs = (GetStatic)gf.objectref;
-                ConstantFieldref cfr =
-                    constants.getConstantFieldref(gs.index);
+                ConstantFieldref cfr = constants.getConstantFieldref(gs.index);
                 String className =
-                    constants.getConstantClassName(cfr.class_index);
+                    constants.getConstantClassName(cfr.getClassIndex());
                 ClassFile outerClass = this.classFile.getOuterClass();
 
                 while (outerClass != null)
@@ -90,22 +89,22 @@ public class ReplaceMultipleOuterReferenceVisitor
 
                         cfr = constants.getConstantFieldref(gf.index);
                         ConstantNameAndType cnat =
-                            constants.getConstantNameAndType(cfr.name_and_type_index);
+                            constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
                         String fieldName =
-                            constants.getConstantUtf8(cnat.name_index);
+                            constants.getConstantUtf8(cnat.getNameIndex());
 
                         ConstantPool outerConstants =
                             outerClass.getConstantPool();
                         String outerFieldName =
-                            outerConstants.getConstantUtf8(outerField.name_index);
+                            outerConstants.getConstantUtf8(outerField.getNameIndex());
 
                         if (!fieldName.equals(outerFieldName))
                             return null;
 
                         String fieldDescriptor =
-                            constants.getConstantUtf8(cnat.descriptor_index);
+                            constants.getConstantUtf8(cnat.getDescriptorIndex());
                         String outerFieldDescriptor =
-                            outerConstants.getConstantUtf8(outerField.descriptor_index);
+                            outerConstants.getConstantUtf8(outerField.getDescriptorIndex());
 
                         if (!fieldDescriptor.equals(outerFieldDescriptor))
                             return null;
@@ -121,12 +120,11 @@ public class ReplaceMultipleOuterReferenceVisitor
         case ByteCodeConstants.GETFIELD:
             {
                 ConstantPool constants = this.classFile.getConstantPool();
-                ConstantFieldref cfr =
-                    constants.getConstantFieldref(gf.index);
+                ConstantFieldref cfr = constants.getConstantFieldref(gf.index);
                 ConstantNameAndType cnat =
-                    constants.getConstantNameAndType(cfr.name_and_type_index);
+                    constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
                 String descriptorName =
-                    constants.getConstantUtf8(cnat.descriptor_index);
+                    constants.getConstantUtf8(cnat.getDescriptorIndex());
                 if (!SignatureUtil.IsObjectSignature(descriptorName))
                     return null;
 
@@ -140,22 +138,22 @@ public class ReplaceMultipleOuterReferenceVisitor
                     return null;
 
                 String className =
-                    constants.getConstantClassName(cfr.class_index);
+                    constants.getConstantClassName(cfr.getClassIndex());
 
                 if (!className.equals(matchedClassFile.getThisClassName()))
                     return null;
 
-                String fieldName = constants.getConstantUtf8(cnat.name_index);
+                String fieldName = constants.getConstantUtf8(cnat.getNameIndex());
 
                 ConstantPool matchedConstants = matchedClassFile.getConstantPool();
                 String matchedFieldName =
-                    matchedConstants.getConstantUtf8(matchedField.name_index);
+                    matchedConstants.getConstantUtf8(matchedField.getNameIndex());
 
                 if (! fieldName.equals(matchedFieldName))
                     return null;
 
                 String matchedDescriptorName =
-                    matchedConstants.getConstantUtf8(matchedField.descriptor_index);
+                    matchedConstants.getConstantUtf8(matchedField.getDescriptorIndex());
 
                 if (! descriptorName.equals(matchedDescriptorName))
                     return null;

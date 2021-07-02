@@ -999,12 +999,12 @@ public class ByteCodeParser {
     }
 
     private void parseLDC(DefaultStack<Expression> stack, ConstantPool constants, int lineNumber, Constant constant) {
-        switch (constant.getTag()) {
-            case Constant.CONSTANT_INTEGER:
+        switch (constant.getClass().getSimpleName()) {
+            case "ConstantInteger":
                 int i = ((ConstantInteger)constant).getValue();
                 stack.push(new IntegerConstantExpression(lineNumber, PrimitiveTypeUtil.getPrimitiveTypeFromValue(i), i));
                 break;
-            case Constant.CONSTANT_FLOAT:
+            case "ConstantFloat":
                 float f = ((ConstantFloat)constant).getValue();
 
                 if (f == Float.MIN_VALUE) {
@@ -1021,7 +1021,7 @@ public class ByteCodeParser {
                     stack.push(new FloatConstantExpression(lineNumber, f));
                 }
                 break;
-            case Constant.CONSTANT_CLASS:
+            case "ConstantClass":
                 int typeNameIndex = ((ConstantClass) constant).getNameIndex();
                 String typeName = ((ConstantUtf8)constants.getConstant(typeNameIndex)).getValue();
                 Type type = typeMaker.makeFromDescriptorOrInternalTypeName(typeName);
@@ -1030,7 +1030,7 @@ public class ByteCodeParser {
                 }
                 stack.push(new TypeReferenceDotClassExpression(lineNumber, type));
                 break;
-            case Constant.CONSTANT_LONG:
+            case "ConstantLong":
                 long l = ((ConstantLong)constant).getValue();
 
                 if (l == Long.MIN_VALUE) {
@@ -1041,7 +1041,7 @@ public class ByteCodeParser {
                     stack.push(new LongConstantExpression(lineNumber, l));
                 }
                 break;
-            case Constant.CONSTANT_DOUBLE:
+            case "ConstantDouble":
                 double d = ((ConstantDouble)constant).getValue();
 
                 if (Double.compare(d, Double.MIN_VALUE) == 0) {
@@ -1062,7 +1062,7 @@ public class ByteCodeParser {
                     stack.push(new DoubleConstantExpression(lineNumber, d));
                 }
                 break;
-            case Constant.CONSTANT_STRING:
+            case "ConstantString":
                 int stringIndex = ((ConstantString)constant).getStringIndex();
                 stack.push(new StringConstantExpression(lineNumber, constants.getConstantUtf8(stringIndex)));
                 break;
@@ -1574,7 +1574,7 @@ public class ByteCodeParser {
     private void parseIF(DefaultStack<Expression> stack, int lineNumber, BasicBlock basicBlock, String operator1, String operator2, int priority) {
         Expression expression = stack.pop();
 
-        if (expression.getClass() == ClassFileCmpExpression.class) {
+        if (expression instanceof ClassFileCmpExpression) {
             ClassFileCmpExpression cmp = (ClassFileCmpExpression)expression;
 
             typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(cmp.getLeftExpression().getType(), cmp.getLeftExpression());

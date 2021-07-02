@@ -198,8 +198,8 @@ public class ObjectType implements Type {
         }
 
         if (StringConstants.JAVA_LANG_CLASS.equals(internalName)) {
-            boolean wildcard1 = typeArguments == null || typeArguments.getClass() == WildcardTypeArgument.class;
-            boolean wildcard2 = that.typeArguments == null || that.typeArguments.getClass() == WildcardTypeArgument.class;
+            boolean wildcard1 = typeArguments == null || typeArguments instanceof WildcardTypeArgument;
+            boolean wildcard2 = that.typeArguments == null || that.typeArguments instanceof WildcardTypeArgument;
 
             if (wildcard1 && wildcard2) {
                 return true;
@@ -228,7 +228,7 @@ public class ObjectType implements Type {
 
     @Override
     public boolean isTypeArgumentAssignableFrom(Map<String, BaseType> typeBounds, BaseTypeArgument typeArgument) {
-        if (typeArgument.getClass() == ObjectType.class || typeArgument.getClass() == InnerObjectType.class) {
+        if (typeArgument instanceof ObjectType || typeArgument instanceof InnerObjectType) {
             ObjectType ot = (ObjectType)typeArgument;
 
             if (dimension != ot.getDimension() || !internalName.equals(ot.getInternalName())) {
@@ -241,13 +241,13 @@ public class ObjectType implements Type {
             return typeArguments != null && typeArguments.isTypeArgumentAssignableFrom(typeBounds, ot.getTypeArguments());
         }
 
-        if (typeArgument.getClass() == GenericType.class) {
+        if (typeArgument instanceof GenericType) {
             GenericType gt = (GenericType)typeArgument;
             BaseType bt = typeBounds.get(gt.getName());
 
             if (bt != null) {
                 for (Type type : bt) {
-                    if (dimension == type.getDimension() && (type.getClass() == ObjectType.class || type.getClass() == InnerObjectType.class)) {
+                    if (dimension == type.getDimension() && (type instanceof ObjectType || type instanceof InnerObjectType)) {
                         ObjectType ot = (ObjectType) type;
 
                         if (internalName.equals(ot.getInternalName())) {

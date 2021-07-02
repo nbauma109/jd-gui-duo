@@ -1199,10 +1199,7 @@ public class FastCodeExceptionAnalyzer
                     if (instruction.opcode == ByteCodeConstants.ATHROW)
                     {
                         AThrow athrow = (AThrow)instruction;
-                        if ((athrow.value.opcode == ByteCodeConstants.ALOAD &&
-                            ((ALoad)athrow.value).index == exceptionIndex) || (athrow.value.opcode == ByteCodeConstants.CHECKCAST &&
-                                ((CheckCast)athrow.value).objectref.opcode == ByteCodeConstants.ALOAD &&
-                                ((ALoad)((CheckCast)athrow.value).objectref).index == exceptionIndex) )
+                        if (findAloadForAThrow(exceptionIndex, athrow))
                         {
                             break;
                         }
@@ -2201,7 +2198,7 @@ public class FastCodeExceptionAnalyzer
             fce.tryToOffset = g.offset;
         }
 
-        // Format catch blockes
+        // Format catch blocks
         int i = fastTry.catches.size()-1;
         if (i >= 0)
         {
@@ -2293,7 +2290,7 @@ public class FastCodeExceptionAnalyzer
             fce.tryToOffset = g.offset;
         }
 
-        // Format catch blockes
+        // Format catch blocks
         int i = fastTry.catches.size();
         List<Instruction> catchInstructions;
         int catchInstructionsLength;
@@ -2378,7 +2375,7 @@ public class FastCodeExceptionAnalyzer
                 break;
             }
 
-            // Format catch blockes
+            // Format catch blocks
             i = fastTry.catches.size();
             List<Instruction> catchInstructions;
             while (i-- > 0)
@@ -2415,7 +2412,7 @@ public class FastCodeExceptionAnalyzer
         {
             // La sous procedure [finally] se trouve dans le bloc 'finally'.
 
-            // Format catch blockes
+            // Format catch blocks
             int i = fastTry.catches.size();
             List<Instruction> catchInstructions;
             while (i-- > 0)
@@ -2768,7 +2765,7 @@ public class FastCodeExceptionAnalyzer
         FormatFastTry_RemoveJsrInstructionAndCompactStoreReturn(
             tryInstructions, localVariables, finallyInstructionsLineNumber);
 
-        // Format catch blockes
+        // Format catch blocks
         int i = fastTry.catches.size();
         List<Instruction> catchInstructions;
         while (i-- > 0)
@@ -2946,10 +2943,7 @@ public class FastCodeExceptionAnalyzer
                 if (instruction.opcode == ByteCodeConstants.ATHROW)
                 {
                     AThrow athrow = (AThrow)instruction;
-                    if ((athrow.value.opcode == ByteCodeConstants.ALOAD &&
-                        ((ALoad)athrow.value).index == exceptionIndex) || (athrow.value.opcode == ByteCodeConstants.CHECKCAST &&
-                            ((CheckCast)athrow.value).objectref.opcode == ByteCodeConstants.ALOAD &&
-                            ((ALoad)((CheckCast)athrow.value).objectref).index == exceptionIndex) )
+                    if (findAloadForAThrow(exceptionIndex, athrow))
                     {
                         // Remove last 'athrow' instruction in finally block
                         athrowOffset = instruction.offset;
@@ -2988,7 +2982,7 @@ public class FastCodeExceptionAnalyzer
         }
     }
 
-    protected static void removeOutOfBoundsInstructions(FastTry fastTry, Instruction astore) {
+    private static void removeOutOfBoundsInstructions(FastTry fastTry, Instruction astore) {
         Instruction tryInstr;
         // Remove try instructions that are out of bounds and should be found in finally instructions
         for (Iterator<Instruction> tryIter = fastTry.instructions.iterator(); tryIter.hasNext();) {
@@ -3073,10 +3067,7 @@ public class FastCodeExceptionAnalyzer
             if (instruction.opcode == ByteCodeConstants.ATHROW)
             {
                 AThrow athrow = (AThrow)instruction;
-                if ((athrow.value.opcode == ByteCodeConstants.ALOAD &&
-                    ((ALoad)athrow.value).index == exceptionIndex) || (athrow.value.opcode == ByteCodeConstants.CHECKCAST &&
-                        ((CheckCast)athrow.value).objectref.opcode == ByteCodeConstants.ALOAD &&
-                        ((ALoad)((CheckCast)athrow.value).objectref).index == exceptionIndex) )
+                if (findAloadForAThrow(exceptionIndex, athrow))
                 {
                     // Remove last 'athrow' instruction in finally block
                     athrowOffset = finallyInstructions.remove(index).offset;
@@ -3104,7 +3095,8 @@ public class FastCodeExceptionAnalyzer
             }
 
             removeOutOfBoundsInstructions(fastTry, astore);
-                        // Remove finally instructions before 'return' instruction
+
+            // Remove finally instructions before 'return' instruction
             int finallyInstructionsSize = finallyInstructions.size();
             FormatEclipse677Finally_RemoveFinallyInstructionsBeforeReturn(
                 tryInstructions, finallyInstructionsSize);
@@ -3114,7 +3106,7 @@ public class FastCodeExceptionAnalyzer
                 tryInstructions, athrowOffset,
                 afterAthrowOffset, lastTryInstructionOffset+1);
 
-            // Format catch blockes
+            // Format catch blocks
             int i = fastTry.catches.size();
             FastCatch fastCatch;
             List<Instruction> catchInstructions;
@@ -3165,6 +3157,14 @@ public class FastCodeExceptionAnalyzer
             }
         }
     }
+
+	private static boolean findAloadForAThrow(int exceptionIndex, AThrow athrow) {
+		return (athrow.value.opcode == ByteCodeConstants.ALOAD &&
+		        ((ALoad)athrow.value).index == exceptionIndex) 
+            || (athrow.value.opcode == ByteCodeConstants.CHECKCAST &&
+		        ((CheckCast)athrow.value).objectref.opcode == ByteCodeConstants.ALOAD &&
+		        ((ALoad)((CheckCast)athrow.value).objectref).index == exceptionIndex);
+	}
 
     public static class FastCodeException
         implements Comparable<FastCodeException>

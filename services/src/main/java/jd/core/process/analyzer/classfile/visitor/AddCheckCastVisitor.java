@@ -16,6 +16,10 @@
  */
 package jd.core.process.analyzer.classfile.visitor;
 
+import org.jd.core.v1.model.classfile.constant.ConstantClass;
+import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
+import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.List;
@@ -23,10 +27,6 @@ import java.util.List;
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.LocalVariable;
 import jd.core.model.classfile.LocalVariables;
-import jd.core.model.classfile.constant.ConstantClass;
-import jd.core.model.classfile.constant.ConstantFieldref;
-import jd.core.model.classfile.constant.ConstantMethodref;
-import jd.core.model.classfile.constant.ConstantNameAndType;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 import jd.core.util.SignatureUtil;
@@ -186,14 +186,14 @@ public class AddCheckCastVisitor
                 if (match(insi.objectref))
                 {
                     ConstantMethodref cmr = this.constants.getConstantMethodref(insi.index);
-                    ConstantClass cc = this.constants.getConstantClass(cmr.class_index);
+                    ConstantClass cc = this.constants.getConstantClass(cmr.getClassIndex());
 
-                    if (this.constants.objectClassNameIndex != cc.name_index)
+                    if (this.constants.objectClassNameIndex != cc.getNameIndex())
                     {
                         Instruction i = insi.objectref;
                         insi.objectref = new CheckCast(
                             ByteCodeConstants.CHECKCAST, i.offset,
-                            i.lineNumber, cmr.class_index, i);
+                            i.lineNumber, cmr.getClassIndex(), i);
                     }
                 }
                 else
@@ -261,14 +261,14 @@ public class AddCheckCastVisitor
                 {
                     ConstantFieldref cfr =
                         this.constants.getConstantFieldref(getField.index);
-                    ConstantClass cc = this.constants.getConstantClass(cfr.class_index);
+                    ConstantClass cc = this.constants.getConstantClass(cfr.getClassIndex());
 
-                    if (this.constants.objectClassNameIndex != cc.name_index)
+                    if (this.constants.objectClassNameIndex != cc.getNameIndex())
                     {
                         Instruction i = getField.objectref;
                         getField.objectref = new CheckCast(
                             ByteCodeConstants.CHECKCAST, i.offset,
-                            i.lineNumber, cfr.class_index, i);
+                            i.lineNumber, cfr.getClassIndex(), i);
                     }
                 }
                 else
@@ -284,14 +284,14 @@ public class AddCheckCastVisitor
                 {
                     ConstantFieldref cfr =
                         this.constants.getConstantFieldref(putField.index);
-                    ConstantClass cc = this.constants.getConstantClass(cfr.class_index);
+                    ConstantClass cc = this.constants.getConstantClass(cfr.getClassIndex());
 
-                    if (this.constants.objectClassNameIndex != cc.name_index)
+                    if (this.constants.objectClassNameIndex != cc.getNameIndex())
                     {
                         Instruction i = putField.objectref;
                         putField.objectref = new CheckCast(
                             ByteCodeConstants.CHECKCAST, i.offset,
-                            i.lineNumber, cfr.class_index, i);
+                            i.lineNumber, cfr.getClassIndex(), i);
                     }
                 }
                 else
@@ -302,12 +302,12 @@ public class AddCheckCastVisitor
                 {
                     ConstantFieldref cfr = constants.getConstantFieldref(putField.index);
                     ConstantNameAndType cnat =
-                        constants.getConstantNameAndType(cfr.name_and_type_index);
+                        constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
 
-                    if (cnat.descriptor_index != this.constants.objectSignatureIndex)
+                    if (cnat.getDescriptorIndex() != this.constants.objectSignatureIndex)
                     {
                         String signature =
-                            this.constants.getConstantUtf8(cnat.descriptor_index);
+                            this.constants.getConstantUtf8(cnat.getDescriptorIndex());
                         putField.valueref = newInstruction(
                             signature, putField.valueref);
                     }
@@ -325,12 +325,12 @@ public class AddCheckCastVisitor
                 {
                     ConstantFieldref cfr = constants.getConstantFieldref(putStatic.index);
                     ConstantNameAndType cnat =
-                        constants.getConstantNameAndType(cfr.name_and_type_index);
+                        constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
 
-                    if (cnat.descriptor_index != this.constants.objectSignatureIndex)
+                    if (cnat.getDescriptorIndex() != this.constants.objectSignatureIndex)
                     {
                         String signature =
-                            this.constants.getConstantUtf8(cnat.descriptor_index);
+                            this.constants.getConstantUtf8(cnat.getDescriptorIndex());
                         putStatic.valueref = newInstruction(
                             signature, putStatic.valueref);
                     }

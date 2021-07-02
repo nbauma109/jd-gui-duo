@@ -132,7 +132,7 @@ public class LocalVariables
         for (int i = length - 1; i >= 0; --i) {
             LocalVariable lv = this.listOfLocalVariables.get(i);
 
-            if (lv.name_index == nameIndex)
+            if (lv.nameIndex == nameIndex)
                 return true;
         }
 

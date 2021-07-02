@@ -16,12 +16,12 @@
  ******************************************************************************/
 package jd.core.model.classfile;
 
+import org.jd.core.v1.model.classfile.constant.*;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import jd.core.model.classfile.constant.*;
 import jd.core.util.IndexToIndexMap;
 import jd.core.util.StringToIndexMap;
 
@@ -80,18 +80,15 @@ public class ConstantPool
             int index = this.listOfConstants.size();
             this.listOfConstants.add(constant);
 
-            if (constant == null)
-                continue;
-
-            switch (constant.tag)
+            if (constant instanceof ConstantUtf8)
             {
-            case ConstantConstant.CONSTANT_UTF8:
                 this.constantUtf8ToIndex.put(
-                        ((ConstantUtf8)constant).bytes, index);
-                break;
-            case ConstantConstant.CONSTANT_CLASS:
+                        ((ConstantUtf8)constant).getValue(), index);
+            }
+            if (constant instanceof ConstantClass)
+            {
                 this.constantClassToIndex.put(
-                        ((ConstantClass)constant).name_index, index);
+                        ((ConstantClass)constant).getNameIndex(), index);
             }
         }
 
@@ -222,7 +219,7 @@ public class ConstantPool
         if (index == -1)
         {
             ConstantUtf8 cutf8 =
-                new ConstantUtf8(ConstantConstant.CONSTANT_UTF8, s);
+                new ConstantUtf8(s);
             index = this.listOfConstants.size();
             this.listOfConstants.add(cutf8);
             this.constantUtf8ToIndex.put(s, index);
@@ -231,29 +228,29 @@ public class ConstantPool
         return index;
     }
 
-    public int addConstantClass(int name_index)
+    public int addConstantClass(int nameIndex)
     {
-        String internalName = getConstantUtf8(name_index);
+        String internalName = getConstantUtf8(nameIndex);
         if ((internalName == null) ||
             (internalName.isEmpty()) ||
             (internalName.charAt(internalName.length()-1) == ';'))
             System.err.println("ConstantPool.addConstantClass: invalid name index");
 
-        int index = this.constantClassToIndex.get(name_index);
+        int index = this.constantClassToIndex.get(nameIndex);
 
         if (index == -1)
         {
             ConstantClass cc =
-                new ConstantClass(ConstantConstant.CONSTANT_CLASS, name_index);
+                new ConstantClass(nameIndex);
             index = this.listOfConstants.size();
             this.listOfConstants.add(cc);
-            this.constantClassToIndex.put(name_index, index);
+            this.constantClassToIndex.put(nameIndex, index);
         }
 
         return index;
     }
 
-    public int addConstantNameAndType(int name_index, int descriptor_index)
+    public int addConstantNameAndType(int nameIndex, int descriptorIndex)
     {
         int index = this.listOfConstants.size();
 
@@ -261,19 +258,17 @@ public class ConstantPool
         {
             Constant constant = this.listOfConstants.get(index);
 
-            if ((constant == null) ||
-                (constant.tag != ConstantConstant.CONSTANT_NAMEANDTYPE))
+            if (!(constant instanceof ConstantNameAndType))
                 continue;
 
             ConstantNameAndType cnat = (ConstantNameAndType)constant;
 
-            if ((cnat.name_index == name_index) &&
-                (cnat.descriptor_index == descriptor_index))
+            if ((cnat.getNameIndex() == nameIndex) &&
+                (cnat.getDescriptorIndex() == descriptorIndex))
                 return index;
         }
 
-        ConstantNameAndType cnat = new ConstantNameAndType(
-                ConstantConstant.CONSTANT_NAMEANDTYPE, name_index, descriptor_index);
+        ConstantNameAndType cnat = new ConstantNameAndType(nameIndex, descriptorIndex);
         index = this.listOfConstants.size();
         this.listOfConstants.add(cnat);
 
@@ -288,19 +283,17 @@ public class ConstantPool
         {
             Constant constant = this.listOfConstants.get(index);
 
-            if ((constant == null) ||
-                (constant.tag != ConstantConstant.CONSTANT_FIELDREF))
+            if (!(constant instanceof ConstantFieldref))
                 continue;
 
             ConstantFieldref cfr = (ConstantFieldref)constant;
 
-            if ((cfr.class_index == class_index) &&
-                (cfr.name_and_type_index == name_and_type_index))
+            if ((cfr.getClassIndex() == class_index) &&
+                (cfr.getNameAndTypeIndex() == name_and_type_index))
                 return index;
         }
 
-        ConstantFieldref cfr = new ConstantFieldref(
-                ConstantConstant.CONSTANT_FIELDREF, class_index, name_and_type_index);
+        ConstantFieldref cfr = new ConstantFieldref(class_index, name_and_type_index);
         index = this.listOfConstants.size();
         this.listOfConstants.add(cfr);
 
@@ -323,19 +316,17 @@ public class ConstantPool
         {
             Constant constant = this.listOfConstants.get(index);
 
-            if ((constant == null) ||
-                (constant.tag != ConstantConstant.CONSTANT_METHODREF))
+            if (!(constant instanceof ConstantMethodref))
                 continue;
 
             ConstantMethodref cmr = (ConstantMethodref)constant;
 
-            if ((cmr.class_index == class_index) &&
-                (cmr.name_and_type_index == name_and_type_index))
+            if ((cmr.getClassIndex() == class_index) &&
+                (cmr.getNameAndTypeIndex() == name_and_type_index))
                 return index;
         }
 
-        ConstantMethodref cfr = new ConstantMethodref(
-            ConstantConstant.CONSTANT_METHODREF, class_index, name_and_type_index,
+        ConstantMethodref cfr = new ConstantMethodref(class_index, name_and_type_index,
             listOfParameterSignatures, returnedSignature);
         index = this.listOfConstants.size();
         this.listOfConstants.add(cfr);
@@ -346,14 +337,14 @@ public class ConstantPool
     public String getConstantUtf8(int index)
     {
         ConstantUtf8 cutf8 = (ConstantUtf8)this.listOfConstants.get(index);
-        return cutf8.bytes;
+        return cutf8.getValue();
     }
 
     public String getConstantClassName(int index)
     {
         ConstantClass cc = (ConstantClass)this.listOfConstants.get(index);
-        ConstantUtf8 cutf8 = (ConstantUtf8)this.listOfConstants.get(cc.name_index);
-        return cutf8.bytes;
+        ConstantUtf8 cutf8 = (ConstantUtf8)this.listOfConstants.get(cc.getNameIndex());
+        return cutf8.getValue();
     }
 
     public ConstantClass getConstantClass(int index)
@@ -381,9 +372,9 @@ public class ConstantPool
         return (ConstantInterfaceMethodref)this.listOfConstants.get(index);
     }
 
-    public ConstantValue getConstantValue(int index)
+    public Constant getConstantValue(int index)
     {
-        return (ConstantValue)this.listOfConstants.get(index);
+        return this.listOfConstants.get(index);
     }
 
     public ConstantInteger getConstantInteger(int index)

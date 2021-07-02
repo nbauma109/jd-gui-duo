@@ -7,11 +7,11 @@
 
 package org.jd.core.v1.model.classfile.constant;
 
-public class ConstantInteger extends ConstantValue {
-    protected int value;
+public class ConstantInteger extends Constant {
+	
+    private int value;
 
     public ConstantInteger(int value) {
-        super(CONSTANT_INTEGER);
         this.value = value;
     }
 

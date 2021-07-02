@@ -16,14 +16,14 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
+import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
+import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import jd.core.model.classfile.*;
-import jd.core.model.classfile.constant.ConstantFieldref;
-import jd.core.model.classfile.constant.ConstantNameAndType;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 import jd.core.model.instruction.fast.FastConstants;
@@ -102,13 +102,13 @@ public class InitDexEnumFieldsReconstructor
                     break;
 
                 ConstantFieldref cfr = constants.getConstantFieldref(putStatic.index);
-                if (cfr.class_index != classFile.getThisClassIndex())
+                if (cfr.getClassIndex() != classFile.getThisClassIndex())
                     break;
 
                 ConstantNameAndType cnat =
-                    constants.getConstantNameAndType(cfr.name_and_type_index);
+                    constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
 
-                String name = constants.getConstantUtf8(cnat.name_index);
+                String name = constants.getConstantUtf8(cnat.getNameIndex());
                 if (! name.equals(StringConstants.ENUM_VALUES_ARRAY_NAME_ECLIPSE))
                     break;
 
@@ -120,8 +120,8 @@ public class InitDexEnumFieldsReconstructor
 
                     if (((field.access_flags & (ClassFileConstants.ACC_STATIC|ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_FINAL|ClassFileConstants.ACC_PRIVATE)) ==
                             (ClassFileConstants.ACC_STATIC|ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_FINAL|ClassFileConstants.ACC_PRIVATE)) &&
-                        (cnat.descriptor_index == field.descriptor_index) &&
-                        (cnat.name_index == field.name_index))
+                        (cnat.getDescriptorIndex() == field.getDescriptorIndex()) &&
+                        (cnat.getNameIndex() == field.getNameIndex()))
                     {
                         // "ENUM$VALUES = ..." found.
                         ALoad aload = (ALoad)putStatic.valueref;

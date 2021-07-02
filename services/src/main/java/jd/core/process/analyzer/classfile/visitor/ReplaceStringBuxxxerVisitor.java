@@ -16,14 +16,14 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.visitor;
 
+import org.jd.core.v1.model.classfile.constant.ConstantClass;
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
+import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.List;
 
 import jd.core.model.classfile.ConstantPool;
-import jd.core.model.classfile.constant.ConstantClass;
-import jd.core.model.classfile.constant.ConstantMethodref;
-import jd.core.model.classfile.constant.ConstantNameAndType;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 
@@ -496,16 +496,16 @@ public class ReplaceStringBuxxxerVisitor
         {
             Invokevirtual iv = (Invokevirtual)i;
             ConstantMethodref cmr = this.constants.getConstantMethodref(iv.index);
-            ConstantClass cc = this.constants.getConstantClass(cmr.class_index);
+            ConstantClass cc = this.constants.getConstantClass(cmr.getClassIndex());
 
-            if ((cc.name_index == constants.stringBufferClassNameIndex) ||
-                (cc.name_index == constants.stringBuilderClassNameIndex))
+            if ((cc.getNameIndex() == constants.stringBufferClassNameIndex) ||
+                (cc.getNameIndex() == constants.stringBuilderClassNameIndex))
             {
                 ConstantNameAndType cnat =
-                    constants.getConstantNameAndType(cmr.name_and_type_index);
+                    constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 
-                if (cnat.name_index == constants.toStringIndex)
-                    return match(iv.objectref, cmr.class_index);
+                if (cnat.getNameIndex() == constants.toStringIndex)
+                    return match(iv.objectref, cmr.getClassIndex());
             }
         }
 
@@ -520,15 +520,15 @@ public class ReplaceStringBuxxxerVisitor
             ConstantMethodref cmr =
                 this.constants.getConstantMethodref(insi.index);
 
-            if (cmr.class_index == classIndex)
+            if (cmr.getClassIndex() == classIndex)
             {
                 ConstantNameAndType cnat =
-                    constants.getConstantNameAndType(cmr.name_and_type_index);
+                    constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 
-                if ((cnat.name_index == this.constants.appendIndex) &&
+                if ((cnat.getNameIndex() == this.constants.appendIndex) &&
                     (insi.args.size() == 1))
                 {
-                    Instruction result = match(insi.objectref, cmr.class_index);
+                    Instruction result = match(insi.objectref, cmr.getClassIndex());
 
                     if (result == null)
                     {
@@ -547,7 +547,7 @@ public class ReplaceStringBuxxxerVisitor
             ConstantMethodref cmr =
                 this.constants.getConstantMethodref(in.index);
 
-            if ((cmr.class_index == classIndex) && (in.args.size() == 1))
+            if ((cmr.getClassIndex() == classIndex) && (in.args.size() == 1))
             {
                 Instruction arg0 = in.args.get(0);
 
@@ -556,14 +556,14 @@ public class ReplaceStringBuxxxerVisitor
                 {
                     Invokestatic is = (Invokestatic)arg0;
                     cmr = this.constants.getConstantMethodref(is.index);
-                    ConstantClass cc = this.constants.getConstantClass(cmr.class_index);
+                    ConstantClass cc = this.constants.getConstantClass(cmr.getClassIndex());
 
-                    if (cc.name_index == this.constants.stringClassNameIndex)
+                    if (cc.getNameIndex() == this.constants.stringClassNameIndex)
                     {
                         ConstantNameAndType cnat =
-                            this.constants.getConstantNameAndType(cmr.name_and_type_index);
+                            this.constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 
-                        if ((cnat.name_index == this.constants.valueOfIndex) &&
+                        if ((cnat.getNameIndex() == this.constants.valueOfIndex) &&
                             (is.args.size() == 1))
                             return is.args.get(0);
                     }

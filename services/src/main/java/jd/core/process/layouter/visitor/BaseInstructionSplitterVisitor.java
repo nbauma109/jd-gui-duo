@@ -16,13 +16,13 @@
  ******************************************************************************/
 package jd.core.process.layouter.visitor;
 
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ConstantPool;
-import jd.core.model.classfile.constant.ConstantMethodref;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 import jd.core.model.instruction.fast.FastConstants;
@@ -147,7 +147,7 @@ public abstract class BaseInstructionSplitterVisitor
                 ConstantMethodref cmr =
                     this.constants.getConstantMethodref(in.index);
                 String internalClassName =
-                    this.constants.getConstantClassName(cmr.class_index);
+                    this.constants.getConstantClassName(cmr.getClassIndex());
                 String prefix =
                     this.classFile.getThisClassName() +
                     StringConstants.INTERNAL_INNER_SEPARATOR;

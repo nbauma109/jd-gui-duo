@@ -16,15 +16,17 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.visitor;
 
+import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
+import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
+import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
+
 import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ClassFileConstants;
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.Method;
-import jd.core.model.classfile.constant.ConstantFieldref;
-import jd.core.model.classfile.constant.ConstantMethodref;
-import jd.core.model.classfile.constant.ConstantNameAndType;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 
@@ -520,16 +522,16 @@ public class ReplaceOuterAccessorVisitor
         ConstantMethodref cmr =
             constants.getConstantMethodref(is.index);
         String className =
-            constants.getConstantClassName(cmr.class_index);
+            constants.getConstantClassName(cmr.getClassIndex());
 
         if (!className.equals(matchedClassFile.getThisClassName()))
             return null;
 
         ConstantNameAndType cnat =
-            constants.getConstantNameAndType(cmr.name_and_type_index);
-        String methodName = constants.getConstantUtf8(cnat.name_index);
+            constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
+        String methodName = constants.getConstantUtf8(cnat.getNameIndex());
         String methodDescriptor =
-            constants.getConstantUtf8(cnat.descriptor_index);
+            constants.getConstantUtf8(cnat.getDescriptorIndex());
         Method method =
             matchedClassFile.getMethod(methodName, methodDescriptor);
 
@@ -558,7 +560,7 @@ public class ReplaceOuterAccessorVisitor
 
                 ConstantFieldref cfr = constants.getConstantFieldref(gs.index);
                 String className =
-                    constants.getConstantClassName(cfr.class_index);
+                    constants.getConstantClassName(cfr.getClassIndex());
                 ClassFile outerClassFile = classFile.getOuterClass();
 
                 if ((outerClassFile == null) ||
@@ -566,9 +568,9 @@ public class ReplaceOuterAccessorVisitor
                     return null;
 
                 ConstantNameAndType cnat =
-                    constants.getConstantNameAndType(cfr.name_and_type_index);
+                    constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
                 String descriptor =
-                    constants.getConstantUtf8(cnat.descriptor_index);
+                    constants.getConstantUtf8(cnat.getDescriptorIndex());
 
                 if (! descriptor.equals(outerClassFile.getInternalClassName()))
                     return null;

@@ -24,6 +24,8 @@ import java.util.Map;
 
 import static org.jd.core.v1.model.classfile.Constants.ACC_SYNTHETIC;
 
+import jd.core.process.deserializer.ClassFormatException;
+
 public class ClassFileDeserializer {
     protected static final int[] EMPTY_INT_ARRAY = {};
 
@@ -101,7 +103,7 @@ public class ClassFileDeserializer {
         int magic = reader.readInt();
 
         if (magic != ClassFileReader.JAVA_MAGIC_NUMBER) {
-            throw new ClassFileFormatException("Invalid CLASS file");
+            throw new ClassFormatException("Invalid CLASS file");
         }
 
         int minorVersion = reader.readUnsignedShort();
@@ -148,11 +150,11 @@ public class ClassFileDeserializer {
                     break;
                 case 5:
                     constants[i] = new ConstantLong(reader.readLong());
-                i++;
+                    i++;
                     break;
                 case 6:
                     constants[i] = new ConstantDouble(reader.readDouble());
-                i++;
+                    i++;
                     break;
                 case 7: case 19: case 20:
                     constants[i] = new ConstantClass(reader.readUnsignedShort());
@@ -173,7 +175,7 @@ public class ClassFileDeserializer {
                     constants[i] = new ConstantMethodType(reader.readUnsignedShort());
                     break;
                 default:
-                    throw new ClassFileFormatException("Invalid constant pool entry");
+                    throw new ClassFormatException("Invalid constant pool entry");
             }
         }
 
@@ -273,8 +275,8 @@ public class ClassFileDeserializer {
 
             constant = constants.getConstant(attributeNameIndex);
 
-            if (constant.getTag() != Constant.CONSTANT_UTF8) {
-                throw new ClassFileFormatException("Invalid attributes");
+            if (!(constant instanceof ConstantUtf8)) {
+                throw new ClassFormatException("Invalid attributes");
             }
             name = ((ConstantUtf8)constant).getValue();
             switch (name) {
@@ -385,7 +387,7 @@ public class ClassFileDeserializer {
             case 'I': case 'J': case 'S':
             case 'Z': case 'C': case 's':
                 int constValueIndex = reader.readUnsignedShort();
-                ConstantValue constValue = (ConstantValue)constants.getConstant(constValueIndex);
+                Constant constValue = constants.getConstant(constValueIndex);
                 return new ElementValuePrimitiveType(type, constValue);
             case 'e':
                 int descriptorIndex = reader.readUnsignedShort();
@@ -404,7 +406,7 @@ public class ClassFileDeserializer {
             case '[':
                 return new ElementValueArrayValue(loadElementValues(reader, constants));
             default:
-                throw new ClassFileFormatException("Invalid element value type: " + type);
+                throw new ClassFormatException("Invalid element value type: " + type);
         }
     }
 
@@ -502,7 +504,7 @@ public class ClassFileDeserializer {
         return codeExceptions;
     }
 
-    protected ConstantValue loadConstantValue(ClassFileReader reader, ConstantPool constants) {
+    protected Constant loadConstantValue(ClassFileReader reader, ConstantPool constants) {
         int constantValueIndex = reader.readUnsignedShort();
 
         return constants.getConstantValue(constantValueIndex);

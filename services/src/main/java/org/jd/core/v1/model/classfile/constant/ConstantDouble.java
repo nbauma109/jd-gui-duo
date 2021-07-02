@@ -7,11 +7,11 @@
 
 package org.jd.core.v1.model.classfile.constant;
 
-public class ConstantDouble extends ConstantValue {
-    protected double value;
+public class ConstantDouble extends Constant {
+	
+    private double value;
 
     public ConstantDouble(double value) {
-        super(CONSTANT_DOUBLE);
         this.value = value;
     }
 

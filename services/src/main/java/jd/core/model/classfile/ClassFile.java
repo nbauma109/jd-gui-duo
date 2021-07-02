@@ -16,6 +16,7 @@
  */
 package jd.core.model.classfile;
 
+import org.jd.core.v1.model.classfile.constant.ConstantClass;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.HashMap;
@@ -26,7 +27,6 @@ import jd.core.model.classfile.accessor.Accessor;
 import jd.core.model.classfile.attribute.Attribute;
 import jd.core.model.classfile.attribute.AttributeConstants;
 import jd.core.model.classfile.attribute.AttributeInnerClasses;
-import jd.core.model.classfile.constant.ConstantClass;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.util.SignatureUtil;
 
@@ -107,7 +107,7 @@ public class ClassFile extends Base
                 method = this.methods[i];
 
                 if ((method.access_flags & ClassFileConstants.ACC_STATIC) != 0 &&
-                    method.name_index == this.constants.classConstructorIndex)
+                    method.getNameIndex() == this.constants.classConstructorIndex)
                 {
                     this.staticMethod = method;
                     break;
@@ -252,7 +252,7 @@ public class ClassFile extends Base
         {
             ConstantClass cc = this.constants.getConstantClass(this.super_class);
 
-            if (cc.name_index != this.constants.objectClassNameIndex)
+            if (cc.getNameIndex() != this.constants.objectClassNameIndex)
             {
                 // Super class
                 this.internalAnonymousClassName = this.superClassName;
@@ -317,8 +317,8 @@ public class ClassFile extends Base
             {
                 field = this.fields[i];
 
-                if (fieldNameIndex == field.name_index &&
-                    fieldDescriptorIndex == field.descriptor_index)
+                if (fieldNameIndex == field.getNameIndex() &&
+                    fieldDescriptorIndex == field.getDescriptorIndex())
                 {
                     return field;
                 }
@@ -337,12 +337,12 @@ public class ClassFile extends Base
             {
                 field = this.fields[i];
 
-                name = this.constants.getConstantUtf8(field.name_index);
+                name = this.constants.getConstantUtf8(field.getNameIndex());
 
                 if (fieldName.equals(name))
                 {
                     String descriptor =
-                        this.constants.getConstantUtf8(field.descriptor_index);
+                        this.constants.getConstantUtf8(field.getDescriptorIndex());
 
                     if (fieldDescriptor.equals(descriptor)) {
                         return field;
@@ -367,8 +367,8 @@ public class ClassFile extends Base
             {
                 method = this.methods[i];
 
-                if (methodNameIndex == method.name_index &&
-                    methodDescriptorIndex == method.descriptor_index)
+                if (methodNameIndex == method.getNameIndex() &&
+                    methodDescriptorIndex == method.getDescriptorIndex())
                 {
                     return method;
                 }
@@ -387,12 +387,12 @@ public class ClassFile extends Base
             {
                 method = this.methods[i];
 
-                name = this.constants.getConstantUtf8(method.name_index);
+                name = this.constants.getConstantUtf8(method.getNameIndex());
 
                 if (methodName.equals(name))
                 {
                     String descriptor =
-                        this.constants.getConstantUtf8(method.descriptor_index);
+                        this.constants.getConstantUtf8(method.getDescriptorIndex());
 
                     if (methodDescriptor.equals(descriptor)) {
                         return method;

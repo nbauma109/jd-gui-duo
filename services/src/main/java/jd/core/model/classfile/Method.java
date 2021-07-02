@@ -40,10 +40,10 @@ public class Method extends FieldOrMethod
      */
     private int superConstructorParameterCount;
 
-    public Method(int access_flags, int name_index, int descriptor_index,
+    public Method(int access_flags, int nameIndex, int descriptorIndex,
                   Attribute[] attributes)
     {
-        super(access_flags, name_index, descriptor_index, attributes);
+        super(access_flags, nameIndex, descriptorIndex, attributes);
 
         this.containsError = false;
         this.exceptionIndexes = null;

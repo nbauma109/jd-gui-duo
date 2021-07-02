@@ -16,13 +16,13 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
+import org.jd.core.v1.model.classfile.constant.*;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import jd.core.model.classfile.*;
-import jd.core.model.classfile.constant.*;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 import jd.core.model.reference.ReferenceMap;
@@ -118,16 +118,16 @@ public class DotClass118AReconstructor
             ConstantMethodref cmr =
                 constants.getConstantMethodref(is.index);
             ConstantNameAndType cnatMethod =
-                constants.getConstantNameAndType(cmr.name_and_type_index);
-            String nameMethod = constants.getConstantUtf8(cnatMethod.name_index);
+                constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
+            String nameMethod = constants.getConstantUtf8(cnatMethod.getNameIndex());
 
             if (! nameMethod.equals(StringConstants.CLASS_DOLLAR))
                 continue;
 
             Ldc ldc = (Ldc)instruction;
-            ConstantValue cv = constants.getConstantValue(ldc.index);
+            Constant cv = constants.getConstantValue(ldc.index);
 
-            if (cv.tag != ConstantConstant.CONSTANT_STRING)
+            if (!(cv instanceof ConstantString))
                 continue;
 
             instruction = list.get(i+4);
@@ -143,21 +143,21 @@ public class DotClass118AReconstructor
 
             ConstantFieldref cfr = constants.getConstantFieldref(gs.index);
             ConstantNameAndType cnatField = constants.getConstantNameAndType(
-                cfr.name_and_type_index);
+                cfr.getNameAndTypeIndex());
             String signatureField =
-                constants.getConstantUtf8(cnatField.descriptor_index);
+                constants.getConstantUtf8(cnatField.getDescriptorIndex());
 
             if (! signatureField.equals(StringConstants.INTERNAL_CLASS_SIGNATURE))
                 continue;
 
-            String nameField = constants.getConstantUtf8(cnatField.name_index);
+            String nameField = constants.getConstantUtf8(cnatField.getNameIndex());
 
             if (nameField.startsWith(StringConstants.CLASS_DOLLAR))
             {
                 // motif 'x.class' classique trouvé !
                 // Substitution par une constante de type 'ClassConstant'
                 ConstantString cs = (ConstantString)cv;
-                String signature = constants.getConstantUtf8(cs.string_index);
+                String signature = constants.getConstantUtf8(cs.getStringIndex());
                 String internalName = signature.replace(
                     StringConstants.PACKAGE_SEPARATOR,
                     StringConstants.INTERNAL_PACKAGE_SEPARATOR);
@@ -187,7 +187,7 @@ public class DotClass118AReconstructor
                 // motif 'x[].class' trouvé !
                 // Substitution par l'expression 'new x[0].getClass()'
                 ConstantString cs = (ConstantString)cv;
-                String signature = constants.getConstantUtf8(cs.string_index);
+                String signature = constants.getConstantUtf8(cs.getStringIndex());
                 String signatureWithoutDimension =
                         SignatureUtil.CutArrayDimensionPrefix(signature);
 
@@ -276,7 +276,7 @@ public class DotClass118AReconstructor
             {
                 Field field = fields[j];
 
-                if (field.name_index == cnatField.name_index)
+                if (field.getNameIndex() == cnatField.getNameIndex())
                 {
                     field.access_flags |= ClassFileConstants.ACC_SYNTHETIC;
                     break;
@@ -291,7 +291,7 @@ public class DotClass118AReconstructor
             {
                 Method method = methods[j];
 
-                if (method.name_index == cnatMethod.name_index)
+                if (method.getNameIndex() == cnatMethod.getNameIndex())
                 {
                     method.access_flags |= ClassFileConstants.ACC_SYNTHETIC;
                     break;

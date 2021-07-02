@@ -11,6 +11,9 @@ package org.jd.core.v1.model.classfile.constant;
  * @See https://docs.oracle.com/javase/specs/jvms/se16/html/jvms-4.html
  */
 public abstract class Constant {
+	
+	protected Constant() {}
+	
     public static final byte CONSTANT_UNKNOWN            = 0;
     public static final byte CONSTANT_UTF8               = 1;
     public static final byte CONSTANT_INTEGER            = 3;
@@ -27,14 +30,4 @@ public abstract class Constant {
     public static final byte CONSTANT_METHODTYPE         = 16;
     public static final byte CONSTANT_INVOKEDYNAMIC      = 18;
     public static final byte CONSTANT_MEMBERREF          = 19; // Unofficial constant
-
-    protected byte tag;
-
-    protected Constant(byte tag) {
-        this.tag = tag;
-    }
-
-    public byte getTag() {
-        return tag;
-    }
 }

@@ -8,10 +8,10 @@
 package org.jd.core.v1.model.classfile.constant;
 
 public class ConstantString extends Constant {
-    protected int stringIndex;
+	
+    private int stringIndex;
 
     public ConstantString(int stringIndex) {
-        super(CONSTANT_STRING);
         this.stringIndex = stringIndex;
     }
 

@@ -16,13 +16,14 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
+import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
+
 import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.Method;
-import jd.core.model.classfile.constant.ConstantMethodref;
-import jd.core.model.classfile.constant.ConstantNameAndType;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 import jd.core.process.analyzer.util.ReconstructorUtil;
@@ -77,9 +78,9 @@ public class NewInstructionReconstructor extends NewInstructionReconstructorBase
                 ConstantPool constants = classFile.getConstantPool();
                 ConstantMethodref cmr = constants.getConstantMethodref(is.index);
                 ConstantNameAndType cnat =
-                    constants.getConstantNameAndType(cmr.name_and_type_index);
+                    constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 
-                if (cnat.name_index == constants.instanceConstructorIndex)
+                if (cnat.getNameIndex() == constants.instanceConstructorIndex)
                 {
                     New nw = (New)ds.objectref;
                     InvokeNew invokeNew = new InvokeNew(

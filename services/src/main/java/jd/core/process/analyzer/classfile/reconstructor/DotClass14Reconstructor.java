@@ -16,13 +16,13 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
+import org.jd.core.v1.model.classfile.constant.*;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import jd.core.model.classfile.*;
-import jd.core.model.classfile.constant.*;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 import jd.core.model.reference.ReferenceMap;
@@ -132,49 +132,48 @@ public class DotClass14Reconstructor
 
             ConstantFieldref cfr = constants.getConstantFieldref(gs.index);
 
-            if (searchMatchingClassFile(cfr.class_index, classFile) == null)
+            if (searchMatchingClassFile(cfr.getClassIndex(), classFile) == null)
                 continue;
 
             ConstantNameAndType cnatField = constants.getConstantNameAndType(
-                    cfr.name_and_type_index);
+                    cfr.getNameAndTypeIndex());
 
             String descriptorField =
-                constants.getConstantUtf8(cnatField.descriptor_index);
+                constants.getConstantUtf8(cnatField.getDescriptorIndex());
 
             if (! descriptorField.equals(StringConstants.INTERNAL_CLASS_SIGNATURE))
                 continue;
 
-            String nameField = constants.getConstantUtf8(cnatField.name_index);
+            String nameField = constants.getConstantUtf8(cnatField.getNameIndex());
 
             if (!nameField.startsWith(StringConstants.CLASS_DOLLAR) &&
                 !nameField.startsWith(StringConstants.ARRAY_DOLLAR))
                 continue;
 
-            ConstantMethodref cmr =
-                constants.getConstantMethodref(is.index);
+            ConstantMethodref cmr = constants.getConstantMethodref(is.index);
 
             ClassFile matchingClassFile =
-                searchMatchingClassFile(cmr.class_index, classFile);
+                searchMatchingClassFile(cmr.getClassIndex(), classFile);
             if (matchingClassFile == null)
                 continue;
 
             ConstantNameAndType cnatMethod =
-                constants.getConstantNameAndType(cmr.name_and_type_index);
+                constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
             String nameMethod =
-                constants.getConstantUtf8(cnatMethod.name_index);
+                constants.getConstantUtf8(cnatMethod.getNameIndex());
 
             if (! nameMethod.equals(StringConstants.CLASS_DOLLAR))
                 continue;
 
             Ldc ldc = (Ldc)is.args.get(0);
-            ConstantValue cv = constants.getConstantValue(ldc.index);
+            Constant cv = constants.getConstantValue(ldc.index);
 
-            if (cv.tag != ConstantConstant.CONSTANT_STRING)
+            if (!(cv instanceof ConstantString))
                 continue;
 
             // Trouve !
             ConstantString cs = (ConstantString)cv;
-            String signature = constants.getConstantUtf8(cs.string_index);
+            String signature = constants.getConstantUtf8(cs.getStringIndex());
 
             if (SignatureUtil.GetArrayDimensionCount(signature) == 0)
             {
@@ -282,7 +281,7 @@ public class DotClass14Reconstructor
                 {
                     Field field = fields[j];
 
-                    if (field.name_index == cnatField.name_index)
+                    if (field.getNameIndex() == cnatField.getNameIndex())
                     {
                         field.access_flags |= ClassFileConstants.ACC_SYNTHETIC;
                         break;
@@ -297,7 +296,7 @@ public class DotClass14Reconstructor
                 {
                     Method method = methods[j];
 
-                    if (method.name_index == cnatMethod.name_index)
+                    if (method.getNameIndex() == cnatMethod.getNameIndex())
                     {
                         method.access_flags |= ClassFileConstants.ACC_SYNTHETIC;
                         break;
@@ -317,7 +316,7 @@ public class DotClass14Reconstructor
                     Field field = fields[j];
 
                     if (nameField.equals(
-                            matchingConstants.getConstantUtf8(field.name_index)))
+                            matchingConstants.getConstantUtf8(field.getNameIndex())))
                     {
                         field.access_flags |= ClassFileConstants.ACC_SYNTHETIC;
                         break;
@@ -333,7 +332,7 @@ public class DotClass14Reconstructor
                     Method method = methods[j];
 
                     if (nameMethod.equals(
-                            matchingConstants.getConstantUtf8(method.name_index)))
+                            matchingConstants.getConstantUtf8(method.getNameIndex())))
                     {
                         method.access_flags |= ClassFileConstants.ACC_SYNTHETIC;
                         break;

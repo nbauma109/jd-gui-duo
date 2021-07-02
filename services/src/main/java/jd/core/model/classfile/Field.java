@@ -16,10 +16,11 @@
  ******************************************************************************/
 package jd.core.model.classfile;
 
+import org.jd.core.v1.model.classfile.constant.Constant;
+
 import jd.core.model.classfile.attribute.Attribute;
 import jd.core.model.classfile.attribute.AttributeConstantValue;
 import jd.core.model.classfile.attribute.AttributeConstants;
-import jd.core.model.classfile.constant.ConstantValue;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.util.UtilConstants;
 
@@ -42,15 +43,15 @@ public class Field extends FieldOrMethod
     public int outerMethodLocalVariableNameIndex;
 
     public Field(
-        int access_flags, int name_index,
-        int descriptor_index, Attribute[] attributes)
+        int access_flags, int nameIndex,
+        int descriptorIndex, Attribute[] attributes)
     {
-        super(access_flags, name_index, descriptor_index, attributes);
+        super(access_flags, nameIndex, descriptorIndex, attributes);
         this.anonymousClassConstructorParameterIndex = UtilConstants.INVALID_INDEX;
         this.outerMethodLocalVariableNameIndex = UtilConstants.INVALID_INDEX;
     }
 
-    public ConstantValue getConstantValue(ConstantPool constants)
+    public Constant getConstantValue(ConstantPool constants)
     {
         if (this.attributes != null)
             for(int i=0; i<this.attributes.length; i++)

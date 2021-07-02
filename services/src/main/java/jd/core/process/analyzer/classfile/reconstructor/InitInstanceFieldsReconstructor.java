@@ -16,13 +16,14 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
+import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
+import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import jd.core.model.classfile.*;
-import jd.core.model.classfile.constant.ConstantFieldref;
-import jd.core.model.classfile.constant.ConstantMethodref;
-import jd.core.model.classfile.constant.ConstantNameAndType;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.ALoad;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
@@ -49,7 +50,7 @@ public class InitInstanceFieldsReconstructor
         int methodIndex = methods.length;
         Method putFieldListMethod = null;
 
-        // Recherche du dernier constructeur ne faisait pas appel a 'this(...)'
+        // Recherche du dernier constructeur ne faisant pas appel a 'this(...)'
         while (methodIndex > 0)
         {
             final Method method = methods[--methodIndex];
@@ -58,7 +59,7 @@ public class InitInstanceFieldsReconstructor
                 (method.getCode() == null) ||
                 (method.getFastNodes() == null) ||
                 (method.containsError() == true) ||
-                (method.name_index != constants.instanceConstructorIndex))
+                (method.getNameIndex() != constants.instanceConstructorIndex))
                 continue;
 
             List<Instruction> list = method.getFastNodes();
@@ -90,7 +91,7 @@ public class InitInstanceFieldsReconstructor
                     PutField putField = (PutField)instruction;
                     ConstantFieldref cfr = constants.getConstantFieldref(putField.index);
 
-                    if ((cfr.class_index != classFile.getThisClassIndex()) ||
+                    if ((cfr.getClassIndex() != classFile.getThisClassIndex()) ||
                         (putField.objectref.opcode != ByteCodeConstants.ALOAD))
                         break;
 
@@ -161,7 +162,7 @@ public class InitInstanceFieldsReconstructor
                 continue;
             if (method.getCode() == null)
                 continue;
-            if (method.name_index != constants.instanceConstructorIndex)
+            if (method.getNameIndex() != constants.instanceConstructorIndex)
                 continue;
 
             List<Instruction> list = method.getFastNodes();
@@ -178,7 +179,7 @@ public class InitInstanceFieldsReconstructor
                 int firstPutFieldIndex = j + 1;
                 int putFieldListLength = putFieldList.size();
 
-                // If 'putFieldList' is more loonger than 'list',
+                // If 'putFieldList' is longer than 'list',
                 // remove extra 'putField'.
                 while (firstPutFieldIndex+putFieldListLength > length)
                     putFieldList.remove(--putFieldListLength);
@@ -211,18 +212,17 @@ public class InitInstanceFieldsReconstructor
             while (putFieldListIndex-- > 0)
             {
                 PutField putField = putFieldList.get(putFieldListIndex);
-                ConstantFieldref cfr =
-                    constants.getConstantFieldref(putField.index);
+                ConstantFieldref cfr = constants.getConstantFieldref(putField.index);
                 ConstantNameAndType cnat =
-                    constants.getConstantNameAndType(cfr.name_and_type_index);
+                    constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
                 int fieldIndex;
 
                 for (fieldIndex=0; fieldIndex<fieldLength; fieldIndex++)
                 {
                     Field field = fields[fieldIndex];
 
-                    if ((cnat.name_index == field.name_index) &&
-                        (cnat.descriptor_index == field.descriptor_index) &&
+                    if ((cnat.getNameIndex() == field.getNameIndex()) &&
+                        (cnat.getDescriptorIndex() == field.getDescriptorIndex()) &&
                         ((field.access_flags & ClassFileConstants.ACC_STATIC) == 0))
                     {
                         // Field found
@@ -237,7 +237,7 @@ public class InitInstanceFieldsReconstructor
                 if (fieldIndex == fieldLength)
                 {
                     // Field not found
-                    // Remove putField not use to initialize fields
+                    // Remove putField not used to initialize fields
                     putFieldList.remove(putFieldListIndex);
                     putFieldListLength--;
                 }
@@ -257,7 +257,7 @@ public class InitInstanceFieldsReconstructor
                         continue;
                     if (method.getCode() == null)
                         continue;
-                    if (method.name_index != constants.instanceConstructorIndex)
+                    if (method.getNameIndex() != constants.instanceConstructorIndex)
                         continue;
 
                     List<Instruction> list = method.getFastNodes();
@@ -279,16 +279,23 @@ public class InitInstanceFieldsReconstructor
                             if (putField.index != putFieldIndex)
                                 continue;
 
-                            ConstantFieldref cfr =
-                                constants.getConstantFieldref(putField.index);
-                            if ((cfr.class_index != classFile.getThisClassIndex()) ||
+                            ConstantFieldref cfr = constants.getConstantFieldref(putField.index);
+                            if ((cfr.getClassIndex() != classFile.getThisClassIndex()) ||
                                 (putField.objectref.opcode != ByteCodeConstants.ALOAD))
                                 continue;
 
-                            ALoad aLaod = (ALoad)putField.objectref;
-                            if (aLaod.index != 0)
+                            ALoad aLoad = (ALoad)putField.objectref;
+                            if (aLoad.index != 0)
                                 continue;
 
+                            /*
+                             * Do not remove the PutField instruction if it loads a constructor parameter.
+                             * If field is assigned to a constructor parameter, the instruction can only be
+                             * inside the constructor.
+                             */
+                            if (putField.valueref instanceof ALoad && ((ALoad)putField.valueref).index != 0)
+                                continue;
+                            
                             list.remove(index--);
                             length--;
 
@@ -324,12 +331,12 @@ public class InitInstanceFieldsReconstructor
 
             ConstantMethodref cmr = constants.getConstantMethodref(is.index);
             ConstantNameAndType cnat =
-                constants.getConstantNameAndType(cmr.name_and_type_index);
+                constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 
-            if (cnat.name_index != constants.instanceConstructorIndex)
+            if (cnat.getNameIndex() != constants.instanceConstructorIndex)
                 continue;
 
-            if (cmr.class_index == classFile.getThisClassIndex())
+            if (cmr.getClassIndex() == classFile.getThisClassIndex())
                 return -1;
 
             return i;

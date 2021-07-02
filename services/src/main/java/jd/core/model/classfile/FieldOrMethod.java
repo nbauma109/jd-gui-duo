@@ -20,20 +20,33 @@ import jd.core.model.classfile.attribute.Attribute;
 
 public class FieldOrMethod extends Base
 {
-    public int name_index;
-    public final int descriptor_index;
+    private int nameIndex;
+    private final int descriptorIndex;
 
-    public FieldOrMethod(int access_flags, int name_index,
-                         int descriptor_index, Attribute[] attributes)
+    public FieldOrMethod(int access_flags, int nameIndex,
+                         int descriptorIndex, Attribute[] attributes)
     {
         super(access_flags, attributes);
 
-        this.name_index = name_index;
-        this.descriptor_index = descriptor_index;
+        this.nameIndex = nameIndex;
+        this.descriptorIndex = descriptorIndex;
     }
 
     public Attribute[] getAttributes()
     {
         return this.attributes;
     }
+
+	public int getNameIndex() {
+		return nameIndex;
+	}
+
+	public void setNameIndex(int nameIndex) {
+		this.nameIndex = nameIndex;
+	}
+
+	public int getDescriptorIndex() {
+		return descriptorIndex;
+	}
+    
 }

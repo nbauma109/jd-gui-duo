@@ -16,8 +16,9 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
+
 import jd.core.model.classfile.*;
-import jd.core.model.classfile.constant.ConstantMethodref;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.CheckCast;
 import jd.core.model.instruction.bytecode.instruction.IndexInstruction;
@@ -39,10 +40,9 @@ public class NewInstructionReconstructorBase
         ClassFile classFile, Method method, InvokeNew invokeNew)
     {
         ConstantPool constants = classFile.getConstantPool();
-        ConstantMethodref cmr =
-            constants.getConstantMethodref(invokeNew.index);
+        ConstantMethodref cmr = constants.getConstantMethodref(invokeNew.index);
         String internalClassName = constants.getConstantClassName(
-            cmr.class_index);
+            cmr.getClassIndex());
         ClassFile innerClassFile =
             classFile.getInnerClassFile(internalClassName);
 
@@ -91,7 +91,7 @@ public class NewInstructionReconstructorBase
                                     // Ajout du nom du parametre au ConstantPool
                                     // de la class anonyme
                                     String name =
-                                        constants.getConstantUtf8(lv.name_index);
+                                        constants.getConstantUtf8(lv.nameIndex);
                                     innerField.outerMethodLocalVariableNameIndex =
                                         innerConstants.addConstantUtf8(name);
                                     // Ajout du flag 'final' sur la variable

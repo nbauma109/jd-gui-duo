@@ -17,13 +17,13 @@
 package jd.core.process.writer.visitor;
 
 import org.jd.core.v1.api.loader.Loader;
+import org.jd.core.v1.model.classfile.constant.*;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.List;
 import java.util.Set;
 
 import jd.core.model.classfile.*;
-import jd.core.model.classfile.constant.*;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 import jd.core.model.instruction.fast.FastConstants;
@@ -310,15 +310,15 @@ public class SourceWriterVisitor
                     String signature;
                     Constant c = constants.get(checkCast.index);
 
-                    if (c.tag == ConstantConstant.CONSTANT_UTF8)
+                    if (c instanceof ConstantUtf8)
                     {
                         ConstantUtf8 cutf8 = (ConstantUtf8)c;
-                        signature = cutf8.bytes;
+                        signature = cutf8.getValue();
                     }
                     else
                     {
                         ConstantClass cc = (ConstantClass)c;
-                        signature = constants.getConstantUtf8(cc.name_index);
+                        signature = constants.getConstantUtf8(cc.getNameIndex());
                         if (signature.charAt(0) != '[') {
                             signature = SignatureUtil.CreateTypeName(signature);
                         }
@@ -613,18 +613,18 @@ public class SourceWriterVisitor
 
                 ConstantFieldref cfr = constants.getConstantFieldref(putField.index);
                 ConstantNameAndType cnat =
-                    constants.getConstantNameAndType(cfr.name_and_type_index);
+                    constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
 
                 boolean displayPrefix = false;
 
-                if (this.localVariables.containsLocalVariableWithNameIndex(cnat.name_index))
+                if (this.localVariables.containsLocalVariableWithNameIndex(cnat.getNameIndex()))
                 {
                     if (putField.objectref.opcode == ByteCodeConstants.ALOAD) {
                         if (((ALoad)putField.objectref).index == 0) {
                             displayPrefix = true;
                         }
                     } else if (putField.objectref.opcode == ByteCodeConstants.OUTERTHIS && !needAPrefixForThisField(
-                            cnat.name_index, cnat.descriptor_index,
+                            cnat.getNameIndex(), cnat.getDescriptorIndex(),
                             (GetStatic)putField.objectref)) {
                         displayPrefix = true;
                     }
@@ -649,7 +649,7 @@ public class SourceWriterVisitor
                 }
 
                 String fieldName =
-                    constants.getConstantUtf8(cnat.name_index);
+                    constants.getConstantUtf8(cnat.getNameIndex());
                 if (this.keywordSet.contains(fieldName)) {
                     fieldName = StringConstants.JD_FIELD_PREFIX + fieldName;
                 }
@@ -660,9 +660,9 @@ public class SourceWriterVisitor
                     nextOffset <= this.lastOffset)
                 {
                     String internalClassName =
-                        this.constants.getConstantClassName(cfr.class_index);
+                        this.constants.getConstantClassName(cfr.getClassIndex());
                     String descriptor =
-                        this.constants.getConstantUtf8(cnat.descriptor_index);
+                        this.constants.getConstantUtf8(cnat.getDescriptorIndex());
                     this.printer.printField(
                         lineNumber, internalClassName, fieldName,
                         descriptor, this.classFile.getThisClassName());
@@ -828,7 +828,7 @@ public class SourceWriterVisitor
         ConstantFieldref cfr =
             this.constants.getConstantFieldref(getStatic.index);
         String getStaticOuterClassName =
-            this.constants.getConstantClassName(cfr.class_index);
+            this.constants.getConstantClassName(cfr.getClassIndex());
         String fieldName = this.constants.getConstantUtf8(fieldNameIndex);
         String fieldDescriptor =
             this.constants.getConstantUtf8(fieldDescriptorIndex);
@@ -1072,7 +1072,7 @@ public class SourceWriterVisitor
                 Constant cst = constants.get( ((IndexInstruction)value).index );
                 ConstantValueWriter.WriteHexa(
                     this.loader, this.printer, this.referenceMap,
-                    this.classFile, (ConstantValue)cst);
+                    this.classFile, cst);
                 break;
             default:
                 lineNumber = visit(value);
@@ -1233,7 +1233,7 @@ public class SourceWriterVisitor
 
             if (lv != null)
             {
-                int lvNameIndex = lv.name_index;
+                int lvNameIndex = lv.nameIndex;
                 if (lvNameIndex > 0) {
                     lvName = constants.getConstantUtf8(lvNameIndex);
                 }
@@ -1344,7 +1344,7 @@ public class SourceWriterVisitor
     {
         ConstantMethodref cmr = this.constants.getConstantMethodref(in.index);
         String internalClassName =
-            this.constants.getConstantClassName(cmr.class_index);
+            this.constants.getConstantClassName(cmr.getClassIndex());
         String prefix =
             this.classFile.getThisClassName() +
             StringConstants.INTERNAL_INNER_SEPARATOR;
@@ -1361,9 +1361,9 @@ public class SourceWriterVisitor
         int length = in.args.size();
 
         ConstantNameAndType cnat =
-            this.constants.getConstantNameAndType(cmr.name_and_type_index);
+            this.constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
         String constructorDescriptor =
-            this.constants.getConstantUtf8(cnat.descriptor_index);
+            this.constants.getConstantUtf8(cnat.getDescriptorIndex());
 
         if (innerClassFile == null)
         {
@@ -1381,7 +1381,7 @@ public class SourceWriterVisitor
             firstIndex = computeFirstIndex(this.methodAccessFlags, in);
             // Search parameter count of super constructor
             String constructorName =
-                this.constants.getConstantUtf8(cnat.name_index);
+                this.constants.getConstantUtf8(cnat.getNameIndex());
             Method constructor =
                 innerClassFile.getMethod(constructorName, constructorDescriptor);
             if (constructor != null)
@@ -1438,14 +1438,13 @@ public class SourceWriterVisitor
     {
         int lineNumber = in.lineNumber;
 
-        ConstantFieldref cfr =
-            constants.getConstantFieldref(in.enumValueFieldRefIndex);
+        ConstantFieldref cfr = constants.getConstantFieldref(in.enumValueFieldRefIndex);
         ConstantNameAndType cnat = constants.getConstantNameAndType(
-            cfr.name_and_type_index);
+            cfr.getNameAndTypeIndex());
 
         String internalClassName = classFile.getThisClassName();
-        String name = constants.getConstantUtf8(cnat.name_index);
-        String descriptor = constants.getConstantUtf8(cnat.descriptor_index);
+        String name = constants.getConstantUtf8(cnat.getNameIndex());
+        String descriptor = constants.getConstantUtf8(cnat.getDescriptorIndex());
 
         this.printer.addNewLinesAndPrefix(lineNumber);
         this.printer.printStaticFieldDeclaration(
@@ -1461,12 +1460,11 @@ public class SourceWriterVisitor
     private int writeGetField(GetField getField)
     {
         int lineNumber = getField.lineNumber;
-        ConstantFieldref cfr =
-            constants.getConstantFieldref(getField.index);
+        ConstantFieldref cfr = constants.getConstantFieldref(getField.index);
         ConstantNameAndType cnat =
-            constants.getConstantNameAndType(cfr.name_and_type_index);
+            constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
         Field field =
-            this.classFile.getField(cnat.name_index, cnat.descriptor_index);
+            this.classFile.getField(cnat.getNameIndex(), cnat.getDescriptorIndex());
 
         if (field != null &&
             field.outerMethodLocalVariableNameIndex != UtilConstants.INVALID_INDEX)
@@ -1477,14 +1475,14 @@ public class SourceWriterVisitor
                 getField.offset <= this.lastOffset)
             {
                 String internalClassName =
-                    this.constants.getConstantClassName(cfr.class_index);
+                    this.constants.getConstantClassName(cfr.getClassIndex());
                 String fieldName = this.constants.getConstantUtf8(
                     field.outerMethodLocalVariableNameIndex);
                 if (this.keywordSet.contains(fieldName)) {
                     fieldName = StringConstants.JD_FIELD_PREFIX + fieldName;
                 }
                 String descriptor =
-                    this.constants.getConstantUtf8(cnat.descriptor_index);
+                    this.constants.getConstantUtf8(cnat.getDescriptorIndex());
                 this.printer.printField(
                     lineNumber, internalClassName, fieldName,
                     descriptor, this.classFile.getThisClassName());
@@ -1495,14 +1493,14 @@ public class SourceWriterVisitor
             // Cas normal
             boolean displayPrefix = false;
 
-            if (this.localVariables.containsLocalVariableWithNameIndex(cnat.name_index))
+            if (this.localVariables.containsLocalVariableWithNameIndex(cnat.getNameIndex()))
             {
                 if (getField.objectref.opcode == ByteCodeConstants.ALOAD) {
                     if (((ALoad)getField.objectref).index == 0) {
                         displayPrefix = true;
                     }
                 } else if (getField.objectref.opcode == ByteCodeConstants.OUTERTHIS && !needAPrefixForThisField(
-                        cnat.name_index, cnat.descriptor_index,
+                        cnat.getNameIndex(), cnat.getDescriptorIndex(),
                         (GetStatic)getField.objectref)) {
                     displayPrefix = true;
                 }
@@ -1530,14 +1528,14 @@ public class SourceWriterVisitor
                 getField.offset <= this.lastOffset)
             {
                 String internalClassName =
-                    this.constants.getConstantClassName(cfr.class_index);
+                    this.constants.getConstantClassName(cfr.getClassIndex());
                 String fieldName =
-                    this.constants.getConstantUtf8(cnat.name_index);
+                    this.constants.getConstantUtf8(cnat.getNameIndex());
                 if (this.keywordSet.contains(fieldName)) {
                     fieldName = StringConstants.JD_FIELD_PREFIX + fieldName;
                 }
                 String descriptor =
-                    this.constants.getConstantUtf8(cnat.descriptor_index);
+                    this.constants.getConstantUtf8(cnat.getDescriptorIndex());
                 this.printer.printField(
                     lineNumber, internalClassName, fieldName,
                     descriptor, this.classFile.getThisClassName());
@@ -1551,7 +1549,7 @@ public class SourceWriterVisitor
     {
         ConstantMethodref cmr = constants.getConstantMethodref(insi.index);
         ConstantNameAndType cnat =
-            constants.getConstantNameAndType(cmr.name_and_type_index);
+            constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
         boolean thisInvoke = false;
 
         if (insi.objectref.opcode == ByteCodeConstants.ALOAD &&
@@ -1564,7 +1562,7 @@ public class SourceWriterVisitor
 
             if (lv != null)
             {
-                String name = this.constants.getConstantUtf8(lv.name_index);
+                String name = this.constants.getConstantUtf8(lv.nameIndex);
                 if (StringConstants.THIS_LOCAL_VARIABLE_NAME.equals(name)) {
                     thisInvoke = true;
                 }
@@ -1579,13 +1577,13 @@ public class SourceWriterVisitor
                 nextOffset <= this.lastOffset)
             {
                 String internalClassName =
-                    this.constants.getConstantClassName(cmr.class_index);
-                String methodName = constants.getConstantUtf8(cnat.name_index);
+                    this.constants.getConstantClassName(cmr.getClassIndex());
+                String methodName = constants.getConstantUtf8(cnat.getNameIndex());
                 if (this.keywordSet.contains(methodName)) {
                     methodName = StringConstants.JD_METHOD_PREFIX + methodName;
                 }
                 String descriptor =
-                    this.constants.getConstantUtf8(cnat.descriptor_index);
+                    this.constants.getConstantUtf8(cnat.getDescriptorIndex());
                 // Methode de la classe courante : elimination du prefix 'this.'
                 this.printer.printMethod(
                     insi.lineNumber, internalClassName, methodName,
@@ -1597,7 +1595,7 @@ public class SourceWriterVisitor
             boolean displayPrefix =
                 insi.objectref.opcode != ByteCodeConstants.OUTERTHIS ||
             needAPrefixForThisMethod(
-                cnat.name_index, cnat.descriptor_index,
+                cnat.getNameIndex(), cnat.getDescriptorIndex(),
                 (GetStatic)insi.objectref);
 
             int lineNumber = insi.objectref.lineNumber;
@@ -1630,13 +1628,13 @@ public class SourceWriterVisitor
                 nextOffset <= this.lastOffset)
             {
                 String internalClassName =
-                    this.constants.getConstantClassName(cmr.class_index);
-                String methodName = constants.getConstantUtf8(cnat.name_index);
+                    this.constants.getConstantClassName(cmr.getClassIndex());
+                String methodName = constants.getConstantUtf8(cnat.getNameIndex());
                 if (this.keywordSet.contains(methodName)) {
                     methodName = StringConstants.JD_METHOD_PREFIX + methodName;
                 }
                 String descriptor =
-                    this.constants.getConstantUtf8(cnat.descriptor_index);
+                    this.constants.getConstantUtf8(cnat.getDescriptorIndex());
                 this.printer.printMethod(
                     lineNumber, internalClassName, methodName,
                     descriptor, this.classFile.getThisClassName());
@@ -1659,7 +1657,7 @@ public class SourceWriterVisitor
         ConstantFieldref cfr =
             this.constants.getConstantFieldref(getStatic.index);
         String getStaticOuterClassName =
-            this.constants.getConstantClassName(cfr.class_index);
+            this.constants.getConstantClassName(cfr.getClassIndex());
         String methodName = this.constants.getConstantUtf8(methodNameIndex);
         String methodDescriptor =
             this.constants.getConstantUtf8(methodDescriptorIndex);
@@ -1691,7 +1689,7 @@ public class SourceWriterVisitor
     {
         ConstantMethodref cmr = constants.getConstantMethodref(insi.index);
         ConstantNameAndType cnat =
-            constants.getConstantNameAndType(cmr.name_and_type_index);
+            constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
         boolean thisInvoke = false;
         int firstIndex;
 
@@ -1704,16 +1702,16 @@ public class SourceWriterVisitor
                         aload.index, aload.offset);
 
             if (lv != null &&
-                lv.name_index == this.constants.thisLocalVariableNameIndex)
+                lv.nameIndex == this.constants.thisLocalVariableNameIndex)
             {
                 thisInvoke = true;
             }
         }
 
         // Appel d'un constructeur?
-        if (thisInvoke && cnat.name_index == constants.instanceConstructorIndex)
+        if (thisInvoke && cnat.getNameIndex() == constants.instanceConstructorIndex)
         {
-            if (cmr.class_index == classFile.getThisClassIndex())
+            if (cmr.getClassIndex() == classFile.getThisClassIndex())
             {
                 // Appel d'un constructeur de la classe courante
                 if ((this.classFile.access_flags & ClassFileConstants.ACC_ENUM) == 0)
@@ -1765,9 +1763,9 @@ public class SourceWriterVisitor
                 int lineNumber = insi.lineNumber;
 
                 // Appel d'un constructeur?
-                if (cnat.name_index == constants.instanceConstructorIndex)
+                if (cnat.getNameIndex() == constants.instanceConstructorIndex)
                 {
-                    if (cmr.class_index == classFile.getThisClassIndex())
+                    if (cmr.getClassIndex() == classFile.getThisClassIndex())
                     {
                         // Appel d'un constructeur de la classe courante
                         this.printer.printKeyword(lineNumber, "this");
@@ -1782,7 +1780,7 @@ public class SourceWriterVisitor
                 {
                     // Appel a une méthode privee?
                     Method method = this.classFile.getMethod(
-                        cnat.name_index, cnat.descriptor_index);
+                        cnat.getNameIndex(), cnat.getDescriptorIndex());
 
                     if (method == null ||
                         (method.access_flags & ClassFileConstants.ACC_PRIVATE) == 0)
@@ -1797,13 +1795,13 @@ public class SourceWriterVisitor
                     //}
 
                     String internalClassName =
-                        this.constants.getConstantClassName(cmr.class_index);
-                    String methodName = constants.getConstantUtf8(cnat.name_index);
+                        this.constants.getConstantClassName(cmr.getClassIndex());
+                    String methodName = constants.getConstantUtf8(cnat.getNameIndex());
                     if (this.keywordSet.contains(methodName)) {
                         methodName = StringConstants.JD_METHOD_PREFIX + methodName;
                     }
                     String descriptor =
-                        this.constants.getConstantUtf8(cnat.descriptor_index);
+                        this.constants.getConstantUtf8(cnat.getDescriptorIndex());
                     this.printer.printMethod(
                         lineNumber, internalClassName, methodName,
                         descriptor, this.classFile.getThisClassName());
@@ -1824,13 +1822,13 @@ public class SourceWriterVisitor
                 this.printer.print(lineNumber, '.');
 
                 String internalClassName =
-                    this.constants.getConstantClassName(cmr.class_index);
-                String methodName = constants.getConstantUtf8(cnat.name_index);
+                    this.constants.getConstantClassName(cmr.getClassIndex());
+                String methodName = constants.getConstantUtf8(cnat.getNameIndex());
                 if (this.keywordSet.contains(methodName)) {
                     methodName = StringConstants.JD_METHOD_PREFIX + methodName;
                 }
                 String descriptor =
-                    this.constants.getConstantUtf8(cnat.descriptor_index);
+                    this.constants.getConstantUtf8(cnat.getDescriptorIndex());
 
                 this.printer.printMethod(
                     internalClassName, methodName,
@@ -1851,19 +1849,18 @@ public class SourceWriterVisitor
         {
             int lineNumber = invokestatic.lineNumber;
 
-            ConstantMethodref cmr =
-                constants.getConstantMethodref(invokestatic.index);
+            ConstantMethodref cmr = constants.getConstantMethodref(invokestatic.index);
 
             String internalClassName =
-                this.constants.getConstantClassName(cmr.class_index);
+                this.constants.getConstantClassName(cmr.getClassIndex());
 
-            if (classFile.getThisClassIndex() != cmr.class_index)
+            if (classFile.getThisClassIndex() != cmr.getClassIndex())
             {
                 this.printer.addNewLinesAndPrefix(lineNumber);
                 int length = SignatureWriter.WriteSignature(
                     this.loader, this.printer,
                     this.referenceMap, this.classFile,
-                    SignatureUtil.CreateTypeName(constants.getConstantClassName(cmr.class_index)));
+                    SignatureUtil.CreateTypeName(constants.getConstantClassName(cmr.getClassIndex())));
 
                 if (length > 0)
                 {
@@ -1872,14 +1869,14 @@ public class SourceWriterVisitor
             }
 
             ConstantNameAndType cnat =
-                constants.getConstantNameAndType(cmr.name_and_type_index);
+                constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 
-            String methodName = constants.getConstantUtf8(cnat.name_index);
+            String methodName = constants.getConstantUtf8(cnat.getNameIndex());
             if (this.keywordSet.contains(methodName)) {
                 methodName = StringConstants.JD_METHOD_PREFIX + methodName;
             }
             String descriptor =
-                    this.constants.getConstantUtf8(cnat.descriptor_index);
+                    this.constants.getConstantUtf8(cnat.getDescriptorIndex());
 
             this.printer.printStaticMethod(
                 lineNumber, internalClassName, methodName, descriptor,
@@ -1945,12 +1942,11 @@ public class SourceWriterVisitor
         if (this.firstOffset <= this.previousOffset &&
             getStatic.offset <= this.lastOffset)
         {
-            ConstantFieldref cfr =
-                constants.getConstantFieldref(getStatic.index);
+            ConstantFieldref cfr = constants.getConstantFieldref(getStatic.index);
             String internalClassName =
-                constants.getConstantClassName(cfr.class_index);
+                constants.getConstantClassName(cfr.getClassIndex());
 
-            if (cfr.class_index != classFile.getThisClassIndex())
+            if (cfr.getClassIndex() != classFile.getThisClassIndex())
             {
                 this.printer.addNewLinesAndPrefix(lineNumber);
 
@@ -1967,9 +1963,9 @@ public class SourceWriterVisitor
             }
 
             ConstantNameAndType cnat = constants.getConstantNameAndType(
-                cfr.name_and_type_index);
-            String descriptor = constants.getConstantUtf8(cnat.descriptor_index);
-            String constName = constants.getConstantUtf8(cnat.name_index);
+                cfr.getNameAndTypeIndex());
+            String descriptor = constants.getConstantUtf8(cnat.getDescriptorIndex());
+            String constName = constants.getConstantUtf8(cnat.getNameIndex());
 
             this.printer.printStaticField(
                 lineNumber, internalClassName, constName,
@@ -1986,16 +1982,15 @@ public class SourceWriterVisitor
         if (this.firstOffset <= this.previousOffset &&
             getStatic.offset <= this.lastOffset)
         {
-            ConstantFieldref cfr =
-                constants.getConstantFieldref(getStatic.index);
+            ConstantFieldref cfr = constants.getConstantFieldref(getStatic.index);
 
-            if (cfr.class_index != classFile.getThisClassIndex())
+            if (cfr.getClassIndex() != classFile.getThisClassIndex())
             {
                 this.printer.addNewLinesAndPrefix(lineNumber);
                 int length = SignatureWriter.WriteSignature(
                     this.loader, this.printer,
                     this.referenceMap, this.classFile,
-                    SignatureUtil.CreateTypeName(constants.getConstantClassName(cfr.class_index)));
+                    SignatureUtil.CreateTypeName(constants.getConstantClassName(cfr.getClassIndex())));
 
                 if (length > 0)
                 {
@@ -2004,9 +1999,9 @@ public class SourceWriterVisitor
             }
 
             ConstantNameAndType cnat = constants.getConstantNameAndType(
-                cfr.name_and_type_index);
+                cfr.getNameAndTypeIndex());
             this.printer.printKeyword(
-                lineNumber, constants.getConstantUtf8(cnat.name_index));
+                lineNumber, constants.getConstantUtf8(cnat.getNameIndex()));
         }
 
         return lineNumber;
@@ -2025,12 +2020,12 @@ public class SourceWriterVisitor
             // instruction LDC pointant un objet de type 'ConstantClass'.
             Constant cst = constants.get(ii.index);
 
-            if (cst.tag == ConstantConstant.CONSTANT_CLASS)
+            if (cst instanceof ConstantClass)
             {
                 // Exception a la regle
                 ConstantClass cc = (ConstantClass)cst;
                 String signature = SignatureUtil.CreateTypeName(
-                    constants.getConstantUtf8(cc.name_index));
+                    constants.getConstantUtf8(cc.getNameIndex()));
 
                 this.printer.addNewLinesAndPrefix(lineNumber);
                 SignatureWriter.WriteSignature(
@@ -2045,7 +2040,7 @@ public class SourceWriterVisitor
                 this.printer.addNewLinesAndPrefix(lineNumber);
                 ConstantValueWriter.Write(
                     this.loader, this.printer, this.referenceMap,
-                    this.classFile, (ConstantValue)cst);
+                    this.classFile, cst);
             }
         }
 
@@ -2063,7 +2058,7 @@ public class SourceWriterVisitor
                 this.localVariables.getLocalVariableWithIndexAndOffset(
                     loadInstruction.index, loadInstruction.offset);
 
-            if (lv == null || lv.name_index <= 0)
+            if (lv == null || lv.nameIndex <= 0)
             {
                 // Error
                 this.printer.startOfError();
@@ -2072,17 +2067,17 @@ public class SourceWriterVisitor
             }
             else
             {
-                int nameIndex = lv.name_index;
+                int nameIndex = lv.nameIndex;
 
                 if (nameIndex == this.constants.thisLocalVariableNameIndex)
                 {
                     this.printer.printKeyword(
-                        lineNumber, constants.getConstantUtf8(lv.name_index));
+                        lineNumber, constants.getConstantUtf8(lv.nameIndex));
                 }
                 else
                 {
                     this.printer.print(
-                        lineNumber, constants.getConstantUtf8(lv.name_index));
+                        lineNumber, constants.getConstantUtf8(lv.nameIndex));
                 }
             }
         }
@@ -2156,12 +2151,12 @@ public class SourceWriterVisitor
 
             ConstantFieldref cfr = constants.getConstantFieldref(putStatic.index);
 
-            if (cfr.class_index != classFile.getThisClassIndex())
+            if (cfr.getClassIndex() != classFile.getThisClassIndex())
             {
                 this.printer.addNewLinesAndPrefix(lineNumber);
 
                 String signature = SignatureUtil.CreateTypeName(
-                    this.constants.getConstantClassName(cfr.class_index));
+                    this.constants.getConstantClassName(cfr.getClassIndex()));
 
                 int length = SignatureWriter.WriteSignature(
                     this.loader, this.printer,
@@ -2174,10 +2169,10 @@ public class SourceWriterVisitor
             }
 
             ConstantNameAndType cnat =
-                constants.getConstantNameAndType(cfr.name_and_type_index);
-            String descriptor = constants.getConstantUtf8(cnat.descriptor_index);
+                constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
+            String descriptor = constants.getConstantUtf8(cnat.getDescriptorIndex());
             String internalClassName = SignatureUtil.GetInternalName(descriptor);
-            String constName = constants.getConstantUtf8(cnat.name_index);
+            String constName = constants.getConstantUtf8(cnat.getNameIndex());
 
             this.printer.printStaticField(
                 lineNumber, internalClassName, constName,
@@ -2204,7 +2199,7 @@ public class SourceWriterVisitor
                 this.localVariables.getLocalVariableWithIndexAndOffset(
                     storeInstruction.index, storeInstruction.offset);
 
-            if (lv == null || lv.name_index <= 0)
+            if (lv == null || lv.nameIndex <= 0)
             {
                 this.printer.startOfError();
                 this.printer.print(lineNumber, "???");
@@ -2213,7 +2208,7 @@ public class SourceWriterVisitor
             else
             {
                 this.printer.print(
-                    lineNumber, constants.getConstantUtf8(lv.name_index));
+                    lineNumber, constants.getConstantUtf8(lv.nameIndex));
             }
 
             this.printer.print(lineNumber, " = ");
@@ -2242,7 +2237,7 @@ public class SourceWriterVisitor
                     this.localVariables.getLocalVariableWithIndexAndOffset(
                         exceptionLoad.index, exceptionLoad.offset);
 
-                if (lv == null || lv.name_index == 0)
+                if (lv == null || lv.nameIndex == 0)
                 {
                     this.printer.startOfError();
                     this.printer.print(lineNumber, "???");
@@ -2251,7 +2246,7 @@ public class SourceWriterVisitor
                 else
                 {
                     this.printer.print(
-                        lineNumber, constants.getConstantUtf8(lv.name_index));
+                        lineNumber, constants.getConstantUtf8(lv.nameIndex));
                 }
             }
         }
@@ -2417,7 +2412,7 @@ public class SourceWriterVisitor
                 if (this.firstOffset <= this.previousOffset &&
                     nextOffset <= this.lastOffset) {
                     this.printer.print(
-                        lineNumber, constants.getConstantUtf8(lv.name_index));
+                        lineNumber, constants.getConstantUtf8(lv.nameIndex));
                 }
             }
             else

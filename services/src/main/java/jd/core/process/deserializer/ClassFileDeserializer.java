@@ -18,6 +18,7 @@ package jd.core.process.deserializer;
 
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.loader.LoaderException;
+import org.jd.core.v1.model.classfile.constant.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;
 
@@ -36,7 +37,6 @@ import jd.core.model.classfile.Method;
 import jd.core.model.classfile.attribute.Attribute;
 import jd.core.model.classfile.attribute.AttributeInnerClasses;
 import jd.core.model.classfile.attribute.InnerClass;
-import jd.core.model.classfile.constant.*;
 
 public class ClassFileDeserializer
 {
@@ -82,7 +82,7 @@ public class ClassFileDeserializer
                     innerInternalClassPath.substring(0, offsetInternalInnerSeparator) +
                     StringConstants.CLASS_FILE_SUFFIX;
                 if (loader.canLoad(tmpInnerInternalClassPath))
-                    // 'innerInternalClassName' is not a direct inner classe.
+                    // 'innerInternalClassName' is not a direct inner class.
                     continue;
             }
 
@@ -168,61 +168,70 @@ public class ClassFileDeserializer
         throws IOException
     {
         int count = di.readUnsignedShort();
-        if (count == 0)
+
+        if (count == 0) {
             return null;
+        }
 
         Constant[] constants = new Constant[count];
 
-        for (int i=1; i<count; i++)
-        {
-            byte tag = di.readByte();
+        for (int i=1; i<count; i++) {
+        	byte tag = di.readByte();
 
-            switch (tag)
-            {
-            case ConstantConstant.CONSTANT_CLASS:
-                constants[i] = new ConstantClass(tag, di.readUnsignedShort());
-                break;
-            case ConstantConstant.CONSTANT_FIELDREF:
-                constants[i] = new ConstantFieldref(tag,
-                                                    di.readUnsignedShort(),
-                                                    di.readUnsignedShort());
-                break;
-            case ConstantConstant.CONSTANT_METHODREF:
-                constants[i] = new ConstantMethodref(tag,
-                                                     di.readUnsignedShort(),
-                                                     di.readUnsignedShort());
-                break;
-            case ConstantConstant.CONSTANT_INTERFACEMETHODREF:
-                constants[i] = new ConstantInterfaceMethodref(
-                                                       tag,
-                                                       di.readUnsignedShort(),
-                                                       di.readUnsignedShort());
-                break;
-            case ConstantConstant.CONSTANT_STRING:
-                constants[i] = new ConstantString(tag, di.readUnsignedShort());
-                break;
-            case ConstantConstant.CONSTANT_INTEGER:
-                constants[i] = new ConstantInteger(tag, di.readInt());
-                break;
-            case ConstantConstant.CONSTANT_FLOAT:
-                constants[i] = new ConstantFloat(tag, di.readFloat());
-                break;
-            case ConstantConstant.CONSTANT_LONG:
-                constants[i++] = new ConstantLong(tag, di.readLong());
-                break;
-            case ConstantConstant.CONSTANT_DOUBLE:
-                constants[i++] = new ConstantDouble(tag, di.readDouble());
-                break;
-            case ConstantConstant.CONSTANT_NAMEANDTYPE:
-                constants[i] = new ConstantNameAndType(tag,
-                                                       di.readUnsignedShort(),
-                                                       di.readUnsignedShort());
-                break;
-            case ConstantConstant.CONSTANT_UTF8:
-                constants[i] = new ConstantUtf8(tag, di.readUTF());
-                break;
-            default:
-                throw new ClassFormatException("Invalid constant pool entry");
+            switch (tag) {
+                case 19:
+                case 20:
+                case Constant.CONSTANT_CLASS:
+                    constants[i] = new ConstantClass(di.readUnsignedShort());
+                    break;
+                case Constant.CONSTANT_FIELDREF:
+                    constants[i] = new ConstantFieldref(di.readUnsignedShort(),
+                    		                            di.readUnsignedShort());
+                    break;
+                case Constant.CONSTANT_METHODREF:
+                    constants[i] = new ConstantMethodref(di.readUnsignedShort(),
+                    		                             di.readUnsignedShort());
+                    break;
+                case Constant.CONSTANT_INTERFACEMETHODREF:
+                    constants[i] = new ConstantInterfaceMethodref(di.readUnsignedShort(),
+                    		                                      di.readUnsignedShort());
+                    break;
+                case Constant.CONSTANT_STRING:
+                	constants[i] = new ConstantString(di.readUnsignedShort());
+                	break;
+                case Constant.CONSTANT_INTEGER:
+                	constants[i] = new ConstantInteger(di.readInt());
+                	break;
+                case Constant.CONSTANT_FLOAT:
+                	constants[i] = new ConstantFloat(di.readFloat());
+                	break;
+                case Constant.CONSTANT_LONG:
+                	constants[i++] = new ConstantLong(di.readLong());
+                	break;
+                case Constant.CONSTANT_DOUBLE:
+                	constants[i++] = new ConstantDouble(di.readDouble());
+                	break;
+                case Constant.CONSTANT_NAMEANDTYPE:
+                	constants[i] = new ConstantNameAndType(di.readUnsignedShort(),
+                			                               di.readUnsignedShort());
+                	break;
+                case Constant.CONSTANT_UTF8:
+                	constants[i] = new ConstantUtf8(di.readUTF());
+                	break;
+                case Constant.CONSTANT_INVOKEDYNAMIC:
+                case 17:
+                	constants[i] = new ConstantMethodref(di.readUnsignedShort(),
+                			                             di.readUnsignedShort());
+                	break;
+                case Constant.CONSTANT_METHODHANDLE:
+                	constants[i] = new ConstantMethodHandle(di.readByte(),
+                			                                di.readUnsignedShort());
+                	break;
+                case Constant.CONSTANT_METHODTYPE:
+                	constants[i] = new ConstantMethodType(di.readUnsignedShort());
+                	break;
+                default:
+                    throw new ClassFormatException("Invalid constant pool entry");
             }
         }
 

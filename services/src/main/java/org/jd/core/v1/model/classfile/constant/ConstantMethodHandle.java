@@ -8,11 +8,11 @@
 package org.jd.core.v1.model.classfile.constant;
 
 public class ConstantMethodHandle extends Constant {
-    protected int referenceKind;
-    protected int referenceIndex;
+	
+    private int referenceKind;
+    private int referenceIndex;
 
     public ConstantMethodHandle(int referenceKind, int referenceIndex) {
-        super(CONSTANT_METHODHANDLE);
         this.referenceKind = referenceKind;
         this.referenceIndex = referenceIndex;
     }

@@ -7,11 +7,11 @@
 
 package org.jd.core.v1.model.classfile.constant;
 
-public class ConstantLong extends ConstantValue {
-    protected long value;
+public class ConstantLong extends Constant {
+
+	private long value;
 
     public ConstantLong(long value) {
-        super(CONSTANT_LONG);
         this.value = value;
     }
 

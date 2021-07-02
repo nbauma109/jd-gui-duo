@@ -16,10 +16,14 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.visitor;
 
+import org.jd.core.v1.model.classfile.constant.Constant;
+import org.jd.core.v1.model.classfile.constant.ConstantClass;
+import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
+
 import java.util.List;
 
 import jd.core.model.classfile.ConstantPool;
-import jd.core.model.classfile.constant.*;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 import jd.core.model.instruction.fast.FastConstants;
@@ -163,7 +167,7 @@ public class ReferenceVisitor
             {
                 InvokeInstruction ii = (InvokeInstruction)instruction;
                 ConstantMethodref cmr = constants.getConstantMethodref(ii.index);
-                internalName = constants.getConstantClassName(cmr.class_index);
+                internalName = constants.getConstantClassName(cmr.getClassIndex());
                 addReference(internalName);
                 visit(ii.args);
             }
@@ -268,9 +272,8 @@ public class ReferenceVisitor
         case ByteCodeConstants.OUTERTHIS:
             {
                 IndexInstruction indexInstruction = (IndexInstruction)instruction;
-                ConstantFieldref cfr =
-                    constants.getConstantFieldref(indexInstruction.index);
-                internalName = constants.getConstantClassName(cfr.class_index);
+                ConstantFieldref cfr = constants.getConstantFieldref(indexInstruction.index);
+                internalName = constants.getConstantClassName(cfr.getClassIndex());
                 addReference(internalName);
             }
             break;
@@ -376,10 +379,10 @@ public class ReferenceVisitor
                 IndexInstruction indexInstruction = (IndexInstruction)instruction;
                 Constant cst = constants.get(indexInstruction.index);
 
-                if (cst.tag == ConstantConstant.CONSTANT_CLASS)
+                if (cst instanceof ConstantClass)
                 {
                     ConstantClass cc = (ConstantClass)cst;
-                    internalName = constants.getConstantUtf8(cc.name_index);
+                    internalName = constants.getConstantUtf8(cc.getNameIndex());
                     addReference(internalName);
                 }
             }
@@ -429,10 +432,10 @@ public class ReferenceVisitor
     {
         Constant c = constants.get(index);
 
-        if (c.tag == ConstantConstant.CONSTANT_CLASS)
+        if (c instanceof ConstantClass)
         {
             addReference(
-                constants.getConstantUtf8(((ConstantClass)c).name_index));
+                constants.getConstantUtf8(((ConstantClass)c).getNameIndex()));
         }
     }
 

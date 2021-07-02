@@ -216,6 +216,7 @@ public class InstructionFactoryConstants
         FACTORIES[ByteCodeConstants.INVOKESPECIAL]   = new InvokespecialFactory();
         FACTORIES[ByteCodeConstants.INVOKESTATIC ]   = new InvokestaticFactory();
         FACTORIES[ByteCodeConstants.INVOKEINTERFACE] = new InvokeinterfaceFactory();
+        FACTORIES[ByteCodeConstants.INVOKEDYNAMIC]   = new InvokeDynamicFactory();
         FACTORIES[ByteCodeConstants.NEW]             = new NewFactory();
         FACTORIES[ByteCodeConstants.NEWARRAY]        = new NewArrayFactory();
         FACTORIES[ByteCodeConstants.ANEWARRAY]       = new ANewArrayFactory();

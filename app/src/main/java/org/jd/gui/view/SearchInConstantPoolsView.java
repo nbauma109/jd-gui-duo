@@ -96,8 +96,14 @@ public class SearchInConstantPoolsView<T extends DefaultMutableTreeNode & Contai
             searchInConstantPoolsEnterTextField.addKeyListener(new KeyAdapter() {
                 @Override
                 public void keyTyped(KeyEvent e)  {
-                    if (e.getKeyChar() == '=' || e.getKeyChar() == '(' || e.getKeyChar() == ')' || e.getKeyChar() == '{'
-                            || e.getKeyChar() == '}' || e.getKeyChar() == '[' || e.getKeyChar() == ']' || (Character.isDigit(e.getKeyChar()) && searchInConstantPoolsEnterTextField.getText().isEmpty())) {
+                    if (e.getKeyChar() == '=' 
+                     || e.getKeyChar() == '(' 
+                     || e.getKeyChar() == ')' 
+                     || e.getKeyChar() == '{'
+                     || e.getKeyChar() == '}' 
+                     || e.getKeyChar() == '[' 
+                     || e.getKeyChar() == ']' 
+                     || (Character.isDigit(e.getKeyChar()) && searchInConstantPoolsEnterTextField.getText().isEmpty())) {
                         e.consume();
                     }
                 }

@@ -35,8 +35,8 @@ public class InstructionListException extends RuntimeException
     {
         ConstantPool constants = classFile.getConstantPool();
 
-        String name = constants.getConstantUtf8(method.name_index);
-        String descriptor = constants.getConstantUtf8(method.descriptor_index);
+        String name = constants.getConstantUtf8(method.getNameIndex());
+        String descriptor = constants.getConstantUtf8(method.getDescriptorIndex());
 
         StringBuilder sb = new StringBuilder();
 

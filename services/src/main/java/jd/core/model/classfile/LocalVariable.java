@@ -21,7 +21,7 @@ public class LocalVariable
 {
 	public int start_pc;
     public int length;
-    public int name_index;
+    public int nameIndex;
     public int signature_index;
     public final int index;
     public boolean exceptionOrReturnAddress;
@@ -37,34 +37,34 @@ public class LocalVariable
     private boolean toBeRemoved;
 
     public LocalVariable(
-            int start_pc, int length, int name_index, int signature_index,
+            int start_pc, int length, int nameIndex, int signature_index,
             int index)
     {
-        this(start_pc, length, name_index, signature_index, index, false, 0);
+        this(start_pc, length, nameIndex, signature_index, index, false, 0);
     }
 
     public LocalVariable(
-            int start_pc, int length, int name_index, int signature_index,
+            int start_pc, int length, int nameIndex, int signature_index,
             int index, int typesBitSet)
     {
-        this(start_pc, length, name_index, signature_index, index, false,
+        this(start_pc, length, nameIndex, signature_index, index, false,
              typesBitSet);
     }
 
     public LocalVariable(
-            int start_pc, int length, int name_index, int signature_index,
+            int start_pc, int length, int nameIndex, int signature_index,
             int index, boolean exception)
     {
-        this(start_pc, length, name_index, signature_index, index, exception, 0);
+        this(start_pc, length, nameIndex, signature_index, index, exception, 0);
     }
 
     protected LocalVariable(
-        int start_pc, int length, int name_index, int signature_index,
+        int start_pc, int length, int nameIndex, int signature_index,
         int index, boolean exceptionOrReturnAddress, int typesBitField)
     {
         this.start_pc = start_pc;
         this.length = length;
-        this.name_index = name_index;
+        this.nameIndex = nameIndex;
         this.signature_index = signature_index;
         this.index = index;
         this.exceptionOrReturnAddress = exceptionOrReturnAddress;
@@ -97,7 +97,7 @@ public class LocalVariable
         return
             "LocalVariable{start_pc=" + start_pc +
             ", length=" + length +
-            ", name_index=" + name_index +
+            ", nameIndex=" + nameIndex +
             ", signature_index=" + signature_index +
             ", index=" + index +
             "}";
@@ -109,8 +109,8 @@ public class LocalVariable
         if (other == null)
             return -1;
 
-        if (this.name_index != other.name_index)
-            return this.name_index - other.name_index;
+        if (this.nameIndex != other.nameIndex)
+            return this.nameIndex - other.nameIndex;
 
         if (this.length != other.length)
             return this.length - other.length;

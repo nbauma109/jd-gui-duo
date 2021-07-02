@@ -7,11 +7,11 @@
 
 package org.jd.core.v1.model.classfile.constant;
 
-public class ConstantFloat extends ConstantValue {
-    protected float value;
+public class ConstantFloat extends Constant {
+	
+    private float value;
 
     public ConstantFloat(float value) {
-        super(CONSTANT_FLOAT);
         this.value = value;
     }
 

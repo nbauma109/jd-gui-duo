@@ -16,14 +16,14 @@
  */
 package jd.core.process.analyzer.classfile;
 
+import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
+import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.List;
 
 import jd.core.model.classfile.*;
 import jd.core.model.classfile.attribute.AttributeSignature;
-import jd.core.model.classfile.constant.ConstantFieldref;
-import jd.core.model.classfile.constant.ConstantNameAndType;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 import jd.core.process.analyzer.classfile.visitor.AddCheckCastVisitor;
@@ -65,7 +65,7 @@ public class LocalVariableAnalyzer
         variableNameGenerator.clearLocalNames();
 
         // DEBUG String debugClassName = classFile.getInternalClassName();
-        // DEBUG String debugMethodName = constants.getConstantUtf8(method.name_index);
+        // DEBUG String debugMethodName = constants.getConstantUtf8(method.nameIndex);
 
         // Reconstruction de la Liste des variables locales
         byte[] code = method.getCode();
@@ -90,7 +90,7 @@ public class LocalVariableAnalyzer
                 localVariables.add(lv);
             }
 
-            if (method.name_index == constants.instanceConstructorIndex &&
+            if (method.getNameIndex() == constants.instanceConstructorIndex &&
                 classFile.isAInnerClass() &&
                 (classFile.access_flags & ClassFileConstants.ACC_STATIC) == 0)
             {
@@ -128,7 +128,7 @@ public class LocalVariableAnalyzer
             // Traitement des entrées correspondant aux parametres
             AttributeSignature as = method.getAttributeSignature();
             String methodSignature = constants.getConstantUtf8(
-                    (as==null) ? method.descriptor_index : as.signature_index);
+                    (as==null) ? method.getDescriptorIndex() : as.signature_index);
 
             int indexOfFirstLocalVariable =
                 (((method.access_flags & ClassFileConstants.ACC_STATIC) == 0) ? 1 : 0) +
@@ -208,7 +208,7 @@ public class LocalVariableAnalyzer
         // constructeurs des Enums !
         AttributeSignature as = method.getAttributeSignature();
         String methodSignature = constants.getConstantUtf8(
-                as == null ? method.descriptor_index : as.signature_index);
+                as == null ? method.getDescriptorIndex() : as.signature_index);
         List<String> parameterTypes =
             SignatureUtil.GetParameterSignatures(methodSignature);
 
@@ -230,7 +230,7 @@ public class LocalVariableAnalyzer
 
             int firstVisibleParameterCounter = 0;
 
-            if (method.name_index == constants.instanceConstructorIndex)
+            if (method.getNameIndex() == constants.instanceConstructorIndex)
             {
                 if ((classFile.access_flags & ClassFileConstants.ACC_ENUM) != 0)
                 {
@@ -504,7 +504,7 @@ public class LocalVariableAnalyzer
                                     String name =
                                         variableNameGenerator.generateLocalVariableNameFromSignature(
                                             signature, appearsOnce);
-                                    lv.name_index = constants.addConstantUtf8(name);
+                                    lv.nameIndex = constants.addConstantUtf8(name);
                                 }
                                 else
                                 {
@@ -639,7 +639,7 @@ public class LocalVariableAnalyzer
 //				LocalVariable lv2 = localVariables.getLocalVariableAt(j);
 //				if ((lv1.index == lv2.index) &&
 //					(lv1.signature_index == lv2.signature_index) &&
-//					(lv1.name_index == lv2.name_index))
+//					(lv1.nameIndex == lv2.nameIndex))
 //				{
 //					localVariables.remove(i);
 //					lv2.updateRange(lv1.start_pc);
@@ -1438,8 +1438,8 @@ public class LocalVariableAnalyzer
                 || valueref.opcode == ByteCodeConstants.SIPUSH) {
             ConstantFieldref cfr = constants.getConstantFieldref(index);
             ConstantNameAndType cnat =
-                constants.getConstantNameAndType(cfr.name_and_type_index);
-            String signature = constants.getConstantUtf8(cnat.descriptor_index);
+                constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
+            String signature = constants.getConstantUtf8(cnat.getDescriptorIndex());
             ((IConst)valueref).setReturnedSignature(signature);
         }
     }
@@ -1509,12 +1509,11 @@ public class LocalVariableAnalyzer
             case ByteCodeConstants.GETSTATIC:
                 {
                     IndexInstruction ii = (IndexInstruction)asi.arrayref;
-                    ConstantFieldref cfr =
-                        constants.getConstantFieldref(ii.index);
+                    ConstantFieldref cfr = constants.getConstantFieldref(ii.index);
                     ConstantNameAndType cnat =
-                        constants.getConstantNameAndType(cfr.name_and_type_index);
+                        constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
                     String signature =
-                        constants.getConstantUtf8(cnat.descriptor_index);
+                        constants.getConstantUtf8(cnat.getDescriptorIndex());
                     ((IConst)asi.valueref).setReturnedSignature(
                             SignatureUtil.CutArrayDimensionPrefix(signature));
                 }
@@ -1586,7 +1585,7 @@ public class LocalVariableAnalyzer
     {
         AttributeSignature as = method.getAttributeSignature();
         int signatureIndex = (as == null) ?
-            method.descriptor_index : as.signature_index;
+            method.getDescriptorIndex() : as.signature_index;
         String signature =
             classFile.getConstantPool().getConstantUtf8(signatureIndex);
 
@@ -1665,7 +1664,7 @@ public class LocalVariableAnalyzer
         {
             final LocalVariable lv = localVariables.getLocalVariableAt(i);
 
-            if (lv != null && lv.name_index <= 0)
+            if (lv != null && lv.nameIndex <= 0)
             {
                 String signature = constants.getConstantUtf8(lv.signature_index);
                 boolean appearsOnce = SignatureAppearsOnceInLocalVariables(
@@ -1673,7 +1672,7 @@ public class LocalVariableAnalyzer
                 String name =
                     variableNameGenerator.generateLocalVariableNameFromSignature(
                             signature, appearsOnce);
-                lv.name_index = constants.addConstantUtf8(name);
+                lv.nameIndex = constants.addConstantUtf8(name);
             }
         }
     }
@@ -1759,11 +1758,11 @@ public class LocalVariableAnalyzer
         {
             ConstantFieldref cfr = constants.getConstantFieldref(ii.index);
             ConstantNameAndType cnat =
-                constants.getConstantNameAndType(cfr.name_and_type_index);
+                constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
 
             if (lvLoad.signature_index == NUMBER_TYPE)
             {
-                String descriptor = constants.getConstantUtf8(cnat.descriptor_index);
+                String descriptor = constants.getConstantUtf8(cnat.getDescriptorIndex());
                 int typesBitField = SignatureUtil.CreateArgOrReturnBitFields(descriptor);
                 int old = lvLoad.typesBitField;
                 lvLoad.typesBitField &= typesBitField;
@@ -1771,7 +1770,7 @@ public class LocalVariableAnalyzer
             }
             if (lvLoad.signature_index == UNDEFINED_TYPE)
             {
-                lvLoad.signature_index = cnat.descriptor_index;
+                lvLoad.signature_index = cnat.getDescriptorIndex();
                 return true;
             }
         }

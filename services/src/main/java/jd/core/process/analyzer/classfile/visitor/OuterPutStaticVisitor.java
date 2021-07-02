@@ -16,6 +16,9 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.visitor;
 
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
+import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
+
 import java.util.Map;
 
 import jd.core.model.classfile.ClassFile;
@@ -23,8 +26,6 @@ import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.accessor.Accessor;
 import jd.core.model.classfile.accessor.AccessorConstants;
 import jd.core.model.classfile.accessor.PutStaticAccessor;
-import jd.core.model.classfile.constant.ConstantMethodref;
-import jd.core.model.classfile.constant.ConstantNameAndType;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.Invokestatic;
@@ -49,24 +50,23 @@ public class OuterPutStaticVisitor extends OuterGetStaticVisitor
             return null;
 
         Invokestatic is = (Invokestatic)i;
-        ConstantMethodref cmr =
-            constants.getConstantMethodref(is.index);
+        ConstantMethodref cmr = constants.getConstantMethodref(is.index);
         ConstantNameAndType cnat =
-            constants.getConstantNameAndType(cmr.name_and_type_index);
+            constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
         String descriptor =
-            constants.getConstantUtf8(cnat.descriptor_index);
+            constants.getConstantUtf8(cnat.getDescriptorIndex());
 
         // One parameter ?
         if (cmr.getNbrOfParameters() != 1)
             return null;
 
-        String className = constants.getConstantClassName(cmr.class_index);
+        String className = constants.getConstantClassName(cmr.getClassIndex());
         ClassFile classFile = this.innerClassesMap.get(className);
         if (classFile == null)
             return null;
 
         String name =
-            constants.getConstantUtf8(cnat.name_index);
+            constants.getConstantUtf8(cnat.getNameIndex());
 
         Accessor accessor = classFile.getAccessor(name, descriptor);
 

@@ -16,12 +16,13 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.visitor;
 
+import org.jd.core.v1.model.classfile.constant.ConstantClass;
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
+import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
+
 import java.util.List;
 
 import jd.core.model.classfile.ConstantPool;
-import jd.core.model.classfile.constant.ConstantClass;
-import jd.core.model.classfile.constant.ConstantMethodref;
-import jd.core.model.classfile.constant.ConstantNameAndType;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 
@@ -117,9 +118,9 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
                 Invokevirtual iv = (Invokevirtual)instruction;
                 ConstantMethodref cmr =
                     this.constants.getConstantMethodref(iv.index);
-                ConstantClass cc = this.constants.getConstantClass(cmr.class_index);
+                ConstantClass cc = this.constants.getConstantClass(cmr.getClassIndex());
 
-                if (cc.name_index == this.constants.stringClassNameIndex)
+                if (cc.getNameIndex() == this.constants.stringClassNameIndex)
                 {
                     int nbrOfParameters = iv.args.size();
 
@@ -134,9 +135,9 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
                         {
                             ConstantNameAndType cnat =
                                 this.constants.getConstantNameAndType(
-                                    cmr.name_and_type_index);
+                                    cmr.getNameAndTypeIndex());
                             String name =
-                                this.constants.getConstantUtf8(cnat.name_index);
+                                this.constants.getConstantUtf8(cnat.getNameIndex());
 
                             if ("indexOf".equals(name) ||
                                 "lastIndexOf".equals(name))

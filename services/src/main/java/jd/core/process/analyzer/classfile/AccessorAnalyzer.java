@@ -16,15 +16,16 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile;
 
+import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
+import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
+
 import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.Method;
 import jd.core.model.classfile.accessor.*;
-import jd.core.model.classfile.constant.ConstantFieldref;
-import jd.core.model.classfile.constant.ConstantMethodref;
-import jd.core.model.classfile.constant.ConstantNameAndType;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 import jd.core.util.SignatureUtil;
@@ -92,21 +93,21 @@ public class AccessorAnalyzer
         ConstantFieldref cfr = constants.getConstantFieldref(
             ((GetStatic)instruction).index);
 
-        if (cfr.class_index != classFile.getThisClassIndex())
+        if (cfr.getClassIndex() != classFile.getThisClassIndex())
             return false;
 
         String methodDescriptor =
-            constants.getConstantUtf8(method.descriptor_index);
+            constants.getConstantUtf8(method.getDescriptorIndex());
         if (methodDescriptor.charAt(1) != ')')
             return false;
 
-        String methodName = constants.getConstantUtf8(method.name_index);
+        String methodName = constants.getConstantUtf8(method.getNameIndex());
 
         ConstantNameAndType cnat = constants.getConstantNameAndType(
-            cfr.name_and_type_index);
+            cfr.getNameAndTypeIndex());
 
-        String fieldDescriptor = constants.getConstantUtf8(cnat.descriptor_index);
-        String fieldName = constants.getConstantUtf8(cnat.name_index);
+        String fieldDescriptor = constants.getConstantUtf8(cnat.getDescriptorIndex());
+        String fieldName = constants.getConstantUtf8(cnat.getNameIndex());
 
         // Trouve ! Ajout de l'accesseur.
         classFile.addAccessor(methodName, methodDescriptor,
@@ -144,23 +145,23 @@ public class AccessorAnalyzer
         ConstantFieldref cfr = constants.getConstantFieldref(
             ((PutStatic)instruction).index);
 
-        if (cfr.class_index != classFile.getThisClassIndex())
+        if (cfr.getClassIndex() != classFile.getThisClassIndex())
             return false;
 
         String methodDescriptor =
-            constants.getConstantUtf8(method.descriptor_index);
+            constants.getConstantUtf8(method.getDescriptorIndex());
         if (methodDescriptor.charAt(1) == ')')
             return false;
         if (SignatureUtil.GetParameterSignatureCount(methodDescriptor) != 1)
             return false;
 
-        String methodName = constants.getConstantUtf8(method.name_index);
+        String methodName = constants.getConstantUtf8(method.getNameIndex());
 
         ConstantNameAndType cnat = constants.getConstantNameAndType(
-            cfr.name_and_type_index);
+            cfr.getNameAndTypeIndex());
 
-        String fieldDescriptor = constants.getConstantUtf8(cnat.descriptor_index);
-        String fieldName = constants.getConstantUtf8(cnat.name_index);
+        String fieldDescriptor = constants.getConstantUtf8(cnat.getDescriptorIndex());
+        String fieldName = constants.getConstantUtf8(cnat.getNameIndex());
 
         // Trouve ! Ajout de l'accesseur.
         classFile.addAccessor(methodName, methodDescriptor,
@@ -199,23 +200,23 @@ public class AccessorAnalyzer
         ConstantFieldref cfr = constants.getConstantFieldref(
             ((GetField)instruction).index);
 
-        if (cfr.class_index != classFile.getThisClassIndex())
+        if (cfr.getClassIndex() != classFile.getThisClassIndex())
             return false;
 
         String methodDescriptor =
-            constants.getConstantUtf8(method.descriptor_index);
+            constants.getConstantUtf8(method.getDescriptorIndex());
         if (methodDescriptor.charAt(1) == ')')
             return false;
         if (SignatureUtil.GetParameterSignatureCount(methodDescriptor) != 1)
             return false;
 
-        String methodName = constants.getConstantUtf8(method.name_index);
+        String methodName = constants.getConstantUtf8(method.getNameIndex());
 
         ConstantNameAndType cnat = constants.getConstantNameAndType(
-            cfr.name_and_type_index);
+            cfr.getNameAndTypeIndex());
 
-        String fieldDescriptor = constants.getConstantUtf8(cnat.descriptor_index);
-        String fieldName = constants.getConstantUtf8(cnat.name_index);
+        String fieldDescriptor = constants.getConstantUtf8(cnat.getDescriptorIndex());
+        String fieldName = constants.getConstantUtf8(cnat.getNameIndex());
 
         // Trouve ! Ajout de l'accesseur.
         classFile.addAccessor(methodName, methodDescriptor,
@@ -278,22 +279,22 @@ public class AccessorAnalyzer
         ConstantPool constants = classFile.getConstantPool();
         ConstantFieldref cfr = constants.getConstantFieldref(pf.index);
 
-        if (cfr.class_index != classFile.getThisClassIndex())
+        if (cfr.getClassIndex() != classFile.getThisClassIndex())
             return false;
 
         String methodDescriptor =
-            constants.getConstantUtf8(method.descriptor_index);
+            constants.getConstantUtf8(method.getDescriptorIndex());
         if (methodDescriptor.charAt(1) == ')')
             return false;
         if (SignatureUtil.GetParameterSignatureCount(methodDescriptor) != 2)
             return false;
 
         ConstantNameAndType cnat = constants.getConstantNameAndType(
-                cfr.name_and_type_index);
+                cfr.getNameAndTypeIndex());
 
-        String methodName = constants.getConstantUtf8(method.name_index);
-        String fieldDescriptor = constants.getConstantUtf8(cnat.descriptor_index);
-        String fieldName = constants.getConstantUtf8(cnat.name_index);
+        String methodName = constants.getConstantUtf8(method.getNameIndex());
+        String fieldDescriptor = constants.getConstantUtf8(cnat.getDescriptorIndex());
+        String fieldName = constants.getConstantUtf8(cnat.getNameIndex());
 
         // Trouve ! Ajout de l'accesseur.
         classFile.addAccessor(methodName, methodDescriptor,
@@ -366,17 +367,17 @@ public class AccessorAnalyzer
 
         ConstantPool constants = classFile.getConstantPool();
 
-        String methodName = constants.getConstantUtf8(method.name_index);
+        String methodName = constants.getConstantUtf8(method.getNameIndex());
         String methodDescriptor =
-            constants.getConstantUtf8(method.descriptor_index);
+            constants.getConstantUtf8(method.getDescriptorIndex());
 
         ConstantMethodref cmr = constants.getConstantMethodref(ii.index);
         ConstantNameAndType cnat = constants.getConstantNameAndType(
-            cmr.name_and_type_index);
+            cmr.getNameAndTypeIndex());
 
-        String targetMethodName = constants.getConstantUtf8(cnat.name_index);
+        String targetMethodName = constants.getConstantUtf8(cnat.getNameIndex());
         String targetMethodDescriptor =
-            constants.getConstantUtf8(cnat.descriptor_index);
+            constants.getConstantUtf8(cnat.getDescriptorIndex());
 
         // Trouve ! Ajout de l'accesseur.
         classFile.addAccessor(methodName, methodDescriptor,

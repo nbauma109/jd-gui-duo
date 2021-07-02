@@ -87,10 +87,10 @@ public class SignatureWriter
 
         ConstantPool constants = classFile.getConstantPool();
         String internalClassName = classFile.getThisClassName();
-        String descriptor = constants.getConstantUtf8(method.descriptor_index);
+        String descriptor = constants.getConstantUtf8(method.getDescriptorIndex());
         boolean staticMethodFlag = (method.access_flags & ClassFileConstants.ACC_STATIC) != 0;
 
-        if (method.name_index == constants.instanceConstructorIndex)
+        if (method.getNameIndex() == constants.instanceConstructorIndex)
         {
             printer.printConstructorDeclaration(internalClassName, classFile.getClassName(), descriptor);
         }
@@ -109,7 +109,7 @@ public class SignatureWriter
 
             printer.print(' ');
 
-            String methodName = constants.getConstantUtf8(method.name_index);
+            String methodName = constants.getConstantUtf8(method.getNameIndex());
             if (keywordSet.contains(methodName)) {
                 methodName = StringConstants.JD_METHOD_PREFIX + methodName;
             }
@@ -136,7 +136,7 @@ public class SignatureWriter
         int variableIndex = staticMethodFlag ? 0 : 1;
         int firstVisibleParameterIndex = 0;
 
-        if (method.name_index == constants.instanceConstructorIndex) {
+        if (method.getNameIndex() == constants.instanceConstructorIndex) {
             if ((classFile.access_flags & ClassFileConstants.ACC_ENUM) != 0) {
                 if (descriptorFlag) {
                     firstVisibleParameterIndex = 2;
@@ -206,12 +206,12 @@ public class SignatureWriter
 
                 if (lv != null) {
                     printer.print(' ');
-                    if (lv.name_index == -1) {
+                    if (lv.nameIndex == -1) {
                         printer.startOfError();
                         printer.print("???");
                         printer.endOfError();
                     } else {
-                        printer.print(constants.getConstantUtf8(lv.name_index));
+                        printer.print(constants.getConstantUtf8(lv.nameIndex));
                     }
                 } else {
                     printer.print(" arg");

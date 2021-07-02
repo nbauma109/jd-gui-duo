@@ -16,14 +16,15 @@
  ******************************************************************************/
 package jd.core.process.layouter;
 
+import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
+import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
+
 import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.Method;
-import jd.core.model.classfile.constant.ConstantFieldref;
-import jd.core.model.classfile.constant.ConstantMethodref;
-import jd.core.model.classfile.constant.ConstantNameAndType;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 import jd.core.model.instruction.fast.FastConstants;
@@ -622,7 +623,7 @@ public class JavaSourceLayouter
                 // "static int[] $SWITCH_TABLE$basic$data$TestEnum$enum1()".
                 Invokestatic is = (Invokestatic)ali.arrayref;
                 ConstantMethodref cmr = constants.getConstantMethodref(is.index);
-                cnat = constants.getConstantNameAndType(cmr.name_and_type_index);
+                cnat = constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
             }
             else if (ali.arrayref.opcode == ByteCodeConstants.GETSTATIC)
             {
@@ -632,14 +633,14 @@ public class JavaSourceLayouter
                 // "$SwitchMap$basic$data$TestEnum$enum1".
                 GetStatic gs = (GetStatic)ali.arrayref;
                 ConstantFieldref cfr = constants.getConstantFieldref(gs.index);
-                cnat = constants.getConstantNameAndType(cfr.name_and_type_index);
+                cnat = constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
             }
             else
             {
                 throw new IllegalStateException();
             }
 
-            switchMapKeyIndex = cnat.name_index;
+            switchMapKeyIndex = cnat.getNameIndex();
 
             Invokevirtual iv = (Invokevirtual)ali.indexref;
 

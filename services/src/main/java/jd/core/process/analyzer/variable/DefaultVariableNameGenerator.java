@@ -42,7 +42,7 @@ public class DefaultVariableNameGenerator implements VariableNameGenerator
             for (int i=0; i<fields.length; i++) {
                 this.fieldNames.add(
                     classFile.getConstantPool().
-                        getConstantUtf8(fields[i].name_index));
+                        getConstantUtf8(fields[i].getNameIndex()));
             }
         }
     }

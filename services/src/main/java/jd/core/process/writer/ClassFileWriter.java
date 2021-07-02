@@ -17,6 +17,8 @@
 package jd.core.process.writer;
 
 import org.jd.core.v1.api.loader.Loader;
+import org.jd.core.v1.model.classfile.constant.Constant;
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.*;
@@ -25,8 +27,6 @@ import jd.core.model.classfile.*;
 import jd.core.model.classfile.attribute.Annotation;
 import jd.core.model.classfile.attribute.AttributeSignature;
 import jd.core.model.classfile.attribute.ElementValue;
-import jd.core.model.classfile.constant.ConstantMethodref;
-import jd.core.model.classfile.constant.ConstantValue;
 import jd.core.model.instruction.bytecode.instruction.ArrayLoadInstruction;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.Invokevirtual;
@@ -1553,7 +1553,7 @@ public class ClassFileWriter
 
         AttributeSignature as = field.getAttributeSignature();
         int signatureIndex = (as == null) ?
-                field.descriptor_index : as.signature_index;
+                field.getDescriptorIndex() : as.signature_index;
 
         String signature = constants.getConstantUtf8(signatureIndex);
 
@@ -1562,13 +1562,13 @@ public class ClassFileWriter
             classFile, signature);
         this.printer.print(' ');
 
-        String fieldName = constants.getConstantUtf8(field.name_index);
+        String fieldName = constants.getConstantUtf8(field.getNameIndex());
         if (keywords.contains(fieldName)) {
             fieldName = StringConstants.JD_FIELD_PREFIX + fieldName;
         }
 
         String internalClassName = classFile.getThisClassName();
-        String descriptor = constants.getConstantUtf8(field.descriptor_index);
+        String descriptor = constants.getConstantUtf8(field.getDescriptorIndex());
 
         if ((field.access_flags & ClassFileConstants.ACC_STATIC) != 0) {
             this.printer.printStaticFieldDeclaration(
@@ -1586,7 +1586,7 @@ public class ClassFileWriter
         }
         else
         {
-            ConstantValue cv = field.getConstantValue(constants);
+            Constant cv = field.getConstantValue(constants);
 
             if (cv != null)
             {
@@ -2057,7 +2057,7 @@ public class ClassFileWriter
         Invokevirtual iv = (Invokevirtual)ali.indexref;
         ConstantMethodref cmr = constants.getConstantMethodref(iv.index);
         String internalEnumName =
-            constants.getConstantClassName(cmr.class_index);
+            constants.getConstantClassName(cmr.getClassIndex());
 
         String enumDescriptor = SignatureUtil.CreateTypeName(internalEnumName);
 
@@ -2207,7 +2207,7 @@ public class ClassFileWriter
 
                 this.printer.debugStartOfInstructionBlockLayoutBlock();
 
-                ConstantValue cv = constants.getConstantValue(pair.getKey());
+                Constant cv = constants.getConstantValue(pair.getKey());
                 ConstantValueWriter.Write(
                     this.loader, this.printer, this.referenceMap,
                     classFile, cv);
@@ -2249,7 +2249,7 @@ public class ClassFileWriter
 
                 this.printer.debugStartOfInstructionBlockLayoutBlock();
 
-                ConstantValue cv = constants.getConstantValue(pair.getKey());
+                Constant cv = constants.getConstantValue(pair.getKey());
                 ConstantValueWriter.Write(
                     this.loader, this.printer, this.referenceMap,
                     classFile, cv);
@@ -2323,7 +2323,7 @@ public class ClassFileWriter
         }
         else
         {
-            this.printer.print(constants.getConstantUtf8(lv.name_index));
+            this.printer.print(constants.getConstantUtf8(lv.nameIndex));
         }
 
         this.printer.print(')');

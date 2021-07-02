@@ -16,10 +16,11 @@
  ******************************************************************************/
 package jd.core.model.instruction.bytecode.instruction;
 
+import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
+import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
+
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.LocalVariables;
-import jd.core.model.classfile.constant.ConstantFieldref;
-import jd.core.model.classfile.constant.ConstantNameAndType;
 
 public class GetField extends IndexInstruction
 {
@@ -45,10 +46,10 @@ public class GetField extends IndexInstruction
             return null;
 
         ConstantNameAndType cnat =
-            constants.getConstantNameAndType(cfr.name_and_type_index);
+            constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
         if (cnat == null)
             return null;
 
-        return constants.getConstantUtf8(cnat.descriptor_index);
+        return constants.getConstantUtf8(cnat.getDescriptorIndex());
     }
 }

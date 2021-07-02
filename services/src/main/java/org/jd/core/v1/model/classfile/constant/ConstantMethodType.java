@@ -8,10 +8,10 @@
 package org.jd.core.v1.model.classfile.constant;
 
 public class ConstantMethodType extends Constant {
-    protected int descriptorIndex;
+	
+    private int descriptorIndex;
 
     public ConstantMethodType(int descriptorIndex) {
-        super(CONSTANT_METHODTYPE);
         this.descriptorIndex = descriptorIndex;
     }
 

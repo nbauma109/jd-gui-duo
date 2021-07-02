@@ -16,11 +16,12 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
+import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
+import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
+
 import java.util.List;
 
 import jd.core.model.classfile.*;
-import jd.core.model.classfile.constant.ConstantFieldref;
-import jd.core.model.classfile.constant.ConstantNameAndType;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.PutStatic;
@@ -63,11 +64,11 @@ public class InitStaticFieldsReconstructor
             PutStatic putStatic = (PutStatic)instruction;
             ConstantFieldref cfr = constants.getConstantFieldref(putStatic.index);
 
-            if (cfr.class_index != classFile.getThisClassIndex())
+            if (cfr.getClassIndex() != classFile.getThisClassIndex())
                 break;
 
             ConstantNameAndType cnat =
-                constants.getConstantNameAndType(cfr.name_and_type_index);
+                constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
 
             int lengthBeforeSubstitution = list.size();
 
@@ -76,8 +77,8 @@ public class InitStaticFieldsReconstructor
                 Field field = fields[indexField++];
 
                 if (((field.access_flags & ClassFileConstants.ACC_STATIC) != 0) &&
-                    (cnat.descriptor_index == field.descriptor_index) &&
-                    (cnat.name_index == field.name_index))
+                    (cnat.getDescriptorIndex() == field.getDescriptorIndex()) &&
+                    (cnat.getNameIndex() == field.getNameIndex()))
                 {
                     Instruction valueref = putStatic.valueref;
 
@@ -128,11 +129,11 @@ public class InitStaticFieldsReconstructor
                 PutStatic putStatic = (PutStatic)instruction;
                 ConstantFieldref cfr = constants.getConstantFieldref(putStatic.index);
 
-                if (cfr.class_index != classFile.getThisClassIndex())
+                if (cfr.getClassIndex() != classFile.getThisClassIndex())
                     break;
 
                 ConstantNameAndType cnat =
-                    constants.getConstantNameAndType(cfr.name_and_type_index);
+                    constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
 
                 int lengthBeforeSubstitution = list.size();
 
@@ -141,8 +142,8 @@ public class InitStaticFieldsReconstructor
                     Field field = fields[indexField];
 
                     if (((field.access_flags & ClassFileConstants.ACC_STATIC) != 0) &&
-                        (cnat.descriptor_index == field.descriptor_index) &&
-                        (cnat.name_index == field.name_index))
+                        (cnat.getDescriptorIndex() == field.getDescriptorIndex()) &&
+                        (cnat.getNameIndex() == field.getNameIndex()))
                     {
                         Instruction valueref = putStatic.valueref;
 

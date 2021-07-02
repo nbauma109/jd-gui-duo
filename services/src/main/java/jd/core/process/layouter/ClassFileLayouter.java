@@ -16,6 +16,8 @@
  */
 package jd.core.process.layouter;
 
+import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
+import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;
 
@@ -24,8 +26,6 @@ import java.util.*;
 import jd.core.model.classfile.*;
 import jd.core.model.classfile.Field.ValueAndMethod;
 import jd.core.model.classfile.attribute.AttributeSignature;
-import jd.core.model.classfile.constant.ConstantFieldref;
-import jd.core.model.classfile.constant.ConstantNameAndType;
 import jd.core.model.instruction.bytecode.instruction.GetStatic;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.InvokeNew;
@@ -362,7 +362,7 @@ public class ClassFileLayouter {
                     getStatic = (GetStatic)values.get(i);
                     cfr = constants.getConstantFieldref(getStatic.index);
                     cnat = constants.getConstantNameAndType(
-                        cfr.name_and_type_index);
+                        cfr.getNameAndTypeIndex());
 
                     j = fields.length;
 
@@ -370,8 +370,8 @@ public class ClassFileLayouter {
                     {
                         field = fields[j];
 
-                        if (field.name_index != cnat.name_index ||
-                            field.descriptor_index != cnat.descriptor_index) {
+                        if (field.getNameIndex() != cnat.getNameIndex() ||
+                            field.getDescriptorIndex() != cnat.getDescriptorIndex()) {
                             continue;
                         }
 
@@ -578,7 +578,7 @@ public class ClassFileLayouter {
             // constructeurs des Enums ! Cette information est passée à
             // "SignatureWriter.WriteMethodSignature(...)".
             signatureIndex = as == null ?
-                    method.descriptor_index : as.signature_index;
+                    method.getDescriptorIndex() : as.signature_index;
             signature = constants.getConstantUtf8(signatureIndex);
 
             if ((classFile.access_flags & ClassFileConstants.ACC_ENUM) != 0 &&
@@ -586,7 +586,7 @@ public class ClassFileLayouter {
                 continue;
             }
 
-            if (method.name_index == constants.instanceConstructorIndex)
+            if (method.getNameIndex() == constants.instanceConstructorIndex)
             {
                 if (classFile.getInternalAnonymousClassName() != null) {
                     // Ne pas afficher les constructeurs des classes anonymes.
@@ -621,7 +621,7 @@ public class ClassFileLayouter {
                 }
             }
 
-            if (method.name_index == constants.classConstructorIndex && (method.getFastNodes() == null ||
+            if (method.getNameIndex() == constants.classConstructorIndex && (method.getFastNodes() == null ||
                 method.getFastNodes().isEmpty())) {
                 continue;
             }
@@ -655,7 +655,7 @@ public class ClassFileLayouter {
             nullCodeFlag = method.getCode() == null;
             displayThrowsFlag = false;
 
-            if (method.name_index == constants.classConstructorIndex)
+            if (method.getNameIndex() == constants.classConstructorIndex)
             {
                 subLayoutBlockList.add(new MethodStaticLayoutBlock(classFile));
             } else if (method.getExceptionIndexes() == null)

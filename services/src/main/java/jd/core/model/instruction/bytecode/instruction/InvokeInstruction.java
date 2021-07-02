@@ -16,11 +16,12 @@
  ******************************************************************************/
 package jd.core.model.instruction.bytecode.instruction;
 
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
+
 import java.util.List;
 
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.LocalVariables;
-import jd.core.model.classfile.constant.ConstantMethodref;
 
 public abstract class InvokeInstruction extends IndexInstruction
 {

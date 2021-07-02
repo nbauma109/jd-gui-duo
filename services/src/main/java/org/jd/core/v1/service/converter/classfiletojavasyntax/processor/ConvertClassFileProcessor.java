@@ -293,22 +293,22 @@ public class ConvertClassFileProcessor {
         if (acv == null) {
             return null;
         }
-        ConstantValue constantValue = acv.getConstantValue();
+        Constant constantValue = acv.getConstantValue();
         Expression expression;
-        switch (constantValue.getTag()) {
-            case Constant.CONSTANT_INTEGER:
+        switch (constantValue.getClass().getSimpleName()) {
+            case "ConstantInteger":
                 expression = new IntegerConstantExpression(typeField, ((ConstantInteger)constantValue).getValue());
                 break;
-            case Constant.CONSTANT_FLOAT:
+            case "ConstantFloat":
                 expression = new FloatConstantExpression(((ConstantFloat)constantValue).getValue());
                 break;
-            case Constant.CONSTANT_LONG:
+            case "ConstantLong":
                 expression = new LongConstantExpression(((ConstantLong)constantValue).getValue());
                 break;
-            case Constant.CONSTANT_DOUBLE:
+            case "ConstantDouble":
                 expression = new DoubleConstantExpression(((ConstantDouble)constantValue).getValue());
                 break;
-            case Constant.CONSTANT_UTF8:
+            case "ConstantUtf8":
                 expression = new StringConstantExpression(((ConstantUtf8)constantValue).getValue());
                 break;
             default:

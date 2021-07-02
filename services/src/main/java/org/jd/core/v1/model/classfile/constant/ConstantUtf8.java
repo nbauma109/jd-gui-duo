@@ -7,11 +7,11 @@
 
 package org.jd.core.v1.model.classfile.constant;
 
-public class ConstantUtf8 extends ConstantValue {
-    protected String value;
+public class ConstantUtf8 extends Constant {
+	
+    private String value;
 
     public ConstantUtf8(String value) {
-        super(CONSTANT_UTF8);
         this.value = value;
     }
 

@@ -17,7 +17,6 @@ import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.BindTypesToTypesVisitor;
-import org.jd.core.v1.service.deserializer.classfile.ClassFileFormatException;
 import org.jd.core.v1.service.deserializer.classfile.ClassFileReader;
 import org.jd.core.v1.util.StringConstants;
 
@@ -29,6 +28,8 @@ import java.util.*;
 
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
+
+import jd.core.process.deserializer.ClassFormatException;
 
 /**
  * https://jcp.org/aboutJava/communityprocess/maintenance/jsr924/JVMS-SE5.0-Ch4-ClassFile.pdf
@@ -1591,7 +1592,7 @@ public class TypeMaker {
         int magic = reader.readInt();
 
         if (magic != ClassFileReader.JAVA_MAGIC_NUMBER) {
-            throw new ClassFileFormatException("Invalid CLASS file");
+            throw new ClassFormatException("Invalid CLASS file");
         }
 
         // Skip 'minorVersion', 'majorVersion'
@@ -1645,7 +1646,7 @@ public class TypeMaker {
         int count = reader.readUnsignedShort();
 
         if (count == 0) {
-            throw new ClassFileFormatException("Zero-length constant pool");
+            throw new ClassFormatException("Zero-length constant pool");
         }
                 Object[] constants = new Object[count];
 
@@ -1674,7 +1675,7 @@ public class TypeMaker {
                     i++;
                     break;
                 default:
-                    throw new ClassFileFormatException("Invalid constant pool entry");
+                    throw new ClassFormatException("Invalid constant pool entry");
             }
         }
 

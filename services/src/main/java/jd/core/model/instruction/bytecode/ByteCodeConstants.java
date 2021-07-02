@@ -221,6 +221,7 @@ public class ByteCodeConstants
     public static final int INVOKENONVIRTUAL = 183; // Old name in JDK 1.0
     public static final int INVOKESTATIC     = 184;
     public static final int INVOKEINTERFACE  = 185;
+    public static final int INVOKEDYNAMIC    = 186;
     public static final int NEW              = 187;
     public static final int NEWARRAY         = 188;
     public static final int ANEWARRAY        = 189;
@@ -332,7 +333,7 @@ public class ByteCodeConstants
         "tableswitch", "lookupswitch", "ireturn", "lreturn", "freturn",
         "dreturn", "areturn", "return", "getstatic", "putstatic", "getfield",
         "putfield", "invokevirtual", "invokespecial", "invokestatic",
-        "invokeinterface", ILLEGAL_OPCODE, "new", "newarray", "anewarray",
+        "invokeinterface", "invokedynamic", "new", "newarray", "anewarray",
         "arraylength", "athrow", "checkcast", "instanceof", "monitorenter",
         "monitorexit", "wide", "multianewarray", "ifnull", "ifnonnull",
         "goto_w", "jsr_w", "breakpoint", ILLEGAL_OPCODE, ILLEGAL_OPCODE,
@@ -398,7 +399,7 @@ public class ByteCodeConstants
         0/*dreturn*/, 0/*areturn*/, 0/*return*/,
         2/*getstatic*/, 2/*putstatic*/, 2/*getfield*/,
         2/*putfield*/, 2/*invokevirtual*/, 2/*invokespecial*/, 2/*invokestatic*/,
-        4/*invokeinterface*/, NO_OF_OPERANDS_UNDEFINED, 2/*new*/,
+        4/*invokeinterface*/, 4/*invokedynamic*/, 2/*new*/,
         1/*newarray*/, 2/*anewarray*/,
         0/*arraylength*/, 0/*athrow*/, 2/*checkcast*/,
         2/*instanceof*/, 0/*monitorenter*/,

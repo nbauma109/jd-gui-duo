@@ -16,12 +16,11 @@
  ******************************************************************************/
 package jd.core.model.instruction.bytecode.instruction;
 
+import org.jd.core.v1.model.classfile.constant.Constant;
 import org.jd.core.v1.util.StringConstants;
 
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.LocalVariables;
-import jd.core.model.classfile.constant.Constant;
-import jd.core.model.classfile.constant.ConstantConstant;
 
 public class Ldc extends LdcInstruction
 {
@@ -42,18 +41,18 @@ public class Ldc extends LdcInstruction
         if (c == null)
             return null;
 
-        switch (c.tag)
+        switch (c.getClass().getSimpleName())
         {
-        case ConstantConstant.CONSTANT_FLOAT:
+       case "ConstantFloat":
             return "F";
-        case ConstantConstant.CONSTANT_INTEGER:
+        case "ConstantInteger":
             return "I";
-        case ConstantConstant.CONSTANT_STRING:
+        case "ConstantString":
             return StringConstants.INTERNAL_STRING_SIGNATURE;
-        case ConstantConstant.CONSTANT_CLASS:
+        case "ConstantClass":
             return StringConstants.INTERNAL_CLASS_SIGNATURE;
             /*{
-                int index = ((ConstantClass)c).name_index;
+                int index = ((ConstantClass)c).nameIndex;
                 return SignatureUtil.CreateTypeName(
                     constants.getConstantUtf8(index));
             }*/

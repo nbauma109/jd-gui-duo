@@ -17,11 +17,11 @@
 package jd.core.process.writer;
 
 import org.jd.core.v1.api.loader.Loader;
+import org.jd.core.v1.model.classfile.constant.*;
 import org.jd.core.v1.util.StringConstants;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ConstantPool;
-import jd.core.model.classfile.constant.*;
 import jd.core.model.reference.ReferenceMap;
 import jd.core.printer.Printer;
 import jd.core.util.StringUtil;
@@ -34,22 +34,22 @@ public class ConstantValueWriter
 
     public static void Write(
         Loader loader, Printer printer, ReferenceMap referenceMap,
-        ClassFile classFile, ConstantValue cv)
+        ClassFile classFile, Constant cv)
     {
         Write(loader, printer, referenceMap, classFile, cv, (byte)0);
     }
 
     public static void Write(
         Loader loader, Printer printer, ReferenceMap referenceMap,
-        ClassFile classFile, ConstantValue cv, byte constantIntegerType)
+        ClassFile classFile, Constant cv, byte constantIntegerType)
     {
         ConstantPool constants = classFile.getConstantPool();
 
-        switch (cv.tag)
+        switch (cv.getClass().getSimpleName())
         {
-        case ConstantConstant.CONSTANT_DOUBLE:
+          case "ConstantDouble":
             {
-                double d = ((ConstantDouble)cv).bytes;
+                double d = ((ConstantDouble)cv).getValue();
 
                 if (d == Double.POSITIVE_INFINITY)
                 {
@@ -97,9 +97,9 @@ public class ConstantValueWriter
                 }
             }
             break;
-        case ConstantConstant.CONSTANT_FLOAT:
+          case "ConstantFloat":
             {
-                float value = ((ConstantFloat)cv).bytes;
+                float value = ((ConstantFloat)cv).getValue();
 
                 if (value == Float.POSITIVE_INFINITY)
                 {
@@ -147,9 +147,9 @@ public class ConstantValueWriter
                 }
             }
             break;
-        case ConstantConstant.CONSTANT_INTEGER:
+          case "ConstantInteger":
             {
-                int value = ((ConstantInteger)cv).bytes;
+                int value = ((ConstantInteger)cv).getValue();
 
                 switch (constantIntegerType)
                 {
@@ -187,9 +187,9 @@ public class ConstantValueWriter
                 }
             }
             break;
-        case ConstantConstant.CONSTANT_LONG:
+          case "ConstantLong":
             {
-                long value = ((ConstantLong)cv).bytes;
+                long value = ((ConstantLong)cv).getValue();
 
                 if (value == Long.MIN_VALUE)
                 {
@@ -209,10 +209,10 @@ public class ConstantValueWriter
                 }
             }
             break;
-        case ConstantConstant.CONSTANT_STRING:
+          case "ConstantString":
             {
                 String s = constants.getConstantUtf8(
-                    ((ConstantString)cv).string_index);
+                    ((ConstantString)cv).getStringIndex());
                 String escapedString =
                     StringUtil.EscapeStringAndAppendQuotationMark(s);
                 String scopeInternalName = classFile.getThisClassName();
@@ -237,17 +237,17 @@ public class ConstantValueWriter
 
     public static void WriteHexa(
         Loader loader, Printer printer, ReferenceMap referenceMap,
-        ClassFile classFile, ConstantValue cv)
+        ClassFile classFile, Constant cv)
     {
-        switch (cv.tag)
+        switch (cv.getClass().getSimpleName())
         {
-        case ConstantConstant.CONSTANT_INTEGER:
+        case "ConstantInteger":
             printer.printNumeric(
-                "0x" + Integer.toHexString( ((ConstantInteger)cv).bytes ).toUpperCase());
+                "0x" + Integer.toHexString( ((ConstantInteger)cv).getValue() ).toUpperCase());
             break;
-        case ConstantConstant.CONSTANT_LONG:
+        case "ConstantLong":
             printer.printNumeric(
-                "0x" + Long.toHexString( ((ConstantLong)cv).bytes ).toUpperCase());
+                "0x" + Long.toHexString( ((ConstantLong)cv).getValue() ).toUpperCase());
             break;
         default:
             Write(loader, printer, referenceMap, classFile, cv, (byte)0);

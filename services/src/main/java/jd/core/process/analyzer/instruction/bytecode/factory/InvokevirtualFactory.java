@@ -16,14 +16,15 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.bytecode.factory;
 
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
+
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Deque;
+import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Method;
-import jd.core.model.classfile.constant.ConstantMethodref;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.Invokevirtual;

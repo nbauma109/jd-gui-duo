@@ -236,7 +236,7 @@ public class ReferenceAnalyzer
 
             as = field.getAttributeSignature();
             signature = classFile.getConstantPool().getConstantUtf8(
-                (as==null) ? field.descriptor_index : as.signature_index);
+                (as==null) ? field.getDescriptorIndex() : as.signature_index);
             SignatureAnalyzer.AnalyzeSimpleSignature(referenceMap, signature);
 
             if (field.getValueAndMethod() != null) {
@@ -280,7 +280,7 @@ public class ReferenceAnalyzer
             // Signature
             as = method.getAttributeSignature();
             signature = constants.getConstantUtf8(
-                    (as==null) ? method.descriptor_index : as.signature_index);
+                    (as==null) ? method.getDescriptorIndex() : as.signature_index);
             SignatureAnalyzer.AnalyzeMethodSignature(referenceMap, signature);
 
             // Exceptions

@@ -16,6 +16,7 @@
  */
 package jd.core.process.analyzer.classfile;
 
+import org.jd.core.v1.model.classfile.constant.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;
 
@@ -23,7 +24,6 @@ import java.util.*;
 
 import jd.core.model.classfile.*;
 import jd.core.model.classfile.attribute.AttributeSignature;
-import jd.core.model.classfile.constant.*;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 import jd.core.model.instruction.fast.FastConstants;
@@ -190,11 +190,11 @@ public class ClassFileAnalyzer
 
                     ps = (PutStatic)list.get(index);
                     cfr = constants.getConstantFieldref(ps.index);
-                    if (cfr.class_index != classFile.getThisClassIndex()) {
+                    if (cfr.getClassIndex() != classFile.getThisClassIndex()) {
                         break;
                     }
 
-                    cnat = constants.getConstantNameAndType(cfr.name_and_type_index);
+                    cnat = constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
 
                     // Search field
                     field = SearchField(classFile, cnat);
@@ -204,7 +204,7 @@ public class ClassFileAnalyzer
                         break;
                     }
 
-                    fieldName = constants.getConstantUtf8(cnat.name_index);
+                    fieldName = constants.getConstantUtf8(cnat.getNameIndex());
                     if (! fieldName.startsWith("$SwitchMap$")) {
                         break;
                     }
@@ -236,8 +236,8 @@ public class ClassFileAnalyzer
                         cfr = constants.getConstantFieldref(
                             ((GetStatic)instruction).index);
                         cnat = constants.getConstantNameAndType(
-                            cfr.name_and_type_index);
-                        enumName = constants.getConstantUtf8(cnat.name_index);
+                            cfr.getNameAndTypeIndex());
+                        enumName = constants.getConstantUtf8(cnat.getNameIndex());
                         outerEnumNameIndex = outerConstants.addConstantUtf8(enumName);
 
                         // Add enum name index
@@ -273,8 +273,8 @@ public class ClassFileAnalyzer
         {
             field = fields[i];
 
-            if (field.name_index == cnat.name_index &&
-                field.descriptor_index == cnat.descriptor_index) {
+            if (field.getNameIndex() == cnat.getNameIndex() &&
+                field.getDescriptorIndex() == cnat.getDescriptorIndex()) {
                 return field;
             }
         }
@@ -291,18 +291,16 @@ public class ClassFileAnalyzer
         {
             constant = constants.get(i);
 
-            if (constant != null &&
-                (constant.tag == ConstantConstant.CONSTANT_METHODREF ||
-                 constant.tag == ConstantConstant.CONSTANT_INTERFACEMETHODREF))
+            if (constant instanceof ConstantMethodref)
             {
                 ConstantMethodref cmr = (ConstantMethodref)constant;
                 ConstantNameAndType cnat =
-                    constants.getConstantNameAndType(cmr.name_and_type_index);
+                    constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 
                 if (cnat != null)
                 {
                     String signature = constants.getConstantUtf8(
-                        cnat.descriptor_index);
+                        cnat.getDescriptorIndex());
                     cmr.setParameterSignatures(
                         SignatureUtil.GetParameterSignatures(signature));
                     cmr.setReturnedSignature(
@@ -333,7 +331,7 @@ public class ClassFileAnalyzer
                 continue;
             }
 
-            String name = constants.getConstantUtf8(field.name_index);
+            String name = constants.getConstantUtf8(field.getNameIndex());
 
             map.computeIfAbsent(name, k -> new ArrayList<>(5)).add(field);
         }
@@ -363,12 +361,12 @@ public class ClassFileAnalyzer
 
                 // Generate new attribute names
                 newName = FieldNameGenerator.GenerateName(
-                        constants.getConstantUtf8(field.descriptor_index),
-                        constants.getConstantUtf8(field.name_index));
+                        constants.getConstantUtf8(field.getDescriptorIndex()),
+                        constants.getConstantUtf8(field.getNameIndex()));
                 // Add new constant string
                 newNameIndex = constants.addConstantUtf8(newName);
                 // Update name index
-                field.name_index = newNameIndex;
+                field.setNameIndex(newNameIndex);
             }
         }
     }
@@ -388,29 +386,28 @@ public class ClassFileAnalyzer
         {
             constant = constants.get(i);
 
-            if (constant == null ||
-                constant.tag != ConstantConstant.CONSTANT_FIELDREF) {
+            if (!(constant instanceof ConstantFieldref)) {
                 continue;
             }
 
             cfr = (ConstantFieldref)constant;
             Map<String, List<ConstantNameAndType>> map =
-                (Map<String, List<ConstantNameAndType>>)array[cfr.class_index];
+                (Map<String, List<ConstantNameAndType>>)array[cfr.getClassIndex()];
 
             if (map == null)
             {
                 map = new HashMap<>();
-                array[cfr.class_index] = map;
+                array[cfr.getClassIndex()] = map;
             }
 
             ConstantNameAndType cnat =
-                constants.getConstantNameAndType(cfr.name_and_type_index);
-            String name = constants.getConstantUtf8(cnat.name_index);
+                constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
+            String name = constants.getConstantUtf8(cnat.getNameIndex());
             List<ConstantNameAndType> list = map.get(name);
 
             if (list != null)
             {
-                if (list.get(0).descriptor_index != cnat.descriptor_index)
+                if (list.get(0).getDescriptorIndex() != cnat.getDescriptorIndex())
                 {
                     // Same name and different signature
                     list.add(cnat);
@@ -456,9 +453,9 @@ public class ClassFileAnalyzer
                 while (k-- > 0)
                 {
                     cnat = list.get(k);
-                    signature = constants.getConstantUtf8(cnat.descriptor_index);
+                    signature = constants.getConstantUtf8(cnat.getDescriptorIndex());
                     newName = FieldNameGenerator.GenerateName(signature, name);
-                    cnat.name_index = constants.addConstantUtf8(newName);
+                    cnat.setNameIndex(constants.addConstantUtf8(newName));
                 }
             }
         }
@@ -488,7 +485,7 @@ public class ClassFileAnalyzer
                 continue;
             }
 
-            name = constants.getConstantUtf8(field.name_index);
+            name = constants.getConstantUtf8(field.getNameIndex());
             if (! "$assertionsDisabled".equals(name)) {
                 continue;
             }
@@ -500,7 +497,7 @@ public class ClassFileAnalyzer
     private static boolean HasAAccessorMethodName(ClassFile classFile, Method method)
     {
         String methodName =
-            classFile.getConstantPool().getConstantUtf8(method.name_index);
+            classFile.getConstantPool().getConstantUtf8(method.getNameIndex());
 
         if (! methodName.startsWith("access$")) {
             return false;
@@ -522,14 +519,14 @@ public class ClassFileAnalyzer
         ClassFile classFile, Method method)
     {
         String methodName =
-            classFile.getConstantPool().getConstantUtf8(method.name_index);
+            classFile.getConstantPool().getConstantUtf8(method.getNameIndex());
 
         if (! methodName.startsWith("$SWITCH_TABLE$")) {
             return false;
         }
 
         String methodDescriptor =
-            classFile.getConstantPool().getConstantUtf8(method.descriptor_index);
+            classFile.getConstantPool().getConstantUtf8(method.getDescriptorIndex());
 
         return "()[I".equals(methodDescriptor);
     }
@@ -608,14 +605,14 @@ public class ClassFileAnalyzer
 
                 cfr = constants.getConstantFieldref(((GetStatic)instruction).index);
                 cnat = constants.getConstantNameAndType(
-                    cfr.name_and_type_index);
+                    cfr.getNameAndTypeIndex());
 
                 // Add enum name index
-                enumNameIndexes.add(cnat.name_index);
+                enumNameIndexes.add(cnat.getNameIndex());
             }
 
             classFile.getSwitchMaps().put(
-                Integer.valueOf(method.name_index), enumNameIndexes);
+                Integer.valueOf(method.getNameIndex()), enumNameIndexes);
         }
         else if (length >= 7 &&
                 list.get(0).opcode == ByteCodeConstants.ASTORE &&
@@ -653,14 +650,14 @@ public class ClassFileAnalyzer
 
                 cfr = constants.getConstantFieldref(((GetStatic)instruction).index);
                 cnat = constants.getConstantNameAndType(
-                    cfr.name_and_type_index);
+                    cfr.getNameAndTypeIndex());
 
                 // Add enum name index
-                enumNameIndexes.add(cnat.name_index);
+                enumNameIndexes.add(cnat.getNameIndex());
             }
 
             classFile.getSwitchMaps().put(
-                Integer.valueOf(method.name_index), enumNameIndexes);
+                Integer.valueOf(method.getNameIndex()), enumNameIndexes);
         }
     }
 
@@ -828,7 +825,7 @@ public class ClassFileAnalyzer
 
                 // DEBUG //
                 //ConstantPool debugConstants = classFile.getConstantPool();
-                //String debugMethodName = debugConstants.getConstantUtf8(method.name_index);
+                //String debugMethodName = debugConstants.getConstantUtf8(method.nameIndex);
                 // DEBUG //
                 FastInstructionListBuilder.Build(
                     referenceMap, classFile, method, fastList);
@@ -892,14 +889,14 @@ public class ClassFileAnalyzer
         ConstantPool constants = classFile.getConstantPool();
 
         // Is method a constructor ?
-        if (method.name_index != constants.instanceConstructorIndex) {
+        if (method.getNameIndex() != constants.instanceConstructorIndex) {
             return outerThisFieldrefIndex;
         }
 
         // Is parameters counter greater than 0 ?
         AttributeSignature as = method.getAttributeSignature();
         String methodSignature = constants.getConstantUtf8(
-            (as==null) ? method.descriptor_index : as.signature_index);
+            (as==null) ? method.getDescriptorIndex() : as.signature_index);
 
         if (methodSignature.charAt(1) == ')') {
             return 0;
@@ -932,11 +929,11 @@ public class ClassFileAnalyzer
                 // Is a call to "this()" in constructor ?
                 Invokespecial is = (Invokespecial)instruction;
                 ConstantMethodref cmr = constants.getConstantMethodref(is.index);
-                if (cmr.class_index == classFile.getThisClassIndex())
+                if (cmr.getClassIndex() == classFile.getThisClassIndex())
                 {
                     ConstantNameAndType cnat =
-                        constants.getConstantNameAndType(cmr.name_and_type_index);
-                    if (cnat.name_index == constants.instanceConstructorIndex)
+                        constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
+                    if (cnat.getNameIndex() == constants.instanceConstructorIndex)
                     {
                         return outerThisFieldrefIndex;
                     }
@@ -963,13 +960,12 @@ public class ClassFileAnalyzer
         // Recherche de l'attribut portant la reference vers la classe
         // externe.
         ConstantPool constants = classFile.getConstantPool();
-        ConstantFieldref cfr =
-            constants.getConstantFieldref(outerThisFieldrefIndex);
+        ConstantFieldref cfr = constants.getConstantFieldref(outerThisFieldrefIndex);
 
-        if (cfr.class_index == classFile.getThisClassIndex())
+        if (cfr.getClassIndex() == classFile.getThisClassIndex())
         {
             ConstantNameAndType cnat =
-                constants.getConstantNameAndType(cfr.name_and_type_index);
+                constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
             Field[] fields = classFile.getFields();
 
             if (fields != null)
@@ -979,8 +975,8 @@ public class ClassFileAnalyzer
                 {
                     field = fields[i];
 
-                    if (field.name_index == cnat.name_index &&
-                        field.descriptor_index == cnat.descriptor_index)
+                    if (field.getNameIndex() == cnat.getNameIndex() &&
+                        field.getDescriptorIndex() == cnat.getDescriptorIndex())
                     {
                         classFile.setOuterThisField(field);
                         // Ensure outer this field is a synthetic field.
@@ -1009,7 +1005,7 @@ public class ClassFileAnalyzer
 
             listLength = list.size();
 
-            if (method.name_index == constants.instanceConstructorIndex)
+            if (method.getNameIndex() == constants.instanceConstructorIndex)
             {
                 Instruction instruction;
                 // Remove PutField instruction with index = outerThisFieldrefIndex
@@ -1028,7 +1024,7 @@ public class ClassFileAnalyzer
             }
             else if ((method.access_flags &
                         (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_STATIC)) == ClassFileConstants.ACC_STATIC &&
-                     method.name_index != constants.classConstructorIndex &&
+                     method.getNameIndex() != constants.classConstructorIndex &&
                      listLength == 1 &&
                      classFile.isAInnerClass())
             {
@@ -1057,18 +1053,18 @@ public class ClassFileAnalyzer
                 }
 
                 cfr = constants.getConstantFieldref(gf.index);
-                if (cfr.class_index != classFile.getThisClassIndex()) {
+                if (cfr.getClassIndex() != classFile.getThisClassIndex()) {
                     continue;
                 }
 
                 ConstantNameAndType cnat =
-                    constants.getConstantNameAndType(cfr.name_and_type_index);
+                    constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
                 Field outerField = classFile.getOuterThisField();
-                if (cnat.descriptor_index != outerField.descriptor_index) {
+                if (cnat.getDescriptorIndex() != outerField.getDescriptorIndex()) {
                     continue;
                 }
 
-                if (cnat.name_index == outerField.name_index)
+                if (cnat.getNameIndex() == outerField.getNameIndex())
                 {
                     // Ensure accessor method is a synthetic method
                     method.access_flags |= ClassFileConstants.ACC_SYNTHETIC;
@@ -1089,7 +1085,7 @@ public class ClassFileAnalyzer
     {
         ConstantPool constants = classFile.getConstantPool();
 
-        if (method.name_index == constants.instanceConstructorIndex)
+        if (method.getNameIndex() == constants.instanceConstructorIndex)
         {
             List<Instruction> list = method.getFastNodes();
 
@@ -1107,11 +1103,11 @@ public class ClassFileAnalyzer
                     {
                         ConstantMethodref cmr = constants.getConstantMethodref(is.index);
                         ConstantNameAndType cnat =
-                            constants.getConstantNameAndType(cmr.name_and_type_index);
+                            constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 
-                        if (cnat.name_index == constants.instanceConstructorIndex)
+                        if (cnat.getNameIndex() == constants.instanceConstructorIndex)
                         {
-                            if (cmr.class_index == classFile.getSuperClassIndex())
+                            if (cmr.getClassIndex() == classFile.getSuperClassIndex())
                             {
                                 int count = is.args.size();
 
@@ -1155,12 +1151,11 @@ public class ClassFileAnalyzer
                         {
                             // Stockage de la position du parametre du
                             // constructeur initialisant le champs
-                            ConstantFieldref cfr =
-                                constants.getConstantFieldref(pf.index);
+                            ConstantFieldref cfr = constants.getConstantFieldref(pf.index);
                             ConstantNameAndType cnat =
-                                constants.getConstantNameAndType(cfr.name_and_type_index);
+                                constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
                             Field field =
-                                classFile.getField(cnat.name_index, cnat.descriptor_index);
+                                classFile.getField(cnat.getNameIndex(), cnat.getDescriptorIndex());
                             field.anonymousClassConstructorParameterIndex = ii.index - 1;
                             // Ensure this field is a synthetic field.
                             field.access_flags |= ClassFileConstants.ACC_SYNTHETIC;
@@ -1308,11 +1303,11 @@ public class ClassFileAnalyzer
 
             if ((instruction.opcode != ByteCodeConstants.INITARRAY &&
                  instruction.opcode != ByteCodeConstants.NEWANDINITARRAY) ||
-                !constants.getConstantUtf8(field.descriptor_index).equals(enumArraySignature)) {
+                !constants.getConstantUtf8(field.getDescriptorIndex()).equals(enumArraySignature)) {
                 continue;
             }
 
-            fieldName = constants.getConstantUtf8(field.name_index);
+            fieldName = constants.getConstantUtf8(field.getNameIndex());
             if (! StringConstants.ENUM_VALUES_ARRAY_NAME.equals(fieldName) &&
                 ! StringConstants.ENUM_VALUES_ARRAY_NAME_ECLIPSE.equals(fieldName)) {
                 continue;

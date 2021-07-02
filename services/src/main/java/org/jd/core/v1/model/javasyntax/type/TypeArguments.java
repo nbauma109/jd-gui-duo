@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.model.javasyntax.type;
 
 import org.jd.core.v1.util.DefaultList;
@@ -14,7 +13,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class TypeArguments extends DefaultList<TypeArgument> implements BaseTypeArgument {
-
+	
     private static final long serialVersionUID = 1L;
 
     public TypeArguments() {}
@@ -34,7 +33,7 @@ public class TypeArguments extends DefaultList<TypeArgument> implements BaseType
 
     @Override
     public boolean isTypeArgumentAssignableFrom(Map<String, BaseType> typeBounds, BaseTypeArgument typeArgument) {
-        if (typeArgument.getClass() != TypeArguments.class) {
+        if (!(typeArgument instanceof TypeArguments)) {
             return false;
         }
 

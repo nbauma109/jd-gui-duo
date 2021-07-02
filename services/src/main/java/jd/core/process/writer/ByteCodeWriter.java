@@ -17,11 +17,11 @@
 package jd.core.process.writer;
 
 import org.jd.core.v1.api.loader.Loader;
+import org.jd.core.v1.model.classfile.constant.*;
 
 import jd.core.model.classfile.*;
 import jd.core.model.classfile.attribute.CodeException;
 import jd.core.model.classfile.attribute.LineNumber;
-import jd.core.model.classfile.constant.*;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.reference.ReferenceMap;
@@ -182,11 +182,11 @@ public class ByteCodeWriter
 
                         Constant c = constants.get(ioperande);
 
-                        if (c.tag == ConstantConstant.CONSTANT_CLASS)
+                        if (c instanceof ConstantClass)
                         {
                             ConstantClass cc = (ConstantClass)c;
                             printer.print(
-                                constants.getConstantUtf8(cc.name_index));
+                                constants.getConstantUtf8(cc.getNameIndex()));
                         }
                         else
                         {
@@ -380,9 +380,9 @@ public class ByteCodeWriter
                     printer.print(lv.index);
                     printer.print("\t");
 
-                    if (lv.name_index > 0)
+                    if (lv.nameIndex > 0)
                     {
-                        printer.print(constants.getConstantUtf8(lv.name_index));
+                        printer.print(constants.getConstantUtf8(lv.nameIndex));
                     }
                     else
                     {
@@ -449,35 +449,25 @@ public class ByteCodeWriter
         ConstantFieldref cfr;
         Constant c = constants.get(index);
 
-        switch (c.tag)
-        {
-        case ConstantConstant.CONSTANT_FIELDREF:
-            cfr = (ConstantFieldref)c;
-            break;
-        default:
+        if (!(c instanceof ConstantFieldref))
             return null;
-        }
+        cfr = (ConstantFieldref)c;
 
         ConstantClass cc;
-        c = constants.get(cfr.class_index);
+        c = constants.get(cfr.getClassIndex());
 
-        switch (c.tag)
-        {
-        case ConstantConstant.CONSTANT_CLASS:
-            cc = (ConstantClass)c;
-            break;
-        default:
+        if (!(c instanceof ConstantClass))
             return null;
-        }
+        cc = (ConstantClass)c;
 
-        String classPath = constants.getConstantUtf8(cc.name_index);
+        String classPath = constants.getConstantUtf8(cc.getNameIndex());
 
         ConstantNameAndType cnat =
-            constants.getConstantNameAndType(cfr.name_and_type_index);
+            constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
 
-        String fieldName = constants.getConstantUtf8(cnat.name_index);
+        String fieldName = constants.getConstantUtf8(cnat.getNameIndex());
         String fieldDescriptor =
-            constants.getConstantUtf8(cnat.descriptor_index);
+            constants.getConstantUtf8(cnat.getDescriptorIndex());
 
         return classPath + ':' + fieldName + "\t" + fieldDescriptor;
     }
@@ -485,39 +475,28 @@ public class ByteCodeWriter
     private static String GetConstantMethodName(
             ConstantPool constants, int index)
     {
-        ConstantMethodref cfr;
+        ConstantMethodref cmr;
         Constant c = constants.get(index);
 
-        switch (c.tag)
-        {
-        case ConstantConstant.CONSTANT_METHODREF:
-        case ConstantConstant.CONSTANT_INTERFACEMETHODREF:
-            cfr = (ConstantMethodref)c;
-            break;
-        default:
+        if (!(c instanceof ConstantMethodref))
             return null;
-        }
+        cmr = (ConstantMethodref)c;
 
         ConstantClass cc;
-        c = constants.get(cfr.class_index);
+        c = constants.get(cmr.getClassIndex());
 
-        switch (c.tag)
-        {
-        case ConstantConstant.CONSTANT_CLASS:
-            cc = (ConstantClass)c;
-            break;
-        default:
+        if (!(c instanceof ConstantClass))
             return null;
-        }
+        cc = (ConstantClass)c;
 
-        String classPath = constants.getConstantUtf8(cc.name_index);
+        String classPath = constants.getConstantUtf8(cc.getNameIndex());
 
         ConstantNameAndType cnat =
-            constants.getConstantNameAndType(cfr.name_and_type_index);
+            constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 
-        String fieldName = constants.getConstantUtf8(cnat.name_index);
+        String fieldName = constants.getConstantUtf8(cnat.getNameIndex());
         String fieldDescriptor =
-            constants.getConstantUtf8(cnat.descriptor_index);
+            constants.getConstantUtf8(cnat.getDescriptorIndex());
 
         return classPath + ':' + fieldName + "\t" + fieldDescriptor;
     }

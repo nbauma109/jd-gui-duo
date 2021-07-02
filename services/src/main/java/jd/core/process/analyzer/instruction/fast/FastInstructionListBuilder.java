@@ -16,6 +16,9 @@
  */
 package jd.core.process.analyzer.instruction.fast;
 
+import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
+import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.*;
@@ -24,9 +27,6 @@ import java.util.stream.Stream;
 
 import jd.core.model.classfile.*;
 import jd.core.model.classfile.attribute.AttributeSignature;
-import jd.core.model.classfile.constant.ConstantFieldref;
-import jd.core.model.classfile.constant.ConstantMethodref;
-import jd.core.model.classfile.constant.ConstantNameAndType;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 import jd.core.model.instruction.fast.FastConstants;
@@ -129,8 +129,8 @@ public class FastInstructionListBuilder {
 	}
     
 	/*
-	 * Remove unassigned local variable re-declarations
-	 * Convert assigned local variables re-declarations into assignments
+	 * Remove re-declarations of unassigned local variables
+	 * Convert re-declarations of assigned local variables into assignments
 	 * Attempt to manage a simplified scope of local variables
 	 */
     private static void manageRedeclaredVariables(Set<FastDeclaration> outsideDeclarations, Set<FastDeclaration> insideDeclarations, List<Instruction> instructions) {
@@ -152,23 +152,44 @@ public class FastInstructionListBuilder {
 					insideDeclarations.add(declaration);
 				}
 			}
-			if (instruction instanceof FastTest2Lists) {
-				FastTest2Lists fastTest2Lists = (FastTest2Lists) instruction;
-				/* each if/else block has access to the previously declared local variables :
+			List<List<Instruction>> blocks = getBlocks(instruction);
+			if (!blocks.isEmpty()) {
+				/* each block has access to the previously declared local variables :
 				 * - outsideDeclarations contains the previously declared local variables from every parent block
 				 * - insideDeclarations contains the previously declared variables from the current block
-				 * as we enter the if/else block, the current block becomes the parent block, and the if/else block
+				 * as we enter a new block, the current block becomes the parent block, and the new block
 				 * becomes the current block, inheriting from a merged set of variables that contain both inside 
 				 * declarations from the parent, and outside declarations from all other ancestors, 
 				 * whilst starting with a brand new set of variables for its own declarations
 				 */ 
 				Set<FastDeclaration> mergedDeclarations = mergeSets(outsideDeclarations, insideDeclarations);
-				manageRedeclaredVariables(new HashSet<>(mergedDeclarations), new HashSet<>(), fastTest2Lists.instructions);
-				manageRedeclaredVariables(new HashSet<>(mergedDeclarations), new HashSet<>(), fastTest2Lists.instructions2);
+				for (List<Instruction> block : blocks) {
+					manageRedeclaredVariables(new HashSet<>(mergedDeclarations), new HashSet<>(), block);
+				}
 			}
 		}
 	}
 
+    private static List<List<Instruction>> getBlocks(Instruction instruction) {
+		if (instruction instanceof FastTest2Lists) {
+			FastTest2Lists fastTest2Lists = (FastTest2Lists) instruction;
+			return Arrays.asList(fastTest2Lists.instructions, fastTest2Lists.instructions2);
+		}
+		if (instruction instanceof FastTry) {
+			FastTry fastTry = (FastTry) instruction;
+			List<List<Instruction>> instructions = new ArrayList<>();
+			instructions.add(fastTry.instructions);
+			for (FastCatch fastCatch : fastTry.catches) {
+				instructions.add(fastCatch.instructions);
+			}
+			if (fastTry.finallyInstructions != null) {
+				instructions.add(fastTry.finallyInstructions);
+			}
+			return instructions;
+		}
+		return Collections.emptyList();
+    }
+    
     private static <T> Set<T> mergeSets(Set<T> a, Set<T> b) {
 		return Stream.concat(a.stream(), b.stream()).collect(Collectors.toSet());
 	}
@@ -256,7 +277,7 @@ public class FastInstructionListBuilder {
                 }
             }
 
-            // Extract try blockes
+            // Extract try blocks
             List<Instruction> instructions = new ArrayList<>();
             if (index > 0) {
                 int tryFromOffset = fce.tryFromOffset;
@@ -351,7 +372,7 @@ public class FastInstructionListBuilder {
             // 55: monitorexit
             // 56: ret 2
 
-            // Extract try blockes
+            // Extract try blocks
             List<Instruction> instructions = new ArrayList<>();
             instruction = list.remove(index);
             int fastSynchronizedOffset = instruction.offset;
@@ -565,7 +586,7 @@ public class FastInstructionListBuilder {
                 }
             }
 
-            // Extract try blockes
+            // Extract try blocks
             List<Instruction> instructions = new ArrayList<>();
             i = null;
             if (index > 0) {
@@ -797,7 +818,7 @@ public class FastInstructionListBuilder {
             }
         }
 
-        // Extract catch blockes
+        // Extract catch blocks
         List<FastCatch> catches = null;
         if (fce.catches != null)
         {
@@ -1057,7 +1078,7 @@ public class FastInstructionListBuilder {
 
         AttributeSignature as = method.getAttributeSignature();
         int signatureIndex = (as == null) ?
-                method.descriptor_index : as.signature_index;
+                method.getDescriptorIndex() : as.signature_index;
         String signature = constants.getConstantUtf8(signatureIndex);
         String methodReturnedSignature =
                 SignatureUtil.GetMethodReturnedSignature(signature);
@@ -2757,12 +2778,12 @@ public class FastInstructionListBuilder {
         ConstantPool constants = classFile.getConstantPool();
         InvokeNoStaticInstruction insi = (InvokeNoStaticInstruction) astoreIterator.valueref;
         ConstantMethodref cmr = constants.getConstantMethodref(insi.index);
-        ConstantNameAndType cnat = constants.getConstantNameAndType(cmr.name_and_type_index);
-        String iteratorMethodName = constants.getConstantUtf8(cnat.name_index);
+        ConstantNameAndType cnat = constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
+        String iteratorMethodName = constants.getConstantUtf8(cnat.getNameIndex());
         if (!"iterator".equals(iteratorMethodName)) {
             return false;
         }
-        String iteratorMethodDescriptor = constants.getConstantUtf8(cnat.descriptor_index);
+        String iteratorMethodDescriptor = constants.getConstantUtf8(cnat.getDescriptorIndex());
         // Test 'test' instruction: localIterator.hasNext()
         if (!"()Ljava/util/Iterator;".equals(iteratorMethodDescriptor) || test.opcode != ByteCodeConstants.IF) {
             return false;
@@ -2777,12 +2798,12 @@ public class FastInstructionListBuilder {
             return false;
         }
         cmr = constants.getConstantMethodref(insi.index);
-        cnat = constants.getConstantNameAndType(cmr.name_and_type_index);
-        String hasNextMethodName = constants.getConstantUtf8(cnat.name_index);
+        cnat = constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
+        String hasNextMethodName = constants.getConstantUtf8(cnat.getNameIndex());
         if (!"hasNext".equals(hasNextMethodName)) {
             return false;
         }
-        String hasNextMethodDescriptor = constants.getConstantUtf8(cnat.descriptor_index);
+        String hasNextMethodDescriptor = constants.getConstantUtf8(cnat.getDescriptorIndex());
         // Test first instruction: String s = (String)localIterator.next()
         if (!"()Z".equals(hasNextMethodDescriptor) || firstInstruction.opcode != FastConstants.DECLARE) {
             return false;
@@ -2816,12 +2837,12 @@ public class FastInstructionListBuilder {
             return false;
         }
         cmr = constants.getConstantMethodref(insi.index);
-        cnat = constants.getConstantNameAndType(cmr.name_and_type_index);
-        String nextMethodName = constants.getConstantUtf8(cnat.name_index);
+        cnat = constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
+        String nextMethodName = constants.getConstantUtf8(cnat.getNameIndex());
         if (!"next".equals(nextMethodName)) {
             return false;
         }
-        String nextMethodDescriptor = constants.getConstantUtf8(cnat.descriptor_index);
+        String nextMethodDescriptor = constants.getConstantUtf8(cnat.getDescriptorIndex());
         return "()Ljava/lang/Object;".equals(nextMethodDescriptor);
     }
 
@@ -3186,14 +3207,22 @@ public class FastInstructionListBuilder {
     }
 
     private static boolean CheckBeforeLoopAndLastBodyLoop(Instruction beforeLoop, Instruction lastBodyLoop) {
-        if (beforeLoop.opcode == ByteCodeConstants.LOAD || beforeLoop.opcode == ByteCodeConstants.STORE
-                || beforeLoop.opcode == ByteCodeConstants.ALOAD || beforeLoop.opcode == ByteCodeConstants.ASTORE
-                || beforeLoop.opcode == ByteCodeConstants.GETSTATIC || beforeLoop.opcode == ByteCodeConstants.PUTSTATIC
-                || beforeLoop.opcode == ByteCodeConstants.GETFIELD || beforeLoop.opcode == ByteCodeConstants.PUTFIELD) {
-            if (lastBodyLoop.opcode == ByteCodeConstants.LOAD || lastBodyLoop.opcode == ByteCodeConstants.STORE
-                    || lastBodyLoop.opcode == ByteCodeConstants.ALOAD || lastBodyLoop.opcode == ByteCodeConstants.ASTORE
-                    || lastBodyLoop.opcode == ByteCodeConstants.GETSTATIC || lastBodyLoop.opcode == ByteCodeConstants.PUTSTATIC
-                    || lastBodyLoop.opcode == ByteCodeConstants.GETFIELD || lastBodyLoop.opcode == ByteCodeConstants.PUTFIELD) {
+        if (beforeLoop.opcode == ByteCodeConstants.LOAD 
+         || beforeLoop.opcode == ByteCodeConstants.STORE
+         || beforeLoop.opcode == ByteCodeConstants.ALOAD 
+         || beforeLoop.opcode == ByteCodeConstants.ASTORE
+         || beforeLoop.opcode == ByteCodeConstants.GETSTATIC 
+         || beforeLoop.opcode == ByteCodeConstants.PUTSTATIC
+         || beforeLoop.opcode == ByteCodeConstants.GETFIELD 
+         || beforeLoop.opcode == ByteCodeConstants.PUTFIELD) {
+            if (lastBodyLoop.opcode == ByteCodeConstants.LOAD 
+             || lastBodyLoop.opcode == ByteCodeConstants.STORE
+             || lastBodyLoop.opcode == ByteCodeConstants.ALOAD 
+             || lastBodyLoop.opcode == ByteCodeConstants.ASTORE
+             || lastBodyLoop.opcode == ByteCodeConstants.GETSTATIC 
+             || lastBodyLoop.opcode == ByteCodeConstants.PUTSTATIC
+             || lastBodyLoop.opcode == ByteCodeConstants.GETFIELD 
+             || lastBodyLoop.opcode == ByteCodeConstants.PUTFIELD) {
                 return ((IndexInstruction) beforeLoop).index == ((IndexInstruction) lastBodyLoop).index;
             }
         } else if (beforeLoop.opcode == ByteCodeConstants.ISTORE && (beforeLoop.opcode == lastBodyLoop.opcode || lastBodyLoop.opcode == ByteCodeConstants.IINC)) {
@@ -3790,16 +3819,16 @@ public class FastInstructionListBuilder {
 
                     ConstantPool constants = classFile.getConstantPool();
                     ConstantFieldref cfr = constants.getConstantFieldref(gs.index);
-                    ConstantNameAndType cnat = constants.getConstantNameAndType(cfr.name_and_type_index);
+                    ConstantNameAndType cnat = constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
 
-                    if (classFile.getSwitchMaps().containsKey(cnat.name_index)) {
+                    if (classFile.getSwitchMaps().containsKey(cnat.getNameIndex())) {
                         Invokevirtual iv = (Invokevirtual) ali.indexref;
 
                         if (iv.args.isEmpty()) {
-                            ConstantMethodref cmr = constants.getConstantMethodref(iv.index);
-                            cnat = constants.getConstantNameAndType(cmr.name_and_type_index);
+                        	ConstantMethodref cmr = constants.getConstantMethodref(iv.index);
+                            cnat = constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 
-                            if (StringConstants.ORDINAL_METHOD_NAME.equals(constants.getConstantUtf8(cnat.name_index))) {
+                            if (StringConstants.ORDINAL_METHOD_NAME.equals(constants.getConstantUtf8(cnat.getNameIndex()))) {
                                 // SWITCH_ENUM found
                                 return FastConstants.SWITCH_ENUM;
                             }
@@ -3814,16 +3843,16 @@ public class FastInstructionListBuilder {
                         ConstantPool constants = classFile.getConstantPool();
                         ConstantMethodref cmr = constants.getConstantMethodref(is.index);
 
-                        if (cmr.class_index == classFile.getThisClassIndex()) {
-                            ConstantNameAndType cnat = constants.getConstantNameAndType(cmr.name_and_type_index);
-                            if (classFile.getSwitchMaps().containsKey(cnat.name_index)) {
+                        if (cmr.getClassIndex() == classFile.getThisClassIndex()) {
+                            ConstantNameAndType cnat = constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
+                            if (classFile.getSwitchMaps().containsKey(cnat.getNameIndex())) {
                                 Invokevirtual iv = (Invokevirtual) ali.indexref;
 
                                 if (iv.args.isEmpty()) {
                                     cmr = constants.getConstantMethodref(iv.index);
-                                    cnat = constants.getConstantNameAndType(cmr.name_and_type_index);
+                                    cnat = constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 
-                                    if (StringConstants.ORDINAL_METHOD_NAME.equals(constants.getConstantUtf8(cnat.name_index))) {
+                                    if (StringConstants.ORDINAL_METHOD_NAME.equals(constants.getConstantUtf8(cnat.getNameIndex()))) {
                                         // Eclipse SWITCH_ENUM found
                                         return FastConstants.SWITCH_ENUM;
                                     }
@@ -3931,18 +3960,18 @@ public class FastInstructionListBuilder {
             return false;
         }
 
-        String className = constants.getConstantClassName(cmr.class_index);
+        String className = constants.getConstantClassName(cmr.getClassIndex());
         if (!StringConstants.JAVA_LANG_STRING.equals(className)) {
             return false;
         }
 
-        ConstantNameAndType cnat = constants.getConstantNameAndType(cmr.name_and_type_index);
-        String descriptorName = constants.getConstantUtf8(cnat.descriptor_index);
+        ConstantNameAndType cnat = constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
+        String descriptorName = constants.getConstantUtf8(cnat.getDescriptorIndex());
         if (!"()I".equals(descriptorName)) {
             return false;
         }
 
-        String methodName = constants.getConstantUtf8(cnat.name_index);
+        String methodName = constants.getConstantUtf8(cnat.getNameIndex());
         if (!"hashCode".equals(methodName)) {
             return false;
         }
@@ -4078,17 +4107,17 @@ public class FastInstructionListBuilder {
         }
 
         ConstantMethodref cmrTest = constants.getConstantMethodref(ivTest.index);
-        if (cmr.class_index != cmrTest.class_index) {
+        if (cmr.getClassIndex() != cmrTest.getClassIndex()) {
             return false;
         }
 
-        ConstantNameAndType cnatTest = constants.getConstantNameAndType(cmrTest.name_and_type_index);
-        String descriptorNameTest = constants.getConstantUtf8(cnatTest.descriptor_index);
+        ConstantNameAndType cnatTest = constants.getConstantNameAndType(cmrTest.getNameAndTypeIndex());
+        String descriptorNameTest = constants.getConstantUtf8(cnatTest.getDescriptorIndex());
         if (!"(Ljava/lang/Object;)Z".equals(descriptorNameTest)) {
             return false;
         }
 
-        String methodNameTest = constants.getConstantUtf8(cnatTest.name_index);
+        String methodNameTest = constants.getConstantUtf8(cnatTest.getNameIndex());
         if (!"equals".equals(methodNameTest)) {
             return false;
         }
@@ -4189,10 +4218,13 @@ public class FastInstructionListBuilder {
                 while (i-- > 0) {
                     instruction = list.get(i);
 
-                    if (instruction.opcode == ByteCodeConstants.IF || instruction.opcode == ByteCodeConstants.IFCMP
-                            || instruction.opcode == ByteCodeConstants.IFXNULL || instruction.opcode == ByteCodeConstants.GOTO
-                            || instruction.opcode == FastConstants.SWITCH || instruction.opcode == FastConstants.SWITCH_ENUM
-                            || instruction.opcode == FastConstants.SWITCH_STRING) {
+                    if (instruction.opcode == ByteCodeConstants.IF 
+                     || instruction.opcode == ByteCodeConstants.IFCMP
+                     || instruction.opcode == ByteCodeConstants.IFXNULL
+                     || instruction.opcode == ByteCodeConstants.GOTO
+                     || instruction.opcode == FastConstants.SWITCH
+                     || instruction.opcode == FastConstants.SWITCH_ENUM
+                     || instruction.opcode == FastConstants.SWITCH_STRING) {
                         int jumpOffset = ((BranchInstruction) instruction).GetJumpOffset();
                         if (lastSwitchOffset < jumpOffset && jumpOffset < afterSwitchOffset) {
                             afterSwitchOffset = jumpOffset;
@@ -4204,10 +4236,13 @@ public class FastInstructionListBuilder {
                 while (i-- > 0) {
                     instruction = list.get(i);
 
-                    if (instruction.opcode == ByteCodeConstants.IF || instruction.opcode == ByteCodeConstants.IFCMP
-                            || instruction.opcode == ByteCodeConstants.IFXNULL || instruction.opcode == ByteCodeConstants.GOTO
-                            || instruction.opcode == FastConstants.SWITCH || instruction.opcode == FastConstants.SWITCH_ENUM
-                            || instruction.opcode == FastConstants.SWITCH_STRING) {
+                    if (instruction.opcode == ByteCodeConstants.IF
+                     || instruction.opcode == ByteCodeConstants.IFCMP
+                     || instruction.opcode == ByteCodeConstants.IFXNULL
+                     || instruction.opcode == ByteCodeConstants.GOTO
+                     || instruction.opcode == FastConstants.SWITCH
+                     || instruction.opcode == FastConstants.SWITCH_ENUM
+                     || instruction.opcode == FastConstants.SWITCH_STRING) {
                         int jumpOffset = ((BranchInstruction) instruction).GetJumpOffset();
                         if (lastSwitchOffset < jumpOffset && jumpOffset < afterSwitchOffset) {
                             afterSwitchOffset = jumpOffset;
@@ -4292,11 +4327,15 @@ public class FastInstructionListBuilder {
                             {
                                 instruction = instructions.get(nbrInstructions - 1);
 
-                                if (instruction.opcode == ByteCodeConstants.IF || instruction.opcode == ByteCodeConstants.IFCMP
-                                        || instruction.opcode == ByteCodeConstants.IFXNULL || instruction.opcode == FastConstants.IF_SIMPLE
-                                        || instruction.opcode == FastConstants.IF_ELSE || instruction.opcode == ByteCodeConstants.GOTO
-                                        || instruction.opcode == FastConstants.SWITCH || instruction.opcode == FastConstants.SWITCH_ENUM
-                                        || instruction.opcode == FastConstants.SWITCH_STRING) {
+                                if (instruction.opcode == ByteCodeConstants.IF
+                                 || instruction.opcode == ByteCodeConstants.IFCMP
+                                 || instruction.opcode == ByteCodeConstants.IFXNULL
+                                 || instruction.opcode == FastConstants.IF_SIMPLE
+                                 || instruction.opcode == FastConstants.IF_ELSE
+                                 || instruction.opcode == ByteCodeConstants.GOTO
+                                 || instruction.opcode == FastConstants.SWITCH
+                                 || instruction.opcode == FastConstants.SWITCH_ENUM
+                                 || instruction.opcode == FastConstants.SWITCH_STRING) {
                                     int jumpOffset = ((BranchInstruction) instruction).GetJumpOffset();
                                     if (jumpOffset < switchOffset || lastSwitchOffset < jumpOffset) {
                                         instructions.add(new FastInstruction(FastConstants.GOTO_BREAK,

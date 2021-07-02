@@ -16,12 +16,12 @@
  ******************************************************************************/
 package jd.core.model.instruction.bytecode.instruction;
 
+import org.jd.core.v1.model.classfile.constant.Constant;
+import org.jd.core.v1.model.classfile.constant.ConstantClass;
+import org.jd.core.v1.model.classfile.constant.ConstantUtf8;
+
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.LocalVariables;
-import jd.core.model.classfile.constant.Constant;
-import jd.core.model.classfile.constant.ConstantClass;
-import jd.core.model.classfile.constant.ConstantConstant;
-import jd.core.model.classfile.constant.ConstantUtf8;
 import jd.core.util.SignatureUtil;
 
 public class CheckCast extends IndexInstruction
@@ -45,13 +45,13 @@ public class CheckCast extends IndexInstruction
 
         Constant c = constants.get(this.index);
 
-        if (c.tag == ConstantConstant.CONSTANT_UTF8)
+        if (c instanceof ConstantUtf8)
         {
             ConstantUtf8 cutf8 = (ConstantUtf8)c;
-            return cutf8.bytes;
+            return cutf8.getValue();
         }
         ConstantClass cc = (ConstantClass)c;
-        String signature = constants.getConstantUtf8(cc.name_index);
+        String signature = constants.getConstantUtf8(cc.getNameIndex());
         if (signature.charAt(0) != '[')
             signature = SignatureUtil.CreateTypeName(signature);
         return signature;

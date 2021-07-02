@@ -16,6 +16,7 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.fast.reconstructor;
 
+import org.jd.core.v1.model.classfile.constant.*;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.List;
@@ -24,7 +25,6 @@ import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ClassFileConstants;
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.Field;
-import jd.core.model.classfile.constant.*;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 import jd.core.model.instruction.fast.FastConstants;
@@ -87,7 +87,7 @@ public class DotClass118BReconstructor
 
             ConstantFieldref cfr = constants.getConstantFieldref(gs.index);
 
-            if (cfr.class_index != classFile.getThisClassIndex())
+            if (cfr.getClassIndex() != classFile.getThisClassIndex())
                 continue;
 
             instruction = list.get(i+1);
@@ -157,45 +157,44 @@ public class DotClass118BReconstructor
                 continue;
 
             ConstantNameAndType cnatField = constants.getConstantNameAndType(
-                cfr.name_and_type_index);
+                cfr.getNameAndTypeIndex());
 
             String signature =
-                constants.getConstantUtf8(cnatField.descriptor_index);
+                constants.getConstantUtf8(cnatField.getDescriptorIndex());
 
             if (! StringConstants.INTERNAL_CLASS_SIGNATURE.equals(signature))
                 continue;
 
-            String nameField = constants.getConstantUtf8(cnatField.name_index);
+            String nameField = constants.getConstantUtf8(cnatField.getNameIndex());
 
             if (! nameField.startsWith(StringConstants.CLASS_DOLLAR))
                 continue;
 
-            ConstantMethodref cmr =
-                constants.getConstantMethodref(is.index);
+            ConstantMethodref cmr = constants.getConstantMethodref(is.index);
 
             String className =
-                constants.getConstantClassName(cmr.class_index);
+                constants.getConstantClassName(cmr.getClassIndex());
 
             if (! className.equals(StringConstants.JAVA_LANG_CLASS))
                 continue;
 
             ConstantNameAndType cnatMethod =
-                constants.getConstantNameAndType(cmr.name_and_type_index);
+                constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
             String nameMethod =
-                constants.getConstantUtf8(cnatMethod.name_index);
+                constants.getConstantUtf8(cnatMethod.getNameIndex());
 
             if (! nameMethod.equals(StringConstants.FORNAME_METHOD_NAME))
                 continue;
 
             Ldc ldc = (Ldc)instruction;
-            ConstantValue cv = constants.getConstantValue(ldc.index);
+            Constant cv = constants.getConstantValue(ldc.index);
 
-            if (cv.tag != ConstantConstant.CONSTANT_STRING)
+            if (!(cv instanceof ConstantString))
                 continue;
 
             // Trouve !
             ConstantString cs = (ConstantString)cv;
-            String dotClassName = constants.getConstantUtf8(cs.string_index);
+            String dotClassName = constants.getConstantUtf8(cs.getStringIndex());
             String internalName = dotClassName.replace(
                 StringConstants.PACKAGE_SEPARATOR,
                 StringConstants.INTERNAL_PACKAGE_SEPARATOR);
@@ -232,7 +231,7 @@ public class DotClass118BReconstructor
             {
                 Field field = fields[j];
 
-                if (field.name_index == cnatField.name_index)
+                if (field.getNameIndex() == cnatField.getNameIndex())
                 {
                     field.access_flags |= ClassFileConstants.ACC_SYNTHETIC;
                     break;

@@ -17,11 +17,11 @@
 package jd.core.process.writer;
 
 import org.jd.core.v1.api.loader.Loader;
+import org.jd.core.v1.model.classfile.constant.Constant;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.attribute.ElementValuePrimitiveType;
-import jd.core.model.classfile.constant.ConstantValue;
 import jd.core.model.reference.ReferenceMap;
 import jd.core.printer.Printer;
 import jd.core.util.StringUtil;
@@ -48,7 +48,7 @@ public class ElementValuePrimitiveTypeWriter
         }
         else
         {
-            ConstantValue cv = constants.getConstantValue(
+            Constant cv = constants.getConstantValue(
                 evpt.const_value_index);
             ConstantValueWriter.Write(
                 loader, printer, referenceMap, classFile, cv, evpt.type);

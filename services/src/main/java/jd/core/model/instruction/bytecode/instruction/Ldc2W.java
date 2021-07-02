@@ -16,10 +16,11 @@
  ******************************************************************************/
 package jd.core.model.instruction.bytecode.instruction;
 
+import org.jd.core.v1.model.classfile.constant.Constant;
+import org.jd.core.v1.model.classfile.constant.ConstantDouble;
+
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.LocalVariables;
-import jd.core.model.classfile.constant.ConstantConstant;
-import jd.core.model.classfile.constant.ConstantValue;
 
 public class Ldc2W extends LdcInstruction
 {
@@ -35,11 +36,11 @@ public class Ldc2W extends LdcInstruction
         if (constants == null)
             return null;
 
-        ConstantValue cv = constants.getConstantValue(this.index);
+        Constant cv = constants.getConstantValue(this.index);
 
         if (cv == null)
             return null;
 
-        return (cv.tag == ConstantConstant.CONSTANT_DOUBLE) ? "D" : "J";
+        return (cv instanceof ConstantDouble) ? "D" : "J";
     }
 }

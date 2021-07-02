@@ -243,7 +243,7 @@ public class InstructionListBuilder
                 {
                     final String className = classFile.getClassName();
                     final String methodName =
-                        classFile.getConstantPool().getConstantUtf8(method.name_index);
+                        classFile.getConstantPool().getConstantUtf8(method.getNameIndex());
                     System.err.println(
                         "'" + className + '.' + methodName +
                         "' build error: stack not empty. stack=" + stack);

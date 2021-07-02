@@ -8,20 +8,24 @@
 package org.jd.core.v1.model.classfile.constant;
 
 public class ConstantNameAndType extends Constant {
-    protected int nameIndex;
-    protected int descriptorIndex;
+	
+    private int nameIndex;
+    private int descriptorIndex;
 
     public ConstantNameAndType(int nameIndex, int descriptorIndex) {
-        super(CONSTANT_NAMEANDTYPE);
-        this.nameIndex = nameIndex;
+        this.setNameIndex(nameIndex);
         this.descriptorIndex = descriptorIndex;
-    }
-
-    public int getNameIndex() {
-        return nameIndex;
     }
 
     public int getDescriptorIndex() {
         return descriptorIndex;
     }
+
+	public int getNameIndex() {
+		return nameIndex;
+	}
+
+	public void setNameIndex(int nameIndex) {
+		this.nameIndex = nameIndex;
+	}
 }

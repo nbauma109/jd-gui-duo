@@ -16,15 +16,15 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.bytecode.reconstructor;
 
+import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
+import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ConstantPool;
-import jd.core.model.classfile.constant.ConstantFieldref;
-import jd.core.model.classfile.constant.ConstantMethodref;
-import jd.core.model.classfile.constant.ConstantNameAndType;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 
@@ -87,12 +87,12 @@ public class AssertInstructionReconstructor
             ConstantPool constants = classFile.getConstantPool();
             ConstantFieldref cfr = constants.getConstantFieldref(gs.index);
 
-            if (cfr.class_index != classFile.getThisClassIndex())
+            if (cfr.getClassIndex() != classFile.getThisClassIndex())
                 continue;
 
             ConstantNameAndType cnat =
-                constants.getConstantNameAndType(cfr.name_and_type_index);
-            String fieldName = constants.getConstantUtf8(cnat.name_index);
+                constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
+            String fieldName = constants.getConstantUtf8(cnat.getNameIndex());
 
             if (! fieldName.equals("$assertionsDisabled"))
                 continue;
@@ -100,7 +100,7 @@ public class AssertInstructionReconstructor
             InvokeNew in = (InvokeNew)athrow.value;
             ConstantMethodref cmr =
                 constants.getConstantMethodref(in.index);
-            String className = constants.getConstantClassName(cmr.class_index);
+            String className = constants.getConstantClassName(cmr.getClassIndex());
 
             if (! className.equals(StringConstants.JAVA_LANG_ASSERTION_ERROR))
                 continue;

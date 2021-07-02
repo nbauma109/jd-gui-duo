@@ -38,14 +38,14 @@ public class ConstantPool {
         return cutf8.getValue();
     }
 
-    public ConstantValue getConstantValue(int index) {
+    public Constant getConstantValue(int index) {
         Constant constant = constants[index];
 
-        if ((constant != null) && (constant.getTag() == Constant.CONSTANT_STRING)) {
+        if (constant instanceof ConstantString) {
             constant = constants[((ConstantString)constant).getStringIndex()];
         }
 
-        return (ConstantValue)constant;
+        return constant;
     }
 
     @Override

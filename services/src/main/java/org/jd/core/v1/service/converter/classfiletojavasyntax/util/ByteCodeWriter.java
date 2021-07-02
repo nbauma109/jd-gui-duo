@@ -286,24 +286,24 @@ public class ByteCodeWriter {
     }
 
     protected static void writeLDC(StringBuilder sb, ConstantPool constants, Constant constant) {
-        switch (constant.getTag()) {
-            case Constant.CONSTANT_INTEGER:
+        switch (constant.getClass().getSimpleName()) {
+            case "ConstantInteger":
                 sb.append(' ').append(((ConstantInteger) constant).getValue());
                 break;
-            case Constant.CONSTANT_FLOAT:
+            case "ConstantFloat":
                 sb.append(' ').append(((ConstantFloat) constant).getValue());
                 break;
-            case Constant.CONSTANT_CLASS:
+            case "ConstantClass":
                 int typeNameIndex = ((ConstantClass) constant).getNameIndex();
                 sb.append(' ').append(((ConstantUtf8)constants.getConstant(typeNameIndex)).getValue());
                 break;
-            case Constant.CONSTANT_LONG:
+            case "ConstantLong":
                 sb.append(' ').append(((ConstantLong) constant).getValue());
                 break;
-            case Constant.CONSTANT_DOUBLE:
+            case "ConstantDouble":
                 sb.append(' ').append(((ConstantDouble) constant).getValue());
                 break;
-            case Constant.CONSTANT_STRING:
+            case "ConstantString":
                 sb.append(" '");
                 int stringIndex = ((ConstantString) constant).getStringIndex();
                 String str = constants.getConstantUtf8(stringIndex);

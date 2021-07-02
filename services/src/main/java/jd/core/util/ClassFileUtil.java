@@ -50,7 +50,7 @@ public class ClassFileUtil
                  (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_BRIDGE)) != 0)
                 continue;
 
-            if (method.name_index == constants.instanceConstructorIndex)
+            if (method.getNameIndex() == constants.instanceConstructorIndex)
             {
                 if (flag)
                     // A other constructor has been found
@@ -71,7 +71,7 @@ public class ClassFileUtil
         if ((method.access_flags & (ClassFileConstants.ACC_PUBLIC|ClassFileConstants.ACC_STATIC)) ==
             (ClassFileConstants.ACC_PUBLIC|ClassFileConstants.ACC_STATIC))
         {
-            String methodName = constants.getConstantUtf8(method.name_index);
+            String methodName = constants.getConstantUtf8(method.getNameIndex());
 
             if (methodName.equals(StringConstants.ENUM_VALUEOF_METHOD_NAME))
             {

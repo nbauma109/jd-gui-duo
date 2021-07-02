@@ -11,11 +11,11 @@ package org.jd.core.v1.model.classfile.constant;
  * POJO for CONSTANT_Fieldref, CONSTANT_Methodref and CONSTANT_InterfaceMethodref.
  */
 public class ConstantMemberRef extends Constant {
-    protected int classIndex;
-    protected int nameAndTypeIndex;
+	
+    private int classIndex;
+    private int nameAndTypeIndex;
 
     public ConstantMemberRef(int classIndex, int nameAndTypeIndex) {
-        super(CONSTANT_MEMBERREF);
         this.classIndex = classIndex;
         this.nameAndTypeIndex = nameAndTypeIndex;
     }
