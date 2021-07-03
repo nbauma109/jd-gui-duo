@@ -9,13 +9,12 @@ package org.jdv1.gui.util.decompiler;
 
 import org.jd.core.v1.api.Decompiler;
 import org.jd.core.v1.api.loader.LoaderException;
-
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.util.decompiler.ContainerLoader;
 
 import java.io.File;
-import java.io.UTFDataFormatException;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -120,7 +119,7 @@ public class LineNumberStringBuilderPrinter extends StringBuilderPrinter {
         }
     }
 
-    public String buildDecompiledOutput(Map<String, String> preferences, ContainerLoader loader, Container.Entry entry, Decompiler decompiler) throws UTFDataFormatException, LoaderException {
+    public String buildDecompiledOutput(Map<String, String> preferences, ContainerLoader loader, Container.Entry entry, Decompiler decompiler) throws LoaderException, IOException {
         // Init preferences
         boolean realignmentLineNumbers = Boolean.parseBoolean(preferences.getOrDefault(REALIGN_LINE_NUMBERS, Boolean.FALSE.toString()));
         boolean unicodeEscape = Boolean.parseBoolean(preferences.getOrDefault(ESCAPE_UNICODE_CHARACTERS, Boolean.FALSE.toString()));

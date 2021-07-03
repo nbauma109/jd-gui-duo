@@ -18,18 +18,19 @@ import org.jd.core.v1.service.deserializer.classfile.attribute.InvalidAttributeL
 import org.jd.core.v1.util.DefaultList;
 import org.jd.core.v1.util.StringConstants;
 
-import java.io.UTFDataFormatException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.jd.core.v1.model.classfile.Constants.ACC_SYNTHETIC;
 
+import jd.core.CoreConstants;
 import jd.core.process.deserializer.ClassFormatException;
 
 public class ClassFileDeserializer {
     protected static final int[] EMPTY_INT_ARRAY = {};
 
-    public ClassFile loadClassFile(Loader loader, String internalTypeName) throws LoaderException, UTFDataFormatException {
+    public ClassFile loadClassFile(Loader loader, String internalTypeName) throws LoaderException, IOException {
         ClassFile classFile = innerLoadClassFile(loader, internalTypeName);
 
         if (classFile == null) {
@@ -38,7 +39,7 @@ public class ClassFileDeserializer {
         return classFile;
     }
 
-    protected ClassFile innerLoadClassFile(Loader loader, String internalTypeName) throws LoaderException, UTFDataFormatException {
+    protected ClassFile innerLoadClassFile(Loader loader, String internalTypeName) throws LoaderException, IOException {
         if (!loader.canLoad(internalTypeName)) {
             return null;
         }
@@ -49,60 +50,60 @@ public class ClassFileDeserializer {
             return null;
         }
 
-        ClassFileReader reader = new ClassFileReader(data);
+        try (DataInputStream reader = new DataInputStream(new ByteArrayInputStream(data))) {
 
-        // Load main type
-        ClassFile classFile = loadClassFile(reader);
-
-        // Load inner types
-        AttributeInnerClasses aic = classFile.getAttribute("InnerClasses");
-
-        if (aic != null) {
-            DefaultList<ClassFile> innerClassFiles = new DefaultList<>();
-            String innerTypePrefix = internalTypeName + '$';
-
-            String innerTypeName;
-            for (InnerClass ic : aic.getInnerClasses()) {
-                innerTypeName = ic.getInnerTypeName();
-
-                if (!internalTypeName.equals(innerTypeName) && (internalTypeName.equals(ic.getOuterTypeName()) || innerTypeName.startsWith(innerTypePrefix))) {
-                    ClassFile innerClassFile = innerLoadClassFile(loader, innerTypeName);
-                    int flags = ic.getInnerAccessFlags();
-                    int length;
-
-                    if (innerTypeName.startsWith(innerTypePrefix)) {
-                        length = internalTypeName.length() + 1;
-                    } else {
-                        length = innerTypeName.indexOf('$') + 1;
-                    }
-
-                    if (Character.isDigit(innerTypeName.charAt(length))) {
-                        flags |= ACC_SYNTHETIC;
-                    }
-
-                    if (innerClassFile == null) {
-                        // Inner class not found. Create an empty one.
-                        innerClassFile = new ClassFile(classFile.getMajorVersion(), classFile.getMinorVersion(), 0, innerTypeName, StringConstants.JAVA_LANG_OBJECT, null, null, null, null);
-                    }
-
-                    innerClassFile.setOuterClassFile(classFile);
-                    innerClassFile.setAccessFlags(flags);
-                    innerClassFiles.add(innerClassFile);
-                }
-            }
-
-            if (!innerClassFiles.isEmpty()) {
-                classFile.setInnerClassFiles(innerClassFiles);
-            }
+	        // Load main type
+	        ClassFile classFile = loadClassFile(reader);
+	
+	        // Load inner types
+	        AttributeInnerClasses aic = classFile.getAttribute("InnerClasses");
+	
+	        if (aic != null) {
+	            DefaultList<ClassFile> innerClassFiles = new DefaultList<>();
+	            String innerTypePrefix = internalTypeName + '$';
+	
+	            String innerTypeName;
+	            for (InnerClass ic : aic.getInnerClasses()) {
+	                innerTypeName = ic.getInnerTypeName();
+	
+	                if (!internalTypeName.equals(innerTypeName) && (internalTypeName.equals(ic.getOuterTypeName()) || innerTypeName.startsWith(innerTypePrefix))) {
+	                    ClassFile innerClassFile = innerLoadClassFile(loader, innerTypeName);
+	                    int flags = ic.getInnerAccessFlags();
+	                    int length;
+	
+	                    if (innerTypeName.startsWith(innerTypePrefix)) {
+	                        length = internalTypeName.length() + 1;
+	                    } else {
+	                        length = innerTypeName.indexOf('$') + 1;
+	                    }
+	
+	                    if (Character.isDigit(innerTypeName.charAt(length))) {
+	                        flags |= ACC_SYNTHETIC;
+	                    }
+	
+	                    if (innerClassFile == null) {
+	                        // Inner class not found. Create an empty one.
+	                        innerClassFile = new ClassFile(classFile.getMajorVersion(), classFile.getMinorVersion(), 0, innerTypeName, StringConstants.JAVA_LANG_OBJECT, null, null, null, null);
+	                    }
+	
+	                    innerClassFile.setOuterClassFile(classFile);
+	                    innerClassFile.setAccessFlags(flags);
+	                    innerClassFiles.add(innerClassFile);
+	                }
+	            }
+	
+	            if (!innerClassFiles.isEmpty()) {
+	                classFile.setInnerClassFiles(innerClassFiles);
+	            }
+	        }
+	        return classFile;
         }
-
-        return classFile;
     }
 
-    protected ClassFile loadClassFile(ClassFileReader reader) throws UTFDataFormatException {
+    protected ClassFile loadClassFile(DataInput reader) throws IOException {
         int magic = reader.readInt();
 
-        if (magic != ClassFileReader.JAVA_MAGIC_NUMBER) {
+        if (magic != CoreConstants.JAVA_MAGIC_NUMBER) {
             throw new ClassFormatException("Invalid CLASS file");
         }
 
@@ -125,7 +126,7 @@ public class ClassFileDeserializer {
         return new ClassFile(majorVersion, minorVersion, accessFlags, internalTypeName, superTypeName, interfaceTypeNames, fields, methods, attributes);
     }
 
-    protected Constant[] loadConstants(ClassFileReader reader) throws UTFDataFormatException {
+    protected Constant[] loadConstants(DataInput reader) throws IOException {
         int count = reader.readUnsignedShort();
 
         if (count == 0) {
@@ -140,7 +141,7 @@ public class ClassFileDeserializer {
 
             switch (tag) {
                 case 1:
-                    constants[i] = new ConstantUtf8(reader.readUTF8());
+                    constants[i] = new ConstantUtf8(reader.readUTF());
                     break;
                 case 3:
                     constants[i] = new ConstantInteger(reader.readInt());
@@ -182,7 +183,7 @@ public class ClassFileDeserializer {
         return constants;
     }
 
-    protected String[] loadInterfaces(ClassFileReader reader, ConstantPool constants) {
+    protected String[] loadInterfaces(DataInput reader, ConstantPool constants) throws IOException {
         int count = reader.readUnsignedShort();
         if (count == 0) {
             return null;
@@ -199,7 +200,7 @@ public class ClassFileDeserializer {
         return interfaceTypeNames;
     }
 
-    protected Field[] loadFields(ClassFileReader reader, ConstantPool constants) {
+    protected Field[] loadFields(DataInput reader, ConstantPool constants) throws IOException {
         int count = reader.readUnsignedShort();
         if (count == 0) {
             return null;
@@ -228,7 +229,7 @@ public class ClassFileDeserializer {
         return fields;
     }
 
-    protected Method[] loadMethods(ClassFileReader reader, ConstantPool constants) {
+    protected Method[] loadMethods(DataInput reader, ConstantPool constants) throws IOException {
         int count = reader.readUnsignedShort();
         if (count == 0) {
             return null;
@@ -257,7 +258,7 @@ public class ClassFileDeserializer {
         return methods;
     }
 
-    protected Map<String, Attribute> loadAttributes(ClassFileReader reader, ConstantPool constants) {
+    protected Map<String, Attribute> loadAttributes(DataInput reader, ConstantPool constants) throws IOException {
         int count = reader.readUnsignedShort();
         if (count == 0) {
             return null;
@@ -372,14 +373,14 @@ public class ClassFileDeserializer {
                     break;
                 default:
                     attributes.put(name, new UnknownAttribute());
-                    reader.skip(attributeLength);
+                    reader.skipBytes(attributeLength);
             }
         }
 
         return attributes;
     }
 
-    protected AttributeElementValue loadElementValue(ClassFileReader reader, ConstantPool constants) {
+    protected AttributeElementValue loadElementValue(DataInput reader, ConstantPool constants) throws IOException {
         int type = reader.readByte();
 
         switch (type) {
@@ -410,7 +411,7 @@ public class ClassFileDeserializer {
         }
     }
 
-    protected ElementValuePair[] loadElementValuePairs(ClassFileReader reader, ConstantPool constants) {
+    protected ElementValuePair[] loadElementValuePairs(DataInput reader, ConstantPool constants) throws IOException {
         int count = reader.readUnsignedShort();
         if (count == 0) {
             return null;
@@ -429,7 +430,7 @@ public class ClassFileDeserializer {
         return pairs;
     }
 
-    protected AttributeElementValue[] loadElementValues(ClassFileReader reader, ConstantPool constants) {
+    protected AttributeElementValue[] loadElementValues(DataInput reader, ConstantPool constants) throws IOException {
         int count = reader.readUnsignedShort();
         if (count == 0) {
             return null;
@@ -444,7 +445,7 @@ public class ClassFileDeserializer {
         return values;
     }
 
-    protected BootstrapMethod[] loadBootstrapMethods(ClassFileReader reader) {
+    protected BootstrapMethod[] loadBootstrapMethods(DataInput reader) throws IOException {
         int count = reader.readUnsignedShort();
         if (count == 0) {
             return null;
@@ -473,7 +474,7 @@ public class ClassFileDeserializer {
         return values;
     }
 
-    protected byte[] loadCode(ClassFileReader reader) {
+    protected byte[] loadCode(DataInput reader) throws IOException {
         int code_length = reader.readInt();
         if (code_length == 0) {
             return null;
@@ -485,7 +486,7 @@ public class ClassFileDeserializer {
         return code;
     }
 
-    protected CodeException[] loadCodeExceptions(ClassFileReader reader) {
+    protected CodeException[] loadCodeExceptions(DataInput reader) throws IOException {
         int count = reader.readUnsignedShort();
         if (count == 0) {
             return null;
@@ -504,13 +505,13 @@ public class ClassFileDeserializer {
         return codeExceptions;
     }
 
-    protected Constant loadConstantValue(ClassFileReader reader, ConstantPool constants) {
+    protected Constant loadConstantValue(DataInput reader, ConstantPool constants) throws IOException {
         int constantValueIndex = reader.readUnsignedShort();
 
         return constants.getConstantValue(constantValueIndex);
     }
 
-    protected String[] loadExceptionTypeNames(ClassFileReader reader, ConstantPool constants) {
+    protected String[] loadExceptionTypeNames(DataInput reader, ConstantPool constants) throws IOException {
         int count = reader.readUnsignedShort();
         if (count == 0) {
             return null;
@@ -527,7 +528,7 @@ public class ClassFileDeserializer {
         return exceptionTypeNames;
     }
 
-    protected InnerClass[] loadInnerClasses(ClassFileReader reader, ConstantPool constants) {
+    protected InnerClass[] loadInnerClasses(DataInput reader, ConstantPool constants) throws IOException {
         int count = reader.readUnsignedShort();
         if (count == 0) {
             return null;
@@ -558,7 +559,7 @@ public class ClassFileDeserializer {
         return innerClasses;
     }
 
-    protected LocalVariable[] loadLocalVariables(ClassFileReader reader, ConstantPool constants) {
+    protected LocalVariable[] loadLocalVariables(DataInput reader, ConstantPool constants) throws IOException {
         int count = reader.readUnsignedShort();
         if (count == 0) {
             return null;
@@ -589,7 +590,7 @@ public class ClassFileDeserializer {
         return localVariables;
     }
 
-    protected LocalVariableType[] loadLocalVariableTypes(ClassFileReader reader, ConstantPool constants) {
+    protected LocalVariableType[] loadLocalVariableTypes(DataInput reader, ConstantPool constants) throws IOException {
         int count = reader.readUnsignedShort();
         if (count == 0) {
             return null;
@@ -620,7 +621,7 @@ public class ClassFileDeserializer {
         return localVariables;
     }
 
-    protected LineNumber[] loadLineNumbers(ClassFileReader reader) {
+    protected LineNumber[] loadLineNumbers(DataInput reader) throws IOException {
         int count = reader.readUnsignedShort();
         if (count == 0) {
             return null;
@@ -635,7 +636,7 @@ public class ClassFileDeserializer {
         return lineNumbers;
     }
 
-    protected MethodParameter[] loadParameters(ClassFileReader reader, ConstantPool constants) {
+    protected MethodParameter[] loadParameters(DataInput reader, ConstantPool constants) throws IOException {
         int count = reader.readUnsignedByte();
         if (count == 0) {
             return null;
@@ -656,7 +657,7 @@ public class ClassFileDeserializer {
         return parameters;
     }
 
-    protected ModuleInfo[] loadModuleInfos(ClassFileReader reader, ConstantPool constants) {
+    protected ModuleInfo[] loadModuleInfos(DataInput reader, ConstantPool constants) throws IOException {
         int count = reader.readUnsignedShort();
         if (count == 0) {
             return null;
@@ -683,7 +684,7 @@ public class ClassFileDeserializer {
         return moduleInfos;
     }
 
-    protected PackageInfo[] loadPackageInfos(ClassFileReader reader, ConstantPool constants) {
+    protected PackageInfo[] loadPackageInfos(DataInput reader, ConstantPool constants) throws IOException {
         int count = reader.readUnsignedShort();
         if (count == 0) {
             return null;
@@ -706,7 +707,7 @@ public class ClassFileDeserializer {
         return packageInfos;
     }
 
-    protected String[] loadConstantClassNames(ClassFileReader reader, ConstantPool constants) {
+    protected String[] loadConstantClassNames(DataInput reader, ConstantPool constants) throws IOException {
         int count = reader.readUnsignedShort();
         if (count == 0) {
             return null;
@@ -721,7 +722,7 @@ public class ClassFileDeserializer {
         return names;
     }
 
-    protected ServiceInfo[] loadServiceInfos(ClassFileReader reader, ConstantPool constants) {
+    protected ServiceInfo[] loadServiceInfos(DataInput reader, ConstantPool constants) throws IOException {
         int count = reader.readUnsignedShort();
         if (count == 0) {
             return null;
@@ -738,7 +739,7 @@ public class ClassFileDeserializer {
         return services;
     }
 
-    protected Annotation[] loadAnnotations(ClassFileReader reader, ConstantPool constants) {
+    protected Annotation[] loadAnnotations(DataInput reader, ConstantPool constants) throws IOException {
         int count = reader.readUnsignedShort();
         if (count == 0) {
             return null;
@@ -757,7 +758,7 @@ public class ClassFileDeserializer {
         return annotations;
     }
 
-    protected Annotations[] loadParameterAnnotations(ClassFileReader reader, ConstantPool constants) {
+    protected Annotations[] loadParameterAnnotations(DataInput reader, ConstantPool constants) throws IOException {
         int count = reader.readUnsignedByte();
         if (count == 0) {
             return null;

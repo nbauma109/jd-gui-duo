@@ -17,18 +17,15 @@ import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.BindTypesToTypesVisitor;
-import org.jd.core.v1.service.deserializer.classfile.ClassFileReader;
 import org.jd.core.v1.util.StringConstants;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UTFDataFormatException;
+import java.io.*;
 import java.util.*;
 
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
 
+import jd.core.CoreConstants;
 import jd.core.process.deserializer.ClassFormatException;
 
 /**
@@ -884,7 +881,7 @@ public class TypeMaker {
             return null;
         }
         String superInternalTypeName = superObjectType.getInternalName();
-        long superHashCode = superInternalTypeName.hashCode() * 31;
+        long superHashCode = superInternalTypeName.hashCode() * 31L;
         return searchSuperParameterizedType(superHashCode, superInternalTypeName, objectType);
     }
 
@@ -894,7 +891,7 @@ public class TypeMaker {
         }
         if (left.getDimension() <= 0 && right.getDimension() <= 0) {
             String leftInternalTypeName = left.getInternalName();
-            long leftHashCode = leftInternalTypeName.hashCode() * 31;
+            long leftHashCode = leftInternalTypeName.hashCode() * 31L;
             ObjectType ot = searchSuperParameterizedType(leftHashCode, leftInternalTypeName, right);
 
             if (ot != null && leftInternalTypeName.equals(ot.getInternalName())) {
@@ -987,7 +984,7 @@ public class TypeMaker {
         }
         String leftInternalName = left.getInternalName();
         String rightInternalName = right.getInternalName();
-        return leftInternalName.equals(rightInternalName) || isRawTypeAssignable(leftInternalName.hashCode() * 31, leftInternalName, rightInternalName);
+        return leftInternalName.equals(rightInternalName) || isRawTypeAssignable(leftInternalName.hashCode() * 31L, leftInternalName, rightInternalName);
     }
 
     private boolean isRawTypeAssignable(long leftHashCode, String leftInternalName, String rightInternalName) {
@@ -1049,94 +1046,95 @@ public class TypeMaker {
         return typeTypes;
     }
 
-    private TypeTypes makeTypeTypes(String internalTypeName, byte[] data) throws UTFDataFormatException {
+    private TypeTypes makeTypeTypes(String internalTypeName, byte[] data) throws IOException {
         if (data == null) {
             return null;
         }
 
-        ClassFileReader reader = new ClassFileReader(data);
-        Object[] constants = loadClassFile(internalTypeName, reader);
-
-        // Skip fields
-        skipMembers(reader);
-
-        // Skip methods
-        skipMembers(reader);
-
-        // Load attributes
-        String signature = null;
-        int count = reader.readUnsignedShort();
-
-        int attributeNameIndex;
-        int attributeLength;
-        for (int j=0; j<count; j++) {
-            attributeNameIndex = reader.readUnsignedShort();
-            attributeLength = reader.readInt();
-
-            if (StringConstants.SIGNATURE_ATTRIBUTE_NAME.equals(constants[attributeNameIndex])) {
-                signature = (String)constants[reader.readUnsignedShort()];
-                break;
-            }
-            reader.skip(attributeLength);
+        try (DataInputStream reader = new DataInputStream(new ByteArrayInputStream(data))) {
+	        Object[] constants = loadClassFile(internalTypeName, reader);
+	
+	        // Skip fields
+	        skipMembers(reader);
+	
+	        // Skip methods
+	        skipMembers(reader);
+	
+	        // Load attributes
+	        String signature = null;
+	        int count = reader.readUnsignedShort();
+	
+	        int attributeNameIndex;
+	        int attributeLength;
+	        for (int j=0; j<count; j++) {
+	            attributeNameIndex = reader.readUnsignedShort();
+	            attributeLength = reader.readInt();
+	
+	            if (StringConstants.SIGNATURE_ATTRIBUTE_NAME.equals(constants[attributeNameIndex])) {
+	                signature = (String)constants[reader.readUnsignedShort()];
+	                break;
+	            }
+	            reader.skipBytes(attributeLength);
+	        }
+	
+	        String[] superClassAndInterfaceNames = hierarchy.get(internalTypeName);
+	        TypeTypes typeTypes = new TypeTypes();
+	
+	        typeTypes.thisType = makeFromInternalTypeName(internalTypeName);
+	
+	        if (signature == null) {
+	            String superTypeName = superClassAndInterfaceNames[0];
+	
+	            typeTypes.superType = (superTypeName == null) ? null : makeFromInternalTypeName(superTypeName);
+	
+	            switch (superClassAndInterfaceNames.length) {
+	                case 0:
+	                case 1:
+	                    break;
+	                case 2:
+	                    typeTypes.interfaces = makeFromInternalTypeName(superClassAndInterfaceNames[1]);
+	                    break;
+	                default:
+	                    int length = superClassAndInterfaceNames.length;
+	                    UnmodifiableTypes list = new UnmodifiableTypes(length-1);
+	                    for (int i=1; i<length; i++) {
+	                        list.add(makeFromInternalTypeName(superClassAndInterfaceNames[i]));
+	                    }
+	                    typeTypes.interfaces = list;
+	                    break;
+	            }
+	        } else {
+	            // Parse 'signature' attribute
+	            SignatureReader signatureReader = new SignatureReader(signature);
+	
+	            typeTypes.typeParameters = parseTypeParameters(signatureReader);
+	            typeTypes.superType = parseClassTypeSignature(signatureReader, 0);
+	
+	            Type firstInterface = parseClassTypeSignature(signatureReader, 0);
+	
+	            if (firstInterface != null) {
+	                Type nextInterface = parseClassTypeSignature(signatureReader, 0);
+	
+	                if (nextInterface == null) {
+	                    typeTypes.interfaces = firstInterface;
+	                } else {
+	                    int length = superClassAndInterfaceNames.length;
+	                    UnmodifiableTypes list = new UnmodifiableTypes(length-1);
+	
+	                    list.add(firstInterface);
+	
+	                    do {
+	                        list.add(nextInterface);
+	                        nextInterface = parseClassTypeSignature(signatureReader, 0);
+	                    } while (nextInterface != null);
+	
+	                    typeTypes.interfaces = list;
+	                }
+	            }
+	        }
+	
+	        return typeTypes;
         }
-
-        String[] superClassAndInterfaceNames = hierarchy.get(internalTypeName);
-        TypeTypes typeTypes = new TypeTypes();
-
-        typeTypes.thisType = makeFromInternalTypeName(internalTypeName);
-
-        if (signature == null) {
-            String superTypeName = superClassAndInterfaceNames[0];
-
-            typeTypes.superType = (superTypeName == null) ? null : makeFromInternalTypeName(superTypeName);
-
-            switch (superClassAndInterfaceNames.length) {
-                case 0:
-                case 1:
-                    break;
-                case 2:
-                    typeTypes.interfaces = makeFromInternalTypeName(superClassAndInterfaceNames[1]);
-                    break;
-                default:
-                    int length = superClassAndInterfaceNames.length;
-                    UnmodifiableTypes list = new UnmodifiableTypes(length-1);
-                    for (int i=1; i<length; i++) {
-                        list.add(makeFromInternalTypeName(superClassAndInterfaceNames[i]));
-                    }
-                    typeTypes.interfaces = list;
-                    break;
-            }
-        } else {
-            // Parse 'signature' attribute
-            SignatureReader signatureReader = new SignatureReader(signature);
-
-            typeTypes.typeParameters = parseTypeParameters(signatureReader);
-            typeTypes.superType = parseClassTypeSignature(signatureReader, 0);
-
-            Type firstInterface = parseClassTypeSignature(signatureReader, 0);
-
-            if (firstInterface != null) {
-                Type nextInterface = parseClassTypeSignature(signatureReader, 0);
-
-                if (nextInterface == null) {
-                    typeTypes.interfaces = firstInterface;
-                } else {
-                    int length = superClassAndInterfaceNames.length;
-                    UnmodifiableTypes list = new UnmodifiableTypes(length-1);
-
-                    list.add(firstInterface);
-
-                    do {
-                        list.add(nextInterface);
-                        nextInterface = parseClassTypeSignature(signatureReader, 0);
-                    } while (nextInterface != null);
-
-                    typeTypes.interfaces = list;
-                }
-            }
-        }
-
-        return typeTypes;
     }
 
     public void setFieldType(String internalTypeName, String fieldName, Type type) {
@@ -1361,94 +1359,95 @@ public class TypeMaker {
         return ot;
     }
 
-    private ObjectType loadType(String internalTypeName, byte[] data) throws UTFDataFormatException {
+    private ObjectType loadType(String internalTypeName, byte[] data) throws IOException {
         if (data == null) {
             return null;
         }
 
-        ClassFileReader reader = new ClassFileReader(data);
-        Object[] constants = loadClassFile(internalTypeName, reader);
-
-        // Skip fields
-        skipMembers(reader);
-
-        // Skip methods
-        skipMembers(reader);
-
-        String outerTypeName = null;
-        ObjectType outerObjectType = null;
-
-        // Load attributes
-        int count = reader.readUnsignedShort();
-        int attributeNameIndex;
-        int attributeLength;
-        for (int i = 0; i < count; i++) {
-            attributeNameIndex = reader.readUnsignedShort();
-            attributeLength = reader.readInt();
-
-            if ("InnerClasses".equals(constants[attributeNameIndex])) {
-                int innerClassesCount = reader.readUnsignedShort();
-
-                int innerTypeIndex;
-                int outerTypeIndex;
-                Integer cc;
-                String innerTypeName;
-                for(int j=0; j < innerClassesCount; j++) {
-                    innerTypeIndex = reader.readUnsignedShort();
-                    outerTypeIndex = reader.readUnsignedShort();
-
-                    // Skip 'innerNameIndex' & innerAccessFlags'
-                    reader.skip(2 * 2);
-
-                    cc = (Integer)constants[innerTypeIndex];
-                    innerTypeName = (String)constants[cc];
-
-                    if (innerTypeName.equals(internalTypeName)) {
-                        if (outerTypeIndex == 0) {
-                            // Synthetic inner class -> Search outer class
-                            int lastDollar = internalTypeName.lastIndexOf('$');
-
-                            if (lastDollar != -1) {
-                                outerTypeName = internalTypeName.substring(0, lastDollar);
-                                outerObjectType = loadType(outerTypeName);
-                            }
-                        } else {
-                            // Return 'outerTypeName'
-                            cc = (Integer)constants[outerTypeIndex];
-                            outerTypeName = (String)constants[cc];
-                            outerObjectType = loadType(outerTypeName);
-                        }
-                        break;
-                    }
-                }
-
-                break;
-            }
-            reader.skip(attributeLength);
+        try (DataInputStream reader = new DataInputStream(new ByteArrayInputStream(data))) {
+	        Object[] constants = loadClassFile(internalTypeName, reader);
+	
+	        // Skip fields
+	        skipMembers(reader);
+	
+	        // Skip methods
+	        skipMembers(reader);
+	
+	        String outerTypeName = null;
+	        ObjectType outerObjectType = null;
+	
+	        // Load attributes
+	        int count = reader.readUnsignedShort();
+	        int attributeNameIndex;
+	        int attributeLength;
+	        for (int i = 0; i < count; i++) {
+	            attributeNameIndex = reader.readUnsignedShort();
+	            attributeLength = reader.readInt();
+	
+	            if ("InnerClasses".equals(constants[attributeNameIndex])) {
+	                int innerClassesCount = reader.readUnsignedShort();
+	
+	                int innerTypeIndex;
+	                int outerTypeIndex;
+	                Integer cc;
+	                String innerTypeName;
+	                for(int j=0; j < innerClassesCount; j++) {
+	                    innerTypeIndex = reader.readUnsignedShort();
+	                    outerTypeIndex = reader.readUnsignedShort();
+	
+	                    // Skip 'innerNameIndex' & innerAccessFlags'
+	                    reader.skipBytes(2 * 2);
+	
+	                    cc = (Integer)constants[innerTypeIndex];
+	                    innerTypeName = (String)constants[cc];
+	
+	                    if (innerTypeName.equals(internalTypeName)) {
+	                        if (outerTypeIndex == 0) {
+	                            // Synthetic inner class -> Search outer class
+	                            int lastDollar = internalTypeName.lastIndexOf('$');
+	
+	                            if (lastDollar != -1) {
+	                                outerTypeName = internalTypeName.substring(0, lastDollar);
+	                                outerObjectType = loadType(outerTypeName);
+	                            }
+	                        } else {
+	                            // Return 'outerTypeName'
+	                            cc = (Integer)constants[outerTypeIndex];
+	                            outerTypeName = (String)constants[cc];
+	                            outerObjectType = loadType(outerTypeName);
+	                        }
+	                        break;
+	                    }
+	                }
+	
+	                break;
+	            }
+	            reader.skipBytes(attributeLength);
+	        }
+	
+	        if (outerObjectType == null) {
+	            int lastSlash = internalTypeName.lastIndexOf('/');
+	            String qualifiedName = internalTypeName.replace('/', '.');
+	            String name = qualifiedName.substring(lastSlash + 1);
+	
+	            return new ObjectType(internalTypeName, qualifiedName, name);
+	        }
+	        int index;
+	
+	        if (outerTypeName != null && internalTypeName.length() > outerTypeName.length() + 1) {
+	            index = outerTypeName.length();
+	        } else {
+	            index = internalTypeName.lastIndexOf('$');
+	        }
+	
+	        String innerName = internalTypeName.substring(index + 1);
+	
+	        if (Character.isDigit(innerName.charAt(0))) {
+	            return new InnerObjectType(internalTypeName, null, extractLocalClassName(innerName), outerObjectType);
+	        }
+	        String qualifiedName = outerObjectType.getQualifiedName() + '.' + innerName;
+	        return new InnerObjectType(internalTypeName, qualifiedName, innerName, outerObjectType);
         }
-
-        if (outerObjectType == null) {
-            int lastSlash = internalTypeName.lastIndexOf('/');
-            String qualifiedName = internalTypeName.replace('/', '.');
-            String name = qualifiedName.substring(lastSlash + 1);
-
-            return new ObjectType(internalTypeName, qualifiedName, name);
-        }
-        int index;
-
-        if (outerTypeName != null && internalTypeName.length() > outerTypeName.length() + 1) {
-            index = outerTypeName.length();
-        } else {
-            index = internalTypeName.lastIndexOf('$');
-        }
-
-        String innerName = internalTypeName.substring(index + 1);
-
-        if (Character.isDigit(innerName.charAt(0))) {
-            return new InnerObjectType(internalTypeName, null, extractLocalClassName(innerName), outerObjectType);
-        }
-        String qualifiedName = outerObjectType.getQualifiedName() + '.' + innerName;
-        return new InnerObjectType(internalTypeName, qualifiedName, innerName, outerObjectType);
     }
 
     private boolean loadFieldsAndMethods(String internalTypeName) {
@@ -1468,140 +1467,141 @@ public class TypeMaker {
         return false;
     }
 
-    private void loadFieldsAndMethods(String internalTypeName, byte[] data) throws UTFDataFormatException {
+    private void loadFieldsAndMethods(String internalTypeName, byte[] data) throws IOException {
         if (data != null) {
-            ClassFileReader reader = new ClassFileReader(data);
-            Object[] constants = loadClassFile(internalTypeName, reader);
-
-            // Load fields
-            int count = reader.readUnsignedShort();
-            for (int i = 0; i < count; i++) {
-                // skip 'accessFlags'
-                reader.skip(2);
-
-                int nameIndex = reader.readUnsignedShort();
-                int descriptorIndex = reader.readUnsignedShort();
-
-                // Load attributes
-                String signature = null;
-                int attributeCount = reader.readUnsignedShort();
-
-                int attributeNameIndex;
-                int attributeLength;
-                for (int j=0; j<attributeCount; j++) {
-                    attributeNameIndex = reader.readUnsignedShort();
-                    attributeLength = reader.readInt();
-
-                    if (StringConstants.SIGNATURE_ATTRIBUTE_NAME.equals(constants[attributeNameIndex])) {
-                        signature = (String)constants[reader.readUnsignedShort()];
-                    } else {
-                        reader.skip(attributeLength);
-                    }
-                }
-
-                String name = (String)constants[nameIndex];
-                String descriptor = (String)constants[descriptorIndex];
-                String key = internalTypeName + ':' + name;
-
-                if (signature == null) {
-                    internalTypeNameFieldNameToType.put(key, makeFromSignature(descriptor));
-                } else {
-                    internalTypeNameFieldNameToType.put(key, makeFromSignature(signature));
-                }
-            }
-
-            // Load methods
-            count = reader.readUnsignedShort();
-            int nameIndex;
-            int descriptorIndex;
-            String signature;
-            String[] exceptionTypeNames;
-            int attributeCount;
-            String name;
-            String descriptor;
-            String key;
-            MethodTypes methodTypes;
-            int parameterCount;
-            int attributeNameIndex;
-            int attributeLength;
-            for (int i = 0; i < count; i++) {
-                // skip 'accessFlags'
-                reader.skip(2);
-
-                nameIndex = reader.readUnsignedShort();
-                descriptorIndex = reader.readUnsignedShort();
-
-                // Load attributes
-                signature = null;
-                exceptionTypeNames = null;
-                attributeCount = reader.readUnsignedShort();
-
-                for (int j=0; j<attributeCount; j++) {
-                    attributeNameIndex = reader.readUnsignedShort();
-                    attributeLength = reader.readInt();
-                    name = (String)constants[attributeNameIndex];
-
-                    switch (name) {
-                        case StringConstants.SIGNATURE_ATTRIBUTE_NAME:
-                            signature = (String)constants[reader.readUnsignedShort()];
-                            break;
-                        case "Exceptions":
-                            int exceptionCount = reader.readUnsignedShort();
-                            if (exceptionCount > 0) {
-                                exceptionTypeNames = new String[exceptionCount];
-
-                                int exceptionClassIndex;
-                                Integer cc;
-                                for (int k=0; k<exceptionCount; k++) {
-                                    exceptionClassIndex = reader.readUnsignedShort();
-                                    cc = (Integer)constants[exceptionClassIndex];
-                                    exceptionTypeNames[k] = (String)constants[cc];
-                                }
-                            }
-                            break;
-                        default:
-                            reader.skip(attributeLength);
-                            break;
-                    }
-                }
-
-                name = (String)constants[nameIndex];
-                descriptor = (String)constants[descriptorIndex];
-                key = internalTypeName + ':' + name + descriptor;
-                if (signature == null) {
-                    methodTypes = parseMethodSignature(descriptor, exceptionTypeNames);
-                } else {
-                    methodTypes = parseMethodSignature(descriptor, signature, exceptionTypeNames);
-                }
-
-                internalTypeNameMethodNameDescriptorToMethodTypes.put(key, methodTypes);
-
-                parameterCount = (methodTypes.parameterTypes == null) ? 0 : methodTypes.parameterTypes.size();
-                key = internalTypeName + ':' + name + ':' + parameterCount;
-
-                if (parameterCount > 0) {
-                    internalTypeNameMethodNameParameterCountToDeclaredParameterTypes.computeIfAbsent(key, k -> new HashSet<>()).add(methodTypes.parameterTypes);
-                } else {
-                    internalTypeNameMethodNameParameterCountToDeclaredParameterTypes.computeIfAbsent(key, k -> Collections.emptySet());
-                }
-            }
+            try (DataInputStream reader = new DataInputStream(new ByteArrayInputStream(data))) {
+	            Object[] constants = loadClassFile(internalTypeName, reader);
+	
+	            // Load fields
+	            int count = reader.readUnsignedShort();
+	            for (int i = 0; i < count; i++) {
+	                // skip 'accessFlags'
+	                reader.skipBytes(2);
+	
+	                int nameIndex = reader.readUnsignedShort();
+	                int descriptorIndex = reader.readUnsignedShort();
+	
+	                // Load attributes
+	                String signature = null;
+	                int attributeCount = reader.readUnsignedShort();
+	
+	                int attributeNameIndex;
+	                int attributeLength;
+	                for (int j=0; j<attributeCount; j++) {
+	                    attributeNameIndex = reader.readUnsignedShort();
+	                    attributeLength = reader.readInt();
+	
+	                    if (StringConstants.SIGNATURE_ATTRIBUTE_NAME.equals(constants[attributeNameIndex])) {
+	                        signature = (String)constants[reader.readUnsignedShort()];
+	                    } else {
+	                        reader.skipBytes(attributeLength);
+	                    }
+	                }
+	
+	                String name = (String)constants[nameIndex];
+	                String descriptor = (String)constants[descriptorIndex];
+	                String key = internalTypeName + ':' + name;
+	
+	                if (signature == null) {
+	                    internalTypeNameFieldNameToType.put(key, makeFromSignature(descriptor));
+	                } else {
+	                    internalTypeNameFieldNameToType.put(key, makeFromSignature(signature));
+	                }
+	            }
+	
+	            // Load methods
+	            count = reader.readUnsignedShort();
+	            int nameIndex;
+	            int descriptorIndex;
+	            String signature;
+	            String[] exceptionTypeNames;
+	            int attributeCount;
+	            String name;
+	            String descriptor;
+	            String key;
+	            MethodTypes methodTypes;
+	            int parameterCount;
+	            int attributeNameIndex;
+	            int attributeLength;
+	            for (int i = 0; i < count; i++) {
+	                // skip 'accessFlags'
+	                reader.skipBytes(2);
+	
+	                nameIndex = reader.readUnsignedShort();
+	                descriptorIndex = reader.readUnsignedShort();
+	
+	                // Load attributes
+	                signature = null;
+	                exceptionTypeNames = null;
+	                attributeCount = reader.readUnsignedShort();
+	
+	                for (int j=0; j<attributeCount; j++) {
+	                    attributeNameIndex = reader.readUnsignedShort();
+	                    attributeLength = reader.readInt();
+	                    name = (String)constants[attributeNameIndex];
+	
+	                    switch (name) {
+	                        case StringConstants.SIGNATURE_ATTRIBUTE_NAME:
+	                            signature = (String)constants[reader.readUnsignedShort()];
+	                            break;
+	                        case "Exceptions":
+	                            int exceptionCount = reader.readUnsignedShort();
+	                            if (exceptionCount > 0) {
+	                                exceptionTypeNames = new String[exceptionCount];
+	
+	                                int exceptionClassIndex;
+	                                Integer cc;
+	                                for (int k=0; k<exceptionCount; k++) {
+	                                    exceptionClassIndex = reader.readUnsignedShort();
+	                                    cc = (Integer)constants[exceptionClassIndex];
+	                                    exceptionTypeNames[k] = (String)constants[cc];
+	                                }
+	                            }
+	                            break;
+	                        default:
+	                            reader.skipBytes(attributeLength);
+	                            break;
+	                    }
+	                }
+	
+	                name = (String)constants[nameIndex];
+	                descriptor = (String)constants[descriptorIndex];
+	                key = internalTypeName + ':' + name + descriptor;
+	                if (signature == null) {
+	                    methodTypes = parseMethodSignature(descriptor, exceptionTypeNames);
+	                } else {
+	                    methodTypes = parseMethodSignature(descriptor, signature, exceptionTypeNames);
+	                }
+	
+	                internalTypeNameMethodNameDescriptorToMethodTypes.put(key, methodTypes);
+	
+	                parameterCount = (methodTypes.parameterTypes == null) ? 0 : methodTypes.parameterTypes.size();
+	                key = internalTypeName + ':' + name + ':' + parameterCount;
+	
+	                if (parameterCount > 0) {
+	                    internalTypeNameMethodNameParameterCountToDeclaredParameterTypes.computeIfAbsent(key, k -> new HashSet<>()).add(methodTypes.parameterTypes);
+	                } else {
+	                    internalTypeNameMethodNameParameterCountToDeclaredParameterTypes.computeIfAbsent(key, k -> Collections.emptySet());
+	                }
+	            }
+	        }
         }
     }
 
-    private Object[] loadClassFile(String internalTypeName, ClassFileReader reader) throws UTFDataFormatException {
+    private Object[] loadClassFile(String internalTypeName, DataInput reader) throws IOException {
         int magic = reader.readInt();
 
-        if (magic != ClassFileReader.JAVA_MAGIC_NUMBER) {
+        if (magic != CoreConstants.JAVA_MAGIC_NUMBER) {
             throw new ClassFormatException("Invalid CLASS file");
         }
 
         // Skip 'minorVersion', 'majorVersion'
-        reader.skip(2 * 2);
+        reader.skipBytes(2 * 2);
 
         Object[] constants = loadConstants(reader);
 
         // Skip 'accessFlags' & 'thisClassIndex'
-        reader.skip(2 * 2);
+        reader.skipBytes(2 * 2);
 
         // Load super class name
         int superClassIndex = reader.readUnsignedShort();
@@ -1633,16 +1633,16 @@ public class TypeMaker {
         return constants;
     }
 
-    private static void skipMembers(ClassFileReader reader) {
+    private static void skipMembers(DataInput reader) throws IOException {
         int count = reader.readUnsignedShort();
         for (int i = 0; i < count; i++) {
             // skip 'accessFlags', 'nameIndex', 'descriptorIndex'
-            reader.skip(3 * 2);
+            reader.skipBytes(3 * 2);
             skipAttributes(reader);
         }
     }
 
-    private static Object[] loadConstants(ClassFileReader reader) throws UTFDataFormatException {
+    private static Object[] loadConstants(DataInput reader) throws IOException {
         int count = reader.readUnsignedShort();
 
         if (count == 0) {
@@ -1656,22 +1656,22 @@ public class TypeMaker {
 
             switch (tag) {
                 case 1:
-                    constants[i] = reader.readUTF8();
+                    constants[i] = reader.readUTF();
                     break;
                 case 7:
                     constants[i] = Integer.valueOf(reader.readUnsignedShort());
                     break;
                 case 8: case 16: case 19: case 20:
-                    reader.skip(2);
+                    reader.skipBytes(2);
                     break;
                 case 15:
-                    reader.skip(3);
+                    reader.skipBytes(3);
                     break;
                 case 3: case 4: case 9: case 10: case 11: case 12: case 17: case 18:
-                    reader.skip(4);
+                    reader.skipBytes(4);
                     break;
                 case 5: case 6:
-                    reader.skip(8);
+                    reader.skipBytes(8);
                     i++;
                     break;
                 default:
@@ -1682,17 +1682,17 @@ public class TypeMaker {
         return constants;
     }
 
-    private static void skipAttributes(ClassFileReader reader) {
+    private static void skipAttributes(DataInput reader) throws IOException {
         int count = reader.readUnsignedShort();
 
         int attributeLength;
         for (int i = 0; i < count; i++) {
             // skip 'attributeNameIndex'
-            reader.skip(2);
+            reader.skipBytes(2);
 
             attributeLength = reader.readInt();
 
-            reader.skip(attributeLength);
+            reader.skipBytes(attributeLength);
         }
     }
 
