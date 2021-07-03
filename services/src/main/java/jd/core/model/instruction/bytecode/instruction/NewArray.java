@@ -37,7 +37,7 @@ public class NewArray extends Instruction
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        String signature = SignatureUtil.GetSignatureFromType(this.type);
+        String signature = SignatureUtil.getSignatureFromType(this.type);
 
         return (signature == null) ? null : "[" + signature;
     }

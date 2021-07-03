@@ -32,7 +32,7 @@ public class ElementValuePrimitiveTypeWriter
         super();
     }
 
-    public static void Write(
+    public static void write(
         Loader loader, Printer printer, ReferenceMap referenceMap,
         ClassFile classFile, ElementValuePrimitiveType evpt)
     {
@@ -41,16 +41,16 @@ public class ElementValuePrimitiveTypeWriter
         if (evpt.type == 's')
         {
             String constValue =
-                constants.getConstantUtf8(evpt.const_value_index);
+                constants.getConstantUtf8(evpt.constValueIndex);
             String escapedString =
-                StringUtil.EscapeStringAndAppendQuotationMark(constValue);
+                StringUtil.escapeStringAndAppendQuotationMark(constValue);
             printer.printString(escapedString, classFile.getThisClassName());
         }
         else
         {
             Constant cv = constants.getConstantValue(
-                evpt.const_value_index);
-            ConstantValueWriter.Write(
+                evpt.constValueIndex);
+            ConstantValueWriter.write(
                 loader, printer, referenceMap, classFile, cv, evpt.type);
         }
     }

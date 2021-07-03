@@ -42,7 +42,7 @@ public class NewInstructionReconstructor extends NewInstructionReconstructorBase
         super();
     }
 
-    public static void Reconstruct(
+    public static void reconstruct(
             ClassFile classFile, Method method, List<Instruction> list)
     {
         for (int dupStoreIndex=0; dupStoreIndex<list.size(); dupStoreIndex++)
@@ -87,7 +87,7 @@ public class NewInstructionReconstructor extends NewInstructionReconstructorBase
                         ByteCodeConstants.INVOKENEW, is.offset,
                         nw.lineNumber, is.index, is.args);
 
-                    Instruction parentFound = ReconstructorUtil.ReplaceDupLoad(
+                    Instruction parentFound = ReconstructorUtil.replaceDupLoad(
                         list, invokespecialIndex+1, ds, invokeNew);
 
                     list.remove(invokespecialIndex);
@@ -96,7 +96,7 @@ public class NewInstructionReconstructor extends NewInstructionReconstructorBase
                     else
                         list.remove(dupStoreIndex--);
 
-                    InitAnonymousClassConstructorParameterName(
+                    initAnonymousClassConstructorParameterName(
                         classFile, method, invokeNew);
                     break;
                 }

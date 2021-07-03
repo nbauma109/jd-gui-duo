@@ -30,7 +30,7 @@ public class SignatureUtil
     /**
      * @see SignatureAnalyzer.SignatureAnalyzer(...)
      */
-    public static int SkipSignature(char[] caSignature, int length, int index)
+    public static int skipSignature(char[] caSignature, int length, int index)
     {
         char c;
 
@@ -77,11 +77,11 @@ public class SignatureUtil
 
                 if (c == '<')
                 {
-                    index = SkipSignature(caSignature, length, index+1);
+                    index = skipSignature(caSignature, length, index+1);
 
                     while (caSignature[index] != '>')
                     {
-                        index = SkipSignature(caSignature, length, index);
+                        index = skipSignature(caSignature, length, index);
                     }
 
                     // pass '>'
@@ -93,15 +93,15 @@ public class SignatureUtil
                     index++;
                 break;
             case 'T' :
-                index = CharArrayUtil.IndexOf(caSignature, ';', index+1) + 1;
+                index = CharArrayUtil.indexOf(caSignature, ';', index+1) + 1;
                 break;
             case '-' : case '+' :
-                index = SkipSignature(caSignature, length, index+1);
+                index = skipSignature(caSignature, length, index+1);
                 break;
             //default:
                 // DEBUG
                 //new Throwable(
-                //	"SignatureWriter.WriteSignature: invalid signature '" +
+                //	"SignatureWriter.writeSignature: invalid signature '" +
                 //	String.valueOf(caSignature) + "'").printStackTrace();
                 // DEBUG
             }
@@ -113,7 +113,7 @@ public class SignatureUtil
         return index;
     }
 
-    public static String GetSignatureFromType(int type)
+    public static String getSignatureFromType(int type)
     {
         switch (type)
         {
@@ -129,7 +129,7 @@ public class SignatureUtil
         }
     }
 
-    public static int GetTypeFromSignature(String signature)
+    public static int getTypeFromSignature(String signature)
     {
         if (signature.length() != 1)
             return 0;
@@ -148,7 +148,7 @@ public class SignatureUtil
         }
     }
 
-    public static boolean IsPrimitiveSignature(String signature)
+    public static boolean isPrimitiveSignature(String signature)
     {
         if ((signature == null) || (signature.length() != 1))
             return false;
@@ -163,7 +163,7 @@ public class SignatureUtil
         }
     }
 
-    public static boolean IsIntegerSignature(String signature)
+    public static boolean isIntegerSignature(String signature)
     {
         if ((signature == null) || (signature.length() != 1))
             return false;
@@ -177,7 +177,7 @@ public class SignatureUtil
         }
     }
 
-    public static boolean IsObjectSignature(String signature)
+    public static boolean isObjectSignature(String signature)
     {
         if ((signature == null) || (signature.length() <= 2))
             return false;
@@ -185,7 +185,7 @@ public class SignatureUtil
         return signature.charAt(0) == 'L';
     }
 
-    public static String GetInternalName(String signature)
+    public static String getInternalName(String signature)
     {
         char[] caSignature = signature.toCharArray();
         int length = signature.length();
@@ -198,13 +198,13 @@ public class SignatureUtil
         {
             beginIndex++;
             length--;
-            return CharArrayUtil.Substring(caSignature, beginIndex, length);
+            return CharArrayUtil.substring(caSignature, beginIndex, length);
         }
         return (beginIndex == 0) ? signature :
-            CharArrayUtil.Substring(caSignature, beginIndex, length);
+            CharArrayUtil.substring(caSignature, beginIndex, length);
     }
 
-    public static String CutArrayDimensionPrefix(String signature)
+    public static String cutArrayDimensionPrefix(String signature)
     {
         int beginIndex = 0;
 
@@ -214,7 +214,7 @@ public class SignatureUtil
         return signature.substring(beginIndex);
     }
 
-    public static int GetArrayDimensionCount(String signature)
+    public static int getArrayDimensionCount(String signature)
     {
         int beginIndex = 0;
 
@@ -224,9 +224,9 @@ public class SignatureUtil
         return beginIndex;
     }
 
-    public static String GetInnerName(String signature)
+    public static String getInnerName(String signature)
     {
-        signature = CutArrayDimensionPrefix(signature);
+        signature = cutArrayDimensionPrefix(signature);
 
         switch (signature.charAt(0))
         {
@@ -238,13 +238,13 @@ public class SignatureUtil
         }
     }
 
-    public static List<String> GetParameterSignatures(
+    public static List<String> getParameterSignatures(
             String methodSignature)
     {
         char[] caSignature = methodSignature.toCharArray();
         int length = caSignature.length;
         List<String> parameterTypes = new ArrayList<>(1);
-        int index = CharArrayUtil.IndexOf(caSignature, '(', 0);
+        int index = CharArrayUtil.indexOf(caSignature, '(', 0);
 
         if (index != -1)
         {
@@ -254,7 +254,7 @@ public class SignatureUtil
             // Arguments
             while (caSignature[index] != ')')
             {
-                int newIndex = SkipSignature(caSignature, length, index);
+                int newIndex = skipSignature(caSignature, length, index);
                 parameterTypes.add(methodSignature.substring(index, newIndex));
                 index = newIndex;
             }
@@ -263,7 +263,7 @@ public class SignatureUtil
         return parameterTypes;
     }
 
-    public static String GetMethodReturnedSignature(String signature)
+    public static String getMethodReturnedSignature(String signature)
     {
         int index = signature.indexOf(')');
         if (index == -1)
@@ -272,11 +272,11 @@ public class SignatureUtil
         return signature.substring(index + 1);
     }
 
-    public static int GetParameterSignatureCount(String methodSignature)
+    public static int getParameterSignatureCount(String methodSignature)
     {
         char[] caSignature = methodSignature.toCharArray();
         int length = caSignature.length;
-        int index = CharArrayUtil.IndexOf(caSignature, '(', 0);
+        int index = CharArrayUtil.indexOf(caSignature, '(', 0);
         int count = 0;
 
         if (index != -1)
@@ -287,7 +287,7 @@ public class SignatureUtil
             // Arguments
             while (caSignature[index] != ')')
             {
-                int newIndex = SkipSignature(caSignature, length, index);
+                int newIndex = skipSignature(caSignature, length, index);
                 index = newIndex;
                 count++;
             }
@@ -296,7 +296,7 @@ public class SignatureUtil
         return count;
     }
 
-    public static int CreateTypesBitField(String signature)
+    public static int createTypesBitField(String signature)
     {
         /*
          * Pour une constante de type 'signature', les types de variable
@@ -315,7 +315,7 @@ public class SignatureUtil
         }
     }
 
-    public static int CreateArgOrReturnBitFields(String signature)
+    public static int createArgOrReturnBitFields(String signature)
     {
         /*
          * Pour un argument de type 'signature', les types de variable possible
@@ -334,7 +334,7 @@ public class SignatureUtil
         }
     }
 
-    public static String GetSignatureFromTypesBitField(int typesBitField)
+    public static String getSignatureFromTypesBitField(int typesBitField)
     {
         /*
          * Lorsqu'un choix est possible, le plus 'gros' type est retourné.
@@ -352,7 +352,7 @@ public class SignatureUtil
         return "I";
     }
 
-    public static String CreateTypeName(String signature)
+    public static String createTypeName(String signature)
     {
         if (signature.isEmpty())
             return signature;

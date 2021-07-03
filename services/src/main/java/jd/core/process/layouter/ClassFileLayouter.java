@@ -43,13 +43,13 @@ import jd.core.util.TypeNameUtil;
 public class ClassFileLayouter {
     private ClassFileLayouter() {
     }
-        public static int Layout(
+        public static int layout(
         Preferences preferences,
         ReferenceMap referenceMap,
         ClassFile classFile,
         List<LayoutBlock> layoutBlockList)
     {
-        int maxLineNumber = CreateBlocks(
+        int maxLineNumber = createBlocks(
                 preferences, referenceMap, classFile, layoutBlockList);
 
         // "layoutBlockList" contient une structure lineaire classee dans
@@ -58,13 +58,13 @@ public class ClassFileLayouter {
         if (maxLineNumber != Instruction.UNKNOWN_LINE_NUMBER &&
             preferences.getRealignmentLineNumber())
         {
-            LayoutBlocks(layoutBlockList);
+            layoutBlocks(layoutBlockList);
         }
 
         return maxLineNumber;
     }
 
-    private static int CreateBlocks(
+    private static int createBlocks(
         Preferences preferences,
         ReferenceMap referenceMap,
         ClassFile classFile,
@@ -83,7 +83,7 @@ public class ClassFileLayouter {
         }
 
         // Layout import statements
-        int importCount = GetImportCount(referenceMap, classFile);
+        int importCount = getImportCount(referenceMap, classFile);
         if (importCount > 0)
         {
             layoutBlockList.add(new ImportsLayoutBlock(
@@ -100,10 +100,10 @@ public class ClassFileLayouter {
         }
 
         // Layout class
-        return CreateBlocksForClass(preferences, classFile, layoutBlockList);
+        return createBlocksForClass(preferences, classFile, layoutBlockList);
     }
 
-    private static int GetImportCount(
+    private static int getImportCount(
         ReferenceMap referenceMap, ClassFile classFile)
     {
         Collection<Reference> collection = referenceMap.values();
@@ -118,7 +118,7 @@ public class ClassFileLayouter {
         // Filtrage
         while (iterator.hasNext())
         {
-            internalReferencePackageName = TypeNameUtil.InternalTypeNameToInternalPackageName(
+            internalReferencePackageName = TypeNameUtil.internalTypeNameToInternalPackageName(
                 iterator.next().getInternalName());
 
             // No import for same package classes
@@ -134,7 +134,7 @@ public class ClassFileLayouter {
         return importCount;
     }
 
-    private static int CreateBlocksForClass(
+    private static int createBlocksForClass(
         Preferences preferences,
         ClassFile classFile,
         List<LayoutBlock> layoutBlockList)
@@ -144,14 +144,14 @@ public class ClassFileLayouter {
         layoutBlockList.add(tmslb);
 
         boolean displayExtendsOrImplementsFlag =
-            CreateBlocksForHeader(classFile, layoutBlockList);
+            createBlocksForHeader(classFile, layoutBlockList);
 
         TypeBodyBlockStartLayoutBlock bbslb = new TypeBodyBlockStartLayoutBlock();
         layoutBlockList.add(bbslb);
 
         int layoutBlockListLength = layoutBlockList.size();
 
-        int maxLineNumber = CreateBlocksForBody(
+        int maxLineNumber = createBlocksForBody(
             preferences, classFile,
             layoutBlockList);
 
@@ -181,7 +181,7 @@ public class ClassFileLayouter {
         return maxLineNumber;
     }
 
-    private static boolean CreateBlocksForHeader(
+    private static boolean createBlocksForHeader(
         ClassFile classFile, List<LayoutBlock> layoutBlockList)
     {
         boolean displayExtendsOrImplementsFlag = false;
@@ -197,7 +197,7 @@ public class ClassFileLayouter {
         //	layoutBlockList, classFile, classFile.getAttributes());
 
         // Affichage des annotations de la classe
-        AnnotationLayouter.CreateBlocksForAnnotations(
+        AnnotationLayouter.createBlocksForAnnotations(
             classFile, classFile.getAttributes(), layoutBlockList);
 
         // Affichage de la classe, de l'interface, de l'enum ou de l'annotation
@@ -207,16 +207,16 @@ public class ClassFileLayouter {
         {
             layoutBlockList.add(new TypeNameLayoutBlock(classFile));
 
-            if ((classFile.access_flags & ClassFileConstants.ACC_ANNOTATION) == 0) {
-                if ((classFile.access_flags & ClassFileConstants.ACC_ENUM) != 0)
+            if ((classFile.accessFlags & ClassFileConstants.ACC_ANNOTATION) == 0) {
+                if ((classFile.accessFlags & ClassFileConstants.ACC_ENUM) != 0)
                 {
                     // Enum
                      // Interfaces
                     displayExtendsOrImplementsFlag =
-                        CreateBlocksForInterfacesImplements(
+                        createBlocksForInterfacesImplements(
                             classFile, layoutBlockList);
                 }
-                else if ((classFile.access_flags & ClassFileConstants.ACC_INTERFACE) != 0)
+                else if ((classFile.accessFlags & ClassFileConstants.ACC_INTERFACE) != 0)
                 {
                     // Interface
                      // Super interface
@@ -243,7 +243,7 @@ public class ClassFileLayouter {
 
                     // Interfaces
                     displayExtendsOrImplementsFlag |=
-                        CreateBlocksForInterfacesImplements(
+                        createBlocksForInterfacesImplements(
                             classFile, layoutBlockList);
                 }
             }
@@ -252,16 +252,16 @@ public class ClassFileLayouter {
         {
             // Signature contenant des notations generiques
             ConstantPool constants = classFile.getConstantPool();
-            String signature = constants.getConstantUtf8(as.signature_index);
+            String signature = constants.getConstantUtf8(as.signatureIndex);
             displayExtendsOrImplementsFlag =
-                SignatureLayouter.CreateLayoutBlocksForClassSignature(
+                SignatureLayouter.createLayoutBlocksForClassSignature(
                     classFile, signature, layoutBlockList);
         }
 
         return displayExtendsOrImplementsFlag;
     }
 
-    private static boolean CreateBlocksForInterfacesImplements(
+    private static boolean createBlocksForInterfacesImplements(
         ClassFile classFile, List<LayoutBlock> layoutBlockList)
     {
         int[] interfaceIndexes = classFile.getInterfaces();
@@ -276,7 +276,7 @@ public class ClassFileLayouter {
         return false;
     }
 
-    public static int CreateBlocksForBodyOfAnonymousClass(
+    public static int createBlocksForBodyOfAnonymousClass(
         Preferences preferences,
         ClassFile classFile,
         List<LayoutBlock> layoutBlockList)
@@ -287,7 +287,7 @@ public class ClassFileLayouter {
 
         int layoutBlockListLength = layoutBlockList.size();
 
-        int maxLineNumber = CreateBlocksForBody(
+        int maxLineNumber = createBlocksForBody(
                 preferences, classFile, layoutBlockList);
 
         if (layoutBlockListLength == layoutBlockList.size())
@@ -307,26 +307,26 @@ public class ClassFileLayouter {
         return maxLineNumber;
     }
 
-    private static int CreateBlocksForBody(
+    private static int createBlocksForBody(
         Preferences preferences,
         ClassFile classFile,
         List<LayoutBlock> layoutBlockList)
     {
-        CreateBlockForEnumValues(preferences, classFile, layoutBlockList);
+        createBlockForEnumValues(preferences, classFile, layoutBlockList);
 
         List<SubListLayoutBlock> sortedFieldBlockList =
-            CreateSortedBlocksForFields(preferences, classFile);
+            createSortedBlocksForFields(preferences, classFile);
         List<SubListLayoutBlock> sortedMethodBlockList =
-            CreateSortedBlocksForMethods(preferences, classFile);
+            createSortedBlocksForMethods(preferences, classFile);
         List<SubListLayoutBlock> sortedInnerClassBlockList =
-            CreateSortedBlocksForInnerClasses(preferences, classFile);
+            createSortedBlocksForInnerClasses(preferences, classFile);
 
-        return MergeBlocks(
+        return mergeBlocks(
             layoutBlockList, sortedFieldBlockList,
             sortedMethodBlockList, sortedInnerClassBlockList);
     }
 
-    private static void CreateBlockForEnumValues(
+    private static void createBlockForEnumValues(
         Preferences preferences,
         ClassFile classFile,
         List<LayoutBlock> layoutBlockList)
@@ -431,7 +431,7 @@ public class ClassFileLayouter {
      *  -  InstructionsLayoutBlock ?
      *  - FieldBlockEndLayoutBlock
      */
-    private static List<SubListLayoutBlock> CreateSortedBlocksForFields(
+    private static List<SubListLayoutBlock> createSortedBlocksForFields(
         Preferences preferences, ClassFile classFile)
     {
         Field[] fields = classFile.getFields();
@@ -457,7 +457,7 @@ public class ClassFileLayouter {
         {
             field = fields[i];
 
-            if ((field.access_flags & (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_ENUM)) != 0) {
+            if ((field.accessFlags & (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_ENUM)) != 0) {
                 continue;
             }
 
@@ -476,7 +476,7 @@ public class ClassFileLayouter {
                 subLayoutBlockList.add(new CommentDeprecatedLayoutBlock());
             }
 
-            AnnotationLayouter.CreateBlocksForAnnotations(
+            AnnotationLayouter.createBlocksForAnnotations(
                 classFile, field.getAttributes(), subLayoutBlockList);
 
             subLayoutBlockList.add(new FieldNameLayoutBlock(classFile, field));
@@ -516,7 +516,7 @@ public class ClassFileLayouter {
                 subLayoutBlockList, firstLineNumber,
                 lastLineNumber, preferedLineNumber));
         }
-        return SortBlocks(sortedFieldBlockList);
+        return sortBlocks(sortedFieldBlockList);
     }
 
     /**
@@ -532,7 +532,7 @@ public class ClassFileLayouter {
      *  -  StatementsBlockEndLayoutBlock ?
      *  - MethodBlockEndLayoutBlock
      */
-    private static List<SubListLayoutBlock> CreateSortedBlocksForMethods(
+    private static List<SubListLayoutBlock> createSortedBlocksForMethods(
         Preferences preferences, ClassFile classFile)
     {
         Method[] methods = classFile.getMethods();
@@ -544,7 +544,7 @@ public class ClassFileLayouter {
         // Creation des 'MethodLayoutBlock'
         ConstantPool constants = classFile.getConstantPool();
         boolean multipleConstructorFlag =
-            ClassFileUtil.ContainsMultipleConstructor(classFile);
+            ClassFileUtil.containsMultipleConstructor(classFile);
         int length = methods.length;
         List<SubListLayoutBlock> sortedMethodBlockList =
             new ArrayList<>(length);
@@ -567,7 +567,7 @@ public class ClassFileLayouter {
         {
             method = methods[i];
 
-            if ((method.access_flags &
+            if ((method.accessFlags &
                     (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_BRIDGE)) != 0) {
                 continue;
             }
@@ -576,13 +576,13 @@ public class ClassFileLayouter {
 
             // Le descripteur et la signature sont differentes pour les
             // constructeurs des Enums ! Cette information est passée à
-            // "SignatureWriter.WriteMethodSignature(...)".
+            // "SignatureWriter.writeMethodSignature(...)".
             signatureIndex = as == null ?
-                    method.getDescriptorIndex() : as.signature_index;
+                    method.getDescriptorIndex() : as.signatureIndex;
             signature = constants.getConstantUtf8(signatureIndex);
 
-            if ((classFile.access_flags & ClassFileConstants.ACC_ENUM) != 0 &&
-                ClassFileUtil.IsAMethodOfEnum(classFile, method, signature)) {
+            if ((classFile.accessFlags & ClassFileConstants.ACC_ENUM) != 0 &&
+                ClassFileUtil.isAMethodOfEnum(classFile, method, signature)) {
                 continue;
             }
 
@@ -602,9 +602,9 @@ public class ClassFileLayouter {
                     if (exceptionIndexes == null ||
                         exceptionIndexes.length == 0)
                     {
-                        if ((classFile.access_flags & ClassFileConstants.ACC_ENUM) != 0)
+                        if ((classFile.accessFlags & ClassFileConstants.ACC_ENUM) != 0)
                         {
-                            if (SignatureUtil.GetParameterSignatureCount(signature) == 2)
+                            if (SignatureUtil.getParameterSignatureCount(signature) == 2)
                             {
                                 // Ne pas afficher le constructeur par defaut
                                 // des Enum si il est vide et si c'est le seul
@@ -646,7 +646,7 @@ public class ClassFileLayouter {
                 subLayoutBlockList.add(new CommentDeprecatedLayoutBlock());
             }
 
-            AnnotationLayouter.CreateBlocksForAnnotations(
+            AnnotationLayouter.createBlocksForAnnotations(
                 classFile, method.getAttributes(), subLayoutBlockList);
 
             // Information utilisee par 'PrintWriter' pour afficher un ';'
@@ -718,9 +718,9 @@ public class ClassFileLayouter {
                                 classFile, method, list);
                             int afterIndex = subLayoutBlockList.size();
 
-                            firstLineNumber = SearchFirstLineNumber(
+                            firstLineNumber = searchFirstLineNumber(
                                 subLayoutBlockList, beforeIndex, afterIndex);
-                            lastLineNumber = SearchLastLineNumber(
+                            lastLineNumber = searchLastLineNumber(
                                 subLayoutBlockList, beforeIndex, afterIndex);
                         }
                         catch (Exception e)
@@ -780,10 +780,10 @@ public class ClassFileLayouter {
                 subLayoutBlockList, firstLineNumber,
                 lastLineNumber, preferedLineNumber));
         }
-        return SortBlocks(sortedMethodBlockList);
+        return sortBlocks(sortedMethodBlockList);
     }
 
-    private static List<SubListLayoutBlock> CreateSortedBlocksForInnerClasses(
+    private static List<SubListLayoutBlock> createSortedBlocksForInnerClasses(
         Preferences preferences, ClassFile classFile)
     {
         List<ClassFile> innerClassFiles = classFile.getInnerClassFiles();
@@ -805,21 +805,21 @@ public class ClassFileLayouter {
         {
             innerClassFile = innerClassFiles.get(i);
 
-            if ((innerClassFile.access_flags & ClassFileConstants.ACC_SYNTHETIC) != 0 ||
+            if ((innerClassFile.accessFlags & ClassFileConstants.ACC_SYNTHETIC) != 0 ||
                 innerClassFile.getInternalAnonymousClassName() != null) {
                 continue;
             }
 
             innerClassLayoutBlockList = new ArrayList<>(100);
 
-            CreateBlocksForClass(
+            createBlocksForClass(
                 preferences, innerClassFile, innerClassLayoutBlockList);
 
             afterIndex = innerClassLayoutBlockList.size();
 
-            firstLineNumber = SearchFirstLineNumber(
+            firstLineNumber = searchFirstLineNumber(
                 innerClassLayoutBlockList, 0, afterIndex);
-            lastLineNumber = SearchLastLineNumber(
+            lastLineNumber = searchLastLineNumber(
                 innerClassLayoutBlockList, 0, afterIndex);
 
             preferedLineCount = LayoutBlockConstants.UNLIMITED_LINE_COUNT;
@@ -834,10 +834,10 @@ public class ClassFileLayouter {
                 innerClassLayoutBlockList, firstLineNumber,
                 lastLineNumber, preferedLineCount));
         }
-        return SortBlocks(sortedInnerClassBlockList);
+        return sortBlocks(sortedInnerClassBlockList);
     }
 
-    private static int SearchFirstLineNumber(
+    private static int searchFirstLineNumber(
         List<LayoutBlock> layoutBlockList, int firstIndex, int afterIndex)
     {
         int firstLineNumber;
@@ -852,7 +852,7 @@ public class ClassFileLayouter {
         return Instruction.UNKNOWN_LINE_NUMBER;
     }
 
-    private static int SearchLastLineNumber(
+    private static int searchLastLineNumber(
         List<LayoutBlock> layoutBlockList, int firstIndex, int afterIndex)
     {
         int lastLineNumber;
@@ -867,7 +867,7 @@ public class ClassFileLayouter {
         return Instruction.UNKNOWN_LINE_NUMBER;
     }
 
-    private static List<SubListLayoutBlock> SortBlocks(
+    private static List<SubListLayoutBlock> sortBlocks(
         List<SubListLayoutBlock> blockList)
     {
         // Detection de l'ordre de génération des champs par le compilateur:
@@ -990,7 +990,7 @@ public class ClassFileLayouter {
      * Copie des blocs sans numero de ligne des champs au plus tot
      * Copie des blocs sans numero de ligne des méthodes et des classes internes au plus tard
      */
-    private static int MergeBlocks(
+    private static int mergeBlocks(
         List<LayoutBlock> layoutBlockList,
         List<SubListLayoutBlock> sortedFieldBlockList,
         List<SubListLayoutBlock> sortedMethodBlockList,
@@ -1004,9 +1004,9 @@ public class ClassFileLayouter {
 
         // Recherche du bloc ayant un numero de ligne defini
         int minLineNumberMethod =
-            SearchMinimalLineNumber(sortedMethodBlockList);
+            searchMinimalLineNumber(sortedMethodBlockList);
         int minLineNumberInnerClass =
-            SearchMinimalLineNumber(sortedInnerClassBlockList);
+            searchMinimalLineNumber(sortedInnerClassBlockList);
 
         // Fusion des jeux de cartes
         // 1) Champs
@@ -1017,56 +1017,56 @@ public class ClassFileLayouter {
                 if (minLineNumberInnerClass == Instruction.UNKNOWN_LINE_NUMBER)
                 {
                     // Copie de tout dans l'ordre naturel
-                    maxLineNumber = MergeFieldBlockList(
+                    maxLineNumber = mergeFieldBlockList(
                         layoutBlockList, sortedFieldBlockList, maxLineNumber);
                     break;
                 }
                 // Copie des champs avec et sans numero de ligne
-                maxLineNumber = ExclusiveMergeFieldBlockList(
+                maxLineNumber = exclusiveMergeFieldBlockList(
                     layoutBlockList, sortedFieldBlockList,
                     minLineNumberInnerClass, maxLineNumber);
                 // Copie de toutes les méthodes sans numero de ligne
-                maxLineNumber = MergeBlockList(
+                maxLineNumber = mergeBlockList(
                     layoutBlockList, sortedMethodBlockList, maxLineNumber);
                 // Copie des classes internes jusqu'à l'inner classe ayant
                 // le plus petit numero de ligne
-                maxLineNumber = InclusiveMergeBlockList(
+                maxLineNumber = inclusiveMergeBlockList(
                     layoutBlockList, sortedInnerClassBlockList,
                     minLineNumberInnerClass, maxLineNumber);
                 minLineNumberInnerClass =
-                    SearchMinimalLineNumber(sortedInnerClassBlockList);
+                    searchMinimalLineNumber(sortedInnerClassBlockList);
             } else if (minLineNumberInnerClass == Instruction.UNKNOWN_LINE_NUMBER ||
                 minLineNumberMethod < minLineNumberInnerClass)
             {
                 // Copie des champs avec et sans numero de ligne
-                maxLineNumber = ExclusiveMergeFieldBlockList(
+                maxLineNumber = exclusiveMergeFieldBlockList(
                     layoutBlockList, sortedFieldBlockList,
                     minLineNumberMethod, maxLineNumber);
                 // Copie des méthodes jusqu'à la méthode ayant le plus
                 // petit numero de ligne
-                maxLineNumber = InclusiveMergeBlockList(
+                maxLineNumber = inclusiveMergeBlockList(
                     layoutBlockList, sortedMethodBlockList,
                     minLineNumberMethod, maxLineNumber);
                 minLineNumberMethod =
-                    SearchMinimalLineNumber(sortedMethodBlockList);
+                    searchMinimalLineNumber(sortedMethodBlockList);
             }
             else
             {
                 // Copie des champs avec et sans numero de ligne
-                maxLineNumber = ExclusiveMergeFieldBlockList(
+                maxLineNumber = exclusiveMergeFieldBlockList(
                     layoutBlockList, sortedFieldBlockList,
                     minLineNumberInnerClass, maxLineNumber);
                 // Copie des méthodes avec et sans numero de ligne
-                maxLineNumber = ExclusiveMergeMethodOrInnerClassBlockList(
+                maxLineNumber = exclusiveMergeMethodOrInnerClassBlockList(
                     layoutBlockList, sortedMethodBlockList,
                     minLineNumberInnerClass, maxLineNumber);
                 // Copie des classes internes jusqu'à l'inner classe ayant
                 // le plus petit numero de ligne
-                maxLineNumber = InclusiveMergeBlockList(
+                maxLineNumber = inclusiveMergeBlockList(
                     layoutBlockList, sortedInnerClassBlockList,
                     minLineNumberInnerClass, maxLineNumber);
                 minLineNumberInnerClass =
-                    SearchMinimalLineNumber(sortedInnerClassBlockList);
+                    searchMinimalLineNumber(sortedInnerClassBlockList);
             }
         }
 
@@ -1075,28 +1075,28 @@ public class ClassFileLayouter {
         {
             if (minLineNumberInnerClass == Instruction.UNKNOWN_LINE_NUMBER)
             {
-                maxLineNumber = MergeBlockList(
+                maxLineNumber = mergeBlockList(
                     layoutBlockList, sortedMethodBlockList, maxLineNumber);
                 break;
             }
             // Copie des méthodes avec et sans numero de ligne
-            maxLineNumber = ExclusiveMergeMethodOrInnerClassBlockList(
+            maxLineNumber = exclusiveMergeMethodOrInnerClassBlockList(
                 layoutBlockList, sortedMethodBlockList,
                 minLineNumberInnerClass, maxLineNumber);
             // Copie des classes internes jusqu'à l'inner classe ayant le
             // plus petit numero de ligne
-            maxLineNumber = InclusiveMergeBlockList(
+            maxLineNumber = inclusiveMergeBlockList(
                 layoutBlockList, sortedInnerClassBlockList,
                 minLineNumberInnerClass, maxLineNumber);
             minLineNumberInnerClass =
-                SearchMinimalLineNumber(sortedInnerClassBlockList);
+                searchMinimalLineNumber(sortedInnerClassBlockList);
         }
 
-        return MergeBlockList(
+        return mergeBlockList(
             layoutBlockList, sortedInnerClassBlockList, maxLineNumber);
     }
 
-    private static int ExclusiveMergeMethodOrInnerClassBlockList(
+    private static int exclusiveMergeMethodOrInnerClassBlockList(
         List<LayoutBlock> destination,
         List<SubListLayoutBlock> source,
         int minLineNumber, int maxLineNumber)
@@ -1160,7 +1160,7 @@ public class ClassFileLayouter {
         return maxLineNumber;
     }
 
-    private static int ExclusiveMergeFieldBlockList(
+    private static int exclusiveMergeFieldBlockList(
         List<LayoutBlock> destination,
         List<SubListLayoutBlock> source,
         int minLineNumber, int maxLineNumber)
@@ -1223,7 +1223,7 @@ public class ClassFileLayouter {
         return maxLineNumber;
     }
 
-    private static int InclusiveMergeBlockList(
+    private static int inclusiveMergeBlockList(
         List<LayoutBlock> destination,
         List<SubListLayoutBlock> source,
         int minLineNumber, int maxLineNumber)
@@ -1278,7 +1278,7 @@ public class ClassFileLayouter {
         return maxLineNumber;
     }
 
-    private static int MergeBlockList(
+    private static int mergeBlockList(
         List<LayoutBlock> destination,
         List<SubListLayoutBlock> source,
         int maxLineNumber)
@@ -1317,7 +1317,7 @@ public class ClassFileLayouter {
         return maxLineNumber;
     }
 
-    private static int MergeFieldBlockList(
+    private static int mergeFieldBlockList(
         List<LayoutBlock> destination,
         List<SubListLayoutBlock> source,
         int maxLineNumber)
@@ -1371,7 +1371,7 @@ public class ClassFileLayouter {
     }
 
     /** La liste est classee en ordre inverse. */
-    private static int SearchMinimalLineNumber(List<? extends LayoutBlock> list)
+    private static int searchMinimalLineNumber(List<? extends LayoutBlock> list)
     {
         int index = list.size();
 
@@ -1387,7 +1387,7 @@ public class ClassFileLayouter {
         return Instruction.UNKNOWN_LINE_NUMBER;
     }
 
-    private static void LayoutBlocks(List<LayoutBlock> layoutBlockList)
+    private static void layoutBlocks(List<LayoutBlock> layoutBlockList)
     {
         // DEBUG // long time0 = System.currentTimeMillis();
 
@@ -1395,25 +1395,25 @@ public class ClassFileLayouter {
         List<LayoutSection> layoutSectionList =
             new ArrayList<>();
 
-        CreateSections(layoutBlockList, layoutSectionList);
-        InitializeBlocks(layoutBlockList, layoutSectionList);
+        createSections(layoutBlockList, layoutSectionList);
+        initializeBlocks(layoutBlockList, layoutSectionList);
 
         int layoutCount = 20;
 
         do
         {
             // Layout
-            LayoutSections(layoutBlockList, layoutSectionList);
+            layoutSections(layoutBlockList, layoutSectionList);
 
             // Score
-            ScoreSections(layoutBlockList, layoutSectionList);
+            scoreSections(layoutBlockList, layoutSectionList);
 
             // Slice
-            if (!SliceDownBlocks(layoutBlockList, layoutSectionList)) {
+            if (!sliceDownBlocks(layoutBlockList, layoutSectionList)) {
                 break;
             }
 
-            ResetLineCounts(layoutBlockList, layoutSectionList);
+            resetLineCounts(layoutBlockList, layoutSectionList);
         }
         while (layoutCount-- > 0);
 
@@ -1424,17 +1424,17 @@ public class ClassFileLayouter {
         do
         {
             // Layout
-            LayoutSections(layoutBlockList, layoutSectionList);
+            layoutSections(layoutBlockList, layoutSectionList);
 
             // Score
-            ScoreSections(layoutBlockList, layoutSectionList);
+            scoreSections(layoutBlockList, layoutSectionList);
 
             // Slice
-            if (!SliceUpBlocks(layoutBlockList, layoutSectionList)) {
+            if (!sliceUpBlocks(layoutBlockList, layoutSectionList)) {
                 break;
             }
 
-            ResetLineCounts(layoutBlockList, layoutSectionList);
+            resetLineCounts(layoutBlockList, layoutSectionList);
         }
         while (layoutCount-- > 0);
 
@@ -1444,7 +1444,7 @@ public class ClassFileLayouter {
         // DEBUG // System.err.println("LayoutBlocks: Temps: " + (time1-time0) + "ms");
     }
 
-    private static void CreateSections(
+    private static void createSections(
         List<LayoutBlock> layoutBlockList,
         List<LayoutSection> layoutSectionList)
     {
@@ -1493,7 +1493,7 @@ public class ClassFileLayouter {
         }
     }
 
-    private static void InitializeBlocks(
+    private static void initializeBlocks(
         List<LayoutBlock> layoutBlockList,
         List<LayoutSection> layoutSectionList)
     {
@@ -1520,7 +1520,7 @@ public class ClassFileLayouter {
         }
     }
 
-    private static void ResetLineCounts(
+    private static void resetLineCounts(
         List<LayoutBlock> layoutBlockList,
         List<LayoutSection> layoutSectionList)
     {
@@ -1548,7 +1548,7 @@ public class ClassFileLayouter {
         }
     }
 
-    private static void LayoutSections(
+    private static void layoutSections(
         List<LayoutBlock> layoutBlockList,
         List<LayoutSection> layoutSectionList)
     {
@@ -1577,19 +1577,19 @@ public class ClassFileLayouter {
                         section.relayout = false;
 
                         int originalLineCount = section.originalLineCount;
-                        int currentLineCount = GetLineCount(
+                        int currentLineCount = getLineCount(
                             layoutBlockList, section.firstBlockIndex, section.lastBlockIndex);
 
                         if (originalLineCount > currentLineCount)
                         {
-                            ExpandBlocksWithHeuristics(
+                            expandBlocksWithHeuristics(
                                 layoutBlockList, section.firstBlockIndex, section.lastBlockIndex,
                                 originalLineCount-currentLineCount);
                             redo = true;
                         }
                         else if (currentLineCount > originalLineCount)
                         {
-                            CompactBlocksWithHeuristics(
+                            compactBlocksWithHeuristics(
                                 layoutBlockList, section.firstBlockIndex, section.lastBlockIndex,
                                 currentLineCount-originalLineCount);
                             redo = true;
@@ -1615,18 +1615,18 @@ public class ClassFileLayouter {
                         section.relayout = false;
 
                         int originalLineCount = section.originalLineCount;
-                        int currentLineCount = GetLineCount(
+                        int currentLineCount = getLineCount(
                             layoutBlockList, section.firstBlockIndex, section.lastBlockIndex);
 
                         if (originalLineCount > currentLineCount)
                         {
-                            ExpandBlocks(
+                            expandBlocks(
                                 layoutBlockList, section.firstBlockIndex, section.lastBlockIndex,
                                 originalLineCount-currentLineCount);
                         }
                         else if (currentLineCount > originalLineCount)
                         {
-                            CompactBlocks(
+                            compactBlocks(
                                 layoutBlockList, section.firstBlockIndex, section.lastBlockIndex,
                                 currentLineCount-originalLineCount);
                         }
@@ -1639,7 +1639,7 @@ public class ClassFileLayouter {
         }
     }
 
-    private static int GetLineCount(
+    private static int getLineCount(
         List<LayoutBlock> layoutBlockList, int firstIndex, int lastIndex)
     {
         int sum = 0;
@@ -1656,7 +1656,7 @@ public class ClassFileLayouter {
         return sum;
     }
 
-    private static void CompactBlocksWithHeuristics(
+    private static void compactBlocksWithHeuristics(
         List<LayoutBlock> layoutBlockList,
         int firstIndex, int lastIndex, int delta)
     {
@@ -2065,7 +2065,7 @@ public class ClassFileLayouter {
 //		while ((delta>0) && (oldDelta>delta));
     }
 
-    private static void ExpandBlocksWithHeuristics(
+    private static void expandBlocksWithHeuristics(
         List<LayoutBlock> layoutBlockList,
         int firstIndex, int lastIndex, int delta)
     {
@@ -2384,7 +2384,7 @@ public class ClassFileLayouter {
 //		while ((delta>0) && (oldDelta>delta));
     }
 
-    private static void CompactBlocks(
+    private static void compactBlocks(
         List<LayoutBlock> layoutBlockList,
         int firstIndex, int lastIndex, int delta)
     {
@@ -2409,7 +2409,7 @@ public class ClassFileLayouter {
         while (delta>0 && oldDelta>delta);
     }
 
-    private static void ExpandBlocks(
+    private static void expandBlocks(
         List<LayoutBlock> layoutBlockList,
         int firstIndex, int lastIndex, int delta)
     {
@@ -2435,7 +2435,7 @@ public class ClassFileLayouter {
     }
 
     /** Score = sum( - (separator.lineCount)^2 + (sum(block.lineCount==0)) ) */
-    private static void ScoreSections(
+    private static void scoreSections(
         List<LayoutBlock> layoutBlockList,
         List<LayoutSection> layoutSectionList)
     {
@@ -2497,7 +2497,7 @@ public class ClassFileLayouter {
      * @param layoutSectionList
      * @return true si des bloques ont ete deplaces
      */
-    private static boolean SliceDownBlocks(
+    private static boolean sliceDownBlocks(
         List<LayoutBlock> layoutBlockList,
         List<LayoutSection> layoutSectionList)
     {
@@ -2523,7 +2523,7 @@ public class ClassFileLayouter {
                 break;
             }
 
-            if (SliceDownBlocks(
+            if (sliceDownBlocks(
                     layoutBlockList, layoutSectionList,
                     lsSource)) {
                 return true;
@@ -2533,7 +2533,7 @@ public class ClassFileLayouter {
         return false;
     }
 
-    private static boolean SliceUpBlocks(
+    private static boolean sliceUpBlocks(
         List<LayoutBlock> layoutBlockList,
         List<LayoutSection> layoutSectionList)
     {
@@ -2559,7 +2559,7 @@ public class ClassFileLayouter {
                 break;
             }
 
-            if (SliceUpBlocks(
+            if (sliceUpBlocks(
                     layoutBlockList, layoutSectionList,
                     lsSource)) {
                 return true;
@@ -2575,7 +2575,7 @@ public class ClassFileLayouter {
      * @param lsSource
      * @return true si des bloques ont ete deplaces
      */
-    private static boolean SliceDownBlocks(
+    private static boolean sliceDownBlocks(
         List<LayoutBlock> layoutBlockList,
         List<LayoutSection> layoutSectionList,
         LayoutSection lsSource)
@@ -2597,12 +2597,12 @@ public class ClassFileLayouter {
                 // Found
                 // Slice last method block
                 // Slice last field block
-                if (SliceDownBlocks(
+                if (sliceDownBlocks(
                         layoutBlockList, layoutSectionList,
                         blockIndex, lsSource,
                         LayoutBlockConstants.METHOD_MARKER_START,
                         LayoutBlockConstants.METHOD_MARKER_END)
-                 || SliceDownBlocks(
+                 || sliceDownBlocks(
                         layoutBlockList, layoutSectionList,
                         blockIndex, lsSource,
                         LayoutBlockConstants.FIELD_MARKER_START,
@@ -2615,12 +2615,12 @@ public class ClassFileLayouter {
                 // Found
                 // Slice last inner class block
                 // Slice last method block
-                if (SliceDownBlocks(
+                if (sliceDownBlocks(
                         layoutBlockList, layoutSectionList,
                         blockIndex, lsSource,
                         LayoutBlockConstants.TYPE_MARKER_START,
                         LayoutBlockConstants.TYPE_MARKER_END)
-                 || SliceDownBlocks(
+                 || sliceDownBlocks(
                         layoutBlockList, layoutSectionList,
                         blockIndex, lsSource,
                         LayoutBlockConstants.METHOD_MARKER_START,
@@ -2633,12 +2633,12 @@ public class ClassFileLayouter {
                 // Found
                 // Slice last inner class block
                 // Slice last field block
-                if (SliceDownBlocks(
+                if (sliceDownBlocks(
                         layoutBlockList, layoutSectionList,
                         blockIndex, lsSource,
                         LayoutBlockConstants.TYPE_MARKER_START,
                         LayoutBlockConstants.TYPE_MARKER_END)
-                 || SliceDownBlocks(
+                 || sliceDownBlocks(
                         layoutBlockList, layoutSectionList,
                         blockIndex, lsSource,
                         LayoutBlockConstants.FIELD_MARKER_START,
@@ -2663,7 +2663,7 @@ public class ClassFileLayouter {
      * @param markerEndTag
      * @return true si des bloques ont ete deplaces
      */
-    private static boolean SliceDownBlocks(
+    private static boolean sliceDownBlocks(
         List<LayoutBlock> layoutBlockList,
         List<LayoutSection> layoutSectionList,
         int blockIndex,
@@ -2979,8 +2979,8 @@ public class ClassFileLayouter {
                     }
 
                     // Update relayout flag of sections
-                    UpdateRelayoutFlag(layoutBlockList, lsSource);
-                    UpdateRelayoutFlag(layoutBlockList, lsTarget);
+                    updateRelayoutFlag(layoutBlockList, lsSource);
+                    updateRelayoutFlag(layoutBlockList, lsTarget);
 
                     return true;
                 }
@@ -3002,7 +3002,7 @@ public class ClassFileLayouter {
         return false;
     }
 
-    private static boolean SliceUpBlocks(
+    private static boolean sliceUpBlocks(
         List<LayoutBlock> layoutBlockList,
         List<LayoutSection> layoutSectionList,
         LayoutSection lsSource)
@@ -3024,12 +3024,12 @@ public class ClassFileLayouter {
                 // Found
                 // Slice last method block
                 // Slice last field block
-                return SliceUpBlocks(
+                return sliceUpBlocks(
                         layoutBlockList, layoutSectionList,
                         blockIndex, lsSource,
                         LayoutBlockConstants.FIELD_MARKER_START,
                         LayoutBlockConstants.FIELD_MARKER_END)
-                    || SliceUpBlocks(
+                    || sliceUpBlocks(
                         layoutBlockList, layoutSectionList,
                         blockIndex, lsSource,
                         LayoutBlockConstants.METHOD_MARKER_START,
@@ -3037,12 +3037,12 @@ public class ClassFileLayouter {
             case LayoutBlockConstants.FIELD_MARKER_END:
                 // Found
                 // Slice last method block
-                return SliceUpBlocks(
+                return sliceUpBlocks(
                         layoutBlockList, layoutSectionList,
                         blockIndex, lsSource,
                         LayoutBlockConstants.METHOD_MARKER_START,
                         LayoutBlockConstants.METHOD_MARKER_END)
-                    || SliceUpBlocks(
+                    || sliceUpBlocks(
                         layoutBlockList, layoutSectionList,
                         blockIndex, lsSource,
                         LayoutBlockConstants.TYPE_MARKER_START,
@@ -3050,12 +3050,12 @@ public class ClassFileLayouter {
             case LayoutBlockConstants.METHOD_MARKER_END:
                 // Found
                 // Slice last field block
-                return SliceUpBlocks(
+                return sliceUpBlocks(
                         layoutBlockList, layoutSectionList,
                         blockIndex, lsSource,
                         LayoutBlockConstants.FIELD_MARKER_START,
                         LayoutBlockConstants.FIELD_MARKER_END)
-                    || SliceUpBlocks(
+                    || sliceUpBlocks(
                         layoutBlockList, layoutSectionList,
                         blockIndex, lsSource,
                         LayoutBlockConstants.TYPE_MARKER_START,
@@ -3076,7 +3076,7 @@ public class ClassFileLayouter {
      * @param markerEndTag
      * @return true si des bloques ont ete deplaces
      */
-    private static boolean SliceUpBlocks(
+    private static boolean sliceUpBlocks(
         List<LayoutBlock> layoutBlockList,
         List<LayoutSection> layoutSectionList,
         int blockIndex,
@@ -3392,8 +3392,8 @@ public class ClassFileLayouter {
                     }
 
                     // Update relayout flag of sections
-                    UpdateRelayoutFlag(layoutBlockList, lsSource);
-                    UpdateRelayoutFlag(layoutBlockList, lsTarget);
+                    updateRelayoutFlag(layoutBlockList, lsSource);
+                    updateRelayoutFlag(layoutBlockList, lsTarget);
 
                     return true;
                 }
@@ -3415,7 +3415,7 @@ public class ClassFileLayouter {
         return false;
     }
 
-    private static void UpdateRelayoutFlag(
+    private static void updateRelayoutFlag(
         List<LayoutBlock> layoutBlockList, LayoutSection section)
     {
         section.relayout = true;
@@ -3446,7 +3446,7 @@ public class ClassFileLayouter {
                 BlockLayoutBlock blb = (BlockLayoutBlock) block;
                 LayoutSection otherSection = blb.other.section;
                 if (!otherSection.relayout) {
-                    UpdateRelayoutFlag(layoutBlockList, otherSection);
+                    updateRelayoutFlag(layoutBlockList, otherSection);
                 }
             }
         }

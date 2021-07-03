@@ -33,7 +33,7 @@ public class InitStaticFieldsReconstructor
         super();
     }
 
-    public static void Reconstruct(ClassFile classFile)
+    public static void reconstruct(ClassFile classFile)
     {
         Method method = classFile.getStaticMethod();
         if (method == null)
@@ -76,7 +76,7 @@ public class InitStaticFieldsReconstructor
             {
                 Field field = fields[indexField++];
 
-                if (((field.access_flags & ClassFileConstants.ACC_STATIC) != 0) &&
+                if (((field.accessFlags & ClassFileConstants.ACC_STATIC) != 0) &&
                     (cnat.getDescriptorIndex() == field.getDescriptorIndex()) &&
                     (cnat.getNameIndex() == field.getNameIndex()))
                 {
@@ -141,7 +141,7 @@ public class InitStaticFieldsReconstructor
                 {
                     Field field = fields[indexField];
 
-                    if (((field.access_flags & ClassFileConstants.ACC_STATIC) != 0) &&
+                    if (((field.accessFlags & ClassFileConstants.ACC_STATIC) != 0) &&
                         (cnat.getDescriptorIndex() == field.getDescriptorIndex()) &&
                         (cnat.getNameIndex() == field.getNameIndex()))
                     {

@@ -99,7 +99,7 @@ public class InstructionUtil
         }
     }
 
-    public static boolean CheckNoJumpToInterval(
+    public static boolean checkNoJumpToInterval(
             List<Instruction> list, int firstIndex, int afterIndex,
             int firstOffset, int lastOffset)
         {
@@ -113,7 +113,7 @@ public class InstructionUtil
                 case ByteCodeConstants.IFCMP:
                 case ByteCodeConstants.IFXNULL:
                 case ByteCodeConstants.GOTO:
-                    int jumpOffset = ((BranchInstruction)i).GetJumpOffset();
+                    int jumpOffset = ((BranchInstruction)i).getJumpOffset();
                     if ((firstOffset < jumpOffset) && (jumpOffset <= lastOffset))
                         return false;
                 }

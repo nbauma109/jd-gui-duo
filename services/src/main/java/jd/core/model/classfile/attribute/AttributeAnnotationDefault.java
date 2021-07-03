@@ -18,13 +18,13 @@ package jd.core.model.classfile.attribute;
 
 public class AttributeAnnotationDefault extends Attribute
 {
-    public final ElementValue default_value;
+    public final ElementValue defaultValue;
 
     public AttributeAnnotationDefault(byte tag,
-                                      int attribute_name_index,
-                                      ElementValue default_value)
+                                      int attributeNameIndex,
+                                      ElementValue defaultValue)
     {
-        super(tag, attribute_name_index);
-        this.default_value = default_value;
+        super(tag, attributeNameIndex);
+        this.defaultValue = defaultValue;
     }
 }

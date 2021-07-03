@@ -18,13 +18,13 @@ package jd.core.model.classfile.attribute;
 
 public class AttributeConstantValue extends Attribute
 {
-    public final int constantvalue_index;
+    public final int constantvalueIndex;
 
     public AttributeConstantValue(byte tag,
-                                  int attribute_name_index,
-                                  int constantvalue_index)
+                                  int attributeNameIndex,
+                                  int constantvalueIndex)
     {
-        super(tag, attribute_name_index);
-        this.constantvalue_index = constantvalue_index;
+        super(tag, attributeNameIndex);
+        this.constantvalueIndex = constantvalueIndex;
     }
 }

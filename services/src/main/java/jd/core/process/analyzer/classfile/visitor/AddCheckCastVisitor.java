@@ -87,7 +87,7 @@ public class AddCheckCastVisitor
                         this.localVariables.getLocalVariableWithIndexAndOffset(
                             li.index, li.offset);
 
-                    if (lv.signature_index == this.constants.objectSignatureIndex)
+                    if (lv.signatureIndex == this.constants.objectSignatureIndex)
                     {
                         // Add Throwable cast
                         int nameIndex = this.constants.addConstantUtf8(StringConstants.JAVA_LANG_THROWABLE);
@@ -132,10 +132,10 @@ public class AddCheckCastVisitor
                             storeInstruction.index, storeInstruction.offset);
 
                     // AStore est associé à une variable correctment typée
-                    if (lv.signature_index > 0 && lv.signature_index != this.constants.objectSignatureIndex)
+                    if (lv.signatureIndex > 0 && lv.signatureIndex != this.constants.objectSignatureIndex)
                     {
                         String signature =
-                            this.constants.getConstantUtf8(lv.signature_index);
+                            this.constants.getConstantUtf8(lv.signatureIndex);
                         storeInstruction.valueref = newInstruction(
                             signature, storeInstruction.valueref);
                     }
@@ -413,7 +413,7 @@ public class AddCheckCastVisitor
 
     private Instruction newInstruction(String signature, Instruction i)
     {
-        if (SignatureUtil.IsPrimitiveSignature(signature))
+        if (SignatureUtil.isPrimitiveSignature(signature))
         {
             return new ConvertInstruction(
                 ByteCodeConstants.CONVERT, i.offset,
@@ -422,7 +422,7 @@ public class AddCheckCastVisitor
         int nameIndex;
         if (signature.charAt(0) == 'L')
         {
-            String name = SignatureUtil.GetInnerName(signature);
+            String name = SignatureUtil.getInnerName(signature);
             nameIndex = this.constants.addConstantUtf8(name);
         }
         else

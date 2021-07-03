@@ -43,10 +43,10 @@ public class Field extends FieldOrMethod
     public int outerMethodLocalVariableNameIndex;
 
     public Field(
-        int access_flags, int nameIndex,
+        int accessFlags, int nameIndex,
         int descriptorIndex, Attribute[] attributes)
     {
-        super(access_flags, nameIndex, descriptorIndex, attributes);
+        super(accessFlags, nameIndex, descriptorIndex, attributes);
         this.anonymousClassConstructorParameterIndex = UtilConstants.INVALID_INDEX;
         this.outerMethodLocalVariableNameIndex = UtilConstants.INVALID_INDEX;
     }
@@ -58,7 +58,7 @@ public class Field extends FieldOrMethod
                 if (this.attributes[i].tag == AttributeConstants.ATTR_CONSTANT_VALUE)
                 {
                     AttributeConstantValue acv = (AttributeConstantValue)this.attributes[i];
-                    return constants.getConstantValue(acv.constantvalue_index);
+                    return constants.getConstantValue(acv.constantvalueIndex);
                 }
 
         return null;

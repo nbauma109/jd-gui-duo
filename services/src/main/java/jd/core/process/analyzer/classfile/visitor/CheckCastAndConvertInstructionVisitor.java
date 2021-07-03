@@ -151,9 +151,9 @@ public class CheckCastAndConvertInstructionVisitor
                                 {
                                     // Types differents
                                     int argBitFields =
-                                            SignatureUtil.CreateArgOrReturnBitFields(argSignature);
+                                            SignatureUtil.createArgOrReturnBitFields(argSignature);
                                     int paramBitFields =
-                                            SignatureUtil.CreateTypesBitField(parameterSignature);
+                                            SignatureUtil.createTypesBitField(parameterSignature);
 
                                     if ((argBitFields|paramBitFields) == 0)
                                     {

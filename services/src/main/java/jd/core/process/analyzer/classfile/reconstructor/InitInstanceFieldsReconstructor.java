@@ -38,7 +38,7 @@ public class InitInstanceFieldsReconstructor
         super();
     }
 
-    public static void Reconstruct(ClassFile classFile)
+    public static void reconstruct(ClassFile classFile)
     {
         List<PutField> putFieldList = new ArrayList<>();
         ConstantPool constants = classFile.getConstantPool();
@@ -55,7 +55,7 @@ public class InitInstanceFieldsReconstructor
         {
             final Method method = methods[--methodIndex];
 
-            if (((method.access_flags & (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_BRIDGE)) != 0) ||
+            if (((method.accessFlags & (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_BRIDGE)) != 0) ||
                 (method.getCode() == null) ||
                 (method.getFastNodes() == null) ||
                 (method.containsError() == true) ||
@@ -70,7 +70,7 @@ public class InitInstanceFieldsReconstructor
 
             if (length > 0)
             {
-                int j = GetSuperCallIndex(classFile, constants, list);
+                int j = getSuperCallIndex(classFile, constants, list);
 
                 if (j < 0)
                     continue;
@@ -157,7 +157,7 @@ public class InitInstanceFieldsReconstructor
         {
             final Method method = methods[--methodIndex];
 
-            if (((method.access_flags &
+            if (((method.accessFlags &
                     (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_BRIDGE)) != 0))
                 continue;
             if (method.getCode() == null)
@@ -171,7 +171,7 @@ public class InitInstanceFieldsReconstructor
             if (length > 0)
             {
                 // Filter init values
-                int j = GetSuperCallIndex(classFile, constants, list);
+                int j = getSuperCallIndex(classFile, constants, list);
 
                 if (j < 0)
                     continue;
@@ -223,7 +223,7 @@ public class InitInstanceFieldsReconstructor
 
                     if ((cnat.getNameIndex() == field.getNameIndex()) &&
                         (cnat.getDescriptorIndex() == field.getDescriptorIndex()) &&
-                        ((field.access_flags & ClassFileConstants.ACC_STATIC) == 0))
+                        ((field.accessFlags & ClassFileConstants.ACC_STATIC) == 0))
                     {
                         // Field found
                         Instruction valueref = putField.valueref;
@@ -252,7 +252,7 @@ public class InitInstanceFieldsReconstructor
                 {
                     final Method method = methods[methodIndex];
 
-                    if (((method.access_flags &
+                    if (((method.accessFlags &
                             (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_BRIDGE)) != 0))
                         continue;
                     if (method.getCode() == null)
@@ -311,7 +311,7 @@ public class InitInstanceFieldsReconstructor
         }
     }
 
-    private static int GetSuperCallIndex(
+    private static int getSuperCallIndex(
         ClassFile classFile, ConstantPool constants, List<Instruction> list)
     {
         int length = list.size();

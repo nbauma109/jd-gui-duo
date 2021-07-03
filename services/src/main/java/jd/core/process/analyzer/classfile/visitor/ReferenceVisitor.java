@@ -443,10 +443,10 @@ public class ReferenceVisitor
     {
         if (signature.charAt(0) == '[')
         {
-            signature = SignatureUtil.CutArrayDimensionPrefix(signature);
+            signature = SignatureUtil.cutArrayDimensionPrefix(signature);
 
             if (signature.charAt(0) == 'L')
-                referenceMap.add(SignatureUtil.GetInnerName(signature));
+                referenceMap.add(SignatureUtil.getInnerName(signature));
         }
         else
         {

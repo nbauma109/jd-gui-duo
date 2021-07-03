@@ -36,7 +36,7 @@ public class TernaryOpReconstructor
         super();
     }
 
-    public static void Reconstruct(List<Instruction> list)
+    public static void reconstruct(List<Instruction> list)
     {
         int length = list.size();
 
@@ -64,7 +64,7 @@ public class TernaryOpReconstructor
                         (opcode == ByteCodeConstants.COMPLEXIF))
                     {
                         int jumpOffset =
-                            ((BranchInstruction)instruction).GetJumpOffset();
+                            ((BranchInstruction)instruction).getJumpOffset();
                         if ((gi.offset < jumpOffset) &&
                             (jumpOffset <= afterGi.offset))
                         {
@@ -79,7 +79,7 @@ public class TernaryOpReconstructor
 
                 TernaryOpStore value1 = (TernaryOpStore)i;
 
-                ComparisonInstructionAnalyzer.InverseComparison(test);
+                ComparisonInstructionAnalyzer.inverseComparison(test);
 
                 TernaryOperator fto = new TernaryOperator(
                     ByteCodeConstants.TERNARYOP,
@@ -100,7 +100,7 @@ public class TernaryOpReconstructor
                     isBooleanConstant(fto.value2))
                 {
                     if (((IConst)fto.value1).value == 0)
-                        ComparisonInstructionAnalyzer.InverseComparison(fto.test);
+                        ComparisonInstructionAnalyzer.inverseComparison(fto.test);
 
                     visitor.init(fto.offset, fto.test);
 

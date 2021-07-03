@@ -18,12 +18,12 @@ package jd.core.model.classfile.attribute;
 
 public class ElementValuePair
 {
-    public final int element_name_index;
-    public final ElementValue element_value;
+    public final int elementNameIndex;
+    public final ElementValue elementValue;
 
-    public ElementValuePair(int element_name_index, ElementValue element_value)
+    public ElementValuePair(int elementNameIndex, ElementValue elementValue)
     {
-        this.element_name_index = element_name_index;
-        this.element_value = element_value;
+        this.elementNameIndex = elementNameIndex;
+        this.elementValue = elementValue;
     }
 }

@@ -39,10 +39,10 @@ public class IInc extends IndexInstruction
 
         LocalVariable lv = localVariables.getLocalVariableWithIndexAndOffset(this.index, this.offset);
 
-        if ((lv == null) || (lv.signature_index <= 0))
+        if ((lv == null) || (lv.signatureIndex <= 0))
             return null;
 
-        return constants.getConstantUtf8(lv.signature_index);
+        return constants.getConstantUtf8(lv.signatureIndex);
     }
 
     @Override

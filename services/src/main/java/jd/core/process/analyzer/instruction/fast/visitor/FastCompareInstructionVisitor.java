@@ -86,7 +86,7 @@ public class FastCompareInstructionVisitor extends CompareInstructionVisitor
 
                     if ((fc1.exceptionTypeIndex != fc2.exceptionTypeIndex) ||
                         (! visit(fc1.instructions, fc2.instructions)) ||
-                        (! CompareExceptionTypeIndexes(
+                        (! compareExceptionTypeIndexes(
                             fc1.otherExceptionTypeIndexes, fc2.otherExceptionTypeIndexes)))
                         return false;
                 }
@@ -108,7 +108,7 @@ public class FastCompareInstructionVisitor extends CompareInstructionVisitor
         }
     }
 
-    private static boolean CompareExceptionTypeIndexes(
+    private static boolean compareExceptionTypeIndexes(
         int otherExceptionTypeIndexes1[], int otherExceptionTypeIndexes2[])
     {
         if (otherExceptionTypeIndexes1 == null)

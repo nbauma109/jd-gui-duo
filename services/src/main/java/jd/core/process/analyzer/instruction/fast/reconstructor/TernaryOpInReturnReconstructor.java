@@ -34,7 +34,7 @@ public class TernaryOpInReturnReconstructor
         super();
     }
 
-    public static void Reconstruct(List<Instruction> list)
+    public static void reconstruct(List<Instruction> list)
     {
         for (int index=list.size()-1; index>=0; --index)
         {
@@ -94,7 +94,7 @@ public class TernaryOpInReturnReconstructor
                 continue;
 
             BranchInstruction bi = (BranchInstruction)instruction;
-            int offset = bi.GetJumpOffset();
+            int offset = bi.getJumpOffset();
 
             if ((ri2.offset >= offset) || (offset > ri1.offset))
                 continue;
@@ -110,7 +110,7 @@ public class TernaryOpInReturnReconstructor
 
                 if (opcode == ByteCodeConstants.GOTO)
                 {
-                    int jumpOffset = ((Goto)instruction).GetJumpOffset();
+                    int jumpOffset = ((Goto)instruction).getJumpOffset();
                     if ((ri2.offset < jumpOffset) && (jumpOffset <= ri1.offset))
                     {
                         found = true;
@@ -123,7 +123,7 @@ public class TernaryOpInReturnReconstructor
                          (opcode == ByteCodeConstants.COMPLEXIF))
                 {
                     int jumpOffset =
-                        ((BranchInstruction)instruction).GetJumpOffset();
+                        ((BranchInstruction)instruction).getJumpOffset();
                     if ((ri2.offset < jumpOffset) && (jumpOffset <= ri1.offset))
                     {
                         found = true;
@@ -136,7 +136,7 @@ public class TernaryOpInReturnReconstructor
                 continue;
 
             if (iConst2.value == 1)
-                ComparisonInstructionAnalyzer.InverseComparison( bi );
+                ComparisonInstructionAnalyzer.inverseComparison( bi );
 
             list.remove(index);
             list.remove(index2);

@@ -44,7 +44,7 @@ public class ClassFileAnalyzer
 {
     private ClassFileAnalyzer() {
     }
-        public static void Analyze(ReferenceMap referenceMap, ClassFile classFile)
+        public static void analyze(ReferenceMap referenceMap, ClassFile classFile)
     {
         // Creation du tableau associatif [nom de classe interne, objet class].
         // Ce tableau est utilisé pour la suppression des accesseurs des
@@ -54,7 +54,7 @@ public class ClassFileAnalyzer
         {
             innerClassesMap = new HashMap<>(10);
             innerClassesMap.put(classFile.getThisClassName(), classFile);
-            PopulateInnerClassMap(innerClassesMap, classFile);
+            populateInnerClassMap(innerClassesMap, classFile);
         }
         else
         {
@@ -63,10 +63,10 @@ public class ClassFileAnalyzer
 
         // Generation des listes d'instructions
         // Creation du tableau des variables locales si necessaire
-        AnalyzeClass(referenceMap, innerClassesMap, classFile);
+        analyzeClass(referenceMap, innerClassesMap, classFile);
     }
 
-    private static void PopulateInnerClassMap(
+    private static void populateInnerClassMap(
         Map<String, ClassFile> innerClassesMap, ClassFile classFile)
     {
         List<ClassFile> innerClassFiles = classFile.getInnerClassFiles();
@@ -81,19 +81,19 @@ public class ClassFileAnalyzer
                 innerClassFile = innerClassFiles.get(i);
                 innerClassesMap.put(
                     innerClassFile.getThisClassName(), innerClassFile);
-                PopulateInnerClassMap(innerClassesMap, innerClassFile);
+                populateInnerClassMap(innerClassesMap, innerClassFile);
             }
         }
     }
 
-    private static void AnalyzeClass(
+    private static void analyzeClass(
         ReferenceMap referenceMap,
         Map<String, ClassFile> innerClassesMap,
         ClassFile classFile)
     {
-        if ((classFile.access_flags & ClassFileConstants.ACC_SYNTHETIC) != 0)
+        if ((classFile.accessFlags & ClassFileConstants.ACC_SYNTHETIC) != 0)
         {
-            AnalyzeSyntheticClass(classFile);
+            analyzeSyntheticClass(classFile);
         }
         else
         {
@@ -103,7 +103,7 @@ public class ClassFileAnalyzer
             // des classes internes. Elle permet egalement de construire la liste
             // des accesseurs et de parser les tableaux "SwitchMap" produit par le
             // compilateur d'Eclipse et utilisé pour le Switch+Enum.
-            PreAnalyzeMethods(classFile);
+            preAnalyzeMethods(classFile);
 
             // Analyse des classes internes avant l'analyse de la classe pour
             // afficher correctement des classes anonymes.
@@ -112,35 +112,35 @@ public class ClassFileAnalyzer
             {
                 int length = innerClassFiles.size();
                 for (int i=0; i<length; i++) {
-                    AnalyzeClass(referenceMap, innerClassesMap, innerClassFiles.get(i));
+                    analyzeClass(referenceMap, innerClassesMap, innerClassFiles.get(i));
                 }
             }
 
             // Analyse de la classe
-            CheckUnicityOfFieldNames(classFile);
-            CheckUnicityOfFieldrefNames(classFile);
-            AnalyzeMethods(referenceMap, innerClassesMap, classFile);
-            CheckAssertionsDisabledField(classFile);
+            checkUnicityOfFieldNames(classFile);
+            checkUnicityOfFieldrefNames(classFile);
+            analyzeMethods(referenceMap, innerClassesMap, classFile);
+            checkAssertionsDisabledField(classFile);
 
-            if ((classFile.access_flags & ClassFileConstants.ACC_ENUM) != 0) {
-                AnalyzeEnum(classFile);
+            if ((classFile.accessFlags & ClassFileConstants.ACC_ENUM) != 0) {
+                analyzeEnum(classFile);
             }
         }
     }
 
-    private static void AnalyzeSyntheticClass(ClassFile classFile)
+    private static void analyzeSyntheticClass(ClassFile classFile)
     {
         // Recherche des classes internes utilisees par les instructions
         // Switch+Enum generees par les compilateurs autre qu'Eclipse.
 
-        if ((classFile.access_flags & ClassFileConstants.ACC_STATIC) != 0 &&
+        if ((classFile.accessFlags & ClassFileConstants.ACC_STATIC) != 0 &&
             classFile.getOuterClass() != null &&
             classFile.getInternalAnonymousClassName() != null &&
             classFile.getFields() != null &&
             classFile.getMethods() != null &&
             classFile.getFields().length > 0 &&
             classFile.getMethods().length == 1 &&
-            (classFile.getMethods()[0].access_flags &
+            (classFile.getMethods()[0].accessFlags &
                     (ClassFileConstants.ACC_PUBLIC|ClassFileConstants.ACC_PROTECTED|ClassFileConstants.ACC_PRIVATE|ClassFileConstants.ACC_STATIC|ClassFileConstants.ACC_FINAL|ClassFileConstants.ACC_SYNTHETIC)) ==
                         ClassFileConstants.ACC_STATIC)
         {
@@ -151,13 +151,13 @@ public class ClassFileAnalyzer
 
             try
             {
-                AnalyzeMethodref(classFile);
+                analyzeMethodref(classFile);
 
                 // Build instructions
                 List<Instruction> list = new ArrayList<>();
                 List<Instruction> listForAnalyze = new ArrayList<>();
 
-                InstructionListBuilder.Build(
+                InstructionListBuilder.build(
                     classFile, method, list, listForAnalyze);
 
                 /* Parse static method
@@ -197,8 +197,8 @@ public class ClassFileAnalyzer
                     cnat = constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
 
                     // Search field
-                    field = SearchField(classFile, cnat);
-                    if (field == null || (field.access_flags &
+                    field = searchField(classFile, cnat);
+                    if (field == null || (field.accessFlags &
                             (ClassFileConstants.ACC_PUBLIC|ClassFileConstants.ACC_PROTECTED|ClassFileConstants.ACC_PRIVATE|ClassFileConstants.ACC_STATIC|ClassFileConstants.ACC_FINAL|ClassFileConstants.ACC_SYNTHETIC)) !=
                                 (ClassFileConstants.ACC_STATIC|ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_FINAL)) {
                         break;
@@ -262,7 +262,7 @@ public class ClassFileAnalyzer
         }
     }
 
-    private static Field SearchField(
+    private static Field searchField(
         ClassFile classFile, ConstantNameAndType cnat)
     {
         Field[] fields = classFile.getFields();
@@ -282,7 +282,7 @@ public class ClassFileAnalyzer
         return null;
     }
 
-    private static void AnalyzeMethodref(ClassFile classFile)
+    private static void analyzeMethodref(ClassFile classFile)
     {
         ConstantPool constants = classFile.getConstantPool();
 
@@ -302,15 +302,15 @@ public class ClassFileAnalyzer
                     String signature = constants.getConstantUtf8(
                         cnat.getDescriptorIndex());
                     cmr.setParameterSignatures(
-                        SignatureUtil.GetParameterSignatures(signature));
+                        SignatureUtil.getParameterSignatures(signature));
                     cmr.setReturnedSignature(
-                        SignatureUtil.GetMethodReturnedSignature(signature));
+                        SignatureUtil.getMethodReturnedSignature(signature));
                 }
             }
         }
     }
 
-    private static void CheckUnicityOfFieldNames(ClassFile classFile)
+    private static void checkUnicityOfFieldNames(ClassFile classFile)
     {
         Field[] fields = classFile.getFields();
         if (fields == null) {
@@ -327,7 +327,7 @@ public class ClassFileAnalyzer
         {
             Field field = fields[i];
 
-            if ((field.access_flags & (ClassFileConstants.ACC_PUBLIC|ClassFileConstants.ACC_PROTECTED)) != 0) {
+            if ((field.accessFlags & (ClassFileConstants.ACC_PUBLIC|ClassFileConstants.ACC_PROTECTED)) != 0) {
                 continue;
             }
 
@@ -360,7 +360,7 @@ public class ClassFileAnalyzer
                 field = list.get(j);
 
                 // Generate new attribute names
-                newName = FieldNameGenerator.GenerateName(
+                newName = FieldNameGenerator.generateName(
                         constants.getConstantUtf8(field.getDescriptorIndex()),
                         constants.getConstantUtf8(field.getNameIndex()));
                 // Add new constant string
@@ -372,7 +372,7 @@ public class ClassFileAnalyzer
     }
 
     @SuppressWarnings("unchecked")
-    private static void CheckUnicityOfFieldrefNames(ClassFile classFile)
+    private static void checkUnicityOfFieldrefNames(ClassFile classFile)
     {
         ConstantPool constants = classFile.getConstantPool();
 
@@ -454,14 +454,14 @@ public class ClassFileAnalyzer
                 {
                     cnat = list.get(k);
                     signature = constants.getConstantUtf8(cnat.getDescriptorIndex());
-                    newName = FieldNameGenerator.GenerateName(signature, name);
+                    newName = FieldNameGenerator.generateName(signature, name);
                     cnat.setNameIndex(constants.addConstantUtf8(newName));
                 }
             }
         }
     }
 
-    private static void CheckAssertionsDisabledField(ClassFile classFile)
+    private static void checkAssertionsDisabledField(ClassFile classFile)
     {
         ConstantPool constants = classFile.getConstantPool();
         Field[] fields = classFile.getFields();
@@ -477,7 +477,7 @@ public class ClassFileAnalyzer
         {
             field = fields[i];
 
-            if ((field.access_flags &
+            if ((field.accessFlags &
                     (ClassFileConstants.ACC_PUBLIC|ClassFileConstants.ACC_PROTECTED|
                      ClassFileConstants.ACC_PRIVATE|ClassFileConstants.ACC_SYNTHETIC|
                      ClassFileConstants.ACC_STATIC|ClassFileConstants.ACC_FINAL))
@@ -490,11 +490,11 @@ public class ClassFileAnalyzer
                 continue;
             }
 
-            field.access_flags |= ClassFileConstants.ACC_SYNTHETIC;
+            field.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
         }
     }
 
-    private static boolean HasAAccessorMethodName(ClassFile classFile, Method method)
+    private static boolean hasAAccessorMethodName(ClassFile classFile, Method method)
     {
         String methodName =
             classFile.getConstantPool().getConstantUtf8(method.getNameIndex());
@@ -515,7 +515,7 @@ public class ClassFileAnalyzer
         return true;
     }
 
-    private static boolean HasAEclipseSwitchTableMethodName(
+    private static boolean hasAEclipseSwitchTableMethodName(
         ClassFile classFile, Method method)
     {
         String methodName =
@@ -561,7 +561,7 @@ public class ClassFileAnalyzer
      *   73: catch (java/lang/NoSuchFieldError) {}
      * }
      */
-    private static void ParseEclipseOrDexSwitchTableMethod(
+    private static void parseEclipseOrDexSwitchTableMethod(
         ClassFile classFile, Method method)
     {
         List<Instruction> list = method.getInstructions();
@@ -661,9 +661,9 @@ public class ClassFileAnalyzer
         }
     }
 
-    private static void PreAnalyzeMethods(ClassFile classFile)
+    private static void preAnalyzeMethods(ClassFile classFile)
     {
-        AnalyzeMethodref(classFile);
+        analyzeMethodref(classFile);
 
         Method[] methods = classFile.getMethods();
 
@@ -684,11 +684,11 @@ public class ClassFileAnalyzer
             {
                 if (method.getCode() == null)
                 {
-                    if ((method.access_flags &
+                    if ((method.accessFlags &
                             (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_BRIDGE)) == 0)
                     {
                         // Create missing local variable table
-                        LocalVariableAnalyzer.Analyze(
+                        LocalVariableAnalyzer.analyze(
                             classFile, method, variableNameGenerator, null, null);
                     }
                 }
@@ -698,36 +698,36 @@ public class ClassFileAnalyzer
                     List<Instruction> list = new ArrayList<>();
                     List<Instruction> listForAnalyze = new ArrayList<>();
 
-                    InstructionListBuilder.Build(
+                    InstructionListBuilder.build(
                         classFile, method, list, listForAnalyze);
                     method.setInstructions(list);
 
-                    if ((method.access_flags & (ClassFileConstants.ACC_PUBLIC|ClassFileConstants.ACC_PROTECTED|ClassFileConstants.ACC_PRIVATE|ClassFileConstants.ACC_STATIC)) == ClassFileConstants.ACC_STATIC &&
-                        HasAAccessorMethodName(classFile, method))
+                    if ((method.accessFlags & (ClassFileConstants.ACC_PUBLIC|ClassFileConstants.ACC_PROTECTED|ClassFileConstants.ACC_PRIVATE|ClassFileConstants.ACC_STATIC)) == ClassFileConstants.ACC_STATIC &&
+                        hasAAccessorMethodName(classFile, method))
                     {
                         // Recherche des accesseurs
-                        AccessorAnalyzer.Analyze(classFile, method);
+                        AccessorAnalyzer.analyze(classFile, method);
                         // Setup access flag : JDK 1.4 not set synthetic flag...
-                        method.access_flags |= ClassFileConstants.ACC_SYNTHETIC;
+                        method.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
                     }
-                    else if ((method.access_flags &
+                    else if ((method.accessFlags &
                             (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_BRIDGE)) == 0)
                     {
                         // Create missing local variable table
-                        LocalVariableAnalyzer.Analyze(
+                        LocalVariableAnalyzer.analyze(
                             classFile, method, variableNameGenerator, list, listForAnalyze);
 
                         // Recherche du numero de l'attribut contenant la reference
                         // de la classe externe
-                        outerThisFieldrefIndex = SearchOuterThisFieldrefIndex(
+                        outerThisFieldrefIndex = searchOuterThisFieldrefIndex(
                             classFile, method, list, outerThisFieldrefIndex);
                     }
-                    else if ((method.access_flags & (ClassFileConstants.ACC_PUBLIC|ClassFileConstants.ACC_PROTECTED|ClassFileConstants.ACC_PRIVATE|ClassFileConstants.ACC_STATIC|ClassFileConstants.ACC_SYNTHETIC))
+                    else if ((method.accessFlags & (ClassFileConstants.ACC_PUBLIC|ClassFileConstants.ACC_PROTECTED|ClassFileConstants.ACC_PRIVATE|ClassFileConstants.ACC_STATIC|ClassFileConstants.ACC_SYNTHETIC))
                                     == (ClassFileConstants.ACC_STATIC|ClassFileConstants.ACC_SYNTHETIC) &&
-                                HasAEclipseSwitchTableMethodName(classFile, method))
+                                hasAEclipseSwitchTableMethodName(classFile, method))
                     {
                         // Parse "static int[] $SWITCH_TABLE$...()" method
-                        ParseEclipseOrDexSwitchTableMethod(classFile, method);
+                        parseEclipseOrDexSwitchTableMethod(classFile, method);
                     }
                 }
             }
@@ -739,11 +739,11 @@ public class ClassFileAnalyzer
         }
 
         if (outerThisFieldrefIndex != 0) {
-            AnalyzeOuterReferences(classFile, outerThisFieldrefIndex);
+            analyzeOuterReferences(classFile, outerThisFieldrefIndex);
         }
     }
 
-    private static void AnalyzeMethods(
+    private static void analyzeMethods(
         ReferenceMap referenceMap,
         Map<String, ClassFile> innerClassesMap,
         ClassFile classFile)
@@ -767,7 +767,7 @@ public class ClassFileAnalyzer
         {
             final Method method = methods[i];
 
-            if ((method.access_flags &
+            if ((method.accessFlags &
                 (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_BRIDGE)) != 0 ||
                 method.getCode() == null ||
                 method.containsError()) {
@@ -783,36 +783,36 @@ public class ClassFileAnalyzer
                     outerReferenceReconstructor.reconstruct(method, list);
                 }
                 // Re-construct 'new' intruction
-                NewInstructionReconstructor.Reconstruct(classFile, method, list);
-                SimpleNewInstructionReconstructor.Reconstruct(classFile, method, list);
+                NewInstructionReconstructor.reconstruct(classFile, method, list);
+                SimpleNewInstructionReconstructor.reconstruct(classFile, method, list);
                 // Recontruction des instructions de pre-incrementation non entier
-                PreIncReconstructor.Reconstruct(list);
+                PreIncReconstructor.reconstruct(list);
                 // Recontruction des instructions de post-incrementation non entier
-                PostIncReconstructor.Reconstruct(list);
+                PostIncReconstructor.reconstruct(list);
                 // Recontruction du mot clé '.class' pour le JDK 1.1.8 - A
-                DotClass118AReconstructor.Reconstruct(
+                DotClass118AReconstructor.reconstruct(
                     referenceMap, classFile, list);
                 // Recontruction du mot clé '.class' pour le JDK 1.4
-                DotClass14Reconstructor.Reconstruct(
+                DotClass14Reconstructor.reconstruct(
                     referenceMap, classFile, list);
                 // Replace StringBuffer and StringBuilder in java source line
-                ReplaceStringBufferAndStringBuilder(classFile, list);
+                replaceStringBufferAndStringBuilder(classFile, list);
                 // Remove unused pop instruction
-                RemoveUnusedPopInstruction(list);
+                removeUnusedPopInstruction(list);
                 // Transformation des tests sur des types 'long' et 'double'
-                TransformTestOnLongOrDouble(list);
+                transformTestOnLongOrDouble(list);
                 // Set constant type of "String.indexOf(...)" methods
-                SetConstantTypeInStringIndexOfMethods(classFile, list);
+                setConstantTypeInStringIndexOfMethods(classFile, list);
                 // Elimine la séquence DupStore(this) ... DupLoad() ... DupLoad().
                 // Cette operation doit être executee avant
                 // 'AssignmentInstructionReconstructor'.
-                DupStoreThisReconstructor.Reconstruct(list);
+                DupStoreThisReconstructor.reconstruct(list);
                 // Recontruction des affectations multiples
                 // Cette operation doit être executee avant
                 // 'InitArrayInstructionReconstructor', 'TernaryOpReconstructor'
                 // et la construction des instructions try-catch et finally.
                 // Cette operation doit être executee après 'DupStoreThisReconstructor'.
-                AssignmentInstructionReconstructor.Reconstruct(list);
+                AssignmentInstructionReconstructor.reconstruct(list);
                 // Elimine les doubles casts et ajoute des casts devant les
                 // constantes numeriques si necessaire.
                 CheckCastAndConvertInstructionVisitor.visit(
@@ -827,11 +827,11 @@ public class ClassFileAnalyzer
                 //ConstantPool debugConstants = classFile.getConstantPool();
                 //String debugMethodName = debugConstants.getConstantUtf8(method.nameIndex);
                 // DEBUG //
-                FastInstructionListBuilder.Build(
+                FastInstructionListBuilder.build(
                     referenceMap, classFile, method, fastList);
 
                 // Ajout des déclarations des variables locales temporaires
-                DupLocalVariableAnalyzer.Declare(classFile, method, fastList);
+                DupLocalVariableAnalyzer.declare(classFile, method, fastList);
             }
             catch (Exception e)
             {
@@ -841,17 +841,17 @@ public class ClassFileAnalyzer
         }
 
         // Recherche des initialisations des attributs statiques Enum
-        InitDexEnumFieldsReconstructor.Reconstruct(classFile);
+        InitDexEnumFieldsReconstructor.reconstruct(classFile);
         // Recherche des initialisations des attributs statiques
-        InitStaticFieldsReconstructor.Reconstruct(classFile);
+        InitStaticFieldsReconstructor.reconstruct(classFile);
         // Recherche des initialisations des attributs d'instance
-        InitInstanceFieldsReconstructor.Reconstruct(classFile);
+        InitInstanceFieldsReconstructor.reconstruct(classFile);
 
         for (int i=0; i<length; i++)
         {
             final Method method = methods[i];
 
-            if ((method.access_flags &
+            if ((method.accessFlags &
                 (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_BRIDGE)) != 0 ||
                 method.getCode() == null ||
                 method.getFastNodes() == null ||
@@ -862,11 +862,11 @@ public class ClassFileAnalyzer
             try
             {
                 // Remove empty and enum super call
-                AnalyseAndModifyConstructors(classFile, method);
+                analyseAndModifyConstructors(classFile, method);
                 // Check line number of 'return'
-                ReturnLineNumberAnalyzer.Check(method);
+                ReturnLineNumberAnalyzer.check(method);
                 // Remove last instruction 'return'
-                RemoveLastReturnInstruction(method);
+                removeLastReturnInstruction(method);
             }
             catch (Exception e)
             {
@@ -876,13 +876,13 @@ public class ClassFileAnalyzer
         }
     }
 
-    private static int SearchOuterThisFieldrefIndex(
+    private static int searchOuterThisFieldrefIndex(
         ClassFile classFile, Method method,
         List<Instruction> list, int outerThisFieldrefIndex)
     {
         // Is classFile an inner class ?
         if (!classFile.isAInnerClass() ||
-            (classFile.access_flags & ClassFileConstants.ACC_STATIC) != 0) {
+            (classFile.accessFlags & ClassFileConstants.ACC_STATIC) != 0) {
             return 0;
         }
 
@@ -896,7 +896,7 @@ public class ClassFileAnalyzer
         // Is parameters counter greater than 0 ?
         AttributeSignature as = method.getAttributeSignature();
         String methodSignature = constants.getConstantUtf8(
-            (as==null) ? method.getDescriptorIndex() : as.signature_index);
+            (as==null) ? method.getDescriptorIndex() : as.signatureIndex);
 
         if (methodSignature.charAt(1) == ')') {
             return 0;
@@ -946,7 +946,7 @@ public class ClassFileAnalyzer
     }
 
     /** Traitement des references externes des classes internes. */
-    private static void AnalyzeOuterReferences(
+    private static void analyzeOuterReferences(
         ClassFile classFile, int outerThisFieldrefIndex)
     {
         Method[] methods = classFile.getMethods();
@@ -980,7 +980,7 @@ public class ClassFileAnalyzer
                     {
                         classFile.setOuterThisField(field);
                         // Ensure outer this field is a synthetic field.
-                        field.access_flags |= ClassFileConstants.ACC_SYNTHETIC;
+                        field.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
                         break;
                     }
                 }
@@ -1022,7 +1022,7 @@ public class ClassFileAnalyzer
                     }
                 }
             }
-            else if ((method.access_flags &
+            else if ((method.accessFlags &
                         (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_STATIC)) == ClassFileConstants.ACC_STATIC &&
                      method.getNameIndex() != constants.classConstructorIndex &&
                      listLength == 1 &&
@@ -1067,7 +1067,7 @@ public class ClassFileAnalyzer
                 if (cnat.getNameIndex() == outerField.getNameIndex())
                 {
                     // Ensure accessor method is a synthetic method
-                    method.access_flags |= ClassFileConstants.ACC_SYNTHETIC;
+                    method.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
                 }
             }
         }
@@ -1080,7 +1080,7 @@ public class ClassFileAnalyzer
      *    class instanciation
      * 3) Store outer parameter position on field for inner and anonymous classes
      */
-    private static void AnalyseAndModifyConstructors(
+    private static void analyseAndModifyConstructors(
         ClassFile classFile, Method method)
     {
         ConstantPool constants = classFile.getConstantPool();
@@ -1113,7 +1113,7 @@ public class ClassFileAnalyzer
 
                                 method.setSuperConstructorParameterCount(count);
 
-                                if ((classFile.access_flags & ClassFileConstants.ACC_ENUM) != 0)
+                                if ((classFile.accessFlags & ClassFileConstants.ACC_ENUM) != 0)
                                 {
                                     if (count == 2)
                                     {
@@ -1158,7 +1158,7 @@ public class ClassFileAnalyzer
                                 classFile.getField(cnat.getNameIndex(), cnat.getDescriptorIndex());
                             field.anonymousClassConstructorParameterIndex = ii.index - 1;
                             // Ensure this field is a synthetic field.
-                            field.access_flags |= ClassFileConstants.ACC_SYNTHETIC;
+                            field.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
                         }
                     }
                 }
@@ -1170,7 +1170,7 @@ public class ClassFileAnalyzer
         }
     }
 
-    private static void RemoveLastReturnInstruction(Method method)
+    private static void removeLastReturnInstruction(Method method)
     {
         List<Instruction> list = method.getFastNodes();
 
@@ -1195,7 +1195,7 @@ public class ClassFileAnalyzer
         }
     }
 
-    private static void ReplaceStringBufferAndStringBuilder(
+    private static void replaceStringBufferAndStringBuilder(
         ClassFile classFile, List<Instruction> list)
     {
         ReplaceStringBuxxxerVisitor visitor = new ReplaceStringBuxxxerVisitor(
@@ -1208,7 +1208,7 @@ public class ClassFileAnalyzer
         }
     }
 
-    private static void RemoveUnusedPopInstruction(List<Instruction> list)
+    private static void removeUnusedPopInstruction(List<Instruction> list)
     {
         int index = list.size();
 
@@ -1229,7 +1229,7 @@ public class ClassFileAnalyzer
         }
     }
 
-    private static void TransformTestOnLongOrDouble(List<Instruction> list)
+    private static void transformTestOnLongOrDouble(List<Instruction> list)
     {
         int index = list.size();
 
@@ -1265,7 +1265,7 @@ public class ClassFileAnalyzer
         }
     }
 
-    private static void SetConstantTypeInStringIndexOfMethods(
+    private static void setConstantTypeInStringIndexOfMethods(
         ClassFile classFile, List<Instruction> list)
     {
         SetConstantTypeInStringIndexOfMethodsVisitor visitor =
@@ -1275,7 +1275,7 @@ public class ClassFileAnalyzer
         visitor.visit(list);
     }
 
-    private static void AnalyzeEnum(ClassFile classFile)
+    private static void analyzeEnum(ClassFile classFile)
     {
         if (classFile.getFields() == null) {
             return;
@@ -1294,7 +1294,7 @@ public class ClassFileAnalyzer
         {
             field = fields[i];
 
-            if ((field.access_flags & (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_ENUM)) == 0 ||
+            if ((field.accessFlags & (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_ENUM)) == 0 ||
                 field.getValueAndMethod() == null) {
                 continue;
             }

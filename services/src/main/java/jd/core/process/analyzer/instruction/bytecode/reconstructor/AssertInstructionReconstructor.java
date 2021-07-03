@@ -41,7 +41,7 @@ public class AssertInstructionReconstructor
         super();
     }
 
-    public static void Reconstruct(ClassFile classFile, List<Instruction> list)
+    public static void reconstruct(ClassFile classFile, List<Instruction> list)
     {
         int index = list.size();
         if (index-- == 0)
@@ -66,7 +66,7 @@ public class AssertInstructionReconstructor
             // ComplexConditionalBranchInstruction trouve
             ComplexConditionalBranchInstruction cbl =
                 (ComplexConditionalBranchInstruction)instruction;
-            int jumpOffset = cbl.GetJumpOffset();
+            int jumpOffset = cbl.getJumpOffset();
             int lastOffset = list.get(index+1).offset;
 
             if ((athrow.offset >= jumpOffset) || (jumpOffset > lastOffset))

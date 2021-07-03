@@ -31,13 +31,13 @@ public class TypeNameUtil
         super();
     }
 
-    public static String InternalTypeNameToInternalPackageName(String path)
+    public static String internalTypeNameToInternalPackageName(String path)
     {
         int index = path.lastIndexOf(StringConstants.INTERNAL_PACKAGE_SEPARATOR);
         return (index == -1) ? "" : path.substring(0, index);
     }
 
-    public static String InternalTypeNameToQualifiedTypeName(String path)
+    public static String internalTypeNameToQualifiedTypeName(String path)
     {
         return path.replace(StringConstants.INTERNAL_PACKAGE_SEPARATOR,
                             StringConstants.PACKAGE_SEPARATOR)

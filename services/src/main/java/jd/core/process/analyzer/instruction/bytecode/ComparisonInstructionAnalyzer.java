@@ -37,7 +37,7 @@ public class ComparisonInstructionAnalyzer
      *                            |                                |
      * Liste    ... --|----|---|==0===1===2===3===4===5===6==7=...=n---|--| ...
      */
-    public static void Aggregate(List<Instruction> list)
+    public static void aggregate(List<Instruction> list)
     {
         int afterOffest = -1;
         int index = list.size();
@@ -65,15 +65,15 @@ public class ComparisonInstructionAnalyzer
                             BranchInstruction bi     = (BranchInstruction)instruction;
                             BranchInstruction prevBi = (BranchInstruction)prevI;
 
-                            int prevBiJumpOffset = prevBi.GetJumpOffset();
+                            int prevBiJumpOffset = prevBi.getJumpOffset();
 
                             // Le 2eme if appartient-il au meme bloc que le 1er ?
-                            if ((prevBiJumpOffset == bi.GetJumpOffset()) ||
+                            if ((prevBiJumpOffset == bi.getJumpOffset()) ||
                                 ((prevBi.branch > 0) && (prevBiJumpOffset <= afterOffest)))
                             {
                                 // Oui
                                 // Test complexe : plusieurs instructions byte-code de test
-                                index = AnalyzeIfInstructions(
+                                index = analyzeIfInstructions(
                                     list, index, bi, afterOffest);
                             }
                         }
@@ -96,7 +96,7 @@ public class ComparisonInstructionAnalyzer
      * Offsets                                    |   |   afterLastBiOffset
      * Instruction                    (if) prevLast   last (if)
      */
-    private static int AnalyzeIfInstructions(
+    private static int analyzeIfInstructions(
             List<Instruction> list, int index,
             BranchInstruction lastBi, int afterOffest)
     {
@@ -106,11 +106,11 @@ public class ComparisonInstructionAnalyzer
 
         // Recherche de l'indexe de la premiere instruction 'if' du bloc et
         // initialisation de 'offsetToPreviousGotoFlag'
-        int firstIndex = SearchFirstIndex(
+        int firstIndex = searchFirstIndex(
             list, index, lastBi, afterOffest,
             offsetToPreviousGotoFlag, inversedTernaryOpLogic);
 
-        firstIndex = ReduceFirstIndex(list, firstIndex, index);
+        firstIndex = reduceFirstIndex(list, firstIndex, index);
 
         if (firstIndex < index)
         {
@@ -123,7 +123,7 @@ public class ComparisonInstructionAnalyzer
                 branchInstructions.add(list.remove(--index));
 
             Collections.reverse(branchInstructions);
-            list.set(index, CreateIfInstructions(
+            list.set(index, createIfInstructions(
                 offsetToPreviousGotoFlag, inversedTernaryOpLogic,
                 branchInstructions, lastBi));
         }
@@ -131,7 +131,7 @@ public class ComparisonInstructionAnalyzer
         return index;
     }
 
-    private static int ReduceFirstIndex(
+    private static int reduceFirstIndex(
         List<Instruction> list, int firstIndex, int lastIndex)
     {
         int firstOffset = (firstIndex == 0) ? 0 : list.get(firstIndex-1).offset;
@@ -150,7 +150,7 @@ public class ComparisonInstructionAnalyzer
             case ByteCodeConstants.IFCMP:
             case ByteCodeConstants.IFXNULL:
             case ByteCodeConstants.GOTO:
-                int jumpOffset = ((BranchInstruction)i).GetJumpOffset();
+                int jumpOffset = ((BranchInstruction)i).getJumpOffset();
                 if ((newFirstOffset < jumpOffset) && (jumpOffset <= lastOffset))
                     newFirstOffset = jumpOffset;
             }
@@ -168,7 +168,7 @@ public class ComparisonInstructionAnalyzer
             case ByteCodeConstants.IFCMP:
             case ByteCodeConstants.IFXNULL:
             case ByteCodeConstants.GOTO:
-                int jumpOffset = ((BranchInstruction)i).GetJumpOffset();
+                int jumpOffset = ((BranchInstruction)i).getJumpOffset();
                 if ((newFirstOffset < jumpOffset) && (jumpOffset <= lastOffset))
                     newFirstOffset = jumpOffset;
             }
@@ -191,14 +191,14 @@ public class ComparisonInstructionAnalyzer
         return firstIndex;
     }
 
-    private static int SearchFirstIndex(
+    private static int searchFirstIndex(
         List<Instruction> list, int lastIndex,
         BranchInstruction lastBi, int afterOffest,
         boolean[] offsetToPreviousGotoFlag,
         boolean[] inversedTernaryOpLogic)
     {
         int index = lastIndex;
-        int lastBiJumpOffset = lastBi.GetJumpOffset();
+        int lastBiJumpOffset = lastBi.getJumpOffset();
 
         Instruction nextInstruction = lastBi;
 
@@ -212,7 +212,7 @@ public class ComparisonInstructionAnalyzer
                 (opcode == ByteCodeConstants.IFXNULL))
             {
                 BranchInstruction bi = (BranchInstruction)instruction;
-                int jumpOffset = bi.GetJumpOffset();
+                int jumpOffset = bi.getJumpOffset();
 
                 // L'instruction if courante appartient-elle au meme bloc que le 1er ?
                 if (jumpOffset == lastBiJumpOffset)
@@ -268,7 +268,7 @@ public class ComparisonInstructionAnalyzer
             else if (opcode == ByteCodeConstants.GOTO)
             {
                 Goto g = (Goto)instruction;
-                int jumpOffset = g.GetJumpOffset();
+                int jumpOffset = g.getJumpOffset();
 
                 // Ce 'goto' appartient-il au meme bloc que le 1er 'if' ?
                 if ((jumpOffset != lastBiJumpOffset) &&
@@ -289,7 +289,7 @@ public class ComparisonInstructionAnalyzer
                     break; // Non
 
                 int jumpOffsetValue1 =
-                    ((BranchInstruction)lastInstructionValue1).GetJumpOffset();
+                    ((BranchInstruction)lastInstructionValue1).getJumpOffset();
 
                 if ((g.offset < jumpOffsetValue1) &&
                     (jumpOffsetValue1 <= lastBi.offset))
@@ -316,7 +316,7 @@ public class ComparisonInstructionAnalyzer
                     break; // Non
 
                 int jumpOffsetValue2 =
-                    ((BranchInstruction)lastInstructionValue2).GetJumpOffset();
+                    ((BranchInstruction)lastInstructionValue2).getJumpOffset();
 
                 if (jumpOffsetValue1 == jumpOffsetValue2)
                 {
@@ -352,7 +352,7 @@ public class ComparisonInstructionAnalyzer
         return index+1;
     }
 
-    private static ComplexConditionalBranchInstruction CreateIfInstructions(
+    private static ComplexConditionalBranchInstruction createIfInstructions(
         boolean[] offsetToPreviousGotoFlag,
         boolean[] inversedTernaryOpLogic,
         List<Instruction> branchInstructions,
@@ -360,21 +360,21 @@ public class ComparisonInstructionAnalyzer
     {
         // Reconstruction des operateurs ternaires
         //  -> Elimination des instructions 'Goto'
-        ReconstructTernaryOperators(
+        reconstructTernaryOperators(
             offsetToPreviousGotoFlag, inversedTernaryOpLogic,
             branchInstructions, lastBi);
 
         // Creation de l'instruction ComplexBranchList
         ComplexConditionalBranchInstruction cbl =
-            AssembleAndCreateIfInstructions(branchInstructions, lastBi);
+            assembleAndCreateIfInstructions(branchInstructions, lastBi);
 
         // Affectation des comparaisons	& des operateurs
-        SetOperator(cbl, lastBi, false);
+        setOperator(cbl, lastBi, false);
 
         return cbl;
     }
 
-    private static void ReconstructTernaryOperators(
+    private static void reconstructTernaryOperators(
             boolean[] offsetToPreviousGotoFlag,
             boolean[] inversedTernaryOpLogic,
             List<Instruction> branchInstructions,
@@ -399,7 +399,7 @@ public class ComparisonInstructionAnalyzer
             case ByteCodeConstants.IFXNULL:
                 BranchInstruction lastTernaryOpTestBi = (BranchInstruction)i;
                 int lastTernaryOpTestBiJumpOffset =
-                    lastTernaryOpTestBi.GetJumpOffset();
+                    lastTernaryOpTestBi.getJumpOffset();
 
                 if ((lastTernaryOpTestBiJumpOffset < 0) ||
                     (lastBi.offset < lastTernaryOpTestBiJumpOffset) ||
@@ -451,7 +451,7 @@ public class ComparisonInstructionAnalyzer
                 if (ternaryOpTestInstructions.size() > 1)
                 {
                     Collections.reverse(ternaryOpTestInstructions);
-                    test = CreateIfInstructions(
+                    test = createIfInstructions(
                         offsetToPreviousGotoFlag, inversedTernaryOpLogic,
                         ternaryOpTestInstructions, lastTernaryOpTestBi);
                 }
@@ -459,7 +459,7 @@ public class ComparisonInstructionAnalyzer
                 {
                     test = lastTernaryOpTestBi;
                 }
-                InverseComparison(test);
+                inverseComparison(test);
 
                 // Extraction de la sous liste d'instructions constituant
                 // la premiere valeur de l'operateur ternaire (instructions
@@ -493,7 +493,7 @@ public class ComparisonInstructionAnalyzer
                         (BranchInstruction)ternaryOpValue1Instructions.get(
                             ternaryOpValue1Instructions.size()-1);
                     // Creation de l'instruction ComplexBranchList
-                    value1 = AssembleAndCreateIfInstructions(
+                    value1 = assembleAndCreateIfInstructions(
                         ternaryOpValue1Instructions, lastTernaryOpValueBi);
                 }
                 else
@@ -506,12 +506,12 @@ public class ComparisonInstructionAnalyzer
 
                 if (inversedTernaryOpLogic[g.offset])
                 {
-                    gotoJumpOffset = value1.GetJumpOffset();
-                    InverseComparison(value1);
+                    gotoJumpOffset = value1.getJumpOffset();
+                    inverseComparison(value1);
                 }
                 else
                 {
-                    gotoJumpOffset = g.GetJumpOffset();
+                    gotoJumpOffset = g.getJumpOffset();
                 }
 
                 // Extraction de la sous liste d'instructions constituant
@@ -542,7 +542,7 @@ public class ComparisonInstructionAnalyzer
                         (BranchInstruction)ternaryOpValue2Instructions.get(
                             ternaryOpValue2Instructions.size()-1);
                     // Creation de l'instruction ComplexBranchList
-                    value2 = AssembleAndCreateIfInstructions(
+                    value2 = assembleAndCreateIfInstructions(
                         ternaryOpValue2Instructions, lastTernaryOpValueBi);
                 }
                 else
@@ -577,7 +577,7 @@ public class ComparisonInstructionAnalyzer
         }
     }
 
-    private static ComplexConditionalBranchInstruction AssembleAndCreateIfInstructions(
+    private static ComplexConditionalBranchInstruction assembleAndCreateIfInstructions(
             List<Instruction> branchInstructions,
             BranchInstruction lastBi)
     {
@@ -589,7 +589,7 @@ public class ComparisonInstructionAnalyzer
         {
             BranchInstruction branchInstruction =
                 (BranchInstruction)branchInstructions.get(i);
-            int jumpOffset = branchInstruction.GetJumpOffset();
+            int jumpOffset = branchInstruction.getJumpOffset();
 
             if ((branchInstruction.branch > 0) && (jumpOffset < lastBiOffset))
             {
@@ -622,14 +622,14 @@ public class ComparisonInstructionAnalyzer
                 {
                     // Recursive call
                     branchInstructions.set(i,
-                            AssembleAndCreateIfInstructions(
+                            assembleAndCreateIfInstructions(
                                     subBranchInstructions, subLastBi));
                 }
             }
         }
 
         //
-        AnalyzeLastTestBlock(branchInstructions);
+        analyzeLastTestBlock(branchInstructions);
 
         // First branch instruction line number
         int lineNumber = branchInstructions.get(0).lineNumber;
@@ -639,7 +639,7 @@ public class ComparisonInstructionAnalyzer
             ByteCodeConstants.CMP_NONE, branchInstructions, lastBi.branch);
     }
 
-    private static void AnalyzeLastTestBlock(
+    private static void analyzeLastTestBlock(
         List<Instruction> branchInstructions)
     {
         int length = branchInstructions.size();
@@ -649,14 +649,14 @@ public class ComparisonInstructionAnalyzer
             length--;
             BranchInstruction branchInstruction =
                 (BranchInstruction)branchInstructions.get(0);
-            int firstJumpOffset = branchInstruction.GetJumpOffset();
+            int firstJumpOffset = branchInstruction.getJumpOffset();
 
             // Search sub list
             for (int i=1; i<length; ++i)
             {
                 branchInstruction =
                     (BranchInstruction)branchInstructions.get(i);
-                int jumpOffset = branchInstruction.GetJumpOffset();
+                int jumpOffset = branchInstruction.getJumpOffset();
 
                 if (firstJumpOffset != jumpOffset)
                 {
@@ -676,7 +676,7 @@ public class ComparisonInstructionAnalyzer
                     }
 
                     // Recursive call
-                    AnalyzeLastTestBlock(subJumpInstructions);
+                    analyzeLastTestBlock(subJumpInstructions);
 
                     // First branch instruction line number
                     int lineNumber = branchInstructions.get(0).lineNumber;
@@ -691,7 +691,7 @@ public class ComparisonInstructionAnalyzer
         }
     }
 
-    private static void SetOperator(
+    private static void setOperator(
         ComplexConditionalBranchInstruction cbl,
         BranchInstruction lastBi, boolean inverse)
     {
@@ -699,13 +699,13 @@ public class ComparisonInstructionAnalyzer
         int lastIndex = instructions.size()-1;
         BranchInstruction firstBi = (BranchInstruction)instructions.get(0);
 
-        if (firstBi.GetJumpOffset() == lastBi.GetJumpOffset())
+        if (firstBi.getJumpOffset() == lastBi.getJumpOffset())
         {
             cbl.cmp = inverse ?
                 ByteCodeConstants.CMP_AND : ByteCodeConstants.CMP_OR;
 
             for (int i=0; i<=lastIndex; ++i)
-                SetOperator(instructions.get(i), inverse);
+                setOperator(instructions.get(i), inverse);
         }
         else
         {
@@ -717,21 +717,21 @@ public class ComparisonInstructionAnalyzer
             int i = 0;
 
             while (i < lastIndex)
-                SetOperator(instructions.get(i++), tmpInverse);
+                setOperator(instructions.get(i++), tmpInverse);
 
-            SetOperator(instructions.get(i), inverse);
+            setOperator(instructions.get(i), inverse);
         }
     }
 
-    private static void SetOperator(Instruction instruction, boolean inverse)
+    private static void setOperator(Instruction instruction, boolean inverse)
     {
         switch (instruction.opcode)
         {
         case ByteCodeConstants.TERNARYOP:
             {
                 TernaryOperator to = (TernaryOperator)instruction;
-                SetOperator(to.value1, inverse);
-                SetOperator(to.value2, inverse);
+                setOperator(to.value1, inverse);
+                setOperator(to.value2, inverse);
             }
             break;
         case ByteCodeConstants.COMPLEXIF:
@@ -741,11 +741,11 @@ public class ComparisonInstructionAnalyzer
 
                 if (length == 1)
                 {
-                    SetOperator(cbl.instructions.get(0), inverse);
+                    setOperator(cbl.instructions.get(0), inverse);
                 }
                 else if (length > 1)
                 {
-                    SetOperator(
+                    setOperator(
                         cbl,
                         (BranchInstruction)cbl.instructions.get(length-1),
                         inverse);
@@ -765,7 +765,7 @@ public class ComparisonInstructionAnalyzer
         }
     }
 
-    public static void InverseComparison(Instruction instruction)
+    public static void inverseComparison(Instruction instruction)
     {
         switch (instruction.opcode)
         {
@@ -781,19 +781,19 @@ public class ComparisonInstructionAnalyzer
                 (ComplexConditionalBranchInstruction)instruction;
             ccbi.cmp = ByteCodeConstants.CMP_OR - ccbi.cmp;
             for (int i=ccbi.instructions.size()-1; i>=0; --i)
-                InverseComparison(ccbi.instructions.get(i));
+                inverseComparison(ccbi.instructions.get(i));
             break;
         case ByteCodeConstants.TERNARYOP:
             TernaryOperator to = (TernaryOperator)instruction;
-            InverseComparison(to.value1);
-            InverseComparison(to.value2);
+            inverseComparison(to.value1);
+            inverseComparison(to.value2);
             break;
 //		default:
 //			System.out.println("debug");
         }
     }
 
-    public static int GetLastIndex(List<Instruction> list, int firstIndex)
+    public static int getLastIndex(List<Instruction> list, int firstIndex)
     {
         int length = list.size();
         int index = firstIndex+1;
@@ -831,10 +831,10 @@ public class ComparisonInstructionAnalyzer
             BranchInstruction lastBi = (BranchInstruction)list.get(index);
             int afterOffest = (index+1 < length) ? list.get(index+1).offset : -1;
 
-            int firstIndexTmp = SearchFirstIndex(
+            int firstIndexTmp = searchFirstIndex(
                 list, index, lastBi, afterOffest, dummy, dummy);
 
-            firstIndexTmp = ReduceFirstIndex(list, firstIndexTmp, index);
+            firstIndexTmp = reduceFirstIndex(list, firstIndexTmp, index);
 
             if (firstIndex == firstIndexTmp)
             {

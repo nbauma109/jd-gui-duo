@@ -20,12 +20,12 @@ import jd.core.model.classfile.attribute.*;
 
 public class Base
 {
-    public int access_flags;
+    public int accessFlags;
     public final Attribute[] attributes;
 
-    public Base(int access_flags, Attribute[] attributes)
+    public Base(int accessFlags, Attribute[] attributes)
     {
-        this.access_flags = access_flags;
+        this.accessFlags = accessFlags;
         this.attributes = attributes;
     }
 
@@ -86,7 +86,7 @@ public class Base
                 classFile.getConstantPool().internalDeprecatedSignatureIndex;
 
             for (int i=annotations.length-1; i>=0; --i)
-                if (idsIndex == annotations[i].type_index)
+                if (idsIndex == annotations[i].typeIndex)
                     return true;
         }
 

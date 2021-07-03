@@ -32,7 +32,7 @@ public class SignatureLayouter
         super();
     }
 
-    public static boolean CreateLayoutBlocksForClassSignature(
+    public static boolean createLayoutBlocksForClassSignature(
         ClassFile classFile,
         String signature,
         List<LayoutBlock> layoutBlockList)
@@ -47,14 +47,14 @@ public class SignatureLayouter
         layoutBlockList.add(new GenericTypeNameLayoutBlock(classFile, signature));
 
         // Affichage des generics
-        index = SkipGenerics(caSignature, length, index);
+        index = skipGenerics(caSignature, length, index);
 
         // Affichage de la classe mere
-        newIndex = SignatureUtil.SkipSignature(caSignature, length, index);
+        newIndex = SignatureUtil.skipSignature(caSignature, length, index);
 
-        if (((classFile.access_flags &
+        if (((classFile.accessFlags &
                 (ClassFileConstants.ACC_INTERFACE|ClassFileConstants.ACC_ENUM)) == 0) &&
-            !IsObjectClass(caSignature, index, newIndex))
+            !isObjectClass(caSignature, index, newIndex))
         {
             displayExtendsOrImplementsFlag = true;
             layoutBlockList.add(
@@ -67,7 +67,7 @@ public class SignatureLayouter
         {
             displayExtendsOrImplementsFlag = true;
 
-            if ((classFile.access_flags & ClassFileConstants.ACC_INTERFACE) != 0)
+            if ((classFile.accessFlags & ClassFileConstants.ACC_INTERFACE) != 0)
             {
                 layoutBlockList.add(
                     new GenericExtendsSuperInterfacesLayoutBlock(
@@ -84,7 +84,7 @@ public class SignatureLayouter
         return displayExtendsOrImplementsFlag;
     }
 
-    private static int SkipGenerics(char[] caSignature, int length, int index)
+    private static int skipGenerics(char[] caSignature, int length, int index)
     {
         if (caSignature[index] == '<')
         {
@@ -116,10 +116,10 @@ public class SignatureLayouter
         return index;
     }
 
-    private static boolean IsObjectClass(
+    private static boolean isObjectClass(
         char[] caSignature, int beginIndex, int endIndex)
     {
-        return CharArrayUtil.Substring(caSignature, beginIndex, endIndex)
+        return CharArrayUtil.substring(caSignature, beginIndex, endIndex)
                     .equals(StringConstants.INTERNAL_OBJECT_SIGNATURE);
     }
 }

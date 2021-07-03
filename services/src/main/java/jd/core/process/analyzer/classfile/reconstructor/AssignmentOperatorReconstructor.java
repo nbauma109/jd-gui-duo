@@ -42,7 +42,7 @@ public class AssignmentOperatorReconstructor
         super();
     }
 
-    public static void Reconstruct(List<Instruction> list)
+    public static void reconstruct(List<Instruction> list)
     {
         int index = list.size();
 
@@ -55,12 +55,12 @@ public class AssignmentOperatorReconstructor
             case ByteCodeConstants.PUTSTATIC:
                 if (((PutStatic)i).valueref.opcode ==
                         ByteCodeConstants.BINARYOP)
-                    ReconstructPutStaticOperator(list, index, i);
+                    reconstructPutStaticOperator(list, index, i);
                 break;
             case ByteCodeConstants.PUTFIELD:
                 if (((PutField)i).valueref.opcode ==
                         ByteCodeConstants.BINARYOP)
-                    index = ReconstructPutFieldOperator(list, index, i);
+                    index = reconstructPutFieldOperator(list, index, i);
                 break;
             case ByteCodeConstants.ISTORE:
                 if (((StoreInstruction)i).valueref.opcode ==
@@ -69,7 +69,7 @@ public class AssignmentOperatorReconstructor
                     BinaryOperatorInstruction boi = (BinaryOperatorInstruction)
                         ((StoreInstruction)i).valueref;
                     if (boi.value1.opcode == ByteCodeConstants.ILOAD)
-                        ReconstructStoreOperator(list, index, i, boi);
+                        reconstructStoreOperator(list, index, i, boi);
                 }
                 break;
             case ByteCodeConstants.STORE:
@@ -79,13 +79,13 @@ public class AssignmentOperatorReconstructor
                     BinaryOperatorInstruction boi = (BinaryOperatorInstruction)
                         ((StoreInstruction)i).valueref;
                     if (boi.value1.opcode == ByteCodeConstants.LOAD)
-                        ReconstructStoreOperator(list, index, i, boi);
+                        reconstructStoreOperator(list, index, i, boi);
                 }
                 break;
             case ByteCodeConstants.ARRAYSTORE:
                 if (((ArrayStoreInstruction)i).valueref.opcode ==
                         ByteCodeConstants.BINARYOP)
-                    index = ReconstructArrayOperator(list, index, i);
+                    index = reconstructArrayOperator(list, index, i);
                 break;
             }
         }
@@ -94,7 +94,7 @@ public class AssignmentOperatorReconstructor
     /*
      * PutStatic(BinaryOperator(GetStatic(), ...))
      */
-    private static void ReconstructPutStaticOperator(
+    private static void reconstructPutStaticOperator(
         List<Instruction> list, int index, Instruction i)
     {
         PutStatic putStatic = (PutStatic)i;
@@ -122,7 +122,7 @@ public class AssignmentOperatorReconstructor
     /*
      * PutField(objectref, BinaryOperator(GetField(objectref), ...))
      */
-    private static int ReconstructPutFieldOperator(
+    private static int reconstructPutFieldOperator(
         List<Instruction> list, int index, Instruction i)
     {
         PutField putField = (PutField)i;
@@ -144,7 +144,7 @@ public class AssignmentOperatorReconstructor
         {
             // Remove DupStore & DupLoad
             DupLoad dupLoad = (DupLoad)getField.objectref;
-            index = DeleteDupStoreInstruction(list, index, dupLoad);
+            index = deleteDupStoreInstruction(list, index, dupLoad);
             getField.objectref = dupLoad.dupStore.objectref;
         }
 
@@ -161,7 +161,7 @@ public class AssignmentOperatorReconstructor
     /*
      * StoreInstruction(BinaryOperator(LoadInstruction(), ...))
      */
-    private static void ReconstructStoreOperator(
+    private static void reconstructStoreOperator(
         List<Instruction> list, int index,
         Instruction i, BinaryOperatorInstruction boi)
     {
@@ -184,7 +184,7 @@ public class AssignmentOperatorReconstructor
      * ArrayStore(arrayref, indexref,
      *            BinaryOperator(ArrayLoad(arrayref, indexref), ...))
      */
-    private static int ReconstructArrayOperator(
+    private static int reconstructArrayOperator(
         List<Instruction> list, int index, Instruction i)
     {
         ArrayStoreInstruction asi = (ArrayStoreInstruction)i;
@@ -205,7 +205,7 @@ public class AssignmentOperatorReconstructor
         {
             // Remove DupStore & DupLoad
             DupLoad dupLoad = (DupLoad)ali.arrayref;
-            index = DeleteDupStoreInstruction(list, index, dupLoad);
+            index = deleteDupStoreInstruction(list, index, dupLoad);
             ali.arrayref = dupLoad.dupStore.objectref;
         }
 
@@ -213,7 +213,7 @@ public class AssignmentOperatorReconstructor
         {
             // Remove DupStore & DupLoad
             DupLoad dupLoad = (DupLoad)ali.indexref;
-            index = DeleteDupStoreInstruction(list, index, dupLoad);
+            index = deleteDupStoreInstruction(list, index, dupLoad);
             ali.indexref = dupLoad.dupStore.objectref;
         }
 
@@ -227,7 +227,7 @@ public class AssignmentOperatorReconstructor
         return index;
     }
 
-    private static int DeleteDupStoreInstruction(
+    private static int deleteDupStoreInstruction(
         List<Instruction> list, int index, DupLoad dupLoad)
     {
         int indexTmp = index;

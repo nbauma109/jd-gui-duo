@@ -23,10 +23,10 @@ public class FieldOrMethod extends Base
     private int nameIndex;
     private final int descriptorIndex;
 
-    public FieldOrMethod(int access_flags, int nameIndex,
+    public FieldOrMethod(int accessFlags, int nameIndex,
                          int descriptorIndex, Attribute[] attributes)
     {
-        super(access_flags, attributes);
+        super(accessFlags, attributes);
 
         this.nameIndex = nameIndex;
         this.descriptorIndex = descriptorIndex;

@@ -38,7 +38,7 @@ public class ReturnLineNumberAnalyzer
         super();
     }
 
-    public static void Check(Method method)
+    public static void check(Method method)
     {
         List<Instruction> list = method.getFastNodes();
         int length = list.size();
@@ -49,12 +49,12 @@ public class ReturnLineNumberAnalyzer
 
             if (afterListLineNumber != Instruction.UNKNOWN_LINE_NUMBER)
             {
-                RecursiveCheck(list , afterListLineNumber);
+                recursiveCheck(list , afterListLineNumber);
             }
         }
     }
 
-    private static void RecursiveCheck(
+    private static void recursiveCheck(
         List<Instruction> list, int afterListLineNumber)
     {
         int index = list.size();
@@ -77,14 +77,14 @@ public class ReturnLineNumberAnalyzer
                     List<Instruction> instructions =
                             ((FastList)instruction).instructions;
                     if (instructions != null)
-                        RecursiveCheck(instructions, afterListLineNumber);
+                        recursiveCheck(instructions, afterListLineNumber);
                 }
                 break;
             case FastConstants.IF_ELSE:
                 {
                     FastTest2Lists ft2l = (FastTest2Lists)instruction;
-                    RecursiveCheck(ft2l.instructions, afterListLineNumber);
-                    RecursiveCheck(ft2l.instructions2, afterListLineNumber);
+                    recursiveCheck(ft2l.instructions, afterListLineNumber);
+                    recursiveCheck(ft2l.instructions2, afterListLineNumber);
                 }
                 break;
             case FastConstants.SWITCH:
@@ -98,7 +98,7 @@ public class ReturnLineNumberAnalyzer
                             List<Instruction> instructions = pairs[i].getInstructions();
                             if (instructions != null)
                             {
-                                RecursiveCheck(instructions, afterListLineNumber);
+                                recursiveCheck(instructions, afterListLineNumber);
                                 if (!instructions.isEmpty())
                                 {
                                     afterListLineNumber =
@@ -114,7 +114,7 @@ public class ReturnLineNumberAnalyzer
 
                     if (ft.finallyInstructions != null)
                     {
-                        RecursiveCheck(ft.finallyInstructions, afterListLineNumber);
+                        recursiveCheck(ft.finallyInstructions, afterListLineNumber);
                         if (!ft.finallyInstructions.isEmpty())
                         {
                             afterListLineNumber =
@@ -128,7 +128,7 @@ public class ReturnLineNumberAnalyzer
                         {
                             List<Instruction> catchInstructions =
                                 ft.catches.get(i).instructions;
-                            RecursiveCheck(
+                            recursiveCheck(
                                 catchInstructions, afterListLineNumber);
                             if (!catchInstructions.isEmpty())
                             {
@@ -138,7 +138,7 @@ public class ReturnLineNumberAnalyzer
                         }
                     }
 
-                    RecursiveCheck(ft.instructions, afterListLineNumber);
+                    recursiveCheck(ft.instructions, afterListLineNumber);
                 }
                 break;
             case ByteCodeConstants.RETURN:

@@ -18,12 +18,12 @@ package jd.core.model.classfile.attribute;
 
 public class Annotation
 {
-    public final int type_index;
+    public final int typeIndex;
     public final ElementValuePair[] elementValuePairs;
 
-    public Annotation(int type_index, ElementValuePair[] elementValuePairs)
+    public Annotation(int typeIndex, ElementValuePair[] elementValuePairs)
     {
-        this.type_index = type_index;
+        this.typeIndex = typeIndex;
         this.elementValuePairs = elementValuePairs;
     }
 }

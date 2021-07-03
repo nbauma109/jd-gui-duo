@@ -104,7 +104,7 @@ public class JavaSourceLayouter
                 FastTest2Lists ft2l = (FastTest2Lists)instruction;
                 createBlocksForIfElse(
                     preferences, layoutBlockList, classFile, method,
-                    ft2l, ShowSingleInstructionBlock(ft2l));
+                    ft2l, showSingleInstructionBlock(ft2l));
                 break;
             case FastConstants.IF_CONTINUE:
             case FastConstants.IF_BREAK:
@@ -123,7 +123,7 @@ public class JavaSourceLayouter
 //				CreateBlocksForGotoBreak(layoutBlockList);
 //				break;
             case FastConstants.GOTO_LABELED_BREAK:
-                CreateBlocksForGotoLabeledBreak(
+                createBlocksForGotoLabeledBreak(
                     layoutBlockList, (FastInstruction)instruction);
                 break;
             case FastConstants.SWITCH:
@@ -282,7 +282,7 @@ public class JavaSourceLayouter
     }
 
     // Show single instruction block ?
-    private static boolean ShowSingleInstructionBlock(FastTest2Lists ifElse)
+    private static boolean showSingleInstructionBlock(FastTest2Lists ifElse)
     {
         for (;;)
         {
@@ -517,7 +517,7 @@ public class JavaSourceLayouter
             Instruction.UNKNOWN_LINE_NUMBER,
             Instruction.UNKNOWN_LINE_NUMBER,
             0, 0, 0,
-            bi.GetJumpOffset()));
+            bi.getJumpOffset()));
 
         SingleStatementBlockEndLayoutBlock ssbelb =
             new SingleStatementBlockEndLayoutBlock(1);
@@ -526,7 +526,7 @@ public class JavaSourceLayouter
         layoutBlockList.add(ssbelb);
     }
 
-    private static void CreateBlocksForGotoLabeledBreak(
+    private static void createBlocksForGotoLabeledBreak(
         List<LayoutBlock> layoutBlockList, FastInstruction fi)
     {
         BranchInstruction bi = (BranchInstruction)fi.instruction;
@@ -536,7 +536,7 @@ public class JavaSourceLayouter
             Instruction.UNKNOWN_LINE_NUMBER,
             Instruction.UNKNOWN_LINE_NUMBER,
             0, 0, 0,
-            bi.GetJumpOffset()));
+            bi.getJumpOffset()));
     }
 
     private void createBlocksForSwitch(
@@ -832,7 +832,7 @@ public class JavaSourceLayouter
                 FastTest2Lists ft2l = (FastTest2Lists)instruction;
                 createBlocksForIfElse(
                     preferences, layoutBlockList, classFile, method,
-                    ft2l, ShowSingleInstructionBlock(ft2l));
+                    ft2l, showSingleInstructionBlock(ft2l));
                 break;
             case FastConstants.IF_CONTINUE:
             case FastConstants.IF_BREAK:
@@ -851,7 +851,7 @@ public class JavaSourceLayouter
 //						CreateBlocksForGotoBreak(layoutBlockList);
 //						break;
             case FastConstants.GOTO_LABELED_BREAK:
-                CreateBlocksForGotoLabeledBreak(
+                createBlocksForGotoLabeledBreak(
                     layoutBlockList, (FastInstruction)instruction);
                 break;
             case FastConstants.SWITCH:
@@ -971,7 +971,7 @@ public class JavaSourceLayouter
         List<LayoutBlock> layoutBlockList, ClassFile classFile,
         Method method, List<Instruction> list, int index1)
     {
-        int index2 = SkipInstructions(list, index1);
+        int index2 = skipInstructions(list, index1);
 
         instructionsSplitterVisitor.start(
             preferences, layoutBlockList, classFile, method, list, index1);
@@ -987,7 +987,7 @@ public class JavaSourceLayouter
         return index2;
     }
 
-    private static int SkipInstructions(List<Instruction> list, int index)
+    private static int skipInstructions(List<Instruction> list, int index)
     {
         int length = list.size();
 

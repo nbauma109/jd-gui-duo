@@ -32,10 +32,10 @@ import jd.core.util.SignatureUtil;
 
 public class ClassFile extends Base
 {
-    private int minor_version;
-    private int major_version;
-    private int this_class;
-    private int super_class;
+    private int minorVersion;
+    private int majorVersion;
+    private int thisClass;
+    private int superClass;
 
     private int interfaces[];
     private Field fields[];
@@ -68,17 +68,17 @@ public class ClassFile extends Base
      */
     private Map<Integer, List<Integer>> switchMaps;
 
-    public ClassFile(int minor_version, int major_version,
-                     ConstantPool constants, int access_flags, int this_class,
-                     int super_class, int[] interfaces, Field[] fields,
+    public ClassFile(int minorVersion, int majorVersion,
+                     ConstantPool constants, int accessFlags, int thisClass,
+                     int superClass, int[] interfaces, Field[] fields,
                      Method[] methods, Attribute[] attributes)
     {
-        super(access_flags, attributes);
+        super(accessFlags, attributes);
 
-        this.minor_version = minor_version;
-        this.major_version = major_version;
-        this.this_class = this_class;
-        this.super_class = super_class;
+        this.minorVersion = minorVersion;
+        this.majorVersion = majorVersion;
+        this.thisClass = thisClass;
+        this.superClass = superClass;
         this.interfaces = interfaces;
         this.fields = fields;
         this.methods = methods;
@@ -87,11 +87,11 @@ public class ClassFile extends Base
 
         // internalClassName
         this.thisClassName =
-            this.constants.getConstantClassName(this.this_class);
+            this.constants.getConstantClassName(this.thisClass);
         // internalSuperClassName
-        this.superClassName = (this.super_class == 0) ? null :
-            this.constants.getConstantClassName(this.super_class);
-        this.internalClassName = SignatureUtil.CreateTypeName(this.thisClassName);
+        this.superClassName = (this.superClass == 0) ? null :
+            this.constants.getConstantClassName(this.superClass);
+        this.internalClassName = SignatureUtil.createTypeName(this.thisClassName);
         // internalPackageName
         int index = this.thisClassName.lastIndexOf(
                 StringConstants.INTERNAL_PACKAGE_SEPARATOR);
@@ -106,7 +106,7 @@ public class ClassFile extends Base
             {
                 method = this.methods[i];
 
-                if ((method.access_flags & ClassFileConstants.ACC_STATIC) != 0 &&
+                if ((method.accessFlags & ClassFileConstants.ACC_STATIC) != 0 &&
                     method.getNameIndex() == this.constants.classConstructorIndex)
                 {
                     this.staticMethod = method;
@@ -135,22 +135,22 @@ public class ClassFile extends Base
 
     public int getMajorVersion()
     {
-        return major_version;
+        return majorVersion;
     }
 
     public int getMinorVersion()
     {
-        return minor_version;
+        return minorVersion;
     }
 
     public int getSuperClassIndex()
     {
-        return super_class;
+        return superClass;
     }
 
     public int getThisClassIndex()
     {
-        return this_class;
+        return thisClass;
     }
 
     public String getClassName()
@@ -193,9 +193,9 @@ public class ClassFile extends Base
         return this.internalPackageName;
     }
 
-    public void setAccessFlags(int access_flags)
+    public void setAccessFlags(int accessFlags)
     {
-        this.access_flags = access_flags;
+        this.accessFlags = accessFlags;
     }
 
     public Field[] getFields()
@@ -250,7 +250,7 @@ public class ClassFile extends Base
         // internalAnonymousClassName
         if (isAnonymousClass())
         {
-            ConstantClass cc = this.constants.getConstantClass(this.super_class);
+            ConstantClass cc = this.constants.getConstantClass(this.superClass);
 
             if (cc.getNameIndex() != this.constants.objectClassNameIndex)
             {

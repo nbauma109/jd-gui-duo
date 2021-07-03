@@ -18,15 +18,15 @@ package jd.core.model.classfile.attribute;
 
 public class ElementValueEnumConstValue extends ElementValue
 {
-    public final int type_name_index;
-    public final int const_name_index;
+    public final int typeNameIndex;
+    public final int constNameIndex;
 
     public ElementValueEnumConstValue(byte tag,
-                                      int type_name_index,
-                                      int const_name_index)
+                                      int typeNameIndex,
+                                      int constNameIndex)
     {
         super(tag);
-        this.type_name_index = type_name_index;
-        this.const_name_index = const_name_index;
+        this.typeNameIndex = typeNameIndex;
+        this.constNameIndex = constNameIndex;
     }
 }

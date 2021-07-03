@@ -27,10 +27,10 @@ public class InstructionListException extends RuntimeException
     public InstructionListException(
         ClassFile classFile, Method method, int offset, Throwable cause)
     {
-        super(FormatMessage(classFile, method, offset), cause);
+        super(formatMessage(classFile, method, offset), cause);
     }
 
-    private static String FormatMessage(
+    private static String formatMessage(
         ClassFile classFile, Method method, int offset)
     {
         ConstantPool constants = classFile.getConstantPool();

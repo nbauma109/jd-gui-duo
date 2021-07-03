@@ -33,7 +33,7 @@ public class SignatureWriter
 {
     private SignatureWriter() {
     }
-        public static void WriteTypeDeclaration(
+        public static void writeTypeDeclaration(
             Loader loader, Printer printer, ReferenceMap referenceMap,
             ClassFile classFile, String signature)
     {
@@ -45,21 +45,21 @@ public class SignatureWriter
             classFile.getThisClassName(), classFile.getClassName());
 
         // Affichage des generics
-        WriteGenerics(
+        writeGenerics(
             loader, printer, referenceMap, classFile, caSignature, length, 0);
     }
 
-    public static int WriteConstructor(
+    public static int writeConstructor(
             Loader loader, Printer printer, ReferenceMap referenceMap,
             ClassFile classFile, String signature, String descriptor)
     {
         char[] caSignature = signature.toCharArray();
-        return WriteSignature(
+        return writeSignature(
             loader, printer, referenceMap, classFile,
             caSignature, caSignature.length, 0, true, descriptor, false);
     }
 
-    public static void WriteMethodDeclaration(
+    public static void writeMethodDeclaration(
             Set<String> keywordSet, Loader loader, Printer printer,
             ReferenceMap referenceMap, ClassFile classFile, Method method,
             String signature, boolean descriptorFlag)
@@ -69,7 +69,7 @@ public class SignatureWriter
         int index = 0;
 
         // Affichage des generics
-        int newIndex = WriteGenerics(
+        int newIndex = writeGenerics(
                 loader, printer, referenceMap, classFile,
                 caSignature, length, index);
 
@@ -88,7 +88,7 @@ public class SignatureWriter
         ConstantPool constants = classFile.getConstantPool();
         String internalClassName = classFile.getThisClassName();
         String descriptor = constants.getConstantUtf8(method.getDescriptorIndex());
-        boolean staticMethodFlag = (method.access_flags & ClassFileConstants.ACC_STATIC) != 0;
+        boolean staticMethodFlag = (method.accessFlags & ClassFileConstants.ACC_STATIC) != 0;
 
         if (method.getNameIndex() == constants.instanceConstructorIndex)
         {
@@ -103,7 +103,7 @@ public class SignatureWriter
                 // search ')'
             }
 
-            WriteSignature(
+            writeSignature(
                 loader, printer, referenceMap, classFile,
                 caSignature, length, newIndex, false, null, false);
 
@@ -137,13 +137,13 @@ public class SignatureWriter
         int firstVisibleParameterIndex = 0;
 
         if (method.getNameIndex() == constants.instanceConstructorIndex) {
-            if ((classFile.access_flags & ClassFileConstants.ACC_ENUM) != 0) {
+            if ((classFile.accessFlags & ClassFileConstants.ACC_ENUM) != 0) {
                 if (descriptorFlag) {
                     firstVisibleParameterIndex = 2;
                 } else {
                     variableIndex = 3;
                 }
-            } else if (classFile.isAInnerClass() && (classFile.access_flags & ClassFileConstants.ACC_STATIC) == 0) {
+            } else if (classFile.isAInnerClass() && (classFile.accessFlags & ClassFileConstants.ACC_STATIC) == 0) {
                 firstVisibleParameterIndex = 1;
             }
         }
@@ -154,13 +154,13 @@ public class SignatureWriter
         int parameterIndex = 0;
         int varargsParameterIndex;
 
-        if ((method.access_flags & ClassFileConstants.ACC_VARARGS) == 0)
+        if ((method.accessFlags & ClassFileConstants.ACC_VARARGS) == 0)
         {
             varargsParameterIndex = Integer.MAX_VALUE;
         }
         else
         {
-            varargsParameterIndex = SignatureUtil.GetParameterSignatureCount(signature) - 1;
+            varargsParameterIndex = SignatureUtil.getParameterSignatureCount(signature) - 1;
         }
 
         char firstChar;
@@ -174,14 +174,14 @@ public class SignatureWriter
 
                 // Affichage des annotations invisibles
                 if (invisibleParameterAnnotations != null) {
-                    AnnotationWriter.WriteParameterAnnotation(
+                    AnnotationWriter.writeParameterAnnotation(
                         loader, printer, referenceMap, classFile,
                         invisibleParameterAnnotations[parameterIndex]);
                 }
 
                 // Affichage des annotations visibles
                 if (visibleParameterAnnotations != null) {
-                    AnnotationWriter.WriteParameterAnnotation(
+                    AnnotationWriter.writeParameterAnnotation(
                         loader, printer, referenceMap, classFile,
                         visibleParameterAnnotations[parameterIndex]);
                 }
@@ -199,7 +199,7 @@ public class SignatureWriter
                     }
                 }
 
-                index = WriteSignature(
+                index = writeSignature(
                     loader, printer, referenceMap, classFile, caSignature,
                     length, index, false, null,
                     parameterIndex==varargsParameterIndex);
@@ -218,7 +218,7 @@ public class SignatureWriter
                     printer.print(variableIndex);
                 }
             } else {
-                index = SignatureUtil.SkipSignature(caSignature, length, index);
+                index = SignatureUtil.skipSignature(caSignature, length, index);
             }
 
             variableIndex += (firstChar == 'D' || firstChar == 'J') ? 2 : 1;
@@ -228,7 +228,7 @@ public class SignatureWriter
         printer.print(')');
     }
 
-    private static int WriteGenerics(
+    private static int writeGenerics(
             Loader loader, Printer printer, ReferenceMap referenceMap,
             ClassFile classFile, char[] caSignature, int length, int index)
     {
@@ -242,8 +242,8 @@ public class SignatureWriter
             int newIndex;
             while (index < length)
             {
-                endIndex = CharArrayUtil.IndexOf(caSignature, ':', index);
-                templateName = CharArrayUtil.Substring(caSignature, index, endIndex);
+                endIndex = CharArrayUtil.indexOf(caSignature, ':', index);
+                templateName = CharArrayUtil.substring(caSignature, index, endIndex);
                 printer.print(templateName);
                 index = endIndex + 1;
 
@@ -252,14 +252,14 @@ public class SignatureWriter
                     index++;
                 }
 
-                newIndex = SignatureUtil.SkipSignature(caSignature, length, index);
+                newIndex = SignatureUtil.skipSignature(caSignature, length, index);
 
-                if (!IsObjectClass(caSignature, index, newIndex))
+                if (!isObjectClass(caSignature, index, newIndex))
                 {
                     printer.print(' ');
                     printer.printKeyword("extends");
                     printer.print(' ');
-                    WriteSignature(
+                    writeSignature(
                         loader, printer, referenceMap, classFile,
                         caSignature, length, index, false, null, false);
                 }
@@ -279,26 +279,26 @@ public class SignatureWriter
         return index;
     }
 
-    public static int WriteSignature(
+    public static int writeSignature(
             Loader loader, Printer printer, ReferenceMap referenceMap,
             ClassFile classFile, char[] caSignature, int length, int index)
     {
-        return WriteSignature(
+        return writeSignature(
             loader, printer, referenceMap, classFile,
             caSignature, length, index, false, null, false);
     }
 
-    public static int WriteSignature(
+    public static int writeSignature(
             Loader loader, Printer printer, ReferenceMap referenceMap,
             ClassFile classFile, String signature)
     {
         char[] caSignature = signature.toCharArray();
-        return WriteSignature(
+        return writeSignature(
             loader, printer, referenceMap, classFile,
             caSignature, caSignature.length, 0, false, null, false);
     }
 
-    private static int WriteSignature(
+    private static int writeSignature(
             Loader loader, Printer printer, ReferenceMap referenceMap,
             ClassFile classFile, char[] caSignature, int length, int index,
             boolean constructorFlag, String constructorDescriptor,
@@ -370,7 +370,7 @@ public class SignatureWriter
                 }
 
                 String internalClassName =
-                    CharArrayUtil.Substring(caSignature, beginIndex, index);
+                    CharArrayUtil.substring(caSignature, beginIndex, index);
 
                 if (typeFlag)
                 {
@@ -380,7 +380,7 @@ public class SignatureWriter
                     {
                         printer.printConstructor(
                             internalClassName,
-                            InternalClassNameToClassName(
+                            internalClassNameToClassName(
                                 loader, referenceMap, classFile, internalClassName),
                             constructorDescriptor,
                             thisClassName);
@@ -389,26 +389,26 @@ public class SignatureWriter
                     {
                         printer.printType(
                             internalClassName,
-                            InternalClassNameToClassName(
+                            internalClassNameToClassName(
                                 loader, referenceMap, classFile, internalClassName),
                                 thisClassName);
                     }
                 }
                 else
                 {
-                    printer.print(InternalClassNameToClassName(
+                    printer.print(internalClassNameToClassName(
                         loader, referenceMap, classFile, internalClassName));
                 }
 
                 if (c == '<') {
                     printer.print('<');
-                    index = WriteSignature(
+                    index = writeSignature(
                         loader, printer, referenceMap, classFile,
                         caSignature, length, index + 1, false, null, false);
 
                     while (caSignature[index] != '>') {
                         printer.print(", ");
-                        index = WriteSignature(
+                        index = writeSignature(
                             loader, printer, referenceMap, classFile,
                             caSignature, length, index, false, null, false);
                     }
@@ -430,7 +430,7 @@ public class SignatureWriter
             case 'T':
                 index++;
                 beginIndex = index;
-                index = CharArrayUtil.IndexOf(caSignature, ';', beginIndex);
+                index = CharArrayUtil.indexOf(caSignature, ';', beginIndex);
                 printer.print(new String(caSignature, beginIndex, index - beginIndex));
                 index++;
                 break;
@@ -446,7 +446,7 @@ public class SignatureWriter
                 printer.print("? ");
                 printer.printKeyword("super");
                 printer.print(' ');
-                index = WriteSignature(
+                index = writeSignature(
                     loader, printer, referenceMap, classFile,
                     caSignature, length, index + 1, false, null, false);
                 break;
@@ -454,7 +454,7 @@ public class SignatureWriter
                 printer.print("? ");
                 printer.printKeyword("extends");
                 printer.print(' ');
-                index = WriteSignature(
+                index = writeSignature(
                     loader, printer, referenceMap, classFile,
                     caSignature, length, index + 1, false, null, false);
                 break;
@@ -470,7 +470,7 @@ public class SignatureWriter
                 break;
             default:
                 // DEBUG
-                new Throwable("SignatureWriter.WriteSignature: invalid signature '" + String.valueOf(caSignature) + "'")
+                new Throwable("SignatureWriter.writeSignature: invalid signature '" + String.valueOf(caSignature) + "'")
                         .printStackTrace();
                 // DEBUG
             }
@@ -502,7 +502,7 @@ public class SignatureWriter
         return index;
     }
 
-    public static String InternalClassNameToClassName(
+    public static String internalClassNameToClassName(
             Loader loader, ReferenceMap referenceMap,
             ClassFile classFile, String internalName)
     {
@@ -586,7 +586,7 @@ public class SignatureWriter
         return internalName.replace(StringConstants.INTERNAL_INNER_SEPARATOR, StringConstants.INNER_SEPARATOR);
     }
 
-    public static String InternalClassNameToShortClassName(
+    public static String internalClassNameToShortClassName(
             ReferenceMap referenceMap, ClassFile classFile, String internalClassName)
     {
         int index = internalClassName.lastIndexOf(StringConstants.INTERNAL_PACKAGE_SEPARATOR);
@@ -610,11 +610,11 @@ public class SignatureWriter
             StringConstants.INNER_SEPARATOR);
     }
 
-    private static boolean IsObjectClass(char[] caSignature, int beginIndex, int endIndex)
+    private static boolean isObjectClass(char[] caSignature, int beginIndex, int endIndex)
     {
         int length = StringConstants.INTERNAL_OBJECT_SIGNATURE.length();
 
         return endIndex-beginIndex == length && StringConstants.INTERNAL_OBJECT_SIGNATURE.equals(
-                CharArrayUtil.Substring(caSignature, beginIndex, endIndex));
+                CharArrayUtil.substring(caSignature, beginIndex, endIndex));
     }
 }

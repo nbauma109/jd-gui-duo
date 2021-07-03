@@ -125,7 +125,7 @@ public class ReplaceMultipleOuterReferenceVisitor
                     constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
                 String descriptorName =
                     constants.getConstantUtf8(cnat.getDescriptorIndex());
-                if (!SignatureUtil.IsObjectSignature(descriptorName))
+                if (!SignatureUtil.isObjectSignature(descriptorName))
                     return null;
 
                 ClassFile matchedClassFile = match(gf.objectref);

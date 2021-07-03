@@ -18,23 +18,23 @@ package jd.core.model.classfile.attribute;
 
 public class AttributeCode extends Attribute
 {
-    //private int max_stack;
-    //private int max_locals;
+    //private int maxStack;
+    //private int maxLocals;
     public final byte[] code;
-    public final CodeException[] exception_table;
+    public final CodeException[] exceptionTable;
     public final Attribute[] attributes;
 
     public AttributeCode(byte tag,
-                         int attribute_name_index,
+                         int attributeNameIndex,
                          byte[] code,
-                         CodeException[] exception_table,
+                         CodeException[] exceptionTable,
                          Attribute[] attributes)
     {
-        super(tag, attribute_name_index);
-        //this.max_stack = max_stack;
-        //this.max_locals = max_locals;
+        super(tag, attributeNameIndex);
+        //this.maxStack = maxStack;
+        //this.maxLocals = maxLocals;
         this.code = code;
-        this.exception_table = exception_table;
+        this.exceptionTable = exceptionTable;
         this.attributes = attributes;
     }
 

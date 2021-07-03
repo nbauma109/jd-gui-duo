@@ -34,14 +34,14 @@ public class ReferenceAnalyzer
 {
     private ReferenceAnalyzer() {
     }
-        public static void Analyze(
+        public static void analyze(
         ReferenceMap referenceMap, ClassFile classFile)
     {
-        CountReferences(referenceMap, classFile);
-        ReduceReferences(referenceMap, classFile);
+        countReferences(referenceMap, classFile);
+        reduceReferences(referenceMap, classFile);
     }
 
-    private static void CountReferences(
+    private static void countReferences(
             ReferenceMap referenceMap, ClassFile classFile)
     {
         // Class
@@ -69,19 +69,19 @@ public class ReferenceAnalyzer
         else
         {
             String signature =
-                classFile.getConstantPool().getConstantUtf8(as.signature_index);
-            SignatureAnalyzer.AnalyzeClassSignature(referenceMap, signature);
+                classFile.getConstantPool().getConstantUtf8(as.signatureIndex);
+            SignatureAnalyzer.analyzeClassSignature(referenceMap, signature);
         }
 
         // Class annotations
-        CountReferencesInAttributes(
+        countReferencesInAttributes(
             referenceMap, classFile.getConstantPool(), classFile.getAttributes());
 
         // Inner classes
         List<ClassFile> innerClassFiles = classFile.getInnerClassFiles();
         if (innerClassFiles != null) {
             for (int i=innerClassFiles.size()-1; i>=0; --i) {
-                CountReferences(referenceMap, innerClassFiles.get(i));
+                countReferences(referenceMap, innerClassFiles.get(i));
             }
         }
 
@@ -89,13 +89,13 @@ public class ReferenceAnalyzer
             new ReferenceVisitor(classFile.getConstantPool(), referenceMap);
 
         // Fields
-        CountReferencesInFields(referenceMap, visitor, classFile);
+        countReferencesInFields(referenceMap, visitor, classFile);
 
         // Methods
-        CountReferencesInMethods(referenceMap, visitor, classFile);
+        countReferencesInMethods(referenceMap, visitor, classFile);
     }
 
-    private static void CountReferencesInAttributes(
+    private static void countReferencesInAttributes(
             ReferenceMap referenceMap, ConstantPool constants,
             Attribute[] attributes)
     {
@@ -107,38 +107,38 @@ public class ReferenceAnalyzer
                         ((AttributeRuntimeAnnotations)attributes[i])
                         .annotations;
                     for (int j=annotations.length-1; j>=0; --j) {
-                        CountAnnotationReference(referenceMap, constants, annotations[j]);
+                        countAnnotationReference(referenceMap, constants, annotations[j]);
                     }
                 } else if (attributes[i].tag == AttributeConstants.ATTR_RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS || attributes[i].tag == AttributeConstants.ATTR_RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS) {
                     ParameterAnnotations[] parameterAnnotations =
                         ((AttributeRuntimeParameterAnnotations)
-                                attributes[i]).parameter_annotations;
-                    CountParameterAnnotationsReference(
+                                attributes[i]).parameterAnnotations;
+                    countParameterAnnotationsReference(
                             referenceMap, constants, parameterAnnotations);
                 }
             }
         }
     }
 
-    private static void CountAnnotationReference(
+    private static void countAnnotationReference(
             ReferenceMap referenceMap, ConstantPool constants,
             Annotation annotation)
     {
-        String typeName = constants.getConstantUtf8(annotation.type_index);
-        SignatureAnalyzer.AnalyzeSimpleSignature(referenceMap, typeName);
+        String typeName = constants.getConstantUtf8(annotation.typeIndex);
+        SignatureAnalyzer.analyzeClassSignature(referenceMap, typeName);
 
         ElementValuePair[] elementValuePairs =
             annotation.elementValuePairs;
         if (elementValuePairs != null)
         {
             for (int j=elementValuePairs.length-1; j>=0; --j) {
-                CountElementValue(
-                    referenceMap, constants, elementValuePairs[j].element_value);
+                countElementValue(
+                    referenceMap, constants, elementValuePairs[j].elementValue);
             }
         }
     }
 
-    private static void CountParameterAnnotationsReference(
+    private static void countParameterAnnotationsReference(
             ReferenceMap referenceMap, ConstantPool constants,
             ParameterAnnotations[] parameterAnnotations)
     {
@@ -151,7 +151,7 @@ public class ReferenceAnalyzer
                 if (annotations != null)
                 {
                     for (int j=annotations.length-1; j>=0; --j) {
-                        CountAnnotationReference(
+                        countAnnotationReference(
                             referenceMap, constants, annotations[j]);
                     }
                 }
@@ -159,7 +159,7 @@ public class ReferenceAnalyzer
         }
     }
 
-    private static void CountElementValue(
+    private static void countElementValue(
             ReferenceMap referenceMap, ConstantPool constants, ElementValue ev)
     {
         String signature;
@@ -170,15 +170,15 @@ public class ReferenceAnalyzer
         case ElementValueContants.EV_CLASS_INFO:
             {
                 evci = (ElementValueClassInfo)ev;
-                signature = constants.getConstantUtf8(evci.class_info_index);
-                SignatureAnalyzer.AnalyzeSimpleSignature(referenceMap, signature);
+                signature = constants.getConstantUtf8(evci.classInfoIndex);
+                SignatureAnalyzer.analyzeClassSignature(referenceMap, signature);
             }
             break;
         case ElementValueContants.EV_ANNOTATION_VALUE:
             {
                 ElementValueAnnotationValue evanv = (ElementValueAnnotationValue)ev;
-                CountAnnotationReference(
-                        referenceMap, constants, evanv.annotation_value);
+                countAnnotationReference(
+                        referenceMap, constants, evanv.annotationValue);
             }
             break;
         case ElementValueContants.EV_ARRAY_VALUE:
@@ -193,8 +193,8 @@ public class ReferenceAnalyzer
                         {
                             evci = (ElementValueClassInfo)values[i];
                             signature =
-                                constants.getConstantUtf8(evci.class_info_index);
-                            SignatureAnalyzer.AnalyzeSimpleSignature(referenceMap, signature);
+                                constants.getConstantUtf8(evci.classInfoIndex);
+                            SignatureAnalyzer.analyzeClassSignature(referenceMap, signature);
                         }
                     }
                 }
@@ -203,14 +203,14 @@ public class ReferenceAnalyzer
         case ElementValueContants.EV_ENUM_CONST_VALUE:
             {
                 ElementValueEnumConstValue evecv = (ElementValueEnumConstValue)ev;
-                signature = constants.getConstantUtf8(evecv.type_name_index);
-                SignatureAnalyzer.AnalyzeSimpleSignature(referenceMap, signature);
+                signature = constants.getConstantUtf8(evecv.typeNameIndex);
+                SignatureAnalyzer.analyzeClassSignature(referenceMap, signature);
             }
             break;
         }
     }
 
-    private static void CountReferencesInFields(
+    private static void countReferencesInFields(
             ReferenceMap referenceMap, ReferenceVisitor visitor,
             ClassFile classFile)
     {
@@ -227,17 +227,17 @@ public class ReferenceAnalyzer
         {
             field = fields[i];
 
-            if ((field.access_flags & ClassFileConstants.ACC_SYNTHETIC) != 0) {
+            if ((field.accessFlags & ClassFileConstants.ACC_SYNTHETIC) != 0) {
                 continue;
             }
 
-            CountReferencesInAttributes(
+            countReferencesInAttributes(
                     referenceMap, classFile.getConstantPool(), field.getAttributes());
 
             as = field.getAttributeSignature();
             signature = classFile.getConstantPool().getConstantUtf8(
-                (as==null) ? field.getDescriptorIndex() : as.signature_index);
-            SignatureAnalyzer.AnalyzeSimpleSignature(referenceMap, signature);
+                (as==null) ? field.getDescriptorIndex() : as.signatureIndex);
+            SignatureAnalyzer.analyzeClassSignature(referenceMap, signature);
 
             if (field.getValueAndMethod() != null) {
                 visitor.visit(field.getValueAndMethod().getValue());
@@ -245,7 +245,7 @@ public class ReferenceAnalyzer
         }
     }
 
-    private static void CountReferencesInMethods(
+    private static void countReferencesInMethods(
             ReferenceMap referenceMap, ReferenceVisitor visitor,
             ClassFile classFile)
     {
@@ -268,20 +268,20 @@ public class ReferenceAnalyzer
         {
             method = methods[i];
 
-            if ((method.access_flags &
+            if ((method.accessFlags &
                  (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_BRIDGE)) != 0 ||
                 method.containsError()) {
                 continue;
             }
 
-            CountReferencesInAttributes(
+            countReferencesInAttributes(
                 referenceMap, classFile.getConstantPool(), method.getAttributes());
 
             // Signature
             as = method.getAttributeSignature();
             signature = constants.getConstantUtf8(
-                    (as==null) ? method.getDescriptorIndex() : as.signature_index);
-            SignatureAnalyzer.AnalyzeMethodSignature(referenceMap, signature);
+                    (as==null) ? method.getDescriptorIndex() : as.signatureIndex);
+            SignatureAnalyzer.analyzeClassSignature(referenceMap, signature);
 
             // Exceptions
             exceptionIndexes = method.getExceptionIndexes();
@@ -295,30 +295,30 @@ public class ReferenceAnalyzer
             // Default annotation method value
             defaultAnnotationValue = method.getDefaultAnnotationValue();
             if (defaultAnnotationValue != null) {
-                CountElementValue(
+                countElementValue(
                     referenceMap, constants, defaultAnnotationValue);
             }
 
             // Local variables
             localVariables = method.getLocalVariables();
             if (localVariables != null) {
-                CountReferencesInLocalVariables(
+                countReferencesInLocalVariables(
                     referenceMap, constants, localVariables);
             }
 
             // Code exceptions
             codeExceptions = method.getCodeExceptions();
             if (codeExceptions != null) {
-                CountReferencesInCodeExceptions(
+                countReferencesInCodeExceptions(
                     referenceMap, constants, codeExceptions);
             }
 
             // Code
-            CountReferencesInCode(visitor, method);
+            countReferencesInCode(visitor, method);
         }
     }
 
-    private static void CountReferencesInLocalVariables(
+    private static void countReferencesInLocalVariables(
             ReferenceMap referenceMap, ConstantPool constants,
             LocalVariables localVariables)
     {
@@ -327,16 +327,16 @@ public class ReferenceAnalyzer
         {
             lv = localVariables.getLocalVariableAt(i);
 
-            if (lv != null && lv.signature_index > 0)
+            if (lv != null && lv.signatureIndex > 0)
             {
                 String signature =
-                    constants.getConstantUtf8(lv.signature_index);
-                SignatureAnalyzer.AnalyzeSimpleSignature(referenceMap, signature);
+                    constants.getConstantUtf8(lv.signatureIndex);
+                SignatureAnalyzer.analyzeClassSignature(referenceMap, signature);
             }
         }
     }
 
-    private static void CountReferencesInCodeExceptions(
+    private static void countReferencesInCodeExceptions(
             ReferenceMap referenceMap, ConstantPool constants,
             CodeException[] codeExceptions)
     {
@@ -345,16 +345,16 @@ public class ReferenceAnalyzer
         {
             ce = codeExceptions[i];
 
-            if (ce.catch_type != 0)
+            if (ce.catchType != 0)
             {
                 String internalClassName =
-                    constants.getConstantClassName(ce.catch_type);
+                    constants.getConstantClassName(ce.catchType);
                 referenceMap.add(internalClassName);
             }
         }
     }
 
-    private static void CountReferencesInCode(
+    private static void countReferencesInCode(
         ReferenceVisitor visitor, Method method)
     {
         List<Instruction> instructions = method.getFastNodes();
@@ -367,7 +367,7 @@ public class ReferenceAnalyzer
         }
     }
 
-    private static void ReduceReferences(
+    private static void reduceReferences(
         ReferenceMap referenceMap, ClassFile classFile)
     {
         Map<String, Boolean> multipleInternalClassName =
@@ -397,7 +397,7 @@ public class ReferenceAnalyzer
         int index;
         String internalPackageName;
         String internalClassName;
-        String internalPackageName_className;
+        String internalPackageNameClassName;
         while (iterator.hasNext())
         {
             reference = iterator.next();
@@ -414,11 +414,11 @@ public class ReferenceAnalyzer
                 internalClassName = internalName;
             }
 
-            internalPackageName_className = classFile.getInternalPackageName() +
+            internalPackageNameClassName = classFile.getInternalPackageName() +
             StringConstants.INTERNAL_PACKAGE_SEPARATOR + internalClassName;
 
             if ((!classFile.getInternalPackageName().equals(internalPackageName) &&
-                multipleInternalClassName.get(internalClassName)) || referenceMap.contains(internalPackageName_className))
+                multipleInternalClassName.get(internalClassName)) || referenceMap.contains(internalPackageNameClassName))
             {
                 // Remove references with same name and different packages
                 // or with a name of same package of current class

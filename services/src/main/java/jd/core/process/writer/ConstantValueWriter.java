@@ -32,14 +32,14 @@ public class ConstantValueWriter
         super();
     }
 
-    public static void Write(
+    public static void write(
         Loader loader, Printer printer, ReferenceMap referenceMap,
         ClassFile classFile, Constant cv)
     {
-        Write(loader, printer, referenceMap, classFile, cv, (byte)0);
+        write(loader, printer, referenceMap, classFile, cv, (byte)0);
     }
 
-    public static void Write(
+    public static void write(
         Loader loader, Printer printer, ReferenceMap referenceMap,
         ClassFile classFile, Constant cv, byte constantIntegerType)
     {
@@ -53,25 +53,25 @@ public class ConstantValueWriter
 
                 if (d == Double.POSITIVE_INFINITY)
                 {
-                    Write(
+                    write(
                         loader, printer, referenceMap, classFile,
                         StringConstants.JAVA_LANG_DOUBLE, "POSITIVE_INFINITY", "D");
                 }
                 else if (d == Double.NEGATIVE_INFINITY)
                 {
-                    Write(
+                    write(
                         loader, printer, referenceMap, classFile,
                         StringConstants.JAVA_LANG_DOUBLE, "NEGATIVE_INFINITY", "D");
                 }
                 else if (Double.isNaN(d))
                 {
-                    Write(
+                    write(
                         loader, printer, referenceMap, classFile,
                         StringConstants.JAVA_LANG_DOUBLE, "NaN", "D");
                 }
                 else if (d == Double.MAX_VALUE)
                 {
-                    Write(
+                    write(
                         loader, printer, referenceMap, classFile,
                         StringConstants.JAVA_LANG_DOUBLE, StringConstants.MAX_VALUE, "D");
                 }
@@ -83,7 +83,7 @@ public class ConstantValueWriter
                 } */
                 else if (d == Double.MIN_VALUE)
                 {
-                    Write(
+                    write(
                         loader, printer, referenceMap, classFile,
                         StringConstants.JAVA_LANG_DOUBLE, StringConstants.MIN_VALUE, "D");
                 }
@@ -103,25 +103,25 @@ public class ConstantValueWriter
 
                 if (value == Float.POSITIVE_INFINITY)
                 {
-                    Write(
+                    write(
                         loader, printer, referenceMap, classFile,
                         StringConstants.JAVA_LANG_FLOAT, "POSITIVE_INFINITY", "F");
                 }
                 else if (value == Float.NEGATIVE_INFINITY)
                 {
-                    Write(
+                    write(
                         loader, printer, referenceMap, classFile,
                         StringConstants.JAVA_LANG_FLOAT, "NEGATIVE_INFINITY", "F");
                 }
                 else if (Float.isNaN(value))
                 {
-                    Write(
+                    write(
                         loader, printer, referenceMap, classFile,
                         StringConstants.JAVA_LANG_FLOAT, "NaN", "F");
                 }
                 else if (value == Float.MAX_VALUE)
                 {
-                    Write(
+                    write(
                         loader, printer, referenceMap, classFile,
                         StringConstants.JAVA_LANG_FLOAT, StringConstants.MAX_VALUE, "F");
                 }
@@ -133,7 +133,7 @@ public class ConstantValueWriter
                 } */
                 else if (value == Float.MIN_VALUE)
                 {
-                    Write(
+                    write(
                         loader, printer, referenceMap, classFile,
                         StringConstants.JAVA_LANG_FLOAT, StringConstants.MIN_VALUE, "F");
                 }
@@ -160,7 +160,7 @@ public class ConstantValueWriter
                     break;
                 case 'C':
                     {
-                        String escapedString = StringUtil.EscapeCharAndAppendApostrophe((char)value);
+                        String escapedString = StringUtil.escapeCharAndAppendApostrophe((char)value);
                         String scopeInternalName = classFile.getThisClassName();
                         printer.printString(escapedString, scopeInternalName);
                     }
@@ -169,13 +169,13 @@ public class ConstantValueWriter
                     {
                         if (value == Integer.MIN_VALUE)
                         {
-                            Write(
+                            write(
                                 loader, printer, referenceMap, classFile,
                                 StringConstants.JAVA_LANG_INTEGER, StringConstants.MIN_VALUE, "I");
                         }
                         else if (value == Integer.MAX_VALUE)
                         {
-                            Write(
+                            write(
                                 loader, printer, referenceMap, classFile,
                                 StringConstants.JAVA_LANG_INTEGER, StringConstants.MAX_VALUE, "I");
                         }
@@ -193,13 +193,13 @@ public class ConstantValueWriter
 
                 if (value == Long.MIN_VALUE)
                 {
-                    Write(
+                    write(
                         loader, printer, referenceMap, classFile,
                         StringConstants.JAVA_LANG_LONG, StringConstants.MIN_VALUE, "J");
                 }
                 else if (value == Long.MAX_VALUE)
                 {
-                    Write(
+                    write(
                         loader, printer, referenceMap, classFile,
                         StringConstants.JAVA_LANG_LONG, StringConstants.MAX_VALUE, "J");
                 }
@@ -214,7 +214,7 @@ public class ConstantValueWriter
                 String s = constants.getConstantUtf8(
                     ((ConstantString)cv).getStringIndex());
                 String escapedString =
-                    StringUtil.EscapeStringAndAppendQuotationMark(s);
+                    StringUtil.escapeStringAndAppendQuotationMark(s);
                 String scopeInternalName = classFile.getThisClassName();
                 printer.printString(escapedString, scopeInternalName);
             }
@@ -222,12 +222,12 @@ public class ConstantValueWriter
         }
     }
 
-    private static void Write(
+    private static void write(
         Loader loader, Printer printer, ReferenceMap referenceMap,
         ClassFile classFile, String internalTypeName,
         String name, String descriptor)
     {
-        String className = SignatureWriter.InternalClassNameToClassName(
+        String className = SignatureWriter.internalClassNameToClassName(
             loader, referenceMap, classFile, internalTypeName);
         String scopeInternalName = classFile.getThisClassName();
         printer.printType(internalTypeName, className, scopeInternalName);
@@ -235,7 +235,7 @@ public class ConstantValueWriter
         printer.printStaticField(internalTypeName, name, descriptor, scopeInternalName);
     }
 
-    public static void WriteHexa(
+    public static void writeHexa(
         Loader loader, Printer printer, ReferenceMap referenceMap,
         ClassFile classFile, Constant cv)
     {
@@ -250,7 +250,7 @@ public class ConstantValueWriter
                 "0x" + Long.toHexString( ((ConstantLong)cv).getValue() ).toUpperCase());
             break;
         default:
-            Write(loader, printer, referenceMap, classFile, cv, (byte)0);
+            write(loader, printer, referenceMap, classFile, cv, (byte)0);
         }
     }
 }

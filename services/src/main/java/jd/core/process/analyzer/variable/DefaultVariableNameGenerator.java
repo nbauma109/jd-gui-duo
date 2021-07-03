@@ -77,12 +77,12 @@ public class DefaultVariableNameGenerator implements VariableNameGenerator
         {
             return prefix + "VarArgs";
         }
-        int index = CountDimensionOfArray(signature);
+        int index = countDimensionOfArray(signature);
         if (index > 0) {
             prefix += "ArrayOf";
         }
         return generateValidName(
-            prefix + GetSuffixFromSignature(signature.substring(index)),
+            prefix + getSuffixFromSignature(signature.substring(index)),
             appearsOnceFlag);
     }
 
@@ -90,18 +90,18 @@ public class DefaultVariableNameGenerator implements VariableNameGenerator
     public String generateLocalVariableNameFromSignature(
             String signature, boolean appearsOnce)
     {
-        int index = CountDimensionOfArray(signature);
+        int index = countDimensionOfArray(signature);
 
         if (index > 0)
         {
             return generateValidName(
-                    "arrayOf" + GetSuffixFromSignature(signature.substring(index)),
+                    "arrayOf" + getSuffixFromSignature(signature.substring(index)),
                     appearsOnce);
         }
         switch (signature.charAt(0))
         {
         case 'L' :
-            String s = FormatSignature(signature);
+            String s = formatSignature(signature);
 
             if ("String".equals(s)) {
                 return generateValidName("str", appearsOnce);
@@ -127,7 +127,7 @@ public class DefaultVariableNameGenerator implements VariableNameGenerator
         }
     }
 
-    private static int CountDimensionOfArray(String signature)
+    private static int countDimensionOfArray(String signature)
     {
         int index = 0;
         int length = signature.length();
@@ -154,11 +154,11 @@ public class DefaultVariableNameGenerator implements VariableNameGenerator
         return index;
     }
 
-    private static String GetSuffixFromSignature(String signature)
+    private static String getSuffixFromSignature(String signature)
     {
         switch (signature.charAt(0))
         {
-        case 'L' : return FormatSignature(signature);
+        case 'L' : return formatSignature(signature);
         case 'B' : return "Byte";
         case 'C' : return "Char";
         case 'D' : return "Double";
@@ -168,7 +168,7 @@ public class DefaultVariableNameGenerator implements VariableNameGenerator
         case 'S' : return "Short";
         case 'Z' : return "Boolean";
         case '[' : return "Array";
-        case 'T' : return FormatTemplate(signature);
+        case 'T' : return formatTemplate(signature);
         default:
             // DEBUG
             new Throwable("NameGenerator.generateParameterNameFromSignature: invalid signature '" + signature + "'").printStackTrace();
@@ -177,7 +177,7 @@ public class DefaultVariableNameGenerator implements VariableNameGenerator
         }
     }
 
-    private static String FormatSignature(String signature)
+    private static String formatSignature(String signature)
     {
         // cut 'L' and ';'
         signature = signature.substring(1, signature.length()-1);
@@ -203,7 +203,7 @@ public class DefaultVariableNameGenerator implements VariableNameGenerator
         /* return Character.toUpperCase(signature.charAt(0)) + signature.substring(1); */
     }
 
-    private static String FormatTemplate(String signature)
+    private static String formatTemplate(String signature)
     {
         return signature.substring(1, signature.length()-1);
     }

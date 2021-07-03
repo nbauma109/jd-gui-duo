@@ -43,7 +43,7 @@ public class InstructionListBuilder
     private static CodeExceptionComparator COMPARATOR =
         new CodeExceptionComparator();
 
-    public static void Build(
+    public static void build(
             ClassFile classFile, Method method,
             List<Instruction> list,
             List<Instruction> listForAnalyze)
@@ -71,7 +71,7 @@ public class InstructionListBuilder
                 IntSet offsetSet = new IntSet();
 
                 // Population des deux tableaux dans la meme passe.
-                PopulateJumpsArrayAndSubProcOffsets(code, length, jumps, offsetSet);
+                populateJumpsArrayAndSubProcOffsets(code, length, jumps, offsetSet);
 
                 // Initialisation de variables additionnelles pour le traitement
                 // des sous procedures.
@@ -94,9 +94,9 @@ public class InstructionListBuilder
                 }
                 else
                 {
-                    // Sort codeExceptions by handler_pc
+                    // Sort codeExceptions by handlerPc
                     Arrays.sort(codeExceptions, COMPARATOR);
-                    exceptionOffset = codeExceptions[0].handler_pc;
+                    exceptionOffset = codeExceptions[0].handlerPc;
                 }
 
                 // Declaration de variables additionnelles pour le traitement
@@ -114,19 +114,19 @@ public class InstructionListBuilder
                 else
                 {
                     LineNumber ln = lineNumbers[lineNumbersIndex];
-                    lineNumber = ln.line_number;
+                    lineNumber = ln.lineNumber;
                     nextLineOffset = -1;
 
-                    int startPc = ln.start_pc;
+                    int startPc = ln.startPc;
                     while (++lineNumbersIndex < lineNumbers.length)
                     {
                         ln = lineNumbers[lineNumbersIndex];
-                        if (ln.start_pc != startPc)
+                        if (ln.startPc != startPc)
                         {
-                            nextLineOffset = ln.start_pc;
+                            nextLineOffset = ln.startPc;
                             break;
                         }
-                        lineNumber = ln.line_number;
+                        lineNumber = ln.lineNumber;
                     }
                 }
 
@@ -145,7 +145,7 @@ public class InstructionListBuilder
                             // Ajout d'une pseudo instruction de lecture
                             // d'exception en début de bloc catch
                             int catchType =
-                                codeExceptions[codeExceptionsIndex].catch_type;
+                                codeExceptions[codeExceptionsIndex].catchType;
                             int signatureIndex;
 
                             if (catchType == 0)
@@ -154,7 +154,7 @@ public class InstructionListBuilder
                             }
                             else
                             {
-                                String catchClassName = SignatureUtil.CreateTypeName(
+                                String catchClassName = SignatureUtil.createTypeName(
                                     constants.getConstantClassName(catchType));
                                 signatureIndex = constants.addConstantUtf8(
                                     catchClassName);
@@ -177,7 +177,7 @@ public class InstructionListBuilder
                                 }
 
                                 nextOffsetException =
-                                    codeExceptions[codeExceptionsIndex].handler_pc;
+                                    codeExceptions[codeExceptionsIndex].handlerPc;
 
                                 if (nextOffsetException != exceptionOffset)
                                     break;
@@ -209,19 +209,19 @@ public class InstructionListBuilder
                         if (lineNumbers != null && offset == nextLineOffset)
                         {
                             LineNumber ln = lineNumbers[lineNumbersIndex];
-                            lineNumber = ln.line_number;
+                            lineNumber = ln.lineNumber;
                             nextLineOffset = -1;
 
-                            int startPc = ln.start_pc;
+                            int startPc = ln.startPc;
                             while (++lineNumbersIndex < lineNumbers.length)
                             {
                                 ln = lineNumbers[lineNumbersIndex];
-                                if (ln.start_pc != startPc)
+                                if (ln.startPc != startPc)
                                 {
-                                    nextLineOffset = ln.start_pc;
+                                    nextLineOffset = ln.startPc;
                                     break;
                                 }
-                                lineNumber = ln.line_number;
+                                lineNumber = ln.lineNumber;
                             }
                         }
 
@@ -270,7 +270,7 @@ public class InstructionListBuilder
         }
     }
 
-    private static void PopulateJumpsArrayAndSubProcOffsets(
+    private static void populateJumpsArrayAndSubProcOffsets(
             byte[] code, int length, boolean[] jumps, IntSet offsetSet)
     {
         for (int offset=0; offset<length; ++offset)
@@ -349,13 +349,13 @@ public class InstructionListBuilder
                 switch (opcode)
                 {
                 case ByteCodeConstants.TABLESWITCH:
-                    offset = ByteCodeUtil.NextTableSwitchOffset(code, offset);
+                    offset = ByteCodeUtil.nextTableSwitchOffset(code, offset);
                     break;
                 case ByteCodeConstants.LOOKUPSWITCH:
-                    offset = ByteCodeUtil.NextLookupSwitchOffset(code, offset);
+                    offset = ByteCodeUtil.nextLookupSwitchOffset(code, offset);
                     break;
                 case ByteCodeConstants.WIDE:
-                    offset = ByteCodeUtil.NextWideOffset(code, offset);
+                    offset = ByteCodeUtil.nextWideOffset(code, offset);
                     break;
                 default:
                     offset += ByteCodeConstants.NO_OF_OPERANDS[opcode];
@@ -370,14 +370,14 @@ public class InstructionListBuilder
         @Override
         public int compare(CodeException ce1, CodeException ce2)
         {
-            if (ce1.handler_pc != ce2.handler_pc)
-                return ce1.handler_pc - ce2.handler_pc;
+            if (ce1.handlerPc != ce2.handlerPc)
+                return ce1.handlerPc - ce2.handlerPc;
 
-            if (ce1.end_pc != ce2.end_pc)
-                return ce1.end_pc - ce2.end_pc;
+            if (ce1.endPc != ce2.endPc)
+                return ce1.endPc - ce2.endPc;
 
-            if (ce1.start_pc != ce2.start_pc)
-                return ce1.start_pc - ce2.start_pc;
+            if (ce1.startPc != ce2.startPc)
+                return ce1.startPc - ce2.startPc;
 
             return ce1.index - ce2.index;
         }

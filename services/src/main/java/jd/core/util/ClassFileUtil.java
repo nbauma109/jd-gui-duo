@@ -36,7 +36,7 @@ public class ClassFileUtil
         super();
     }
 
-    public static boolean ContainsMultipleConstructor(ClassFile classFile)
+    public static boolean containsMultipleConstructor(ClassFile classFile)
     {
         ConstantPool constants = classFile.getConstantPool();
         Method[] methods = classFile.getMethods();
@@ -46,7 +46,7 @@ public class ClassFileUtil
         {
             Method method = methods[i];
 
-            if ((method.access_flags &
+            if ((method.accessFlags &
                  (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_BRIDGE)) != 0)
                 continue;
 
@@ -63,12 +63,12 @@ public class ClassFileUtil
         return false;
     }
 
-    public static boolean IsAMethodOfEnum(
+    public static boolean isAMethodOfEnum(
         ClassFile classFile, Method method, String signature)
     {
         ConstantPool constants = classFile.getConstantPool();
 
-        if ((method.access_flags & (ClassFileConstants.ACC_PUBLIC|ClassFileConstants.ACC_STATIC)) ==
+        if ((method.accessFlags & (ClassFileConstants.ACC_PUBLIC|ClassFileConstants.ACC_STATIC)) ==
             (ClassFileConstants.ACC_PUBLIC|ClassFileConstants.ACC_STATIC))
         {
             String methodName = constants.getConstantUtf8(method.getNameIndex());

@@ -24,7 +24,7 @@ public class ByteCodeUtil
         super();
     }
 
-    public static int NextTableSwitchOffset(byte[] code, int index)
+    public static int nextTableSwitchOffset(byte[] code, int index)
     {
         // Skip padding
         int i = (index+4) & 0xFFFC;
@@ -47,7 +47,7 @@ public class ByteCodeUtil
         return i - 1;
     }
 
-    public static int NextLookupSwitchOffset(byte[] code, int index)
+    public static int nextLookupSwitchOffset(byte[] code, int index)
     {
         // Skip padding
         int i = (index+4) & 0xFFFC;
@@ -64,34 +64,34 @@ public class ByteCodeUtil
         return i - 1;
     }
 
-    public static int NextWideOffset(byte[] code, int index)
+    public static int nextWideOffset(byte[] code, int index)
     {
         final int opcode = code[index+1] & 255;
 
         return index + ((opcode == ByteCodeConstants.IINC) ? 5 : 3);
     }
 
-    public static int NextInstructionOffset(byte[] code, int index)
+    public static int nextInstructionOffset(byte[] code, int index)
     {
         final int opcode = code[index] & 255;
 
         switch (opcode)
         {
         case ByteCodeConstants.TABLESWITCH:
-            return NextTableSwitchOffset(code, index);
+            return nextTableSwitchOffset(code, index);
 
         case ByteCodeConstants.LOOKUPSWITCH:
-            return NextLookupSwitchOffset(code, index);
+            return nextLookupSwitchOffset(code, index);
 
         case ByteCodeConstants.WIDE:
-            return NextWideOffset(code, index);
+            return nextWideOffset(code, index);
 
         default:
             return index + 1 + ByteCodeConstants.NO_OF_OPERANDS[opcode];
         }
     }
 
-    public static boolean JumpTo(byte[] code, int offset, int targetOffset) {
+    public static boolean jumpTo(byte[] code, int offset, int targetOffset) {
         if (offset != -1) {
             int codeLength = code.length;
 

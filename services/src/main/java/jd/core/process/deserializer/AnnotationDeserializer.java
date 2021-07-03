@@ -27,41 +27,41 @@ public class AnnotationDeserializer
         super();
     }
 
-    public static Annotation[] Deserialize(DataInput di)
+    public static Annotation[] deserialize(DataInput di)
         throws IOException
     {
-        int num_annotations = di.readUnsignedShort();
-        if (num_annotations == 0)
+        int numAnnotations = di.readUnsignedShort();
+        if (numAnnotations == 0)
             return null;
 
-        Annotation[] annotations = new Annotation[num_annotations];
+        Annotation[] annotations = new Annotation[numAnnotations];
 
-        for (int i=0; i<num_annotations; i++)
+        for (int i=0; i<numAnnotations; i++)
             annotations[i] = new Annotation(
                     di.readUnsignedShort(),
-                    DeserializeElementValuePairs(di));
+                    deserializeElementValuePairs(di));
 
         return annotations;
     }
 
-    private static ElementValuePair[] DeserializeElementValuePairs(DataInput di)
+    private static ElementValuePair[] deserializeElementValuePairs(DataInput di)
         throws IOException
     {
-        int num_element_value_pairs = di.readUnsignedShort();
-        if (num_element_value_pairs == 0)
+        int numElementValuePairs = di.readUnsignedShort();
+        if (numElementValuePairs == 0)
             return null;
 
-        ElementValuePair[] pairs = new ElementValuePair[num_element_value_pairs];
+        ElementValuePair[] pairs = new ElementValuePair[numElementValuePairs];
 
-        for(int i=0; i < num_element_value_pairs; i++)
+        for(int i=0; i < numElementValuePairs; i++)
             pairs[i] = new ElementValuePair(
                                 di.readUnsignedShort(),
-                                DeserializeElementValue(di));
+                                deserializeElementValue(di));
 
         return pairs;
     }
 
-    public static ElementValue DeserializeElementValue(DataInput di)
+    public static ElementValue deserializeElementValue(DataInput di)
         throws IOException
     {
         byte type = di.readByte();
@@ -87,27 +87,27 @@ public class AnnotationDeserializer
             return new ElementValueAnnotationValue(
                     ElementValueContants.EV_ANNOTATION_VALUE,
                     new Annotation(di.readUnsignedShort(),
-                               DeserializeElementValuePairs(di)));
+                               deserializeElementValuePairs(di)));
         case '[':
             return new ElementValueArrayValue(
                     ElementValueContants.EV_ARRAY_VALUE,
-                    DeserializeElementValues(di));
+                    deserializeElementValues(di));
         default:
             throw new ClassFormatException("Invalid element value type: " + type);
         }
     }
 
-    private static ElementValue[] DeserializeElementValues(DataInput di)
+    private static ElementValue[] deserializeElementValues(DataInput di)
         throws IOException
     {
-        int num_values = di.readUnsignedShort();
-        if (num_values == 0)
+        int numValues = di.readUnsignedShort();
+        if (numValues == 0)
             return null;
 
-        ElementValue[] values = new ElementValue[num_values];
+        ElementValue[] values = new ElementValue[numValues];
 
-        for (int i=0; i<num_values; i++)
-            values[i] = DeserializeElementValue(di);
+        for (int i=0; i<numValues; i++)
+            values[i] = deserializeElementValue(di);
 
         return values;
     }

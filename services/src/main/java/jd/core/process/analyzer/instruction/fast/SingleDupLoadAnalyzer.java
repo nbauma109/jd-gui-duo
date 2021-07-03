@@ -34,7 +34,7 @@ public class SingleDupLoadAnalyzer
         super();
     }
 
-    public static void Cleanup(List<Instruction> list)
+    public static void cleanup(List<Instruction> list)
     {
         CountDupLoadVisitor countDupLoadVisitor =
             new CountDupLoadVisitor();

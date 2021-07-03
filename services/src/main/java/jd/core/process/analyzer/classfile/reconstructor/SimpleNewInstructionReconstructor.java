@@ -33,7 +33,7 @@ import jd.core.model.instruction.bytecode.instruction.New;
 public class SimpleNewInstructionReconstructor
     extends NewInstructionReconstructorBase
 {
-    public static void Reconstruct(
+    public static void reconstruct(
         ClassFile classFile, Method method, List<Instruction> list)
     {
         for (int invokespecialIndex=0;
@@ -55,7 +55,7 @@ public class SimpleNewInstructionReconstructor
 
             list.set(invokespecialIndex, invokeNew);
 
-            InitAnonymousClassConstructorParameterName(
+            initAnonymousClassConstructorParameterName(
                 classFile, method, invokeNew);
         }
     }

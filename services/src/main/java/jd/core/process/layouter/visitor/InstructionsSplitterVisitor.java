@@ -159,7 +159,7 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
 
         // Add blocks for inner class body
         this.maxLineNumber =
-            ClassFileLayouter.CreateBlocksForBodyOfAnonymousClass(
+            ClassFileLayouter.createBlocksForBodyOfAnonymousClass(
                 this.preferences, innerClassFile, this.layoutBlockList);
 
         this.firstLineNumber = Instruction.UNKNOWN_LINE_NUMBER;

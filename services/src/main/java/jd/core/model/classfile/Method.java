@@ -40,10 +40,10 @@ public class Method extends FieldOrMethod
      */
     private int superConstructorParameterCount;
 
-    public Method(int access_flags, int nameIndex, int descriptorIndex,
+    public Method(int accessFlags, int nameIndex, int descriptorIndex,
                   Attribute[] attributes)
     {
-        super(access_flags, nameIndex, descriptorIndex, attributes);
+        super(accessFlags, nameIndex, descriptorIndex, attributes);
 
         this.containsError = false;
         this.exceptionIndexes = null;
@@ -68,22 +68,22 @@ public class Method extends FieldOrMethod
                 {
                 case AttributeConstants.ATTR_EXCEPTIONS:
                     this.exceptionIndexes =
-                        ((AttributeExceptions)attribute).exception_index_table;
+                        ((AttributeExceptions)attribute).exceptionIndexTable;
                     break;
                 case AttributeConstants.ATTR_CODE:
                     ac = ((AttributeCode)attributes[i]);
                     break;
                 case AttributeConstants.ATTR_RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS:
                     this.visibleParameterAnnotations =
-                        ((AttributeRuntimeParameterAnnotations)attribute).parameter_annotations;
+                        ((AttributeRuntimeParameterAnnotations)attribute).parameterAnnotations;
                     break;
                 case AttributeConstants.ATTR_RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS:
                     this.invisibleParameterAnnotations =
-                        ((AttributeRuntimeParameterAnnotations)attribute).parameter_annotations;
+                        ((AttributeRuntimeParameterAnnotations)attribute).parameterAnnotations;
                     break;
                 case AttributeConstants.ATTR_ANNOTATION_DEFAULT:
                     this.defaultAnnotationValue =
-                        ((AttributeAnnotationDefault)attribute).default_value;
+                        ((AttributeAnnotationDefault)attribute).defaultValue;
                     break;
                 }
             }
@@ -94,21 +94,21 @@ public class Method extends FieldOrMethod
 
                 // localVariables
                 AttributeLocalVariableTable alvt = ac.getAttributeLocalVariableTable();
-                if ((alvt != null) && (alvt.local_variable_table != null))
+                if ((alvt != null) && (alvt.localVariableTable != null))
                 {
                     AttributeLocalVariableTable alvtt = ac.getAttributeLocalVariableTypeTable();
                     LocalVariable[] localVariableTypeTable =
-                        (alvtt == null) ? null : alvtt.local_variable_table;
+                        (alvtt == null) ? null : alvtt.localVariableTable;
                     this.localVariables = new LocalVariables(
-                        alvt.local_variable_table, localVariableTypeTable);
+                        alvt.localVariableTable, localVariableTypeTable);
                 }
 
                 // lineNumbers
                 AttributeNumberTable ant = ac.getAttributeLineNumberTable();
-                this.lineNumbers = (ant == null) ? null : ant.line_number_table;
+                this.lineNumbers = (ant == null) ? null : ant.lineNumberTable;
 
                 // codeExceptions
-                this.codeExceptions = ac.exception_table;
+                this.codeExceptions = ac.exceptionTable;
             }
         }
     }

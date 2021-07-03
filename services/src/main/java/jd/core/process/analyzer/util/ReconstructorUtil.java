@@ -28,7 +28,7 @@ public class ReconstructorUtil
         super();
     }
 
-    public static Instruction ReplaceDupLoad(
+    public static Instruction replaceDupLoad(
             List<Instruction> list, int index,
             DupStore dupStore, Instruction newInstruction)
     {

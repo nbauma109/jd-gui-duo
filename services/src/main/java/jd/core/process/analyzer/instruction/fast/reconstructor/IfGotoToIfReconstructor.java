@@ -43,7 +43,7 @@ public class IfGotoToIfReconstructor
         super();
     }
 
-    public static void Reconstruct(List<Instruction> list)
+    public static void reconstruct(List<Instruction> list)
     {
         int length = list.size();
         if (length < 3)
@@ -70,14 +70,14 @@ public class IfGotoToIfReconstructor
                 Goto g = (Goto)i;
 
                 i = list.get(index+2);
-                int jumpOffset = bi.GetJumpOffset();
+                int jumpOffset = bi.getJumpOffset();
 
                 if ((jumpOffset <= g.offset) || (i.offset < jumpOffset))
                     continue;
 
                 // Setup BranchInstruction
-                bi.branch = g.GetJumpOffset() - bi.offset;
-                ComparisonInstructionAnalyzer.InverseComparison(bi);
+                bi.branch = g.getJumpOffset() - bi.offset;
+                ComparisonInstructionAnalyzer.inverseComparison(bi);
                 // Delete Goto
                 list.remove(index+1);
             }

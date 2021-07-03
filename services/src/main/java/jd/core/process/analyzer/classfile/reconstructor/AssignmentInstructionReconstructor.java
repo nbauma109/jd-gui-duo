@@ -42,7 +42,7 @@ public class AssignmentInstructionReconstructor
         super();
     }
 
-    public static void Reconstruct(List<Instruction> list)
+    public static void reconstruct(List<Instruction> list)
     {
         for (int dupStoreIndex=0; dupStoreIndex<list.size(); dupStoreIndex++)
         {
@@ -129,7 +129,7 @@ public class AssignmentInstructionReconstructor
                 if (dupload1.lineNumber == dupload2.lineNumber)
                 {
                     // Assignation multiple sur une seule ligne : a = b = c;
-                    Instruction newInstruction = CreateAssignmentInstruction(
+                    Instruction newInstruction = createAssignmentInstruction(
                         xstorePutfieldPutstatic, dupStore);
 
                     // Remplacement du 2eme DupLoad
@@ -175,7 +175,7 @@ public class AssignmentInstructionReconstructor
                     // Create new instruction
                     // {?Load | GetField | GetStatic | AALoad | ARRAYLoad }
                     Instruction newInstruction =
-                        CreateInstruction(xstorePutfieldPutstatic);
+                        createInstruction(xstorePutfieldPutstatic);
 
                     if (newInstruction != null)
                     {
@@ -197,7 +197,7 @@ public class AssignmentInstructionReconstructor
         }
     }
 
-    private static Instruction CreateInstruction(
+    private static Instruction createInstruction(
         Instruction xstorePutfieldPutstatic)
     {
         switch (xstorePutfieldPutstatic.opcode)
@@ -254,7 +254,7 @@ public class AssignmentInstructionReconstructor
         }
     }
 
-    private static Instruction CreateAssignmentInstruction(
+    private static Instruction createAssignmentInstruction(
         Instruction xstorePutfieldPutstatic, DupStore dupStore)
     {
         if (dupStore.objectref.opcode == ByteCodeConstants.BINARYOP)
@@ -271,21 +271,21 @@ public class AssignmentInstructionReconstructor
                     if ((value1.opcode == ByteCodeConstants.ALOAD) &&
                         (((StoreInstruction)xstorePutfieldPutstatic).index ==
                             ((LoadInstruction)value1).index))
-                        return CreateBinaryOperatorAssignmentInstruction(
+                        return createBinaryOperatorAssignmentInstruction(
                             xstorePutfieldPutstatic, dupStore);
                     break;
                 case ByteCodeConstants.ISTORE:
                     if ((value1.opcode == ByteCodeConstants.ILOAD) &&
                         (((StoreInstruction)xstorePutfieldPutstatic).index ==
                             ((LoadInstruction)value1).index))
-                        return CreateBinaryOperatorAssignmentInstruction(
+                        return createBinaryOperatorAssignmentInstruction(
                             xstorePutfieldPutstatic, dupStore);
                     break;
                 case ByteCodeConstants.STORE:
                     if ((value1.opcode == ByteCodeConstants.LOAD) &&
                         (((StoreInstruction)xstorePutfieldPutstatic).index ==
                             ((LoadInstruction)value1).index))
-                        return CreateBinaryOperatorAssignmentInstruction(
+                        return createBinaryOperatorAssignmentInstruction(
                             xstorePutfieldPutstatic, dupStore);
                     break;
                 case ByteCodeConstants.PUTFIELD:
@@ -299,7 +299,7 @@ public class AssignmentInstructionReconstructor
                         if (visitor.visit(
                                 ((PutField)xstorePutfieldPutstatic).objectref,
                                 ((GetField)value1).objectref))
-                            return CreateBinaryOperatorAssignmentInstruction(
+                            return createBinaryOperatorAssignmentInstruction(
                                 xstorePutfieldPutstatic, dupStore);
                     }
                     break;
@@ -307,7 +307,7 @@ public class AssignmentInstructionReconstructor
                     if ((value1.opcode == ByteCodeConstants.GETFIELD) &&
                         (((PutStatic)xstorePutfieldPutstatic).index ==
                             ((GetStatic)value1).index))
-                        return CreateBinaryOperatorAssignmentInstruction(
+                        return createBinaryOperatorAssignmentInstruction(
                             xstorePutfieldPutstatic, dupStore);
                     break;
                 case ByteCodeConstants.AASTORE:
@@ -324,7 +324,7 @@ public class AssignmentInstructionReconstructor
                                 aas.arrayref, aal.arrayref) &&
                             visitor.visit(
                                 aas.indexref, aal.indexref))
-                            return CreateBinaryOperatorAssignmentInstruction(
+                            return createBinaryOperatorAssignmentInstruction(
                                     xstorePutfieldPutstatic, dupStore);
                     }
                     break;
@@ -342,7 +342,7 @@ public class AssignmentInstructionReconstructor
                                 aas.arrayref, aal.arrayref) &&
                             visitor.visit(
                                 aas.indexref, aal.indexref))
-                            return CreateBinaryOperatorAssignmentInstruction(
+                            return createBinaryOperatorAssignmentInstruction(
                                     xstorePutfieldPutstatic, dupStore);
                     }
                     break;
@@ -355,14 +355,14 @@ public class AssignmentInstructionReconstructor
             }
         }
 
-        Instruction newInstruction = CreateInstruction(xstorePutfieldPutstatic);
+        Instruction newInstruction = createInstruction(xstorePutfieldPutstatic);
         return new AssignmentInstruction(
             ByteCodeConstants.ASSIGNMENT, xstorePutfieldPutstatic.offset,
             dupStore.lineNumber, 14, "=",
             newInstruction, dupStore.objectref);
     }
 
-    private static AssignmentInstruction CreateBinaryOperatorAssignmentInstruction(
+    private static AssignmentInstruction createBinaryOperatorAssignmentInstruction(
             Instruction xstorePutfieldPutstatic, DupStore dupstore)
     {
         BinaryOperatorInstruction boi =
@@ -373,6 +373,6 @@ public class AssignmentInstructionReconstructor
         return new AssignmentInstruction(
                 ByteCodeConstants.ASSIGNMENT, xstorePutfieldPutstatic.offset,
                 dupstore.lineNumber, boi.getPriority(), newOperator,
-                CreateInstruction(xstorePutfieldPutstatic), boi.value2);
+                createInstruction(xstorePutfieldPutstatic), boi.value2);
     }
 }

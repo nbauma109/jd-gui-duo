@@ -36,7 +36,7 @@ public class NewInstructionReconstructorBase
      * Methode permettant l'affichage des variables locales d'une méthode d'une
      * outer class dans une inner class
      */
-    public static void InitAnonymousClassConstructorParameterName(
+    public static void initAnonymousClassConstructorParameterName(
         ClassFile classFile, Method method, InvokeNew invokeNew)
     {
         ConstantPool constants = classFile.getConstantPool();

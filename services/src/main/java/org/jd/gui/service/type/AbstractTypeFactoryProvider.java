@@ -167,7 +167,7 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
                     break;
                 case '*': sb.append('?'); index++; break;
             default:
-                    throw new IllegalStateException("SignatureWriter.WriteSignature: invalid signature '" + descriptor + "'");
+                    throw new IllegalStateException("SignatureWriter.writeSignature: invalid signature '" + descriptor + "'");
             }
 
             if (varargsFlag) {

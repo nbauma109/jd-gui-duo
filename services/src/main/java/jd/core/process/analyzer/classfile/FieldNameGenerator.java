@@ -26,23 +26,23 @@ public class FieldNameGenerator
         super();
     }
 
-    public static String GenerateName(
+    public static String generateName(
         String signature, String name)
     {
         StringBuilder sbName = new StringBuilder(StringConstants.JD_FIELD_PREFIX);
 
         sbName.append(name);
-        sbName.append("_of_type");
+        sbName.append("OfType");
 
         char[] caSignature = signature.toCharArray();
         int length = caSignature.length;
 
-        GenerateName(sbName, caSignature, length, 0);
+        generateName(sbName, caSignature, length, 0);
 
         return sbName.toString();
     }
 
-    private static int GenerateName(
+    private static int generateName(
         StringBuilder sbName, char[] caSignature, int length, int index)
     {
         char c;
@@ -112,20 +112,20 @@ public class FieldNameGenerator
                 }
 
                 String internalClassName =
-                    CharArrayUtil.Substring(caSignature, beginIndex, index);
-                InternalClassNameToCapitalizedClassName(
+                    CharArrayUtil.substring(caSignature, beginIndex, index);
+                internalClassNameToCapitalizedClassName(
                             sbName, internalClassName);
 
                 if (c == '<')
                 {
-                    sbName.append("_of");
-                    index = GenerateName(
+                    sbName.append("Of");
+                    index = generateName(
                             sbName, caSignature, length, index+1);
 
                     while (caSignature[index] != '>')
                     {
-                        sbName.append("_and");
-                        index = GenerateName(
+                        sbName.append("And");
+                        index = generateName(
                             sbName, caSignature, length, index);
                     }
 
@@ -143,7 +143,7 @@ public class FieldNameGenerator
                 break;
             case 'T' :
                 beginIndex = ++index;
-                index = CharArrayUtil.IndexOf(caSignature, ';', beginIndex);
+                index = CharArrayUtil.indexOf(caSignature, ';', beginIndex);
                 sbName.append(caSignature, beginIndex, index-beginIndex);
                 index++;
                 break;
@@ -156,12 +156,12 @@ public class FieldNameGenerator
                 index++;
                 break;
             case '-' :
-                sbName.append("_super_");
-                index = GenerateName(sbName, caSignature, length, index+1);
+                sbName.append("Super");
+                index = generateName(sbName, caSignature, length, index+1);
                 break;
             case '+' :
-                sbName.append("_extends_");
-                index = GenerateName(sbName, caSignature, length, index+1);
+                sbName.append("Extends");
+                index = generateName(sbName, caSignature, length, index+1);
                 break;
             case '*' :
                 sbName.append('X');
@@ -176,7 +176,7 @@ public class FieldNameGenerator
             default:
                 // DEBUG
                 new Throwable(
-                    "SignatureWriter.WriteSignature: invalid signature '" +
+                    "SignatureWriter.writeSignature: invalid signature '" +
                     String.valueOf(caSignature) + "'").printStackTrace();
                 // DEBUG
             }
@@ -190,7 +190,7 @@ public class FieldNameGenerator
         return index;
     }
 
-    private static void InternalClassNameToCapitalizedClassName(
+    private static void internalClassNameToCapitalizedClassName(
             StringBuilder sbName, String internalClassName)
     {
         int index1 = 0;

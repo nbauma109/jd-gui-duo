@@ -31,7 +31,7 @@ public class ElementValueWriter
         super();
     }
 
-    public static void WriteElementValue(
+    public static void writeElementValue(
         Loader loader, Printer printer, ReferenceMap referenceMap,
         ClassFile classFile, ElementValue ev)
     {
@@ -41,15 +41,15 @@ public class ElementValueWriter
         {
         case ElementValueContants.EV_PRIMITIVE_TYPE:
             ElementValuePrimitiveType evpt = (ElementValuePrimitiveType)ev;
-            ElementValuePrimitiveTypeWriter.Write(
+            ElementValuePrimitiveTypeWriter.write(
                 loader, printer, referenceMap, classFile, evpt);
             break;
 
         case ElementValueContants.EV_CLASS_INFO:
             ElementValueClassInfo evci = (ElementValueClassInfo)ev;
             String signature =
-                constants.getConstantUtf8(evci.class_info_index);
-            SignatureWriter.WriteSignature(
+                constants.getConstantUtf8(evci.classInfoIndex);
+            SignatureWriter.writeSignature(
                 loader, printer, referenceMap, classFile, signature);
             printer.print('.');
             printer.printKeyword("class");
@@ -57,9 +57,9 @@ public class ElementValueWriter
 
         case ElementValueContants.EV_ANNOTATION_VALUE:
             ElementValueAnnotationValue evav = (ElementValueAnnotationValue)ev;
-            AnnotationWriter.WriteAnnotation(
+            AnnotationWriter.writeAnnotation(
                 loader, printer, referenceMap,
-                classFile, evav.annotation_value);
+                classFile, evav.annotationValue);
             break;
 
         case ElementValueContants.EV_ARRAY_VALUE:
@@ -69,12 +69,12 @@ public class ElementValueWriter
 
             if ((values != null) && (values.length > 0))
             {
-                WriteElementValue(
+                writeElementValue(
                     loader, printer, referenceMap, classFile, values[0]);
                 for (int i=1; i<values.length; i++)
                 {
                     printer.print(", ");
-                    WriteElementValue(
+                    writeElementValue(
                         loader, printer, referenceMap, classFile, values[i]);
                 }
             }
@@ -83,11 +83,11 @@ public class ElementValueWriter
 
         case ElementValueContants.EV_ENUM_CONST_VALUE:
             ElementValueEnumConstValue evecv = (ElementValueEnumConstValue)ev;
-            signature = constants.getConstantUtf8(evecv.type_name_index);
-            String constName = constants.getConstantUtf8(evecv.const_name_index);
-            String internalClassName = SignatureUtil.GetInternalName(signature);
+            signature = constants.getConstantUtf8(evecv.typeNameIndex);
+            String constName = constants.getConstantUtf8(evecv.constNameIndex);
+            String internalClassName = SignatureUtil.getInternalName(signature);
 
-            SignatureWriter.WriteSignature(
+            SignatureWriter.writeSignature(
                 loader, printer, referenceMap, classFile, signature);
 
             printer.print('.');

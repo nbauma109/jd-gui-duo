@@ -47,7 +47,7 @@ public class FastDeclaration extends Instruction
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(lv.index, lv.nameIndex, lv.signature_index);
+		return Objects.hash(lv.index, lv.nameIndex, lv.signatureIndex);
 	}
 
 	@Override
@@ -61,6 +61,6 @@ public class FastDeclaration extends Instruction
 		FastDeclaration other = (FastDeclaration) obj;
 		return lv.index == other.lv.index 
             && lv.nameIndex == other.lv.nameIndex
-            && lv.signature_index == other.lv.signature_index;
+            && lv.signatureIndex == other.lv.signatureIndex;
 	}
 }

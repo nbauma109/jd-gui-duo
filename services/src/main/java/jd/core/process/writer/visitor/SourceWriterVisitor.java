@@ -85,7 +85,7 @@ public class SourceWriterVisitor
         else
         {
             this.constants = classFile.getConstantPool();
-            this.methodAccessFlags = method.access_flags;
+            this.methodAccessFlags = method.accessFlags;
             this.localVariables = method.getLocalVariables();
         }
     }
@@ -142,11 +142,11 @@ public class SourceWriterVisitor
                 String signature = constants.getConstantClassName(newArray.index);
 
                 if (signature.charAt(0) != '[') {
-                    signature = SignatureUtil.CreateTypeName(signature);
+                    signature = SignatureUtil.createTypeName(signature);
                 }
 
                 String signatureWithoutArray =
-                    SignatureUtil.CutArrayDimensionPrefix(signature);
+                    SignatureUtil.cutArrayDimensionPrefix(signature);
 
                 int nextOffset = this.previousOffset + 1;
 
@@ -156,7 +156,7 @@ public class SourceWriterVisitor
                     this.printer.printKeyword(lineNumber, "new");
                     this.printer.print(' ');
 
-                    SignatureWriter.WriteSignature(
+                    SignatureWriter.writeSignature(
                         this.loader, this.printer, this.referenceMap,
                         this.classFile, signatureWithoutArray);
 
@@ -320,11 +320,11 @@ public class SourceWriterVisitor
                         ConstantClass cc = (ConstantClass)c;
                         signature = constants.getConstantUtf8(cc.getNameIndex());
                         if (signature.charAt(0) != '[') {
-                            signature = SignatureUtil.CreateTypeName(signature);
+                            signature = SignatureUtil.createTypeName(signature);
                         }
                     }
 
-                    SignatureWriter.WriteSignature(
+                    SignatureWriter.writeSignature(
                         this.loader, this.printer, this.referenceMap,
                         this.classFile, signature);
 
@@ -395,7 +395,7 @@ public class SourceWriterVisitor
                     this.printer.printKeyword(lineNumber, "goto");
                     this.printer.print(' ');
                     this.printer.print(
-                        lineNumber, gotoInstruction.GetJumpOffset());
+                        lineNumber, gotoInstruction.getJumpOffset());
                 }
             }
             break;
@@ -456,10 +456,10 @@ public class SourceWriterVisitor
                         constants.getConstantClassName(instanceOf.index);
 
                     if (signature.charAt(0) != '[') {
-                        signature = SignatureUtil.CreateTypeName(signature);
+                        signature = SignatureUtil.createTypeName(signature);
                     }
 
-                    SignatureWriter.WriteSignature(
+                    SignatureWriter.writeSignature(
                         this.loader, this.printer, this.referenceMap,
                         this.classFile, signature);
                 }
@@ -589,10 +589,10 @@ public class SourceWriterVisitor
                 {
                     this.printer.printKeyword(lineNumber, "new");
                     this.printer.print(' ');
-                    SignatureWriter.WriteSignature(
+                    SignatureWriter.writeSignature(
                         this.loader, this.printer,
                         this.referenceMap, this.classFile,
-                        SignatureUtil.GetSignatureFromType(newArray.type));
+                        SignatureUtil.getSignatureFromType(newArray.type));
                     this.printer.print(lineNumber, '[');
                 }
 
@@ -770,11 +770,11 @@ public class SourceWriterVisitor
             }
             break;
         case ByteCodeConstants.INITARRAY:
-            lineNumber = WriteInitArrayInstruction(
+            lineNumber = writeInitArrayInstruction(
                 (InitArrayInstruction)instruction);
             break;
         case ByteCodeConstants.NEWANDINITARRAY:
-            lineNumber = WriteNewAndInitArrayInstruction(
+            lineNumber = writeNewAndInitArrayInstruction(
                 (InitArrayInstruction)instruction);
             break;
         case ByteCodeConstants.NOP:
@@ -903,7 +903,7 @@ public class SourceWriterVisitor
             else if ("C".equals(signature))
             {
                 String escapedString =
-                    StringUtil.EscapeCharAndAppendApostrophe((char)value);
+                    StringUtil.escapeCharAndAppendApostrophe((char)value);
                 String scopeInternalName =  this.classFile.getThisClassName();
                 this.printer.printString(
                     lineNumber, escapedString, scopeInternalName);
@@ -925,7 +925,7 @@ public class SourceWriterVisitor
     private void writeBIPush_SIPush_IConst(
         int lineNumber, String internalTypeName, String name, String descriptor)
     {
-        String className = SignatureWriter.InternalClassNameToClassName(
+        String className = SignatureWriter.internalClassNameToClassName(
             this.loader, this.referenceMap, this.classFile, internalTypeName);
         String scopeInternalName = this.classFile.getThisClassName();
         this.printer.printType(
@@ -1070,7 +1070,7 @@ public class SourceWriterVisitor
             case ByteCodeConstants.LDC2_W:
                 this.printer.addNewLinesAndPrefix(lineNumber);
                 Constant cst = constants.get( ((IndexInstruction)value).index );
-                ConstantValueWriter.WriteHexa(
+                ConstantValueWriter.writeHexa(
                     this.loader, this.printer, this.referenceMap,
                     this.classFile, cst);
                 break;
@@ -1373,7 +1373,7 @@ public class SourceWriterVisitor
         else if (innerClassFile.getInternalAnonymousClassName() == null)
         {
             // Inner class new invoke
-            firstIndex = computeFirstIndex(innerClassFile.access_flags, in);
+            firstIndex = computeFirstIndex(innerClassFile.accessFlags, in);
         }
         else
         {
@@ -1402,17 +1402,17 @@ public class SourceWriterVisitor
             if (innerClassFile == null || innerClassFile.getInternalAnonymousClassName() == null)
             {
                 // Normal or inner class new invoke
-                SignatureWriter.WriteConstructor(
+                SignatureWriter.writeConstructor(
                     this.loader, this.printer, this.referenceMap,
                     this.classFile,
-                    SignatureUtil.CreateTypeName(internalClassName),
+                    SignatureUtil.createTypeName(internalClassName),
                     constructorDescriptor);
                 //writeArgs(in.lineNumber, 0, in.args);
             } else {
                 // Anonymous new invoke
-                SignatureWriter.WriteConstructor(
+                SignatureWriter.writeConstructor(
                     this.loader, this.printer, this.referenceMap, this.classFile,
-                    SignatureUtil.CreateTypeName(innerClassFile.getInternalAnonymousClassName()),
+                    SignatureUtil.createTypeName(innerClassFile.getInternalAnonymousClassName()),
                     constructorDescriptor);
             }
         }
@@ -1714,10 +1714,10 @@ public class SourceWriterVisitor
             if (cmr.getClassIndex() == classFile.getThisClassIndex())
             {
                 // Appel d'un constructeur de la classe courante
-                if ((this.classFile.access_flags & ClassFileConstants.ACC_ENUM) == 0)
+                if ((this.classFile.accessFlags & ClassFileConstants.ACC_ENUM) == 0)
                 {
                     if (this.classFile.isAInnerClass() &&
-                        (this.classFile.access_flags & ClassFileConstants.ACC_STATIC) == 0)
+                        (this.classFile.accessFlags & ClassFileConstants.ACC_STATIC) == 0)
                     {
                         // inner class: firstIndex=1
                         firstIndex = 1;
@@ -1783,7 +1783,7 @@ public class SourceWriterVisitor
                         cnat.getNameIndex(), cnat.getDescriptorIndex());
 
                     if (method == null ||
-                        (method.access_flags & ClassFileConstants.ACC_PRIVATE) == 0)
+                        (method.accessFlags & ClassFileConstants.ACC_PRIVATE) == 0)
                     {
                         // Methode de la classe mere
                         this.printer.printKeyword(lineNumber, "super");
@@ -1857,10 +1857,10 @@ public class SourceWriterVisitor
             if (classFile.getThisClassIndex() != cmr.getClassIndex())
             {
                 this.printer.addNewLinesAndPrefix(lineNumber);
-                int length = SignatureWriter.WriteSignature(
+                int length = SignatureWriter.writeSignature(
                     this.loader, this.printer,
                     this.referenceMap, this.classFile,
-                    SignatureUtil.CreateTypeName(constants.getConstantClassName(cmr.getClassIndex())));
+                    SignatureUtil.createTypeName(constants.getConstantClassName(cmr.getClassIndex())));
 
                 if (length > 0)
                 {
@@ -1950,9 +1950,9 @@ public class SourceWriterVisitor
             {
                 this.printer.addNewLinesAndPrefix(lineNumber);
 
-                String className = SignatureUtil.CreateTypeName(internalClassName);
+                String className = SignatureUtil.createTypeName(internalClassName);
 
-                int length = SignatureWriter.WriteSignature(
+                int length = SignatureWriter.writeSignature(
                     this.loader, this.printer,
                     this.referenceMap, this.classFile, className);
 
@@ -1987,10 +1987,10 @@ public class SourceWriterVisitor
             if (cfr.getClassIndex() != classFile.getThisClassIndex())
             {
                 this.printer.addNewLinesAndPrefix(lineNumber);
-                int length = SignatureWriter.WriteSignature(
+                int length = SignatureWriter.writeSignature(
                     this.loader, this.printer,
                     this.referenceMap, this.classFile,
-                    SignatureUtil.CreateTypeName(constants.getConstantClassName(cfr.getClassIndex())));
+                    SignatureUtil.createTypeName(constants.getConstantClassName(cfr.getClassIndex())));
 
                 if (length > 0)
                 {
@@ -2024,11 +2024,11 @@ public class SourceWriterVisitor
             {
                 // Exception a la regle
                 ConstantClass cc = (ConstantClass)cst;
-                String signature = SignatureUtil.CreateTypeName(
+                String signature = SignatureUtil.createTypeName(
                     constants.getConstantUtf8(cc.getNameIndex()));
 
                 this.printer.addNewLinesAndPrefix(lineNumber);
-                SignatureWriter.WriteSignature(
+                SignatureWriter.writeSignature(
                     this.loader, this.printer, this.referenceMap,
                     this.classFile, signature);
                 this.printer.print('.');
@@ -2038,7 +2038,7 @@ public class SourceWriterVisitor
             {
                 // Cas général
                 this.printer.addNewLinesAndPrefix(lineNumber);
-                ConstantValueWriter.Write(
+                ConstantValueWriter.write(
                     this.loader, this.printer, this.referenceMap,
                     this.classFile, cst);
             }
@@ -2099,9 +2099,9 @@ public class SourceWriterVisitor
             this.printer.printKeyword(lineNumber, "new");
             this.printer.print(' ');
 
-            SignatureWriter.WriteSignature(
+            SignatureWriter.writeSignature(
                 this.loader, this.printer, this.referenceMap, this.classFile,
-                SignatureUtil.CutArrayDimensionPrefix(signature));
+                SignatureUtil.cutArrayDimensionPrefix(signature));
         }
 
         Instruction[] dimensions = multiANewArray.dimensions;
@@ -2131,7 +2131,7 @@ public class SourceWriterVisitor
         if (this.firstOffset <= this.previousOffset &&
             nextOffset <= this.lastOffset)
         {
-            int dimensionCount = SignatureUtil.GetArrayDimensionCount(signature);
+            int dimensionCount = SignatureUtil.getArrayDimensionCount(signature);
             for (int i=dimensions.length; i<dimensionCount; i++) {
                 this.printer.print(lineNumber, "[]");
             }
@@ -2155,10 +2155,10 @@ public class SourceWriterVisitor
             {
                 this.printer.addNewLinesAndPrefix(lineNumber);
 
-                String signature = SignatureUtil.CreateTypeName(
+                String signature = SignatureUtil.createTypeName(
                     this.constants.getConstantClassName(cfr.getClassIndex()));
 
-                int length = SignatureWriter.WriteSignature(
+                int length = SignatureWriter.writeSignature(
                     this.loader, this.printer,
                     this.referenceMap, this.classFile, signature);
 
@@ -2171,7 +2171,7 @@ public class SourceWriterVisitor
             ConstantNameAndType cnat =
                 constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
             String descriptor = constants.getConstantUtf8(cnat.getDescriptorIndex());
-            String internalClassName = SignatureUtil.GetInternalName(descriptor);
+            String internalClassName = SignatureUtil.getInternalName(descriptor);
             String constName = constants.getConstantUtf8(cnat.getNameIndex());
 
             this.printer.printStaticField(
@@ -2374,9 +2374,9 @@ public class SourceWriterVisitor
             {
                 this.printer.addNewLinesAndPrefix(lineNumber);
                 String signature =
-                    this.constants.getConstantUtf8(lv.signature_index);
+                    this.constants.getConstantUtf8(lv.signatureIndex);
                 String internalName =
-                        SignatureUtil.GetInternalName(signature);
+                        SignatureUtil.getInternalName(signature);
                 ClassFile innerClassFile =
                     this.classFile.getInnerClassFile(internalName);
 
@@ -2390,14 +2390,14 @@ public class SourceWriterVisitor
                     innerClassFile.getInternalAnonymousClassName() != null)
                 {
                     String internalAnonymousClassSignature =
-                            SignatureUtil.CreateTypeName(innerClassFile.getInternalAnonymousClassName());
-                    SignatureWriter.WriteSignature(
+                            SignatureUtil.createTypeName(innerClassFile.getInternalAnonymousClassName());
+                    SignatureWriter.writeSignature(
                         this.loader, this.printer, this.referenceMap,
                         this.classFile, internalAnonymousClassSignature);
                 }
                 else
                 {
-                    SignatureWriter.WriteSignature(
+                    SignatureWriter.writeSignature(
                         this.loader, this.printer, this.referenceMap,
                         this.classFile, signature);
                 }
@@ -2429,7 +2429,7 @@ public class SourceWriterVisitor
      * 'NEWARRAY' et 'ANEWARRAY' dans les affectations '?Store' et passees
      * en parametres.
      */
-    private int WriteInitArrayInstruction(InitArrayInstruction iai)
+    private int writeInitArrayInstruction(InitArrayInstruction iai)
     {
         int lineNumber = iai.lineNumber;
 
@@ -2483,7 +2483,7 @@ public class SourceWriterVisitor
      * 'NEWARRAY' et 'ANEWARRAY' dans les affectations '?Store' et passees
      * en parametres.
      */
-    private int WriteNewAndInitArrayInstruction(InitArrayInstruction iai)
+    private int writeNewAndInitArrayInstruction(InitArrayInstruction iai)
     {
         int nextOffset = this.previousOffset + 1;
 
@@ -2498,19 +2498,19 @@ public class SourceWriterVisitor
 
             if (iai.newArray.opcode == ByteCodeConstants.NEWARRAY) {
                 NewArray na = (NewArray)iai.newArray;
-                SignatureWriter.WriteSignature(
+                SignatureWriter.writeSignature(
                     this.loader, this.printer,
                     this.referenceMap, this.classFile,
-                    SignatureUtil.GetSignatureFromType(na.type));
+                    SignatureUtil.getSignatureFromType(na.type));
             } else if (iai.newArray.opcode == ByteCodeConstants.ANEWARRAY) {
                 ANewArray ana = (ANewArray)iai.newArray;
                 String signature = constants.getConstantClassName(ana.index);
 
                 if (signature.charAt(0) != '[') {
-                    signature = SignatureUtil.CreateTypeName(signature);
+                    signature = SignatureUtil.createTypeName(signature);
                 }
 
-                SignatureWriter.WriteSignature(
+                SignatureWriter.writeSignature(
                     this.loader, this.printer, this.referenceMap,
                     this.classFile, signature);
             }
@@ -2518,6 +2518,6 @@ public class SourceWriterVisitor
             this.printer.print(lineNumber, "[] ");
         }
 
-        return WriteInitArrayInstruction(iai);
+        return writeInitArrayInstruction(iai);
     }
 }

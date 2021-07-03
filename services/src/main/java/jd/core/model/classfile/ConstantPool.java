@@ -275,7 +275,7 @@ public class ConstantPool
         return index;
     }
 
-    public int addConstantFieldref(int class_index, int name_and_type_index)
+    public int addConstantFieldref(int classIndex, int nameAndTypeIndex)
     {
         int index = this.listOfConstants.size();
 
@@ -288,26 +288,26 @@ public class ConstantPool
 
             ConstantFieldref cfr = (ConstantFieldref)constant;
 
-            if ((cfr.getClassIndex() == class_index) &&
-                (cfr.getNameAndTypeIndex() == name_and_type_index))
+            if ((cfr.getClassIndex() == classIndex) &&
+                (cfr.getNameAndTypeIndex() == nameAndTypeIndex))
                 return index;
         }
 
-        ConstantFieldref cfr = new ConstantFieldref(class_index, name_and_type_index);
+        ConstantFieldref cfr = new ConstantFieldref(classIndex, nameAndTypeIndex);
         index = this.listOfConstants.size();
         this.listOfConstants.add(cfr);
 
         return index;
     }
 
-    public int addConstantMethodref(int class_index, int name_and_type_index)
+    public int addConstantMethodref(int classIndex, int nameAndTypeIndex)
     {
         return addConstantMethodref(
-            class_index, name_and_type_index, null, null);
+            classIndex, nameAndTypeIndex, null, null);
     }
 
     public int addConstantMethodref(
-        int class_index, int name_and_type_index,
+        int classIndex, int nameAndTypeIndex,
         List<String> listOfParameterSignatures, String returnedSignature)
     {
         int index = this.listOfConstants.size();
@@ -321,12 +321,12 @@ public class ConstantPool
 
             ConstantMethodref cmr = (ConstantMethodref)constant;
 
-            if ((cmr.getClassIndex() == class_index) &&
-                (cmr.getNameAndTypeIndex() == name_and_type_index))
+            if ((cmr.getClassIndex() == classIndex) &&
+                (cmr.getNameAndTypeIndex() == nameAndTypeIndex))
                 return index;
         }
 
-        ConstantMethodref cfr = new ConstantMethodref(class_index, name_and_type_index,
+        ConstantMethodref cfr = new ConstantMethodref(classIndex, nameAndTypeIndex,
             listOfParameterSignatures, returnedSignature);
         index = this.listOfConstants.size();
         this.listOfConstants.add(cfr);

@@ -56,7 +56,7 @@ public class DotClassEclipseReconstructor
         super();
     }
 
-    public static void Reconstruct(
+    public static void reconstruct(
         ReferenceMap referenceMap, ClassFile classFile, List<Instruction> list)
     {
         int i = list.size();
@@ -79,7 +79,7 @@ public class DotClassEclipseReconstructor
             if (ii.value.opcode != ByteCodeConstants.GETSTATIC)
                 continue;
 
-            int jumpOffset = ii.GetJumpOffset();
+            int jumpOffset = ii.getJumpOffset();
 
             instruction = list.get(i+1);
 
@@ -222,7 +222,7 @@ public class DotClassEclipseReconstructor
 
                 if (field.getNameIndex() == cnatField.getNameIndex())
                 {
-                    field.access_flags |= ClassFileConstants.ACC_SYNTHETIC;
+                    field.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
                     break;
                 }
             }

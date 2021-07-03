@@ -19,10 +19,10 @@ package jd.core.model.classfile;
 public class LocalVariable
     implements Comparable<LocalVariable>
 {
-	public int start_pc;
+	public int startPc;
     public int length;
     public int nameIndex;
-    public int signature_index;
+    public int signatureIndex;
     public final int index;
     public boolean exceptionOrReturnAddress;
     // Champ de bits utilisé pour determiner le type de la variable (byte, char,
@@ -37,35 +37,35 @@ public class LocalVariable
     private boolean toBeRemoved;
 
     public LocalVariable(
-            int start_pc, int length, int nameIndex, int signature_index,
+            int startPc, int length, int nameIndex, int signatureIndex,
             int index)
     {
-        this(start_pc, length, nameIndex, signature_index, index, false, 0);
+        this(startPc, length, nameIndex, signatureIndex, index, false, 0);
     }
 
     public LocalVariable(
-            int start_pc, int length, int nameIndex, int signature_index,
+            int startPc, int length, int nameIndex, int signatureIndex,
             int index, int typesBitSet)
     {
-        this(start_pc, length, nameIndex, signature_index, index, false,
+        this(startPc, length, nameIndex, signatureIndex, index, false,
              typesBitSet);
     }
 
     public LocalVariable(
-            int start_pc, int length, int nameIndex, int signature_index,
+            int startPc, int length, int nameIndex, int signatureIndex,
             int index, boolean exception)
     {
-        this(start_pc, length, nameIndex, signature_index, index, exception, 0);
+        this(startPc, length, nameIndex, signatureIndex, index, exception, 0);
     }
 
     protected LocalVariable(
-        int start_pc, int length, int nameIndex, int signature_index,
+        int startPc, int length, int nameIndex, int signatureIndex,
         int index, boolean exceptionOrReturnAddress, int typesBitField)
     {
-        this.start_pc = start_pc;
+        this.startPc = startPc;
         this.length = length;
         this.nameIndex = nameIndex;
-        this.signature_index = signature_index;
+        this.signatureIndex = signatureIndex;
         this.index = index;
         this.exceptionOrReturnAddress = exceptionOrReturnAddress;
         this.declarationFlag = exceptionOrReturnAddress;
@@ -74,31 +74,31 @@ public class LocalVariable
 
     public void updateRange(int offset)
     {
-        if (offset < this.start_pc)
+        if (offset < this.startPc)
         {
-            this.length += (this.start_pc - offset);
-            this.start_pc = offset;
+            this.length += (this.startPc - offset);
+            this.startPc = offset;
         }
 
-        if (offset >= this.start_pc+this.length)
+        if (offset >= this.startPc+this.length)
         {
-            this.length = offset - this.start_pc + 1;
+            this.length = offset - this.startPc + 1;
         }
     }
 
     public void updateSignatureIndex(int signatureIndex)
     {
-        this.signature_index = signatureIndex;
+        this.signatureIndex = signatureIndex;
     }
 
     @Override
     public String toString()
     {
         return
-            "LocalVariable{start_pc=" + start_pc +
+            "LocalVariable{startPc=" + startPc +
             ", length=" + length +
             ", nameIndex=" + nameIndex +
-            ", signature_index=" + signature_index +
+            ", signatureIndex=" + signatureIndex +
             ", index=" + index +
             "}";
     }
@@ -115,8 +115,8 @@ public class LocalVariable
         if (this.length != other.length)
             return this.length - other.length;
 
-        if (this.start_pc != other.start_pc)
-            return this.start_pc - other.start_pc;
+        if (this.startPc != other.startPc)
+            return this.startPc - other.startPc;
 
         return this.index - other.index;
     }

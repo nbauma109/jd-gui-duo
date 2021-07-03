@@ -21,10 +21,10 @@ public class AttributeRuntimeAnnotations extends Attribute
     public final Annotation[] annotations;
 
     public AttributeRuntimeAnnotations(byte tag,
-                                                int attribute_name_index,
+                                                int attributeNameIndex,
                                                 Annotation[] annotations)
     {
-        super(tag, attribute_name_index);
+        super(tag, attributeNameIndex);
         this.annotations = annotations;
     }
 }

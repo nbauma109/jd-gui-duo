@@ -46,22 +46,22 @@ public class DecompilerImpl implements Decompiler
 
         // 1) Deserialisation
         ClassFile classFile =
-            ClassFileDeserializer.Deserialize(loader, internalClassPath);
+            ClassFileDeserializer.deserialize(loader, internalClassPath);
         if (classFile == null)
             throw new LoaderException(
                 "Can not deserialize '" + internalClassPath + "'.");
 
         // 2) Analyse du byte code
         ReferenceMap referenceMap = new ReferenceMap();
-        ClassFileAnalyzer.Analyze(referenceMap, classFile);
+        ClassFileAnalyzer.analyze(referenceMap, classFile);
 
         // 3) Creation de la liste des references pour generer la liste des
         //    "import"
-        ReferenceAnalyzer.Analyze(referenceMap, classFile);
+        ReferenceAnalyzer.analyze(referenceMap, classFile);
 
         // 4) Mise en page du code source
         List<LayoutBlock> layoutBlockList = new ArrayList<>(1024);
-        int maxLineNumber =	ClassFileLayouter.Layout(
+        int maxLineNumber =	ClassFileLayouter.layout(
                 preferences, referenceMap, classFile, layoutBlockList);
 
 //System.out.println("layoutBlockList.size = " + layoutBlockList.size());

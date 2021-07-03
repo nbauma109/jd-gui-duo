@@ -67,7 +67,7 @@ public class CheckLocalVariableUsedVisitor
                 LocalVariable lv =
                     localVariables.getLocalVariableWithIndexAndOffset(
                         li.index, li.offset);
-                return lv != null && maxOffset <= lv.start_pc;
+                return lv != null && maxOffset <= lv.startPc;
             }
         case ByteCodeConstants.STORE:
         case ByteCodeConstants.ASTORE:
@@ -77,7 +77,7 @@ public class CheckLocalVariableUsedVisitor
                 LocalVariable lv =
                     localVariables.getLocalVariableWithIndexAndOffset(
                         si.index, si.offset);
-                return (lv != null && maxOffset <= lv.start_pc) || visit(localVariables, maxOffset, si.valueref);
+                return (lv != null && maxOffset <= lv.startPc) || visit(localVariables, maxOffset, si.valueref);
             }
         case ByteCodeConstants.DUPSTORE:
             return visit(

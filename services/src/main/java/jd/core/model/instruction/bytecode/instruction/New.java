@@ -34,7 +34,7 @@ public class New extends IndexInstruction
         if (constants == null)
             return null;
 
-        return SignatureUtil.CreateTypeName(
+        return SignatureUtil.createTypeName(
             constants.getConstantClassName(this.index));
     }
 }

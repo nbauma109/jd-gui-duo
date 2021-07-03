@@ -34,7 +34,7 @@ public class EmptySynchronizedBlockReconstructor
         super();
     }
 
-    public static void Reconstruct(
+    public static void reconstruct(
         LocalVariables localVariables, List<Instruction> list)
     {
         int index = list.size();

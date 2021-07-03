@@ -26,7 +26,7 @@ public class SignatureAnalyzer
         super();
     }
 
-    public static void AnalyzeClassSignature(
+    public static void analyzeClassSignature(
             ReferenceMap referenceMap, String signature)
     {
         try // DEBUG //
@@ -36,14 +36,14 @@ public class SignatureAnalyzer
         int index = 0;
 
         // Generics
-        index = AnalyzeGenerics(referenceMap, caSignature, length, index);
+        index = analyzeGenerics(referenceMap, caSignature, length, index);
 
         // Superclass
-        index = AnalyzeSignature(referenceMap, caSignature, length, index);
+        index = analyzeSignature(referenceMap, caSignature, length, index);
 
         //Interfaces
         while (index < signature.length())
-            index = AnalyzeSignature(referenceMap, caSignature, length, index);
+            index = analyzeSignature(referenceMap, caSignature, length, index);
         }
         catch (RuntimeException e) // DEBUG //
         {
@@ -52,7 +52,7 @@ public class SignatureAnalyzer
         }
     }
 
-    public static void AnalyzeMethodSignature(
+    public static void analyzeMethodSignature(
             ReferenceMap referenceMap, String signature)
     {
         try // DEBUG //
@@ -62,7 +62,7 @@ public class SignatureAnalyzer
         int index = 0;
 
         // Affichage des generics
-        index = AnalyzeGenerics(referenceMap, caSignature, length, index);
+        index = analyzeGenerics(referenceMap, caSignature, length, index);
 
         if (caSignature[index] != '(')
             throw new SignatureFormatException(signature);
@@ -72,12 +72,12 @@ public class SignatureAnalyzer
 
         // Arguments
         while (caSignature[index] != ')')
-            index = AnalyzeSignature(referenceMap, caSignature, length, index);
+            index = analyzeSignature(referenceMap, caSignature, length, index);
 
         // pass ')'
         index++;
 
-        AnalyzeSignature(referenceMap, caSignature, length, index);
+        analyzeSignature(referenceMap, caSignature, length, index);
         }
         catch (RuntimeException e) // DEBUG //
         {
@@ -86,13 +86,13 @@ public class SignatureAnalyzer
         }
     }
 
-    public static void AnalyzeSimpleSignature(
+    public static void analyzeSimpleSignature(
             ReferenceMap referenceMap, String signature)
     {
         try // DEBUG //
         {
         char[] caSignature = signature.toCharArray();
-        AnalyzeSignature(referenceMap, caSignature, caSignature.length, 0);
+        analyzeSignature(referenceMap, caSignature, caSignature.length, 0);
         }
         catch (RuntimeException e) // DEBUG //
         {
@@ -101,7 +101,7 @@ public class SignatureAnalyzer
         }
     }
 
-    private static int AnalyzeGenerics(
+    private static int analyzeGenerics(
         ReferenceMap referenceMap, char[] caSignature, int length, int index)
     {
         if (caSignature[index] == '<')
@@ -110,13 +110,13 @@ public class SignatureAnalyzer
 
             while (index < length)
             {
-                index = CharArrayUtil.IndexOf(caSignature, ':', index) + 1;
+                index = CharArrayUtil.indexOf(caSignature, ':', index) + 1;
 
                 // Mystere ...
                 if (caSignature[index] == ':')
                     index++;
 
-                index = AnalyzeSignature(referenceMap, caSignature, length, index);
+                index = analyzeSignature(referenceMap, caSignature, length, index);
 
                 if (caSignature[index] == '>')
                     break;
@@ -128,7 +128,7 @@ public class SignatureAnalyzer
         return index;
     }
 
-    private static int AnalyzeSignature(
+    private static int analyzeSignature(
         ReferenceMap referenceMap, char[] caSignature, int length, int index)
     {
         int debugCounter = 0; // DEBUG //
@@ -173,7 +173,7 @@ public class SignatureAnalyzer
 
                 if (classFlag)
                     referenceMap.add(
-                        CharArrayUtil.Substring(caSignature, beginIndex, index));
+                        CharArrayUtil.substring(caSignature, beginIndex, index));
 
                 if (c == '<')
                 {
@@ -181,7 +181,7 @@ public class SignatureAnalyzer
                     index++;
 
                     while (caSignature[index] != '>')
-                        index = AnalyzeSignature(
+                        index = analyzeSignature(
                             referenceMap, caSignature, length, index);
 
                     // pass '>'
@@ -193,11 +193,11 @@ public class SignatureAnalyzer
                     index++;
                 break;
             case '-' : case '+' :
-                index = AnalyzeSignature(
+                index = analyzeSignature(
                             referenceMap, caSignature, length, index+1);
                 break;
             case 'T' :
-                index = CharArrayUtil.IndexOf(caSignature, ';', index+1) + 1;
+                index = CharArrayUtil.indexOf(caSignature, ';', index+1) + 1;
                 break;
             case 'B' : case 'C' : case 'D' : case 'F' : case 'I' :
             case 'J' : case 'S' : case 'V' : case 'Z' : case '*' :

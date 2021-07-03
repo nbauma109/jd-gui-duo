@@ -47,7 +47,7 @@ public class DotClass14Reconstructor
         super();
     }
 
-    public static void Reconstruct(
+    public static void reconstruct(
         ReferenceMap referenceMap, ClassFile classFile, List<Instruction> list)
     {
         int i = list.size();
@@ -70,7 +70,7 @@ public class DotClass14Reconstructor
             if (ii.value.opcode != ByteCodeConstants.GETSTATIC)
                 continue;
 
-            int jumpOffset = ii.GetJumpOffset();
+            int jumpOffset = ii.getJumpOffset();
 
             instruction = list.get(i+1);
 
@@ -175,7 +175,7 @@ public class DotClass14Reconstructor
             ConstantString cs = (ConstantString)cv;
             String signature = constants.getConstantUtf8(cs.getStringIndex());
 
-            if (SignatureUtil.GetArrayDimensionCount(signature) == 0)
+            if (SignatureUtil.getArrayDimensionCount(signature) == 0)
             {
                 String internalName = signature.replace(
                     StringConstants.PACKAGE_SEPARATOR,
@@ -205,9 +205,9 @@ public class DotClass14Reconstructor
                 Instruction newArray;
 
                 String signatureWithoutDimension =
-                    SignatureUtil.CutArrayDimensionPrefix(signature);
+                    SignatureUtil.cutArrayDimensionPrefix(signature);
 
-                if (SignatureUtil.IsObjectSignature(signatureWithoutDimension))
+                if (SignatureUtil.isObjectSignature(signatureWithoutDimension))
                 {
                     //  8: iconst_0
                     //  9: anewarray 62	java/lang/String
@@ -235,7 +235,7 @@ public class DotClass14Reconstructor
                     //  11: invokevirtual 62	java/lang/Object:getClass	()Ljava/lang/Class;
                     newArray = new NewArray(
                         ByteCodeConstants.NEWARRAY, ii.offset, ii.lineNumber,
-                        SignatureUtil.GetTypeFromSignature(signatureWithoutDimension),
+                        SignatureUtil.getTypeFromSignature(signatureWithoutDimension),
                         iconst0);
                 }
 
@@ -283,7 +283,7 @@ public class DotClass14Reconstructor
 
                     if (field.getNameIndex() == cnatField.getNameIndex())
                     {
-                        field.access_flags |= ClassFileConstants.ACC_SYNTHETIC;
+                        field.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
                         break;
                     }
                 }
@@ -298,7 +298,7 @@ public class DotClass14Reconstructor
 
                     if (method.getNameIndex() == cnatMethod.getNameIndex())
                     {
-                        method.access_flags |= ClassFileConstants.ACC_SYNTHETIC;
+                        method.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
                         break;
                     }
                 }
@@ -318,7 +318,7 @@ public class DotClass14Reconstructor
                     if (nameField.equals(
                             matchingConstants.getConstantUtf8(field.getNameIndex())))
                     {
-                        field.access_flags |= ClassFileConstants.ACC_SYNTHETIC;
+                        field.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
                         break;
                     }
                 }
@@ -334,7 +334,7 @@ public class DotClass14Reconstructor
                     if (nameMethod.equals(
                             matchingConstants.getConstantUtf8(method.getNameIndex())))
                     {
-                        method.access_flags |= ClassFileConstants.ACC_SYNTHETIC;
+                        method.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
                         break;
                     }
                 }

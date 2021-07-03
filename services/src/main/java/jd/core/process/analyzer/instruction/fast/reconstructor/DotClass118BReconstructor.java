@@ -60,7 +60,7 @@ public class DotClass118BReconstructor
         super();
     }
 
-    public static void Reconstruct(
+    public static void reconstruct(
         ReferenceMap referenceMap, ClassFile classFile, List<Instruction> list)
     {
         int i = list.size();
@@ -233,7 +233,7 @@ public class DotClass118BReconstructor
 
                 if (field.getNameIndex() == cnatField.getNameIndex())
                 {
-                    field.access_flags |= ClassFileConstants.ACC_SYNTHETIC;
+                    field.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
                     break;
                 }
             }

@@ -36,7 +36,7 @@ public class PostIncReconstructor
         super();
     }
 
-    public static void Reconstruct(List<Instruction> list)
+    public static void reconstruct(List<Instruction> list)
     {
         int length = list.size();
 
@@ -141,7 +141,7 @@ public class PostIncReconstructor
                     ByteCodeConstants.POSTINC, boi.offset, boi.lineNumber,
                     dupstore.objectref, value);
 
-                ReconstructorUtil.ReplaceDupLoad(
+                ReconstructorUtil.replaceDupLoad(
                         list, xstorePutfieldPutstaticIndex+1, dupstore, inc);
 
                 list.remove(xstorePutfieldPutstaticIndex);

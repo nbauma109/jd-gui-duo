@@ -33,15 +33,15 @@ public class DupLocalVariableAnalyzer
         super();
     }
 
-    public static void Declare(
+    public static void declare(
         ClassFile classFile, Method method, List<Instruction> list)
     {
-        RecursiveDeclare(
+        recursiveDeclare(
             classFile.getConstantPool(), method.getLocalVariables(),
             method.getCode().length, list);
     }
 
-    private static void RecursiveDeclare(
+    private static void recursiveDeclare(
             ConstantPool constants,
             LocalVariables localVariables,
             int codeLength,
@@ -67,7 +67,7 @@ public class DupLocalVariableAnalyzer
                     List<Instruction> instructions =
                         ((FastList)instruction).instructions;
                     if (instructions != null)
-                        RecursiveDeclare(
+                        recursiveDeclare(
                             constants, localVariables, codeLength, instructions);
                 }
                 break;
@@ -75,9 +75,9 @@ public class DupLocalVariableAnalyzer
             case FastConstants.IF_ELSE:
                 {
                     FastTest2Lists ft2l = (FastTest2Lists)instruction;
-                    RecursiveDeclare(
+                    recursiveDeclare(
                         constants, localVariables, codeLength, ft2l.instructions);
-                    RecursiveDeclare(
+                    recursiveDeclare(
                         constants, localVariables, codeLength, ft2l.instructions2);
                 }
                 break;
@@ -92,7 +92,7 @@ public class DupLocalVariableAnalyzer
                         {
                             List<Instruction> instructions = pairs[i].getInstructions();
                             if (instructions != null)
-                                RecursiveDeclare(
+                                recursiveDeclare(
                                     constants, localVariables, codeLength, instructions);
                         }
                 }
@@ -101,17 +101,17 @@ public class DupLocalVariableAnalyzer
             case FastConstants.TRY:
                 {
                     FastTry ft = (FastTry)instruction;
-                    RecursiveDeclare(
+                    recursiveDeclare(
                         constants, localVariables, codeLength, ft.instructions);
 
                     if (ft.catches != null)
                         for (int i=ft.catches.size()-1; i>=0; --i)
-                            RecursiveDeclare(
+                            recursiveDeclare(
                                 constants, localVariables,
                                 codeLength, ft.catches.get(i).instructions);
 
                     if (ft.finallyInstructions != null)
-                        RecursiveDeclare(
+                        recursiveDeclare(
                             constants, localVariables,
                             codeLength, ft.finallyInstructions);
                 }

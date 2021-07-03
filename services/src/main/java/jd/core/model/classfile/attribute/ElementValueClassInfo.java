@@ -18,11 +18,11 @@ package jd.core.model.classfile.attribute;
 
 public class ElementValueClassInfo extends ElementValue
 {
-    public final int class_info_index;
+    public final int classInfoIndex;
 
-    public ElementValueClassInfo(byte tag, int class_info_index)
+    public ElementValueClassInfo(byte tag, int classInfoIndex)
     {
         super(tag);
-        this.class_info_index = class_info_index;
+        this.classInfoIndex = classInfoIndex;
     }
 }

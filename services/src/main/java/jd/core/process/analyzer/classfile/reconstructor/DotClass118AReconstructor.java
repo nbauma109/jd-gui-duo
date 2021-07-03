@@ -47,7 +47,7 @@ public class DotClass118AReconstructor
         super();
     }
 
-    public static void Reconstruct(
+    public static void reconstruct(
         ReferenceMap referenceMap, ClassFile classFile, List<Instruction> list)
     {
         int i = list.size();
@@ -72,7 +72,7 @@ public class DotClass118AReconstructor
 
             GetStatic gs = (GetStatic)ii.value;
 
-            int jumpOffset = ii.GetJumpOffset();
+            int jumpOffset = ii.getJumpOffset();
 
             instruction = list.get(i+1);
 
@@ -189,14 +189,14 @@ public class DotClass118AReconstructor
                 ConstantString cs = (ConstantString)cv;
                 String signature = constants.getConstantUtf8(cs.getStringIndex());
                 String signatureWithoutDimension =
-                        SignatureUtil.CutArrayDimensionPrefix(signature);
+                        SignatureUtil.cutArrayDimensionPrefix(signature);
 
                 IConst iconst0 = new IConst(
                     ByteCodeConstants.ICONST, ii.offset,
                     ii.lineNumber, 0);
                 Instruction newArray;
 
-                if (SignatureUtil.IsObjectSignature(signatureWithoutDimension))
+                if (SignatureUtil.isObjectSignature(signatureWithoutDimension))
                 {
                     //  8: iconst_0
                     //  9: anewarray 62	java/lang/String
@@ -224,7 +224,7 @@ public class DotClass118AReconstructor
                     //  11: invokevirtual 62	java/lang/Object:getClass	()Ljava/lang/Class;
                     newArray = new NewArray(
                         ByteCodeConstants.NEWARRAY, ii.offset, ii.lineNumber,
-                        SignatureUtil.GetTypeFromSignature(signatureWithoutDimension),
+                        SignatureUtil.getTypeFromSignature(signatureWithoutDimension),
                         iconst0);
                 }
 
@@ -278,7 +278,7 @@ public class DotClass118AReconstructor
 
                 if (field.getNameIndex() == cnatField.getNameIndex())
                 {
-                    field.access_flags |= ClassFileConstants.ACC_SYNTHETIC;
+                    field.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
                     break;
                 }
             }
@@ -293,7 +293,7 @@ public class DotClass118AReconstructor
 
                 if (method.getNameIndex() == cnatMethod.getNameIndex())
                 {
-                    method.access_flags |= ClassFileConstants.ACC_SYNTHETIC;
+                    method.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
                     break;
                 }
             }

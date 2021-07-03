@@ -38,7 +38,7 @@ public class ByteCodeWriter
     private static final String CORRUPTED_CONSTANT_POOL =
         "Corrupted_Constant_Pool";
 
-    public static void Write(
+    public static void write(
         Loader loader, Printer printer, ReferenceMap referenceMap,
         ClassFile classFile, Method method)
     {
@@ -136,7 +136,7 @@ public class ByteCodeWriter
                         printer.print(ioperande);
                         printer.print("\t");
                         String fieldName =
-                            GetConstantFieldName(constants, ioperande);
+                            getConstantFieldName(constants, ioperande);
 
                         if (fieldName == null)
                         {
@@ -158,7 +158,7 @@ public class ByteCodeWriter
                         printer.print(ioperande);
                         printer.print("\t");
                         String methodName =
-                            GetConstantMethodName(constants, ioperande);
+                            getConstantMethodName(constants, ioperande);
 
                         if (methodName == null)
                         {
@@ -301,7 +301,7 @@ public class ByteCodeWriter
                         }
                         break;
                     case ByteCodeConstants.WIDE:
-                        index = ByteCodeUtil.NextWideOffset(code, index);
+                        index = ByteCodeUtil.nextWideOffset(code, index);
                         break;
                     default:
                         for (int j=ByteCodeConstants.NO_OF_OPERANDS[opcode]; j>0; --j)
@@ -313,16 +313,16 @@ public class ByteCodeWriter
                 }
             }
 
-            WriteAttributeNumberTables(printer, method);
-            WriteAttributeLocalVariableTables(
+            writeAttributeNumberTables(printer, method);
+            writeAttributeLocalVariableTables(
                 loader, printer, referenceMap, classFile, method);
-            WriteCodeExceptions(printer, classFile, method);
+            writeCodeExceptions(printer, classFile, method);
 
             printer.endOfComment();
         }
     }
 
-    private static void WriteAttributeNumberTables(
+    private static void writeAttributeNumberTables(
             Printer printer, Method method)
     {
         // Ecriture de la table des numeros de ligne
@@ -338,14 +338,14 @@ public class ByteCodeWriter
                 printer.endOfLine();
                 printer.startOfLine(Instruction.UNKNOWN_LINE_NUMBER);
                 printer.print("//   Java source line #");
-                printer.print(lineNumbers[i].line_number);
+                printer.print(lineNumbers[i].lineNumber);
                 printer.print("\t-> byte code offset #");
-                printer.print(lineNumbers[i].start_pc);
+                printer.print(lineNumbers[i].startPc);
             }
         }
     }
 
-    private static void WriteAttributeLocalVariableTables(
+    private static void writeAttributeLocalVariableTables(
             Loader loader, Printer printer, ReferenceMap referenceMap,
             ClassFile classFile, Method method)
     {
@@ -373,7 +373,7 @@ public class ByteCodeWriter
                     printer.endOfLine();
                     printer.startOfLine(Instruction.UNKNOWN_LINE_NUMBER);
                     printer.print(START_OF_COMMENT);
-                    printer.print(lv.start_pc);
+                    printer.print(lv.startPc);
                     printer.print("\t");
                     printer.print(lv.length);
                     printer.print("\t");
@@ -391,11 +391,11 @@ public class ByteCodeWriter
 
                     printer.print("\t");
 
-                    if (lv.signature_index > 0)
+                    if (lv.signatureIndex > 0)
                     {
-                        SignatureWriter.WriteSignature(
+                        SignatureWriter.writeSignature(
                             loader, printer, referenceMap,
-                            classFile, constants.getConstantUtf8(lv.signature_index));
+                            classFile, constants.getConstantUtf8(lv.signatureIndex));
                     }
                     else
                     {
@@ -406,7 +406,7 @@ public class ByteCodeWriter
         }
     }
 
-    private static void WriteCodeExceptions(
+    private static void writeCodeExceptions(
             Printer printer, ClassFile classFile, Method method)
     {
         // Ecriture de la table des exceptions
@@ -425,25 +425,25 @@ public class ByteCodeWriter
                 printer.endOfLine();
                 printer.startOfLine(Instruction.UNKNOWN_LINE_NUMBER);
                 printer.print(START_OF_COMMENT);
-                printer.print(codeExceptions[i].start_pc);
+                printer.print(codeExceptions[i].startPc);
                 printer.print("\t");
-                printer.print(codeExceptions[i].end_pc);
+                printer.print(codeExceptions[i].endPc);
                 printer.print("\t");
-                printer.print(codeExceptions[i].handler_pc);
+                printer.print(codeExceptions[i].handlerPc);
                 printer.print("\t");
 
-                if (codeExceptions[i].catch_type == 0)
+                if (codeExceptions[i].catchType == 0)
                     printer.print("finally");
                 else
                     printer.print(
 
                         classFile.getConstantPool().getConstantClassName(
-                                codeExceptions[i].catch_type));
+                                codeExceptions[i].catchType));
             }
         }
     }
 
-    private static String GetConstantFieldName(
+    private static String getConstantFieldName(
             ConstantPool constants, int index)
     {
         ConstantFieldref cfr;
@@ -472,7 +472,7 @@ public class ByteCodeWriter
         return classPath + ':' + fieldName + "\t" + fieldDescriptor;
     }
 
-    private static String GetConstantMethodName(
+    private static String getConstantMethodName(
             ConstantPool constants, int index)
     {
         ConstantMethodref cmr;

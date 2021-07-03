@@ -22,12 +22,12 @@ public class CharArrayUtil
         super();
     }
 
-    public static String Substring(char[] ca, int beginIndex, int endIndex)
+    public static String substring(char[] ca, int beginIndex, int endIndex)
     {
         return new String(ca, beginIndex, endIndex - beginIndex);
     }
 
-    public static int IndexOf(char[] ca, char ch, int fromIndex)
+    public static int indexOf(char[] ca, char ch, int fromIndex)
     {
         int length = ca.length;
 

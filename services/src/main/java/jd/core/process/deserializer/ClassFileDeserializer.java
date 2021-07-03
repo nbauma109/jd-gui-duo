@@ -44,10 +44,10 @@ public class ClassFileDeserializer
         super();
     }
 
-    public static ClassFile Deserialize(Loader loader, String internalClassPath)
+    public static ClassFile deserialize(Loader loader, String internalClassPath)
         throws LoaderException
     {
-        ClassFile classFile = LoadSingleClass(loader, internalClassPath);
+        ClassFile classFile = loadSingleClass(loader, internalClassPath);
         if (classFile == null)
             return null;
 
@@ -69,7 +69,7 @@ public class ClassFileDeserializer
         for (int i=0; i<length; i++)
         {
             String innerInternalClassPath =
-                constants.getConstantClassName(cs[i].inner_class_index);
+                constants.getConstantClassName(cs[i].innerClassIndex);
 
             if (! innerInternalClassPath.startsWith(innerInternalClassNamePrefix))
                 continue;
@@ -89,13 +89,13 @@ public class ClassFileDeserializer
             try
             {
                 ClassFile innerClassFile =
-                    Deserialize(loader, innerInternalClassPath +
+                    deserialize(loader, innerInternalClassPath +
                     StringConstants.CLASS_FILE_SUFFIX);
 
                 if (innerClassFile != null)
                 {
                     // Alter inner class access flag
-                    innerClassFile.setAccessFlags(cs[i].inner_access_flags);
+                    innerClassFile.setAccessFlags(cs[i].innerAccessFlags);
                     // Setup outer class reference
                     innerClassFile.setOuterClass(classFile);
                     // Add inner classes
@@ -114,7 +114,7 @@ public class ClassFileDeserializer
         return classFile;
     }
 
-    private static ClassFile LoadSingleClass(
+    private static ClassFile loadSingleClass(
             Loader loader, String internalClassPath)
         throws LoaderException
     {
@@ -122,7 +122,7 @@ public class ClassFileDeserializer
 
         try (DataInputStream dis = new DataInputStream(new ByteArrayInputStream(loader.load(internalClassPath))))
         {
-            classFile = Deserialize(dis);
+            classFile = deserialize(dis);
         }
         catch (IOException e)
         {
@@ -131,32 +131,32 @@ public class ClassFileDeserializer
         return classFile;
     }
 
-    private static ClassFile Deserialize(DataInput di)
+    private static ClassFile deserialize(DataInput di)
         throws IOException
     {
-        CheckMagic(di);
+        checkMagic(di);
 
-        int minor_version = di.readUnsignedShort();
-        int major_version = di.readUnsignedShort();
+        int minorVersion = di.readUnsignedShort();
+        int majorVersion = di.readUnsignedShort();
 
-        Constant[] constants = DeserializeConstants(di);
+        Constant[] constants = deserializeConstants(di);
         ConstantPool constantPool = new ConstantPool(constants);
 
-        int access_flags = di.readUnsignedShort();
-        int this_class = di.readUnsignedShort();
-        int super_class = di.readUnsignedShort();
+        int accessFlags = di.readUnsignedShort();
+        int thisClass = di.readUnsignedShort();
+        int superClass = di.readUnsignedShort();
 
-        int[] interfaces = DeserializeInterfaces(di);
-        Field[] fieldInfos = DeserializeFields(di, constantPool);
-        Method[] methodInfos = DeserializeMethods(di, constantPool);
+        int[] interfaces = deserializeInterfaces(di);
+        Field[] fieldInfos = deserializeFields(di, constantPool);
+        Method[] methodInfos = deserializeMethods(di, constantPool);
 
         Attribute[] attributeInfos =
-            AttributeDeserializer.Deserialize(di, constantPool);
+            AttributeDeserializer.deserialize(di, constantPool);
 
         return new ClassFile(
-                minor_version, major_version,
+                minorVersion, majorVersion,
                 constantPool,
-                access_flags, this_class, super_class,
+                accessFlags, thisClass, superClass,
                 interfaces,
                 fieldInfos,
                 methodInfos,
@@ -164,7 +164,7 @@ public class ClassFileDeserializer
         );
     }
 
-    private static Constant[] DeserializeConstants(DataInput di)
+    private static Constant[] deserializeConstants(DataInput di)
         throws IOException
     {
         int count = di.readUnsignedShort();
@@ -238,7 +238,7 @@ public class ClassFileDeserializer
         return constants;
     }
 
-    private static int[] DeserializeInterfaces(DataInput di)
+    private static int[] deserializeInterfaces(DataInput di)
         throws IOException
     {
         int count = di.readUnsignedShort();
@@ -253,7 +253,7 @@ public class ClassFileDeserializer
         return interfaces;
     }
 
-    private static Field[] DeserializeFields(
+    private static Field[] deserializeFields(
             DataInput di, ConstantPool constantPool)
         throws IOException
     {
@@ -268,12 +268,12 @@ public class ClassFileDeserializer
                         di.readUnsignedShort(),
                         di.readUnsignedShort(),
                         di.readUnsignedShort(),
-                        AttributeDeserializer.Deserialize(di, constantPool));
+                        AttributeDeserializer.deserialize(di, constantPool));
 
         return fieldInfos;
     }
 
-    private static Method[] DeserializeMethods(DataInput di,
+    private static Method[] deserializeMethods(DataInput di,
             ConstantPool constants)
         throws IOException
     {
@@ -288,12 +288,12 @@ public class ClassFileDeserializer
                         di.readUnsignedShort(),
                         di.readUnsignedShort(),
                         di.readUnsignedShort(),
-                        AttributeDeserializer.Deserialize(di, constants));
+                        AttributeDeserializer.deserialize(di, constants));
 
         return methodInfos;
     }
 
-    private static void CheckMagic(DataInput di)
+    private static void checkMagic(DataInput di)
         throws IOException
     {
         int magic = di.readInt();

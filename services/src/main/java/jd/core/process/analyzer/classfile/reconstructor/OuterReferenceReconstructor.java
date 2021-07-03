@@ -55,7 +55,7 @@ public class OuterReferenceReconstructor
         // Initialisation des visiteurs traitant les references des classes externes
         this.outerReferenceVisitor = new ReplaceOuterReferenceVisitor(
             ByteCodeConstants.ALOAD, 1,
-            CreateOuterThisInstructionIndex(classFile));
+            createOuterThisInstructionIndex(classFile));
         this.multipleOuterReference =
             new ReplaceMultipleOuterReferenceVisitor(classFile);
         this.outerAccessorVisitor =
@@ -103,7 +103,7 @@ public class OuterReferenceReconstructor
 
     // Creation d'une nouvelle constante de type 'Fieldref', dans le
     // pool, permettant l'affichage de 'OuterClass.this.'
-    private static int CreateOuterThisInstructionIndex(ClassFile classFile)
+    private static int createOuterThisInstructionIndex(ClassFile classFile)
     {
         if (classFile.getOuterClass() == null)
             return 0;
@@ -111,7 +111,7 @@ public class OuterReferenceReconstructor
         String internalOuterClassName =
             classFile.getOuterClass().getInternalClassName();
         String outerClassName =
-                SignatureUtil.GetInnerName(internalOuterClassName);
+                SignatureUtil.getInnerName(internalOuterClassName);
 
         ConstantPool constants = classFile.getConstantPool();
 

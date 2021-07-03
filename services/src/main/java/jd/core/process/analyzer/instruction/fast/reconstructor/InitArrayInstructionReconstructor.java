@@ -42,7 +42,7 @@ public class InitArrayInstructionReconstructor
         super();
     }
 
-    public static void Reconstruct(List<Instruction> list)
+    public static void reconstruct(List<Instruction> list)
     {
         for (int index=list.size()-1; index>=0; --index)
         {
@@ -58,11 +58,11 @@ public class InitArrayInstructionReconstructor
                 (opcode != ByteCodeConstants.ANEWARRAY))
                 continue;
 
-            ReconstructAInstruction(list, index, dupStore);
+            reconstructAInstruction(list, index, dupStore);
         }
     }
 
-    private static void ReconstructAInstruction(
+    private static void reconstructAInstruction(
         List<Instruction> list, int index, DupStore dupStore)
     {
         // 1er DupStore trouvé
@@ -130,7 +130,7 @@ public class InitArrayInstructionReconstructor
                 dupStore.lineNumber, dupStore.objectref, values);
 
             // Recherche de l'instruction 'DupLoad' suivante
-            Instruction parent = ReconstructorUtil.ReplaceDupLoad(
+            Instruction parent = ReconstructorUtil.replaceDupLoad(
                 list, index, lastDupStore, iai);
 
             if (parent != null)
@@ -152,26 +152,26 @@ public class InitArrayInstructionReconstructor
                 switch (na.type)
                 {
                 case ByteCodeConstants.T_BOOLEAN:
-                    SetContantTypes("Z", iai.values);
+                    setContantTypes("Z", iai.values);
                     break;
                 case ByteCodeConstants.T_CHAR:
-                    SetContantTypes("C", iai.values);
+                    setContantTypes("C", iai.values);
                     break;
                 case ByteCodeConstants.T_BYTE:
-                    SetContantTypes("B", iai.values);
+                    setContantTypes("B", iai.values);
                     break;
                 case ByteCodeConstants.T_SHORT:
-                    SetContantTypes("S", iai.values);
+                    setContantTypes("S", iai.values);
                     break;
                 case ByteCodeConstants.T_INT:
-                    SetContantTypes("I", iai.values);
+                    setContantTypes("I", iai.values);
                     break;
                 }
             }
         }
     }
 
-    private static void SetContantTypes(
+    private static void setContantTypes(
         String signature, List<Instruction> values)
     {
         final int length = values.size();

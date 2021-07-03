@@ -18,12 +18,12 @@ package jd.core.model.classfile.attribute;
 
 public class LineNumber
 {
-    public final int start_pc;
-    public final int line_number;
+    public final int startPc;
+    public final int lineNumber;
 
-    public LineNumber(int start_pc, int line_number)
+    public LineNumber(int startPc, int lineNumber)
     {
-        this.start_pc = start_pc;
-        this.line_number = line_number;
+        this.startPc = startPc;
+        this.lineNumber = lineNumber;
     }
 }

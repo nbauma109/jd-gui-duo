@@ -75,7 +75,7 @@ public class LocalVariables
             LocalVariable lv = this.listOfLocalVariables.get(i);
 
             if (
-                ((lv.index == index) && (lv.start_pc > localVariable.start_pc)) ||
+                ((lv.index == index) && (lv.startPc > localVariable.startPc)) ||
                 (lv.index > index)
                 )
             {
@@ -117,8 +117,8 @@ public class LocalVariables
         for (int i = length - 1; i >= 0; --i) {
             LocalVariable lv = this.listOfLocalVariables.get(i);
 
-            if ((lv.index == index) && (lv.start_pc <= offset)
-                    && (offset < lv.start_pc + lv.length))
+            if ((lv.index == index) && (lv.startPc <= offset)
+                    && (offset < lv.startPc + lv.length))
                 return lv;
         }
 
@@ -146,8 +146,8 @@ public class LocalVariables
         for (int i = length - 1; i >= 0; --i) {
             LocalVariable lv = this.listOfLocalVariables.get(i);
 
-            if ((lv.index == index) && (lv.start_pc <= offset)
-                    && (offset < lv.start_pc + lv.length))
+            if ((lv.index == index) && (lv.startPc <= offset)
+                    && (offset < lv.startPc + lv.length))
             {
                 this.listOfLocalVariables.remove(i);
                 break;
@@ -164,7 +164,7 @@ public class LocalVariables
         {
             LocalVariable lv = this.listOfLocalVariables.get(i);
 
-            if ((lv.index == index) && (lv.start_pc <= offset))
+            if ((lv.index == index) && (lv.startPc <= offset))
                 return lv;
         }
 

@@ -65,7 +65,7 @@ public class InitDexEnumFieldsReconstructor
         super();
     }
 
-    public static void Reconstruct(ClassFile classFile)
+    public static void reconstruct(ClassFile classFile)
     {
         Method method = classFile.getStaticMethod();
         if (method == null)
@@ -118,7 +118,7 @@ public class InitDexEnumFieldsReconstructor
                 {
                     Field field = fields[indexField];
 
-                    if (((field.access_flags & (ClassFileConstants.ACC_STATIC|ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_FINAL|ClassFileConstants.ACC_PRIVATE)) ==
+                    if (((field.accessFlags & (ClassFileConstants.ACC_STATIC|ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_FINAL|ClassFileConstants.ACC_PRIVATE)) ==
                             (ClassFileConstants.ACC_STATIC|ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_FINAL|ClassFileConstants.ACC_PRIVATE)) &&
                         (cnat.getDescriptorIndex() == field.getDescriptorIndex()) &&
                         (cnat.getNameIndex() == field.getNameIndex()))

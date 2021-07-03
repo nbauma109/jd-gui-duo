@@ -109,7 +109,7 @@ public class InstructionSplitterVisitor extends BaseInstructionSplitterVisitor
         this.offset1 = in.offset;
 
         // Add blocks for inner class body
-        ClassFileLayouter.CreateBlocksForBodyOfAnonymousClass(
+        ClassFileLayouter.createBlocksForBodyOfAnonymousClass(
             this.preferences, innerClassFile, this.layoutBlockList);
     }
 }

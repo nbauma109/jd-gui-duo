@@ -22,7 +22,7 @@ public class StringUtil
         super();
     }
 
-    private static void EscapeChar(StringBuilder sb, char c)
+    private static void escapeChar(StringBuilder sb, char c)
     {
         switch (c)
         {
@@ -58,7 +58,7 @@ public class StringUtil
         }
     }
 
-    public static String EscapeStringAndAppendQuotationMark(String s)
+    public static String escapeStringAndAppendQuotationMark(String s)
     {
         int length = s.length();
         StringBuilder sb = new StringBuilder(length * 2 + 2);
@@ -72,7 +72,7 @@ public class StringUtil
                 if (s.charAt(i) == '"')
                     sb.append("\\\"");
                 else
-                    EscapeChar(sb, s.charAt(i));
+                    escapeChar(sb, s.charAt(i));
             }
         }
 
@@ -81,7 +81,7 @@ public class StringUtil
         return sb.toString();
     }
 
-    public static String EscapeCharAndAppendApostrophe(char c)
+    public static String escapeCharAndAppendApostrophe(char c)
     {
         StringBuilder sb = new StringBuilder(10);
 
@@ -90,7 +90,7 @@ public class StringUtil
         if (c == '\'')
             sb.append("\\'");
         else
-            EscapeChar(sb,  c);
+            escapeChar(sb,  c);
 
         sb.append('\'');
 

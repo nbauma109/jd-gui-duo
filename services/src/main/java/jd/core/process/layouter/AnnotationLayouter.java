@@ -33,7 +33,7 @@ public class AnnotationLayouter
         super();
     }
 
-    public static void CreateBlocksForAnnotations(
+    public static void createBlocksForAnnotations(
         ClassFile classFile, Attribute[] attributes,
         List<LayoutBlock> layoutBlockList)
     {

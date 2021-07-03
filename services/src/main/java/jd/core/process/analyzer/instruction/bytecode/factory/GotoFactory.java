@@ -255,13 +255,13 @@ public class GotoFactory extends InstructionFactory
                 switch (opcode)
                 {
                 case ByteCodeConstants.TABLESWITCH:
-                    offset = ByteCodeUtil.NextTableSwitchOffset(code, offset);
+                    offset = ByteCodeUtil.nextTableSwitchOffset(code, offset);
                     break;
                 case ByteCodeConstants.LOOKUPSWITCH:
-                    offset = ByteCodeUtil.NextLookupSwitchOffset(code, offset);
+                    offset = ByteCodeUtil.nextLookupSwitchOffset(code, offset);
                     break;
                 case ByteCodeConstants.WIDE:
-                    offset = ByteCodeUtil.NextWideOffset(code, offset);
+                    offset = ByteCodeUtil.nextWideOffset(code, offset);
                 }
                 break;
             case ByteCodeConstants.NO_OF_OPERANDS_UNDEFINED:

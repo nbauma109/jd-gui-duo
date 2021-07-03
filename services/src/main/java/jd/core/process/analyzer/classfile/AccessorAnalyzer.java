@@ -39,31 +39,31 @@ public class AccessorAnalyzer
         super();
     }
 
-    public static void Analyze(ClassFile classFile, Method method)
+    public static void analyze(ClassFile classFile, Method method)
     {
         // Recherche des accesseurs de champs statiques
         //   static AuthenticatedSubject access$000()
-        if (SearchGetStaticAccessor(classFile, method) == true)
+        if (searchGetStaticAccessor(classFile, method) == true)
             return;
 
         // Recherche des accesseurs de champs statiques
         //   static void access$0(int)
-        if (SearchPutStaticAccessor(classFile, method) == true)
+        if (searchPutStaticAccessor(classFile, method) == true)
             return;
 
         // Recherche des accesseurs de champs
         //   static int access$1(TestInnerClass)
-        if (SearchGetFieldAccessor(classFile, method) == true)
+        if (searchGetFieldAccessor(classFile, method) == true)
             return;
 
         // Recherche des accesseurs de champs
         //   static void access$0(TestInnerClass, int)
-        if (SearchPutFieldAccessor(classFile, method) == true)
+        if (searchPutFieldAccessor(classFile, method) == true)
             return;
 
         // Recherche des accesseurs de méthodes
         //   static void access$100(EntitlementFunctionLibrary, EvaluationCtx, URI, Bag, Bag[])
-        SearchInvokeMethodAccessor(classFile, method);
+        searchInvokeMethodAccessor(classFile, method);
     }
 
     /* Recherche des accesseurs de champs statiques:
@@ -74,7 +74,7 @@ public class AccessorAnalyzer
      *       areturn
      *   }
      */
-    private static boolean SearchGetStaticAccessor(
+    private static boolean searchGetStaticAccessor(
         ClassFile classFile, Method method)
     {
         List<Instruction> list = method.getInstructions();
@@ -127,7 +127,7 @@ public class AccessorAnalyzer
      *       return
      *   }
      */
-    private static boolean SearchPutStaticAccessor(
+    private static boolean searchPutStaticAccessor(
         ClassFile classFile, Method method)
     {
         List<Instruction> list = method.getInstructions();
@@ -152,7 +152,7 @@ public class AccessorAnalyzer
             constants.getConstantUtf8(method.getDescriptorIndex());
         if (methodDescriptor.charAt(1) == ')')
             return false;
-        if (SignatureUtil.GetParameterSignatureCount(methodDescriptor) != 1)
+        if (SignatureUtil.getParameterSignatureCount(methodDescriptor) != 1)
             return false;
 
         String methodName = constants.getConstantUtf8(method.getNameIndex());
@@ -181,7 +181,7 @@ public class AccessorAnalyzer
      *       ireturn
      *   }
      */
-    private static boolean SearchGetFieldAccessor(
+    private static boolean searchGetFieldAccessor(
         ClassFile classFile, Method method)
     {
         List<Instruction> list = method.getInstructions();
@@ -207,7 +207,7 @@ public class AccessorAnalyzer
             constants.getConstantUtf8(method.getDescriptorIndex());
         if (methodDescriptor.charAt(1) == ')')
             return false;
-        if (SignatureUtil.GetParameterSignatureCount(methodDescriptor) != 1)
+        if (SignatureUtil.getParameterSignatureCount(methodDescriptor) != 1)
             return false;
 
         String methodName = constants.getConstantUtf8(method.getNameIndex());
@@ -237,7 +237,7 @@ public class AccessorAnalyzer
      *       return
      *   }
      */
-    private static boolean SearchPutFieldAccessor(
+    private static boolean searchPutFieldAccessor(
         ClassFile classFile, Method method)
     {
         List<Instruction> list = method.getInstructions();
@@ -286,7 +286,7 @@ public class AccessorAnalyzer
             constants.getConstantUtf8(method.getDescriptorIndex());
         if (methodDescriptor.charAt(1) == ')')
             return false;
-        if (SignatureUtil.GetParameterSignatureCount(methodDescriptor) != 2)
+        if (SignatureUtil.getParameterSignatureCount(methodDescriptor) != 2)
             return false;
 
         ConstantNameAndType cnat = constants.getConstantNameAndType(
@@ -318,7 +318,7 @@ public class AccessorAnalyzer
      *         return
      *     }
      */
-    private static boolean SearchInvokeMethodAccessor(
+    private static boolean searchInvokeMethodAccessor(
         ClassFile classFile, Method method)
     {
         List<Instruction> list = method.getInstructions();

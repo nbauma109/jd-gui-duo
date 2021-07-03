@@ -536,7 +536,7 @@ public class ReplaceOuterAccessorVisitor
             matchedClassFile.getMethod(methodName, methodDescriptor);
 
         if ((method == null) ||
-            ((method.access_flags & (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_STATIC))
+            ((method.accessFlags & (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_STATIC))
                 != (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_STATIC)))
             return null;
 

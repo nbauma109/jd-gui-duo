@@ -30,7 +30,7 @@ public class AnnotationWriter
 {
     private AnnotationWriter() {
     }
-        public static void WriteParameterAnnotation(
+        public static void writeParameterAnnotation(
         Loader loader, Printer printer, ReferenceMap referenceMap,
         ClassFile classFile, ParameterAnnotations parameterAnnotation)
     {
@@ -46,21 +46,21 @@ public class AnnotationWriter
 
         for (int i=0; i<annotations.length; i++)
         {
-            WriteAnnotation(
+            writeAnnotation(
                 loader, printer, referenceMap, classFile, annotations[i]);
             printer.print(' ');
         }
     }
 
-    public static void WriteAnnotation(
+    public static void writeAnnotation(
         Loader loader, Printer printer, ReferenceMap referenceMap,
         ClassFile classFile, Annotation annotation)
     {
         printer.startOfAnnotationName();
         printer.print('@');
         String annotationName =
-            classFile.getConstantPool().getConstantUtf8(annotation.type_index);
-        SignatureWriter.WriteSignature(
+            classFile.getConstantPool().getConstantUtf8(annotation.typeIndex);
+        SignatureWriter.writeSignature(
             loader, printer, referenceMap, classFile, annotationName);
         printer.endOfAnnotationName();
 
@@ -70,27 +70,27 @@ public class AnnotationWriter
             printer.print('(');
 
             ConstantPool constants = classFile.getConstantPool();
-            String name = constants.getConstantUtf8(evps[0].element_name_index);
+            String name = constants.getConstantUtf8(evps[0].elementNameIndex);
 
             if (evps.length > 1 || !"value".equals(name))
             {
                 printer.print(name);
                 printer.print('=');
             }
-            ElementValueWriter.WriteElementValue(
+            ElementValueWriter.writeElementValue(
                 loader, printer, referenceMap,
-                classFile, evps[0].element_value);
+                classFile, evps[0].elementValue);
 
             for (int j=1; j<evps.length; j++)
             {
-                name = constants.getConstantUtf8(evps[j].element_name_index);
+                name = constants.getConstantUtf8(evps[j].elementNameIndex);
 
                 printer.print(", ");
                 printer.print(name);
                 printer.print('=');
-                ElementValueWriter.WriteElementValue(
+                ElementValueWriter.writeElementValue(
                     loader, printer, referenceMap,
-                    classFile, evps[j].element_value);
+                    classFile, evps[j].elementValue);
             }
 
             printer.print(')');

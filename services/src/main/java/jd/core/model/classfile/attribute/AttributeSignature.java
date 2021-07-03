@@ -18,12 +18,12 @@ package jd.core.model.classfile.attribute;
 
 public class AttributeSignature extends Attribute
 {
-    public final int signature_index;
+    public final int signatureIndex;
 
     public AttributeSignature(
-            byte tag, int attribute_name_index, int signature_index)
+            byte tag, int attributeNameIndex, int signatureIndex)
     {
-        super(tag, attribute_name_index);
-        this.signature_index = signature_index;
+        super(tag, attributeNameIndex);
+        this.signatureIndex = signatureIndex;
     }
 }

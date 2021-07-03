@@ -53,7 +53,7 @@ public class CheckCast extends IndexInstruction
         ConstantClass cc = (ConstantClass)c;
         String signature = constants.getConstantUtf8(cc.getNameIndex());
         if (signature.charAt(0) != '[')
-            signature = SignatureUtil.CreateTypeName(signature);
+            signature = SignatureUtil.createTypeName(signature);
         return signature;
     }
 
