@@ -1965,7 +1965,7 @@ public class FastCodeExceptionAnalyzer
         }
 
         // Remove JSR instruction in try block before 'return' instruction
-        formatFastTry_RemoveJsrInstructionAndCompactStoreReturn(
+        formatFastTryRemoveJsrInstructionAndCompactStoreReturn(
             tryInstructions, localVariables, Instruction.UNKNOWN_LINE_NUMBER);
 
         int i = fastTry.catches.size();
@@ -1975,7 +1975,7 @@ public class FastCodeExceptionAnalyzer
             catchInstructions = fastTry.catches.get(i).instructions;
 
             // Remove first catch instruction in each catch block
-            if (formatCatch_RemoveFirstCatchInstruction(catchInstructions.get(0))) {
+            if (formatCatchRemoveFirstCatchInstruction(catchInstructions.get(0))) {
                 catchInstructions.remove(0);
             }
 
@@ -2007,14 +2007,14 @@ public class FastCodeExceptionAnalyzer
                 }
 
                 // Remove JSR instruction in try block before 'return' instruction
-                formatFastTry_RemoveJsrInstructionAndCompactStoreReturn(
+                formatFastTryRemoveJsrInstructionAndCompactStoreReturn(
                     catchInstructions, localVariables,
                     Instruction.UNKNOWN_LINE_NUMBER);
             }
         }
     }
 
-    private static boolean formatCatch_RemoveFirstCatchInstruction(
+    private static boolean formatCatchRemoveFirstCatchInstruction(
         Instruction instruction)
     {
         switch (instruction.opcode)
@@ -2056,7 +2056,7 @@ public class FastCodeExceptionAnalyzer
         // Remove JSR instruction in try block before 'return' instruction
         int finallyInstructionsLineNumber =
                 fastTry.finallyInstructions.get(0).lineNumber;
-        formatFastTry_RemoveJsrInstructionAndCompactStoreReturn(
+        formatFastTryRemoveJsrInstructionAndCompactStoreReturn(
             tryInstructions, localVariables, finallyInstructionsLineNumber);
 
         format118FinallyThrow(fastTry);
@@ -2329,7 +2329,7 @@ public class FastCodeExceptionAnalyzer
         // Remove JSR instruction in try block before 'return' instruction
         int finallyInstructionsLineNumber =
                 fastTry.finallyInstructions.get(0).lineNumber;
-        int jumpOffset = formatFastTry_RemoveJsrInstructionAndCompactStoreReturn(
+        int jumpOffset = formatFastTryRemoveJsrInstructionAndCompactStoreReturn(
                 tryInstructions, localVariables, finallyInstructionsLineNumber);
         // Remove last 'jsr' instruction in try block
         length = tryInstructions.size();
@@ -2394,7 +2394,7 @@ public class FastCodeExceptionAnalyzer
                     catchInstructions.remove(length);
                 }
                 // Remove JSR instruction in try block before 'return' instruction
-                formatFastTry_RemoveJsrInstructionAndCompactStoreReturn(
+                formatFastTryRemoveJsrInstructionAndCompactStoreReturn(
                     catchInstructions, localVariables,
                     finallyInstructionsLineNumber);
                 // Remove first catch instruction in each catch block
@@ -2431,7 +2431,7 @@ public class FastCodeExceptionAnalyzer
                     catchInstructions.remove(length);
                 }
                 // Remove JSR instruction in try block before 'return' instruction
-                formatFastTry_RemoveJsrInstructionAndCompactStoreReturn(
+                formatFastTryRemoveJsrInstructionAndCompactStoreReturn(
                     catchInstructions, localVariables,
                     finallyInstructionsLineNumber);
                 // Remove first catch instruction in each catch block
@@ -2499,7 +2499,7 @@ public class FastCodeExceptionAnalyzer
             }
 
             // Remove finally instructions in try block before 'return' instruction
-            format142_RemoveFinallyInstructionsBeforeReturnAndCompactStoreReturn(
+            format142RemoveFinallyInstructionsBeforeReturnAndCompactStoreReturn(
                 localVariables, visitor, tryInstructions, finallyInstructions);
 
             if (fastTry.catches != null)
@@ -2528,7 +2528,7 @@ public class FastCodeExceptionAnalyzer
                     }
 
                     // Remove finally instructions before 'return' instruction
-                    format142_RemoveFinallyInstructionsBeforeReturnAndCompactStoreReturn(
+                    format142RemoveFinallyInstructionsBeforeReturnAndCompactStoreReturn(
                         localVariables, visitor, catchInstructions, finallyInstructions);
                     // Remove first catch instruction in each catch block
                     if (!catchInstructions.isEmpty()) {
@@ -2547,14 +2547,14 @@ public class FastCodeExceptionAnalyzer
                 catchInstructions = fastTry.catches.get(i).instructions;
                 
 		        // Remove first catch instruction in each catch block
-		        if (!catchInstructions.isEmpty() && formatCatch_RemoveFirstCatchInstruction(catchInstructions.get(0))) {
+		        if (!catchInstructions.isEmpty() && formatCatchRemoveFirstCatchInstruction(catchInstructions.get(0))) {
 		            catchInstructions.remove(0);
 		        }
             }
         }
     }
 
-    private static void format142_RemoveFinallyInstructionsBeforeReturnAndCompactStoreReturn(
+    private static void format142RemoveFinallyInstructionsBeforeReturnAndCompactStoreReturn(
         LocalVariables localVariables,
         FastCompareInstructionVisitor visitor,
         List<Instruction> instructions,
@@ -2659,7 +2659,7 @@ public class FastCodeExceptionAnalyzer
                     // Recursive calls
                     FastTry ft = (FastTry)instruction;
 
-                    format142_RemoveFinallyInstructionsBeforeReturnAndCompactStoreReturn(
+                    format142RemoveFinallyInstructionsBeforeReturnAndCompactStoreReturn(
                         localVariables, visitor,
                         ft.instructions, finallyInstructions);
 
@@ -2668,7 +2668,7 @@ public class FastCodeExceptionAnalyzer
                         int i = ft.catches.size();
                         while (i-- > 0)
                         {
-                            format142_RemoveFinallyInstructionsBeforeReturnAndCompactStoreReturn(
+                            format142RemoveFinallyInstructionsBeforeReturnAndCompactStoreReturn(
                                 localVariables, visitor,
                                 ft.catches.get(i).instructions, finallyInstructions);
                         }
@@ -2676,7 +2676,7 @@ public class FastCodeExceptionAnalyzer
 
                     if (ft.finallyInstructions != null)
                     {
-                        format142_RemoveFinallyInstructionsBeforeReturnAndCompactStoreReturn(
+                        format142RemoveFinallyInstructionsBeforeReturnAndCompactStoreReturn(
                             localVariables, visitor,
                             ft.finallyInstructions, finallyInstructions);
                     }
@@ -2687,7 +2687,7 @@ public class FastCodeExceptionAnalyzer
                     // Recursive calls
                     FastSynchronized fs = (FastSynchronized)instruction;
 
-                    format142_RemoveFinallyInstructionsBeforeReturnAndCompactStoreReturn(
+                    format142RemoveFinallyInstructionsBeforeReturnAndCompactStoreReturn(
                         localVariables, visitor,
                         fs.instructions, finallyInstructions);
                 }
@@ -2762,7 +2762,7 @@ public class FastCodeExceptionAnalyzer
         } else {
             finallyInstructionsLineNumber = fastTry.finallyInstructions.get(0).lineNumber;
         }
-        formatFastTry_RemoveJsrInstructionAndCompactStoreReturn(
+        formatFastTryRemoveJsrInstructionAndCompactStoreReturn(
             tryInstructions, localVariables, finallyInstructionsLineNumber);
 
         // Format catch blocks
@@ -2781,12 +2781,12 @@ public class FastCodeExceptionAnalyzer
             }
             // Remove Jsr instruction before return instructions
             if (finallyInstructionsLineNumber != -1) {
-                formatFastTry_RemoveJsrInstructionAndCompactStoreReturn(
+                formatFastTryRemoveJsrInstructionAndCompactStoreReturn(
                     catchInstructions, localVariables,
                     finallyInstructionsLineNumber);
             }
             // Change negative jump goto to return offset
-            formatFastTry_FormatNegativeJumpOffset(
+            formatFastTryFormatNegativeJumpOffset(
                 catchInstructions, lastTryInstructionOffset, returnOffset);
             // Remove first catch instruction in each catch block
             catchInstructions.remove(0);
@@ -2823,7 +2823,7 @@ public class FastCodeExceptionAnalyzer
         }
     }
 
-    private static int formatFastTry_RemoveJsrInstructionAndCompactStoreReturn(
+    private static int formatFastTryRemoveJsrInstructionAndCompactStoreReturn(
         List<Instruction> instructions, LocalVariables localVariables,
         int finallyInstructionsLineNumber)
     {
@@ -2885,7 +2885,7 @@ public class FastCodeExceptionAnalyzer
         return jumpOffset;
     }
 
-    private static void formatFastTry_FormatNegativeJumpOffset(
+    private static void formatFastTryFormatNegativeJumpOffset(
         List<Instruction> instructions,
         int lastTryInstructionOffset, int returnOffset)
     {
@@ -2972,11 +2972,11 @@ public class FastCodeExceptionAnalyzer
                 removeOutOfBoundsInstructions(fastTry, astore);
                                     // Remove finally instructions before 'return' instruction
                 int finallyInstructionsSize = finallyInstructions.size();
-                formatEclipse677Finally_RemoveFinallyInstructionsBeforeReturn(
+                formatEclipse677FinallyRemoveFinallyInstructionsBeforeReturn(
                     tryInstructions, finallyInstructionsSize);
 
                 // Format 'ifxxx' instruction jumping to finally block
-                formatEclipse677Finally_FormatIfInstruction(
+                formatEclipse677FinallyFormatIfInstruction(
                     tryInstructions, athrowOffset, afterAthrowOffset, astore.offset);
             }
         }
@@ -3003,7 +3003,7 @@ public class FastCodeExceptionAnalyzer
         }
     }
 
-    private static void formatEclipse677Finally_FormatIfInstruction(
+    private static void formatEclipse677FinallyFormatIfInstruction(
         List<Instruction> instructions, int athrowOffset,
         int afterAthrowOffset, int afterTryOffset)
     {
@@ -3028,7 +3028,7 @@ public class FastCodeExceptionAnalyzer
         }
     }
 
-    private static void formatEclipse677Finally_RemoveFinallyInstructionsBeforeReturn(
+    private static void formatEclipse677FinallyRemoveFinallyInstructionsBeforeReturn(
             List<Instruction> instructions, int finallyInstructionsSize)
     {
         int i = instructions.size();
@@ -3098,11 +3098,11 @@ public class FastCodeExceptionAnalyzer
 
             // Remove finally instructions before 'return' instruction
             int finallyInstructionsSize = finallyInstructions.size();
-            formatEclipse677Finally_RemoveFinallyInstructionsBeforeReturn(
+            formatEclipse677FinallyRemoveFinallyInstructionsBeforeReturn(
                 tryInstructions, finallyInstructionsSize);
 
             // Format 'ifxxx' instruction jumping to finally block
-            formatEclipse677Finally_FormatIfInstruction(
+            formatEclipse677FinallyFormatIfInstruction(
                 tryInstructions, athrowOffset,
                 afterAthrowOffset, lastTryInstructionOffset+1);
 
@@ -3140,16 +3140,16 @@ public class FastCodeExceptionAnalyzer
                 }
 
                 // Remove finally instructions before 'return' instruction
-                formatEclipse677Finally_RemoveFinallyInstructionsBeforeReturn(
+                formatEclipse677FinallyRemoveFinallyInstructionsBeforeReturn(
                     catchInstructions, finallyInstructionsSize);
 
                 // Format 'ifxxx' instruction jumping to finally block
-                formatEclipse677Finally_FormatIfInstruction(
+                formatEclipse677FinallyFormatIfInstruction(
                     catchInstructions, athrowOffset,
                     afterAthrowOffset, lastInstructionOffset+1);
 
                 // Change negative jump goto to return offset
-                formatFastTry_FormatNegativeJumpOffset(
+                formatFastTryFormatNegativeJumpOffset(
                     catchInstructions, lastTryInstructionOffset, returnOffset);
 
                 // Remove first catch instruction in each catch block

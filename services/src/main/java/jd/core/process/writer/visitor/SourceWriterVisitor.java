@@ -255,7 +255,7 @@ public class SourceWriterVisitor
         case ByteCodeConstants.BIPUSH:
         case ByteCodeConstants.SIPUSH:
         case ByteCodeConstants.ICONST:
-            lineNumber = writeBIPush_SIPush_IConst((IConst)instruction);
+            lineNumber = writeBIPushSIPushIConst((IConst)instruction);
             break;
         case ByteCodeConstants.LCONST:
             if (this.firstOffset <= this.previousOffset &&
@@ -856,7 +856,7 @@ public class SourceWriterVisitor
         return false;
     }
 
-    private int writeBIPush_SIPush_IConst(IConst iconst)
+    private int writeBIPushSIPushIConst(IConst iconst)
     {
         int lineNumber = iconst.lineNumber;
 
@@ -870,12 +870,12 @@ public class SourceWriterVisitor
             {
                 if ((short)value == Short.MIN_VALUE)
                 {
-                    writeBIPush_SIPush_IConst(
+                    writeBIPushSIPushIConst(
                         lineNumber, StringConstants.JAVA_LANG_SHORT, StringConstants.MIN_VALUE, "S");
                 }
                 else if ((short)value == Short.MAX_VALUE)
                 {
-                    writeBIPush_SIPush_IConst(
+                    writeBIPushSIPushIConst(
                         lineNumber, StringConstants.JAVA_LANG_SHORT, StringConstants.MAX_VALUE, "S");
                 }
                 else
@@ -887,12 +887,12 @@ public class SourceWriterVisitor
             {
                 if (value == Byte.MIN_VALUE)
                 {
-                    writeBIPush_SIPush_IConst(
+                    writeBIPushSIPushIConst(
                         lineNumber, StringConstants.JAVA_LANG_BYTE, StringConstants.MIN_VALUE, "B");
                 }
                 else if (value == Byte.MAX_VALUE)
                 {
-                    writeBIPush_SIPush_IConst(
+                    writeBIPushSIPushIConst(
                         lineNumber, StringConstants.JAVA_LANG_BYTE, StringConstants.MAX_VALUE, "B");
                 }
                 else
@@ -922,7 +922,7 @@ public class SourceWriterVisitor
         return lineNumber;
     }
 
-    private void writeBIPush_SIPush_IConst(
+    private void writeBIPushSIPushIConst(
         int lineNumber, String internalTypeName, String name, String descriptor)
     {
         String className = SignatureWriter.internalClassNameToClassName(
