@@ -17,7 +17,6 @@
 package jd.core.process.analyzer.classfile.visitor;
 
 import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
-import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
 import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
 import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 

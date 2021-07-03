@@ -56,7 +56,7 @@ public class MergeTryWithResourcesStatementVisitor implements StatementVisitor {
     @Override public void visit(ForEachStatement statement) { safeAccept(statement.getStatements()); }
     @Override public void visit(ForStatement statement) { safeAccept(statement.getStatements()); }
     @Override public void visit(IfStatement statement) { safeAccept(statement.getStatements()); }
-    @Override @SuppressWarnings("unchecked") public void visit(Statements list) { acceptListStatement(list); }
+    @Override public void visit(Statements list) { acceptListStatement(list); }
     @Override public void visit(SynchronizedStatement statement) { safeAccept(statement.getStatements()); }
     @Override public void visit(TryStatement.CatchClause statement) { safeAccept(statement.getStatements()); }
     @Override public void visit(WhileStatement statement) { safeAccept(statement.getStatements()); }

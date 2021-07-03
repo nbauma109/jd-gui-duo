@@ -24,7 +24,6 @@ import org.jd.core.v1.service.writer.WriteTokenProcessor;
 import org.jd.core.v1.util.DefaultList;
 
 import java.io.IOException;
-import java.io.UTFDataFormatException;
 import java.util.Map;
 
 public class ClassFileToJavaSourceDecompiler implements Decompiler {
