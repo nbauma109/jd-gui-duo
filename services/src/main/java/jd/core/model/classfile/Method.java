@@ -16,10 +16,12 @@
  ******************************************************************************/
 package jd.core.model.classfile;
 
+
 import java.util.List;
 
 import jd.core.model.classfile.attribute.*;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
+import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
 
 public class Method extends FieldOrMethod
 {
@@ -90,8 +92,8 @@ public class Method extends FieldOrMethod
 
             if (ac != null)
             {
-                this.code = ac.code;
-
+                this.code = ByteCodeUtil.cleanUpByteCode(ac.code);
+                
                 // localVariables
                 AttributeLocalVariableTable alvt = ac.getAttributeLocalVariableTable();
                 if ((alvt != null) && (alvt.localVariableTable != null))

@@ -251,7 +251,7 @@ public class InstructionListBuilder
             }
             catch (Exception e)
             {
-                // Bad byte code ... generate, for example, by Eclipse Java
+                // Bad byte code ... generated, for example, by Eclipse Java
                 // Compiler or Harmony:
                 // Byte code:
                 //   0: aload_0

@@ -18,13 +18,17 @@ import org.jd.core.v1.service.deserializer.classfile.attribute.InvalidAttributeL
 import org.jd.core.v1.util.DefaultList;
 import org.jd.core.v1.util.StringConstants;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.jd.core.v1.model.classfile.Constants.ACC_SYNTHETIC;
 
 import jd.core.CoreConstants;
+import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
 import jd.core.process.deserializer.ClassFormatException;
 
 public class ClassFileDeserializer {
@@ -475,15 +479,15 @@ public class ClassFileDeserializer {
     }
 
     protected byte[] loadCode(DataInput reader) throws IOException {
-        int code_length = reader.readInt();
-        if (code_length == 0) {
+        int codeLength = reader.readInt();
+        if (codeLength == 0) {
             return null;
         }
 
-        byte[] code = new byte[code_length];
+        byte[] code = new byte[codeLength];
         reader.readFully(code);
 
-        return code;
+        return ByteCodeUtil.cleanUpByteCode(code);
     }
 
     protected CodeException[] loadCodeExceptions(DataInput reader) throws IOException {

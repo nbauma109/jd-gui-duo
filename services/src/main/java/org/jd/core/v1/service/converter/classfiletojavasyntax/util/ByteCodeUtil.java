@@ -32,86 +32,7 @@ public class ByteCodeUtil {
         for (; offset<toOffset; offset++) {
             int opcode = code[offset] & 255;
 
-            switch (opcode) {
-                case 16: case 18: // BIPUSH, LDC
-                case 21: case 22: case 23: case 24: case 25: // ILOAD, LLOAD, FLOAD, DLOAD, ALOAD
-                case 54: case 55: case 56: case 57: case 58: // ISTORE, LSTORE, FSTORE, DSTORE, ASTORE
-                case 169: // RET
-                case 188: // NEWARRAY
-                    offset++;
-                    break;
-                case 17: // SIPUSH
-                case 19: case 20: // LDC_W, LDC2_W
-                case 132: // IINC
-                case 178: // GETSTATIC
-                case 179: // PUTSTATIC
-                case 187: // NEW
-                case 180: // GETFIELD
-                case 181: // PUTFIELD
-                case 182: case 183: // INVOKEVIRTUAL, INVOKESPECIAL
-                case 184: // INVOKESTATIC
-                case 189: // ANEWARRAY
-                case 192: // CHECKCAST
-                case 193: // INSTANCEOF
-                    offset += 2;
-                    break;
-                case 153: case 154: case 155: case 156: case 157: case 158: // IFEQ, IFNE, IFLT, IFGE, IFGT, IFLE
-                case 159: case 160: case 161: case 162: case 163: case 164: case 165: case 166: // IF_ICMPEQ, IF_ICMPNE, IF_ICMPLT, IF_ICMPGE, IF_ICMPGT, IF_ICMPLE, IF_ACMPEQ, IF_ACMPNE
-                case 167: // GOTO
-                case 198: case 199: // IFNULL, IFNONNULL
-                    int deltaOffset = (short)(((code[++offset] & 255) << 8) | (code[++offset] & 255));
-
-                    if (deltaOffset > 0) {
-                        offset += deltaOffset - 2 - 1;
-                    }
-                    break;
-                case 200: // GOTO_W
-                    deltaOffset = (((code[++offset] & 255) << 24) | ((code[++offset] & 255) << 16) | ((code[++offset] & 255) << 8) | (code[++offset] & 255));
-
-                    if (deltaOffset > 0) {
-                        offset += deltaOffset - 4 - 1;
-                    }
-                    break;
-                case 168: // JSR
-                    offset += 2;
-                    break;
-                case 197: // MULTIANEWARRAY
-                    offset += 3;
-                    break;
-                case 185: // INVOKEINTERFACE
-                case 186: // INVOKEDYNAMIC
-                    offset += 4;
-                    break;
-                case 201: // JSR_W
-                    offset += 4;
-                    break;
-                case 170: // TABLESWITCH
-                    offset = (offset + 4) & 0xFFFC; // Skip padding
-                    offset += 4; // Skip default offset
-
-                    int low = ((code[offset++] & 255) << 24) | ((code[offset++] & 255) << 16) | ((code[offset++] & 255) << 8) | (code[offset++] & 255);
-                    int high = ((code[offset++] & 255) << 24) | ((code[offset++] & 255) << 16) | ((code[offset++] & 255) << 8) | (code[offset++] & 255);
-
-                    offset += (4 * (high - low + 1)) - 1;
-                    break;
-                case 171: // LOOKUPSWITCH
-                    offset = (offset + 4) & 0xFFFC; // Skip padding
-                    offset += 4; // Skip default offset
-
-                    int count = ((code[offset++] & 255) << 24) | ((code[offset++] & 255) << 16) | ((code[offset++] & 255) << 8) | (code[offset++] & 255);
-
-                    offset += (8 * count) - 1;
-                    break;
-                case 196: // WIDE
-                    opcode = code[++offset] & 255;
-
-                    if (opcode == 132) { // IINC
-                        offset += 4;
-                    } else {
-                        offset += 2;
-                    }
-                    break;
-            }
+            offset = computeNextOffset(code, offset, opcode);
         }
 
         if (offset <= maxOffset) {
@@ -136,90 +57,95 @@ public class ByteCodeUtil {
 
             lastOffset = offset;
 
-            switch (opcode) {
-                case 16: case 18: // BIPUSH, LDC
-                case 21: case 22: case 23: case 24: case 25: // ILOAD, LLOAD, FLOAD, DLOAD, ALOAD
-                case 54: case 55: case 56: case 57: case 58: // ISTORE, LSTORE, FSTORE, DSTORE, ASTORE
-                case 169: // RET
-                case 188: // NEWARRAY
-                    offset++;
-                    break;
-                case 17: // SIPUSH
-                case 19: case 20: // LDC_W, LDC2_W
-                case 132: // IINC
-                case 178: // GETSTATIC
-                case 179: // PUTSTATIC
-                case 187: // NEW
-                case 180: // GETFIELD
-                case 181: // PUTFIELD
-                case 182: case 183: // INVOKEVIRTUAL, INVOKESPECIAL
-                case 184: // INVOKESTATIC
-                case 189: // ANEWARRAY
-                case 192: // CHECKCAST
-                case 193: // INSTANCEOF
-                    offset += 2;
-                    break;
-                case 153: case 154: case 155: case 156: case 157: case 158: // IFEQ, IFNE, IFLT, IFGE, IFGT, IFLE
-                case 159: case 160: case 161: case 162: case 163: case 164: case 165: case 166: // IF_ICMPEQ, IF_ICMPNE, IF_ICMPLT, IF_ICMPGE, IF_ICMPGT, IF_ICMPLE, IF_ACMPEQ, IF_ACMPNE
-                case 167: // GOTO
-                case 198: case 199: // IFNULL, IFNONNULL
-                    int deltaOffset = (short)(((code[++offset] & 255) << 8) | (code[++offset] & 255));
-
-                    if (deltaOffset > 0) {
-                        offset += deltaOffset - 2 - 1;
-                    }
-                    break;
-                case 200: // GOTO_W
-                    deltaOffset = (((code[++offset] & 255) << 24) | ((code[++offset] & 255) << 16) | ((code[++offset] & 255) << 8) | (code[++offset] & 255));
-
-                    if (deltaOffset > 0) {
-                        offset += deltaOffset - 4 - 1;
-                    }
-                    break;
-                case 168: // JSR
-                    offset += 2;
-                    break;
-                case 197: // MULTIANEWARRAY
-                    offset += 3;
-                    break;
-                case 185: // INVOKEINTERFACE
-                case 186: // INVOKEDYNAMIC
-                    offset += 4;
-                    break;
-                case 201: // JSR_W
-                    offset += 4;
-                    break;
-                case 170: // TABLESWITCH
-                    offset = (offset + 4) & 0xFFFC; // Skip padding
-                    offset += 4; // Skip default offset
-
-                    int low = ((code[offset++] & 255) << 24) | ((code[offset++] & 255) << 16) | ((code[offset++] & 255) << 8) | (code[offset++] & 255);
-                    int high = ((code[offset++] & 255) << 24) | ((code[offset++] & 255) << 16) | ((code[offset++] & 255) << 8) | (code[offset++] & 255);
-
-                    offset += (4 * (high - low + 1)) - 1;
-                    break;
-                case 171: // LOOKUPSWITCH
-                    offset = (offset + 4) & 0xFFFC; // Skip padding
-                    offset += 4; // Skip default offset
-
-                    int count = ((code[offset++] & 255) << 24) | ((code[offset++] & 255) << 16) | ((code[offset++] & 255) << 8) | (code[offset++] & 255);
-
-                    offset += (8 * count) - 1;
-                    break;
-                case 196: // WIDE
-                    opcode = code[++offset] & 255;
-
-                    if (opcode == 132) { // IINC
-                        offset += 4;
-                    } else {
-                        offset += 2;
-                    }
-                    break;
-            }
+            offset = computeNextOffset(code, offset, opcode);
         }
 
         return code[lastOffset] & 255;
     }
+
+	protected static int computeNextOffset(byte[] code, int offset, int opcode) {
+		switch (opcode) {
+		    case 16: case 18: // BIPUSH, LDC
+		    case 21: case 22: case 23: case 24: case 25: // ILOAD, LLOAD, FLOAD, DLOAD, ALOAD
+		    case 54: case 55: case 56: case 57: case 58: // ISTORE, LSTORE, FSTORE, DSTORE, ASTORE
+		    case 169: // RET
+		    case 188: // NEWARRAY
+		        offset++;
+		        break;
+		    case 17: // SIPUSH
+		    case 19: case 20: // LDC_W, LDC2_W
+		    case 132: // IINC
+		    case 178: // GETSTATIC
+		    case 179: // PUTSTATIC
+		    case 187: // NEW
+		    case 180: // GETFIELD
+		    case 181: // PUTFIELD
+		    case 182: case 183: // INVOKEVIRTUAL, INVOKESPECIAL
+		    case 184: // INVOKESTATIC
+		    case 189: // ANEWARRAY
+		    case 192: // CHECKCAST
+		    case 193: // INSTANCEOF
+		        offset += 2;
+		        break;
+		    case 153: case 154: case 155: case 156: case 157: case 158: // IFEQ, IFNE, IFLT, IFGE, IFGT, IFLE
+		    case 159: case 160: case 161: case 162: case 163: case 164: case 165: case 166: // IF_ICMPEQ, IF_ICMPNE, IF_ICMPLT, IF_ICMPGE, IF_ICMPGT, IF_ICMPLE, IF_ACMPEQ, IF_ACMPNE
+		    case 167: // GOTO
+		    case 198: case 199: // IFNULL, IFNONNULL
+		        int deltaOffset = (short)(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+
+		        if (deltaOffset > 0) {
+		            offset += deltaOffset - 2 - 1;
+		        }
+		        break;
+		    case 200: // GOTO_W
+		        deltaOffset = (((code[++offset] & 255) << 24) | ((code[++offset] & 255) << 16) | ((code[++offset] & 255) << 8) | (code[++offset] & 255));
+
+		        if (deltaOffset > 0) {
+		            offset += deltaOffset - 4 - 1;
+		        }
+		        break;
+		    case 168: // JSR
+		        offset += 2;
+		        break;
+		    case 197: // MULTIANEWARRAY
+		        offset += 3;
+		        break;
+		    case 185: // INVOKEINTERFACE
+		    case 186: // INVOKEDYNAMIC
+		        offset += 4;
+		        break;
+		    case 201: // JSR_W
+		        offset += 4;
+		        break;
+		    case 170: // TABLESWITCH
+		        offset = (offset + 4) & 0xFFFC; // Skip padding
+		        offset += 4; // Skip default offset
+
+		        int low = ((code[offset++] & 255) << 24) | ((code[offset++] & 255) << 16) | ((code[offset++] & 255) << 8) | (code[offset++] & 255);
+		        int high = ((code[offset++] & 255) << 24) | ((code[offset++] & 255) << 16) | ((code[offset++] & 255) << 8) | (code[offset++] & 255);
+
+		        offset += (4 * (high - low + 1)) - 1;
+		        break;
+		    case 171: // LOOKUPSWITCH
+		        offset = (offset + 4) & 0xFFFC; // Skip padding
+		        offset += 4; // Skip default offset
+
+		        int count = ((code[offset++] & 255) << 24) | ((code[offset++] & 255) << 16) | ((code[offset++] & 255) << 8) | (code[offset++] & 255);
+
+		        offset += (8 * count) - 1;
+		        break;
+		    case 196: // WIDE
+		        opcode = code[++offset] & 255;
+
+		        if (opcode == 132) { // IINC
+		            offset += 4;
+		        } else {
+		            offset += 2;
+		        }
+		        break;
+		}
+		return offset;
+	}
 
     public static int evalStackDepth(BasicBlock bb) {
         Method method = bb.getControlFlowGraph().getMethod();
@@ -697,4 +623,18 @@ public class ByteCodeUtil {
 
         return count;
     }
+    
+    public static boolean isStaticAccess(byte[] code, int offset) {
+    	int opCode = code[offset] & 255;
+    	return opCode == 178 // GETSTATIC
+    	    || opCode == 184 // INVOKESTATIC
+    	    || opCode == 18  // LDC
+    	    || opCode == 19  // LDC_W
+    	    || opCode == 20; // LDC2_W
+    }
+
+	public static boolean isLoad(byte[] code, int offset) {
+    	int opCode = code[offset] & 255;
+		return opCode >= 18 && opCode <= 53;
+	}
 }

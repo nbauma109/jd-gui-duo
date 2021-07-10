@@ -121,7 +121,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
                     	reduced = true;
                         break;
                     }
-	            } catch (Exception e) {
+	            } catch (Throwable e) {
 	                assert ExceptionUtil.printStackTrace(e);
 	            }
             }

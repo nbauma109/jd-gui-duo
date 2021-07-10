@@ -10,7 +10,7 @@ package org.jd.gui.util.decompiler;
 import jd.core.printer.Printer;
 
 public abstract class ClassFileSourcePrinter implements Printer {
-    protected static final String TAB = "    ";
+    protected static final String TAB = "  ";
     protected static final String NEWLINE = "\n";
 
     protected int maxLineNumber = 0;

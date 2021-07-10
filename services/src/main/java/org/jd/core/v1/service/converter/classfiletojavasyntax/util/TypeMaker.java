@@ -18,8 +18,10 @@ import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.BindTypesToTypesVisitor;
 import org.jd.core.v1.util.StringConstants;
+import org.jd.gui.util.IOUtils;
 
 import java.io.*;
+import java.net.URL;
 import java.util.*;
 
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
@@ -50,21 +52,26 @@ public class TypeMaker {
         INTERNALNAME_TO_OBJECTPRIMITIVETYPE.put(ObjectType.TYPE_PRIMITIVE_VOID.getInternalName(),    ObjectType.TYPE_PRIMITIVE_VOID);
     }
 
-    private Map<String, Type> signatureToType = new HashMap<>(1024);
-    private Map<String, Type> internalTypeNameFieldNameToType = new HashMap<>(1024);
-    private Map<String, ObjectType> descriptorToObjectType = new HashMap<>(1024);
-    private Map<String, ObjectType> internalTypeNameToObjectType = new HashMap<>(1024);
-    private Map<String, TypeTypes> internalTypeNameToTypeTypes = new HashMap<>(1024);
-    private Map<String, Set<BaseType>> internalTypeNameMethodNameParameterCountToDeclaredParameterTypes = new HashMap<>(1024);
-    private Map<String, Set<BaseType>> internalTypeNameMethodNameParameterCountToParameterTypes = new HashMap<>(1024);
-    private Map<String, MethodTypes> internalTypeNameMethodNameDescriptorToMethodTypes = new HashMap<>(1024);
+    /*
+     * Internal type names for which we have already loaded fields and methods
+     */
+    private static Map<String, Boolean> loaded = new HashMap<>();
+
+    private static Map<String, Type> signatureToType = new HashMap<>(1024);
+    private static Map<String, Type> internalTypeNameFieldNameToType = new HashMap<>(1024);
+    private static Map<String, ObjectType> descriptorToObjectType = new HashMap<>(1024);
+    private static Map<String, ObjectType> internalTypeNameToObjectType = new HashMap<>(1024);
+    private static Map<String, TypeTypes> internalTypeNameToTypeTypes = new HashMap<>(1024);
+    private static Map<String, Set<BaseType>> internalTypeNameMethodNameParameterCountToDeclaredParameterTypes = new HashMap<>(1024);
+    private static Map<String, Set<BaseType>> internalTypeNameMethodNameParameterCountToParameterTypes = new HashMap<>(1024);
+    private static Map<String, MethodTypes> internalTypeNameMethodNameDescriptorToMethodTypes = new HashMap<>(1024);
     private Map<String, MethodTypes> signatureToMethodTypes = new HashMap<>(1024);
 
     private Map<Long, Boolean> assignableRawTypes = new HashMap<>(1024);
     private Map<Long, ObjectType> superParameterizedObjectTypes = new HashMap<>(1024);
 
-    private Map<String, String[]> hierarchy = new HashMap<>(1024);
-    private ClassPathLoader classPathLoader = new ClassPathLoader();
+    private static Map<String, String[]> hierarchy = new HashMap<>(1024);
+    private static ClassPathLoader classPathLoader = new ClassPathLoader();
     private Loader loader;
 
     public TypeMaker(Loader loader) {
@@ -1159,7 +1166,7 @@ public class TypeMaker {
         Type type = internalTypeNameFieldNameToType.get(key);
 
         // Load fields
-        if (type == null && loadFieldsAndMethods(internalTypeName)) {
+        if (type == null && loaded.computeIfAbsent(internalTypeName, this::loadFieldsAndMethods)) {
             type = internalTypeNameFieldNameToType.get(key);
 
             if (type == null) {
@@ -1252,7 +1259,7 @@ public class TypeMaker {
         MethodTypes methodTypes = internalTypeNameMethodNameDescriptorToMethodTypes.get(key);
 
         // Load method
-        if (methodTypes == null && loadFieldsAndMethods(internalTypeName)) {
+        if (methodTypes == null && loaded.computeIfAbsent(internalTypeName, this::loadFieldsAndMethods)) {
             methodTypes = internalTypeNameMethodNameDescriptorToMethodTypes.get(key);
 
             if (methodTypes == null) {
@@ -1588,7 +1595,7 @@ public class TypeMaker {
         }
     }
 
-    private Object[] loadClassFile(String internalTypeName, DataInput reader) throws IOException {
+    private static Object[] loadClassFile(String internalTypeName, DataInput reader) throws IOException {
         int magic = reader.readInt();
 
         if (magic != CoreConstants.JAVA_MAGIC_NUMBER) {
@@ -1697,32 +1704,31 @@ public class TypeMaker {
     }
 
     private static class ClassPathLoader implements Loader {
-        protected byte[] buffer = new byte[1024*5];
 
+        private static Map<String, byte[]> resourceCache = new HashMap<>();
+        private static Map<String, URL> resourceURLCache = new HashMap<>();
+        
         @Override
-        public byte[] load(String internalName) throws LoaderException {
-            InputStream is = getClass().getResourceAsStream("/" + internalName + StringConstants.CLASS_FILE_SUFFIX);
-
-            if (is == null) {
-                return null;
-            }
-            try (InputStream in=is; ByteArrayOutputStream out=new ByteArrayOutputStream()) {
-                int read = in.read(buffer);
-
-                while (read > 0) {
-                    out.write(buffer, 0, read);
-                    read = in.read(buffer);
-                }
-
-                return out.toByteArray();
-            } catch (IOException e) {
-                throw new LoaderException(e);
-            }
-        }
+		public byte[] load(String internalName) throws LoaderException {
+			byte[] resourceFromCache = resourceCache.get(internalName);
+			if (resourceFromCache == null) {
+				try (InputStream is = getClass().getResourceAsStream(toInternalPath(internalName))) {
+					resourceFromCache = IOUtils.toByteArray(is);
+					resourceCache.put(internalName, resourceFromCache);
+				} catch (IOException e) {
+					throw new LoaderException(e);
+				}
+			}
+			return resourceFromCache;
+		}
 
         @Override
         public boolean canLoad(String internalName) {
-            return getClass().getResource("/" + internalName + StringConstants.CLASS_FILE_SUFFIX) != null;
+        	return resourceURLCache.computeIfAbsent(internalName, iName -> getClass().getResource(toInternalPath(iName))) != null;
+        }
+
+        private static String toInternalPath(String internalName) {
+        	return "/" + internalName + StringConstants.CLASS_FILE_SUFFIX;
         }
     }
 
@@ -1837,7 +1843,7 @@ public class TypeMaker {
 
             Set<BaseType> declaredParameterTypes = internalTypeNameMethodNameParameterCountToDeclaredParameterTypes.get(key);
 
-            if (declaredParameterTypes == null && loadFieldsAndMethods(internalTypeName)) {
+            if (declaredParameterTypes == null && loaded.computeIfAbsent(internalTypeName, this::loadFieldsAndMethods)) {
                 declaredParameterTypes = internalTypeNameMethodNameParameterCountToDeclaredParameterTypes.get(key);
             }
             if (declaredParameterTypes != null) {
