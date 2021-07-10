@@ -7,19 +7,25 @@
 
 package org.jdv1.gui.view.component;
 
+import org.apache.commons.lang3.Range;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.fife.ui.rsyntaxtextarea.DocumentRange;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
 import org.jd.core.v1.api.loader.LoaderException;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeWriter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
+import org.jd.gui.util.StringUtilities;
 import org.jd.gui.util.decompiler.ClassFileSourcePrinter;
 import org.jd.gui.util.decompiler.ContainerLoader;
 import org.jd.gui.util.decompiler.GuiPreferences;
-import org.jd.gui.util.decompiler.postprocess.impl.ByteCodeReplacer;
 import org.jd.gui.util.io.NewlineOutputStream;
+import org.jd.gui.util.parser.jdt.ASTParserFactory;
 import org.jd.gui.util.parser.jdt.core.DeclarationData;
 import org.jd.gui.util.parser.jdt.core.HyperlinkReferenceData;
 import org.jd.gui.util.parser.jdt.core.StringData;
@@ -30,9 +36,11 @@ import java.awt.Color;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.IntUnaryOperator;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
@@ -113,15 +121,7 @@ public class ClassFilePage extends TypePage {
 
     protected void decompileV0(Map<String, String> preferences, ContainerLoader loader) {
         try {
-            String currentSourceCode = decompileV0Internal(preferences, loader);
-            if (currentSourceCode.contains(ByteCodeReplacer.BYTE_CODE)) {
-                listener.clearData();
-                ByteCodeReplacer byteCodeReplacer = new ByteCodeReplacer(entry, false);
-                String newSourceCode = byteCodeReplacer.process(currentSourceCode);
-                parseAndSetText(newSourceCode);
-            } else {
-                setText(currentSourceCode);
-            }
+            setText(decompileV0Internal(preferences, loader));
         } catch (LoaderException e) {
             assert ExceptionUtil.printStackTrace(e);
             setText("// INTERNAL ERROR //");
@@ -432,15 +432,75 @@ public class ClassFilePage extends TypePage {
 
         @Override
         public void end() {
-            String currentSourceCode = stringBuffer.toString();
-//			if (currentSourceCode.contains(ByteCodeReplacer.BYTE_CODE)) {
-//				listener.clearData();
-//				ByteCodeReplacer byteCodeReplacer = new ByteCodeReplacer(entry, false);
-//				String newSourceCode = byteCodeReplacer.process(currentSourceCode);
-//				parseAndSetText(newSourceCode);
-//			} else {
-                setText(currentSourceCode);
-//			}
+            String sourceCodeV1 = stringBuffer.toString();
+			if (sourceCodeV1.contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
+				listener.clearData();
+				try {
+					String sourceCodeV0 = decompileV0Internal(api.getPreferences(), new ContainerLoader(entry));
+			        Map<Integer, Range<Integer>> lineToPositionRanges = new HashMap<>();
+			        URI jarURI = entry.getContainer().getRoot().getParent().getUri();
+			        String unitName = entry.getPath();
+			        ASTParserFactory.getInstance().newASTParser(sourceCodeV1.toCharArray(), unitName, jarURI, new ASTVisitor() {
+			        	
+			        	private IntUnaryOperator positionToLineNumber;
+
+						@Override
+			        	public boolean visit(CompilationUnit node) {
+			        		positionToLineNumber = node::getLineNumber;
+			        		return super.visit(node);
+			        	}
+			        	
+						@Override
+						public boolean visit(MethodDeclaration node) {
+							int methodStart = node.getBody().getStartPosition();
+							int methodEnd = methodStart + node.getBody().getLength();
+							String methodSource = sourceCodeV1.substring(methodStart, methodEnd);
+							if (methodSource.contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
+								int sourceLineMin = positionToLineNumber.applyAsInt(methodStart);
+			                    lineToPositionRanges.put(sourceLineMin, Range.between(methodStart, methodEnd));
+							}
+							return super.visit(node);
+						}
+					});
+			        Map<Range<Integer>, String> replacementMap = new HashMap<>();
+			        ASTParserFactory.getInstance().newASTParser(sourceCodeV0.toCharArray(), unitName, jarURI, new ASTVisitor() {
+			        	
+			        	private IntUnaryOperator positionToLineNumber;
+
+						@Override
+			        	public boolean visit(CompilationUnit node) {
+			        		positionToLineNumber = node::getLineNumber;
+			        		return super.visit(node);
+			        	}
+			        	
+			        	@Override
+						public boolean visit(MethodDeclaration node) {
+			                int methodStart = node.getBody().getStartPosition();
+			                int methodEnd = methodStart + node.getBody().getLength();
+			                String methodV0 = sourceCodeV0.substring(methodStart, methodEnd);
+			                int sourceLineMin = positionToLineNumber.applyAsInt(methodStart);
+			                Range<Integer> rangeV1 = lineToPositionRanges.get(sourceLineMin);
+			                if (rangeV1 != null) {
+			                	String methodV1 = sourceCodeV1.substring(rangeV1.getMinimum(), rangeV1.getMaximum());
+			                	int methodV0LineCount = (int) methodV0.lines().count();
+			                	int methodV1LineCount = (int) methodV1.lines().count();
+			                	StringBuilder newMethod = new StringBuilder(methodV0);
+			                	for (int i = 0; i < methodV1LineCount - methodV0LineCount; i++) {
+			                		newMethod.append(System.lineSeparator());
+			                	}
+			                	replacementMap.put(rangeV1, newMethod.toString());
+			                }
+							return super.visit(node);
+						}
+					});
+					parseAndSetText(StringUtilities.applyModifications(sourceCodeV1, replacementMap));
+		        } catch (LoaderException e) {
+		            assert ExceptionUtil.printStackTrace(e);
+		            setText("// INTERNAL ERROR //");
+		        }
+			} else {
+                setText(sourceCodeV1);
+			}
         }
 
         // --- Add strings --- //

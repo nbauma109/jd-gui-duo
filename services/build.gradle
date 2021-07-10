@@ -3,8 +3,8 @@ apply plugin: 'java'
 dependencies {
     implementation 'com.fifesoft:rsyntaxtextarea:3.0.4'
     implementation 'org.ow2.asm:asm:9.1'
-    implementation 'org.bitbucket.mstrobel:procyon-compilertools:0.5.36'
-    implementation 'org.benf:cfr:0.151'
+    implementation 'commons-io:commons-io:2.10.0'
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
     implementation 'org.eclipse.jdt:org.eclipse.jdt.core:3.26.0'
     implementation project(':api')
     testImplementation 'junit:junit:4.12'

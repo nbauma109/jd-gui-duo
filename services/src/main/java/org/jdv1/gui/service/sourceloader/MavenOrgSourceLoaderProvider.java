@@ -7,12 +7,12 @@
 
 package org.jdv1.gui.service.sourceloader;
 
+import org.apache.commons.io.IOUtils;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.model.container.entry.path.DirectoryEntryPath;
 import org.jd.gui.spi.SourceLoader;
-import org.jd.gui.util.IOUtils;
 import org.jdv1.gui.service.preferencespanel.MavenOrgSourceLoaderPreferencesProvider;
 
 import java.io.*;

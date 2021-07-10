@@ -11,6 +11,13 @@ import org.jd.core.v1.model.classfile.ConstantPool;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.*;
 import org.jd.core.v1.model.classfile.constant.*;
+import org.jd.core.v1.model.javasyntax.expression.BooleanExpression;
+import org.jd.core.v1.model.javasyntax.expression.StringConstantExpression;
+import org.jd.core.v1.model.javasyntax.statement.AssertStatement;
+import org.jd.core.v1.model.javasyntax.statement.Statement;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Example:
@@ -96,7 +103,9 @@ import org.jd.core.v1.model.classfile.constant.*;
  */
 public class ByteCodeWriter {
 
-    public static final String ILLEGAL_OPCODE = "<illegal opcode>";
+    public static final String DECOMPILATION_FAILED_AT_LINE = "Decompilation failed at line #";
+    
+	public static final String ILLEGAL_OPCODE = "<illegal opcode>";
 
     private ByteCodeWriter() {
         super();
@@ -337,6 +346,36 @@ public class ByteCodeWriter {
                 sb.append(lineNumber.getStartPc()).append('\n');
             }
         }
+    }
+    
+    public static List<Statement> getLineNumberTableAsStatements(Method method) {
+    	
+    	List<Statement> comments = new ArrayList<>();
+ 
+        AttributeCode attributeCode = method.getAttribute("Code");
+
+        if (attributeCode == null) {
+            return null;
+        }
+    	
+    	TreeMap<Integer, List<Integer>> lineNumberToOffsets = new TreeMap<>();
+    	
+    	AttributeLineNumberTable lineNumberTable = attributeCode.getAttribute("LineNumberTable");
+    	
+    	if (lineNumberTable != null) {
+    		
+    		for (LineNumber lineNumber : lineNumberTable.getLineNumberTable()) {
+    			lineNumberToOffsets.computeIfAbsent(lineNumber.getLineNumber(), k -> new ArrayList<>()).add(lineNumber.getStartPc());
+    		}
+    		for (Entry<Integer, List<Integer>> entry : lineNumberToOffsets.entrySet()) {
+    			int lineNumber = entry.getKey();
+				List<Integer> offsets = entry.getValue();
+				BooleanExpression condition = new BooleanExpression(entry.getKey(), false);
+				StringConstantExpression message = new StringConstantExpression(lineNumber, DECOMPILATION_FAILED_AT_LINE + lineNumber + " -> offsets " + offsets);
+				comments.add(new AssertStatement(condition, message));
+			}
+    	}
+		return comments;
     }
 
     protected static void writeLocalVariableTable(String linePrefix, StringBuilder sb, AttributeCode attributeCode) {

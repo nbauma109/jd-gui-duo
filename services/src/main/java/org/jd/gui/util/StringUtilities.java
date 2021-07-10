@@ -1,6 +1,6 @@
 package org.jd.gui.util;
 
-import com.strobel.decompiler.ast.Range;
+import org.apache.commons.lang3.Range;
 
 import java.util.*;
 
@@ -36,15 +36,14 @@ public class StringUtilities {
         return sb.toString();
     }
 
-    public static String applyModifications(final String text, final Map<Range, String> modificationMap) {
-        List<Integer> indexes = collectIndexes(modificationMap.keySet());
-        indexes.add(text.length());
+    public static String applyModifications(final String text, final Map<Range<Integer>, String> replacementMap) {
+        List<Integer> indexes = collectIndexes(replacementMap.keySet(), text.length());
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < indexes.size() - 1; i++) {
             Integer fromIdx = indexes.get(i);
             Integer toIdx = indexes.get(i + 1);
-            Range range = new Range(fromIdx, toIdx);
-            String modification = modificationMap.get(range);
+            Range<Integer> range = Range.between(fromIdx, toIdx);
+            String modification = replacementMap.get(range);
             if (modification == null) {
                 sb.append(text.substring(fromIdx, toIdx));
             } else {
@@ -54,13 +53,14 @@ public class StringUtilities {
         return sb.toString();
     }
 
-    private static List<Integer> collectIndexes(final Set<Range> rangeSet) {
+    private static List<Integer> collectIndexes(final Set<Range<Integer>> ranges, final int length) {
         Set<Integer> indexes = new TreeSet<>();
         indexes.add(0);
-        for (Range range : rangeSet) {
-            indexes.add(range.getStart());
-            indexes.add(range.getEnd());
+        for (Range<Integer> range : ranges) {
+            indexes.add(range.getMinimum());
+            indexes.add(range.getMaximum());
         }
+        indexes.add(length);
         return new ArrayList<>(indexes);
     }
 }

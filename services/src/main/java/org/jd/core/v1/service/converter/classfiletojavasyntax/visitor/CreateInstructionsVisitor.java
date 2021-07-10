@@ -12,7 +12,7 @@ import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.*;
-import org.jd.core.v1.model.javasyntax.statement.ByteCodeStatement;
+import org.jd.core.v1.model.javasyntax.statement.*;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
@@ -126,7 +126,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
 	            }
             }
          	if (!reduced) {
-				comd.setStatements(new ByteCodeStatement(ByteCodeWriter.write("// ", method)));
+				comd.setStatements(new Statements(ByteCodeWriter.getLineNumberTableAsStatements(method)));
 //            	throw new CFGReduceException("Could not reduce control flow graph in method " + method.getName() + method.getDescriptor() + " from class " + classFile.getInternalTypeName());
          	}
 

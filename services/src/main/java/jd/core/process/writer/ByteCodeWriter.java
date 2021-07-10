@@ -30,7 +30,9 @@ import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
 
 public class ByteCodeWriter
 {
-    private ByteCodeWriter() {
+    public static final String BYTE_CODE = "// Byte code:";
+
+	private ByteCodeWriter() {
         super();
     }
 
@@ -55,7 +57,7 @@ public class ByteCodeWriter
 
             ConstantPool constants = classFile.getConstantPool();
 
-            printer.print("// Byte code:");
+            printer.print(BYTE_CODE);
 
             for (int index=0; index<length; ++index)
             {
