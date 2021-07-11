@@ -33,12 +33,6 @@ public class MinDepthCFGReducer extends ControlFlowGraphReducer {
     }
 
     @Override
-    protected void maybeEndCondition(BasicBlock condition) {
-        condition.setNext(END);
-        condition.setBranch(END);
-    }
-
-    @Override
     protected boolean needToCreateIf(BasicBlock branch, BasicBlock nextNext, int maxOffset) {
         return nextNext.getFromOffset() < branch.getFromOffset() && nextNext.getPredecessors().size() == 1;
     }

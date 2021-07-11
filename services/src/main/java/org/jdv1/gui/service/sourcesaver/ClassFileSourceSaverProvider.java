@@ -8,12 +8,14 @@
 package org.jdv1.gui.service.sourcesaver;
 
 import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeWriter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.service.sourcesaver.AbstractSourceSaverProvider;
 import org.jd.gui.util.decompiler.ContainerLoader;
+import org.jdv1.gui.util.MethodPatcher;
 import org.jdv1.gui.util.decompiler.LineNumberStringBuilderPrinter;
 
 import java.io.File;
@@ -130,26 +132,19 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
                     stringBuffer.append(')');
                 }
                 // Add JD-Core version
-//                stringBuffer.append("\n * JD-Core Version:       ");
-//                stringBuffer.append(preferences.get(JD_CORE_VERSION));
+                stringBuffer.append("\n * JD-Core Version:       ");
+                stringBuffer.append(preferences.get(JD_CORE_VERSION));
                 stringBuffer.append("\n */");
             }
 
-            String currentSourceCode = stringBuffer.toString();
-            String newSourceCode;
-//			if (currentSourceCode.contains(ByteCodeReplacer.BYTE_CODE)) {
-//				ByteCodeReplacer byteCodeReplacer = new ByteCodeReplacer(entry, showLineNumbers);
-//				newSourceCode = byteCodeReplacer.process(currentSourceCode);
-//			} else {
-                newSourceCode = currentSourceCode;
-//			}
-//            LineNumberRealigner lineNumberRealigner = new LineNumberRealigner();
-//            String realigned = lineNumberRealigner.process(stringBuffer.toString());
-            try (OutputStream os = Files.newOutputStream(path)) {
-                os.write(newSourceCode.getBytes(StandardCharsets.UTF_8));
-            } catch (IOException e) {
-                assert ExceptionUtil.printStackTrace(e);
-            }
+			String sourceCodeV1 = stringBuffer.toString();
+			if (sourceCodeV1.contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
+				String sourceCodeV0 = v0Saver.decompileV0(api, entry);
+				String patchedCode = MethodPatcher.patchCode(sourceCodeV1, sourceCodeV0, entry);
+				writeCodeToFile(path, patchedCode);
+			} else {
+				writeCodeToFile(path, sourceCodeV1);
+			}
         } catch (Exception t) {
             assert ExceptionUtil.printStackTrace(t);
             if (!Boolean.parseBoolean(api.getPreferences().getOrDefault(USE_JD_CORE_V0, "false"))) {
@@ -157,4 +152,12 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
             }
         }
     }
+
+	private static void writeCodeToFile(Path path, String sourceCode) {
+		try (OutputStream os = Files.newOutputStream(path)) {
+		    os.write(sourceCode.getBytes(StandardCharsets.UTF_8));
+		} catch (IOException e) {
+		    assert ExceptionUtil.printStackTrace(e);
+		}
+	}
 }

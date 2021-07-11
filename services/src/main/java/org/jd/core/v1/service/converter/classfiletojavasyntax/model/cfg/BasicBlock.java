@@ -346,6 +346,11 @@ public class BasicBlock {
                 throw new IllegalStateException("Invalid condition");
         }
     }
+    
+    public void endCondition() {
+        setNext(END);
+        setBranch(END);
+    }
 
     public boolean matchType(int types) {
         return (type & types) != 0;

@@ -22,11 +22,6 @@ public class CmpDepthCFGReducer extends ControlFlowGraphReducer {
     }
 
     @Override
-    protected void maybeEndCondition(BasicBlock condition) {
-        // do not end condition
-    }
-
-    @Override
     protected boolean needToCreateIf(BasicBlock branch, BasicBlock nextNext, int maxOffset) {
         return nextNext.getFromOffset() < maxOffset && nextNext.getPredecessors().size() == 1;
     }

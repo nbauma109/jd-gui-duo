@@ -321,16 +321,24 @@ public class ByteCodeUtil
 				clearFromIdx = newParamEndIdx;
 			} else {
 				int astoreIdx = paramEndIdx;
-				if (getOpCode(code, astoreIdx) == ASTORE) {
-					// if we have ASTORE here, we should have had enough room to copy
-					continue;
-				}
 				// subtract 33 for ASTORE to ALOAD conversion
 				byte aloadCode = (byte) (code[astoreIdx] - 33);
-				// copy ALOAD code twice for following invocations
-				code[astoreIdx + 1] = aloadCode;
-				code[astoreIdx + 2] = code[astoreIdx + 1];
-				clearFromIdx = astoreIdx + 3;
+				if (getOpCode(code, astoreIdx) == ASTORE) {
+					// rarest case
+					// skip ASTORE and parameter
+					// copy ALOAD and parameter twice
+					// for following invocations
+					code[astoreIdx + 2] = aloadCode;
+					code[astoreIdx + 3] = code[astoreIdx + 1];
+					code[astoreIdx + 4] = code[astoreIdx + 2];
+					code[astoreIdx + 5] = code[astoreIdx + 3];
+					clearFromIdx = astoreIdx + 6;
+				} else {
+					// copy ALOAD code twice for following invocations
+					code[astoreIdx + 1] = aloadCode;
+					code[astoreIdx + 2] = code[astoreIdx + 1];
+					clearFromIdx = astoreIdx + 3;
+				}
 			}
 			// move invoke virtual/static down to make space to copy parameters
 			System.arraycopy(code, invokeStaticIdx, code, newInvokeStaticIdx, 3);

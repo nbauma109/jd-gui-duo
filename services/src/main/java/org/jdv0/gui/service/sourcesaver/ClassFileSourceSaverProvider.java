@@ -7,6 +7,7 @@
 
 package org.jdv0.gui.service.sourcesaver;
 
+import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
@@ -71,75 +72,9 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
             if (path.toString().indexOf('$') == -1) {
                 listener.pathSaved(path);
             }
-            // Init preferences
-            Map<String, String> p = api.getPreferences();
-            boolean showLineNumbers = getPreferenceValue(p, WRITE_LINE_NUMBERS, true);
-            preferences.setUnicodeEscape(getPreferenceValue(p, ESCAPE_UNICODE_CHARACTERS, false));
-            preferences.setShowPrefixThis(! getPreferenceValue(p, OMIT_THIS_PREFIX, false));
-            preferences.setShowDefaultConstructor(getPreferenceValue(p, WRITE_DEFAULT_CONSTRUCTOR, false));
-            preferences.setRealignmentLineNumber(getPreferenceValue(p, REALIGN_LINE_NUMBERS, true));
-            preferences.setShowLineNumbers(showLineNumbers);
-
-            // Init loader
-            loader.setEntry(entry);
-
-            // Init printer
-            baos.reset();
-            PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name());
-            printer.setPrintStream(ps);
-            printer.setPreferences(preferences);
-
-            // Decompile class file
-            DECOMPILER.decompile(preferences, loader, printer, entry.getPath());
-
-            // Metadata
-            if (getPreferenceValue(p, WRITE_METADATA, true)) {
-                // Add location
-                String location =
-                    new File(entry.getUri()).getPath()
-                    // Escape "\ u" sequence to prevent "Invalid unicode" errors
-                    .replaceAll("(^|[^\\\\])\\\\u", "\\\\\\\\u");
-                ps.println();
-                ps.println();
-                ps.print("/* Location:              ");
-                ps.print(location);
-                // Add Java compiler version
-                int majorVersion = printer.getMajorVersion();
-
-                if (majorVersion >= 45) {
-                    ps.println();
-                    ps.print(" * Java compiler version: ");
-
-                    if (majorVersion >= 49) {
-                        ps.print(majorVersion - (49 - 5));
-                    } else {
-                        ps.print(majorVersion - (45 - 1));
-                    }
-
-                    ps.print(" (");
-                    ps.print(majorVersion);
-                    ps.print('.');
-                    ps.print(printer.getMinorVersion());
-                    ps.print(')');
-                }
-                // Add JD-Core version
-                ps.println();
-                ps.print(" * JD-Core Version:       ");
-                ps.println(CoreConstants.JD_CORE_VERSION);
-                ps.print(" */");
-            }
-            String currentSourceCode = new String(baos.toByteArray(), StandardCharsets.UTF_8);
-            String newSourceCode;
-//			if (currentSourceCode.contains(ByteCodeReplacer.BYTE_CODE)) {
-//				ByteCodeReplacer byteCodeReplacer = new ByteCodeReplacer(entry, showLineNumbers);
-//				newSourceCode = byteCodeReplacer.process(currentSourceCode);
-//			} else {
-                newSourceCode = currentSourceCode;
-//			}
-//            LineNumberRealigner lineNumberRealigner = new LineNumberRealigner();
-//            String realigned = lineNumberRealigner.process(new String(baos.toByteArray(), StandardCharsets.UTF_8));
+            String decompiledOutput = decompileV0(api, entry);
             try (OutputStream os = Files.newOutputStream(path)) {
-                os.write(newSourceCode.getBytes(StandardCharsets.UTF_8));
+                os.write(decompiledOutput.getBytes(StandardCharsets.UTF_8));
             } catch (IOException e) {
                 assert ExceptionUtil.printStackTrace(e);
             }
@@ -153,6 +88,68 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
             }
         }
     }
+
+	public String decompileV0(API api, Container.Entry entry)
+			throws UnsupportedEncodingException, LoaderException {
+		// Init preferences
+		Map<String, String> p = api.getPreferences();
+		boolean showLineNumbers = getPreferenceValue(p, WRITE_LINE_NUMBERS, true);
+		preferences.setUnicodeEscape(getPreferenceValue(p, ESCAPE_UNICODE_CHARACTERS, false));
+		preferences.setShowPrefixThis(! getPreferenceValue(p, OMIT_THIS_PREFIX, false));
+		preferences.setShowDefaultConstructor(getPreferenceValue(p, WRITE_DEFAULT_CONSTRUCTOR, false));
+		preferences.setRealignmentLineNumber(getPreferenceValue(p, REALIGN_LINE_NUMBERS, true));
+		preferences.setShowLineNumbers(showLineNumbers);
+
+		// Init loader
+		loader.setEntry(entry);
+
+		// Init printer
+		baos.reset();
+		PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name());
+		printer.setPrintStream(ps);
+		printer.setPreferences(preferences);
+
+		// Decompile class file
+		DECOMPILER.decompile(preferences, loader, printer, entry.getPath());
+
+		// Metadata
+		if (getPreferenceValue(p, WRITE_METADATA, true)) {
+		    // Add location
+		    String location =
+		        new File(entry.getUri()).getPath()
+		        // Escape "\ u" sequence to prevent "Invalid unicode" errors
+		        .replaceAll("(^|[^\\\\])\\\\u", "\\\\\\\\u");
+		    ps.println();
+		    ps.println();
+		    ps.print("/* Location:              ");
+		    ps.print(location);
+		    // Add Java compiler version
+		    int majorVersion = printer.getMajorVersion();
+
+		    if (majorVersion >= 45) {
+		        ps.println();
+		        ps.print(" * Java compiler version: ");
+
+		        if (majorVersion >= 49) {
+		            ps.print(majorVersion - (49 - 5));
+		        } else {
+		            ps.print(majorVersion - (45 - 1));
+		        }
+
+		        ps.print(" (");
+		        ps.print(majorVersion);
+		        ps.print('.');
+		        ps.print(printer.getMinorVersion());
+		        ps.print(')');
+		    }
+		    // Add JD-Core version
+		    ps.println();
+		    ps.print(" * JD-Core Version:       ");
+		    ps.println(CoreConstants.JD_CORE_VERSION);
+		    ps.print(" */");
+		}
+		return new String(baos.toByteArray(), StandardCharsets.UTF_8);
+	}
 
     protected static boolean getPreferenceValue(Map<String, String> preferences, String key, boolean defaultValue) {
         String v = preferences.get(key);

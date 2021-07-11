@@ -230,7 +230,7 @@ public abstract class ControlFlowGraphReducer {
     protected void createIf(BasicBlock basicBlock, BasicBlock sub, BasicBlock last, BasicBlock next) {
         BasicBlock condition = basicBlock.getControlFlowGraph().newBasicBlock(basicBlock);
 
-        maybeEndCondition(condition);
+        condition.endCondition();
 
         int toOffset = last.getToOffset();
 
@@ -253,7 +253,7 @@ public abstract class ControlFlowGraphReducer {
     protected void createIfElse(int type, BasicBlock basicBlock, BasicBlock sub1, BasicBlock last1, BasicBlock sub2, BasicBlock last2, BasicBlock next) {
         BasicBlock condition = basicBlock.getControlFlowGraph().newBasicBlock(basicBlock);
 
-        maybeEndCondition(condition);
+        condition.endCondition();
 
         int toOffset = last2.getToOffset();
 
@@ -280,7 +280,6 @@ public abstract class ControlFlowGraphReducer {
         basicBlock.setNext(next);
     }
 
-    protected abstract void maybeEndCondition(BasicBlock condition);
     protected abstract boolean needToUpdateConditionTernaryOperator(BasicBlock basicBlock, BasicBlock nextNext);
     protected abstract boolean needToUpdateCondition(BasicBlock basicBlock, BasicBlock nextNext);
     protected abstract boolean needToCreateIf(BasicBlock branch, BasicBlock nextNext, int maxOffset);
@@ -432,8 +431,7 @@ public abstract class ControlFlowGraphReducer {
         condition.setType(basicBlock.getType());
         condition.setFromOffset(basicBlock.getFromOffset());
         condition.setToOffset(basicBlock.getToOffset());
-        condition.setNext(END);
-        condition.setBranch(END);
+        condition.endCondition();
         condition.setCondition(basicBlock.getCondition());
         condition.setSub1(basicBlock.getSub1());
         condition.setSub2(basicBlock.getSub2());
@@ -477,8 +475,8 @@ public abstract class ControlFlowGraphReducer {
         nextNextNextNext.setCondition(condition);
         nextNextNextNext.setSub1(basicBlock.getNext());
         nextNextNextNext.setSub2(basicBlock.getBranch());
-        maybeEndCondition(nextNextNextNext);
-        maybeEndCondition(condition);
+        nextNextNextNext.endCondition();
+        condition.endCondition();
 
         condition = nextNext.getControlFlowGraph().newBasicBlock(nextNext);
         condition.setType(TYPE_CONDITION);
@@ -494,8 +492,8 @@ public abstract class ControlFlowGraphReducer {
         nextNext.setCondition(condition);
         nextNext.setSub1(nextNext.getNext());
         nextNext.setSub2(nextNext.getBranch());
-        maybeEndCondition(nextNext);
-        maybeEndCondition(condition);
+        nextNext.endCondition();
+        condition.endCondition();
 
         basicBlock.setType(TYPE_CONDITION);
         basicBlock.setFromOffset(fromOffset);
@@ -516,7 +514,7 @@ public abstract class ControlFlowGraphReducer {
         ControlFlowGraph cfg = basicBlock.getControlFlowGraph();
         BasicBlock condition = cfg.newBasicBlock(TYPE_CONDITION, basicBlock.getFromOffset(), basicBlock.getToOffset());
 
-        maybeEndCondition(condition);
+        condition.endCondition();
 
         basicBlock.setType(TYPE_CONDITION_TERNARY_OPERATOR);
         basicBlock.setToOffset(basicBlock.getFromOffset());
