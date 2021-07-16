@@ -16,12 +16,13 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.bytecode.factory;
 
-import java.util.List;
+import org.apache.bcel.Const;
+
 import java.util.Deque;
+import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Method;
-import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.Goto;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 
@@ -39,8 +40,8 @@ public class GotoWFactory extends InstructionFactory
                           ((code[offset+3] & 255) << 8 ) |  (code[offset+4] & 255);
 
         list.add(new Goto(
-            ByteCodeConstants.GOTO, offset, lineNumber, value));
+            Const.GOTO, offset, lineNumber, value));
 
-        return ByteCodeConstants.NO_OF_OPERANDS[opcode];
+        return Const.getNoOfOperands(opcode);
     }
 }

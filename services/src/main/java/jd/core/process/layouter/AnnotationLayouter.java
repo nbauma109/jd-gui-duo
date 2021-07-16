@@ -16,13 +16,14 @@
  ******************************************************************************/
 package jd.core.process.layouter;
 
+import org.apache.bcel.Const;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.attribute.Annotation;
 import jd.core.model.classfile.attribute.Attribute;
-import jd.core.model.classfile.attribute.AttributeConstants;
 import jd.core.model.classfile.attribute.AttributeRuntimeAnnotations;
 import jd.core.model.layout.block.AnnotationsLayoutBlock;
 import jd.core.model.layout.block.LayoutBlock;
@@ -50,8 +51,8 @@ public class AnnotationLayouter
 
             switch(attribute.tag)
             {
-            case AttributeConstants.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS:
-            case AttributeConstants.ATTR_RUNTIME_VISIBLE_ANNOTATIONS:
+            case Const.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS:
+            case Const.ATTR_RUNTIME_VISIBLE_ANNOTATIONS:
                 Annotation[] array =
                     ((AttributeRuntimeAnnotations)attribute).annotations;
 

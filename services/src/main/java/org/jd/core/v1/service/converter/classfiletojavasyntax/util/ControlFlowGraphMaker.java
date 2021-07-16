@@ -6,14 +6,15 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
+import org.apache.bcel.classfile.CodeException;
+import org.apache.bcel.classfile.ConstantNameAndType;
+import org.apache.bcel.classfile.LineNumber;
+import org.apache.commons.lang3.Range;
 import org.jd.core.v1.model.classfile.ConstantPool;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.classfile.attribute.AttributeLineNumberTable;
-import org.jd.core.v1.model.classfile.attribute.CodeException;
-import org.jd.core.v1.model.classfile.attribute.LineNumber;
 import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
-import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.SwitchCase;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
@@ -127,7 +128,7 @@ public class ControlFlowGraphMaker {
                 case 182: case 183: case 184: // INVOKEVIRTUAL, INVOKESPECIAL, INVOKESTATIC
                     ConstantMemberRef constantMemberRef = constants.getConstant( ((code[++offset] & 255) << 8) | (code[++offset] & 255) );
                     ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    String descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                    String descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     if (descriptor.charAt(descriptor.length()-1) == 'V') {
                         lastStatementOffset = offset;
                     }
@@ -135,7 +136,7 @@ public class ControlFlowGraphMaker {
                 case 185: case 186: // INVOKEINTERFACE, INVOKEDYNAMIC
                     constantMemberRef = constants.getConstant( ((code[++offset] & 255) << 8) | (code[++offset] & 255) );
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     offset += 2; // Skip 2 bytes
                     if (descriptor.charAt(descriptor.length()-1) == 'V') {
                         lastStatementOffset = offset;
@@ -347,8 +348,8 @@ public class ControlFlowGraphMaker {
         CodeException[] codeExceptions = attributeCode.getExceptionTable();
         if (codeExceptions != null) {
             for (CodeException codeException : codeExceptions) {
-                map[codeException.getStartPc()] = MARK;
-                map[codeException.getHandlerPc()] = MARK;
+                map[codeException.getStartPC()] = MARK;
+                map[codeException.getHandlerPC()] = MARK;
             }
         }
         // --- Create line numbers --- //
@@ -366,7 +367,7 @@ public class ControlFlowGraphMaker {
             int toIndex;
             for (int i=1, len=lineNumberTable.length; i<len; i++) {
                 lineNumberEntry = lineNumberTable[i];
-                toIndex = lineNumberEntry.getStartPc();
+                toIndex = lineNumberEntry.getStartPC();
 
                 while (offset < toIndex) {
                     offsetToLineNumbers[offset] = lineNumber;
@@ -490,7 +491,7 @@ public class ControlFlowGraphMaker {
         }
         // --- Create try-catch-finally basic blocks --- //
         if (codeExceptions != null) {
-            Map<CodeException, BasicBlock> cache = new HashMap<>();
+            Map<Range<Integer>, BasicBlock> cache = new HashMap<>();
             ConstantPool constantPool = method.getConstants();
             // Reuse arrays
             int[] handlePcToStartPc = branchOffsets;
@@ -501,15 +502,15 @@ public class ControlFlowGraphMaker {
             int startPc;
             int handlerPc;
             for (CodeException codeException : codeExceptions) {
-                startPc = codeException.getStartPc();
-                handlerPc = codeException.getHandlerPc();
+                startPc = codeException.getStartPC();
+                handlerPc = codeException.getHandlerPC();
 
                 if (startPc != handlerPc && (handlePcMarks[handlerPc] != 'T' || startPc <= map[handlePcToStartPc[handlerPc]].getFromOffset())) {
                     int catchType = codeException.getCatchType();
-                    BasicBlock tcf = cache.get(codeException);
+                    BasicBlock tcf = cache.get(Range.between(codeException.getStartPC(), codeException.getEndPC()));
 
                     if (tcf == null) {
-                        int endPc = codeException.getEndPc();
+                        int endPc = codeException.getEndPC();
                         // Check 'endPc'
                         BasicBlock start = map[startPc];
 
@@ -539,7 +540,7 @@ public class ControlFlowGraphMaker {
                         map[startPc] = tcf;
 
                         // Store to objectTypeCache
-                        cache.put(codeException, tcf);
+                        cache.put(Range.between(codeException.getStartPC(), codeException.getEndPC()), tcf);
                     }
 
                     String internalThrowableName = catchType == 0 ? null : constantPool.getConstantTypeName(catchType);
@@ -605,9 +606,9 @@ public class ControlFlowGraphMaker {
     public static class CodeExceptionComparator implements Comparator<CodeException> {
         @Override
         public int compare(CodeException ce1, CodeException ce2) {
-            int comp = ce1.getStartPc() - ce2.getStartPc();
+            int comp = ce1.getStartPC() - ce2.getStartPC();
             if (comp == 0) {
-                comp = ce1.getEndPc() - ce2.getEndPc();
+                comp = ce1.getEndPC() - ce2.getEndPC();
             }
             return comp;
         }

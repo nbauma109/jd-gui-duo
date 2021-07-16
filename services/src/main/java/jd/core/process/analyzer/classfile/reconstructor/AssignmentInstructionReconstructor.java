@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
+import org.apache.bcel.Const;
+
 import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
@@ -63,7 +65,7 @@ public class AssignmentInstructionReconstructor
                 Instruction i = list.get(dupStoreIndex+1);
 
                 // Recherche de ?AStore ( DupLoad, index, value )
-                if ((i.opcode == ByteCodeConstants.AASTORE) ||
+                if ((i.opcode == Const.AASTORE) ||
                     (i.opcode == ByteCodeConstants.ARRAYSTORE))
                 {
                     i = ((ArrayStoreInstruction)i).arrayref;
@@ -83,12 +85,12 @@ public class AssignmentInstructionReconstructor
 
                 switch (xstorePutfieldPutstatic.opcode)
                 {
-                case ByteCodeConstants.ASTORE:
-                case ByteCodeConstants.ISTORE:
+                case Const.ASTORE:
+                case Const.ISTORE:
                 case ByteCodeConstants.STORE:
-                case ByteCodeConstants.PUTFIELD:
-                case ByteCodeConstants.PUTSTATIC:
-                case ByteCodeConstants.AASTORE:
+                case Const.PUTFIELD:
+                case Const.PUTSTATIC:
+                case Const.AASTORE:
                 case ByteCodeConstants.ARRAYSTORE:
                     {
                         Instruction i =
@@ -101,9 +103,9 @@ public class AssignmentInstructionReconstructor
                         }
                     }
                     break;
-                case ByteCodeConstants.DSTORE:
-                case ByteCodeConstants.FSTORE:
-                case ByteCodeConstants.LSTORE:
+                case Const.DSTORE:
+                case Const.FSTORE:
+                case Const.LSTORE:
                     new RuntimeException("Instruction inattendue")
                                 .printStackTrace();
                 }
@@ -202,15 +204,15 @@ public class AssignmentInstructionReconstructor
     {
         switch (xstorePutfieldPutstatic.opcode)
         {
-        case ByteCodeConstants.ASTORE:
+        case Const.ASTORE:
             return new ALoad(
-                ByteCodeConstants.ALOAD,
+                Const.ALOAD,
                 xstorePutfieldPutstatic.offset,
                 xstorePutfieldPutstatic.lineNumber,
                 ((AStore)xstorePutfieldPutstatic).index);
-        case ByteCodeConstants.ISTORE:
+        case Const.ISTORE:
             return new ILoad(
-                ByteCodeConstants.ILOAD,
+                Const.ILOAD,
                 xstorePutfieldPutstatic.offset,
                 xstorePutfieldPutstatic.lineNumber,
                 ((IStore)xstorePutfieldPutstatic).index);
@@ -221,20 +223,20 @@ public class AssignmentInstructionReconstructor
                 xstorePutfieldPutstatic.lineNumber,
                 ((StoreInstruction)xstorePutfieldPutstatic).index,
                 xstorePutfieldPutstatic.getReturnedSignature(null, null));
-        case ByteCodeConstants.PUTFIELD:
+        case Const.PUTFIELD:
             return new GetField(
-                ByteCodeConstants.GETFIELD,
+                Const.GETFIELD,
                 xstorePutfieldPutstatic.offset,
                 xstorePutfieldPutstatic.lineNumber,
                 ((PutField)xstorePutfieldPutstatic).index,
                 ((PutField)xstorePutfieldPutstatic).objectref);
-        case ByteCodeConstants.PUTSTATIC:
+        case Const.PUTSTATIC:
             return new GetStatic(
-                ByteCodeConstants.GETSTATIC,
+                Const.GETSTATIC,
                 xstorePutfieldPutstatic.offset,
                 xstorePutfieldPutstatic.lineNumber,
                 ((PutStatic)xstorePutfieldPutstatic).index);
-        case ByteCodeConstants.AASTORE:
+        case Const.AASTORE:
             return new AALoad(
                 ByteCodeConstants.ARRAYLOAD,
                 xstorePutfieldPutstatic.offset,
@@ -267,15 +269,15 @@ public class AssignmentInstructionReconstructor
             {
                 switch (xstorePutfieldPutstatic.opcode)
                 {
-                case ByteCodeConstants.ASTORE:
-                    if ((value1.opcode == ByteCodeConstants.ALOAD) &&
+                case Const.ASTORE:
+                    if ((value1.opcode == Const.ALOAD) &&
                         (((StoreInstruction)xstorePutfieldPutstatic).index ==
                             ((LoadInstruction)value1).index))
                         return createBinaryOperatorAssignmentInstruction(
                             xstorePutfieldPutstatic, dupStore);
                     break;
-                case ByteCodeConstants.ISTORE:
-                    if ((value1.opcode == ByteCodeConstants.ILOAD) &&
+                case Const.ISTORE:
+                    if ((value1.opcode == Const.ILOAD) &&
                         (((StoreInstruction)xstorePutfieldPutstatic).index ==
                             ((LoadInstruction)value1).index))
                         return createBinaryOperatorAssignmentInstruction(
@@ -288,8 +290,8 @@ public class AssignmentInstructionReconstructor
                         return createBinaryOperatorAssignmentInstruction(
                             xstorePutfieldPutstatic, dupStore);
                     break;
-                case ByteCodeConstants.PUTFIELD:
-                    if ((value1.opcode == ByteCodeConstants.GETFIELD) &&
+                case Const.PUTFIELD:
+                    if ((value1.opcode == Const.GETFIELD) &&
                         (((PutField)xstorePutfieldPutstatic).index ==
                             ((GetField)value1).index))
                     {
@@ -303,15 +305,15 @@ public class AssignmentInstructionReconstructor
                                 xstorePutfieldPutstatic, dupStore);
                     }
                     break;
-                case ByteCodeConstants.PUTSTATIC:
-                    if ((value1.opcode == ByteCodeConstants.GETFIELD) &&
+                case Const.PUTSTATIC:
+                    if ((value1.opcode == Const.GETFIELD) &&
                         (((PutStatic)xstorePutfieldPutstatic).index ==
                             ((GetStatic)value1).index))
                         return createBinaryOperatorAssignmentInstruction(
                             xstorePutfieldPutstatic, dupStore);
                     break;
-                case ByteCodeConstants.AASTORE:
-                    if (value1.opcode == ByteCodeConstants.AALOAD)
+                case Const.AASTORE:
+                    if (value1.opcode == Const.AALOAD)
                     {
                         ArrayStoreInstruction aas =
                             (ArrayStoreInstruction)xstorePutfieldPutstatic;
@@ -346,9 +348,9 @@ public class AssignmentInstructionReconstructor
                                     xstorePutfieldPutstatic, dupStore);
                     }
                     break;
-                case ByteCodeConstants.DSTORE:
-                case ByteCodeConstants.FSTORE:
-                case ByteCodeConstants.LSTORE:
+                case Const.DSTORE:
+                case Const.FSTORE:
+                case Const.LSTORE:
                     new RuntimeException("Unexpected instruction")
                                 .printStackTrace();
                 }

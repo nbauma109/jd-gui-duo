@@ -208,6 +208,7 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
                 int topPosition = rTextArea.viewToModel(visibleRect.getLocation());
                 int topLine = root.getElementIndex(topPosition);
                 Rectangle visibleEditorRect = ui.getVisibleEditorRect();
+                @SuppressWarnings("all")
                 Rectangle r = LineNumberList.getChildViewBounds(v, topLine, visibleEditorRect);
                 int y = r.y;
 

@@ -16,9 +16,10 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.visitor;
 
-import org.jd.core.v1.model.classfile.constant.ConstantClass;
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.ConstantClass;
+import org.apache.bcel.classfile.ConstantNameAndType;
 import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
-import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 
 import java.util.List;
 
@@ -46,10 +47,10 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
     {
         switch (instruction.opcode)
         {
-        case ByteCodeConstants.ARRAYLENGTH:
+        case Const.ARRAYLENGTH:
             visit(((ArrayLength)instruction).arrayref);
             break;
-        case ByteCodeConstants.AASTORE:
+        case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             visit(((ArrayStoreInstruction)instruction).arrayref);
             break;
@@ -61,7 +62,7 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
                     visit(ai.msg);
             }
             break;
-        case ByteCodeConstants.ATHROW:
+        case Const.ATHROW:
             visit(((AThrow)instruction).value);
             break;
         case ByteCodeConstants.UNARYOP:
@@ -76,12 +77,12 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
                 visit(boi.value2);
             }
             break;
-        case ByteCodeConstants.CHECKCAST:
+        case Const.CHECKCAST:
             visit(((CheckCast)instruction).objectref);
             break;
         case ByteCodeConstants.STORE:
-        case ByteCodeConstants.ASTORE:
-        case ByteCodeConstants.ISTORE:
+        case Const.ASTORE:
+        case Const.ISTORE:
             visit(((StoreInstruction)instruction).valueref);
             break;
         case ByteCodeConstants.DUPSTORE:
@@ -110,10 +111,10 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
                     visit(branchList.get(i));
             }
             break;
-        case ByteCodeConstants.INSTANCEOF:
+        case Const.INSTANCEOF:
             visit(((InstanceOf)instruction).objectref);
             break;
-        case ByteCodeConstants.INVOKEVIRTUAL:
+        case Const.INVOKEVIRTUAL:
             {
                 Invokevirtual iv = (Invokevirtual)instruction;
                 ConstantMethodref cmr =
@@ -128,8 +129,8 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
                     {
                         int opcode = iv.args.get(0).opcode;
 
-                        if (((opcode==ByteCodeConstants.BIPUSH) ||
-                             (opcode==ByteCodeConstants.SIPUSH)) &&
+                        if (((opcode==Const.BIPUSH) ||
+                             (opcode==Const.SIPUSH)) &&
                              cmr.getReturnedSignature().equals("I") &&
                              cmr.getListOfParameterSignatures().get(0).equals("I"))
                         {
@@ -152,11 +153,11 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
                 }
             }
             // intended fall through
-        case ByteCodeConstants.INVOKEINTERFACE:
-        case ByteCodeConstants.INVOKESPECIAL:
+        case Const.INVOKEINTERFACE:
+        case Const.INVOKESPECIAL:
             visit(((InvokeNoStaticInstruction)instruction).objectref);
             // intended fall through
-        case ByteCodeConstants.INVOKESTATIC:
+        case Const.INVOKESTATIC:
         case ByteCodeConstants.INVOKENEW:
             {
                 List<Instruction> list = ((InvokeInstruction)instruction).args;
@@ -164,45 +165,45 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
                     visit(list.get(i));
             }
             break;
-        case ByteCodeConstants.LOOKUPSWITCH:
+        case Const.LOOKUPSWITCH:
             visit(((LookupSwitch)instruction).key);
             break;
-        case ByteCodeConstants.MONITORENTER:
+        case Const.MONITORENTER:
             visit(((MonitorEnter)instruction).objectref);
             break;
-        case ByteCodeConstants.MONITOREXIT:
+        case Const.MONITOREXIT:
             visit(((MonitorExit)instruction).objectref);
             break;
-        case ByteCodeConstants.MULTIANEWARRAY:
+        case Const.MULTIANEWARRAY:
             {
                 Instruction[] dimensions = ((MultiANewArray)instruction).dimensions;
                 for (int i=dimensions.length-1; i>=0; --i)
                     visit(dimensions[i]);
             }
             break;
-        case ByteCodeConstants.NEWARRAY:
+        case Const.NEWARRAY:
             visit(((NewArray)instruction).dimension);
             break;
-        case ByteCodeConstants.ANEWARRAY:
+        case Const.ANEWARRAY:
             visit(((ANewArray)instruction).dimension);
             break;
-        case ByteCodeConstants.POP:
+        case Const.POP:
             visit(((Pop)instruction).objectref);
             break;
-        case ByteCodeConstants.PUTFIELD:
+        case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
                 visit(putField.objectref);
                 visit(putField.valueref);
             }
             break;
-        case ByteCodeConstants.PUTSTATIC:
+        case Const.PUTSTATIC:
             visit(((PutStatic)instruction).valueref);
             break;
         case ByteCodeConstants.XRETURN:
             visit(((ReturnInstruction)instruction).valueref);
             break;
-        case ByteCodeConstants.TABLESWITCH:
+        case Const.TABLESWITCH:
             visit(((TableSwitch)instruction).key);
             break;
         case ByteCodeConstants.TERNARYOPSTORE:
@@ -212,7 +213,7 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
         case ByteCodeConstants.POSTINC:
             visit(((IncInstruction)instruction).value);
             break;
-        case ByteCodeConstants.GETFIELD:
+        case Const.GETFIELD:
             visit(((GetField)instruction).objectref);
             break;
         case ByteCodeConstants.INITARRAY:
@@ -224,29 +225,29 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
                     visit(iai.values);
             }
             break;
-        case ByteCodeConstants.ACONST_NULL:
+        case Const.ACONST_NULL:
         case ByteCodeConstants.ARRAYLOAD:
         case ByteCodeConstants.LOAD:
-        case ByteCodeConstants.ALOAD:
-        case ByteCodeConstants.ILOAD:
-        case ByteCodeConstants.BIPUSH:
+        case Const.ALOAD:
+        case Const.ILOAD:
+        case Const.BIPUSH:
         case ByteCodeConstants.ICONST:
         case ByteCodeConstants.LCONST:
         case ByteCodeConstants.FCONST:
         case ByteCodeConstants.DCONST:
         case ByteCodeConstants.DUPLOAD:
-        case ByteCodeConstants.GETSTATIC:
+        case Const.GETSTATIC:
         case ByteCodeConstants.OUTERTHIS:
-        case ByteCodeConstants.GOTO:
-        case ByteCodeConstants.IINC:
-        case ByteCodeConstants.JSR:
-        case ByteCodeConstants.LDC:
-        case ByteCodeConstants.LDC2_W:
-        case ByteCodeConstants.NEW:
-        case ByteCodeConstants.NOP:
-        case ByteCodeConstants.SIPUSH:
-        case ByteCodeConstants.RET:
-        case ByteCodeConstants.RETURN:
+        case Const.GOTO:
+        case Const.IINC:
+        case Const.JSR:
+        case Const.LDC:
+        case Const.LDC2_W:
+        case Const.NEW:
+        case Const.NOP:
+        case Const.SIPUSH:
+        case Const.RET:
+        case Const.RETURN:
         case ByteCodeConstants.EXCEPTIONLOAD:
         case ByteCodeConstants.RETURNADDRESSLOAD:
             break;

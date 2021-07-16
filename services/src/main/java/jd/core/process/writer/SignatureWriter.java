@@ -16,12 +16,16 @@
  */
 package jd.core.process.writer;
 
+import org.apache.bcel.Const;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.Set;
 
-import jd.core.model.classfile.*;
+import jd.core.model.classfile.ClassFile;
+import jd.core.model.classfile.ConstantPool;
+import jd.core.model.classfile.LocalVariable;
+import jd.core.model.classfile.Method;
 import jd.core.model.classfile.attribute.ParameterAnnotations;
 import jd.core.model.reference.ReferenceMap;
 import jd.core.printer.Printer;
@@ -88,7 +92,7 @@ public class SignatureWriter
         ConstantPool constants = classFile.getConstantPool();
         String internalClassName = classFile.getThisClassName();
         String descriptor = constants.getConstantUtf8(method.getDescriptorIndex());
-        boolean staticMethodFlag = (method.accessFlags & ClassFileConstants.ACC_STATIC) != 0;
+        boolean staticMethodFlag = (method.accessFlags & Const.ACC_STATIC) != 0;
 
         if (method.getNameIndex() == constants.instanceConstructorIndex)
         {
@@ -137,13 +141,13 @@ public class SignatureWriter
         int firstVisibleParameterIndex = 0;
 
         if (method.getNameIndex() == constants.instanceConstructorIndex) {
-            if ((classFile.accessFlags & ClassFileConstants.ACC_ENUM) != 0) {
+            if ((classFile.accessFlags & Const.ACC_ENUM) != 0) {
                 if (descriptorFlag) {
                     firstVisibleParameterIndex = 2;
                 } else {
                     variableIndex = 3;
                 }
-            } else if (classFile.isAInnerClass() && (classFile.accessFlags & ClassFileConstants.ACC_STATIC) == 0) {
+            } else if (classFile.isAInnerClass() && (classFile.accessFlags & Const.ACC_STATIC) == 0) {
                 firstVisibleParameterIndex = 1;
             }
         }
@@ -154,7 +158,7 @@ public class SignatureWriter
         int parameterIndex = 0;
         int varargsParameterIndex;
 
-        if ((method.accessFlags & ClassFileConstants.ACC_VARARGS) == 0)
+        if ((method.accessFlags & Const.ACC_VARARGS) == 0)
         {
             varargsParameterIndex = Integer.MAX_VALUE;
         }

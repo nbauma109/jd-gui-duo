@@ -16,12 +16,13 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.bytecode.factory;
 
-import java.util.List;
+import org.apache.bcel.Const;
+
 import java.util.Deque;
+import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Method;
-import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class DummyFactory extends InstructionFactory
@@ -33,6 +34,6 @@ public class DummyFactory extends InstructionFactory
             Deque<Instruction> stack, byte[] code, int offset,
             int lineNumber, boolean[] jumps)
     {
-        return ByteCodeConstants.NO_OF_OPERANDS[code[offset] & 255];
+        return Const.getNoOfOperands(code[offset] & 255);
     }
 }

@@ -7,11 +7,11 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
+import org.apache.bcel.classfile.ConstantNameAndType;
 import org.jd.core.v1.model.classfile.ConstantPool;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
-import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 
 public class ByteCodeUtil {
@@ -270,7 +270,7 @@ public class ByteCodeUtil {
                 case 182: case 183: // INVOKEVIRTUAL, INVOKESPECIAL
                     constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     depth -= 1 + countMethodParameters(descriptor);
 
                     if (descriptor.charAt(descriptor.length()-1) != 'V') {
@@ -280,7 +280,7 @@ public class ByteCodeUtil {
                 case 184: // INVOKESTATIC
                     constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     depth -= countMethodParameters(descriptor);
 
                     if (descriptor.charAt(descriptor.length()-1) != 'V') {
@@ -290,7 +290,7 @@ public class ByteCodeUtil {
                 case 185: // INVOKEINTERFACE
                     constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     depth -= 1 + countMethodParameters(descriptor);
                     offset += 2; // Skip 'count' and one byte
 
@@ -301,7 +301,7 @@ public class ByteCodeUtil {
                 case 186: // INVOKEDYNAMIC
                     constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     depth -= countMethodParameters(descriptor);
                     offset += 2; // Skip 2 bytes
 
@@ -518,7 +518,7 @@ public class ByteCodeUtil {
                 case 182: case 183: // INVOKEVIRTUAL, INVOKESPECIAL
                     constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     depth -= 1 + countMethodParameters(descriptor);
                     if (minDepth > depth) minDepth = depth;
 
@@ -529,7 +529,7 @@ public class ByteCodeUtil {
                 case 184: // INVOKESTATIC
                     constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     depth -= countMethodParameters(descriptor);
                     if (minDepth > depth) minDepth = depth;
 
@@ -540,7 +540,7 @@ public class ByteCodeUtil {
                 case 185: // INVOKEINTERFACE
                     constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     depth -= 1 + countMethodParameters(descriptor);
                     if (minDepth > depth) minDepth = depth;
                     offset += 2; // Skip 'count' and one byte
@@ -552,7 +552,7 @@ public class ByteCodeUtil {
                 case 186: // INVOKEDYNAMIC
                     constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     depth -= countMethodParameters(descriptor);
                     if (minDepth > depth) minDepth = depth;
                     offset += 2; // Skip 2 bytes

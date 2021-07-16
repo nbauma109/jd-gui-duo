@@ -12,7 +12,7 @@ import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.*;
-import org.jd.core.v1.model.javasyntax.statement.*;
+import org.jd.core.v1.model.javasyntax.statement.Statements;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
@@ -121,7 +121,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
                     	reduced = true;
                         break;
                     }
-	            } catch (Throwable e) {
+	            } catch (Exception | StackOverflowError e) {
 	                assert ExceptionUtil.printStackTrace(e);
 	            }
             }

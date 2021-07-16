@@ -16,13 +16,14 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
+import org.apache.bcel.Const;
+
 import java.util.List;
 import java.util.Map;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.Method;
-import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.process.analyzer.classfile.visitor.*;
 import jd.core.util.SignatureUtil;
@@ -54,7 +55,7 @@ public class OuterReferenceReconstructor
 
         // Initialisation des visiteurs traitant les references des classes externes
         this.outerReferenceVisitor = new ReplaceOuterReferenceVisitor(
-            ByteCodeConstants.ALOAD, 1,
+            Const.ALOAD, 1,
             createOuterThisInstructionIndex(classFile));
         this.multipleOuterReference =
             new ReplaceMultipleOuterReferenceVisitor(classFile);

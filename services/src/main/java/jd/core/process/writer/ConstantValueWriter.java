@@ -16,8 +16,8 @@
  ******************************************************************************/
 package jd.core.process.writer;
 
+import org.apache.bcel.classfile.*;
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.model.classfile.constant.*;
 import org.jd.core.v1.util.StringConstants;
 
 import jd.core.model.classfile.ClassFile;
@@ -49,7 +49,7 @@ public class ConstantValueWriter
         {
           case "ConstantDouble":
             {
-                double d = ((ConstantDouble)cv).getValue();
+                double d = ((ConstantDouble)cv).getBytes();
 
                 if (d == Double.POSITIVE_INFINITY)
                 {
@@ -99,7 +99,7 @@ public class ConstantValueWriter
             break;
           case "ConstantFloat":
             {
-                float value = ((ConstantFloat)cv).getValue();
+                float value = ((ConstantFloat)cv).getBytes();
 
                 if (value == Float.POSITIVE_INFINITY)
                 {
@@ -149,7 +149,7 @@ public class ConstantValueWriter
             break;
           case "ConstantInteger":
             {
-                int value = ((ConstantInteger)cv).getValue();
+                int value = ((ConstantInteger)cv).getBytes();
 
                 switch (constantIntegerType)
                 {
@@ -189,7 +189,7 @@ public class ConstantValueWriter
             break;
           case "ConstantLong":
             {
-                long value = ((ConstantLong)cv).getValue();
+                long value = ((ConstantLong)cv).getBytes();
 
                 if (value == Long.MIN_VALUE)
                 {
@@ -243,11 +243,11 @@ public class ConstantValueWriter
         {
         case "ConstantInteger":
             printer.printNumeric(
-                "0x" + Integer.toHexString( ((ConstantInteger)cv).getValue() ).toUpperCase());
+                "0x" + Integer.toHexString( ((ConstantInteger)cv).getBytes() ).toUpperCase());
             break;
         case "ConstantLong":
             printer.printNumeric(
-                "0x" + Long.toHexString( ((ConstantLong)cv).getValue() ).toUpperCase());
+                "0x" + Long.toHexString( ((ConstantLong)cv).getBytes() ).toUpperCase());
             break;
         default:
             write(loader, printer, referenceMap, classFile, cv, (byte)0);

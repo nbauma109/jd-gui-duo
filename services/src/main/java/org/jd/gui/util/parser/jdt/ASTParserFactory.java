@@ -1,9 +1,9 @@
 package org.jd.gui.util.parser.jdt;
 
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.JavaCore;
+import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.dom.AST;
+import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.dom.ASTParser;
+import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.dom.ASTVisitor;
 import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;

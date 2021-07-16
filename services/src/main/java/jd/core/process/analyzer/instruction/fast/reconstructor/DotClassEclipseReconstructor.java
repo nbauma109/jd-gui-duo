@@ -16,13 +16,17 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.fast.reconstructor;
 
-import org.jd.core.v1.model.classfile.constant.*;
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.Constant;
+import org.apache.bcel.classfile.ConstantFieldref;
+import org.apache.bcel.classfile.ConstantNameAndType;
+import org.apache.bcel.classfile.ConstantString;
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
-import jd.core.model.classfile.ClassFileConstants;
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.Field;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
@@ -76,7 +80,7 @@ public class DotClassEclipseReconstructor
 
             IfInstruction ii = (IfInstruction)instruction;
 
-            if (ii.value.opcode != ByteCodeConstants.GETSTATIC)
+            if (ii.value.opcode != Const.GETSTATIC)
                 continue;
 
             int jumpOffset = ii.getJumpOffset();
@@ -114,7 +118,7 @@ public class DotClassEclipseReconstructor
                     cfr.getNameAndTypeIndex());
 
             String signature =
-                constants.getConstantUtf8(cnatField.getDescriptorIndex());
+                constants.getConstantUtf8(cnatField.getSignatureIndex());
 
             if (! StringConstants.INTERNAL_CLASS_SIGNATURE.equals(signature))
                 continue;
@@ -131,7 +135,7 @@ public class DotClassEclipseReconstructor
 
             DupStore ds = (DupStore)instruction;
 
-            if (ds.objectref.opcode != ByteCodeConstants.INVOKESTATIC)
+            if (ds.objectref.opcode != Const.INVOKESTATIC)
                 continue;
 
             Invokestatic is = (Invokestatic)ds.objectref;
@@ -141,7 +145,7 @@ public class DotClassEclipseReconstructor
 
             instruction = is.args.get(0);
 
-            if (instruction.opcode != ByteCodeConstants.LDC)
+            if (instruction.opcode != Const.LDC)
                 continue;
 
             ConstantMethodref cmr = constants.getConstantMethodref(is.index);
@@ -166,7 +170,7 @@ public class DotClassEclipseReconstructor
 
             instruction = ft.instructions.get(1);
 
-            if (instruction.opcode != ByteCodeConstants.PUTSTATIC)
+            if (instruction.opcode != Const.PUTSTATIC)
                 continue;
 
             PutStatic ps = (PutStatic)instruction;
@@ -182,7 +186,7 @@ public class DotClassEclipseReconstructor
             if (! exceptionName.equals(StringConstants.INTERNAL_CLASSNOTFOUNDEXCEPTION_SIGNATURE))
                 continue;
 
-            if (fc.instructions.get(0).opcode != ByteCodeConstants.ATHROW)
+            if (fc.instructions.get(0).opcode != Const.ATHROW)
                 continue;
 
             // Trouve !
@@ -199,7 +203,7 @@ public class DotClassEclipseReconstructor
             // Ajout d'une nouvelle classe
             index = constants.addConstantClass(index);
             ldc = new Ldc(
-                ByteCodeConstants.LDC, ii.offset,
+                Const.LDC, ii.offset,
                 ii.lineNumber, index);
 
             // Remplacement de l'intruction GetStatic par l'instruction Ldc
@@ -222,7 +226,7 @@ public class DotClassEclipseReconstructor
 
                 if (field.getNameIndex() == cnatField.getNameIndex())
                 {
-                    field.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
+                    field.accessFlags |= Const.ACC_SYNTHETIC;
                     break;
                 }
             }

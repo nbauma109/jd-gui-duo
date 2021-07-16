@@ -85,7 +85,7 @@ public class ClassFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
 
                             entry = entryFound;
 
-                            try (InputStream is2 = entry.getInputStream()) {
+                            try (@SuppressWarnings("all") InputStream is2 = entry.getInputStream()) {
                                 classReader = new ClassReader(is2);
                             } catch (IOException e) {
                                 assert ExceptionUtil.printStackTrace(e);

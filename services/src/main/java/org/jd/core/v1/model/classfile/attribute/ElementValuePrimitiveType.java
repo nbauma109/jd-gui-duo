@@ -7,7 +7,7 @@
 
 package org.jd.core.v1.model.classfile.attribute;
 
-import org.jd.core.v1.model.classfile.constant.Constant;
+import org.apache.bcel.classfile.Constant;
 
 public class ElementValuePrimitiveType implements AttributeElementValue {
     /*

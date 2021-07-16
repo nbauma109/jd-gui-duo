@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
+import org.apache.bcel.Const;
+
 import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
@@ -40,12 +42,12 @@ public class SimpleNewInstructionReconstructor
              invokespecialIndex<list.size();
              invokespecialIndex++)
         {
-            if (list.get(invokespecialIndex).opcode != ByteCodeConstants.INVOKESPECIAL)
+            if (list.get(invokespecialIndex).opcode != Const.INVOKESPECIAL)
                 continue;
 
             Invokespecial is = (Invokespecial)list.get(invokespecialIndex);
 
-            if (is.objectref.opcode != ByteCodeConstants.NEW)
+            if (is.objectref.opcode != Const.NEW)
                 continue;
 
             New nw = (New)is.objectref;

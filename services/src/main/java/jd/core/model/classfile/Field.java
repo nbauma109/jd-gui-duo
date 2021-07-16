@@ -16,11 +16,11 @@
  ******************************************************************************/
 package jd.core.model.classfile;
 
-import org.jd.core.v1.model.classfile.constant.Constant;
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.Constant;
 
 import jd.core.model.classfile.attribute.Attribute;
 import jd.core.model.classfile.attribute.AttributeConstantValue;
-import jd.core.model.classfile.attribute.AttributeConstants;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.util.UtilConstants;
 
@@ -55,7 +55,7 @@ public class Field extends FieldOrMethod
     {
         if (this.attributes != null)
             for(int i=0; i<this.attributes.length; i++)
-                if (this.attributes[i].tag == AttributeConstants.ATTR_CONSTANT_VALUE)
+                if (this.attributes[i].tag == Const.ATTR_CONSTANT_VALUE)
                 {
                     AttributeConstantValue acv = (AttributeConstantValue)this.attributes[i];
                     return constants.getConstantValue(acv.constantvalueIndex);

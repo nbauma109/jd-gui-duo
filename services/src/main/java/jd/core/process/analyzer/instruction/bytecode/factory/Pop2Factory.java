@@ -16,12 +16,13 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.bytecode.factory;
 
-import java.util.List;
+import org.apache.bcel.Const;
+
 import java.util.Deque;
+import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Method;
-import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.Pop;
 
@@ -37,8 +38,8 @@ public class Pop2Factory extends InstructionFactory
         final int opcode = code[offset] & 255;
 
         list.add(new Pop(
-            ByteCodeConstants.POP, offset, lineNumber, stack.pop()));
+            Const.POP, offset, lineNumber, stack.pop()));
 
-        return ByteCodeConstants.NO_OF_OPERANDS[opcode];
+        return Const.getNoOfOperands(opcode);
     }
 }

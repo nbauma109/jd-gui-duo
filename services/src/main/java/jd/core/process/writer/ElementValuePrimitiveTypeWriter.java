@@ -16,8 +16,8 @@
  ******************************************************************************/
 package jd.core.process.writer;
 
+import org.apache.bcel.classfile.Constant;
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.model.classfile.constant.Constant;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ConstantPool;

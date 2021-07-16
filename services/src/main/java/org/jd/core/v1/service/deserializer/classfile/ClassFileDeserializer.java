@@ -6,6 +6,8 @@
  */
 package org.jd.core.v1.service.deserializer.classfile;
 
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.*;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.model.classfile.ClassFile;
@@ -13,7 +15,11 @@ import org.jd.core.v1.model.classfile.ConstantPool;
 import org.jd.core.v1.model.classfile.Field;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.*;
-import org.jd.core.v1.model.classfile.constant.*;
+import org.jd.core.v1.model.classfile.attribute.Annotations;
+import org.jd.core.v1.model.classfile.attribute.Attribute;
+import org.jd.core.v1.model.classfile.attribute.InnerClass;
+import org.jd.core.v1.model.classfile.attribute.LocalVariable;
+import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
 import org.jd.core.v1.service.deserializer.classfile.attribute.InvalidAttributeLengthException;
 import org.jd.core.v1.util.DefaultList;
 import org.jd.core.v1.util.StringConstants;
@@ -22,10 +28,14 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
-import static org.jd.core.v1.model.classfile.Constants.ACC_SYNTHETIC;
+import static org.apache.bcel.Const.ACC_SYNTHETIC;
 
 import jd.core.CoreConstants;
 import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
@@ -144,39 +154,39 @@ public class ClassFileDeserializer {
             tag = reader.readByte();
 
             switch (tag) {
-                case 1:
+                case Const.CONSTANT_Utf8:
                     constants[i] = new ConstantUtf8(reader.readUTF());
                     break;
-                case 3:
+                case Const.CONSTANT_Integer:
                     constants[i] = new ConstantInteger(reader.readInt());
                     break;
-                case 4:
+                case Const.CONSTANT_Float:
                     constants[i] = new ConstantFloat(reader.readFloat());
                     break;
-                case 5:
+                case Const.CONSTANT_Long:
                     constants[i] = new ConstantLong(reader.readLong());
                     i++;
                     break;
-                case 6:
+                case Const.CONSTANT_Double:
                     constants[i] = new ConstantDouble(reader.readDouble());
                     i++;
                     break;
-                case 7: case 19: case 20:
+                case Const.CONSTANT_Class, Const.CONSTANT_Module, Const.CONSTANT_Package:
                     constants[i] = new ConstantClass(reader.readUnsignedShort());
                     break;
-                case 8:
+                case Const.CONSTANT_String:
                     constants[i] = new ConstantString(reader.readUnsignedShort());
                     break;
-                case 9: case 10: case 11: case 17: case 18:
+                case Const.CONSTANT_Fieldref, Const.CONSTANT_Methodref, Const.CONSTANT_InterfaceMethodref, Const.CONSTANT_Dynamic, Const.CONSTANT_InvokeDynamic:
                     constants[i] = new ConstantMemberRef(reader.readUnsignedShort(), reader.readUnsignedShort());
                     break;
-                case 12:
+                case Const.CONSTANT_NameAndType:
                     constants[i] = new ConstantNameAndType(reader.readUnsignedShort(), reader.readUnsignedShort());
                     break;
-                case 15:
+                case Const.CONSTANT_MethodHandle:
                     constants[i] = new ConstantMethodHandle(reader.readByte(), reader.readUnsignedShort());
                     break;
-                case 16:
+                case Const.CONSTANT_MethodType:
                     constants[i] = new ConstantMethodType(reader.readUnsignedShort());
                     break;
                 default:
@@ -283,7 +293,7 @@ public class ClassFileDeserializer {
             if (!(constant instanceof ConstantUtf8)) {
                 throw new ClassFormatException("Invalid attributes");
             }
-            name = ((ConstantUtf8)constant).getValue();
+            name = ((ConstantUtf8)constant).getBytes();
             switch (name) {
                 case "AnnotationDefault":
                     attributes.put(name, new AttributeAnnotationDefault(loadElementValue(reader, constants)));
@@ -327,7 +337,7 @@ public class ClassFileDeserializer {
                     attributes.put(name, new AttributeLineNumberTable(loadLineNumbers(reader)));
                     break;
                 case "MethodParameters":
-                    attributes.put(name, new AttributeMethodParameters(loadParameters(reader, constants)));
+                    attributes.put(name, new AttributeMethodParameters(loadParameters(reader)));
                     break;
                 case "Module":
                     attributes.put(name, new AttributeModule(
@@ -415,20 +425,20 @@ public class ClassFileDeserializer {
         }
     }
 
-    protected ElementValuePair[] loadElementValuePairs(DataInput reader, ConstantPool constants) throws IOException {
+    protected List<Entry<String, AttributeElementValue>> loadElementValuePairs(DataInput reader, ConstantPool constants) throws IOException {
         int count = reader.readUnsignedShort();
         if (count == 0) {
             return null;
         }
 
-        ElementValuePair[] pairs = new ElementValuePair[count];
+        List<Entry<String, AttributeElementValue>> pairs = new ArrayList<>(count);
 
         int elementNameIndex;
         String elementName;
         for (int i=0; i < count; i++) {
             elementNameIndex = reader.readUnsignedShort();
             elementName = constants.getConstantUtf8(elementNameIndex);
-            pairs[i] = new ElementValuePair(elementName, loadElementValue(reader, constants));
+            pairs.add(new SimpleEntry<>(elementName, loadElementValue(reader, constants)));
         }
 
         return pairs;
@@ -499,11 +509,10 @@ public class ClassFileDeserializer {
         CodeException[] codeExceptions = new CodeException[count];
 
         for (int i=0; i<count; i++) {
-            codeExceptions[i] = new CodeException(i,
-                    reader.readUnsignedShort(),
-                    reader.readUnsignedShort(),
-                    reader.readUnsignedShort(),
-                    reader.readUnsignedShort());
+            codeExceptions[i] = new CodeException(reader.readUnsignedShort(),
+                                                  reader.readUnsignedShort(),
+                                                  reader.readUnsignedShort(),
+                                                  reader.readUnsignedShort());
         }
 
         return codeExceptions;
@@ -640,22 +649,17 @@ public class ClassFileDeserializer {
         return lineNumbers;
     }
 
-    protected MethodParameter[] loadParameters(DataInput reader, ConstantPool constants) throws IOException {
+    protected MethodParameter[] loadParameters(DataInput reader) throws IOException {
         int count = reader.readUnsignedByte();
         if (count == 0) {
             return null;
         }
 
         MethodParameter[] parameters = new MethodParameter[count];
-
-        int nameIndex;
-        String name;
         for (int i=0; i<count; i++) {
-            nameIndex = reader.readUnsignedShort();
-
-            name = constants.getConstantUtf8(nameIndex);
-
-            parameters[i] = new MethodParameter(name, reader.readUnsignedShort());
+            parameters[i] = new MethodParameter();
+            parameters[i].setNameIndex(reader.readUnsignedShort());
+            parameters[i].setAccessFlags(reader.readUnsignedShort());
         }
 
         return parameters;

@@ -6,7 +6,7 @@
  */
 package org.jdv1.gui.service.indexer;
 
-import org.eclipse.jdt.core.dom.*;
+import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.dom.*;
 import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;

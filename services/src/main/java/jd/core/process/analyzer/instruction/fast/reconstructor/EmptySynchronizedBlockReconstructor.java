@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.fast.reconstructor;
 
+import org.apache.bcel.Const;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,12 +45,12 @@ public class EmptySynchronizedBlockReconstructor
         {
             Instruction monitorExit = list.get(index);
 
-            if (monitorExit.opcode != ByteCodeConstants.MONITOREXIT)
+            if (monitorExit.opcode != Const.MONITOREXIT)
                 continue;
 
             Instruction instruction = list.get(index-1);
 
-            if (instruction.opcode != ByteCodeConstants.MONITORENTER)
+            if (instruction.opcode != Const.MONITORENTER)
                 continue;
 
             MonitorEnter me = (MonitorEnter)instruction;
@@ -63,7 +65,7 @@ public class EmptySynchronizedBlockReconstructor
             {
                 dupStore = (DupStore)instruction;
             }
-            else if (instruction.opcode == ByteCodeConstants.ASTORE)
+            else if (instruction.opcode == Const.ASTORE)
             {
                 if (index <= 2)
                     continue;

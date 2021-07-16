@@ -16,15 +16,19 @@
  */
 package jd.core.process.layouter;
 
-import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
-import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.ConstantFieldref;
+import org.apache.bcel.classfile.ConstantNameAndType;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.*;
 
-import jd.core.model.classfile.*;
+import jd.core.model.classfile.ClassFile;
+import jd.core.model.classfile.ConstantPool;
+import jd.core.model.classfile.Field;
 import jd.core.model.classfile.Field.ValueAndMethod;
+import jd.core.model.classfile.Method;
 import jd.core.model.classfile.attribute.AttributeSignature;
 import jd.core.model.instruction.bytecode.instruction.GetStatic;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
@@ -207,8 +211,8 @@ public class ClassFileLayouter {
         {
             layoutBlockList.add(new TypeNameLayoutBlock(classFile));
 
-            if ((classFile.accessFlags & ClassFileConstants.ACC_ANNOTATION) == 0) {
-                if ((classFile.accessFlags & ClassFileConstants.ACC_ENUM) != 0)
+            if ((classFile.accessFlags & Const.ACC_ANNOTATION) == 0) {
+                if ((classFile.accessFlags & Const.ACC_ENUM) != 0)
                 {
                     // Enum
                      // Interfaces
@@ -216,7 +220,7 @@ public class ClassFileLayouter {
                         createBlocksForInterfacesImplements(
                             classFile, layoutBlockList);
                 }
-                else if ((classFile.accessFlags & ClassFileConstants.ACC_INTERFACE) != 0)
+                else if ((classFile.accessFlags & Const.ACC_INTERFACE) != 0)
                 {
                     // Interface
                      // Super interface
@@ -371,7 +375,7 @@ public class ClassFileLayouter {
                         field = fields[j];
 
                         if (field.getNameIndex() != cnat.getNameIndex() ||
-                            field.getDescriptorIndex() != cnat.getDescriptorIndex()) {
+                            field.getDescriptorIndex() != cnat.getSignatureIndex()) {
                             continue;
                         }
 
@@ -457,7 +461,7 @@ public class ClassFileLayouter {
         {
             field = fields[i];
 
-            if ((field.accessFlags & (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_ENUM)) != 0) {
+            if ((field.accessFlags & (Const.ACC_SYNTHETIC|Const.ACC_ENUM)) != 0) {
                 continue;
             }
 
@@ -568,7 +572,7 @@ public class ClassFileLayouter {
             method = methods[i];
 
             if ((method.accessFlags &
-                    (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_BRIDGE)) != 0) {
+                    (Const.ACC_SYNTHETIC|Const.ACC_BRIDGE)) != 0) {
                 continue;
             }
 
@@ -581,7 +585,7 @@ public class ClassFileLayouter {
                     method.getDescriptorIndex() : as.signatureIndex;
             signature = constants.getConstantUtf8(signatureIndex);
 
-            if ((classFile.accessFlags & ClassFileConstants.ACC_ENUM) != 0 &&
+            if ((classFile.accessFlags & Const.ACC_ENUM) != 0 &&
                 ClassFileUtil.isAMethodOfEnum(classFile, method, signature)) {
                 continue;
             }
@@ -602,7 +606,7 @@ public class ClassFileLayouter {
                     if (exceptionIndexes == null ||
                         exceptionIndexes.length == 0)
                     {
-                        if ((classFile.accessFlags & ClassFileConstants.ACC_ENUM) != 0)
+                        if ((classFile.accessFlags & Const.ACC_ENUM) != 0)
                         {
                             if (SignatureUtil.getParameterSignatureCount(signature) == 2)
                             {
@@ -805,7 +809,7 @@ public class ClassFileLayouter {
         {
             innerClassFile = innerClassFiles.get(i);
 
-            if ((innerClassFile.accessFlags & ClassFileConstants.ACC_SYNTHETIC) != 0 ||
+            if ((innerClassFile.accessFlags & Const.ACC_SYNTHETIC) != 0 ||
                 innerClassFile.getInternalAnonymousClassName() != null) {
                 continue;
             }

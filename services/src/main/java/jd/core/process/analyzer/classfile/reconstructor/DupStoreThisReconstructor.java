@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
+import org.apache.bcel.Const;
+
 import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
@@ -46,7 +48,7 @@ public class DupStoreThisReconstructor
             // DupStore trouvé
             DupStore dupStore = (DupStore)list.get(dupStoreIndex);
 
-            if ((dupStore.objectref.opcode != ByteCodeConstants.ALOAD) ||
+            if ((dupStore.objectref.opcode != Const.ALOAD) ||
                 (((ALoad)dupStore.objectref).index != 0))
                 continue;
 
@@ -54,7 +56,7 @@ public class DupStoreThisReconstructor
             if (dupStoreIndex+2 < list.size())
             {
                 Instruction instruction = list.get(dupStoreIndex+2);
-                if (instruction.opcode == ByteCodeConstants.MONITORENTER)
+                if (instruction.opcode == Const.MONITORENTER)
                 {
                     MonitorEnter me = (MonitorEnter)instruction;
                     if ((me.objectref.opcode == ByteCodeConstants.DUPLOAD) &&

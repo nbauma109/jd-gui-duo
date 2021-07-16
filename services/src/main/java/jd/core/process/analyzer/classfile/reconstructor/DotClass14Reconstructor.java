@@ -16,13 +16,21 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
-import org.jd.core.v1.model.classfile.constant.*;
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.Constant;
+import org.apache.bcel.classfile.ConstantFieldref;
+import org.apache.bcel.classfile.ConstantNameAndType;
+import org.apache.bcel.classfile.ConstantString;
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import jd.core.model.classfile.*;
+import jd.core.model.classfile.ClassFile;
+import jd.core.model.classfile.ConstantPool;
+import jd.core.model.classfile.Field;
+import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 import jd.core.model.reference.ReferenceMap;
@@ -67,7 +75,7 @@ public class DotClass14Reconstructor
 
             IfInstruction ii = (IfInstruction)instruction;
 
-            if (ii.value.opcode != ByteCodeConstants.GETSTATIC)
+            if (ii.value.opcode != Const.GETSTATIC)
                 continue;
 
             int jumpOffset = ii.getJumpOffset();
@@ -79,7 +87,7 @@ public class DotClass14Reconstructor
 
             DupStore ds = (DupStore)instruction;
 
-            if (ds.objectref.opcode != ByteCodeConstants.INVOKESTATIC)
+            if (ds.objectref.opcode != Const.INVOKESTATIC)
                 continue;
 
             Invokestatic is = (Invokestatic)ds.objectref;
@@ -89,12 +97,12 @@ public class DotClass14Reconstructor
 
             instruction = is.args.get(0);
 
-            if (instruction.opcode != ByteCodeConstants.LDC)
+            if (instruction.opcode != Const.LDC)
                 continue;
 
             instruction = list.get(i+2);
 
-            if (instruction.opcode != ByteCodeConstants.PUTSTATIC)
+            if (instruction.opcode != Const.PUTSTATIC)
                 continue;
 
             PutStatic ps = (PutStatic)instruction;
@@ -116,7 +124,7 @@ public class DotClass14Reconstructor
 
             instruction = list.get(i+4);
 
-            if (instruction.opcode != ByteCodeConstants.GOTO)
+            if (instruction.opcode != Const.GOTO)
                 continue;
 
             Goto g = (Goto)instruction;
@@ -139,7 +147,7 @@ public class DotClass14Reconstructor
                     cfr.getNameAndTypeIndex());
 
             String descriptorField =
-                constants.getConstantUtf8(cnatField.getDescriptorIndex());
+                constants.getConstantUtf8(cnatField.getSignatureIndex());
 
             if (! descriptorField.equals(StringConstants.INTERNAL_CLASS_SIGNATURE))
                 continue;
@@ -188,7 +196,7 @@ public class DotClass14Reconstructor
                 // Ajout d'une nouvelle classe
                 index = constants.addConstantClass(index);
                 ldc = new Ldc(
-                    ByteCodeConstants.LDC, ii.offset,
+                    Const.LDC, ii.offset,
                     ii.lineNumber, index);
 
                 // Remplacement de l'intruction GetStatic par l'instruction Ldc
@@ -225,7 +233,7 @@ public class DotClass14Reconstructor
                     index = constants.addConstantClass(index);
 
                     newArray = new ANewArray(
-                        ByteCodeConstants.ANEWARRAY, ii.offset,
+                        Const.ANEWARRAY, ii.offset,
                         ii.lineNumber, index, iconst0);
                 }
                 else
@@ -234,7 +242,7 @@ public class DotClass14Reconstructor
                     //  9: newarray byte
                     //  11: invokevirtual 62	java/lang/Object:getClass	()Ljava/lang/Class;
                     newArray = new NewArray(
-                        ByteCodeConstants.NEWARRAY, ii.offset, ii.lineNumber,
+                        Const.NEWARRAY, ii.offset, ii.lineNumber,
                         SignatureUtil.getTypeFromSignature(signatureWithoutDimension),
                         iconst0);
                 }
@@ -249,7 +257,7 @@ public class DotClass14Reconstructor
                     constants.objectClassIndex, nameAndTypeIndex);
 
                 Invokevirtual iv = new Invokevirtual(
-                    ByteCodeConstants.INVOKEVIRTUAL, ii.offset,
+                    Const.INVOKEVIRTUAL, ii.offset,
                     ii.lineNumber, cmrIndex, newArray,
                     new ArrayList<>(0));
 
@@ -283,7 +291,7 @@ public class DotClass14Reconstructor
 
                     if (field.getNameIndex() == cnatField.getNameIndex())
                     {
-                        field.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
+                        field.accessFlags |= Const.ACC_SYNTHETIC;
                         break;
                     }
                 }
@@ -298,7 +306,7 @@ public class DotClass14Reconstructor
 
                     if (method.getNameIndex() == cnatMethod.getNameIndex())
                     {
-                        method.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
+                        method.accessFlags |= Const.ACC_SYNTHETIC;
                         break;
                     }
                 }
@@ -318,7 +326,7 @@ public class DotClass14Reconstructor
                     if (nameField.equals(
                             matchingConstants.getConstantUtf8(field.getNameIndex())))
                     {
-                        field.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
+                        field.accessFlags |= Const.ACC_SYNTHETIC;
                         break;
                     }
                 }
@@ -334,7 +342,7 @@ public class DotClass14Reconstructor
                     if (nameMethod.equals(
                             matchingConstants.getConstantUtf8(method.getNameIndex())))
                     {
-                        method.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
+                        method.accessFlags |= Const.ACC_SYNTHETIC;
                         break;
                     }
                 }

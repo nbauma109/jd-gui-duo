@@ -7,6 +7,8 @@
 
 package org.jd.core.v1.model.classfile.attribute;
 
+import org.apache.bcel.classfile.LineNumber;
+
 public class AttributeLineNumberTable implements Attribute {
     protected LineNumber[] lineNumberTable;
 

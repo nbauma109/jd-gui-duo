@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.bytecode;
 
+import org.apache.bcel.Const;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -60,7 +62,7 @@ public class ComparisonInstructionAnalyzer
                     case ByteCodeConstants.IF:
                     case ByteCodeConstants.IFCMP:
                     case ByteCodeConstants.IFXNULL:
-                    case ByteCodeConstants.GOTO:
+                    case Const.GOTO:
                         {
                             BranchInstruction bi     = (BranchInstruction)instruction;
                             BranchInstruction prevBi = (BranchInstruction)prevI;
@@ -149,7 +151,7 @@ public class ComparisonInstructionAnalyzer
             case ByteCodeConstants.IF:
             case ByteCodeConstants.IFCMP:
             case ByteCodeConstants.IFXNULL:
-            case ByteCodeConstants.GOTO:
+            case Const.GOTO:
                 int jumpOffset = ((BranchInstruction)i).getJumpOffset();
                 if ((newFirstOffset < jumpOffset) && (jumpOffset <= lastOffset))
                     newFirstOffset = jumpOffset;
@@ -167,7 +169,7 @@ public class ComparisonInstructionAnalyzer
             case ByteCodeConstants.IF:
             case ByteCodeConstants.IFCMP:
             case ByteCodeConstants.IFXNULL:
-            case ByteCodeConstants.GOTO:
+            case Const.GOTO:
                 int jumpOffset = ((BranchInstruction)i).getJumpOffset();
                 if ((newFirstOffset < jumpOffset) && (jumpOffset <= lastOffset))
                     newFirstOffset = jumpOffset;
@@ -238,7 +240,7 @@ public class ComparisonInstructionAnalyzer
                         {
                             Instruction ins = list.get(i);
 
-                            if (ins.opcode == ByteCodeConstants.IINC)
+                            if (ins.opcode == Const.IINC)
                             {
                                 int lineNumber = ins.lineNumber;
 
@@ -265,7 +267,7 @@ public class ComparisonInstructionAnalyzer
                     break; // Non
                 }
             }
-            else if (opcode == ByteCodeConstants.GOTO)
+            else if (opcode == Const.GOTO)
             {
                 Goto g = (Goto)instruction;
                 int jumpOffset = g.getJumpOffset();
@@ -422,7 +424,7 @@ public class ComparisonInstructionAnalyzer
                     if ((opcode != ByteCodeConstants.IF) &&
                         (opcode != ByteCodeConstants.IFCMP) &&
                         (opcode != ByteCodeConstants.IFXNULL) &&
-                        (opcode != ByteCodeConstants.GOTO))
+                        (opcode != Const.GOTO))
                     {
                         index++;
                         break;
@@ -526,7 +528,7 @@ public class ComparisonInstructionAnalyzer
                     Instruction instruction =
                         branchInstructions.get(index);
 
-                    if ((instruction.opcode == ByteCodeConstants.GOTO) ||
+                    if ((instruction.opcode == Const.GOTO) ||
                         (instruction.offset >= gotoJumpOffset))
                         break;
 
@@ -807,7 +809,7 @@ public class ComparisonInstructionAnalyzer
             if ((opcode == ByteCodeConstants.IF) ||
                 (opcode == ByteCodeConstants.IFCMP) ||
                 (opcode == ByteCodeConstants.IFXNULL) ||
-                (opcode == ByteCodeConstants.GOTO))
+                (opcode == Const.GOTO))
             {
                 index++;
             }

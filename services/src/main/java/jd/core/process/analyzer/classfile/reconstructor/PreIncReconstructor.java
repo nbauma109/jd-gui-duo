@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
+import org.apache.bcel.Const;
+
 import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
@@ -83,15 +85,15 @@ public class PreIncReconstructor
 
                 switch (i.opcode)
                 {
-                case ByteCodeConstants.ASTORE:
-                    if ((boi.value1.opcode == ByteCodeConstants.ALOAD) &&
+                case Const.ASTORE:
+                    if ((boi.value1.opcode == Const.ALOAD) &&
                         (((StoreInstruction)i).valueref.opcode == ByteCodeConstants.DUPLOAD) &&
                         (((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index))
                         // 1er DupLoad trouvé
                         dupload = ((StoreInstruction)i).valueref;
                         break;
-                case ByteCodeConstants.ISTORE:
-                    if ((boi.value1.opcode == ByteCodeConstants.ILOAD) &&
+                case Const.ISTORE:
+                    if ((boi.value1.opcode == Const.ILOAD) &&
                         (((StoreInstruction)i).valueref.opcode == ByteCodeConstants.DUPLOAD) &&
                         (((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index))
                         // 1er DupLoad trouvé
@@ -104,15 +106,15 @@ public class PreIncReconstructor
                         // 1er DupLoad trouvé
                         dupload = ((StoreInstruction)i).valueref;
                     break;
-                case ByteCodeConstants.PUTFIELD:
-                    if ((boi.value1.opcode == ByteCodeConstants.GETFIELD) &&
+                case Const.PUTFIELD:
+                    if ((boi.value1.opcode == Const.GETFIELD) &&
                         (((PutField)i).valueref.opcode == ByteCodeConstants.DUPLOAD) &&
                         (((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index))
                         // 1er DupLoad trouvé
                         dupload = ((PutField)i).valueref;
                     break;
-                case ByteCodeConstants.PUTSTATIC:
-                    if ((boi.value1.opcode == ByteCodeConstants.GETSTATIC) &&
+                case Const.PUTSTATIC:
+                    if ((boi.value1.opcode == Const.GETSTATIC) &&
                         (((PutStatic)i).valueref.opcode == ByteCodeConstants.DUPLOAD) &&
                         (((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index))
                         // 1er DupLoad trouvé

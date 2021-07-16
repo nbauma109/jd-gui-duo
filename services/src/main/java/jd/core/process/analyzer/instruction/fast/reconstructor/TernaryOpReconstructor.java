@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.fast.reconstructor;
 
+import org.apache.bcel.Const;
+
 import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
@@ -129,9 +131,9 @@ public class TernaryOpReconstructor
 
         switch (instruction.opcode)
         {
-        case ByteCodeConstants.BIPUSH:
+        case Const.BIPUSH:
         case ByteCodeConstants.ICONST:
-        case ByteCodeConstants.SIPUSH:
+        case Const.SIPUSH:
             return "Z".equals(instruction.getReturnedSignature(null, null));
         default:
             return false;

@@ -16,8 +16,10 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.bytecode.factory;
 
-import java.util.List;
+import org.apache.bcel.Const;
+
 import java.util.Deque;
+import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Method;
@@ -37,10 +39,10 @@ public class FStoreFactory extends InstructionFactory
         final int opcode = code[offset] & 255;
         int index;
 
-        if (opcode == ByteCodeConstants.FSTORE)
+        if (opcode == Const.FSTORE)
             index = code[offset+1] & 255;
         else
-            index = opcode - ByteCodeConstants.FSTORE_0;
+            index = opcode - Const.FSTORE_0;
 
         final Instruction instruction = new StoreInstruction(
             ByteCodeConstants.STORE, offset,
@@ -49,6 +51,6 @@ public class FStoreFactory extends InstructionFactory
         list.add(instruction);
         listForAnalyze.add(instruction);
 
-        return ByteCodeConstants.NO_OF_OPERANDS[opcode];
+        return Const.getNoOfOperands(opcode);
     }
 }

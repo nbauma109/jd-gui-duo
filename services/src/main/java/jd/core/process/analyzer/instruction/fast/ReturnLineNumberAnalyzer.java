@@ -16,10 +16,11 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.fast;
 
+import org.apache.bcel.Const;
+
 import java.util.List;
 
 import jd.core.model.classfile.Method;
-import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.Return;
 import jd.core.model.instruction.fast.FastConstants;
@@ -141,7 +142,7 @@ public class ReturnLineNumberAnalyzer
                     recursiveCheck(ft.instructions, afterListLineNumber);
                 }
                 break;
-            case ByteCodeConstants.RETURN:
+            case Const.RETURN:
                 {
                     Return r = (Return)instruction;
                     if (r.lineNumber > afterListLineNumber)

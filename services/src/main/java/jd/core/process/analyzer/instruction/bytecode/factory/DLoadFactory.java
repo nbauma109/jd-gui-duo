@@ -16,8 +16,10 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.bytecode.factory;
 
-import java.util.List;
+import org.apache.bcel.Const;
+
 import java.util.Deque;
+import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Method;
@@ -37,10 +39,10 @@ public class DLoadFactory extends InstructionFactory
         final int opcode = code[offset] & 255;
         int index;
 
-        if (opcode == ByteCodeConstants.DLOAD)
+        if (opcode == Const.DLOAD)
             index = code[offset+1] & 255;
         else
-            index = opcode - ByteCodeConstants.DLOAD_0;
+            index = opcode - Const.DLOAD_0;
 
         final Instruction instruction = new LoadInstruction(
             ByteCodeConstants.LOAD, offset, lineNumber, index, "D");
@@ -48,6 +50,6 @@ public class DLoadFactory extends InstructionFactory
         stack.push(instruction);
         listForAnalyze.add(instruction);
 
-        return ByteCodeConstants.NO_OF_OPERANDS[opcode];
+        return Const.getNoOfOperands(opcode);
     }
 }

@@ -13,7 +13,7 @@ import org.jd.core.v1.model.classfile.attribute.Attribute;
 import java.util.List;
 import java.util.Map;
 
-import static org.jd.core.v1.model.classfile.Constants.*;
+import static org.apache.bcel.Const.*;
 
 public class ClassFile {
     protected int majorVersion;

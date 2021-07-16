@@ -16,7 +16,9 @@
  ******************************************************************************/
 package jd.core.model.classfile;
 
-import org.jd.core.v1.model.classfile.constant.*;
+import org.apache.bcel.classfile.*;
+import org.jd.core.v1.model.classfile.constant.ConstantInterfaceMethodref;
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.ArrayList;
@@ -83,7 +85,7 @@ public class ConstantPool
             if (constant instanceof ConstantUtf8)
             {
                 this.constantUtf8ToIndex.put(
-                        ((ConstantUtf8)constant).getValue(), index);
+                        ((ConstantUtf8)constant).getBytes(), index);
             }
             if (constant instanceof ConstantClass)
             {
@@ -264,7 +266,7 @@ public class ConstantPool
             ConstantNameAndType cnat = (ConstantNameAndType)constant;
 
             if ((cnat.getNameIndex() == nameIndex) &&
-                (cnat.getDescriptorIndex() == descriptorIndex))
+                (cnat.getSignatureIndex() == descriptorIndex))
                 return index;
         }
 
@@ -337,14 +339,14 @@ public class ConstantPool
     public String getConstantUtf8(int index)
     {
         ConstantUtf8 cutf8 = (ConstantUtf8)this.listOfConstants.get(index);
-        return cutf8.getValue();
+        return cutf8.getBytes();
     }
 
     public String getConstantClassName(int index)
     {
         ConstantClass cc = (ConstantClass)this.listOfConstants.get(index);
         ConstantUtf8 cutf8 = (ConstantUtf8)this.listOfConstants.get(cc.getNameIndex());
-        return cutf8.getValue();
+        return cutf8.getBytes();
     }
 
     public ConstantClass getConstantClass(int index)

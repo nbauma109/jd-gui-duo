@@ -16,8 +16,10 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.bytecode.factory;
 
-import java.util.List;
+import org.apache.bcel.Const;
+
 import java.util.Deque;
+import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Method;
@@ -46,7 +48,7 @@ public class GotoFactory extends InstructionFactory
 
         list.add(new Goto(opcode, offset, lineNumber, value));
 
-        return ByteCodeConstants.NO_OF_OPERANDS[opcode];
+        return Const.getNoOfOperands(opcode);
     }
 
     private static void generateTernaryOpStore(
@@ -95,138 +97,138 @@ public class GotoFactory extends InstructionFactory
             // information sur la pile.
             switch (opcode)
             {
-            case ByteCodeConstants.ACONST_NULL:
-            case ByteCodeConstants.ICONST_M1:
-            case ByteCodeConstants.ICONST_0:
-            case ByteCodeConstants.ICONST_1:
-            case ByteCodeConstants.ICONST_2:
-            case ByteCodeConstants.ICONST_3:
-            case ByteCodeConstants.ICONST_4:
-            case ByteCodeConstants.ICONST_5:
-            case ByteCodeConstants.LCONST_0:
-            case ByteCodeConstants.LCONST_1:
-            case ByteCodeConstants.FCONST_0:
-            case ByteCodeConstants.FCONST_1:
-            case ByteCodeConstants.FCONST_2:
-            case ByteCodeConstants.DCONST_0:
-            case ByteCodeConstants.DCONST_1:
-            case ByteCodeConstants.BIPUSH:
-            case ByteCodeConstants.SIPUSH:
-            case ByteCodeConstants.LDC:
-            case ByteCodeConstants.LDC_W:
-            case ByteCodeConstants.LDC2_W:
-            case ByteCodeConstants.ILOAD:
-            case ByteCodeConstants.LLOAD:
-            case ByteCodeConstants.FLOAD:
-            case ByteCodeConstants.DLOAD:
-            case ByteCodeConstants.ALOAD:
-            case ByteCodeConstants.ILOAD_0:
-            case ByteCodeConstants.ILOAD_1:
-            case ByteCodeConstants.ILOAD_2:
-            case ByteCodeConstants.ILOAD_3:
-            case ByteCodeConstants.LLOAD_0:
-            case ByteCodeConstants.LLOAD_1:
-            case ByteCodeConstants.LLOAD_2:
-            case ByteCodeConstants.LLOAD_3:
-            case ByteCodeConstants.FLOAD_0:
-            case ByteCodeConstants.FLOAD_1:
-            case ByteCodeConstants.FLOAD_2:
-            case ByteCodeConstants.FLOAD_3:
-            case ByteCodeConstants.DLOAD_0:
-            case ByteCodeConstants.DLOAD_1:
-            case ByteCodeConstants.DLOAD_2:
-            case ByteCodeConstants.DLOAD_3:
-            case ByteCodeConstants.ALOAD_0:
-            case ByteCodeConstants.ALOAD_1:
-            case ByteCodeConstants.ALOAD_2:
-            case ByteCodeConstants.ALOAD_3:
-            case ByteCodeConstants.IALOAD:
-            case ByteCodeConstants.LALOAD:
-            case ByteCodeConstants.FALOAD:
-            case ByteCodeConstants.DALOAD:
-            case ByteCodeConstants.AALOAD:
-            case ByteCodeConstants.BALOAD:
-            case ByteCodeConstants.CALOAD:
-            case ByteCodeConstants.SALOAD:
-            case ByteCodeConstants.DUP:
-            case ByteCodeConstants.DUP_X1:
-            case ByteCodeConstants.DUP_X2:
-            case ByteCodeConstants.DUP2:
-            case ByteCodeConstants.DUP2_X1:
-            case ByteCodeConstants.DUP2_X2:
-            case ByteCodeConstants.SWAP:
-            case ByteCodeConstants.IADD:
-            case ByteCodeConstants.LADD:
-            case ByteCodeConstants.FADD:
-            case ByteCodeConstants.DADD:
-            case ByteCodeConstants.ISUB:
-            case ByteCodeConstants.LSUB:
-            case ByteCodeConstants.FSUB:
-            case ByteCodeConstants.DSUB:
-            case ByteCodeConstants.IMUL:
-            case ByteCodeConstants.LMUL:
-            case ByteCodeConstants.FMUL:
-            case ByteCodeConstants.DMUL:
-            case ByteCodeConstants.IDIV:
-            case ByteCodeConstants.LDIV:
-            case ByteCodeConstants.FDIV:
-            case ByteCodeConstants.DDIV:
-            case ByteCodeConstants.IREM:
-            case ByteCodeConstants.LREM:
-            case ByteCodeConstants.FREM:
-            case ByteCodeConstants.DREM:
-            case ByteCodeConstants.INEG:
-            case ByteCodeConstants.LNEG:
-            case ByteCodeConstants.FNEG:
-            case ByteCodeConstants.DNEG:
-            case ByteCodeConstants.ISHL:
-            case ByteCodeConstants.LSHL:
-            case ByteCodeConstants.ISHR:
-            case ByteCodeConstants.LSHR:
-            case ByteCodeConstants.IUSHR:
-            case ByteCodeConstants.LUSHR:
-            case ByteCodeConstants.IAND:
-            case ByteCodeConstants.LAND:
-            case ByteCodeConstants.IOR:
-            case ByteCodeConstants.LOR:
-            case ByteCodeConstants.IXOR:
-            case ByteCodeConstants.LXOR:
-            case ByteCodeConstants.IINC:
-            case ByteCodeConstants.I2L:
-            case ByteCodeConstants.I2F:
-            case ByteCodeConstants.I2D:
-            case ByteCodeConstants.L2I:
-            case ByteCodeConstants.L2F:
-            case ByteCodeConstants.L2D:
-            case ByteCodeConstants.F2I:
-            case ByteCodeConstants.F2L:
-            case ByteCodeConstants.F2D:
-            case ByteCodeConstants.D2I:
-            case ByteCodeConstants.D2L:
-            case ByteCodeConstants.D2F:
-            case ByteCodeConstants.I2B:
-            case ByteCodeConstants.I2C:
-            case ByteCodeConstants.I2S:
-            case ByteCodeConstants.LCMP:
-            case ByteCodeConstants.FCMPL:
-            case ByteCodeConstants.FCMPG:
-            case ByteCodeConstants.DCMPL:
-            case ByteCodeConstants.DCMPG:
-            case ByteCodeConstants.GETSTATIC:
+            case Const.ACONST_NULL:
+            case Const.ICONST_M1:
+            case Const.ICONST_0:
+            case Const.ICONST_1:
+            case Const.ICONST_2:
+            case Const.ICONST_3:
+            case Const.ICONST_4:
+            case Const.ICONST_5:
+            case Const.LCONST_0:
+            case Const.LCONST_1:
+            case Const.FCONST_0:
+            case Const.FCONST_1:
+            case Const.FCONST_2:
+            case Const.DCONST_0:
+            case Const.DCONST_1:
+            case Const.BIPUSH:
+            case Const.SIPUSH:
+            case Const.LDC:
+            case Const.LDC_W:
+            case Const.LDC2_W:
+            case Const.ILOAD:
+            case Const.LLOAD:
+            case Const.FLOAD:
+            case Const.DLOAD:
+            case Const.ALOAD:
+            case Const.ILOAD_0:
+            case Const.ILOAD_1:
+            case Const.ILOAD_2:
+            case Const.ILOAD_3:
+            case Const.LLOAD_0:
+            case Const.LLOAD_1:
+            case Const.LLOAD_2:
+            case Const.LLOAD_3:
+            case Const.FLOAD_0:
+            case Const.FLOAD_1:
+            case Const.FLOAD_2:
+            case Const.FLOAD_3:
+            case Const.DLOAD_0:
+            case Const.DLOAD_1:
+            case Const.DLOAD_2:
+            case Const.DLOAD_3:
+            case Const.ALOAD_0:
+            case Const.ALOAD_1:
+            case Const.ALOAD_2:
+            case Const.ALOAD_3:
+            case Const.IALOAD:
+            case Const.LALOAD:
+            case Const.FALOAD:
+            case Const.DALOAD:
+            case Const.AALOAD:
+            case Const.BALOAD:
+            case Const.CALOAD:
+            case Const.SALOAD:
+            case Const.DUP:
+            case Const.DUP_X1:
+            case Const.DUP_X2:
+            case Const.DUP2:
+            case Const.DUP2_X1:
+            case Const.DUP2_X2:
+            case Const.SWAP:
+            case Const.IADD:
+            case Const.LADD:
+            case Const.FADD:
+            case Const.DADD:
+            case Const.ISUB:
+            case Const.LSUB:
+            case Const.FSUB:
+            case Const.DSUB:
+            case Const.IMUL:
+            case Const.LMUL:
+            case Const.FMUL:
+            case Const.DMUL:
+            case Const.IDIV:
+            case Const.LDIV:
+            case Const.FDIV:
+            case Const.DDIV:
+            case Const.IREM:
+            case Const.LREM:
+            case Const.FREM:
+            case Const.DREM:
+            case Const.INEG:
+            case Const.LNEG:
+            case Const.FNEG:
+            case Const.DNEG:
+            case Const.ISHL:
+            case Const.LSHL:
+            case Const.ISHR:
+            case Const.LSHR:
+            case Const.IUSHR:
+            case Const.LUSHR:
+            case Const.IAND:
+            case Const.LAND:
+            case Const.IOR:
+            case Const.LOR:
+            case Const.IXOR:
+            case Const.LXOR:
+            case Const.IINC:
+            case Const.I2L:
+            case Const.I2F:
+            case Const.I2D:
+            case Const.L2I:
+            case Const.L2F:
+            case Const.L2D:
+            case Const.F2I:
+            case Const.F2L:
+            case Const.F2D:
+            case Const.D2I:
+            case Const.D2L:
+            case Const.D2F:
+            case Const.I2B:
+            case Const.I2C:
+            case Const.I2S:
+            case Const.LCMP:
+            case Const.FCMPL:
+            case Const.FCMPG:
+            case Const.DCMPL:
+            case Const.DCMPG:
+            case Const.GETSTATIC:
             case ByteCodeConstants.OUTERTHIS:
-            case ByteCodeConstants.GETFIELD:
-            case ByteCodeConstants.INVOKEVIRTUAL:
-            case ByteCodeConstants.INVOKESPECIAL:
-            case ByteCodeConstants.INVOKESTATIC:
-            case ByteCodeConstants.INVOKEINTERFACE:
-            case ByteCodeConstants.NEW:
-            case ByteCodeConstants.NEWARRAY:
-            case ByteCodeConstants.ANEWARRAY:
-            case ByteCodeConstants.ARRAYLENGTH:
-            case ByteCodeConstants.CHECKCAST:
-            case ByteCodeConstants.INSTANCEOF:
-            case ByteCodeConstants.WIDE:
-            case ByteCodeConstants.MULTIANEWARRAY:
+            case Const.GETFIELD:
+            case Const.INVOKEVIRTUAL:
+            case Const.INVOKESPECIAL:
+            case Const.INVOKESTATIC:
+            case Const.INVOKEINTERFACE:
+            case Const.NEW:
+            case Const.NEWARRAY:
+            case Const.ANEWARRAY:
+            case Const.ARRAYLENGTH:
+            case Const.CHECKCAST:
+            case Const.INSTANCEOF:
+            case Const.WIDE:
+            case Const.MULTIANEWARRAY:
             // Extension for decompiler
             case ByteCodeConstants.ICONST:
             case ByteCodeConstants.LCONST:
@@ -247,24 +249,24 @@ public class GotoFactory extends InstructionFactory
                 result = offset;
             }
 
-            int nbOfOperands = ByteCodeConstants.NO_OF_OPERANDS[opcode];
+            int nbOfOperands = Const.getNoOfOperands(opcode);
 
             switch (nbOfOperands)
             {
-            case ByteCodeConstants.NO_OF_OPERANDS_UNPREDICTABLE:
+            case Const.UNPREDICTABLE:
                 switch (opcode)
                 {
-                case ByteCodeConstants.TABLESWITCH:
+                case Const.TABLESWITCH:
                     offset = ByteCodeUtil.nextTableSwitchOffset(code, offset);
                     break;
-                case ByteCodeConstants.LOOKUPSWITCH:
+                case Const.LOOKUPSWITCH:
                     offset = ByteCodeUtil.nextLookupSwitchOffset(code, offset);
                     break;
-                case ByteCodeConstants.WIDE:
+                case Const.WIDE:
                     offset = ByteCodeUtil.nextWideOffset(code, offset);
                 }
                 break;
-            case ByteCodeConstants.NO_OF_OPERANDS_UNDEFINED:
+            case Const.UNDEFINED:
                 break;
             default:
                 offset += nbOfOperands;

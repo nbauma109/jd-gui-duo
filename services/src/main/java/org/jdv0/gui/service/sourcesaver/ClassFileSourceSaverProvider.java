@@ -73,11 +73,7 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
                 listener.pathSaved(path);
             }
             String decompiledOutput = decompileV0(api, entry);
-            try (OutputStream os = Files.newOutputStream(path)) {
-                os.write(decompiledOutput.getBytes(StandardCharsets.UTF_8));
-            } catch (IOException e) {
-                assert ExceptionUtil.printStackTrace(e);
-            }
+            writeToFile(path, decompiledOutput);
         } catch (Exception t) {
             assert ExceptionUtil.printStackTrace(t);
 
@@ -88,6 +84,14 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
             }
         }
     }
+
+	private static void writeToFile(Path path, String decompiledOutput) {
+		try (OutputStream os = Files.newOutputStream(path)) {
+		    os.write(decompiledOutput.getBytes(StandardCharsets.UTF_8));
+		} catch (IOException e) {
+		    assert ExceptionUtil.printStackTrace(e);
+		}
+	}
 
 	public String decompileV0(API api, Container.Entry entry)
 			throws UnsupportedEncodingException, LoaderException {

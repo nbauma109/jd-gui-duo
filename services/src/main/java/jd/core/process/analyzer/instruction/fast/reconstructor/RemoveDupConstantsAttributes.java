@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.fast.reconstructor;
 
+import org.apache.bcel.Const;
+
 import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
@@ -50,12 +52,12 @@ public class RemoveDupConstantsAttributes
 
             int opcode = dupstore.objectref.opcode;
 
-            if (/*(opcode != ByteCodeConstants.GETFIELD) &&
-                (opcode != ByteCodeConstants.GETSTATIC) &&*/
-                (opcode != ByteCodeConstants.BIPUSH) &&
-                (opcode != ByteCodeConstants.SIPUSH) /*&&
-                (opcode != ByteCodeConstants.ALOAD) &&
-                (opcode != ByteCodeConstants.ILOAD)*/)
+            if (/*(opcode != Const.GETFIELD) &&
+                (opcode != Const.GETSTATIC) &&*/
+                (opcode != Const.BIPUSH) &&
+                (opcode != Const.SIPUSH) /*&&
+                (opcode != Const.ALOAD) &&
+                (opcode != Const.ILOAD)*/)
                 continue;
 
             Instruction i = dupstore.objectref;

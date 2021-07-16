@@ -16,12 +16,13 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.bytecode.factory;
 
-import java.util.List;
+import org.apache.bcel.Const;
+
 import java.util.Deque;
+import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Method;
-import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.Jsr;
 
@@ -39,8 +40,8 @@ public class JsrWFactory extends InstructionFactory
             ((code[offset+1] & 255) << 24) | ((code[offset+2] & 255) << 16) |
             ((code[offset+3] & 255) <<  8) | (code[offset+4] & 255);
 
-        list.add(new Jsr(ByteCodeConstants.JSR, offset, lineNumber, value));
+        list.add(new Jsr(Const.JSR, offset, lineNumber, value));
 
-        return ByteCodeConstants.NO_OF_OPERANDS[opcode];
+        return Const.getNoOfOperands(opcode);
     }
 }

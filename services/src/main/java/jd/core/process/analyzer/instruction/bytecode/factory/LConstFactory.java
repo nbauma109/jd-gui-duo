@@ -16,8 +16,10 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.bytecode.factory;
 
-import java.util.List;
+import org.apache.bcel.Const;
+
 import java.util.Deque;
+import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Method;
@@ -35,11 +37,11 @@ public class LConstFactory extends InstructionFactory
             int lineNumber, boolean[] jumps)
     {
         final int opcode = code[offset] & 255;
-        final int value = opcode - ByteCodeConstants.LCONST_0;
+        final int value = opcode - Const.LCONST_0;
 
         stack.push(new LConst(
             ByteCodeConstants.LCONST, offset, lineNumber, value));
 
-        return ByteCodeConstants.NO_OF_OPERANDS[opcode];
+        return Const.getNoOfOperands(opcode);
     }
 }

@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.visitor;
 
+import org.apache.bcel.Const;
+
 import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
@@ -34,7 +36,7 @@ public class SearchDupLoadInstructionVisitor
     {
         switch (instruction.opcode)
         {
-        case ByteCodeConstants.ARRAYLENGTH:
+        case Const.ARRAYLENGTH:
             return visit(((ArrayLength)instruction).arrayref, dupStore);
         case ByteCodeConstants.ARRAYLOAD:
             {
@@ -44,7 +46,7 @@ public class SearchDupLoadInstructionVisitor
                     return dupLoad;
                 return visit(ali.indexref, dupStore);
             }
-        case ByteCodeConstants.AASTORE:
+        case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
@@ -66,7 +68,7 @@ public class SearchDupLoadInstructionVisitor
                     return null;
                 return visit(ai.msg, dupStore);
             }
-        case ByteCodeConstants.ATHROW:
+        case Const.ATHROW:
             return visit(((AThrow)instruction).value, dupStore);
         case ByteCodeConstants.UNARYOP:
             return visit(((UnaryOperatorInstruction)instruction).value, dupStore);
@@ -80,11 +82,11 @@ public class SearchDupLoadInstructionVisitor
                     return dupLoad;
                 return visit(boi.value2, dupStore);
             }
-        case ByteCodeConstants.CHECKCAST:
+        case Const.CHECKCAST:
             return visit(((CheckCast)instruction).objectref, dupStore);
         case ByteCodeConstants.STORE:
-        case ByteCodeConstants.ASTORE:
-        case ByteCodeConstants.ISTORE:
+        case Const.ASTORE:
+        case Const.ISTORE:
             return visit(((StoreInstruction)instruction).valueref, dupStore);
         case ByteCodeConstants.DUPLOAD:
             if (((DupLoad)instruction).dupStore == dupStore)
@@ -118,11 +120,11 @@ public class SearchDupLoadInstructionVisitor
                 }
             }
             break;
-        case ByteCodeConstants.INSTANCEOF:
+        case Const.INSTANCEOF:
             return visit(((InstanceOf)instruction).objectref, dupStore);
-        case ByteCodeConstants.INVOKEINTERFACE:
-        case ByteCodeConstants.INVOKESPECIAL:
-        case ByteCodeConstants.INVOKEVIRTUAL:
+        case Const.INVOKEINTERFACE:
+        case Const.INVOKESPECIAL:
+        case Const.INVOKEVIRTUAL:
             {
                 DupLoad dupLoad = visit(
                     ((InvokeNoStaticInstruction)instruction).objectref, dupStore);
@@ -130,7 +132,7 @@ public class SearchDupLoadInstructionVisitor
                     return dupLoad;
             }
             // intended fall through
-        case ByteCodeConstants.INVOKESTATIC:
+        case Const.INVOKESTATIC:
         case ByteCodeConstants.INVOKENEW:
             {
                 List<Instruction> list = ((InvokeInstruction)instruction).args;
@@ -142,13 +144,13 @@ public class SearchDupLoadInstructionVisitor
                 }
             }
             break;
-        case ByteCodeConstants.LOOKUPSWITCH:
+        case Const.LOOKUPSWITCH:
             return visit(((LookupSwitch)instruction).key, dupStore);
-        case ByteCodeConstants.MONITORENTER:
+        case Const.MONITORENTER:
             return visit(((MonitorEnter)instruction).objectref, dupStore);
-        case ByteCodeConstants.MONITOREXIT:
+        case Const.MONITOREXIT:
             return visit(((MonitorExit)instruction).objectref, dupStore);
-        case ByteCodeConstants.MULTIANEWARRAY:
+        case Const.MULTIANEWARRAY:
             {
                 Instruction[] dimensions = ((MultiANewArray)instruction).dimensions;
                 for (int i=dimensions.length-1; i>=0; --i)
@@ -159,13 +161,13 @@ public class SearchDupLoadInstructionVisitor
                 }
             }
             break;
-        case ByteCodeConstants.NEWARRAY:
+        case Const.NEWARRAY:
             return visit(((NewArray)instruction).dimension, dupStore);
-        case ByteCodeConstants.ANEWARRAY:
+        case Const.ANEWARRAY:
             return visit(((ANewArray)instruction).dimension, dupStore);
-        case ByteCodeConstants.POP:
+        case Const.POP:
             return visit(((Pop)instruction).objectref, dupStore);
-        case ByteCodeConstants.PUTFIELD:
+        case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
                 DupLoad dupLoad = visit(putField.objectref, dupStore);
@@ -173,18 +175,18 @@ public class SearchDupLoadInstructionVisitor
                     return dupLoad;
                 return visit(putField.valueref, dupStore);
             }
-        case ByteCodeConstants.PUTSTATIC:
+        case Const.PUTSTATIC:
             return visit(((PutStatic)instruction).valueref, dupStore);
         case ByteCodeConstants.XRETURN:
             return visit(((ReturnInstruction)instruction).valueref, dupStore);
-        case ByteCodeConstants.TABLESWITCH:
+        case Const.TABLESWITCH:
             return visit(((TableSwitch)instruction).key, dupStore);
         case ByteCodeConstants.TERNARYOPSTORE:
             return visit(((TernaryOpStore)instruction).objectref, dupStore);
         case ByteCodeConstants.PREINC:
         case ByteCodeConstants.POSTINC:
             return visit(((IncInstruction)instruction).value, dupStore);
-        case ByteCodeConstants.GETFIELD:
+        case Const.GETFIELD:
             return visit(((GetField)instruction).objectref, dupStore);
         case ByteCodeConstants.INITARRAY:
         case ByteCodeConstants.NEWANDINITARRAY:
@@ -197,27 +199,27 @@ public class SearchDupLoadInstructionVisitor
                     return visit(iai.values, dupStore);
             }
             break;
-        case ByteCodeConstants.ACONST_NULL:
+        case Const.ACONST_NULL:
         case ByteCodeConstants.LOAD:
-        case ByteCodeConstants.ALOAD:
-        case ByteCodeConstants.ILOAD:
-        case ByteCodeConstants.BIPUSH:
+        case Const.ALOAD:
+        case Const.ILOAD:
+        case Const.BIPUSH:
         case ByteCodeConstants.ICONST:
         case ByteCodeConstants.LCONST:
         case ByteCodeConstants.FCONST:
         case ByteCodeConstants.DCONST:
-        case ByteCodeConstants.GETSTATIC:
+        case Const.GETSTATIC:
         case ByteCodeConstants.OUTERTHIS:
-        case ByteCodeConstants.GOTO:
-        case ByteCodeConstants.IINC:
-        case ByteCodeConstants.JSR:
-        case ByteCodeConstants.LDC:
-        case ByteCodeConstants.LDC2_W:
-        case ByteCodeConstants.NEW:
-        case ByteCodeConstants.NOP:
-        case ByteCodeConstants.SIPUSH:
-        case ByteCodeConstants.RET:
-        case ByteCodeConstants.RETURN:
+        case Const.GOTO:
+        case Const.IINC:
+        case Const.JSR:
+        case Const.LDC:
+        case Const.LDC2_W:
+        case Const.NEW:
+        case Const.NOP:
+        case Const.SIPUSH:
+        case Const.RET:
+        case Const.RETURN:
         case ByteCodeConstants.EXCEPTIONLOAD:
         case ByteCodeConstants.RETURNADDRESSLOAD:
             break;

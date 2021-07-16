@@ -16,8 +16,9 @@
  */
 package jd.core.process.writer;
 
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.Constant;
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.model.classfile.constant.Constant;
 import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
 import org.jd.core.v1.util.StringConstants;
 
@@ -801,14 +802,14 @@ public class ClassFileWriter
     {
         // Affichage de la classe, de l'interface, de l'enum ou de l'annotation
          // Check annotation
-        if ((classFile.accessFlags & ClassFileConstants.ACC_ANNOTATION) != 0)
+        if ((classFile.accessFlags & Const.ACC_ANNOTATION) != 0)
         {
             // Retrait du flags 'abstract'
-            classFile.accessFlags &= ~ClassFileConstants.ACC_ABSTRACT;
+            classFile.accessFlags &= ~Const.ACC_ABSTRACT;
         }
 
         // Access : public private static volatile ...
-        if ((classFile.accessFlags & ClassFileConstants.ACC_ENUM) == 0)
+        if ((classFile.accessFlags & Const.ACC_ENUM) == 0)
         {
             if (classFile.isAInnerClass()) {
                 writeAccessNestedClass(classFile.accessFlags);
@@ -832,14 +833,14 @@ public class ClassFileWriter
         {
             acc = 1 << i;
 
-            if((accessFlags & acc) != 0 && acc != ClassFileConstants.ACC_SUPER && acc != ClassFileConstants.ACC_INTERFACE)
+            if((accessFlags & acc) != 0 && acc != Const.ACC_SUPER && acc != Const.ACC_INTERFACE)
             {
                 this.printer.printKeyword(ACCESS_NESTED_CLASS_NAMES[i]);
                 this.printer.print(' ');
             }
         }
 
-        if ((accessFlags & ClassFileConstants.ACC_ABSTRACT) != 0)
+        if ((accessFlags & Const.ACC_ABSTRACT) != 0)
         {
             this.printer.printKeyword(ABSTRACT);
             this.printer.print(' ');
@@ -848,17 +849,17 @@ public class ClassFileWriter
 
     private void writeAccessClass(int accessFlags)
     {
-        if ((accessFlags & ClassFileConstants.ACC_PUBLIC) != 0)
+        if ((accessFlags & Const.ACC_PUBLIC) != 0)
         {
             this.printer.printKeyword(PUBLIC);
             this.printer.print(' ');
         }
-        if ((accessFlags & ClassFileConstants.ACC_FINAL) != 0)
+        if ((accessFlags & Const.ACC_FINAL) != 0)
         {
             this.printer.printKeyword(FINAL);
             this.printer.print(' ');
         }
-        if ((accessFlags & ClassFileConstants.ACC_ABSTRACT) != 0)
+        if ((accessFlags & Const.ACC_ABSTRACT) != 0)
         {
             this.printer.printKeyword(ABSTRACT);
             this.printer.print(' ');
@@ -872,14 +873,14 @@ public class ClassFileWriter
         {
             acc = 1 << i;
 
-            if((accessFlags & acc) != 0 && acc != ClassFileConstants.ACC_SUPER && acc != ClassFileConstants.ACC_INTERFACE)
+            if((accessFlags & acc) != 0 && acc != Const.ACC_SUPER && acc != Const.ACC_INTERFACE)
             {
                 this.printer.printKeyword(ACCESS_NESTED_ENUM_NAMES[i]);
                 this.printer.print(' ');
             }
         }
 
-        if ((accessFlags & ClassFileConstants.ACC_ABSTRACT) != 0)
+        if ((accessFlags & Const.ACC_ABSTRACT) != 0)
         {
             this.printer.printKeyword(ABSTRACT);
             this.printer.print(' ');
@@ -888,7 +889,7 @@ public class ClassFileWriter
 
     private void writeAccessEnum(int accessFlags)
     {
-        if ((accessFlags & ClassFileConstants.ACC_PUBLIC) != 0) {
+        if ((accessFlags & Const.ACC_PUBLIC) != 0) {
             this.printer.printKeyword(PUBLIC);
         }
 
@@ -897,11 +898,11 @@ public class ClassFileWriter
 
     private void writeType(int accessFlags)
     {
-        if ((accessFlags & ClassFileConstants.ACC_ANNOTATION) != 0) {
+        if ((accessFlags & Const.ACC_ANNOTATION) != 0) {
             this.printer.printKeyword("@interface");
-        } else if ((accessFlags & ClassFileConstants.ACC_ENUM) != 0) {
+        } else if ((accessFlags & Const.ACC_ENUM) != 0) {
             this.printer.printKeyword("enum");
-        } else if ((accessFlags & ClassFileConstants.ACC_INTERFACE) != 0) {
+        } else if ((accessFlags & Const.ACC_INTERFACE) != 0) {
             this.printer.printKeyword("interface");
         } else {
             this.printer.printKeyword("class");
@@ -1570,7 +1571,7 @@ public class ClassFileWriter
         String internalClassName = classFile.getThisClassName();
         String descriptor = constants.getConstantUtf8(field.getDescriptorIndex());
 
-        if ((field.accessFlags & ClassFileConstants.ACC_STATIC) != 0) {
+        if ((field.accessFlags & Const.ACC_STATIC) != 0) {
             this.printer.printStaticFieldDeclaration(
                 internalClassName, fieldName, descriptor);
         } else {
@@ -1606,7 +1607,7 @@ public class ClassFileWriter
         {
             acc = 1 << i;
 
-            if ((accessFlags & acc) != 0 && acc != ClassFileConstants.ACC_SUPER && acc != ClassFileConstants.ACC_INTERFACE && ACCESS_FIELD_NAMES[i] != null)
+            if ((accessFlags & acc) != 0 && acc != Const.ACC_SUPER && acc != Const.ACC_INTERFACE && ACCESS_FIELD_NAMES[i] != null)
             {
                 this.printer.printKeyword(ACCESS_FIELD_NAMES[i]);
                 this.printer.print(' ');
@@ -1624,7 +1625,7 @@ public class ClassFileWriter
     {
         Method method = mlb.method;
 
-        if ((mlb.classFile.accessFlags & ClassFileConstants.ACC_ANNOTATION) == 0)
+        if ((mlb.classFile.accessFlags & Const.ACC_ANNOTATION) == 0)
         {
             writeAccessMethod(method.accessFlags);
 
@@ -1639,7 +1640,7 @@ public class ClassFileWriter
         else
         {
             writeAccessMethod(
-                method.accessFlags & ~(ClassFileConstants.ACC_PUBLIC|ClassFileConstants.ACC_ABSTRACT));
+                method.accessFlags & ~(Const.ACC_PUBLIC|Const.ACC_ABSTRACT));
 
             SignatureWriter.writeMethodDeclaration(
                 keywords, this.loader, this.printer, this.referenceMap,

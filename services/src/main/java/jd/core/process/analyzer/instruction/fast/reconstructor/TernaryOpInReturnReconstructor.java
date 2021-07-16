@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.fast.reconstructor;
 
+import org.apache.bcel.Const;
+
 import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
@@ -44,8 +46,8 @@ public class TernaryOpInReturnReconstructor
             ReturnInstruction ri1 = (ReturnInstruction)list.get(index);
             int opcode = ri1.valueref.opcode;
 
-            if ((opcode != ByteCodeConstants.SIPUSH) &&
-                (opcode != ByteCodeConstants.BIPUSH) &&
+            if ((opcode != Const.SIPUSH) &&
+                (opcode != Const.BIPUSH) &&
                 (opcode != ByteCodeConstants.ICONST))
                 continue;
 
@@ -70,8 +72,8 @@ public class TernaryOpInReturnReconstructor
 
             opcode = ri2.valueref.opcode;
 
-            if ((opcode != ByteCodeConstants.SIPUSH) &&
-                (opcode != ByteCodeConstants.BIPUSH) &&
+            if ((opcode != Const.SIPUSH) &&
+                (opcode != Const.BIPUSH) &&
                 (opcode != ByteCodeConstants.ICONST))
                 continue;
 
@@ -108,7 +110,7 @@ public class TernaryOpInReturnReconstructor
                 instruction = list.get(i);
                 opcode = instruction.opcode;
 
-                if (opcode == ByteCodeConstants.GOTO)
+                if (opcode == Const.GOTO)
                 {
                     int jumpOffset = ((Goto)instruction).getJumpOffset();
                     if ((ri2.offset < jumpOffset) && (jumpOffset <= ri1.offset))

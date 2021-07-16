@@ -16,9 +16,7 @@
  ******************************************************************************/
 package jd.core.model.instruction.fast;
 
-import jd.core.model.instruction.bytecode.ByteCodeConstants;
-
-public class FastConstants extends ByteCodeConstants
+public class FastConstants
 {
     private FastConstants() {
         super();

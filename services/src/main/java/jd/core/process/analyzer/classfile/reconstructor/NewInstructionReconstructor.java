@@ -16,8 +16,9 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.ConstantNameAndType;
 import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
-import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 
 import java.util.List;
 
@@ -52,7 +53,7 @@ public class NewInstructionReconstructor extends NewInstructionReconstructorBase
 
             DupStore ds = (DupStore)list.get(dupStoreIndex);
 
-            if (ds.objectref.opcode != ByteCodeConstants.NEW)
+            if (ds.objectref.opcode != Const.NEW)
                 continue;
 
             int invokespecialIndex = dupStoreIndex;
@@ -62,7 +63,7 @@ public class NewInstructionReconstructor extends NewInstructionReconstructorBase
             {
                 Instruction instruction = list.get(invokespecialIndex);
 
-                if (instruction.opcode != ByteCodeConstants.INVOKESPECIAL)
+                if (instruction.opcode != Const.INVOKESPECIAL)
                     continue;
 
                 Invokespecial is = (Invokespecial)instruction;

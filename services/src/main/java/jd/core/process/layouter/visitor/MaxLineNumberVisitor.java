@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.process.layouter.visitor;
 
+import org.apache.bcel.Const;
+
 import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
@@ -38,7 +40,7 @@ public class MaxLineNumberVisitor
         case ByteCodeConstants.ARRAYLOAD:
             maxLineNumber = visit(((ArrayLoadInstruction)instruction).indexref);
             break;
-        case ByteCodeConstants.AASTORE:
+        case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             maxLineNumber = visit(((ArrayStoreInstruction)instruction).valueref);
             break;
@@ -48,7 +50,7 @@ public class MaxLineNumberVisitor
                 maxLineNumber = visit((ai.msg == null) ? ai.test : ai.msg);
             }
             break;
-        case ByteCodeConstants.ATHROW:
+        case Const.ATHROW:
             maxLineNumber = visit(((AThrow)instruction).value);
             break;
         case ByteCodeConstants.UNARYOP:
@@ -58,12 +60,12 @@ public class MaxLineNumberVisitor
         case ByteCodeConstants.ASSIGNMENT:
             maxLineNumber = visit(((BinaryOperatorInstruction)instruction).value2);
             break;
-        case ByteCodeConstants.CHECKCAST:
+        case Const.CHECKCAST:
             maxLineNumber = visit(((CheckCast)instruction).objectref);
             break;
         case ByteCodeConstants.STORE:
-        case ByteCodeConstants.ASTORE:
-        case ByteCodeConstants.ISTORE:
+        case Const.ASTORE:
+        case Const.ISTORE:
             maxLineNumber = visit(((StoreInstruction)instruction).valueref);
             break;
         case ByteCodeConstants.DUPSTORE:
@@ -94,13 +96,13 @@ public class MaxLineNumberVisitor
                 maxLineNumber = visit(branchList.get(branchList.size()-1));
             }
             break;
-        case ByteCodeConstants.INSTANCEOF:
+        case Const.INSTANCEOF:
             maxLineNumber = visit(((InstanceOf)instruction).objectref);
             break;
-        case ByteCodeConstants.INVOKEINTERFACE:
-        case ByteCodeConstants.INVOKESPECIAL:
-        case ByteCodeConstants.INVOKEVIRTUAL:
-        case ByteCodeConstants.INVOKESTATIC:
+        case Const.INVOKEINTERFACE:
+        case Const.INVOKESPECIAL:
+        case Const.INVOKEVIRTUAL:
+        case Const.INVOKESTATIC:
             {
                 List<Instruction> list = ((InvokeInstruction)instruction).args;
                 int length = list.size();
@@ -149,16 +151,16 @@ public class MaxLineNumberVisitor
                 }
             }
             break;
-        case ByteCodeConstants.LOOKUPSWITCH:
+        case Const.LOOKUPSWITCH:
             maxLineNumber = visit(((LookupSwitch)instruction).key);
             break;
-        case ByteCodeConstants.MONITORENTER:
+        case Const.MONITORENTER:
             maxLineNumber = visit(((MonitorEnter)instruction).objectref);
             break;
-        case ByteCodeConstants.MONITOREXIT:
+        case Const.MONITOREXIT:
             maxLineNumber = visit(((MonitorExit)instruction).objectref);
             break;
-        case ByteCodeConstants.MULTIANEWARRAY:
+        case Const.MULTIANEWARRAY:
             {
                 Instruction[] dimensions = ((MultiANewArray)instruction).dimensions;
                 int length = dimensions.length;
@@ -166,25 +168,25 @@ public class MaxLineNumberVisitor
                     maxLineNumber = visit(dimensions[length-1]);
             }
             break;
-        case ByteCodeConstants.NEWARRAY:
+        case Const.NEWARRAY:
             maxLineNumber = visit(((NewArray)instruction).dimension);
             break;
-        case ByteCodeConstants.ANEWARRAY:
+        case Const.ANEWARRAY:
             maxLineNumber = visit(((ANewArray)instruction).dimension);
             break;
-        case ByteCodeConstants.POP:
+        case Const.POP:
             maxLineNumber = visit(((Pop)instruction).objectref);
             break;
-        case ByteCodeConstants.PUTFIELD:
+        case Const.PUTFIELD:
             maxLineNumber = visit(((PutField)instruction).valueref);
             break;
-        case ByteCodeConstants.PUTSTATIC:
+        case Const.PUTSTATIC:
             maxLineNumber = visit(((PutStatic)instruction).valueref);
             break;
         case ByteCodeConstants.XRETURN:
             maxLineNumber = visit(((ReturnInstruction)instruction).valueref);
             break;
-        case ByteCodeConstants.TABLESWITCH:
+        case Const.TABLESWITCH:
             maxLineNumber = visit(((TableSwitch)instruction).key);
             break;
         case ByteCodeConstants.TERNARYOPSTORE:

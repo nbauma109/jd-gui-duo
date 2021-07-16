@@ -16,8 +16,8 @@
  ******************************************************************************/
 package jd.core.model.instruction.bytecode.instruction;
 
-import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
-import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
+import org.apache.bcel.classfile.ConstantFieldref;
+import org.apache.bcel.classfile.ConstantNameAndType;
 
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.LocalVariables;
@@ -50,6 +50,6 @@ public class GetField extends IndexInstruction
         if (cnat == null)
             return null;
 
-        return constants.getConstantUtf8(cnat.getDescriptorIndex());
+        return constants.getConstantUtf8(cnat.getSignatureIndex());
     }
 }

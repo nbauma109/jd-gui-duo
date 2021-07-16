@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.visitor;
 
+import org.apache.bcel.Const;
+
 import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
@@ -38,7 +40,7 @@ public class ReplaceGetStaticVisitor
     {
         switch (instruction.opcode)
         {
-        case ByteCodeConstants.ARRAYLENGTH:
+        case Const.ARRAYLENGTH:
             {
                 ArrayLength al = (ArrayLength)instruction;
                 if (match(al, al.arrayref))
@@ -47,7 +49,7 @@ public class ReplaceGetStaticVisitor
                     visit(al.arrayref);
             }
             break;
-        case ByteCodeConstants.AASTORE:
+        case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
@@ -102,7 +104,7 @@ public class ReplaceGetStaticVisitor
                 }
             }
             break;
-        case ByteCodeConstants.ATHROW:
+        case Const.ATHROW:
             {
                 AThrow aThrow = (AThrow)instruction;
                 if (match(aThrow, aThrow.value))
@@ -141,7 +143,7 @@ public class ReplaceGetStaticVisitor
                 }
             }
             break;
-        case ByteCodeConstants.CHECKCAST:
+        case Const.CHECKCAST:
             {
                 CheckCast checkCast = (CheckCast)instruction;
                 if (match(checkCast, checkCast.objectref))
@@ -151,8 +153,8 @@ public class ReplaceGetStaticVisitor
             }
             break;
         case ByteCodeConstants.STORE:
-        case ByteCodeConstants.ASTORE:
-        case ByteCodeConstants.ISTORE:
+        case Const.ASTORE:
+        case Const.ISTORE:
             {
                 StoreInstruction storeInstruction = (StoreInstruction)instruction;
                 if (match(storeInstruction, storeInstruction.valueref))
@@ -221,7 +223,7 @@ public class ReplaceGetStaticVisitor
                 }
             }
             break;
-        case ByteCodeConstants.INSTANCEOF:
+        case Const.INSTANCEOF:
             {
                 InstanceOf instanceOf = (InstanceOf)instruction;
                 if (match(instanceOf, instanceOf.objectref))
@@ -230,9 +232,9 @@ public class ReplaceGetStaticVisitor
                     visit(instanceOf.objectref);
             }
             break;
-        case ByteCodeConstants.INVOKEINTERFACE:
-        case ByteCodeConstants.INVOKESPECIAL:
-        case ByteCodeConstants.INVOKEVIRTUAL:
+        case Const.INVOKEINTERFACE:
+        case Const.INVOKESPECIAL:
+        case Const.INVOKEVIRTUAL:
             {
                 InvokeNoStaticInstruction insi =
                     (InvokeNoStaticInstruction)instruction;
@@ -242,7 +244,7 @@ public class ReplaceGetStaticVisitor
                     visit(insi.objectref);
             }
             // intended fall through
-        case ByteCodeConstants.INVOKESTATIC:
+        case Const.INVOKESTATIC:
         case ByteCodeConstants.INVOKENEW:
             {
                 List<Instruction> list = ((InvokeInstruction)instruction).args;
@@ -255,7 +257,7 @@ public class ReplaceGetStaticVisitor
                 }
             }
             break;
-        case ByteCodeConstants.LOOKUPSWITCH:
+        case Const.LOOKUPSWITCH:
             {
                 LookupSwitch ls = (LookupSwitch)instruction;
                 if (match(ls, ls.key))
@@ -264,7 +266,7 @@ public class ReplaceGetStaticVisitor
                     visit(ls.key);
             }
             break;
-        case ByteCodeConstants.MONITORENTER:
+        case Const.MONITORENTER:
             {
                 MonitorEnter monitorEnter = (MonitorEnter)instruction;
                 if (match(monitorEnter, monitorEnter.objectref))
@@ -273,7 +275,7 @@ public class ReplaceGetStaticVisitor
                     visit(monitorEnter.objectref);
             }
             break;
-        case ByteCodeConstants.MONITOREXIT:
+        case Const.MONITOREXIT:
             {
                 MonitorExit monitorExit = (MonitorExit)instruction;
                 if (match(monitorExit, monitorExit.objectref))
@@ -282,7 +284,7 @@ public class ReplaceGetStaticVisitor
                     visit(monitorExit.objectref);
             }
             break;
-        case ByteCodeConstants.MULTIANEWARRAY:
+        case Const.MULTIANEWARRAY:
             {
                 Instruction[] dimensions = ((MultiANewArray)instruction).dimensions;
                 for (int i=dimensions.length-1; (i>=0) && (this.parentFound == null); --i)
@@ -294,7 +296,7 @@ public class ReplaceGetStaticVisitor
                 }
             }
             break;
-        case ByteCodeConstants.NEWARRAY:
+        case Const.NEWARRAY:
             {
                 NewArray newArray = (NewArray)instruction;
                 if (match(newArray, newArray.dimension))
@@ -303,7 +305,7 @@ public class ReplaceGetStaticVisitor
                     visit(newArray.dimension);
             }
             break;
-        case ByteCodeConstants.ANEWARRAY:
+        case Const.ANEWARRAY:
             {
                 ANewArray aNewArray = (ANewArray)instruction;
                 if (match(aNewArray, aNewArray.dimension))
@@ -312,7 +314,7 @@ public class ReplaceGetStaticVisitor
                     visit(aNewArray.dimension);
             }
             break;
-        case ByteCodeConstants.POP:
+        case Const.POP:
             {
                 Pop pop = (Pop)instruction;
                 if (match(pop, pop.objectref))
@@ -321,7 +323,7 @@ public class ReplaceGetStaticVisitor
                     visit(pop.objectref);
             }
             break;
-        case ByteCodeConstants.PUTFIELD:
+        case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
                 if (match(putField, putField.objectref))
@@ -342,7 +344,7 @@ public class ReplaceGetStaticVisitor
                 }
             }
             break;
-        case ByteCodeConstants.PUTSTATIC:
+        case Const.PUTSTATIC:
             {
                 PutStatic putStatic = (PutStatic)instruction;
                 if (match(putStatic, putStatic.valueref))
@@ -360,7 +362,7 @@ public class ReplaceGetStaticVisitor
                     visit(ri.valueref);
             }
             break;
-        case ByteCodeConstants.TABLESWITCH:
+        case Const.TABLESWITCH:
             {
                 TableSwitch ts = (TableSwitch)instruction;
                 if (match(ts, ts.key))
@@ -463,7 +465,7 @@ public class ReplaceGetStaticVisitor
                     visit(ii.value);
             }
             break;
-        case ByteCodeConstants.GETFIELD:
+        case Const.GETFIELD:
             {
                 GetField gf = (GetField)instruction;
                 if (match(gf, gf.objectref))
@@ -489,27 +491,27 @@ public class ReplaceGetStaticVisitor
                 }
             }
             break;
-        case ByteCodeConstants.ACONST_NULL:
+        case Const.ACONST_NULL:
         case ByteCodeConstants.LOAD:
-        case ByteCodeConstants.ALOAD:
-        case ByteCodeConstants.ILOAD:
-        case ByteCodeConstants.BIPUSH:
+        case Const.ALOAD:
+        case Const.ILOAD:
+        case Const.BIPUSH:
         case ByteCodeConstants.ICONST:
         case ByteCodeConstants.LCONST:
         case ByteCodeConstants.FCONST:
         case ByteCodeConstants.DCONST:
         case ByteCodeConstants.DUPLOAD:
-        case ByteCodeConstants.GETSTATIC:
-        case ByteCodeConstants.GOTO:
-        case ByteCodeConstants.IINC:
-        case ByteCodeConstants.JSR:
-        case ByteCodeConstants.LDC:
-        case ByteCodeConstants.LDC2_W:
-        case ByteCodeConstants.NEW:
-        case ByteCodeConstants.NOP:
-        case ByteCodeConstants.SIPUSH:
-        case ByteCodeConstants.RET:
-        case ByteCodeConstants.RETURN:
+        case Const.GETSTATIC:
+        case Const.GOTO:
+        case Const.IINC:
+        case Const.JSR:
+        case Const.LDC:
+        case Const.LDC2_W:
+        case Const.NEW:
+        case Const.NOP:
+        case Const.SIPUSH:
+        case Const.RET:
+        case Const.RETURN:
         case ByteCodeConstants.EXCEPTIONLOAD:
         case ByteCodeConstants.RETURNADDRESSLOAD:
             break;
@@ -537,7 +539,7 @@ public class ReplaceGetStaticVisitor
 
     private boolean match(Instruction parent, Instruction i)
     {
-        if ((i.opcode == ByteCodeConstants.GETSTATIC) &&
+        if ((i.opcode == Const.GETSTATIC) &&
             (((GetStatic)i).index == this.index))
         {
             this.parentFound = parent;

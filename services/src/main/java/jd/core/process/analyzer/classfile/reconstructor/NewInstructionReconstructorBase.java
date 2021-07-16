@@ -16,6 +16,7 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
+import org.apache.bcel.Const;
 import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
 
 import jd.core.model.classfile.*;
@@ -72,14 +73,14 @@ public class NewInstructionReconstructorBase
                         {
                             Instruction arg = invokeNew.args.get(index);
 
-                            if (arg.opcode == ByteCodeConstants.CHECKCAST)
+                            if (arg.opcode == Const.CHECKCAST)
                                 arg = ((CheckCast)arg).objectref;
 
                             switch (arg.opcode)
                             {
                             case ByteCodeConstants.LOAD:
-                            case ByteCodeConstants.ALOAD:
-                            case ByteCodeConstants.ILOAD:
+                            case Const.ALOAD:
+                            case Const.ILOAD:
                                 LocalVariable lv =
                                     localVariables
                                         .getLocalVariableWithIndexAndOffset(

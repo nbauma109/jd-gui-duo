@@ -16,13 +16,17 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.fast.reconstructor;
 
-import org.jd.core.v1.model.classfile.constant.*;
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.Constant;
+import org.apache.bcel.classfile.ConstantFieldref;
+import org.apache.bcel.classfile.ConstantNameAndType;
+import org.apache.bcel.classfile.ConstantString;
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
-import jd.core.model.classfile.ClassFileConstants;
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.Field;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
@@ -80,7 +84,7 @@ public class DotClass118BReconstructor
 
             DupStore ds = (DupStore)instruction;
 
-            if (ds.objectref.opcode != ByteCodeConstants.GETSTATIC)
+            if (ds.objectref.opcode != Const.GETSTATIC)
                 continue;
 
             GetStatic gs = (GetStatic)ds.objectref;
@@ -103,7 +107,7 @@ public class DotClass118BReconstructor
 
             instruction = list.get(i+2);
 
-            if (instruction.opcode != ByteCodeConstants.POP)
+            if (instruction.opcode != Const.POP)
                 continue;
 
             Pop pop = (Pop)instruction;
@@ -128,7 +132,7 @@ public class DotClass118BReconstructor
                 ft.catches.get(0).instructions;
 
             if ((catchInstructions.size() != 1) ||
-                (catchInstructions.get(0).opcode != ByteCodeConstants.ATHROW))
+                (catchInstructions.get(0).opcode != Const.ATHROW))
                 continue;
 
             instruction = ft.instructions.get(0);
@@ -143,7 +147,7 @@ public class DotClass118BReconstructor
 
             AssignmentInstruction ai = (AssignmentInstruction)tos.objectref;
 
-            if (ai.value2.opcode != ByteCodeConstants.INVOKESTATIC)
+            if (ai.value2.opcode != Const.INVOKESTATIC)
                 continue;
 
             Invokestatic is = (Invokestatic)ai.value2;
@@ -153,14 +157,14 @@ public class DotClass118BReconstructor
 
             instruction = is.args.get(0);
 
-            if (instruction.opcode != ByteCodeConstants.LDC)
+            if (instruction.opcode != Const.LDC)
                 continue;
 
             ConstantNameAndType cnatField = constants.getConstantNameAndType(
                 cfr.getNameAndTypeIndex());
 
             String signature =
-                constants.getConstantUtf8(cnatField.getDescriptorIndex());
+                constants.getConstantUtf8(cnatField.getSignatureIndex());
 
             if (! StringConstants.INTERNAL_CLASS_SIGNATURE.equals(signature))
                 continue;
@@ -206,7 +210,7 @@ public class DotClass118BReconstructor
             // Ajout d'une nouvelle classe
             index = constants.addConstantClass(index);
             ldc = new Ldc(
-                ByteCodeConstants.LDC, ii.offset,
+                Const.LDC, ii.offset,
                 ii.lineNumber, index);
 
             // Remplacement de l'intruction GetStatic par l'instruction Ldc
@@ -233,7 +237,7 @@ public class DotClass118BReconstructor
 
                 if (field.getNameIndex() == cnatField.getNameIndex())
                 {
-                    field.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
+                    field.accessFlags |= Const.ACC_SYNTHETIC;
                     break;
                 }
             }

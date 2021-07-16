@@ -7,11 +7,11 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
+import org.apache.bcel.classfile.ConstantNameAndType;
 import org.jd.core.v1.model.classfile.ConstantPool;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
-import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
@@ -74,7 +74,7 @@ public class UpdateOuterFieldTypeVisitor extends AbstractJavaSyntaxVisitor {
                 ConstantMemberRef constantMemberRef = constants.getConstant(index);
                 String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
                 ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                String descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                String descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                 TypeMaker.TypeTypes typeTypes = typeMaker.makeTypeTypes(descriptor.substring(1, descriptor.length() - 1));
 
                 if ((typeTypes != null) && (typeTypes.typeParameters != null)) {

@@ -16,8 +16,9 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.visitor;
 
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.ConstantNameAndType;
 import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
-import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 
 import java.util.Map;
 
@@ -26,7 +27,6 @@ import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.accessor.Accessor;
 import jd.core.model.classfile.accessor.AccessorConstants;
 import jd.core.model.classfile.accessor.InvokeMethodAccessor;
-import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 
 /*
@@ -44,7 +44,7 @@ public class OuterInvokeMethodVisitor extends OuterGetStaticVisitor
     @Override
     protected Accessor match(Instruction i)
     {
-        if (i.opcode != ByteCodeConstants.INVOKESTATIC)
+        if (i.opcode != Const.INVOKESTATIC)
             return null;
 
         Invokestatic is = (Invokestatic)i;
@@ -52,7 +52,7 @@ public class OuterInvokeMethodVisitor extends OuterGetStaticVisitor
         ConstantNameAndType cnat =
             constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
         String descriptor =
-            constants.getConstantUtf8(cnat.getDescriptorIndex());
+            constants.getConstantUtf8(cnat.getSignatureIndex());
 
         // Zero parameter ?
         if (descriptor.charAt(1) == ')')
@@ -96,31 +96,31 @@ public class OuterInvokeMethodVisitor extends OuterGetStaticVisitor
 
         switch (ima.methodOpcode)
         {
-        case ByteCodeConstants.INVOKESPECIAL:
+        case Const.INVOKESPECIAL:
             {
                 Instruction objectref = is.args.remove(0);
                 return new Invokespecial(
-                    ByteCodeConstants.INVOKESPECIAL, i.offset, i.lineNumber,
+                    Const.INVOKESPECIAL, i.offset, i.lineNumber,
                     cmrIndex, objectref, is.args);
             }
-        case ByteCodeConstants.INVOKEVIRTUAL:
+        case Const.INVOKEVIRTUAL:
             {
                 Instruction objectref = is.args.remove(0);
                 return new Invokevirtual(
-                    ByteCodeConstants.INVOKEVIRTUAL, i.offset, i.lineNumber,
+                    Const.INVOKEVIRTUAL, i.offset, i.lineNumber,
                     cmrIndex, objectref, is.args);
             }
-        case ByteCodeConstants.INVOKEINTERFACE:
+        case Const.INVOKEINTERFACE:
             {
                 Instruction objectref = is.args.remove(0);
                 return new Invokeinterface(
-                    ByteCodeConstants.INVOKEINTERFACE, i.offset, i.lineNumber,
+                    Const.INVOKEINTERFACE, i.offset, i.lineNumber,
                     cmrIndex, objectref, is.args);
             }
-        case ByteCodeConstants.INVOKESTATIC:
+        case Const.INVOKESTATIC:
             {
                 return new Invokestatic(
-                    ByteCodeConstants.INVOKESTATIC, i.offset, i.lineNumber,
+                    Const.INVOKESTATIC, i.offset, i.lineNumber,
                     cmrIndex, is.args);
             }
         default:

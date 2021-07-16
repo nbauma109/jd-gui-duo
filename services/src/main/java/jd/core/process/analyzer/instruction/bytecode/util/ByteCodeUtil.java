@@ -16,11 +16,11 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.bytecode.util;
 
+import org.apache.bcel.Const;
+
 import java.util.Arrays;
 
-import static jd.core.model.instruction.bytecode.ByteCodeConstants.*;
-
-import jd.core.model.instruction.bytecode.ByteCodeConstants;
+import static org.apache.bcel.Const.*;
 
 public class ByteCodeUtil
 {
@@ -72,7 +72,7 @@ public class ByteCodeUtil
     {
         final int opcode = code[index+1] & 255;
 
-        return index + ((opcode == ByteCodeConstants.IINC) ? 5 : 3);
+        return index + ((opcode == Const.IINC) ? 5 : 3);
     }
 
     public static int nextInstructionOffset(byte[] code, int index)
@@ -81,17 +81,17 @@ public class ByteCodeUtil
 
         switch (opcode)
         {
-        case ByteCodeConstants.TABLESWITCH:
+        case Const.TABLESWITCH:
             return nextTableSwitchOffset(code, index);
 
-        case ByteCodeConstants.LOOKUPSWITCH:
+        case Const.LOOKUPSWITCH:
             return nextLookupSwitchOffset(code, index);
 
-        case ByteCodeConstants.WIDE:
+        case Const.WIDE:
             return nextWideOffset(code, index);
 
         default:
-            return index + 1 + ByteCodeConstants.NO_OF_OPERANDS[opcode];
+            return index + 1 + Const.getNoOfOperands(opcode);
         }
     }
 
@@ -108,9 +108,9 @@ public class ByteCodeUtil
 
                 int opcode = code[offset] & 255;
 
-                if (opcode == ByteCodeConstants.GOTO) {
+                if (opcode == Const.GOTO) {
                     offset += (short) (((code[offset + 1] & 255) << 8) | (code[offset + 2] & 255));
-                } else if (opcode == ByteCodeConstants.GOTO_W) {
+                } else if (opcode == Const.GOTO_W) {
 
                     offset += ((code[offset + 1] & 255) << 24) | ((code[offset + 2] & 255) << 16)
                             | ((code[offset + 3] & 255) << 8) | (code[offset + 4] & 255);
@@ -154,7 +154,7 @@ public class ByteCodeUtil
 			}
 			while (offset < code.length && opCodeIn(code, offset, GETFIELD, INVOKEVIRTUAL, INVOKESPECIAL, INVOKESTATIC, INVOKEINTERFACE, CHECKCAST)) {
 				// skip GETFIELD, INVOKEVIRTUAL, INVOKESPECIAL, INVOKESTATIC, INVOKEINTERFACE, CHECKCAST and parameters
-				offset += 1 + ByteCodeConstants.NO_OF_OPERANDS[getOpCode(code, offset)];
+				offset += 1 + Const.getNoOfOperands(getOpCode(code, offset));
 			}
 			if (offset >= code.length) {
 				continue;
@@ -190,7 +190,7 @@ public class ByteCodeUtil
 			if (!opCodeIn(code, offset, ASTORE, ASTORE_0, ASTORE_1, ASTORE_2, ASTORE_3)) {
 				continue;
 			}
-			offset += 1 + ByteCodeConstants.NO_OF_OPERANDS[getOpCode(code, offset)];
+			offset += 1 + Const.getNoOfOperands(getOpCode(code, offset));
 			if (offset >= code.length) {
 				continue;
 			}
@@ -226,7 +226,7 @@ public class ByteCodeUtil
 			if (!opCodeIn(code, offset, ASTORE, ASTORE_0, ASTORE_1, ASTORE_2, ASTORE_3)) {
 				continue;
 			}
-			offset += 1 + ByteCodeConstants.NO_OF_OPERANDS[getOpCode(code, offset)];
+			offset += 1 + Const.getNoOfOperands(getOpCode(code, offset));
 			if (offset >= code.length) {
 				continue;
 			}
@@ -285,7 +285,7 @@ public class ByteCodeUtil
 			if (!opCodeIn(code, offset, ASTORE, ASTORE_0, ASTORE_1, ASTORE_2, ASTORE_3)) {
 				continue;
 			}
-			offset += 1 + ByteCodeConstants.NO_OF_OPERANDS[getOpCode(code, offset)];
+			offset += 1 + Const.getNoOfOperands(getOpCode(code, offset));
 			if (offset >= code.length) {
 				continue;
 			}
@@ -348,7 +348,7 @@ public class ByteCodeUtil
 				System.arraycopy(code, i, code, paramEndIdx, paramLength);
 			}
 			// clear what's left in the middle
-			Arrays.fill(code, clearFromIdx, newInvokeVirtualIdx, (byte)ByteCodeConstants.NOP);
+			Arrays.fill(code, clearFromIdx, newInvokeVirtualIdx, (byte)Const.NOP);
 		}
 		
 		return code;

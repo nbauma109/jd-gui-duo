@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.fast.visitor;
 
+import org.apache.bcel.Const;
+
 import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
@@ -44,10 +46,10 @@ public class CountDupLoadVisitor
     {
         switch (instruction.opcode)
         {
-        case ByteCodeConstants.ARRAYLENGTH:
+        case Const.ARRAYLENGTH:
             visit(((ArrayLength)instruction).arrayref);
             break;
-        case ByteCodeConstants.AASTORE:
+        case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
@@ -56,7 +58,7 @@ public class CountDupLoadVisitor
                 visit(asi.valueref);
             }
             break;
-        case ByteCodeConstants.ATHROW:
+        case Const.ATHROW:
             visit(((AThrow)instruction).value);
             break;
         case ByteCodeConstants.UNARYOP:
@@ -69,12 +71,12 @@ public class CountDupLoadVisitor
                 visit(boi.value2);
             }
             break;
-        case ByteCodeConstants.CHECKCAST:
+        case Const.CHECKCAST:
             visit(((CheckCast)instruction).objectref);
             break;
         case ByteCodeConstants.STORE:
-        case ByteCodeConstants.ASTORE:
-        case ByteCodeConstants.ISTORE:
+        case Const.ASTORE:
+        case Const.ISTORE:
             visit(((StoreInstruction)instruction).valueref);
             break;
         case ByteCodeConstants.DUPSTORE:
@@ -105,15 +107,15 @@ public class CountDupLoadVisitor
                 }
             }
             break;
-        case ByteCodeConstants.INSTANCEOF:
+        case Const.INSTANCEOF:
             visit(((InstanceOf)instruction).objectref);
             break;
-        case ByteCodeConstants.INVOKEINTERFACE:
-        case ByteCodeConstants.INVOKESPECIAL:
-        case ByteCodeConstants.INVOKEVIRTUAL:
+        case Const.INVOKEINTERFACE:
+        case Const.INVOKESPECIAL:
+        case Const.INVOKEVIRTUAL:
             visit(((InvokeNoStaticInstruction)instruction).objectref);
             // intended fall through
-        case ByteCodeConstants.INVOKESTATIC:
+        case Const.INVOKESTATIC:
             {
                 List<Instruction> list = ((InvokeInstruction)instruction).args;
                 for (int i=list.size()-1; i>=0; --i)
@@ -131,16 +133,16 @@ public class CountDupLoadVisitor
                 }
             }
             break;
-        case ByteCodeConstants.LOOKUPSWITCH:
+        case Const.LOOKUPSWITCH:
             visit(((LookupSwitch)instruction).key);
             break;
-        case ByteCodeConstants.MONITORENTER:
+        case Const.MONITORENTER:
             visit(((MonitorEnter)instruction).objectref);
             break;
-        case ByteCodeConstants.MONITOREXIT:
+        case Const.MONITOREXIT:
             visit(((MonitorExit)instruction).objectref);
             break;
-        case ByteCodeConstants.MULTIANEWARRAY:
+        case Const.MULTIANEWARRAY:
             {
                 Instruction[] dimensions = ((MultiANewArray)instruction).dimensions;
                 for (int i=dimensions.length-1; i>=0; --i)
@@ -149,29 +151,29 @@ public class CountDupLoadVisitor
                 }
             }
             break;
-        case ByteCodeConstants.NEWARRAY:
+        case Const.NEWARRAY:
             visit(((NewArray)instruction).dimension);
             break;
-        case ByteCodeConstants.ANEWARRAY:
+        case Const.ANEWARRAY:
             visit(((ANewArray)instruction).dimension);
             break;
-        case ByteCodeConstants.POP:
+        case Const.POP:
             visit(((Pop)instruction).objectref);
             break;
-        case ByteCodeConstants.PUTFIELD:
+        case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
                 visit(putField.objectref);
                 visit(putField.valueref);
             }
             break;
-        case ByteCodeConstants.PUTSTATIC:
+        case Const.PUTSTATIC:
             visit(((PutStatic)instruction).valueref);
             break;
         case ByteCodeConstants.XRETURN:
             visit(((ReturnInstruction)instruction).valueref);
             break;
-        case ByteCodeConstants.TABLESWITCH:
+        case Const.TABLESWITCH:
             visit(((TableSwitch)instruction).key);
             break;
         case ByteCodeConstants.TERNARYOPSTORE:
@@ -202,7 +204,7 @@ public class CountDupLoadVisitor
         case ByteCodeConstants.POSTINC:
             visit(((IncInstruction)instruction).value);
             break;
-        case ByteCodeConstants.GETFIELD:
+        case Const.GETFIELD:
             visit(((GetField)instruction).objectref);
             break;
         case ByteCodeConstants.DUPLOAD:
@@ -321,27 +323,27 @@ public class CountDupLoadVisitor
                     visit(fd.instruction);
             }
             break;
-        case ByteCodeConstants.GETSTATIC:
+        case Const.GETSTATIC:
         case ByteCodeConstants.OUTERTHIS:
-        case ByteCodeConstants.ACONST_NULL:
+        case Const.ACONST_NULL:
         case ByteCodeConstants.LOAD:
-        case ByteCodeConstants.ALOAD:
-        case ByteCodeConstants.ILOAD:
-        case ByteCodeConstants.BIPUSH:
+        case Const.ALOAD:
+        case Const.ILOAD:
+        case Const.BIPUSH:
         case ByteCodeConstants.ICONST:
         case ByteCodeConstants.LCONST:
         case ByteCodeConstants.FCONST:
         case ByteCodeConstants.DCONST:
-        case ByteCodeConstants.GOTO:
-        case ByteCodeConstants.IINC:
-        case ByteCodeConstants.JSR:
-        case ByteCodeConstants.LDC:
-        case ByteCodeConstants.LDC2_W:
-        case ByteCodeConstants.NEW:
-        case ByteCodeConstants.NOP:
-        case ByteCodeConstants.SIPUSH:
-        case ByteCodeConstants.RET:
-        case ByteCodeConstants.RETURN:
+        case Const.GOTO:
+        case Const.IINC:
+        case Const.JSR:
+        case Const.LDC:
+        case Const.LDC2_W:
+        case Const.NEW:
+        case Const.NOP:
+        case Const.SIPUSH:
+        case Const.RET:
+        case Const.RETURN:
         case ByteCodeConstants.EXCEPTIONLOAD:
         case ByteCodeConstants.RETURNADDRESSLOAD:
             break;

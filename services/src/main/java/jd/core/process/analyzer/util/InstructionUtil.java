@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.process.analyzer.util;
 
+import org.apache.bcel.Const;
+
 import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
@@ -112,7 +114,7 @@ public class InstructionUtil
                 case ByteCodeConstants.IF:
                 case ByteCodeConstants.IFCMP:
                 case ByteCodeConstants.IFXNULL:
-                case ByteCodeConstants.GOTO:
+                case Const.GOTO:
                     int jumpOffset = ((BranchInstruction)i).getJumpOffset();
                     if ((firstOffset < jumpOffset) && (jumpOffset <= lastOffset))
                         return false;

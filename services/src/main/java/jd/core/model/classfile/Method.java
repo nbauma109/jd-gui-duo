@@ -17,7 +17,12 @@
 package jd.core.model.classfile;
 
 
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.CodeException;
+import org.apache.bcel.classfile.LineNumber;
+
 import java.util.List;
+import java.util.Map.Entry;
 
 import jd.core.model.classfile.attribute.*;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
@@ -29,7 +34,7 @@ public class Method extends FieldOrMethod
     private int[] exceptionIndexes;
     private byte[] code;
     private LineNumber[] lineNumbers;
-    private CodeException[] codeExceptions;
+    private List<Entry<Integer, CodeException>> codeExceptions;
     private ParameterAnnotations[] visibleParameterAnnotations;
     private ParameterAnnotations[] invisibleParameterAnnotations;
     private ElementValue defaultAnnotationValue;
@@ -68,22 +73,22 @@ public class Method extends FieldOrMethod
 
                 switch (attribute.tag)
                 {
-                case AttributeConstants.ATTR_EXCEPTIONS:
+                case Const.ATTR_EXCEPTIONS:
                     this.exceptionIndexes =
                         ((AttributeExceptions)attribute).exceptionIndexTable;
                     break;
-                case AttributeConstants.ATTR_CODE:
+                case Const.ATTR_CODE:
                     ac = ((AttributeCode)attributes[i]);
                     break;
-                case AttributeConstants.ATTR_RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS:
+                case Const.ATTR_RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS:
                     this.visibleParameterAnnotations =
                         ((AttributeRuntimeParameterAnnotations)attribute).parameterAnnotations;
                     break;
-                case AttributeConstants.ATTR_RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS:
+                case Const.ATTR_RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS:
                     this.invisibleParameterAnnotations =
                         ((AttributeRuntimeParameterAnnotations)attribute).parameterAnnotations;
                     break;
-                case AttributeConstants.ATTR_ANNOTATION_DEFAULT:
+                case Const.ATTR_ANNOTATION_DEFAULT:
                     this.defaultAnnotationValue =
                         ((AttributeAnnotationDefault)attribute).defaultValue;
                     break;
@@ -168,7 +173,7 @@ public class Method extends FieldOrMethod
         return lineNumbers;
     }
 
-    public CodeException[] getCodeExceptions()
+    public List<Entry<Integer, CodeException>> getCodeExceptions()
     {
         return this.codeExceptions;
     }

@@ -26,9 +26,6 @@ public class Method {
         this.constants = constants;
     }
 
-    /**
-     * @see Constants
-     */
     public int getAccessFlags() {
         return accessFlags;
     }

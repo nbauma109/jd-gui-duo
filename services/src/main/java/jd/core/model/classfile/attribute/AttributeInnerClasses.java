@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.model.classfile.attribute;
 
+import org.apache.bcel.classfile.InnerClass;
+
 public class AttributeInnerClasses extends Attribute
 {
     public final InnerClass[] classes;

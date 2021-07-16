@@ -16,12 +16,19 @@
  ******************************************************************************/
 package jd.core.process.writer;
 
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.*;
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.model.classfile.constant.*;
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
 
-import jd.core.model.classfile.*;
-import jd.core.model.classfile.attribute.CodeException;
-import jd.core.model.classfile.attribute.LineNumber;
+import java.util.List;
+import java.util.Map.Entry;
+
+import jd.core.model.classfile.ClassFile;
+import jd.core.model.classfile.ConstantPool;
+import jd.core.model.classfile.LocalVariable;
+import jd.core.model.classfile.LocalVariables;
+import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.reference.ReferenceMap;
@@ -70,17 +77,17 @@ public class ByteCodeWriter
                 printer.print(offset);
                 printer.print(": ");
                 printer.print(
-                    ByteCodeConstants.OPCODE_NAMES[opcode]);
+                    Const.getOpcodeName(opcode));
 
-                switch (ByteCodeConstants.NO_OF_OPERANDS[opcode])
+                switch (Const.getNoOfOperands(opcode))
                 {
                 case 1:
                     printer.print(" ");
                     switch (opcode)
                     {
-                    case ByteCodeConstants.NEWARRAY:
+                    case Const.NEWARRAY:
                         printer.print(
-                            ByteCodeConstants.TYPE_NAMES[code[++index] & 16]);
+                            Const.getTypeName(code[++index] & 16));
                         break;
                     default:
                         printer.print(code[++index]);
@@ -90,34 +97,31 @@ public class ByteCodeWriter
                     printer.print(" ");
                     switch (opcode)
                     {
-                    case ByteCodeConstants.IINC:
+                    case Const.IINC:
                         printer.print(code[++index]);
                         printer.print(" ");
                         printer.print(code[++index]);
                         break;
 
-                    case ByteCodeConstants.IFEQ:
-                    case ByteCodeConstants.IFNE:
-                    case ByteCodeConstants.IFLT:
-                    case ByteCodeConstants.IFGE:
-                    case ByteCodeConstants.IFGT:
-                    case ByteCodeConstants.IFLE:
+                    case Const.IFEQ:
+                    case Const.IFNE:
+                    case Const.IFLT:
+                    case Const.IFGE:
+                    case Const.IFGT:
+                    case Const.IFLE:
+                    case Const.IF_ICMPEQ:
+                    case Const.IF_ICMPNE:
+                    case Const.IF_ICMPLT:
+                    case Const.IF_ICMPGE:
+                    case Const.IF_ICMPGT:
+                    case Const.IF_ICMPLE:
+                    case Const.IF_ACMPEQ:
+                    case Const.IF_ACMPNE:
+                    case Const.IFNONNULL:
+                    case Const.IFNULL:
 
-                    case ByteCodeConstants.IF_ICMPEQ:
-                    case ByteCodeConstants.IF_ICMPNE:
-                    case ByteCodeConstants.IF_ICMPLT:
-                    case ByteCodeConstants.IF_ICMPGE:
-                    case ByteCodeConstants.IF_ICMPGT:
-                    case ByteCodeConstants.IF_ICMPLE:
-
-                    case ByteCodeConstants.IF_ACMPEQ:
-                    case ByteCodeConstants.IF_ACMPNE:
-
-                    case ByteCodeConstants.IFNONNULL:
-                    case ByteCodeConstants.IFNULL:
-
-                    case ByteCodeConstants.GOTO:
-                    case ByteCodeConstants.JSR:
+                    case Const.GOTO:
+                    case Const.JSR:
                         soperande = (short)( ((code[++index] & 255) << 8) |
                                              (code[++index] & 255) );
                         if (soperande >= 0)
@@ -128,11 +132,11 @@ public class ByteCodeWriter
                             index + soperande - 2);
                         break;
 
-                    case ByteCodeConstants.PUTSTATIC:
-                    case ByteCodeConstants.PUTFIELD:
-                    case ByteCodeConstants.GETSTATIC:
+                    case Const.PUTSTATIC:
+                    case Const.PUTFIELD:
+                    case Const.GETSTATIC:
                     case ByteCodeConstants.OUTERTHIS:
-                    case ByteCodeConstants.GETFIELD:
+                    case Const.GETFIELD:
                         ioperande = ((code[++index] & 255) << 8) |
                                     (code[++index] & 255);
                         printer.print(ioperande);
@@ -152,9 +156,9 @@ public class ByteCodeWriter
                         }
                         break;
 
-                    case ByteCodeConstants.INVOKESTATIC:
-                    case ByteCodeConstants.INVOKESPECIAL:
-                    case ByteCodeConstants.INVOKEVIRTUAL:
+                    case Const.INVOKESTATIC:
+                    case Const.INVOKESPECIAL:
+                    case Const.INVOKEVIRTUAL:
                         ioperande = ((code[++index] & 255) << 8) |
                                     (code[++index] & 255);
                         printer.print(ioperande);
@@ -174,9 +178,9 @@ public class ByteCodeWriter
                         }
                         break;
 
-                    case ByteCodeConstants.NEW:
-                    case ByteCodeConstants.ANEWARRAY:
-                    case ByteCodeConstants.CHECKCAST:
+                    case Const.NEW:
+                    case Const.ANEWARRAY:
+                    case Const.CHECKCAST:
                         ioperande = ((code[++index] & 255) << 8) |
                                     (code[++index] & 255);
                         printer.print(ioperande);
@@ -205,14 +209,14 @@ public class ByteCodeWriter
                 default:
                     switch (opcode)
                     {
-                    case ByteCodeConstants.MULTIANEWARRAY:
+                    case Const.MULTIANEWARRAY:
                         printer.print(" ");
                         printer.print(
                             ((code[++index] & 255) << 8) | (code[++index] & 255));
                         printer.print(" ");
                         printer.print(code[++index]);
                         break;
-                    case ByteCodeConstants.INVOKEINTERFACE:
+                    case Const.INVOKEINTERFACE:
                         printer.print(" ");
                         printer.print(
                             ((code[++index] & 255) << 8) | (code[++index] & 255));
@@ -221,7 +225,7 @@ public class ByteCodeWriter
                         printer.print(" ");
                         printer.print(code[++index]);
                         break;
-                    case ByteCodeConstants.TABLESWITCH:
+                    case Const.TABLESWITCH:
                         // Skip padding
                         index = ((index+4) & 0xFFFC) - 1;
 
@@ -261,7 +265,7 @@ public class ByteCodeWriter
                             printer.print(offset + jump);
                         }
                         break;
-                    case ByteCodeConstants.LOOKUPSWITCH:
+                    case Const.LOOKUPSWITCH:
                         // Skip padding
                         index = ((index+4) & 0xFFFC) - 1;
 
@@ -302,11 +306,11 @@ public class ByteCodeWriter
                             printer.print(offset + jump);
                         }
                         break;
-                    case ByteCodeConstants.WIDE:
+                    case Const.WIDE:
                         index = ByteCodeUtil.nextWideOffset(code, index);
                         break;
                     default:
-                        for (int j=ByteCodeConstants.NO_OF_OPERANDS[opcode]; j>0; --j)
+                        for (int j=Const.getNoOfOperands(opcode); j>0; --j)
                         {
                             printer.print(" ");
                             printer.print(code[++index]);
@@ -340,9 +344,9 @@ public class ByteCodeWriter
                 printer.endOfLine();
                 printer.startOfLine(Instruction.UNKNOWN_LINE_NUMBER);
                 printer.print("//   Java source line #");
-                printer.print(lineNumbers[i].lineNumber);
+                printer.print(lineNumbers[i].getLineNumber());
                 printer.print("\t-> byte code offset #");
-                printer.print(lineNumbers[i].startPc);
+                printer.print(lineNumbers[i].getStartPC());
             }
         }
     }
@@ -412,8 +416,8 @@ public class ByteCodeWriter
             Printer printer, ClassFile classFile, Method method)
     {
         // Ecriture de la table des exceptions
-        CodeException[] codeExceptions = method.getCodeExceptions();
-        if ((codeExceptions != null) && (codeExceptions.length > 0))
+        List<Entry<Integer, CodeException>> codeExceptions = method.getCodeExceptions();
+        if ((codeExceptions != null) && (!codeExceptions.isEmpty()))
         {
             printer.endOfLine();
             printer.startOfLine(Instruction.UNKNOWN_LINE_NUMBER);
@@ -422,25 +426,25 @@ public class ByteCodeWriter
             printer.startOfLine(Instruction.UNKNOWN_LINE_NUMBER);
             printer.print("//   from\tto\ttarget\ttype");
 
-            for (int i=0; i<codeExceptions.length; i++)
+            for (int i=0; i<codeExceptions.size(); i++)
             {
                 printer.endOfLine();
                 printer.startOfLine(Instruction.UNKNOWN_LINE_NUMBER);
                 printer.print(START_OF_COMMENT);
-                printer.print(codeExceptions[i].startPc);
+                printer.print(codeExceptions.get(i).getValue().getStartPC());
                 printer.print("\t");
-                printer.print(codeExceptions[i].endPc);
+                printer.print(codeExceptions.get(i).getValue().getEndPC());
                 printer.print("\t");
-                printer.print(codeExceptions[i].handlerPc);
+                printer.print(codeExceptions.get(i).getValue().getHandlerPC());
                 printer.print("\t");
 
-                if (codeExceptions[i].catchType == 0)
+                if (codeExceptions.get(i).getValue().getCatchType() == 0)
                     printer.print("finally");
                 else
                     printer.print(
 
                         classFile.getConstantPool().getConstantClassName(
-                                codeExceptions[i].catchType));
+                                codeExceptions.get(i).getValue().getCatchType()));
             }
         }
     }
@@ -469,7 +473,7 @@ public class ByteCodeWriter
 
         String fieldName = constants.getConstantUtf8(cnat.getNameIndex());
         String fieldDescriptor =
-            constants.getConstantUtf8(cnat.getDescriptorIndex());
+            constants.getConstantUtf8(cnat.getSignatureIndex());
 
         return classPath + ':' + fieldName + "\t" + fieldDescriptor;
     }
@@ -498,7 +502,7 @@ public class ByteCodeWriter
 
         String fieldName = constants.getConstantUtf8(cnat.getNameIndex());
         String fieldDescriptor =
-            constants.getConstantUtf8(cnat.getDescriptorIndex());
+            constants.getConstantUtf8(cnat.getSignatureIndex());
 
         return classPath + ':' + fieldName + "\t" + fieldDescriptor;
     }

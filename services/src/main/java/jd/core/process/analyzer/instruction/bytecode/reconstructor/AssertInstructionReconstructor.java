@@ -16,9 +16,10 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.bytecode.reconstructor;
 
-import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.ConstantFieldref;
+import org.apache.bcel.classfile.ConstantNameAndType;
 import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
-import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.List;
@@ -51,7 +52,7 @@ public class AssertInstructionReconstructor
         {
             Instruction instruction = list.get(index);
 
-            if (instruction.opcode != ByteCodeConstants.ATHROW)
+            if (instruction.opcode != Const.ATHROW)
                 continue;
 
             // AThrow trouve
@@ -80,7 +81,7 @@ public class AssertInstructionReconstructor
                 continue;
 
             IfInstruction if1 = (IfInstruction)instruction;
-            if ((if1.cmp != 7) || (if1.value.opcode != ByteCodeConstants.GETSTATIC))
+            if ((if1.cmp != 7) || (if1.value.opcode != Const.GETSTATIC))
                 continue;
 
             GetStatic gs = (GetStatic)if1.value;

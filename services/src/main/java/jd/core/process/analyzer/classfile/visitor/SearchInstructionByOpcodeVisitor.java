@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.visitor;
 
+import org.apache.bcel.Const;
+
 import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
@@ -45,12 +47,12 @@ public class SearchInstructionByOpcodeVisitor
 
         switch (instruction.opcode)
         {
-        case ByteCodeConstants.ARRAYLENGTH:
+        case Const.ARRAYLENGTH:
             return visit(((ArrayLength)instruction).arrayref, opcode);
-        case ByteCodeConstants.AASTORE:
+        case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             return visit(((ArrayStoreInstruction)instruction).arrayref, opcode);
-        case ByteCodeConstants.ATHROW:
+        case Const.ATHROW:
             return visit(((AThrow)instruction).value, opcode);
         case ByteCodeConstants.UNARYOP:
             return visit(((UnaryOperatorInstruction)instruction).value, opcode);
@@ -64,11 +66,11 @@ public class SearchInstructionByOpcodeVisitor
                     return tmp;
                 return visit(boi.value2, opcode);
             }
-        case ByteCodeConstants.CHECKCAST:
+        case Const.CHECKCAST:
             return visit(((CheckCast)instruction).objectref, opcode);
         case ByteCodeConstants.STORE:
-        case ByteCodeConstants.ASTORE:
-        case ByteCodeConstants.ISTORE:
+        case Const.ASTORE:
+        case Const.ISTORE:
             return visit(((StoreInstruction)instruction).valueref, opcode);
         case ByteCodeConstants.DUPSTORE:
             return visit(((DupStore)instruction).objectref, opcode);
@@ -98,11 +100,11 @@ public class SearchInstructionByOpcodeVisitor
                 }
             }
             break;
-        case ByteCodeConstants.INSTANCEOF:
+        case Const.INSTANCEOF:
             return visit(((InstanceOf)instruction).objectref, opcode);
-        case ByteCodeConstants.INVOKEINTERFACE:
-        case ByteCodeConstants.INVOKESPECIAL:
-        case ByteCodeConstants.INVOKEVIRTUAL:
+        case Const.INVOKEINTERFACE:
+        case Const.INVOKESPECIAL:
+        case Const.INVOKEVIRTUAL:
             {
                 Instruction result = visit(
                     ((InvokeNoStaticInstruction)instruction).objectref, opcode);
@@ -110,7 +112,7 @@ public class SearchInstructionByOpcodeVisitor
                     return result;
             }
             // intended fall through
-        case ByteCodeConstants.INVOKESTATIC:
+        case Const.INVOKESTATIC:
         case ByteCodeConstants.INVOKENEW:
             {
                 List<Instruction> list = ((InvokeInstruction)instruction).args;
@@ -122,13 +124,13 @@ public class SearchInstructionByOpcodeVisitor
                 }
             }
             break;
-        case ByteCodeConstants.LOOKUPSWITCH:
+        case Const.LOOKUPSWITCH:
             return visit(((LookupSwitch)instruction).key, opcode);
-        case ByteCodeConstants.MONITORENTER:
+        case Const.MONITORENTER:
             return visit(((MonitorEnter)instruction).objectref, opcode);
-        case ByteCodeConstants.MONITOREXIT:
+        case Const.MONITOREXIT:
             return visit(((MonitorExit)instruction).objectref, opcode);
-        case ByteCodeConstants.MULTIANEWARRAY:
+        case Const.MULTIANEWARRAY:
             {
                 Instruction[] dimensions = ((MultiANewArray)instruction).dimensions;
                 for (int i=dimensions.length-1; i>=0; --i)
@@ -139,13 +141,13 @@ public class SearchInstructionByOpcodeVisitor
                 }
             }
             break;
-        case ByteCodeConstants.NEWARRAY:
+        case Const.NEWARRAY:
             return visit(((NewArray)instruction).dimension, opcode);
-        case ByteCodeConstants.ANEWARRAY:
+        case Const.ANEWARRAY:
             return visit(((ANewArray)instruction).dimension, opcode);
-        case ByteCodeConstants.POP:
+        case Const.POP:
             return visit(((Pop)instruction).objectref, opcode);
-        case ByteCodeConstants.PUTFIELD:
+        case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
                 Instruction tmp = visit(putField.objectref, opcode);
@@ -153,18 +155,18 @@ public class SearchInstructionByOpcodeVisitor
                     return tmp;
                 return visit(putField.valueref, opcode);
             }
-        case ByteCodeConstants.PUTSTATIC:
+        case Const.PUTSTATIC:
             return visit(((PutStatic)instruction).valueref, opcode);
         case ByteCodeConstants.XRETURN:
             return visit(((ReturnInstruction)instruction).valueref, opcode);
-        case ByteCodeConstants.TABLESWITCH:
+        case Const.TABLESWITCH:
             return visit(((TableSwitch)instruction).key, opcode);
         case ByteCodeConstants.TERNARYOPSTORE:
             return visit(((TernaryOpStore)instruction).objectref, opcode);
         case ByteCodeConstants.PREINC:
         case ByteCodeConstants.POSTINC:
             return visit(((IncInstruction)instruction).value, opcode);
-        case ByteCodeConstants.GETFIELD:
+        case Const.GETFIELD:
             return visit(((GetField)instruction).objectref, opcode);
         case ByteCodeConstants.INITARRAY:
         case ByteCodeConstants.NEWANDINITARRAY:
@@ -318,31 +320,31 @@ public class SearchInstructionByOpcodeVisitor
                     return visit(fla.instruction, opcode);
             }
             break;
-        case ByteCodeConstants.ACONST_NULL:
+        case Const.ACONST_NULL:
         case ByteCodeConstants.ARRAYLOAD:
         case ByteCodeConstants.LOAD:
-        case ByteCodeConstants.ALOAD:
-        case ByteCodeConstants.ILOAD:
-        case ByteCodeConstants.BIPUSH:
+        case Const.ALOAD:
+        case Const.ILOAD:
+        case Const.BIPUSH:
         case ByteCodeConstants.ICONST:
         case ByteCodeConstants.LCONST:
         case ByteCodeConstants.FCONST:
         case ByteCodeConstants.DCONST:
         case ByteCodeConstants.DUPLOAD:
         case ByteCodeConstants.EXCEPTIONLOAD:
-        case ByteCodeConstants.GETSTATIC:
+        case Const.GETSTATIC:
         case ByteCodeConstants.OUTERTHIS:
-        case ByteCodeConstants.GOTO:
-        case ByteCodeConstants.IINC:
-        case ByteCodeConstants.JSR:
-        case ByteCodeConstants.LDC:
-        case ByteCodeConstants.LDC2_W:
-        case ByteCodeConstants.NEW:
-        case ByteCodeConstants.NOP:
-        case ByteCodeConstants.RET:
-        case ByteCodeConstants.RETURN:
+        case Const.GOTO:
+        case Const.IINC:
+        case Const.JSR:
+        case Const.LDC:
+        case Const.LDC2_W:
+        case Const.NEW:
+        case Const.NOP:
+        case Const.RET:
+        case Const.RETURN:
         case ByteCodeConstants.RETURNADDRESSLOAD:
-        case ByteCodeConstants.SIPUSH:
+        case Const.SIPUSH:
             break;
         default:
             System.err.println(

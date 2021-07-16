@@ -31,7 +31,7 @@ public class MavenOrgSourceLoaderPreferencesProvider extends JPanel implements P
             "+org +com.google +com.springsource +com.sun -com +java +javax +sun +sunw " +
             "+spring +springframework +springmodules +tomcat +maven +edu";
 
-    protected static final Pattern CONTROL_PATTERN = Pattern.compile("([+-][a-zA-Z0-9$_.]+(\\s+[+-][a-zA-Z0-9$_.]+)*)?\\s*");
+    protected static final Pattern CONTROL_PATTERN = Pattern.compile("([+-][a-zA-Z0-9$_.]+(\\s+[+-][a-zA-Z0-9$_.]+)*+)?\\s*");
 
     protected JCheckBox enableCheckBox;
     protected JTextArea filtersTextArea;

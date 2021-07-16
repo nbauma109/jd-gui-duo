@@ -6,13 +6,18 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
+import org.apache.bcel.classfile.*;
 import org.jd.core.v1.model.classfile.attribute.*;
-import org.jd.core.v1.model.classfile.attribute.ElementValuePair;
-import org.jd.core.v1.model.classfile.constant.*;
+import org.jd.core.v1.model.classfile.attribute.Annotations;
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.reference.*;
+import org.jd.core.v1.model.javasyntax.reference.AnnotationElementValue;
+import org.jd.core.v1.model.javasyntax.reference.ElementValuePair;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
+
+import java.util.List;
+import java.util.Map.Entry;
 
 public class AnnotationConverter implements ElementValueVisitor {
     protected TypeMaker typeMaker;
@@ -65,30 +70,30 @@ public class AnnotationConverter implements ElementValueVisitor {
         assert descriptor != null && descriptor.length() > 2 && descriptor.charAt(0) == 'L' && descriptor.charAt(descriptor.length()-1) == ';';
 
         ObjectType ot = typeMaker.makeFromDescriptor(descriptor);
-        ElementValuePair[] elementValuePairs = annotation.getElementValuePairs();
+        List<Entry<String, AttributeElementValue>> elementValuePairs = annotation.getElementValuePairs();
 
         if (elementValuePairs == null) {
             return new AnnotationReference(ot);
         }
-		if (elementValuePairs.length == 1) {
-            ElementValuePair elementValuePair = elementValuePairs[0];
-            String elementName = elementValuePair.getElementName();
-            AttributeElementValue elementValue = elementValuePair.getElementValue();
+		if (elementValuePairs.size() == 1) {
+			Entry<String, AttributeElementValue> elementValuePair = elementValuePairs.get(0);
+            String elementName = elementValuePair.getKey();
+            AttributeElementValue elementValue = elementValuePair.getValue();
 
             if ("value".equals(elementName)) {
                 return new AnnotationReference(ot, convert(elementValue));
             }
             return new AnnotationReference(
                     ot,
-                    new org.jd.core.v1.model.javasyntax.reference.ElementValuePair(elementName, convert(elementValue)));
+                    new ElementValuePair(elementName, convert(elementValue)));
         }
-		ElementValuePairs list = new ElementValuePairs(elementValuePairs.length);
+		ElementValuePairs list = new ElementValuePairs(elementValuePairs.size());
 		String elementName;
 		AttributeElementValue elementValue;
-		for (ElementValuePair elementValuePair : elementValuePairs) {
-		    elementName = elementValuePair.getElementName();
-		    elementValue = elementValuePair.getElementValue();
-		    list.add(new org.jd.core.v1.model.javasyntax.reference.ElementValuePair(elementName, convert(elementValue)));
+		for (Entry<String, AttributeElementValue> elementValuePair : elementValuePairs) {
+		    elementName = elementValuePair.getKey();
+		    elementValue = elementValuePair.getValue();
+		    list.add(new ElementValuePair(elementName, convert(elementValue)));
 		}
 		return new AnnotationReference(ot, list);
     }
@@ -103,31 +108,31 @@ public class AnnotationConverter implements ElementValueVisitor {
     public void visit(ElementValuePrimitiveType elementValuePrimitiveType) {
         switch (elementValuePrimitiveType.getType()) {
             case 'B':
-                elementValue = new ExpressionElementValue(new IntegerConstantExpression(PrimitiveType.TYPE_BYTE, elementValuePrimitiveType.<ConstantInteger>getConstValue().getValue()));
+                elementValue = new ExpressionElementValue(new IntegerConstantExpression(PrimitiveType.TYPE_BYTE, elementValuePrimitiveType.<ConstantInteger>getConstValue().getBytes()));
                 break;
             case 'D':
-                elementValue = new ExpressionElementValue(new DoubleConstantExpression(elementValuePrimitiveType.<ConstantDouble>getConstValue().getValue()));
+                elementValue = new ExpressionElementValue(new DoubleConstantExpression(elementValuePrimitiveType.<ConstantDouble>getConstValue().getBytes()));
                 break;
             case 'F':
-                elementValue = new ExpressionElementValue(new FloatConstantExpression(elementValuePrimitiveType.<ConstantFloat>getConstValue().getValue()));
+                elementValue = new ExpressionElementValue(new FloatConstantExpression(elementValuePrimitiveType.<ConstantFloat>getConstValue().getBytes()));
                 break;
             case 'I':
-                elementValue = new ExpressionElementValue(new IntegerConstantExpression(PrimitiveType.TYPE_INT, elementValuePrimitiveType.<ConstantInteger>getConstValue().getValue()));
+                elementValue = new ExpressionElementValue(new IntegerConstantExpression(PrimitiveType.TYPE_INT, elementValuePrimitiveType.<ConstantInteger>getConstValue().getBytes()));
                 break;
             case 'J':
-                elementValue = new ExpressionElementValue(new LongConstantExpression(elementValuePrimitiveType.<ConstantLong>getConstValue().getValue()));
+                elementValue = new ExpressionElementValue(new LongConstantExpression(elementValuePrimitiveType.<ConstantLong>getConstValue().getBytes()));
                 break;
             case 'S':
-                elementValue = new ExpressionElementValue(new IntegerConstantExpression(PrimitiveType.TYPE_SHORT, elementValuePrimitiveType.<ConstantInteger>getConstValue().getValue()));
+                elementValue = new ExpressionElementValue(new IntegerConstantExpression(PrimitiveType.TYPE_SHORT, elementValuePrimitiveType.<ConstantInteger>getConstValue().getBytes()));
                 break;
             case 'Z':
-                elementValue = new ExpressionElementValue(new IntegerConstantExpression(PrimitiveType.TYPE_BOOLEAN, elementValuePrimitiveType.<ConstantInteger>getConstValue().getValue()));
+                elementValue = new ExpressionElementValue(new IntegerConstantExpression(PrimitiveType.TYPE_BOOLEAN, elementValuePrimitiveType.<ConstantInteger>getConstValue().getBytes()));
                 break;
             case 'C':
-                elementValue = new ExpressionElementValue(new IntegerConstantExpression(PrimitiveType.TYPE_CHAR, elementValuePrimitiveType.<ConstantInteger>getConstValue().getValue()));
+                elementValue = new ExpressionElementValue(new IntegerConstantExpression(PrimitiveType.TYPE_CHAR, elementValuePrimitiveType.<ConstantInteger>getConstValue().getBytes()));
                 break;
             case 's':
-                elementValue = new ExpressionElementValue(new StringConstantExpression(elementValuePrimitiveType.<ConstantUtf8>getConstValue().getValue()));
+                elementValue = new ExpressionElementValue(new StringConstantExpression(elementValuePrimitiveType.<ConstantUtf8>getConstValue().getBytes()));
                 break;
         }
     }

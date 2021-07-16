@@ -16,8 +16,8 @@
  ******************************************************************************/
 package jd.core.model.instruction.bytecode.instruction;
 
-import org.jd.core.v1.model.classfile.constant.Constant;
-import org.jd.core.v1.model.classfile.constant.ConstantDouble;
+import org.apache.bcel.classfile.Constant;
+import org.apache.bcel.classfile.ConstantDouble;
 
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.LocalVariables;

@@ -1826,6 +1826,7 @@ public class TypeMaker {
         return counter;
     }
 
+    @SuppressWarnings("all")
     private Set<BaseType> getSetOfParameterTypes(String internalTypeName, String suffixKey, boolean constructor) {
         String key = internalTypeName + suffixKey;
         Set<BaseType> setOfParameterTypes = internalTypeNameMethodNameParameterCountToParameterTypes.get(key);

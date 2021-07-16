@@ -16,10 +16,10 @@
  ******************************************************************************/
 package jd.core.util;
 
+import org.apache.bcel.Const;
 import org.jd.core.v1.util.StringConstants;
 
 import jd.core.model.classfile.ClassFile;
-import jd.core.model.classfile.ClassFileConstants;
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.Method;
 
@@ -47,7 +47,7 @@ public class ClassFileUtil
             Method method = methods[i];
 
             if ((method.accessFlags &
-                 (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_BRIDGE)) != 0)
+                 (Const.ACC_SYNTHETIC|Const.ACC_BRIDGE)) != 0)
                 continue;
 
             if (method.getNameIndex() == constants.instanceConstructorIndex)
@@ -68,8 +68,8 @@ public class ClassFileUtil
     {
         ConstantPool constants = classFile.getConstantPool();
 
-        if ((method.accessFlags & (ClassFileConstants.ACC_PUBLIC|ClassFileConstants.ACC_STATIC)) ==
-            (ClassFileConstants.ACC_PUBLIC|ClassFileConstants.ACC_STATIC))
+        if ((method.accessFlags & (Const.ACC_PUBLIC|Const.ACC_STATIC)) ==
+            (Const.ACC_PUBLIC|Const.ACC_STATIC))
         {
             String methodName = constants.getConstantUtf8(method.getNameIndex());
 

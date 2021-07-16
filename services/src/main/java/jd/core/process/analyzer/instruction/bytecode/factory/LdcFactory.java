@@ -16,12 +16,13 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.bytecode.factory;
 
-import java.util.List;
+import org.apache.bcel.Const;
+
 import java.util.Deque;
+import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Method;
-import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.Ldc;
 
@@ -37,8 +38,8 @@ public class LdcFactory extends InstructionFactory
         final int opcode = code[offset] & 255;
         final int index = code[offset+1] & 255;
 
-        stack.push(new Ldc(ByteCodeConstants.LDC, offset, lineNumber, index));
+        stack.push(new Ldc(Const.LDC, offset, lineNumber, index));
 
-        return ByteCodeConstants.NO_OF_OPERANDS[opcode];
+        return Const.getNoOfOperands(opcode);
     }
 }

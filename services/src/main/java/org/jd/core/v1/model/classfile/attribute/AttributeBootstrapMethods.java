@@ -7,6 +7,8 @@
 
 package org.jd.core.v1.model.classfile.attribute;
 
+import org.apache.bcel.classfile.BootstrapMethod;
+
 public class AttributeBootstrapMethods implements Attribute {
     protected BootstrapMethod[] bootstrapMethods;
 

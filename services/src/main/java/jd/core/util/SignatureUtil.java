@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.util;
 
+import org.apache.bcel.Const;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -117,14 +119,14 @@ public class SignatureUtil
     {
         switch (type)
         {
-        case ByteCodeConstants.T_BOOLEAN: return "Z";
-        case ByteCodeConstants.T_CHAR:    return "C";
-        case ByteCodeConstants.T_FLOAT:   return "F";
-        case ByteCodeConstants.T_DOUBLE:  return "D";
-        case ByteCodeConstants.T_BYTE:    return "B";
-        case ByteCodeConstants.T_SHORT:   return "S";
-        case ByteCodeConstants.T_INT:     return "I";
-        case ByteCodeConstants.T_LONG:    return "J";
+        case Const.T_BOOLEAN: return "Z";
+        case Const.T_CHAR:    return "C";
+        case Const.T_FLOAT:   return "F";
+        case Const.T_DOUBLE:  return "D";
+        case Const.T_BYTE:    return "B";
+        case Const.T_SHORT:   return "S";
+        case Const.T_INT:     return "I";
+        case Const.T_LONG:    return "J";
         default:                          return null;
         }
     }
@@ -136,14 +138,14 @@ public class SignatureUtil
 
         switch (signature.charAt(0))
         {
-        case 'Z': return ByteCodeConstants.T_BOOLEAN;
-        case 'C': return ByteCodeConstants.T_CHAR;
-        case 'F': return ByteCodeConstants.T_FLOAT;
-        case 'D': return ByteCodeConstants.T_DOUBLE;
-        case 'B': return ByteCodeConstants.T_BYTE;
-        case 'S': return ByteCodeConstants.T_SHORT;
-        case 'I': return ByteCodeConstants.T_INT;
-        case 'J': return ByteCodeConstants.T_LONG;
+        case 'Z': return Const.T_BOOLEAN;
+        case 'C': return Const.T_CHAR;
+        case 'F': return Const.T_FLOAT;
+        case 'D': return Const.T_DOUBLE;
+        case 'B': return Const.T_BYTE;
+        case 'S': return Const.T_SHORT;
+        case 'I': return Const.T_INT;
+        case 'J': return Const.T_LONG;
         default:  return 0;
         }
     }

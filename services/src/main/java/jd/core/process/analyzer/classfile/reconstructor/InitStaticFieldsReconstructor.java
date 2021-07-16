@@ -16,12 +16,16 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
-import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
-import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.ConstantFieldref;
+import org.apache.bcel.classfile.ConstantNameAndType;
 
 import java.util.List;
 
-import jd.core.model.classfile.*;
+import jd.core.model.classfile.ClassFile;
+import jd.core.model.classfile.ConstantPool;
+import jd.core.model.classfile.Field;
+import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.PutStatic;
@@ -58,7 +62,7 @@ public class InitStaticFieldsReconstructor
         {
             Instruction instruction = list.get(indexInstruction);
 
-            if (instruction.opcode != ByteCodeConstants.PUTSTATIC)
+            if (instruction.opcode != Const.PUTSTATIC)
                 break;
 
             PutStatic putStatic = (PutStatic)instruction;
@@ -76,20 +80,20 @@ public class InitStaticFieldsReconstructor
             {
                 Field field = fields[indexField++];
 
-                if (((field.accessFlags & ClassFileConstants.ACC_STATIC) != 0) &&
-                    (cnat.getDescriptorIndex() == field.getDescriptorIndex()) &&
+                if (((field.accessFlags & Const.ACC_STATIC) != 0) &&
+                    (cnat.getSignatureIndex() == field.getDescriptorIndex()) &&
                     (cnat.getNameIndex() == field.getNameIndex()))
                 {
                     Instruction valueref = putStatic.valueref;
 
                     if (SearchInstructionByOpcodeVisitor.visit(
-                            valueref, ByteCodeConstants.ALOAD) != null)
+                            valueref, Const.ALOAD) != null)
                         break;
                     if (SearchInstructionByOpcodeVisitor.visit(
                             valueref, ByteCodeConstants.LOAD) != null)
                         break;
                     if (SearchInstructionByOpcodeVisitor.visit(
-                            valueref, ByteCodeConstants.ILOAD) != null)
+                            valueref, Const.ILOAD) != null)
                         break;
 
                     field.setValueAndMethod(valueref, method);
@@ -123,7 +127,7 @@ public class InitStaticFieldsReconstructor
             {
                 Instruction instruction = list.get(indexInstruction);
 
-                if (instruction.opcode != ByteCodeConstants.PUTSTATIC)
+                if (instruction.opcode != Const.PUTSTATIC)
                     break;
 
                 PutStatic putStatic = (PutStatic)instruction;
@@ -141,20 +145,20 @@ public class InitStaticFieldsReconstructor
                 {
                     Field field = fields[indexField];
 
-                    if (((field.accessFlags & ClassFileConstants.ACC_STATIC) != 0) &&
-                        (cnat.getDescriptorIndex() == field.getDescriptorIndex()) &&
+                    if (((field.accessFlags & Const.ACC_STATIC) != 0) &&
+                        (cnat.getSignatureIndex() == field.getDescriptorIndex()) &&
                         (cnat.getNameIndex() == field.getNameIndex()))
                     {
                         Instruction valueref = putStatic.valueref;
 
                         if (SearchInstructionByOpcodeVisitor.visit(
-                                valueref, ByteCodeConstants.ALOAD) != null)
+                                valueref, Const.ALOAD) != null)
                             break;
                         if (SearchInstructionByOpcodeVisitor.visit(
                                 valueref, ByteCodeConstants.LOAD) != null)
                             break;
                         if (SearchInstructionByOpcodeVisitor.visit(
-                                valueref, ByteCodeConstants.ILOAD) != null)
+                                valueref, Const.ILOAD) != null)
                             break;
 
                         field.setValueAndMethod(valueref, method);

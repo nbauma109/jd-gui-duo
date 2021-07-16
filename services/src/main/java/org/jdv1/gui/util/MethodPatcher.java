@@ -1,9 +1,9 @@
 package org.jdv1.gui.util;
 
 import org.apache.commons.lang3.Range;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.dom.ASTVisitor;
+import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.dom.CompilationUnit;
+import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeWriter;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.util.StringUtilities;

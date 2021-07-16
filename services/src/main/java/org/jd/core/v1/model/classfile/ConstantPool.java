@@ -7,7 +7,10 @@
 
 package org.jd.core.v1.model.classfile;
 
-import org.jd.core.v1.model.classfile.constant.*;
+import org.apache.bcel.classfile.Constant;
+import org.apache.bcel.classfile.ConstantClass;
+import org.apache.bcel.classfile.ConstantString;
+import org.apache.bcel.classfile.ConstantUtf8;
 
 public class ConstantPool {
     protected Constant[] constants;
@@ -24,18 +27,18 @@ public class ConstantPool {
     public String getConstantTypeName(int index) {
         ConstantClass cc = (ConstantClass)constants[index];
         ConstantUtf8 cutf8 = (ConstantUtf8)constants[cc.getNameIndex()];
-        return cutf8.getValue();
+        return cutf8.getBytes();
     }
 
     public String getConstantString(int index) {
         ConstantString cString = (ConstantString)constants[index];
         ConstantUtf8 cutf8 = (ConstantUtf8)constants[cString.getStringIndex()];
-        return cutf8.getValue();
+        return cutf8.getBytes();
     }
 
     public String getConstantUtf8(int index) {
         ConstantUtf8 cutf8 = (ConstantUtf8)constants[index];
-        return cutf8.getValue();
+        return cutf8.getBytes();
     }
 
     public Constant getConstantValue(int index) {

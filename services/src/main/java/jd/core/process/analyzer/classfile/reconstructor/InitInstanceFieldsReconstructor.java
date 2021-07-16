@@ -16,14 +16,18 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
-import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.ConstantFieldref;
+import org.apache.bcel.classfile.ConstantNameAndType;
 import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
-import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import jd.core.model.classfile.*;
+import jd.core.model.classfile.ClassFile;
+import jd.core.model.classfile.ConstantPool;
+import jd.core.model.classfile.Field;
+import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.ALoad;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
@@ -55,7 +59,7 @@ public class InitInstanceFieldsReconstructor
         {
             final Method method = methods[--methodIndex];
 
-            if (((method.accessFlags & (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_BRIDGE)) != 0) ||
+            if (((method.accessFlags & (Const.ACC_SYNTHETIC|Const.ACC_BRIDGE)) != 0) ||
                 (method.getCode() == null) ||
                 (method.getFastNodes() == null) ||
                 (method.containsError() == true) ||
@@ -85,14 +89,14 @@ public class InitInstanceFieldsReconstructor
                 while (j < length)
                 {
                     instruction = list.get(j++);
-                    if (instruction.opcode != ByteCodeConstants.PUTFIELD)
+                    if (instruction.opcode != Const.PUTFIELD)
                         break;
 
                     PutField putField = (PutField)instruction;
                     ConstantFieldref cfr = constants.getConstantFieldref(putField.index);
 
                     if ((cfr.getClassIndex() != classFile.getThisClassIndex()) ||
-                        (putField.objectref.opcode != ByteCodeConstants.ALOAD))
+                        (putField.objectref.opcode != Const.ALOAD))
                         break;
 
                     ALoad aLaod = (ALoad)putField.objectref;
@@ -101,7 +105,7 @@ public class InitInstanceFieldsReconstructor
 
                     Instruction valueInstruction =
                         SearchInstructionByOpcodeVisitor.visit(
-                                putField.valueref, ByteCodeConstants.ALOAD);
+                                putField.valueref, Const.ALOAD);
                     if ((valueInstruction != null) &&
                         (((ALoad)valueInstruction).index != 0))
                         break;
@@ -109,7 +113,7 @@ public class InitInstanceFieldsReconstructor
                             putField.valueref, ByteCodeConstants.LOAD) != null)
                         break;
                     if (SearchInstructionByOpcodeVisitor.visit(
-                            putField.valueref, ByteCodeConstants.ILOAD) != null)
+                            putField.valueref, Const.ILOAD) != null)
                         break;
 
                     putFieldList.add(putField);
@@ -127,7 +131,7 @@ public class InitInstanceFieldsReconstructor
                     // 'RETURN' ayant le meme numero de ligne que le dernier
                     // 'PUTFIELD', le constructeur est synthetique et ne sera
                     // pas filtre.
-                    if ((instruction.opcode != ByteCodeConstants.RETURN) ||
+                    if ((instruction.opcode != Const.RETURN) ||
                         (j != length) || (i == 0) ||
                         (lineNumberAfter != putFieldList.get(i-1).lineNumber))
                     {
@@ -158,7 +162,7 @@ public class InitInstanceFieldsReconstructor
             final Method method = methods[--methodIndex];
 
             if (((method.accessFlags &
-                    (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_BRIDGE)) != 0))
+                    (Const.ACC_SYNTHETIC|Const.ACC_BRIDGE)) != 0))
                 continue;
             if (method.getCode() == null)
                 continue;
@@ -222,8 +226,8 @@ public class InitInstanceFieldsReconstructor
                     Field field = fields[fieldIndex];
 
                     if ((cnat.getNameIndex() == field.getNameIndex()) &&
-                        (cnat.getDescriptorIndex() == field.getDescriptorIndex()) &&
-                        ((field.accessFlags & ClassFileConstants.ACC_STATIC) == 0))
+                        (cnat.getSignatureIndex() == field.getDescriptorIndex()) &&
+                        ((field.accessFlags & Const.ACC_STATIC) == 0))
                     {
                         // Field found
                         Instruction valueref = putField.valueref;
@@ -253,7 +257,7 @@ public class InitInstanceFieldsReconstructor
                     final Method method = methods[methodIndex];
 
                     if (((method.accessFlags &
-                            (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_BRIDGE)) != 0))
+                            (Const.ACC_SYNTHETIC|Const.ACC_BRIDGE)) != 0))
                         continue;
                     if (method.getCode() == null)
                         continue;
@@ -272,7 +276,7 @@ public class InitInstanceFieldsReconstructor
                         for (int index=0; index<length; index++)
                         {
                             Instruction instruction = list.get(index);
-                            if (instruction.opcode != ByteCodeConstants.PUTFIELD)
+                            if (instruction.opcode != Const.PUTFIELD)
                                 continue;
 
                             PutField putField = (PutField)instruction;
@@ -281,7 +285,7 @@ public class InitInstanceFieldsReconstructor
 
                             ConstantFieldref cfr = constants.getConstantFieldref(putField.index);
                             if ((cfr.getClassIndex() != classFile.getThisClassIndex()) ||
-                                (putField.objectref.opcode != ByteCodeConstants.ALOAD))
+                                (putField.objectref.opcode != Const.ALOAD))
                                 continue;
 
                             ALoad aLoad = (ALoad)putField.objectref;
@@ -320,12 +324,12 @@ public class InitInstanceFieldsReconstructor
         {
             Instruction instruction = list.get(i);
 
-            if (instruction.opcode != ByteCodeConstants.INVOKESPECIAL)
+            if (instruction.opcode != Const.INVOKESPECIAL)
                 continue;
 
             Invokespecial is = (Invokespecial)instruction;
 
-            if ((is.objectref.opcode != ByteCodeConstants.ALOAD) ||
+            if ((is.objectref.opcode != Const.ALOAD) ||
                 (((ALoad)is.objectref).index != 0))
                 continue;
 

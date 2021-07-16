@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.model.instruction.bytecode.instruction;
 
+import org.apache.bcel.Const;
+
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.LocalVariables;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
@@ -40,8 +42,8 @@ public class IBinaryOperatorInstruction extends BinaryOperatorInstruction
         switch (this.value1.opcode)
         {
         case ByteCodeConstants.ICONST:
-        case ByteCodeConstants.BIPUSH:
-        case ByteCodeConstants.SIPUSH:
+        case Const.BIPUSH:
+        case Const.SIPUSH:
             signature = this.value2.getReturnedSignature(constants, localVariables);
             if (signature == null)
                 signature = this.value1.getReturnedSignature(constants, localVariables);

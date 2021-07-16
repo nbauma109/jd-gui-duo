@@ -16,10 +16,11 @@
  */
 package jd.core.process.analyzer.classfile.visitor;
 
-import org.jd.core.v1.model.classfile.constant.ConstantClass;
-import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.ConstantClass;
+import org.apache.bcel.classfile.ConstantFieldref;
+import org.apache.bcel.classfile.ConstantNameAndType;
 import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
-import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.List;
@@ -54,13 +55,13 @@ public class AddCheckCastVisitor
     {
         switch (instruction.opcode)
         {
-        case ByteCodeConstants.ARRAYLENGTH:
+        case Const.ARRAYLENGTH:
             {
                 ArrayLength al = (ArrayLength)instruction;
                 visit(al.arrayref);
             }
             break;
-        case ByteCodeConstants.AASTORE:
+        case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
@@ -77,7 +78,7 @@ public class AddCheckCastVisitor
                 }
             }
             break;
-        case ByteCodeConstants.ATHROW:
+        case Const.ATHROW:
             {
                 AThrow aThrow = (AThrow)instruction;
                 if (match(aThrow.value))
@@ -95,7 +96,7 @@ public class AddCheckCastVisitor
                             this.constants.addConstantClass(nameIndex);
                         Instruction i = aThrow.value;
                         aThrow.value = new CheckCast(
-                            ByteCodeConstants.CHECKCAST, i.offset,
+                            Const.CHECKCAST, i.offset,
                             i.lineNumber, classIndex, i);
                     }
                 }
@@ -115,14 +116,14 @@ public class AddCheckCastVisitor
                 visit(boi.value2);
             }
             break;
-        case ByteCodeConstants.CHECKCAST:
+        case Const.CHECKCAST:
             visit(((CheckCast)instruction).objectref);
             break;
         case ByteCodeConstants.STORE:
-        case ByteCodeConstants.ISTORE:
+        case Const.ISTORE:
             visit(((StoreInstruction)instruction).valueref);
             break;
-        case ByteCodeConstants.ASTORE:
+        case Const.ASTORE:
             {
                 StoreInstruction storeInstruction = (StoreInstruction)instruction;
                 if (match(storeInstruction.valueref))
@@ -174,12 +175,12 @@ public class AddCheckCastVisitor
                 }
             }
             break;
-        case ByteCodeConstants.INSTANCEOF:
+        case Const.INSTANCEOF:
             visit(((InstanceOf)instruction).objectref);
             break;
-        case ByteCodeConstants.INVOKEINTERFACE:
-        case ByteCodeConstants.INVOKESPECIAL:
-        case ByteCodeConstants.INVOKEVIRTUAL:
+        case Const.INVOKEINTERFACE:
+        case Const.INVOKESPECIAL:
+        case Const.INVOKEVIRTUAL:
             {
                 InvokeNoStaticInstruction insi =
                     (InvokeNoStaticInstruction)instruction;
@@ -192,7 +193,7 @@ public class AddCheckCastVisitor
                     {
                         Instruction i = insi.objectref;
                         insi.objectref = new CheckCast(
-                            ByteCodeConstants.CHECKCAST, i.offset,
+                            Const.CHECKCAST, i.offset,
                             i.lineNumber, cmr.getClassIndex(), i);
                     }
                 }
@@ -202,7 +203,7 @@ public class AddCheckCastVisitor
                 }
             }
             // intended fall through
-        case ByteCodeConstants.INVOKESTATIC:
+        case Const.INVOKESTATIC:
             {
                 List<Instruction> list = ((InvokeInstruction)instruction).args;
                 List<String> types = ((InvokeInstruction)instruction)
@@ -228,16 +229,16 @@ public class AddCheckCastVisitor
                 }
             }
             break;
-        case ByteCodeConstants.LOOKUPSWITCH:
+        case Const.LOOKUPSWITCH:
             visit(((LookupSwitch)instruction).key);
             break;
-        case ByteCodeConstants.MONITORENTER:
+        case Const.MONITORENTER:
             visit(((MonitorEnter)instruction).objectref);
             break;
-        case ByteCodeConstants.MONITOREXIT:
+        case Const.MONITOREXIT:
             visit(((MonitorExit)instruction).objectref);
             break;
-        case ByteCodeConstants.MULTIANEWARRAY:
+        case Const.MULTIANEWARRAY:
             {
                 Instruction[] dimensions = ((MultiANewArray)instruction).dimensions;
                 for (int i=dimensions.length-1; i>=0; --i) {
@@ -245,16 +246,16 @@ public class AddCheckCastVisitor
                 }
             }
             break;
-        case ByteCodeConstants.NEWARRAY:
+        case Const.NEWARRAY:
             visit(((NewArray)instruction).dimension);
             break;
-        case ByteCodeConstants.ANEWARRAY:
+        case Const.ANEWARRAY:
             visit(((ANewArray)instruction).dimension);
             break;
-        case ByteCodeConstants.POP:
+        case Const.POP:
             visit(((Pop)instruction).objectref);
             break;
-        case ByteCodeConstants.GETFIELD:
+        case Const.GETFIELD:
             {
                 GetField getField = (GetField)instruction;
                 if (match(getField.objectref))
@@ -267,7 +268,7 @@ public class AddCheckCastVisitor
                     {
                         Instruction i = getField.objectref;
                         getField.objectref = new CheckCast(
-                            ByteCodeConstants.CHECKCAST, i.offset,
+                            Const.CHECKCAST, i.offset,
                             i.lineNumber, cfr.getClassIndex(), i);
                     }
                 }
@@ -277,7 +278,7 @@ public class AddCheckCastVisitor
                 }
             }
             break;
-        case ByteCodeConstants.PUTFIELD:
+        case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
                 if (match(putField.objectref))
@@ -290,7 +291,7 @@ public class AddCheckCastVisitor
                     {
                         Instruction i = putField.objectref;
                         putField.objectref = new CheckCast(
-                            ByteCodeConstants.CHECKCAST, i.offset,
+                            Const.CHECKCAST, i.offset,
                             i.lineNumber, cfr.getClassIndex(), i);
                     }
                 }
@@ -304,10 +305,10 @@ public class AddCheckCastVisitor
                     ConstantNameAndType cnat =
                         constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
 
-                    if (cnat.getDescriptorIndex() != this.constants.objectSignatureIndex)
+                    if (cnat.getSignatureIndex() != this.constants.objectSignatureIndex)
                     {
                         String signature =
-                            this.constants.getConstantUtf8(cnat.getDescriptorIndex());
+                            this.constants.getConstantUtf8(cnat.getSignatureIndex());
                         putField.valueref = newInstruction(
                             signature, putField.valueref);
                     }
@@ -318,7 +319,7 @@ public class AddCheckCastVisitor
                 }
             }
             break;
-        case ByteCodeConstants.PUTSTATIC:
+        case Const.PUTSTATIC:
             {
                 PutStatic putStatic = (PutStatic)instruction;
                 if (match(putStatic.valueref))
@@ -327,10 +328,10 @@ public class AddCheckCastVisitor
                     ConstantNameAndType cnat =
                         constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
 
-                    if (cnat.getDescriptorIndex() != this.constants.objectSignatureIndex)
+                    if (cnat.getSignatureIndex() != this.constants.objectSignatureIndex)
                     {
                         String signature =
-                            this.constants.getConstantUtf8(cnat.getDescriptorIndex());
+                            this.constants.getConstantUtf8(cnat.getSignatureIndex());
                         putStatic.valueref = newInstruction(
                             signature, putStatic.valueref);
                     }
@@ -344,7 +345,7 @@ public class AddCheckCastVisitor
         case ByteCodeConstants.XRETURN:
             visit(((ReturnInstruction)instruction).valueref);
             break;
-        case ByteCodeConstants.TABLESWITCH:
+        case Const.TABLESWITCH:
             visit(((TableSwitch)instruction).key);
             break;
         case ByteCodeConstants.TERNARYOPSTORE:
@@ -357,32 +358,32 @@ public class AddCheckCastVisitor
                 visit(to.value2);
             }
             break;
-        case ByteCodeConstants.ACONST_NULL:
+        case Const.ACONST_NULL:
         case ByteCodeConstants.ARRAYLOAD:
         case ByteCodeConstants.LOAD:
-        case ByteCodeConstants.ALOAD:
-        case ByteCodeConstants.ILOAD:
-        case ByteCodeConstants.BIPUSH:
+        case Const.ALOAD:
+        case Const.ILOAD:
+        case Const.BIPUSH:
         case ByteCodeConstants.ICONST:
         case ByteCodeConstants.LCONST:
         case ByteCodeConstants.FCONST:
         case ByteCodeConstants.DCONST:
         case ByteCodeConstants.DUPLOAD:
-        case ByteCodeConstants.GETSTATIC:
+        case Const.GETSTATIC:
         case ByteCodeConstants.OUTERTHIS:
-        case ByteCodeConstants.GOTO:
+        case Const.GOTO:
         case ByteCodeConstants.INVOKENEW:
-        case ByteCodeConstants.JSR:
-        case ByteCodeConstants.LDC:
-        case ByteCodeConstants.LDC2_W:
-        case ByteCodeConstants.NEW:
-        case ByteCodeConstants.NOP:
-        case ByteCodeConstants.SIPUSH:
-        case ByteCodeConstants.RET:
-        case ByteCodeConstants.RETURN:
+        case Const.JSR:
+        case Const.LDC:
+        case Const.LDC2_W:
+        case Const.NEW:
+        case Const.NOP:
+        case Const.SIPUSH:
+        case Const.RET:
+        case Const.RETURN:
         case ByteCodeConstants.EXCEPTIONLOAD:
         case ByteCodeConstants.RETURNADDRESSLOAD:
-        case ByteCodeConstants.IINC:
+        case Const.IINC:
         case ByteCodeConstants.PREINC:
         case ByteCodeConstants.POSTINC:
             break;
@@ -396,7 +397,7 @@ public class AddCheckCastVisitor
 
     private boolean match(Instruction i)
     {
-        if (i.opcode == ByteCodeConstants.ALOAD)
+        if (i.opcode == Const.ALOAD)
         {
             LoadInstruction li = (LoadInstruction)i;
             if (li.index == this.localVariable.index)
@@ -432,7 +433,7 @@ public class AddCheckCastVisitor
         int classIndex =
             this.constants.addConstantClass(nameIndex);
         return new CheckCast(
-            ByteCodeConstants.CHECKCAST, i.offset,
+            Const.CHECKCAST, i.offset,
             i.lineNumber, classIndex, i);
     }
 }

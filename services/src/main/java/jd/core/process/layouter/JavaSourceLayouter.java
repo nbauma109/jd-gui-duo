@@ -16,9 +16,10 @@
  ******************************************************************************/
 package jd.core.process.layouter;
 
-import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.ConstantFieldref;
+import org.apache.bcel.classfile.ConstantNameAndType;
 import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
-import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 
 import java.util.List;
 
@@ -616,7 +617,7 @@ public class JavaSourceLayouter
             ArrayLoadInstruction ali = (ArrayLoadInstruction)test;
             ConstantNameAndType cnat;
 
-            if (ali.arrayref.opcode == ByteCodeConstants.INVOKESTATIC)
+            if (ali.arrayref.opcode == Const.INVOKESTATIC)
             {
                 // Dans le cas des instructions Switch+Enum d'Eclipse, la clé de la map
                 // est l'indexe du nom de la méthode
@@ -625,7 +626,7 @@ public class JavaSourceLayouter
                 ConstantMethodref cmr = constants.getConstantMethodref(is.index);
                 cnat = constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
             }
-            else if (ali.arrayref.opcode == ByteCodeConstants.GETSTATIC)
+            else if (ali.arrayref.opcode == Const.GETSTATIC)
             {
                 // Dans le cas des instructions Switch+Enum des autres compilateurs,
                 // la clé de la map est l'indexe du nom de la classe interne

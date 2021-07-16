@@ -16,13 +16,16 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.bytecode;
 
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.CodeException;
+import org.apache.bcel.classfile.LineNumber;
+
 import java.util.*;
+import java.util.Map.Entry;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.Method;
-import jd.core.model.classfile.attribute.CodeException;
-import jd.core.model.classfile.attribute.LineNumber;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.ExceptionLoad;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
@@ -83,7 +86,7 @@ public class InstructionListBuilder
                 // Declaration de variables additionnelles pour le traitement
                 // des blocs 'catch' et 'finally'.
                 final Deque<Instruction> stack = new ArrayDeque<>();
-                final CodeException[] codeExceptions = method.getCodeExceptions();
+                final List<Entry<Integer, CodeException>> codeExceptions = method.getCodeExceptions();
                 int codeExceptionsIndex = 0;
                 int exceptionOffset;
                 ConstantPool constants = classFile.getConstantPool();
@@ -95,8 +98,8 @@ public class InstructionListBuilder
                 else
                 {
                     // Sort codeExceptions by handlerPc
-                    Arrays.sort(codeExceptions, COMPARATOR);
-                    exceptionOffset = codeExceptions[0].handlerPc;
+                    Collections.sort(codeExceptions, COMPARATOR);
+                    exceptionOffset = codeExceptions.get(0).getValue().getHandlerPC();
                 }
 
                 // Declaration de variables additionnelles pour le traitement
@@ -114,19 +117,19 @@ public class InstructionListBuilder
                 else
                 {
                     LineNumber ln = lineNumbers[lineNumbersIndex];
-                    lineNumber = ln.lineNumber;
+                    lineNumber = ln.getLineNumber();
                     nextLineOffset = -1;
 
-                    int startPc = ln.startPc;
+                    int startPc = ln.getStartPC();
                     while (++lineNumbersIndex < lineNumbers.length)
                     {
                         ln = lineNumbers[lineNumbersIndex];
-                        if (ln.startPc != startPc)
+                        if (ln.getStartPC() != startPc)
                         {
-                            nextLineOffset = ln.startPc;
+                            nextLineOffset = ln.getStartPC();
                             break;
                         }
-                        lineNumber = ln.lineNumber;
+                        lineNumber = ln.getLineNumber();
                     }
                 }
 
@@ -145,7 +148,7 @@ public class InstructionListBuilder
                             // Ajout d'une pseudo instruction de lecture
                             // d'exception en début de bloc catch
                             int catchType =
-                                codeExceptions[codeExceptionsIndex].catchType;
+                                codeExceptions.get(codeExceptionsIndex).getValue().getCatchType();
                             int signatureIndex;
 
                             if (catchType == 0)
@@ -170,14 +173,14 @@ public class InstructionListBuilder
                             int nextOffsetException;
                             for (;;)
                             {
-                                if (++codeExceptionsIndex >= codeExceptions.length)
+                                if (++codeExceptionsIndex >= codeExceptions.size())
                                 {
                                     nextOffsetException = -1;
                                     break;
                                 }
 
                                 nextOffsetException =
-                                    codeExceptions[codeExceptionsIndex].handlerPc;
+                                    codeExceptions.get(codeExceptionsIndex).getValue().getHandlerPC();
 
                                 if (nextOffsetException != exceptionOffset)
                                     break;
@@ -209,19 +212,19 @@ public class InstructionListBuilder
                         if (lineNumbers != null && offset == nextLineOffset)
                         {
                             LineNumber ln = lineNumbers[lineNumbersIndex];
-                            lineNumber = ln.lineNumber;
+                            lineNumber = ln.getLineNumber();
                             nextLineOffset = -1;
 
-                            int startPc = ln.startPc;
+                            int startPc = ln.getStartPC();
                             while (++lineNumbersIndex < lineNumbers.length)
                             {
                                 ln = lineNumbers[lineNumbersIndex];
-                                if (ln.startPc != startPc)
+                                if (ln.getStartPC() != startPc)
                                 {
-                                    nextLineOffset = ln.startPc;
+                                    nextLineOffset = ln.getStartPC();
                                     break;
                                 }
-                                lineNumber = ln.lineNumber;
+                                lineNumber = ln.getLineNumber();
                             }
                         }
 
@@ -233,7 +236,7 @@ public class InstructionListBuilder
                     else
                     {
                         String msg = "No factory for " +
-                                ByteCodeConstants.OPCODE_NAMES[opcode];
+                                Const.getOpcodeName(opcode);
                         System.err.println(msg);
                         throw new UnexpectedOpcodeException(opcode);
                     }
@@ -278,40 +281,40 @@ public class InstructionListBuilder
             int jumpOffset;
             int opcode = code[offset] & 255;
 
-            switch (ByteCodeConstants.NO_OF_OPERANDS[opcode])
+            switch (Const.getNoOfOperands(opcode))
             {
             case 0:
                 break;
             case 2:
                 switch (opcode)
                 {
-                case ByteCodeConstants.IFEQ:
-                case ByteCodeConstants.IFNE:
-                case ByteCodeConstants.IFLT:
-                case ByteCodeConstants.IFGE:
-                case ByteCodeConstants.IFGT:
-                case ByteCodeConstants.IFLE:
+                case Const.IFEQ:
+                case Const.IFNE:
+                case Const.IFLT:
+                case Const.IFGE:
+                case Const.IFGT:
+                case Const.IFLE:
 
-                case ByteCodeConstants.IF_ICMPEQ:
-                case ByteCodeConstants.IF_ICMPNE:
-                case ByteCodeConstants.IF_ICMPLT:
-                case ByteCodeConstants.IF_ICMPGE:
-                case ByteCodeConstants.IF_ICMPGT:
-                case ByteCodeConstants.IF_ICMPLE:
+                case Const.IF_ICMPEQ:
+                case Const.IF_ICMPNE:
+                case Const.IF_ICMPLT:
+                case Const.IF_ICMPGE:
+                case Const.IF_ICMPGT:
+                case Const.IF_ICMPLE:
 
-                case ByteCodeConstants.IF_ACMPEQ:
-                case ByteCodeConstants.IF_ACMPNE:
+                case Const.IF_ACMPEQ:
+                case Const.IF_ACMPNE:
 
-                case ByteCodeConstants.IFNONNULL:
-                case ByteCodeConstants.IFNULL:
+                case Const.IFNONNULL:
+                case Const.IFNULL:
 
-                case ByteCodeConstants.GOTO:
+                case Const.GOTO:
                     jumpOffset = offset +
                                         (short)( ((code[++offset] & 255) << 8) |
                                                   (code[++offset] & 255) );
                     jumps[jumpOffset] = true;
                     break;
-                case ByteCodeConstants.JSR:
+                case Const.JSR:
                     jumpOffset = offset +
                                     (short)( ((code[++offset] & 255) << 8) |
                                               (code[++offset] & 255) );
@@ -325,7 +328,7 @@ public class InstructionListBuilder
             case 4:
                 switch (opcode)
                 {
-                case ByteCodeConstants.GOTO_W:
+                case Const.GOTO_W:
                     jumpOffset = offset +
                                         ((code[++offset] & 255) << 24) |
                                         ((code[++offset] & 255) << 16) |
@@ -333,7 +336,7 @@ public class InstructionListBuilder
                                          (code[++offset] & 255);
                     jumps[jumpOffset] = true;
                     break;
-                case ByteCodeConstants.JSR_W:
+                case Const.JSR_W:
                     jumpOffset = offset +
                                      ((code[++offset] & 255) << 24) |
                                      ((code[++offset] & 255) << 16) |
@@ -348,38 +351,41 @@ public class InstructionListBuilder
             default:
                 switch (opcode)
                 {
-                case ByteCodeConstants.TABLESWITCH:
+                case Const.TABLESWITCH:
                     offset = ByteCodeUtil.nextTableSwitchOffset(code, offset);
                     break;
-                case ByteCodeConstants.LOOKUPSWITCH:
+                case Const.LOOKUPSWITCH:
                     offset = ByteCodeUtil.nextLookupSwitchOffset(code, offset);
                     break;
-                case ByteCodeConstants.WIDE:
+                case Const.WIDE:
                     offset = ByteCodeUtil.nextWideOffset(code, offset);
                     break;
                 default:
-                    offset += ByteCodeConstants.NO_OF_OPERANDS[opcode];
+                    offset += Const.getNoOfOperands(opcode);
                 }
             }
         }
     }
 
     private static class CodeExceptionComparator
-        implements Comparator<CodeException>
+        implements Comparator<Entry<Integer, CodeException>>
     {
         @Override
-        public int compare(CodeException ce1, CodeException ce2)
+        public int compare(Entry<Integer, CodeException> ice1, Entry<Integer, CodeException> ice2)
         {
-            if (ce1.handlerPc != ce2.handlerPc)
-                return ce1.handlerPc - ce2.handlerPc;
+        	CodeException ce1 = ice1.getValue();
+        	CodeException ce2 = ice2.getValue();
+        	
+            if (ce1.getHandlerPC() != ce2.getHandlerPC())
+                return ce1.getHandlerPC() - ce2.getHandlerPC();
 
-            if (ce1.endPc != ce2.endPc)
-                return ce1.endPc - ce2.endPc;
+            if (ce1.getEndPC() != ce2.getEndPC())
+                return ce1.getEndPC() - ce2.getEndPC();
 
-            if (ce1.startPc != ce2.startPc)
-                return ce1.startPc - ce2.startPc;
+            if (ce1.getStartPC() != ce2.getStartPC())
+                return ce1.getStartPC() - ce2.getStartPC();
 
-            return ce1.index - ce2.index;
+            return ice1.getKey() - ice2.getKey();
         }
     }
 }

@@ -16,9 +16,9 @@
  ******************************************************************************/
 package jd.core.model.instruction.bytecode.instruction;
 
-import org.jd.core.v1.model.classfile.constant.Constant;
-import org.jd.core.v1.model.classfile.constant.ConstantClass;
-import org.jd.core.v1.model.classfile.constant.ConstantUtf8;
+import org.apache.bcel.classfile.Constant;
+import org.apache.bcel.classfile.ConstantClass;
+import org.apache.bcel.classfile.ConstantUtf8;
 
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.LocalVariables;
@@ -48,7 +48,7 @@ public class CheckCast extends IndexInstruction
         if (c instanceof ConstantUtf8)
         {
             ConstantUtf8 cutf8 = (ConstantUtf8)c;
-            return cutf8.getValue();
+            return cutf8.getBytes();
         }
         ConstantClass cc = (ConstantClass)c;
         String signature = constants.getConstantUtf8(cc.getNameIndex());

@@ -16,9 +16,10 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile;
 
-import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.ConstantFieldref;
+import org.apache.bcel.classfile.ConstantNameAndType;
 import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
-import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 
 import java.util.List;
 
@@ -86,7 +87,7 @@ public class AccessorAnalyzer
             return false;
 
         instruction = ((ReturnInstruction)instruction).valueref;
-        if (instruction.opcode != ByteCodeConstants.GETSTATIC)
+        if (instruction.opcode != Const.GETSTATIC)
             return false;
 
         ConstantPool constants = classFile.getConstantPool();
@@ -106,7 +107,7 @@ public class AccessorAnalyzer
         ConstantNameAndType cnat = constants.getConstantNameAndType(
             cfr.getNameAndTypeIndex());
 
-        String fieldDescriptor = constants.getConstantUtf8(cnat.getDescriptorIndex());
+        String fieldDescriptor = constants.getConstantUtf8(cnat.getSignatureIndex());
         String fieldName = constants.getConstantUtf8(cnat.getNameIndex());
 
         // Trouve ! Ajout de l'accesseur.
@@ -134,11 +135,11 @@ public class AccessorAnalyzer
         if (list.size() != 2)
             return false;
 
-        if (list.get(1).opcode != ByteCodeConstants.RETURN)
+        if (list.get(1).opcode != Const.RETURN)
             return false;
 
         Instruction instruction = list.get(0);
-        if (instruction.opcode != ByteCodeConstants.PUTSTATIC)
+        if (instruction.opcode != Const.PUTSTATIC)
             return false;
 
         ConstantPool constants = classFile.getConstantPool();
@@ -160,7 +161,7 @@ public class AccessorAnalyzer
         ConstantNameAndType cnat = constants.getConstantNameAndType(
             cfr.getNameAndTypeIndex());
 
-        String fieldDescriptor = constants.getConstantUtf8(cnat.getDescriptorIndex());
+        String fieldDescriptor = constants.getConstantUtf8(cnat.getSignatureIndex());
         String fieldName = constants.getConstantUtf8(cnat.getNameIndex());
 
         // Trouve ! Ajout de l'accesseur.
@@ -193,7 +194,7 @@ public class AccessorAnalyzer
             return false;
 
         instruction = ((ReturnInstruction)instruction).valueref;
-        if (instruction.opcode != ByteCodeConstants.GETFIELD)
+        if (instruction.opcode != Const.GETFIELD)
             return false;
 
         ConstantPool constants = classFile.getConstantPool();
@@ -215,7 +216,7 @@ public class AccessorAnalyzer
         ConstantNameAndType cnat = constants.getConstantNameAndType(
             cfr.getNameAndTypeIndex());
 
-        String fieldDescriptor = constants.getConstantUtf8(cnat.getDescriptorIndex());
+        String fieldDescriptor = constants.getConstantUtf8(cnat.getSignatureIndex());
         String fieldName = constants.getConstantUtf8(cnat.getNameIndex());
 
         // Trouve ! Ajout de l'accesseur.
@@ -247,11 +248,11 @@ public class AccessorAnalyzer
         {
         case 2:
             {
-                if (list.get(1).opcode != ByteCodeConstants.RETURN)
+                if (list.get(1).opcode != Const.RETURN)
                     return false;
 
                 Instruction instruction = list.get(0);
-                if (instruction.opcode != ByteCodeConstants.PUTFIELD)
+                if (instruction.opcode != Const.PUTFIELD)
                     return false;
 
                 pf = (PutField)instruction;
@@ -266,7 +267,7 @@ public class AccessorAnalyzer
                     return false;
 
                 Instruction instruction = list.get(1);
-                if (instruction.opcode != ByteCodeConstants.PUTFIELD)
+                if (instruction.opcode != Const.PUTFIELD)
                     return false;
 
                 pf = (PutField)instruction;
@@ -293,7 +294,7 @@ public class AccessorAnalyzer
                 cfr.getNameAndTypeIndex());
 
         String methodName = constants.getConstantUtf8(method.getNameIndex());
-        String fieldDescriptor = constants.getConstantUtf8(cnat.getDescriptorIndex());
+        String fieldDescriptor = constants.getConstantUtf8(cnat.getSignatureIndex());
         String fieldName = constants.getConstantUtf8(cnat.getNameIndex());
 
         // Trouve ! Ajout de l'accesseur.
@@ -334,7 +335,7 @@ public class AccessorAnalyzer
             break;
         case 2:
             instruction = list.get(1);
-            if (instruction.opcode != ByteCodeConstants.RETURN)
+            if (instruction.opcode != Const.RETURN)
                 return false;
             instruction = list.get(0);
             break;
@@ -346,19 +347,19 @@ public class AccessorAnalyzer
 
         switch (instruction.opcode)
         {
-        case ByteCodeConstants.INVOKEVIRTUAL:
-        case ByteCodeConstants.INVOKESPECIAL:
-        case ByteCodeConstants.INVOKEINTERFACE:
+        case Const.INVOKEVIRTUAL:
+        case Const.INVOKESPECIAL:
+        case Const.INVOKEINTERFACE:
             InvokeNoStaticInstruction insi =
                 (InvokeNoStaticInstruction)instruction;
 
-            if ((insi.objectref.opcode != ByteCodeConstants.ALOAD) ||
+            if ((insi.objectref.opcode != Const.ALOAD) ||
                 (((ALoad)insi.objectref).index != 0))
                 return false;
 
             ii = insi;
             break;
-        case ByteCodeConstants.INVOKESTATIC:
+        case Const.INVOKESTATIC:
             ii = (InvokeInstruction)instruction;
             break;
         default:
@@ -377,7 +378,7 @@ public class AccessorAnalyzer
 
         String targetMethodName = constants.getConstantUtf8(cnat.getNameIndex());
         String targetMethodDescriptor =
-            constants.getConstantUtf8(cnat.getDescriptorIndex());
+            constants.getConstantUtf8(cnat.getSignatureIndex());
 
         // Trouve ! Ajout de l'accesseur.
         classFile.addAccessor(methodName, methodDescriptor,

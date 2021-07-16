@@ -16,13 +16,20 @@
  */
 package jd.core.process.analyzer.classfile;
 
-import org.jd.core.v1.model.classfile.constant.*;
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.Constant;
+import org.apache.bcel.classfile.ConstantFieldref;
+import org.apache.bcel.classfile.ConstantNameAndType;
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.*;
 
-import jd.core.model.classfile.*;
+import jd.core.model.classfile.ClassFile;
+import jd.core.model.classfile.ConstantPool;
+import jd.core.model.classfile.Field;
+import jd.core.model.classfile.Method;
 import jd.core.model.classfile.attribute.AttributeSignature;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
@@ -91,7 +98,7 @@ public class ClassFileAnalyzer
         Map<String, ClassFile> innerClassesMap,
         ClassFile classFile)
     {
-        if ((classFile.accessFlags & ClassFileConstants.ACC_SYNTHETIC) != 0)
+        if ((classFile.accessFlags & Const.ACC_SYNTHETIC) != 0)
         {
             analyzeSyntheticClass(classFile);
         }
@@ -122,7 +129,7 @@ public class ClassFileAnalyzer
             analyzeMethods(referenceMap, innerClassesMap, classFile);
             checkAssertionsDisabledField(classFile);
 
-            if ((classFile.accessFlags & ClassFileConstants.ACC_ENUM) != 0) {
+            if ((classFile.accessFlags & Const.ACC_ENUM) != 0) {
                 analyzeEnum(classFile);
             }
         }
@@ -133,7 +140,7 @@ public class ClassFileAnalyzer
         // Recherche des classes internes utilisees par les instructions
         // Switch+Enum generees par les compilateurs autre qu'Eclipse.
 
-        if ((classFile.accessFlags & ClassFileConstants.ACC_STATIC) != 0 &&
+        if ((classFile.accessFlags & Const.ACC_STATIC) != 0 &&
             classFile.getOuterClass() != null &&
             classFile.getInternalAnonymousClassName() != null &&
             classFile.getFields() != null &&
@@ -141,8 +148,8 @@ public class ClassFileAnalyzer
             classFile.getFields().length > 0 &&
             classFile.getMethods().length == 1 &&
             (classFile.getMethods()[0].accessFlags &
-                    (ClassFileConstants.ACC_PUBLIC|ClassFileConstants.ACC_PROTECTED|ClassFileConstants.ACC_PRIVATE|ClassFileConstants.ACC_STATIC|ClassFileConstants.ACC_FINAL|ClassFileConstants.ACC_SYNTHETIC)) ==
-                        ClassFileConstants.ACC_STATIC)
+                    (Const.ACC_PUBLIC|Const.ACC_PROTECTED|Const.ACC_PRIVATE|Const.ACC_STATIC|Const.ACC_FINAL|Const.ACC_SYNTHETIC)) ==
+                        Const.ACC_STATIC)
         {
             ClassFile outerClassFile = classFile.getOuterClass();
             ConstantPool outerConstants = outerClassFile.getConstantPool();
@@ -184,7 +191,7 @@ public class ClassFileAnalyzer
                 int outerEnumNameIndex;
                 for (int index=0; index<length; index++)
                 {
-                    if (list.get(index).opcode != ByteCodeConstants.PUTSTATIC) {
+                    if (list.get(index).opcode != Const.PUTSTATIC) {
                         break;
                     }
 
@@ -199,8 +206,8 @@ public class ClassFileAnalyzer
                     // Search field
                     field = searchField(classFile, cnat);
                     if (field == null || (field.accessFlags &
-                            (ClassFileConstants.ACC_PUBLIC|ClassFileConstants.ACC_PROTECTED|ClassFileConstants.ACC_PRIVATE|ClassFileConstants.ACC_STATIC|ClassFileConstants.ACC_FINAL|ClassFileConstants.ACC_SYNTHETIC)) !=
-                                (ClassFileConstants.ACC_STATIC|ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_FINAL)) {
+                            (Const.ACC_PUBLIC|Const.ACC_PROTECTED|Const.ACC_PRIVATE|Const.ACC_STATIC|Const.ACC_FINAL|Const.ACC_SYNTHETIC)) !=
+                                (Const.ACC_STATIC|Const.ACC_SYNTHETIC|Const.ACC_FINAL)) {
                         break;
                     }
 
@@ -216,20 +223,20 @@ public class ClassFileAnalyzer
                         instruction = list.get(index-2);
 
                         if (instruction.opcode != ByteCodeConstants.ARRAYSTORE ||
-                            list.get(index-1).opcode != ByteCodeConstants.GOTO ||
-                            list.get(index).opcode != ByteCodeConstants.ASTORE) {
+                            list.get(index-1).opcode != Const.GOTO ||
+                            list.get(index).opcode != Const.ASTORE) {
                             break;
                         }
 
                         instruction = ((ArrayStoreInstruction)instruction).indexref;
 
-                        if (instruction.opcode != ByteCodeConstants.INVOKEVIRTUAL) {
+                        if (instruction.opcode != Const.INVOKEVIRTUAL) {
                             break;
                         }
 
                         instruction = ((Invokevirtual)instruction).objectref;
 
-                        if (instruction.opcode != ByteCodeConstants.GETSTATIC) {
+                        if (instruction.opcode != Const.GETSTATIC) {
                             break;
                         }
 
@@ -274,7 +281,7 @@ public class ClassFileAnalyzer
             field = fields[i];
 
             if (field.getNameIndex() == cnat.getNameIndex() &&
-                field.getDescriptorIndex() == cnat.getDescriptorIndex()) {
+                field.getDescriptorIndex() == cnat.getSignatureIndex()) {
                 return field;
             }
         }
@@ -300,7 +307,7 @@ public class ClassFileAnalyzer
                 if (cnat != null)
                 {
                     String signature = constants.getConstantUtf8(
-                        cnat.getDescriptorIndex());
+                        cnat.getSignatureIndex());
                     cmr.setParameterSignatures(
                         SignatureUtil.getParameterSignatures(signature));
                     cmr.setReturnedSignature(
@@ -327,7 +334,7 @@ public class ClassFileAnalyzer
         {
             Field field = fields[i];
 
-            if ((field.accessFlags & (ClassFileConstants.ACC_PUBLIC|ClassFileConstants.ACC_PROTECTED)) != 0) {
+            if ((field.accessFlags & (Const.ACC_PUBLIC|Const.ACC_PROTECTED)) != 0) {
                 continue;
             }
 
@@ -407,7 +414,7 @@ public class ClassFileAnalyzer
 
             if (list != null)
             {
-                if (list.get(0).getDescriptorIndex() != cnat.getDescriptorIndex())
+                if (list.get(0).getSignatureIndex() != cnat.getSignatureIndex())
                 {
                     // Same name and different signature
                     list.add(cnat);
@@ -453,7 +460,7 @@ public class ClassFileAnalyzer
                 while (k-- > 0)
                 {
                     cnat = list.get(k);
-                    signature = constants.getConstantUtf8(cnat.getDescriptorIndex());
+                    signature = constants.getConstantUtf8(cnat.getSignatureIndex());
                     newName = FieldNameGenerator.generateName(signature, name);
                     cnat.setNameIndex(constants.addConstantUtf8(newName));
                 }
@@ -478,10 +485,10 @@ public class ClassFileAnalyzer
             field = fields[i];
 
             if ((field.accessFlags &
-                    (ClassFileConstants.ACC_PUBLIC|ClassFileConstants.ACC_PROTECTED|
-                     ClassFileConstants.ACC_PRIVATE|ClassFileConstants.ACC_SYNTHETIC|
-                     ClassFileConstants.ACC_STATIC|ClassFileConstants.ACC_FINAL))
-                         != (ClassFileConstants.ACC_STATIC|ClassFileConstants.ACC_FINAL) || field.getValueAndMethod() == null) {
+                    (Const.ACC_PUBLIC|Const.ACC_PROTECTED|
+                     Const.ACC_PRIVATE|Const.ACC_SYNTHETIC|
+                     Const.ACC_STATIC|Const.ACC_FINAL))
+                         != (Const.ACC_STATIC|Const.ACC_FINAL) || field.getValueAndMethod() == null) {
                 continue;
             }
 
@@ -490,7 +497,7 @@ public class ClassFileAnalyzer
                 continue;
             }
 
-            field.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
+            field.accessFlags |= Const.ACC_SYNTHETIC;
         }
     }
 
@@ -571,8 +578,8 @@ public class ClassFileAnalyzer
             list.get(0).opcode == ByteCodeConstants.DUPSTORE &&
             list.get(1).opcode == ByteCodeConstants.IFXNULL &&
             list.get(2).opcode == ByteCodeConstants.XRETURN &&
-            list.get(3).opcode == ByteCodeConstants.POP &&
-            list.get(4).opcode == ByteCodeConstants.ASTORE)
+            list.get(3).opcode == Const.POP &&
+            list.get(4).opcode == Const.ASTORE)
         {
             // Eclipse pattern
             ConstantPool constants = classFile.getConstantPool();
@@ -586,20 +593,20 @@ public class ClassFileAnalyzer
                 instruction = list.get(index-2);
 
                 if (instruction.opcode != ByteCodeConstants.ARRAYSTORE ||
-                    list.get(index-1).opcode != ByteCodeConstants.GOTO ||
-                    list.get(index).opcode != ByteCodeConstants.POP) {
+                    list.get(index-1).opcode != Const.GOTO ||
+                    list.get(index).opcode != Const.POP) {
                     break;
                 }
 
                 instruction = ((ArrayStoreInstruction)instruction).indexref;
 
-                if (instruction.opcode != ByteCodeConstants.INVOKEVIRTUAL) {
+                if (instruction.opcode != Const.INVOKEVIRTUAL) {
                     break;
                 }
 
                 instruction = ((Invokevirtual)instruction).objectref;
 
-                if (instruction.opcode != ByteCodeConstants.GETSTATIC) {
+                if (instruction.opcode != Const.GETSTATIC) {
                     break;
                 }
 
@@ -615,10 +622,10 @@ public class ClassFileAnalyzer
                 Integer.valueOf(method.getNameIndex()), enumNameIndexes);
         }
         else if (length >= 7 &&
-                list.get(0).opcode == ByteCodeConstants.ASTORE &&
+                list.get(0).opcode == Const.ASTORE &&
                 list.get(1).opcode == ByteCodeConstants.IFXNULL &&
                 list.get(2).opcode == ByteCodeConstants.XRETURN &&
-                list.get(3).opcode == ByteCodeConstants.ASTORE &&
+                list.get(3).opcode == Const.ASTORE &&
                 list.get(4).opcode == ByteCodeConstants.ARRAYSTORE)
         {
             // Dalvik pattern
@@ -638,13 +645,13 @@ public class ClassFileAnalyzer
 
                 instruction = ((ArrayStoreInstruction)instruction).indexref;
 
-                if (instruction.opcode != ByteCodeConstants.INVOKEVIRTUAL) {
+                if (instruction.opcode != Const.INVOKEVIRTUAL) {
                     break;
                 }
 
                 instruction = ((Invokevirtual)instruction).objectref;
 
-                if (instruction.opcode != ByteCodeConstants.GETSTATIC) {
+                if (instruction.opcode != Const.GETSTATIC) {
                     break;
                 }
 
@@ -685,7 +692,7 @@ public class ClassFileAnalyzer
                 if (method.getCode() == null)
                 {
                     if ((method.accessFlags &
-                            (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_BRIDGE)) == 0)
+                            (Const.ACC_SYNTHETIC|Const.ACC_BRIDGE)) == 0)
                     {
                         // Create missing local variable table
                         LocalVariableAnalyzer.analyze(
@@ -702,16 +709,16 @@ public class ClassFileAnalyzer
                         classFile, method, list, listForAnalyze);
                     method.setInstructions(list);
 
-                    if ((method.accessFlags & (ClassFileConstants.ACC_PUBLIC|ClassFileConstants.ACC_PROTECTED|ClassFileConstants.ACC_PRIVATE|ClassFileConstants.ACC_STATIC)) == ClassFileConstants.ACC_STATIC &&
+                    if ((method.accessFlags & (Const.ACC_PUBLIC|Const.ACC_PROTECTED|Const.ACC_PRIVATE|Const.ACC_STATIC)) == Const.ACC_STATIC &&
                         hasAAccessorMethodName(classFile, method))
                     {
                         // Recherche des accesseurs
                         AccessorAnalyzer.analyze(classFile, method);
                         // Setup access flag : JDK 1.4 not set synthetic flag...
-                        method.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
+                        method.accessFlags |= Const.ACC_SYNTHETIC;
                     }
                     else if ((method.accessFlags &
-                            (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_BRIDGE)) == 0)
+                            (Const.ACC_SYNTHETIC|Const.ACC_BRIDGE)) == 0)
                     {
                         // Create missing local variable table
                         LocalVariableAnalyzer.analyze(
@@ -722,8 +729,8 @@ public class ClassFileAnalyzer
                         outerThisFieldrefIndex = searchOuterThisFieldrefIndex(
                             classFile, method, list, outerThisFieldrefIndex);
                     }
-                    else if ((method.accessFlags & (ClassFileConstants.ACC_PUBLIC|ClassFileConstants.ACC_PROTECTED|ClassFileConstants.ACC_PRIVATE|ClassFileConstants.ACC_STATIC|ClassFileConstants.ACC_SYNTHETIC))
-                                    == (ClassFileConstants.ACC_STATIC|ClassFileConstants.ACC_SYNTHETIC) &&
+                    else if ((method.accessFlags & (Const.ACC_PUBLIC|Const.ACC_PROTECTED|Const.ACC_PRIVATE|Const.ACC_STATIC|Const.ACC_SYNTHETIC))
+                                    == (Const.ACC_STATIC|Const.ACC_SYNTHETIC) &&
                                 hasAEclipseSwitchTableMethodName(classFile, method))
                     {
                         // Parse "static int[] $SWITCH_TABLE$...()" method
@@ -768,7 +775,7 @@ public class ClassFileAnalyzer
             final Method method = methods[i];
 
             if ((method.accessFlags &
-                (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_BRIDGE)) != 0 ||
+                (Const.ACC_SYNTHETIC|Const.ACC_BRIDGE)) != 0 ||
                 method.getCode() == null ||
                 method.containsError()) {
                 continue;
@@ -852,7 +859,7 @@ public class ClassFileAnalyzer
             final Method method = methods[i];
 
             if ((method.accessFlags &
-                (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_BRIDGE)) != 0 ||
+                (Const.ACC_SYNTHETIC|Const.ACC_BRIDGE)) != 0 ||
                 method.getCode() == null ||
                 method.getFastNodes() == null ||
                 method.containsError()) {
@@ -882,7 +889,7 @@ public class ClassFileAnalyzer
     {
         // Is classFile an inner class ?
         if (!classFile.isAInnerClass() ||
-            (classFile.accessFlags & ClassFileConstants.ACC_STATIC) != 0) {
+            (classFile.accessFlags & Const.ACC_STATIC) != 0) {
             return 0;
         }
 
@@ -911,20 +918,20 @@ public class ClassFileAnalyzer
         {
             instruction = list.get(i);
 
-            if (instruction.opcode == ByteCodeConstants.PUTFIELD)
+            if (instruction.opcode == Const.PUTFIELD)
             {
                 // Is '#' equals to 'outerThisFieldIndex' ?
                 PutField pf = (PutField)instruction;
 
-                if (pf.objectref.opcode == ByteCodeConstants.ALOAD &&
-                    pf.valueref.opcode == ByteCodeConstants.ALOAD &&
+                if (pf.objectref.opcode == Const.ALOAD &&
+                    pf.valueref.opcode == Const.ALOAD &&
                     ((ALoad)pf.objectref).index == 0 &&
                     ((ALoad)pf.valueref).index == 1 && (outerThisFieldrefIndex == 0 ||
                     pf.index == outerThisFieldrefIndex)) {
                     return pf.index;
                 }
             }
-            else if (instruction.opcode == ByteCodeConstants.INVOKESPECIAL)
+            else if (instruction.opcode == Const.INVOKESPECIAL)
             {
                 // Is a call to "this()" in constructor ?
                 Invokespecial is = (Invokespecial)instruction;
@@ -976,11 +983,11 @@ public class ClassFileAnalyzer
                     field = fields[i];
 
                     if (field.getNameIndex() == cnat.getNameIndex() &&
-                        field.getDescriptorIndex() == cnat.getDescriptorIndex())
+                        field.getDescriptorIndex() == cnat.getSignatureIndex())
                     {
                         classFile.setOuterThisField(field);
                         // Ensure outer this field is a synthetic field.
-                        field.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
+                        field.accessFlags |= Const.ACC_SYNTHETIC;
                         break;
                     }
                 }
@@ -1014,7 +1021,7 @@ public class ClassFileAnalyzer
                 {
                     instruction = list.get(index);
 
-                    if (instruction.opcode == ByteCodeConstants.PUTFIELD &&
+                    if (instruction.opcode == Const.PUTFIELD &&
                         ((PutField)instruction).index == outerThisFieldrefIndex)
                     {
                         list.remove(index);
@@ -1023,7 +1030,7 @@ public class ClassFileAnalyzer
                 }
             }
             else if ((method.accessFlags &
-                        (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_STATIC)) == ClassFileConstants.ACC_STATIC &&
+                        (Const.ACC_SYNTHETIC|Const.ACC_STATIC)) == Const.ACC_STATIC &&
                      method.getNameIndex() != constants.classConstructorIndex &&
                      listLength == 1 &&
                      classFile.isAInnerClass())
@@ -1042,12 +1049,12 @@ public class ClassFileAnalyzer
                 }
 
                 instruction = ((ReturnInstruction)instruction).valueref;
-                if (instruction.opcode != ByteCodeConstants.GETFIELD) {
+                if (instruction.opcode != Const.GETFIELD) {
                     continue;
                 }
 
                 GetField gf = (GetField)instruction;
-                if (gf.objectref.opcode != ByteCodeConstants.ALOAD ||
+                if (gf.objectref.opcode != Const.ALOAD ||
                     ((ALoad)gf.objectref).index != 0) {
                     continue;
                 }
@@ -1060,14 +1067,14 @@ public class ClassFileAnalyzer
                 ConstantNameAndType cnat =
                     constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
                 Field outerField = classFile.getOuterThisField();
-                if (cnat.getDescriptorIndex() != outerField.getDescriptorIndex()) {
+                if (cnat.getSignatureIndex() != outerField.getDescriptorIndex()) {
                     continue;
                 }
 
                 if (cnat.getNameIndex() == outerField.getNameIndex())
                 {
                     // Ensure accessor method is a synthetic method
-                    method.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
+                    method.accessFlags |= Const.ACC_SYNTHETIC;
                 }
             }
         }
@@ -1094,11 +1101,11 @@ public class ClassFileAnalyzer
             {
                 instruction = list.get(0);
 
-                if (instruction.opcode == ByteCodeConstants.INVOKESPECIAL)
+                if (instruction.opcode == Const.INVOKESPECIAL)
                 {
                     Invokespecial is = (Invokespecial)instruction;
 
-                    if (is.objectref.opcode == ByteCodeConstants.ALOAD &&
+                    if (is.objectref.opcode == Const.ALOAD &&
                         ((ALoad)is.objectref).index == 0)
                     {
                         ConstantMethodref cmr = constants.getConstantMethodref(is.index);
@@ -1113,7 +1120,7 @@ public class ClassFileAnalyzer
 
                                 method.setSuperConstructorParameterCount(count);
 
-                                if ((classFile.accessFlags & ClassFileConstants.ACC_ENUM) != 0)
+                                if ((classFile.accessFlags & Const.ACC_ENUM) != 0)
                                 {
                                     if (count == 2)
                                     {
@@ -1133,12 +1140,12 @@ public class ClassFileAnalyzer
                         }
                     }
                 }
-                else if (instruction.opcode == ByteCodeConstants.PUTFIELD)
+                else if (instruction.opcode == Const.PUTFIELD)
                 {
                     PutField pf = (PutField)instruction;
 
-                    if (pf.valueref.opcode == ByteCodeConstants.LOAD || pf.valueref.opcode == ByteCodeConstants.ALOAD
-                            || pf.valueref.opcode == ByteCodeConstants.ILOAD) {
+                    if (pf.valueref.opcode == ByteCodeConstants.LOAD || pf.valueref.opcode == Const.ALOAD
+                            || pf.valueref.opcode == Const.ILOAD) {
                         IndexInstruction ii = (IndexInstruction)pf.valueref;
                         // Rappel sur l'ordre des parametres passes aux constructeurs:
                         //  <init>(outer this, p1, p2, ..., outer local var1, ...)
@@ -1155,10 +1162,10 @@ public class ClassFileAnalyzer
                             ConstantNameAndType cnat =
                                 constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
                             Field field =
-                                classFile.getField(cnat.getNameIndex(), cnat.getDescriptorIndex());
+                                classFile.getField(cnat.getNameIndex(), cnat.getSignatureIndex());
                             field.anonymousClassConstructorParameterIndex = ii.index - 1;
                             // Ensure this field is a synthetic field.
-                            field.accessFlags |= ClassFileConstants.ACC_SYNTHETIC;
+                            field.accessFlags |= Const.ACC_SYNTHETIC;
                         }
                     }
                 }
@@ -1182,12 +1189,12 @@ public class ClassFileAnalyzer
             {
                 switch (list.get(length-1).opcode)
                 {
-                case ByteCodeConstants.RETURN:
+                case Const.RETURN:
                     list.remove(length-1);
                     break;
                 case FastConstants.LABEL:
                     FastLabel fl = (FastLabel)list.get(length-1);
-                    if (fl.instruction.opcode == ByteCodeConstants.RETURN) {
+                    if (fl.instruction.opcode == Const.RETURN) {
                         fl.instruction = null;
                     }
                 }
@@ -1217,12 +1224,12 @@ public class ClassFileAnalyzer
         {
             instruction = list.get(index);
 
-            if (instruction.opcode == ByteCodeConstants.POP &&
-                          (((Pop)instruction).objectref.opcode == ByteCodeConstants.GETFIELD
-                        || ((Pop)instruction).objectref.opcode == ByteCodeConstants.GETSTATIC
+            if (instruction.opcode == Const.POP &&
+                          (((Pop)instruction).objectref.opcode == Const.GETFIELD
+                        || ((Pop)instruction).objectref.opcode == Const.GETSTATIC
                         || ((Pop)instruction).objectref.opcode == ByteCodeConstants.OUTERTHIS
-                        || ((Pop)instruction).objectref.opcode == ByteCodeConstants.ALOAD
-                        || ((Pop)instruction).objectref.opcode == ByteCodeConstants.ILOAD
+                        || ((Pop)instruction).objectref.opcode == Const.ALOAD
+                        || ((Pop)instruction).objectref.opcode == Const.ILOAD
                         || ((Pop)instruction).objectref.opcode == ByteCodeConstants.LOAD)) {
                 list.remove(index);
             }
@@ -1294,7 +1301,7 @@ public class ClassFileAnalyzer
         {
             field = fields[i];
 
-            if ((field.accessFlags & (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_ENUM)) == 0 ||
+            if ((field.accessFlags & (Const.ACC_SYNTHETIC|Const.ACC_ENUM)) == 0 ||
                 field.getValueAndMethod() == null) {
                 continue;
             }

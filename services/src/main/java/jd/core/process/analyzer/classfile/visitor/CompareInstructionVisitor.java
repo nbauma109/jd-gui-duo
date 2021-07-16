@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.visitor;
 
+import org.apache.bcel.Const;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -32,10 +34,10 @@ public class CompareInstructionVisitor
 
         switch (i1.opcode)
         {
-        case ByteCodeConstants.ARRAYLENGTH:
+        case Const.ARRAYLENGTH:
             return visit(
                 ((ArrayLength)i1).arrayref, ((ArrayLength)i2).arrayref);
-        case ByteCodeConstants.AASTORE:
+        case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             {
                 if (Objects.compare(((ArrayStoreInstruction)i1).signature,
@@ -72,7 +74,7 @@ public class CompareInstructionVisitor
                     return false;
                 return visit(msg1, msg2);
             }
-        case ByteCodeConstants.ATHROW:
+        case Const.ATHROW:
             return visit(((AThrow)i1).value, ((AThrow)i2).value);
         case ByteCodeConstants.UNARYOP:
             {
@@ -115,7 +117,7 @@ public class CompareInstructionVisitor
                     ((BinaryOperatorInstruction)i1).value2,
                     ((BinaryOperatorInstruction)i2).value2);
             }
-        case ByteCodeConstants.CHECKCAST:
+        case Const.CHECKCAST:
             {
                 if (((CheckCast)i1).index != ((CheckCast)i2).index)
                     return false;
@@ -124,8 +126,8 @@ public class CompareInstructionVisitor
                     ((CheckCast)i1).objectref, ((CheckCast)i2).objectref);
             }
         case ByteCodeConstants.STORE:
-        case ByteCodeConstants.ASTORE:
-        case ByteCodeConstants.ISTORE:
+        case Const.ASTORE:
+        case Const.ISTORE:
             {
                 String rs1 = ((StoreInstruction)i1).getReturnedSignature(null, null);
                 String rs2 = ((StoreInstruction)i2).getReturnedSignature(null, null);
@@ -186,7 +188,7 @@ public class CompareInstructionVisitor
                         ((ComplexConditionalBranchInstruction)i1).instructions,
                         ((ComplexConditionalBranchInstruction)i2).instructions);
             }
-        case ByteCodeConstants.INSTANCEOF:
+        case Const.INSTANCEOF:
             {
                 if (((InstanceOf)i1).index != ((InstanceOf)i2).index)
                     return false;
@@ -194,9 +196,9 @@ public class CompareInstructionVisitor
                 return visit(
                     ((InstanceOf)i1).objectref, ((InstanceOf)i2).objectref);
             }
-        case ByteCodeConstants.INVOKEINTERFACE:
-        case ByteCodeConstants.INVOKESPECIAL:
-        case ByteCodeConstants.INVOKEVIRTUAL:
+        case Const.INVOKEINTERFACE:
+        case Const.INVOKESPECIAL:
+        case Const.INVOKEVIRTUAL:
             {
                 if (! visit(
                         ((InvokeNoStaticInstruction)i1).objectref,
@@ -204,7 +206,7 @@ public class CompareInstructionVisitor
                     return false;
             }
             // intended fall through
-        case ByteCodeConstants.INVOKESTATIC:
+        case Const.INVOKESTATIC:
             return visit(
                 ((InvokeInstruction)i1).args, ((InvokeInstruction)i2).args);
         case ByteCodeConstants.INVOKENEW:
@@ -215,7 +217,7 @@ public class CompareInstructionVisitor
                 return visit(
                     ((InvokeNew)i1).args, ((InvokeNew)i2).args);
             }
-        case ByteCodeConstants.MULTIANEWARRAY:
+        case Const.MULTIANEWARRAY:
             {
                 if (((MultiANewArray)i1).index != ((MultiANewArray)i2).index)
                     return false;
@@ -234,7 +236,7 @@ public class CompareInstructionVisitor
 
                 return true;
             }
-        case ByteCodeConstants.NEWARRAY:
+        case Const.NEWARRAY:
             {
                 if (((NewArray)i1).type != ((NewArray)i2).type)
                     return false;
@@ -242,7 +244,7 @@ public class CompareInstructionVisitor
                 return visit(
                     ((NewArray)i1).dimension, ((NewArray)i2).dimension);
             }
-        case ByteCodeConstants.ANEWARRAY:
+        case Const.ANEWARRAY:
             {
                 if (((ANewArray)i1).index != ((ANewArray)i2).index)
                     return false;
@@ -250,7 +252,7 @@ public class CompareInstructionVisitor
                 return visit(
                     ((ANewArray)i1).dimension, ((ANewArray)i2).dimension);
             }
-        case ByteCodeConstants.PUTFIELD:
+        case Const.PUTFIELD:
             {
                 if (! visit(
                         ((PutField)i1).objectref,
@@ -340,7 +342,7 @@ public class CompareInstructionVisitor
                         ((IncInstruction)i1).value,
                         ((IncInstruction)i2).value);
             }
-        case ByteCodeConstants.GETFIELD:
+        case Const.GETFIELD:
             {
                 if (((GetField)i1).index != ((GetField)i2).index)
                     return false;
@@ -359,16 +361,16 @@ public class CompareInstructionVisitor
                 return visit(((InitArrayInstruction)i1).values,
                         ((InitArrayInstruction)i2).values);
             }
-        case ByteCodeConstants.ALOAD:
-        case ByteCodeConstants.ILOAD:
+        case Const.ALOAD:
+        case Const.ILOAD:
             {
                 String rs1 = ((LoadInstruction)i1).getReturnedSignature(null, null);
                 String rs2 = ((LoadInstruction)i2).getReturnedSignature(null, null);
                 return (rs1 == null) ? (rs2 == null) : (rs1.compareTo(rs2) == 0);
             }
         case ByteCodeConstants.ICONST:
-        case ByteCodeConstants.BIPUSH:
-        case ByteCodeConstants.SIPUSH:
+        case Const.BIPUSH:
+        case Const.SIPUSH:
             {
                 if (((IConst)i1).value != ((IConst)i2).value)
                     return false;
@@ -383,26 +385,26 @@ public class CompareInstructionVisitor
             return ((ConstInstruction)i1).value == ((ConstInstruction)i2).value;
         case ByteCodeConstants.DUPLOAD:
             return ((DupLoad)i1).dupStore == ((DupLoad)i2).dupStore;
-        case ByteCodeConstants.TABLESWITCH:
+        case Const.TABLESWITCH:
         case ByteCodeConstants.XRETURN:
-        case ByteCodeConstants.PUTSTATIC:
-        case ByteCodeConstants.LOOKUPSWITCH:
-        case ByteCodeConstants.MONITORENTER:
-        case ByteCodeConstants.MONITOREXIT:
-        case ByteCodeConstants.POP:
-        case ByteCodeConstants.ACONST_NULL:
+        case Const.PUTSTATIC:
+        case Const.LOOKUPSWITCH:
+        case Const.MONITORENTER:
+        case Const.MONITOREXIT:
+        case Const.POP:
+        case Const.ACONST_NULL:
         case ByteCodeConstants.LOAD:
-        case ByteCodeConstants.GETSTATIC:
+        case Const.GETSTATIC:
         case ByteCodeConstants.OUTERTHIS:
-        case ByteCodeConstants.GOTO:
-        case ByteCodeConstants.IINC:
-        case ByteCodeConstants.JSR:
-        case ByteCodeConstants.LDC:
-        case ByteCodeConstants.LDC2_W:
-        case ByteCodeConstants.NEW:
-        case ByteCodeConstants.NOP:
-        case ByteCodeConstants.RET:
-        case ByteCodeConstants.RETURN:
+        case Const.GOTO:
+        case Const.IINC:
+        case Const.JSR:
+        case Const.LDC:
+        case Const.LDC2_W:
+        case Const.NEW:
+        case Const.NOP:
+        case Const.RET:
+        case Const.RETURN:
         case ByteCodeConstants.EXCEPTIONLOAD:
         case ByteCodeConstants.RETURNADDRESSLOAD:
             return true;

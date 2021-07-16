@@ -58,13 +58,7 @@ public class SaveAllSourcesController implements SourcesSavable.Controller, Sour
                 Path path = Paths.get(file.toURI());
                 Files.deleteIfExists(path);
 
-                try {
-                    savable.save(api, this, this, path);
-                } catch (Exception e) {
-                    assert ExceptionUtil.printStackTrace(e);
-                    saveAllSourcesView.showActionFailedDialog();
-                    cancel = true;
-                }
+                trySave(savable, path);
 
                 if (cancel) {
                     Files.deleteIfExists(path);
@@ -76,6 +70,16 @@ public class SaveAllSourcesController implements SourcesSavable.Controller, Sour
             saveAllSourcesView.hide();
         });
     }
+
+	private void trySave(SourcesSavable savable, Path path) {
+		try {
+		    savable.save(api, this, this, path);
+		} catch (Exception e) {
+		    assert ExceptionUtil.printStackTrace(e);
+		    saveAllSourcesView.showActionFailedDialog();
+		    cancel = true;
+		}
+	}
 
     public boolean isActivated() { return saveAllSourcesView.isVisible(); }
 

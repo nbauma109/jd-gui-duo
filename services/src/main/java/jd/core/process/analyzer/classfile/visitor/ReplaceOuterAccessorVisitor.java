@@ -16,14 +16,14 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.visitor;
 
-import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.ConstantFieldref;
+import org.apache.bcel.classfile.ConstantNameAndType;
 import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
-import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 
 import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
-import jd.core.model.classfile.ClassFileConstants;
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
@@ -45,7 +45,7 @@ public class ReplaceOuterAccessorVisitor
     {
         switch (instruction.opcode)
         {
-        case ByteCodeConstants.ARRAYLENGTH:
+        case Const.ARRAYLENGTH:
             {
                 ArrayLength al = (ArrayLength)instruction;
                 ClassFile matchedClassFile = match(al.arrayref);
@@ -55,7 +55,7 @@ public class ReplaceOuterAccessorVisitor
                     visit(al.arrayref);
             }
             break;
-        case ByteCodeConstants.AASTORE:
+        case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
@@ -94,7 +94,7 @@ public class ReplaceOuterAccessorVisitor
                 }
             }
             break;
-        case ByteCodeConstants.ATHROW:
+        case Const.ATHROW:
             {
                 AThrow aThrow = (AThrow)instruction;
                 ClassFile matchedClassFile = match(aThrow.value);
@@ -129,7 +129,7 @@ public class ReplaceOuterAccessorVisitor
                     visit(boi.value2);
             }
             break;
-        case ByteCodeConstants.CHECKCAST:
+        case Const.CHECKCAST:
             {
                 CheckCast checkCast = (CheckCast)instruction;
                 ClassFile matchedClassFile = match(checkCast.objectref);
@@ -140,8 +140,8 @@ public class ReplaceOuterAccessorVisitor
             }
             break;
         case ByteCodeConstants.STORE:
-        case ByteCodeConstants.ASTORE:
-        case ByteCodeConstants.ISTORE:
+        case Const.ASTORE:
+        case Const.ISTORE:
             {
                 StoreInstruction storeInstruction = (StoreInstruction)instruction;
                 ClassFile matchedClassFile = match(storeInstruction.valueref);
@@ -206,7 +206,7 @@ public class ReplaceOuterAccessorVisitor
                     visit(branchList.get(i));
             }
             break;
-        case ByteCodeConstants.INSTANCEOF:
+        case Const.INSTANCEOF:
             {
                 InstanceOf instanceOf = (InstanceOf)instruction;
                 ClassFile matchedClassFile = match(instanceOf.objectref);
@@ -216,9 +216,9 @@ public class ReplaceOuterAccessorVisitor
                     visit(instanceOf.objectref);
             }
             break;
-        case ByteCodeConstants.INVOKEINTERFACE:
-        case ByteCodeConstants.INVOKESPECIAL:
-        case ByteCodeConstants.INVOKEVIRTUAL:
+        case Const.INVOKEINTERFACE:
+        case Const.INVOKESPECIAL:
+        case Const.INVOKEVIRTUAL:
             {
                 InvokeNoStaticInstruction insi =
                     (InvokeNoStaticInstruction)instruction;
@@ -229,7 +229,7 @@ public class ReplaceOuterAccessorVisitor
                     visit(insi.objectref);
             }
             // intended fall through
-        case ByteCodeConstants.INVOKESTATIC:
+        case Const.INVOKESTATIC:
         case ByteCodeConstants.INVOKENEW:
             {
                 List<Instruction> list = ((InvokeInstruction)instruction).args;
@@ -243,7 +243,7 @@ public class ReplaceOuterAccessorVisitor
                 }
             }
             break;
-        case ByteCodeConstants.LOOKUPSWITCH:
+        case Const.LOOKUPSWITCH:
             {
                 LookupSwitch ls = (LookupSwitch)instruction;
                 ClassFile matchedClassFile = match(ls.key);
@@ -253,7 +253,7 @@ public class ReplaceOuterAccessorVisitor
                     visit(ls.key);
             }
             break;
-        case ByteCodeConstants.MONITORENTER:
+        case Const.MONITORENTER:
             {
                 MonitorEnter monitorEnter = (MonitorEnter)instruction;
                 ClassFile matchedClassFile = match(monitorEnter.objectref);
@@ -263,7 +263,7 @@ public class ReplaceOuterAccessorVisitor
                     visit(monitorEnter.objectref);
             }
             break;
-        case ByteCodeConstants.MONITOREXIT:
+        case Const.MONITOREXIT:
             {
                 MonitorExit monitorExit = (MonitorExit)instruction;
                 ClassFile matchedClassFile = match(monitorExit.objectref);
@@ -273,7 +273,7 @@ public class ReplaceOuterAccessorVisitor
                     visit(monitorExit.objectref);
             }
             break;
-        case ByteCodeConstants.MULTIANEWARRAY:
+        case Const.MULTIANEWARRAY:
             {
                 Instruction[] dimensions = ((MultiANewArray)instruction).dimensions;
                 for (int i=dimensions.length-1; i>=0; --i)
@@ -286,7 +286,7 @@ public class ReplaceOuterAccessorVisitor
                 }
             }
             break;
-        case ByteCodeConstants.NEWARRAY:
+        case Const.NEWARRAY:
             {
                 NewArray newArray = (NewArray)instruction;
                 ClassFile matchedClassFile = match(newArray.dimension);
@@ -296,7 +296,7 @@ public class ReplaceOuterAccessorVisitor
                     visit(newArray.dimension);
             }
             break;
-        case ByteCodeConstants.ANEWARRAY:
+        case Const.ANEWARRAY:
             {
                 ANewArray aNewArray = (ANewArray)instruction;
                 ClassFile matchedClassFile = match(aNewArray.dimension);
@@ -306,7 +306,7 @@ public class ReplaceOuterAccessorVisitor
                     visit(aNewArray.dimension);
             }
             break;
-        case ByteCodeConstants.POP:
+        case Const.POP:
             {
                 Pop pop = (Pop)instruction;
                 ClassFile matchedClassFile = match(pop.objectref);
@@ -316,7 +316,7 @@ public class ReplaceOuterAccessorVisitor
                     visit(pop.objectref);
             }
             break;
-        case ByteCodeConstants.PUTFIELD:
+        case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
                 ClassFile matchedClassFile = match(putField.objectref);
@@ -331,7 +331,7 @@ public class ReplaceOuterAccessorVisitor
                     visit(putField.valueref);
             }
             break;
-        case ByteCodeConstants.PUTSTATIC:
+        case Const.PUTSTATIC:
             {
                 PutStatic putStatic = (PutStatic)instruction;
                 ClassFile matchedClassFile = match(putStatic.valueref);
@@ -351,7 +351,7 @@ public class ReplaceOuterAccessorVisitor
                     visit(ri.valueref);
             }
             break;
-        case ByteCodeConstants.TABLESWITCH:
+        case Const.TABLESWITCH:
             {
                 TableSwitch ts = (TableSwitch)instruction;
                 ClassFile matchedClassFile = match(ts.key);
@@ -432,7 +432,7 @@ public class ReplaceOuterAccessorVisitor
                     visit(ii.value);
             }
             break;
-        case ByteCodeConstants.GETFIELD:
+        case Const.GETFIELD:
             {
                 GetField gf = (GetField)instruction;
                 ClassFile matchedClassFile = match(gf.objectref);
@@ -455,28 +455,28 @@ public class ReplaceOuterAccessorVisitor
                     visit(iai.values);
             }
             break;
-        case ByteCodeConstants.ACONST_NULL:
+        case Const.ACONST_NULL:
         case ByteCodeConstants.LOAD:
-        case ByteCodeConstants.ALOAD:
-        case ByteCodeConstants.ILOAD:
-        case ByteCodeConstants.BIPUSH:
+        case Const.ALOAD:
+        case Const.ILOAD:
+        case Const.BIPUSH:
         case ByteCodeConstants.ICONST:
         case ByteCodeConstants.LCONST:
         case ByteCodeConstants.FCONST:
         case ByteCodeConstants.DCONST:
         case ByteCodeConstants.DUPLOAD:
-        case ByteCodeConstants.GETSTATIC:
+        case Const.GETSTATIC:
         case ByteCodeConstants.OUTERTHIS:
-        case ByteCodeConstants.GOTO:
-        case ByteCodeConstants.IINC:
-        case ByteCodeConstants.JSR:
-        case ByteCodeConstants.LDC:
-        case ByteCodeConstants.LDC2_W:
-        case ByteCodeConstants.NEW:
-        case ByteCodeConstants.NOP:
-        case ByteCodeConstants.SIPUSH:
-        case ByteCodeConstants.RET:
-        case ByteCodeConstants.RETURN:
+        case Const.GOTO:
+        case Const.IINC:
+        case Const.JSR:
+        case Const.LDC:
+        case Const.LDC2_W:
+        case Const.NEW:
+        case Const.NOP:
+        case Const.SIPUSH:
+        case Const.RET:
+        case Const.RETURN:
         case ByteCodeConstants.EXCEPTIONLOAD:
         case ByteCodeConstants.RETURNADDRESSLOAD:
             break;
@@ -504,7 +504,7 @@ public class ReplaceOuterAccessorVisitor
 
     protected ClassFile match(Instruction instruction)
     {
-        if (instruction.opcode != ByteCodeConstants.INVOKESTATIC)
+        if (instruction.opcode != Const.INVOKESTATIC)
             return null;
 
         Invokestatic is = (Invokestatic)instruction;
@@ -530,13 +530,13 @@ public class ReplaceOuterAccessorVisitor
             constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
         String methodName = constants.getConstantUtf8(cnat.getNameIndex());
         String methodDescriptor =
-            constants.getConstantUtf8(cnat.getDescriptorIndex());
+            constants.getConstantUtf8(cnat.getSignatureIndex());
         Method method =
             matchedClassFile.getMethod(methodName, methodDescriptor);
 
         if ((method == null) ||
-            ((method.accessFlags & (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_STATIC))
-                != (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_STATIC)))
+            ((method.accessFlags & (Const.ACC_SYNTHETIC|Const.ACC_STATIC))
+                != (Const.ACC_SYNTHETIC|Const.ACC_STATIC)))
             return null;
 
         ClassFile outerClassFile = matchedClassFile.getOuterClass();
@@ -569,14 +569,14 @@ public class ReplaceOuterAccessorVisitor
                 ConstantNameAndType cnat =
                     constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
                 String descriptor =
-                    constants.getConstantUtf8(cnat.getDescriptorIndex());
+                    constants.getConstantUtf8(cnat.getSignatureIndex());
 
                 if (! descriptor.equals(outerClassFile.getInternalClassName()))
                     return null;
 
                 return outerClassFile;
             }
-        case ByteCodeConstants.INVOKESTATIC:
+        case Const.INVOKESTATIC:
             return match(instruction);
         default:
             return null;

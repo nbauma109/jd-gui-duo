@@ -3,9 +3,11 @@ apply plugin: 'java'
 dependencies {
     implementation 'com.fifesoft:rsyntaxtextarea:3.0.4'
     implementation 'org.ow2.asm:asm:9.1'
+    implementation 'org.apache.bcel:bcel:6.5.0'
     implementation 'commons-io:commons-io:2.10.0'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
-    implementation 'org.eclipse.jdt:org.eclipse.jdt.core:3.26.0'
+    implementation 'org.jboss.forge.roaster:roaster-jdt:2.23.0.Final'
+    implementation 'org.jboss.forge.roaster:roaster-api:2.23.0.Final'
     implementation project(':api')
     testImplementation 'junit:junit:4.12'
 }

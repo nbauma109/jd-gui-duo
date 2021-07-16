@@ -16,14 +16,21 @@
  */
 package jd.core.process.writer.visitor;
 
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.*;
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.model.classfile.constant.*;
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.List;
 import java.util.Set;
 
-import jd.core.model.classfile.*;
+import jd.core.model.classfile.ClassFile;
+import jd.core.model.classfile.ConstantPool;
+import jd.core.model.classfile.Field;
+import jd.core.model.classfile.LocalVariable;
+import jd.core.model.classfile.LocalVariables;
+import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 import jd.core.model.instruction.fast.FastConstants;
@@ -101,7 +108,7 @@ public class SourceWriterVisitor
 
         switch (instruction.opcode)
         {
-        case ByteCodeConstants.ARRAYLENGTH:
+        case Const.ARRAYLENGTH:
             {
                 lineNumber = visit(instruction, ((ArrayLength)instruction).arrayref);
 
@@ -119,7 +126,7 @@ public class SourceWriterVisitor
                 lineNumber = writeArray(ali, ali.arrayref, ali.indexref);
             }
             break;
-        case ByteCodeConstants.AASTORE:
+        case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
@@ -134,7 +141,7 @@ public class SourceWriterVisitor
                 lineNumber = visit(asi, asi.valueref);
             }
             break;
-        case ByteCodeConstants.ANEWARRAY:
+        case Const.ANEWARRAY:
             {
                 ANewArray newArray = (ANewArray)instruction;
                 Instruction dimension = newArray.dimension;
@@ -179,7 +186,7 @@ public class SourceWriterVisitor
                 }
             }
             break;
-        case ByteCodeConstants.ACONST_NULL:
+        case Const.ACONST_NULL:
             {
                 if (this.firstOffset <= this.previousOffset &&
                     instruction.offset <= this.lastOffset) {
@@ -218,7 +225,7 @@ public class SourceWriterVisitor
             lineNumber = writeAssignmentInstruction(
                 (AssignmentInstruction)instruction);
             break;
-        case ByteCodeConstants.ATHROW:
+        case Const.ATHROW:
             {
                 AThrow athrow = (AThrow)instruction;
                 int nextOffset = this.previousOffset + 1;
@@ -252,8 +259,8 @@ public class SourceWriterVisitor
             lineNumber = writeBinaryOperatorInstruction(
                 (BinaryOperatorInstruction)instruction);
             break;
-        case ByteCodeConstants.BIPUSH:
-        case ByteCodeConstants.SIPUSH:
+        case Const.BIPUSH:
+        case Const.SIPUSH:
         case ByteCodeConstants.ICONST:
             lineNumber = writeBIPushSIPushIConst((IConst)instruction);
             break;
@@ -296,7 +303,7 @@ public class SourceWriterVisitor
         case ByteCodeConstants.IMPLICITCONVERT:
             lineNumber = visit(((ConvertInstruction)instruction).value);
             break;
-        case ByteCodeConstants.CHECKCAST:
+        case Const.CHECKCAST:
             {
                 CheckCast checkCast = (CheckCast)instruction;
 
@@ -313,7 +320,7 @@ public class SourceWriterVisitor
                     if (c instanceof ConstantUtf8)
                     {
                         ConstantUtf8 cutf8 = (ConstantUtf8)c;
-                        signature = cutf8.getValue();
+                        signature = cutf8.getBytes();
                     }
                     else
                     {
@@ -377,16 +384,16 @@ public class SourceWriterVisitor
         case FastConstants.ENUMVALUE:
             lineNumber = writeEnumValueInstruction((InvokeNew)instruction);
             break;
-        case ByteCodeConstants.GETFIELD:
+        case Const.GETFIELD:
             writeGetField((GetField)instruction);
             break;
-        case ByteCodeConstants.GETSTATIC:
+        case Const.GETSTATIC:
             lineNumber = writeGetStatic((GetStatic)instruction);
             break;
         case ByteCodeConstants.OUTERTHIS:
             lineNumber = writeOuterThis((GetStatic)instruction);
             break;
-        case ByteCodeConstants.GOTO:
+        case Const.GOTO:
             {
                 if (this.firstOffset <= this.previousOffset &&
                     instruction.offset <= this.lastOffset)
@@ -426,7 +433,7 @@ public class SourceWriterVisitor
             lineNumber = writeComplexConditionalBranchInstructionTest(
                 (ComplexConditionalBranchInstruction)instruction);
             break;
-        case ByteCodeConstants.IINC:
+        case Const.IINC:
             lineNumber = writeIInc((IInc)instruction);
             break;
         case ByteCodeConstants.PREINC:
@@ -438,7 +445,7 @@ public class SourceWriterVisitor
         case ByteCodeConstants.INVOKENEW:
             lineNumber = writeInvokeNewInstruction((InvokeNew)instruction);
             break;
-        case ByteCodeConstants.INSTANCEOF:
+        case Const.INSTANCEOF:
             {
                 InstanceOf instanceOf = (InstanceOf)instruction;
 
@@ -465,19 +472,19 @@ public class SourceWriterVisitor
                 }
             }
             break;
-        case ByteCodeConstants.INVOKEINTERFACE:
-        case ByteCodeConstants.INVOKEVIRTUAL:
+        case Const.INVOKEINTERFACE:
+        case Const.INVOKEVIRTUAL:
             lineNumber = writeInvokeNoStaticInstruction(
                 (InvokeNoStaticInstruction)instruction);
             break;
-        case ByteCodeConstants.INVOKESPECIAL:
+        case Const.INVOKESPECIAL:
             lineNumber = writeInvokespecial(
                 (InvokeNoStaticInstruction)instruction);
             break;
-        case ByteCodeConstants.INVOKESTATIC:
+        case Const.INVOKESTATIC:
             lineNumber = writeInvokestatic((Invokestatic)instruction);
             break;
-        case ByteCodeConstants.JSR:
+        case Const.JSR:
             {
                 if (this.firstOffset <= this.previousOffset &&
                     instruction.offset <= this.lastOffset)
@@ -488,16 +495,16 @@ public class SourceWriterVisitor
                 }
             }
             break;
-        case ByteCodeConstants.LDC:
-        case ByteCodeConstants.LDC2_W:
+        case Const.LDC:
+        case Const.LDC2_W:
             lineNumber = writeLcdInstruction((IndexInstruction)instruction);
             break;
         case ByteCodeConstants.LOAD:
-        case ByteCodeConstants.ALOAD:
-        case ByteCodeConstants.ILOAD:
+        case Const.ALOAD:
+        case Const.ILOAD:
             lineNumber = writeLoadInstruction((LoadInstruction)instruction);
             break;
-        case ByteCodeConstants.LOOKUPSWITCH:
+        case Const.LOOKUPSWITCH:
             {
                 LookupSwitch lookupSwitch = (LookupSwitch)instruction;
 
@@ -519,7 +526,7 @@ public class SourceWriterVisitor
                 }
             }
             break;
-        case ByteCodeConstants.TABLESWITCH:
+        case Const.TABLESWITCH:
             {
                 TableSwitch tableSwitch = (TableSwitch)instruction;
 
@@ -541,7 +548,7 @@ public class SourceWriterVisitor
                 }
             }
             break;
-        case ByteCodeConstants.MONITORENTER:
+        case Const.MONITORENTER:
             {
                 if (this.firstOffset <= this.previousOffset &&
                     instruction.offset <= this.lastOffset)
@@ -552,7 +559,7 @@ public class SourceWriterVisitor
                 }
             }
             break;
-        case ByteCodeConstants.MONITOREXIT:
+        case Const.MONITOREXIT:
             {
                 if (this.firstOffset <= this.previousOffset &&
                     instruction.offset <= this.lastOffset)
@@ -563,10 +570,10 @@ public class SourceWriterVisitor
                 }
             }
             break;
-        case ByteCodeConstants.MULTIANEWARRAY:
+        case Const.MULTIANEWARRAY:
             lineNumber = writeMultiANewArray((MultiANewArray)instruction);
             break;
-        case ByteCodeConstants.NEW:
+        case Const.NEW:
             {
                 if (this.firstOffset <= this.previousOffset &&
                     instruction.offset <= this.lastOffset)
@@ -579,7 +586,7 @@ public class SourceWriterVisitor
                 }
             }
             break;
-        case ByteCodeConstants.NEWARRAY:
+        case Const.NEWARRAY:
             {
                 NewArray newArray = (NewArray)instruction;
                 int nextOffset = this.previousOffset + 1;
@@ -604,10 +611,10 @@ public class SourceWriterVisitor
                 }
             }
             break;
-        case ByteCodeConstants.POP:
+        case Const.POP:
             lineNumber = visit(instruction, ((Pop)instruction).objectref);
             break;
-        case ByteCodeConstants.PUTFIELD:
+        case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
 
@@ -619,12 +626,12 @@ public class SourceWriterVisitor
 
                 if (this.localVariables.containsLocalVariableWithNameIndex(cnat.getNameIndex()))
                 {
-                    if (putField.objectref.opcode == ByteCodeConstants.ALOAD) {
+                    if (putField.objectref.opcode == Const.ALOAD) {
                         if (((ALoad)putField.objectref).index == 0) {
                             displayPrefix = true;
                         }
                     } else if (putField.objectref.opcode == ByteCodeConstants.OUTERTHIS && !needAPrefixForThisField(
-                            cnat.getNameIndex(), cnat.getDescriptorIndex(),
+                            cnat.getNameIndex(), cnat.getSignatureIndex(),
                             (GetStatic)putField.objectref)) {
                         displayPrefix = true;
                     }
@@ -662,7 +669,7 @@ public class SourceWriterVisitor
                     String internalClassName =
                         this.constants.getConstantClassName(cfr.getClassIndex());
                     String descriptor =
-                        this.constants.getConstantUtf8(cnat.getDescriptorIndex());
+                        this.constants.getConstantUtf8(cnat.getSignatureIndex());
                     this.printer.printField(
                         lineNumber, internalClassName, fieldName,
                         descriptor, this.classFile.getThisClassName());
@@ -672,10 +679,10 @@ public class SourceWriterVisitor
                 lineNumber = visit(putField, putField.valueref);
             }
             break;
-        case ByteCodeConstants.PUTSTATIC:
+        case Const.PUTSTATIC:
             lineNumber = writePutStatic((PutStatic)instruction);
             break;
-        case ByteCodeConstants.RET:
+        case Const.RET:
             {
                 if (this.firstOffset <= this.previousOffset &&
                     instruction.offset <= this.lastOffset)
@@ -686,7 +693,7 @@ public class SourceWriterVisitor
                 }
             }
             break;
-        case ByteCodeConstants.RETURN:
+        case Const.RETURN:
             {
                 if (this.firstOffset <= this.previousOffset &&
                     instruction.offset <= this.lastOffset) {
@@ -709,8 +716,8 @@ public class SourceWriterVisitor
             }
             break;
         case ByteCodeConstants.STORE:
-        case ByteCodeConstants.ASTORE:
-        case ByteCodeConstants.ISTORE:
+        case Const.ASTORE:
+        case Const.ISTORE:
             lineNumber = writeStoreInstruction((StoreInstruction)instruction);
             break;
         case ByteCodeConstants.EXCEPTIONLOAD:
@@ -777,7 +784,7 @@ public class SourceWriterVisitor
             lineNumber = writeNewAndInitArrayInstruction(
                 (InitArrayInstruction)instruction);
             break;
-        case ByteCodeConstants.NOP:
+        case Const.NOP:
             break;
         default:
             System.err.println(
@@ -1045,9 +1052,9 @@ public class SourceWriterVisitor
         {
             switch (value.opcode)
             {
-            case ByteCodeConstants.BIPUSH:
+            case Const.BIPUSH:
             case ByteCodeConstants.ICONST:
-            case ByteCodeConstants.SIPUSH:
+            case Const.SIPUSH:
                 {
                     IConst iconst = (IConst)value;
                     if ("Z".equals(iconst.signature))
@@ -1066,8 +1073,8 @@ public class SourceWriterVisitor
                     }
                 }
                 break;
-            case ByteCodeConstants.LDC:
-            case ByteCodeConstants.LDC2_W:
+            case Const.LDC:
+            case Const.LDC2_W:
                 this.printer.addNewLinesAndPrefix(lineNumber);
                 Constant cst = constants.get( ((IndexInstruction)value).index );
                 ConstantValueWriter.writeHexa(
@@ -1363,7 +1370,7 @@ public class SourceWriterVisitor
         ConstantNameAndType cnat =
             this.constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
         String constructorDescriptor =
-            this.constants.getConstantUtf8(cnat.getDescriptorIndex());
+            this.constants.getConstantUtf8(cnat.getSignatureIndex());
 
         if (innerClassFile == null)
         {
@@ -1422,11 +1429,11 @@ public class SourceWriterVisitor
 
     private static int computeFirstIndex(int accessFlags, InvokeNew in)
     {
-        if ((accessFlags & ClassFileConstants.ACC_STATIC) != 0 || in.args.isEmpty()) {
+        if ((accessFlags & Const.ACC_STATIC) != 0 || in.args.isEmpty()) {
             return 0;
         }
         Instruction arg0 = in.args.get(0);
-        if (arg0.opcode == ByteCodeConstants.ALOAD &&
+        if (arg0.opcode == Const.ALOAD &&
             ((ALoad)arg0).index == 0)
         {
             return 1;
@@ -1444,7 +1451,7 @@ public class SourceWriterVisitor
 
         String internalClassName = classFile.getThisClassName();
         String name = constants.getConstantUtf8(cnat.getNameIndex());
-        String descriptor = constants.getConstantUtf8(cnat.getDescriptorIndex());
+        String descriptor = constants.getConstantUtf8(cnat.getSignatureIndex());
 
         this.printer.addNewLinesAndPrefix(lineNumber);
         this.printer.printStaticFieldDeclaration(
@@ -1464,7 +1471,7 @@ public class SourceWriterVisitor
         ConstantNameAndType cnat =
             constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
         Field field =
-            this.classFile.getField(cnat.getNameIndex(), cnat.getDescriptorIndex());
+            this.classFile.getField(cnat.getNameIndex(), cnat.getSignatureIndex());
 
         if (field != null &&
             field.outerMethodLocalVariableNameIndex != UtilConstants.INVALID_INDEX)
@@ -1482,7 +1489,7 @@ public class SourceWriterVisitor
                     fieldName = StringConstants.JD_FIELD_PREFIX + fieldName;
                 }
                 String descriptor =
-                    this.constants.getConstantUtf8(cnat.getDescriptorIndex());
+                    this.constants.getConstantUtf8(cnat.getSignatureIndex());
                 this.printer.printField(
                     lineNumber, internalClassName, fieldName,
                     descriptor, this.classFile.getThisClassName());
@@ -1495,12 +1502,12 @@ public class SourceWriterVisitor
 
             if (this.localVariables.containsLocalVariableWithNameIndex(cnat.getNameIndex()))
             {
-                if (getField.objectref.opcode == ByteCodeConstants.ALOAD) {
+                if (getField.objectref.opcode == Const.ALOAD) {
                     if (((ALoad)getField.objectref).index == 0) {
                         displayPrefix = true;
                     }
                 } else if (getField.objectref.opcode == ByteCodeConstants.OUTERTHIS && !needAPrefixForThisField(
-                        cnat.getNameIndex(), cnat.getDescriptorIndex(),
+                        cnat.getNameIndex(), cnat.getSignatureIndex(),
                         (GetStatic)getField.objectref)) {
                     displayPrefix = true;
                 }
@@ -1535,7 +1542,7 @@ public class SourceWriterVisitor
                     fieldName = StringConstants.JD_FIELD_PREFIX + fieldName;
                 }
                 String descriptor =
-                    this.constants.getConstantUtf8(cnat.getDescriptorIndex());
+                    this.constants.getConstantUtf8(cnat.getSignatureIndex());
                 this.printer.printField(
                     lineNumber, internalClassName, fieldName,
                     descriptor, this.classFile.getThisClassName());
@@ -1552,7 +1559,7 @@ public class SourceWriterVisitor
             constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
         boolean thisInvoke = false;
 
-        if (insi.objectref.opcode == ByteCodeConstants.ALOAD &&
+        if (insi.objectref.opcode == Const.ALOAD &&
             ((ALoad)insi.objectref).index == 0)
         {
             ALoad aload = (ALoad)insi.objectref;
@@ -1583,7 +1590,7 @@ public class SourceWriterVisitor
                     methodName = StringConstants.JD_METHOD_PREFIX + methodName;
                 }
                 String descriptor =
-                    this.constants.getConstantUtf8(cnat.getDescriptorIndex());
+                    this.constants.getConstantUtf8(cnat.getSignatureIndex());
                 // Methode de la classe courante : elimination du prefix 'this.'
                 this.printer.printMethod(
                     insi.lineNumber, internalClassName, methodName,
@@ -1595,7 +1602,7 @@ public class SourceWriterVisitor
             boolean displayPrefix =
                 insi.objectref.opcode != ByteCodeConstants.OUTERTHIS ||
             needAPrefixForThisMethod(
-                cnat.getNameIndex(), cnat.getDescriptorIndex(),
+                cnat.getNameIndex(), cnat.getSignatureIndex(),
                 (GetStatic)insi.objectref);
 
             int lineNumber = insi.objectref.lineNumber;
@@ -1634,7 +1641,7 @@ public class SourceWriterVisitor
                     methodName = StringConstants.JD_METHOD_PREFIX + methodName;
                 }
                 String descriptor =
-                    this.constants.getConstantUtf8(cnat.getDescriptorIndex());
+                    this.constants.getConstantUtf8(cnat.getSignatureIndex());
                 this.printer.printMethod(
                     lineNumber, internalClassName, methodName,
                     descriptor, this.classFile.getThisClassName());
@@ -1693,7 +1700,7 @@ public class SourceWriterVisitor
         boolean thisInvoke = false;
         int firstIndex;
 
-        if (insi.objectref.opcode == ByteCodeConstants.ALOAD &&
+        if (insi.objectref.opcode == Const.ALOAD &&
             ((ALoad)insi.objectref).index == 0)
         {
             ALoad aload = (ALoad)insi.objectref;
@@ -1714,10 +1721,10 @@ public class SourceWriterVisitor
             if (cmr.getClassIndex() == classFile.getThisClassIndex())
             {
                 // Appel d'un constructeur de la classe courante
-                if ((this.classFile.accessFlags & ClassFileConstants.ACC_ENUM) == 0)
+                if ((this.classFile.accessFlags & Const.ACC_ENUM) == 0)
                 {
                     if (this.classFile.isAInnerClass() &&
-                        (this.classFile.accessFlags & ClassFileConstants.ACC_STATIC) == 0)
+                        (this.classFile.accessFlags & Const.ACC_STATIC) == 0)
                     {
                         // inner class: firstIndex=1
                         firstIndex = 1;
@@ -1780,10 +1787,10 @@ public class SourceWriterVisitor
                 {
                     // Appel a une méthode privee?
                     Method method = this.classFile.getMethod(
-                        cnat.getNameIndex(), cnat.getDescriptorIndex());
+                        cnat.getNameIndex(), cnat.getSignatureIndex());
 
                     if (method == null ||
-                        (method.accessFlags & ClassFileConstants.ACC_PRIVATE) == 0)
+                        (method.accessFlags & Const.ACC_PRIVATE) == 0)
                     {
                         // Methode de la classe mere
                         this.printer.printKeyword(lineNumber, "super");
@@ -1801,7 +1808,7 @@ public class SourceWriterVisitor
                         methodName = StringConstants.JD_METHOD_PREFIX + methodName;
                     }
                     String descriptor =
-                        this.constants.getConstantUtf8(cnat.getDescriptorIndex());
+                        this.constants.getConstantUtf8(cnat.getSignatureIndex());
                     this.printer.printMethod(
                         lineNumber, internalClassName, methodName,
                         descriptor, this.classFile.getThisClassName());
@@ -1828,7 +1835,7 @@ public class SourceWriterVisitor
                     methodName = StringConstants.JD_METHOD_PREFIX + methodName;
                 }
                 String descriptor =
-                    this.constants.getConstantUtf8(cnat.getDescriptorIndex());
+                    this.constants.getConstantUtf8(cnat.getSignatureIndex());
 
                 this.printer.printMethod(
                     internalClassName, methodName,
@@ -1876,7 +1883,7 @@ public class SourceWriterVisitor
                 methodName = StringConstants.JD_METHOD_PREFIX + methodName;
             }
             String descriptor =
-                    this.constants.getConstantUtf8(cnat.getDescriptorIndex());
+                    this.constants.getConstantUtf8(cnat.getSignatureIndex());
 
             this.printer.printStaticMethod(
                 lineNumber, internalClassName, methodName, descriptor,
@@ -1964,7 +1971,7 @@ public class SourceWriterVisitor
 
             ConstantNameAndType cnat = constants.getConstantNameAndType(
                 cfr.getNameAndTypeIndex());
-            String descriptor = constants.getConstantUtf8(cnat.getDescriptorIndex());
+            String descriptor = constants.getConstantUtf8(cnat.getSignatureIndex());
             String constName = constants.getConstantUtf8(cnat.getNameIndex());
 
             this.printer.printStaticField(
@@ -2170,7 +2177,7 @@ public class SourceWriterVisitor
 
             ConstantNameAndType cnat =
                 constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
-            String descriptor = constants.getConstantUtf8(cnat.getDescriptorIndex());
+            String descriptor = constants.getConstantUtf8(cnat.getSignatureIndex());
             String internalClassName = SignatureUtil.getInternalName(descriptor);
             String constName = constants.getConstantUtf8(cnat.getNameIndex());
 
@@ -2496,13 +2503,13 @@ public class SourceWriterVisitor
             this.printer.printKeyword(lineNumber, "new");
             this.printer.print(' ');
 
-            if (iai.newArray.opcode == ByteCodeConstants.NEWARRAY) {
+            if (iai.newArray.opcode == Const.NEWARRAY) {
                 NewArray na = (NewArray)iai.newArray;
                 SignatureWriter.writeSignature(
                     this.loader, this.printer,
                     this.referenceMap, this.classFile,
                     SignatureUtil.getSignatureFromType(na.type));
-            } else if (iai.newArray.opcode == ByteCodeConstants.ANEWARRAY) {
+            } else if (iai.newArray.opcode == Const.ANEWARRAY) {
                 ANewArray ana = (ANewArray)iai.newArray;
                 String signature = constants.getConstantClassName(ana.index);
 

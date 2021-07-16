@@ -7,24 +7,22 @@
 
 package org.jd.core.v1.model.classfile.constant;
 
+import org.apache.bcel.classfile.ConstantCP;
+import org.apache.bcel.classfile.Visitor;
+
 /**
  * POJO for CONSTANT_Fieldref, CONSTANT_Methodref and CONSTANT_InterfaceMethodref.
  */
-public class ConstantMemberRef extends Constant {
+public class ConstantMemberRef extends ConstantCP {
+
+    public static final byte CONSTANT_MEMBER_REF = 19; // Unofficial constant
 	
-    private int classIndex;
-    private int nameAndTypeIndex;
-
     public ConstantMemberRef(int classIndex, int nameAndTypeIndex) {
-        this.classIndex = classIndex;
-        this.nameAndTypeIndex = nameAndTypeIndex;
+        super(CONSTANT_MEMBER_REF, classIndex, nameAndTypeIndex);
     }
 
-    public int getClassIndex() {
-        return classIndex;
-    }
-
-    public int getNameAndTypeIndex() {
-        return nameAndTypeIndex;
-    }
+	@Override
+	public void accept(Visitor v) {
+		throw new UnsupportedOperationException();
+	}
 }

@@ -6,12 +6,12 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.processor;
 
+import org.apache.bcel.classfile.*;
 import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.classfile.Constants;
 import org.jd.core.v1.model.classfile.Field;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.*;
-import org.jd.core.v1.model.classfile.constant.*;
+import org.jd.core.v1.model.classfile.attribute.Annotations;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
 import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
@@ -31,7 +31,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.jd.core.v1.model.classfile.Constants.ACC_STATIC;
+import static org.apache.bcel.Const.ACC_PUBLIC;
+import static org.apache.bcel.Const.ACC_STATIC;
 
 /**
  * Convert ClassFile model to Java syntax model.<br><br>
@@ -232,7 +233,7 @@ public class ConvertClassFileProcessor {
                         bodyDeclaration, classFile, method, annotationReferences, name, methodTypes.typeParameters,
                         methodTypes.returnedType, methodTypes.parameterTypes, methodTypes.exceptionTypes, defaultAnnotationValue,
                         bindings, typeBounds, firstLineNumber);
-                if (classFile.isInterface() && methodDeclaration.getFlags() == Constants.ACC_PUBLIC) {
+                if (classFile.isInterface() && methodDeclaration.getFlags() == ACC_PUBLIC) {
                     // For interfaces, add 'default' access flag on public methods
                     methodDeclaration.setFlags(Declaration.FLAG_PUBLIC|Declaration.FLAG_DEFAULT);
                 }
@@ -297,19 +298,19 @@ public class ConvertClassFileProcessor {
         Expression expression;
         switch (constantValue.getClass().getSimpleName()) {
             case "ConstantInteger":
-                expression = new IntegerConstantExpression(typeField, ((ConstantInteger)constantValue).getValue());
+                expression = new IntegerConstantExpression(typeField, ((ConstantInteger)constantValue).getBytes());
                 break;
             case "ConstantFloat":
-                expression = new FloatConstantExpression(((ConstantFloat)constantValue).getValue());
+                expression = new FloatConstantExpression(((ConstantFloat)constantValue).getBytes());
                 break;
             case "ConstantLong":
-                expression = new LongConstantExpression(((ConstantLong)constantValue).getValue());
+                expression = new LongConstantExpression(((ConstantLong)constantValue).getBytes());
                 break;
             case "ConstantDouble":
-                expression = new DoubleConstantExpression(((ConstantDouble)constantValue).getValue());
+                expression = new DoubleConstantExpression(((ConstantDouble)constantValue).getBytes());
                 break;
             case "ConstantUtf8":
-                expression = new StringConstantExpression(((ConstantUtf8)constantValue).getValue());
+                expression = new StringConstantExpression(((ConstantUtf8)constantValue).getBytes());
                 break;
             default:
                 throw new ConvertClassFileException("Invalid attributes");

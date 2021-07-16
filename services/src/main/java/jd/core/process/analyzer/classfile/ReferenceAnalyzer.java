@@ -16,12 +16,15 @@
  */
 package jd.core.process.analyzer.classfile;
 
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.CodeException;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import jd.core.model.classfile.*;
 import jd.core.model.classfile.attribute.*;
@@ -102,14 +105,14 @@ public class ReferenceAnalyzer
         if (attributes != null)
         {
             for (int i=attributes.length-1; i>=0; --i) {
-                if (attributes[i].tag == AttributeConstants.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS || attributes[i].tag == AttributeConstants.ATTR_RUNTIME_VISIBLE_ANNOTATIONS) {
+                if (attributes[i].tag == Const.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS || attributes[i].tag == Const.ATTR_RUNTIME_VISIBLE_ANNOTATIONS) {
                     Annotation[] annotations =
                         ((AttributeRuntimeAnnotations)attributes[i])
                         .annotations;
                     for (int j=annotations.length-1; j>=0; --j) {
                         countAnnotationReference(referenceMap, constants, annotations[j]);
                     }
-                } else if (attributes[i].tag == AttributeConstants.ATTR_RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS || attributes[i].tag == AttributeConstants.ATTR_RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS) {
+                } else if (attributes[i].tag == Const.ATTR_RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS || attributes[i].tag == Const.ATTR_RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS) {
                     ParameterAnnotations[] parameterAnnotations =
                         ((AttributeRuntimeParameterAnnotations)
                                 attributes[i]).parameterAnnotations;
@@ -227,7 +230,7 @@ public class ReferenceAnalyzer
         {
             field = fields[i];
 
-            if ((field.accessFlags & ClassFileConstants.ACC_SYNTHETIC) != 0) {
+            if ((field.accessFlags & Const.ACC_SYNTHETIC) != 0) {
                 continue;
             }
 
@@ -263,13 +266,13 @@ public class ReferenceAnalyzer
         int[] exceptionIndexes;
         ElementValue defaultAnnotationValue;
         LocalVariables localVariables;
-        CodeException[] codeExceptions;
+        List<Entry<Integer, CodeException>> codeExceptions;
         for (int i=methods.length-1; i>=0; --i)
         {
             method = methods[i];
 
             if ((method.accessFlags &
-                 (ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_BRIDGE)) != 0 ||
+                 (Const.ACC_SYNTHETIC|Const.ACC_BRIDGE)) != 0 ||
                 method.containsError()) {
                 continue;
             }
@@ -338,17 +341,17 @@ public class ReferenceAnalyzer
 
     private static void countReferencesInCodeExceptions(
             ReferenceMap referenceMap, ConstantPool constants,
-            CodeException[] codeExceptions)
+            List<Entry<Integer, CodeException>> codeExceptions)
     {
         CodeException ce;
-        for (int i=codeExceptions.length-1; i>=0; --i)
+        for (int i=codeExceptions.size()-1; i>=0; --i)
         {
-            ce = codeExceptions[i];
+            ce = codeExceptions.get(i).getValue();
 
-            if (ce.catchType != 0)
+            if (ce.getCatchType() != 0)
             {
                 String internalClassName =
-                    constants.getConstantClassName(ce.catchType);
+                    constants.getConstantClassName(ce.getCatchType());
                 referenceMap.add(internalClassName);
             }
         }

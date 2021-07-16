@@ -16,10 +16,18 @@
  ******************************************************************************/
 package jd.core.process.deserializer;
 
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.CodeException;
+import org.apache.bcel.classfile.InnerClass;
+import org.apache.bcel.classfile.LineNumber;
 import org.jd.core.v1.service.deserializer.classfile.attribute.InvalidAttributeLengthException;
 
 import java.io.DataInput;
 import java.io.IOException;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
 
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.LocalVariable;
@@ -49,7 +57,7 @@ public class AttributeDeserializer
             if (attributeNameIndex == constants.annotationDefaultAttributeNameIndex)
             {
                 attributes[i] = new AttributeAnnotationDefault(
-                        AttributeConstants.ATTR_ANNOTATION_DEFAULT,
+                        Const.ATTR_ANNOTATION_DEFAULT,
                         attributeNameIndex,
                         AnnotationDeserializer.deserializeElementValue(di));
             }
@@ -58,7 +66,7 @@ public class AttributeDeserializer
                 // skip max stack (1 short) and max locals (1 short) => skip 2 shorts = 4 bytes
                 di.skipBytes(4);
                 attributes[i] = new AttributeCode(
-                        AttributeConstants.ATTR_CODE,
+                        Const.ATTR_CODE,
                         attributeNameIndex,
                         deserializeCode(di),
                         deserializeCodeExceptions(di),
@@ -69,7 +77,7 @@ public class AttributeDeserializer
                 if (attributeLength != 2)
                     throw new InvalidAttributeLengthException();
                 attributes[i] = new AttributeConstantValue(
-                        AttributeConstants.ATTR_CONSTANT_VALUE,
+                        Const.ATTR_CONSTANT_VALUE,
                         attributeNameIndex,
                         di.readUnsignedShort());
             }
@@ -78,7 +86,7 @@ public class AttributeDeserializer
                 if (attributeLength != 0)
                     throw new InvalidAttributeLengthException();
                 attributes[i] = new AttributeDeprecated(
-                        AttributeConstants.ATTR_DEPRECATED,
+                        Const.ATTR_DEPRECATED,
                         attributeNameIndex);
             }
             else if (attributeNameIndex == constants.enclosingMethodAttributeNameIndex)
@@ -86,7 +94,7 @@ public class AttributeDeserializer
                 if (attributeLength != 4)
                     throw new InvalidAttributeLengthException();
                 attributes[i] = new AttributeEnclosingMethod(
-                        AttributeConstants.ATTR_ENCLOSING_METHOD,
+                        Const.ATTR_ENCLOSING_METHOD,
                         attributeNameIndex,
                         di.readUnsignedShort(),
                         di.readUnsignedShort());
@@ -94,63 +102,63 @@ public class AttributeDeserializer
             else if (attributeNameIndex == constants.exceptionsAttributeNameIndex)
             {
                 attributes[i] = new AttributeExceptions(
-                        AttributeConstants.ATTR_EXCEPTIONS,
+                        Const.ATTR_EXCEPTIONS,
                         attributeNameIndex,
                         deserializeExceptionIndexTable(di));
             }
             else if (attributeNameIndex == constants.innerClassesAttributeNameIndex)
             {
                 attributes[i] = new AttributeInnerClasses(
-                        AttributeConstants.ATTR_INNER_CLASSES,
+                        Const.ATTR_INNER_CLASSES,
                         attributeNameIndex,
                         deserializeInnerClasses(di));
             }
             else if (attributeNameIndex == constants.lineNumberTableAttributeNameIndex)
             {
                 attributes[i] = new AttributeNumberTable(
-                        AttributeConstants.ATTR_NUMBER_TABLE,
+                        Const.ATTR_LINE_NUMBER_TABLE,
                         attributeNameIndex,
                         deserializeLineNumbers(di));
             }
             else if (attributeNameIndex == constants.localVariableTableAttributeNameIndex)
             {
                 attributes[i] = new AttributeLocalVariableTable(
-                        AttributeConstants.ATTR_LOCAL_VARIABLE_TABLE,
+                        Const.ATTR_LOCAL_VARIABLE_TABLE,
                         attributeNameIndex,
                         deserializeLocalVariable(di));
             }
             else if (attributeNameIndex == constants.localVariableTypeTableAttributeNameIndex)
             {
                 attributes[i] = new AttributeLocalVariableTable(
-                        AttributeConstants.ATTR_LOCAL_VARIABLE_TYPE_TABLE,
+                        Const.ATTR_LOCAL_VARIABLE_TYPE_TABLE,
                         attributeNameIndex,
                         deserializeLocalVariable(di));
             }
             else if (attributeNameIndex == constants.runtimeInvisibleAnnotationsAttributeNameIndex)
             {
                 attributes[i] = new AttributeRuntimeAnnotations(
-                        AttributeConstants.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS,
+                        Const.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS,
                         attributeNameIndex,
                         AnnotationDeserializer.deserialize(di));
             }
             else if (attributeNameIndex == constants.runtimeVisibleAnnotationsAttributeNameIndex)
             {
                 attributes[i] = new AttributeRuntimeAnnotations(
-                        AttributeConstants.ATTR_RUNTIME_VISIBLE_ANNOTATIONS,
+                        Const.ATTR_RUNTIME_VISIBLE_ANNOTATIONS,
                         attributeNameIndex,
                         AnnotationDeserializer.deserialize(di));
             }
             else if (attributeNameIndex == constants.runtimeInvisibleParameterAnnotationsAttributeNameIndex)
             {
                 attributes[i] = new AttributeRuntimeParameterAnnotations(
-                        AttributeConstants.ATTR_RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS,
+                        Const.ATTR_RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS,
                         attributeNameIndex,
                         deserializeParameterAnnotations(di));
             }
             else if (attributeNameIndex == constants.runtimeVisibleParameterAnnotationsAttributeNameIndex)
             {
                 attributes[i] = new AttributeRuntimeParameterAnnotations(
-                        AttributeConstants.ATTR_RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS,
+                        Const.ATTR_RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS,
                         attributeNameIndex,
                         deserializeParameterAnnotations(di));
             }
@@ -159,7 +167,7 @@ public class AttributeDeserializer
                 if (attributeLength != 2)
                     throw new InvalidAttributeLengthException();
                 attributes[i] = new AttributeSignature(
-                        AttributeConstants.ATTR_SIGNATURE,
+                        Const.ATTR_SIGNATURE,
                         attributeNameIndex,
                         di.readUnsignedShort());
             }
@@ -168,7 +176,7 @@ public class AttributeDeserializer
                 if (attributeLength != 2)
                     throw new InvalidAttributeLengthException();
                 attributes[i] = new AttributeSourceFile(
-                        AttributeConstants.ATTR_SOURCE_FILE,
+                        Const.ATTR_SOURCE_FILE,
                         attributeNameIndex,
                         di.readUnsignedShort());
             }
@@ -177,13 +185,13 @@ public class AttributeDeserializer
                 if (attributeLength != 0)
                     throw new InvalidAttributeLengthException();
                 attributes[i] = new AttributeSynthetic(
-                        AttributeConstants.ATTR_SYNTHETIC,
+                        Const.ATTR_SYNTHETIC,
                         attributeNameIndex);
             }
             else
             {
                 attributes[i] = new UnknowAttribute(
-                        AttributeConstants.ATTR_UNKNOWN,
+                        Const.ATTR_UNKNOWN,
                         attributeNameIndex);
                 for (int j=0; j<attributeLength; j++)
                     di.readByte();
@@ -206,21 +214,20 @@ public class AttributeDeserializer
         return code;
     }
 
-    private static CodeException[] deserializeCodeExceptions(DataInput di)
+    private static List<Entry<Integer, CodeException>> deserializeCodeExceptions(DataInput di)
         throws IOException
     {
         int count = di.readUnsignedShort();
         if (count == 0)
             return null;
 
-        CodeException[] codeExceptions = new CodeException[count];
+        List<Entry<Integer, CodeException>> codeExceptions = new ArrayList<>();
 
         for (int i=0; i<count; i++)
-            codeExceptions[i] = new CodeException(i,
-                                                  di.readUnsignedShort(),
-                                                  di.readUnsignedShort(),
-                                                  di.readUnsignedShort(),
-                                                  di.readUnsignedShort());
+            codeExceptions.add(new SimpleEntry<>(i, new CodeException(di.readUnsignedShort(),
+                                                                  di.readUnsignedShort(),
+                                                                  di.readUnsignedShort(),
+                                                                  di.readUnsignedShort())));
         return codeExceptions;
     }
 

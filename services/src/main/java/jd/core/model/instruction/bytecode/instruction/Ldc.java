@@ -16,7 +16,7 @@
  ******************************************************************************/
 package jd.core.model.instruction.bytecode.instruction;
 
-import org.jd.core.v1.model.classfile.constant.Constant;
+import org.apache.bcel.classfile.Constant;
 import org.jd.core.v1.util.StringConstants;
 
 import jd.core.model.classfile.ConstantPool;

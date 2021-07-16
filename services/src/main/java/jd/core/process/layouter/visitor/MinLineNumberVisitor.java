@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.process.layouter.visitor;
 
+import org.apache.bcel.Const;
+
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 
@@ -31,7 +33,7 @@ public class MinLineNumberVisitor
         {
         case ByteCodeConstants.ARRAYLOAD:
             return visit(((ArrayLoadInstruction)instruction).arrayref);
-        case ByteCodeConstants.AASTORE:
+        case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             return visit(((ArrayStoreInstruction)instruction).arrayref);
         case ByteCodeConstants.ASSIGNMENT:
@@ -64,15 +66,15 @@ public class MinLineNumberVisitor
                     return instruction.lineNumber;
                 }
             }
-        case ByteCodeConstants.INSTANCEOF:
+        case Const.INSTANCEOF:
             return visit(((InstanceOf)instruction).objectref);
-        case ByteCodeConstants.INVOKEINTERFACE:
-        case ByteCodeConstants.INVOKEVIRTUAL:
-        case ByteCodeConstants.INVOKESPECIAL:
+        case Const.INVOKEINTERFACE:
+        case Const.INVOKEVIRTUAL:
+        case Const.INVOKESPECIAL:
             return visit(((InvokeNoStaticInstruction)instruction).objectref);
-        case ByteCodeConstants.POP:
+        case Const.POP:
             return visit(((Pop)instruction).objectref);
-        case ByteCodeConstants.PUTFIELD:
+        case Const.PUTFIELD:
             return visit(((PutField)instruction).objectref);
         case ByteCodeConstants.TERNARYOP:
             return visit(((TernaryOperator)instruction).test);

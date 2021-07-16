@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.fast.visitor;
 
+import org.apache.bcel.Const;
+
 import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
@@ -51,7 +53,7 @@ public class ReplaceInstructionVisitor
     {
         switch (instruction.opcode)
         {
-        case ByteCodeConstants.ARRAYLENGTH:
+        case Const.ARRAYLENGTH:
             {
                 ArrayLength al = (ArrayLength)instruction;
                 if (al.arrayref.offset == this.offset)
@@ -65,7 +67,7 @@ public class ReplaceInstructionVisitor
                 }
             }
             break;
-        case ByteCodeConstants.AASTORE:
+        case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
@@ -133,7 +135,7 @@ public class ReplaceInstructionVisitor
                 }
             }
             break;
-        case ByteCodeConstants.ATHROW:
+        case Const.ATHROW:
             {
                 AThrow aThrow = (AThrow)instruction;
                 if (aThrow.value.offset == this.offset)
@@ -189,7 +191,7 @@ public class ReplaceInstructionVisitor
                 }
             }
             break;
-        case ByteCodeConstants.CHECKCAST:
+        case Const.CHECKCAST:
             {
                 CheckCast checkCast = (CheckCast)instruction;
                 if (checkCast.objectref.offset == this.offset)
@@ -204,8 +206,8 @@ public class ReplaceInstructionVisitor
             }
             break;
         case ByteCodeConstants.STORE:
-        case ByteCodeConstants.ASTORE:
-        case ByteCodeConstants.ISTORE:
+        case Const.ASTORE:
+        case Const.ISTORE:
             {
                 StoreInstruction storeInstruction = (StoreInstruction)instruction;
                 if (storeInstruction.valueref.offset == this.offset)
@@ -298,7 +300,7 @@ public class ReplaceInstructionVisitor
                     visit(branchList.get(i));
             }
             break;
-        case ByteCodeConstants.INSTANCEOF:
+        case Const.INSTANCEOF:
             {
                 InstanceOf instanceOf = (InstanceOf)instruction;
                 if (instanceOf.objectref.offset == this.offset)
@@ -312,9 +314,9 @@ public class ReplaceInstructionVisitor
                 }
             }
             break;
-        case ByteCodeConstants.INVOKEINTERFACE:
-        case ByteCodeConstants.INVOKESPECIAL:
-        case ByteCodeConstants.INVOKEVIRTUAL:
+        case Const.INVOKEINTERFACE:
+        case Const.INVOKESPECIAL:
+        case Const.INVOKEVIRTUAL:
             {
                 InvokeNoStaticInstruction insi =
                     (InvokeNoStaticInstruction)instruction;
@@ -329,7 +331,7 @@ public class ReplaceInstructionVisitor
                 }
             }
             // intended fall through
-        case ByteCodeConstants.INVOKESTATIC:
+        case Const.INVOKESTATIC:
             {
                 List<Instruction> list = ((InvokeInstruction)instruction).args;
                 for (int i=list.size()-1; (i>=0) && (this.oldInstruction == null); --i)
@@ -365,7 +367,7 @@ public class ReplaceInstructionVisitor
                 }
             }
             break;
-        case ByteCodeConstants.LOOKUPSWITCH:
+        case Const.LOOKUPSWITCH:
             {
                 LookupSwitch ls = (LookupSwitch)instruction;
                 if (ls.key.offset == this.offset)
@@ -379,7 +381,7 @@ public class ReplaceInstructionVisitor
                 }
             }
             break;
-        case ByteCodeConstants.MONITORENTER:
+        case Const.MONITORENTER:
             {
                 MonitorEnter monitorEnter = (MonitorEnter)instruction;
                 if (monitorEnter.objectref.offset == this.offset)
@@ -393,7 +395,7 @@ public class ReplaceInstructionVisitor
                 }
             }
             break;
-        case ByteCodeConstants.MONITOREXIT:
+        case Const.MONITOREXIT:
             {
                 MonitorExit monitorExit = (MonitorExit)instruction;
                 if (monitorExit.objectref.offset == this.offset)
@@ -407,7 +409,7 @@ public class ReplaceInstructionVisitor
                 }
             }
             break;
-        case ByteCodeConstants.MULTIANEWARRAY:
+        case Const.MULTIANEWARRAY:
             {
                 Instruction[] dimensions = ((MultiANewArray)instruction).dimensions;
                 for (int i=dimensions.length-1; (i>=0) && (this.oldInstruction == null); --i)
@@ -424,7 +426,7 @@ public class ReplaceInstructionVisitor
                 }
             }
             break;
-        case ByteCodeConstants.NEWARRAY:
+        case Const.NEWARRAY:
             {
                 NewArray newArray = (NewArray)instruction;
                 if (newArray.dimension.offset == this.offset)
@@ -438,7 +440,7 @@ public class ReplaceInstructionVisitor
                 }
             }
             break;
-        case ByteCodeConstants.ANEWARRAY:
+        case Const.ANEWARRAY:
             {
                 ANewArray aNewArray = (ANewArray)instruction;
                 if (aNewArray.dimension.offset == this.offset)
@@ -452,7 +454,7 @@ public class ReplaceInstructionVisitor
                 }
             }
             break;
-        case ByteCodeConstants.POP:
+        case Const.POP:
             {
                 Pop pop = (Pop)instruction;
                 if (pop.objectref.offset == this.offset)
@@ -466,7 +468,7 @@ public class ReplaceInstructionVisitor
                 }
             }
             break;
-        case ByteCodeConstants.PUTFIELD:
+        case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
                 if (putField.objectref.offset == this.offset)
@@ -493,7 +495,7 @@ public class ReplaceInstructionVisitor
                 }
             }
             break;
-        case ByteCodeConstants.PUTSTATIC:
+        case Const.PUTSTATIC:
             {
                 PutStatic putStatic = (PutStatic)instruction;
                 if (putStatic.valueref.offset == this.offset)
@@ -521,7 +523,7 @@ public class ReplaceInstructionVisitor
                 }
             }
             break;
-        case ByteCodeConstants.TABLESWITCH:
+        case Const.TABLESWITCH:
             {
                 TableSwitch ts = (TableSwitch)instruction;
                 if (ts.key.offset == this.offset)
@@ -564,7 +566,7 @@ public class ReplaceInstructionVisitor
                 }
             }
             break;
-        case ByteCodeConstants.GETFIELD:
+        case Const.GETFIELD:
             {
                 GetField gf = (GetField)instruction;
                 if (gf.objectref.offset == this.offset)
@@ -707,29 +709,29 @@ public class ReplaceInstructionVisitor
                 }
             }
             break;
-        case ByteCodeConstants.ACONST_NULL:
+        case Const.ACONST_NULL:
         case ByteCodeConstants.ARRAYLOAD:
         case ByteCodeConstants.LOAD:
-        case ByteCodeConstants.ALOAD:
-        case ByteCodeConstants.ILOAD:
-        case ByteCodeConstants.BIPUSH:
+        case Const.ALOAD:
+        case Const.ILOAD:
+        case Const.BIPUSH:
         case ByteCodeConstants.ICONST:
         case ByteCodeConstants.LCONST:
         case ByteCodeConstants.FCONST:
         case ByteCodeConstants.DCONST:
         case ByteCodeConstants.DUPLOAD:
-        case ByteCodeConstants.GETSTATIC:
+        case Const.GETSTATIC:
         case ByteCodeConstants.OUTERTHIS:
-        case ByteCodeConstants.GOTO:
-        case ByteCodeConstants.IINC:
-        case ByteCodeConstants.JSR:
-        case ByteCodeConstants.LDC:
-        case ByteCodeConstants.LDC2_W:
-        case ByteCodeConstants.NEW:
-        case ByteCodeConstants.NOP:
-        case ByteCodeConstants.SIPUSH:
-        case ByteCodeConstants.RET:
-        case ByteCodeConstants.RETURN:
+        case Const.GOTO:
+        case Const.IINC:
+        case Const.JSR:
+        case Const.LDC:
+        case Const.LDC2_W:
+        case Const.NEW:
+        case Const.NOP:
+        case Const.SIPUSH:
+        case Const.RET:
+        case Const.RETURN:
         case ByteCodeConstants.EXCEPTIONLOAD:
         case ByteCodeConstants.RETURNADDRESSLOAD:
             break;

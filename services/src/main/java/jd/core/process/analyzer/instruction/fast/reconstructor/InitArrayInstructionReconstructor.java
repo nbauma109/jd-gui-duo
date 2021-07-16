@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.fast.reconstructor;
 
+import org.apache.bcel.Const;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,8 +56,8 @@ public class InitArrayInstructionReconstructor
             DupStore dupStore = (DupStore)i;
             int opcode = dupStore.objectref.opcode;
 
-            if ((opcode != ByteCodeConstants.NEWARRAY) &&
-                (opcode != ByteCodeConstants.ANEWARRAY))
+            if ((opcode != Const.NEWARRAY) &&
+                (opcode != Const.ANEWARRAY))
                 continue;
 
             reconstructAInstruction(list, index, dupStore);
@@ -78,7 +80,7 @@ public class InitArrayInstructionReconstructor
             Instruction i = list.get(index);
 
             // Recherche de ?AStore ( DupLoad, index, value )
-            if ((i.opcode != ByteCodeConstants.AASTORE) &&
+            if ((i.opcode != Const.AASTORE) &&
                 (i.opcode != ByteCodeConstants.ARRAYSTORE))
                 break;
 
@@ -136,7 +138,7 @@ public class InitArrayInstructionReconstructor
             if (parent != null)
                 switch (parent.opcode)
                 {
-                case ByteCodeConstants.AASTORE:
+                case Const.AASTORE:
                     iai.opcode = ByteCodeConstants.INITARRAY;
                 }
 
@@ -145,25 +147,25 @@ public class InitArrayInstructionReconstructor
                 list.remove(--index);
 
             // Initialisation des types de constantes entieres
-            if (iai.newArray.opcode == ByteCodeConstants.NEWARRAY)
+            if (iai.newArray.opcode == Const.NEWARRAY)
             {
                 NewArray na = (NewArray)iai.newArray;
 
                 switch (na.type)
                 {
-                case ByteCodeConstants.T_BOOLEAN:
+                case Const.T_BOOLEAN:
                     setContantTypes("Z", iai.values);
                     break;
-                case ByteCodeConstants.T_CHAR:
+                case Const.T_CHAR:
                     setContantTypes("C", iai.values);
                     break;
-                case ByteCodeConstants.T_BYTE:
+                case Const.T_BYTE:
                     setContantTypes("B", iai.values);
                     break;
-                case ByteCodeConstants.T_SHORT:
+                case Const.T_SHORT:
                     setContantTypes("S", iai.values);
                     break;
-                case ByteCodeConstants.T_INT:
+                case Const.T_INT:
                     setContantTypes("I", iai.values);
                     break;
                 }
@@ -182,9 +184,9 @@ public class InitArrayInstructionReconstructor
 
             switch (value.opcode)
             {
-            case ByteCodeConstants.BIPUSH:
+            case Const.BIPUSH:
             case ByteCodeConstants.ICONST:
-            case ByteCodeConstants.SIPUSH:
+            case Const.SIPUSH:
                 ((IConst)value).setReturnedSignature(signature);
                 break;
             }
@@ -197,9 +199,9 @@ public class InitArrayInstructionReconstructor
         {
         case ByteCodeConstants.ICONST:
             return ((IConst)i).value;
-        case ByteCodeConstants.BIPUSH:
+        case Const.BIPUSH:
             return ((BIPush)i).value;
-        case ByteCodeConstants.SIPUSH:
+        case Const.SIPUSH:
             return ((SIPush)i).value;
         default:
             return -1;

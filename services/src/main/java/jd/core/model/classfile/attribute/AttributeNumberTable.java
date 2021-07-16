@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.model.classfile.attribute;
 
+import org.apache.bcel.classfile.LineNumber;
+
 public class AttributeNumberTable extends Attribute
 {
     public final LineNumber[] lineNumberTable;

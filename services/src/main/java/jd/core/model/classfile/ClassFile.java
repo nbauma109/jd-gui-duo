@@ -16,7 +16,8 @@
  */
 package jd.core.model.classfile;
 
-import org.jd.core.v1.model.classfile.constant.ConstantClass;
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.ConstantClass;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.HashMap;
@@ -25,7 +26,6 @@ import java.util.Map;
 
 import jd.core.model.classfile.accessor.Accessor;
 import jd.core.model.classfile.attribute.Attribute;
-import jd.core.model.classfile.attribute.AttributeConstants;
 import jd.core.model.classfile.attribute.AttributeInnerClasses;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.util.SignatureUtil;
@@ -106,7 +106,7 @@ public class ClassFile extends Base
             {
                 method = this.methods[i];
 
-                if ((method.accessFlags & ClassFileConstants.ACC_STATIC) != 0 &&
+                if ((method.accessFlags & Const.ACC_STATIC) != 0 &&
                     method.getNameIndex() == this.constants.classConstructorIndex)
                 {
                     this.staticMethod = method;
@@ -218,7 +218,7 @@ public class ClassFile extends Base
         if (this.attributes != null)
         {
             for (int i=0; i<this.attributes.length; i++) {
-                if (this.attributes[i].tag == AttributeConstants.ATTR_INNER_CLASSES) {
+                if (this.attributes[i].tag == Const.ATTR_INNER_CLASSES) {
                     return (AttributeInnerClasses)this.attributes[i];
                 }
             }

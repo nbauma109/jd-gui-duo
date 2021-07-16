@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
+import org.apache.bcel.Const;
+
 import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
@@ -52,29 +54,29 @@ public class AssignmentOperatorReconstructor
 
             switch (i.opcode)
             {
-            case ByteCodeConstants.PUTSTATIC:
+            case Const.PUTSTATIC:
                 if (((PutStatic)i).valueref.opcode ==
-                        ByteCodeConstants.BINARYOP)
+                		ByteCodeConstants.BINARYOP)
                     reconstructPutStaticOperator(list, index, i);
                 break;
-            case ByteCodeConstants.PUTFIELD:
+            case Const.PUTFIELD:
                 if (((PutField)i).valueref.opcode ==
-                        ByteCodeConstants.BINARYOP)
+                		ByteCodeConstants.BINARYOP)
                     index = reconstructPutFieldOperator(list, index, i);
                 break;
-            case ByteCodeConstants.ISTORE:
+            case Const.ISTORE:
                 if (((StoreInstruction)i).valueref.opcode ==
-                        ByteCodeConstants.BINARYOP)
+                		ByteCodeConstants.BINARYOP)
                 {
                     BinaryOperatorInstruction boi = (BinaryOperatorInstruction)
                         ((StoreInstruction)i).valueref;
-                    if (boi.value1.opcode == ByteCodeConstants.ILOAD)
+                    if (boi.value1.opcode == Const.ILOAD)
                         reconstructStoreOperator(list, index, i, boi);
                 }
                 break;
             case ByteCodeConstants.STORE:
                 if (((StoreInstruction)i).valueref.opcode ==
-                        ByteCodeConstants.BINARYOP)
+                		ByteCodeConstants.BINARYOP)
                 {
                     BinaryOperatorInstruction boi = (BinaryOperatorInstruction)
                         ((StoreInstruction)i).valueref;
@@ -84,7 +86,7 @@ public class AssignmentOperatorReconstructor
                 break;
             case ByteCodeConstants.ARRAYSTORE:
                 if (((ArrayStoreInstruction)i).valueref.opcode ==
-                        ByteCodeConstants.BINARYOP)
+                		ByteCodeConstants.BINARYOP)
                     index = reconstructArrayOperator(list, index, i);
                 break;
             }
@@ -101,7 +103,7 @@ public class AssignmentOperatorReconstructor
         BinaryOperatorInstruction boi =
             (BinaryOperatorInstruction)putStatic.valueref;
 
-        if (boi.value1.opcode != ByteCodeConstants.GETSTATIC)
+        if (boi.value1.opcode != Const.GETSTATIC)
             return;
 
         GetStatic getStatic = (GetStatic)boi.value1;
@@ -129,7 +131,7 @@ public class AssignmentOperatorReconstructor
         BinaryOperatorInstruction boi =
             (BinaryOperatorInstruction)putField.valueref;
 
-        if (boi.value1.opcode != ByteCodeConstants.GETFIELD)
+        if (boi.value1.opcode != Const.GETFIELD)
             return index;
 
         GetField getField = (GetField)boi.value1;

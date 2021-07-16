@@ -16,14 +16,18 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
-import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
-import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.ConstantFieldref;
+import org.apache.bcel.classfile.ConstantNameAndType;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import jd.core.model.classfile.*;
+import jd.core.model.classfile.ClassFile;
+import jd.core.model.classfile.ConstantPool;
+import jd.core.model.classfile.Field;
+import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 import jd.core.model.instruction.fast.FastConstants;
@@ -94,11 +98,11 @@ public class InitDexEnumFieldsReconstructor
             while (indexInstruction-- > 0)
             {
                 Instruction instruction = list.get(indexInstruction);
-                if (instruction.opcode != ByteCodeConstants.PUTSTATIC)
+                if (instruction.opcode != Const.PUTSTATIC)
                     break;
 
                 PutStatic putStatic = (PutStatic)instruction;
-                if (putStatic.valueref.opcode != ByteCodeConstants.ALOAD)
+                if (putStatic.valueref.opcode != Const.ALOAD)
                     break;
 
                 ConstantFieldref cfr = constants.getConstantFieldref(putStatic.index);
@@ -118,9 +122,9 @@ public class InitDexEnumFieldsReconstructor
                 {
                     Field field = fields[indexField];
 
-                    if (((field.accessFlags & (ClassFileConstants.ACC_STATIC|ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_FINAL|ClassFileConstants.ACC_PRIVATE)) ==
-                            (ClassFileConstants.ACC_STATIC|ClassFileConstants.ACC_SYNTHETIC|ClassFileConstants.ACC_FINAL|ClassFileConstants.ACC_PRIVATE)) &&
-                        (cnat.getDescriptorIndex() == field.getDescriptorIndex()) &&
+                    if (((field.accessFlags & (Const.ACC_STATIC|Const.ACC_SYNTHETIC|Const.ACC_FINAL|Const.ACC_PRIVATE)) ==
+                            (Const.ACC_STATIC|Const.ACC_SYNTHETIC|Const.ACC_FINAL|Const.ACC_PRIVATE)) &&
+                        (cnat.getSignatureIndex() == field.getDescriptorIndex()) &&
                         (cnat.getNameIndex() == field.getNameIndex()))
                     {
                         // "ENUM$VALUES = ..." found.
@@ -134,11 +138,11 @@ public class InitDexEnumFieldsReconstructor
                         while (index-- > 0)
                         {
                             instruction = list.get(index);
-                            if (instruction.opcode != ByteCodeConstants.AASTORE)
+                            if (instruction.opcode != Const.AASTORE)
                                 break;
                             AAStore aastore = (AAStore)instruction;
-                            if ((aastore.arrayref.opcode != ByteCodeConstants.ALOAD) ||
-                                (aastore.valueref.opcode != ByteCodeConstants.GETSTATIC) ||
+                            if ((aastore.arrayref.opcode != Const.ALOAD) ||
+                                (aastore.valueref.opcode != Const.GETSTATIC) ||
                                 (((ALoad)aastore.arrayref).index != localEnumArrayIndex))
                                 break;
                             values.add(aastore.valueref);
@@ -148,7 +152,7 @@ public class InitDexEnumFieldsReconstructor
                         if (instruction.opcode != FastConstants.DECLARE)
                             break;
                         FastDeclaration declaration = (FastDeclaration)instruction;
-                        if (declaration.instruction.opcode != ByteCodeConstants.ASTORE)
+                        if (declaration.instruction.opcode != Const.ASTORE)
                             break;
                         AStore astore = (AStore)declaration.instruction;
                         if (astore.index != localEnumArrayIndex)
@@ -167,7 +171,7 @@ public class InitDexEnumFieldsReconstructor
                                     putStatic.offset,
                                     declaration.lineNumber,
                                     new ANewArray(
-                                        ByteCodeConstants.ANEWARRAY,
+                                        Const.ANEWARRAY,
                                         putStatic.offset,
                                         declaration.lineNumber,
                                         classFile.getThisClassIndex(),

@@ -16,8 +16,9 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.visitor;
 
-import org.jd.core.v1.model.classfile.constant.ConstantFieldref;
-import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.ConstantFieldref;
+import org.apache.bcel.classfile.ConstantNameAndType;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ConstantPool;
@@ -43,14 +44,14 @@ public class ReplaceMultipleOuterReferenceVisitor
     @Override
     protected ClassFile match(Instruction instruction)
     {
-        if (instruction.opcode != ByteCodeConstants.GETFIELD)
+        if (instruction.opcode != Const.GETFIELD)
             return null;
 
         GetField gf = (GetField)instruction;
 
         switch (gf.objectref.opcode)
         {
-        case ByteCodeConstants.ALOAD:
+        case Const.ALOAD:
             {
                 ALoad aload = (ALoad)gf.objectref;
                 if (aload.index != 0)
@@ -65,7 +66,7 @@ public class ReplaceMultipleOuterReferenceVisitor
                 ConstantNameAndType cnat =
                     constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
                 if ((field.getNameIndex() != cnat.getNameIndex()) ||
-                    (field.getDescriptorIndex() != cnat.getDescriptorIndex()))
+                    (field.getDescriptorIndex() != cnat.getSignatureIndex()))
                     return null;
                 return this.classFile.getOuterClass();
             }
@@ -102,7 +103,7 @@ public class ReplaceMultipleOuterReferenceVisitor
                             return null;
 
                         String fieldDescriptor =
-                            constants.getConstantUtf8(cnat.getDescriptorIndex());
+                            constants.getConstantUtf8(cnat.getSignatureIndex());
                         String outerFieldDescriptor =
                             outerConstants.getConstantUtf8(outerField.getDescriptorIndex());
 
@@ -117,14 +118,14 @@ public class ReplaceMultipleOuterReferenceVisitor
 
                 return null;
             }
-        case ByteCodeConstants.GETFIELD:
+        case Const.GETFIELD:
             {
                 ConstantPool constants = this.classFile.getConstantPool();
                 ConstantFieldref cfr = constants.getConstantFieldref(gf.index);
                 ConstantNameAndType cnat =
                     constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
                 String descriptorName =
-                    constants.getConstantUtf8(cnat.getDescriptorIndex());
+                    constants.getConstantUtf8(cnat.getSignatureIndex());
                 if (!SignatureUtil.isObjectSignature(descriptorName))
                     return null;
 

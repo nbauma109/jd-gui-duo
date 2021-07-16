@@ -7,7 +7,7 @@
 
 package org.jdv1.gui.service.type;
 
-import org.eclipse.jdt.core.dom.*;
+import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.dom.*;
 import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;
@@ -301,7 +301,7 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
         protected boolean enterTypeDeclaration(AbstractTypeDeclaration node, int access) {
             String name = node.getName().getIdentifier();
 
-            org.eclipse.jdt.core.dom.Type superType = getSuperType(node);
+            org.jboss.forge.roaster._shade.org.eclipse.jdt.core.dom.Type superType = getSuperType(node);
             String superQualifiedTypeName;
 
             if (superType == null) {

@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
+import org.apache.bcel.Const;
+
 import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
@@ -57,8 +59,8 @@ public class PostIncReconstructor
 
                 switch (i.opcode)
                 {
-                case ByteCodeConstants.ASTORE:
-                    if ((dupstore.objectref.opcode == ByteCodeConstants.ALOAD) &&
+                case Const.ASTORE:
+                    if ((dupstore.objectref.opcode == Const.ALOAD) &&
                         (((IndexInstruction)i).index == ((IndexInstruction)dupstore.objectref).index))
                     {
                         i = ((StoreInstruction)i).valueref;
@@ -68,8 +70,8 @@ public class PostIncReconstructor
                             boi = (BinaryOperatorInstruction)i;
                     }
                     break;
-                case ByteCodeConstants.ISTORE:
-                    if ((dupstore.objectref.opcode == ByteCodeConstants.ILOAD) &&
+                case Const.ISTORE:
+                    if ((dupstore.objectref.opcode == Const.ILOAD) &&
                         (((IndexInstruction)i).index == ((IndexInstruction)dupstore.objectref).index))
                     {
                         i = ((StoreInstruction)i).valueref;
@@ -90,8 +92,8 @@ public class PostIncReconstructor
                             boi = (BinaryOperatorInstruction)i;
                     }
                     break;
-                case ByteCodeConstants.PUTFIELD:
-                    if ((dupstore.objectref.opcode == ByteCodeConstants.GETFIELD) &&
+                case Const.PUTFIELD:
+                    if ((dupstore.objectref.opcode == Const.GETFIELD) &&
                         (((IndexInstruction)i).index == ((IndexInstruction)dupstore.objectref).index))
                     {
                         i = ((PutField)i).valueref;
@@ -101,8 +103,8 @@ public class PostIncReconstructor
                             boi = (BinaryOperatorInstruction)i;
                     }
                     break;
-                case ByteCodeConstants.PUTSTATIC:
-                    if ((dupstore.objectref.opcode == ByteCodeConstants.GETSTATIC) &&
+                case Const.PUTSTATIC:
+                    if ((dupstore.objectref.opcode == Const.GETSTATIC) &&
                         (((IndexInstruction)i).index == ((IndexInstruction)dupstore.objectref).index))
                     {
                         i = ((PutStatic)i).valueref;

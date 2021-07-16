@@ -16,7 +16,12 @@
  ******************************************************************************/
 package jd.core.model.classfile;
 
-import jd.core.model.classfile.attribute.*;
+import org.apache.bcel.Const;
+
+import jd.core.model.classfile.attribute.Annotation;
+import jd.core.model.classfile.attribute.Attribute;
+import jd.core.model.classfile.attribute.AttributeRuntimeAnnotations;
+import jd.core.model.classfile.attribute.AttributeSignature;
 
 public class Base
 {
@@ -34,7 +39,7 @@ public class Base
         if (this.attributes != null)
         {
             for (int i=this.attributes.length-1; i>=0; --i)
-                if (this.attributes[i].tag == AttributeConstants.ATTR_SIGNATURE)
+                if (this.attributes[i].tag == Const.ATTR_SIGNATURE)
                     return (AttributeSignature)this.attributes[i];
         }
 
@@ -46,7 +51,7 @@ public class Base
         if (this.attributes != null)
         {
             for (int i=this.attributes.length-1; i>=0; --i)
-                if (this.attributes[i].tag == AttributeConstants.ATTR_DEPRECATED)
+                if (this.attributes[i].tag == Const.ATTR_DEPRECATED)
                     return true;
         }
 
@@ -61,8 +66,8 @@ public class Base
             {
                 switch (this.attributes[i].tag)
                 {
-                case AttributeConstants.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS:
-                case AttributeConstants.ATTR_RUNTIME_VISIBLE_ANNOTATIONS:
+                case Const.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS:
+                case Const.ATTR_RUNTIME_VISIBLE_ANNOTATIONS:
                     {
                         Annotation[]annotations =
                             ((AttributeRuntimeAnnotations)attributes[i]).annotations;

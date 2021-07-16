@@ -7,11 +7,14 @@
 
 package org.jd.core.v1.model.classfile.attribute;
 
+import java.util.List;
+import java.util.Map.Entry;
+
 public class Annotation {
     protected String descriptor;
-    protected ElementValuePair[] elementValuePairs;
+    protected List<Entry<String, AttributeElementValue>> elementValuePairs;
 
-    public Annotation(String descriptor, ElementValuePair[] elementValuePairs) {
+    public Annotation(String descriptor, List<Entry<String,AttributeElementValue>> elementValuePairs) {
         this.descriptor = descriptor;
         this.elementValuePairs = elementValuePairs;
     }
@@ -20,7 +23,7 @@ public class Annotation {
         return descriptor;
     }
 
-    public ElementValuePair[] getElementValuePairs() {
+    public List<Entry<String, AttributeElementValue>> getElementValuePairs() {
         return elementValuePairs;
     }
 }

@@ -16,6 +16,8 @@
  */
 package jd.core.process.analyzer.instruction.fast.visitor;
 
+import org.apache.bcel.Const;
+
 import java.util.List;
 
 import jd.core.model.classfile.LocalVariable;
@@ -35,16 +37,16 @@ public class CheckLocalVariableUsedVisitor
     {
         switch (instruction.opcode)
         {
-        case ByteCodeConstants.ARRAYLENGTH:
+        case Const.ARRAYLENGTH:
             return visit(
                 localVariables, maxOffset, ((ArrayLength)instruction).arrayref);
-        case ByteCodeConstants.AASTORE:
+        case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
                 return visit(localVariables, maxOffset, asi.indexref) || visit(localVariables, maxOffset, asi.valueref);
             }
-        case ByteCodeConstants.ATHROW:
+        case Const.ATHROW:
             return visit(localVariables, maxOffset, ((AThrow)instruction).value);
         case ByteCodeConstants.UNARYOP:
             return visit(
@@ -56,12 +58,12 @@ public class CheckLocalVariableUsedVisitor
                     (BinaryOperatorInstruction)instruction;
                 return visit(localVariables, maxOffset, boi.value1) || visit(localVariables, maxOffset, boi.value2);
             }
-        case ByteCodeConstants.CHECKCAST:
+        case Const.CHECKCAST:
             return visit(
                 localVariables, maxOffset, ((CheckCast)instruction).objectref);
         case ByteCodeConstants.LOAD:
-        case ByteCodeConstants.ALOAD:
-        case ByteCodeConstants.ILOAD:
+        case Const.ALOAD:
+        case Const.ILOAD:
             {
                 LoadInstruction li = (LoadInstruction)instruction;
                 LocalVariable lv =
@@ -70,8 +72,8 @@ public class CheckLocalVariableUsedVisitor
                 return lv != null && maxOffset <= lv.startPc;
             }
         case ByteCodeConstants.STORE:
-        case ByteCodeConstants.ASTORE:
-        case ByteCodeConstants.ISTORE:
+        case Const.ASTORE:
+        case Const.ISTORE:
             {
                 StoreInstruction si = (StoreInstruction)instruction;
                 LocalVariable lv =
@@ -108,19 +110,19 @@ public class CheckLocalVariableUsedVisitor
                 }
                 return false;
             }
-        case ByteCodeConstants.INSTANCEOF:
+        case Const.INSTANCEOF:
             return visit(
                 localVariables, maxOffset, ((InstanceOf)instruction).objectref);
-        case ByteCodeConstants.INVOKEINTERFACE:
-        case ByteCodeConstants.INVOKESPECIAL:
-        case ByteCodeConstants.INVOKEVIRTUAL:
+        case Const.INVOKEINTERFACE:
+        case Const.INVOKESPECIAL:
+        case Const.INVOKEVIRTUAL:
             if (visit(
                     localVariables, maxOffset,
                     ((InvokeNoStaticInstruction)instruction).objectref)) {
                 return true;
             }
             // intended fall through
-        case ByteCodeConstants.INVOKESTATIC:
+        case Const.INVOKESTATIC:
             {
                 List<Instruction> list = ((InvokeInstruction)instruction).args;
                 for (int i=list.size()-1; i>=0; --i)
@@ -142,18 +144,18 @@ public class CheckLocalVariableUsedVisitor
                 }
                 return false;
             }
-        case ByteCodeConstants.LOOKUPSWITCH:
+        case Const.LOOKUPSWITCH:
             return visit(
                 localVariables, maxOffset, ((LookupSwitch)instruction).key);
-        case ByteCodeConstants.MONITORENTER:
+        case Const.MONITORENTER:
             return visit(
                 localVariables, maxOffset,
                 ((MonitorEnter)instruction).objectref);
-        case ByteCodeConstants.MONITOREXIT:
+        case Const.MONITOREXIT:
             return visit(
                 localVariables, maxOffset,
                 ((MonitorExit)instruction).objectref);
-        case ByteCodeConstants.MULTIANEWARRAY:
+        case Const.MULTIANEWARRAY:
             {
                 Instruction[] dimensions = ((MultiANewArray)instruction).dimensions;
                 for (int i=dimensions.length-1; i>=0; --i)
@@ -164,24 +166,24 @@ public class CheckLocalVariableUsedVisitor
                 }
                 return false;
             }
-        case ByteCodeConstants.NEWARRAY:
+        case Const.NEWARRAY:
             return visit(
                 localVariables, maxOffset,
                 ((NewArray)instruction).dimension);
-        case ByteCodeConstants.ANEWARRAY:
+        case Const.ANEWARRAY:
             return visit(
                 localVariables, maxOffset,
                 ((ANewArray)instruction).dimension);
-        case ByteCodeConstants.POP:
+        case Const.POP:
             return visit(
                 localVariables, maxOffset,
                 ((Pop)instruction).objectref);
-        case ByteCodeConstants.PUTFIELD:
+        case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
                 return visit(localVariables, maxOffset, putField.objectref) || visit(localVariables, maxOffset, putField.valueref);
             }
-        case ByteCodeConstants.PUTSTATIC:
+        case Const.PUTSTATIC:
             return visit(
                 localVariables, maxOffset,
                 ((PutStatic)instruction).valueref);
@@ -189,7 +191,7 @@ public class CheckLocalVariableUsedVisitor
             return visit(
                 localVariables, maxOffset,
                 ((ReturnInstruction)instruction).valueref);
-        case ByteCodeConstants.TABLESWITCH:
+        case Const.TABLESWITCH:
             return visit(
                 localVariables, maxOffset,
                 ((TableSwitch)instruction).key);
@@ -217,7 +219,7 @@ public class CheckLocalVariableUsedVisitor
             return visit(
                 localVariables, maxOffset,
                 ((IncInstruction)instruction).value);
-        case ByteCodeConstants.GETFIELD:
+        case Const.GETFIELD:
             return visit(
                 localVariables, maxOffset,
                 ((GetField)instruction).objectref);
@@ -313,24 +315,24 @@ public class CheckLocalVariableUsedVisitor
                 FastDeclaration fd = (FastDeclaration)instruction;
                 return fd.instruction != null && visit(localVariables, maxOffset, fd.instruction);
             }
-        case ByteCodeConstants.GETSTATIC:
+        case Const.GETSTATIC:
         case ByteCodeConstants.OUTERTHIS:
-        case ByteCodeConstants.ACONST_NULL:
-        case ByteCodeConstants.BIPUSH:
+        case Const.ACONST_NULL:
+        case Const.BIPUSH:
         case ByteCodeConstants.ICONST:
         case ByteCodeConstants.LCONST:
         case ByteCodeConstants.FCONST:
         case ByteCodeConstants.DCONST:
-        case ByteCodeConstants.GOTO:
-        case ByteCodeConstants.IINC:
-        case ByteCodeConstants.JSR:
-        case ByteCodeConstants.LDC:
-        case ByteCodeConstants.LDC2_W:
-        case ByteCodeConstants.NEW:
-        case ByteCodeConstants.NOP:
-        case ByteCodeConstants.SIPUSH:
-        case ByteCodeConstants.RET:
-        case ByteCodeConstants.RETURN:
+        case Const.GOTO:
+        case Const.IINC:
+        case Const.JSR:
+        case Const.LDC:
+        case Const.LDC2_W:
+        case Const.NEW:
+        case Const.NOP:
+        case Const.SIPUSH:
+        case Const.RET:
+        case Const.RETURN:
         case ByteCodeConstants.EXCEPTIONLOAD:
         case ByteCodeConstants.RETURNADDRESSLOAD:
         case ByteCodeConstants.DUPLOAD:

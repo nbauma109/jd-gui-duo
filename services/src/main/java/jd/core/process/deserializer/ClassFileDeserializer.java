@@ -16,9 +16,12 @@
  ******************************************************************************/
 package jd.core.process.deserializer;
 
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.*;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.loader.LoaderException;
-import org.jd.core.v1.model.classfile.constant.*;
+import org.jd.core.v1.model.classfile.constant.ConstantInterfaceMethodref;
+import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;
 
@@ -36,7 +39,6 @@ import jd.core.model.classfile.Field;
 import jd.core.model.classfile.Method;
 import jd.core.model.classfile.attribute.Attribute;
 import jd.core.model.classfile.attribute.AttributeInnerClasses;
-import jd.core.model.classfile.attribute.InnerClass;
 
 public class ClassFileDeserializer
 {
@@ -47,7 +49,7 @@ public class ClassFileDeserializer
     public static ClassFile deserialize(Loader loader, String internalClassPath)
         throws LoaderException
     {
-        ClassFile classFile = loadSingleClass(loader, internalClassPath);
+    	ClassFile classFile = loadSingleClass(loader, internalClassPath);
         if (classFile == null)
             return null;
 
@@ -69,7 +71,7 @@ public class ClassFileDeserializer
         for (int i=0; i<length; i++)
         {
             String innerInternalClassPath =
-                constants.getConstantClassName(cs[i].innerClassIndex);
+                constants.getConstantClassName(cs[i].getInnerClassIndex());
 
             if (! innerInternalClassPath.startsWith(innerInternalClassNamePrefix))
                 continue;
@@ -95,7 +97,7 @@ public class ClassFileDeserializer
                 if (innerClassFile != null)
                 {
                     // Alter inner class access flag
-                    innerClassFile.setAccessFlags(cs[i].innerAccessFlags);
+                    innerClassFile.setAccessFlags(cs[i].getInnerAccessFlags());
                     // Setup outer class reference
                     innerClassFile.setOuterClass(classFile);
                     // Add inner classes
@@ -118,11 +120,10 @@ public class ClassFileDeserializer
             Loader loader, String internalClassPath)
         throws LoaderException
     {
-        ClassFile classFile = null;
-
+    	ClassFile classFile = null;
         try (DataInputStream dis = new DataInputStream(new ByteArrayInputStream(loader.load(internalClassPath))))
         {
-            classFile = deserialize(dis);
+        	classFile = deserialize(dis);
         }
         catch (IOException e)
         {
@@ -179,55 +180,52 @@ public class ClassFileDeserializer
         	byte tag = di.readByte();
 
             switch (tag) {
-                case 19:
-                case 20:
-                case Constant.CONSTANT_CLASS:
+                case Const.CONSTANT_Module, Const.CONSTANT_Package, Const.CONSTANT_Class:
                     constants[i] = new ConstantClass(di.readUnsignedShort());
                     break;
-                case Constant.CONSTANT_FIELDREF:
+                case Const.CONSTANT_Fieldref:
                     constants[i] = new ConstantFieldref(di.readUnsignedShort(),
                     		                            di.readUnsignedShort());
                     break;
-                case Constant.CONSTANT_METHODREF:
+                case Const.CONSTANT_Methodref:
                     constants[i] = new ConstantMethodref(di.readUnsignedShort(),
                     		                             di.readUnsignedShort());
                     break;
-                case Constant.CONSTANT_INTERFACEMETHODREF:
+                case Const.CONSTANT_InterfaceMethodref:
                     constants[i] = new ConstantInterfaceMethodref(di.readUnsignedShort(),
                     		                                      di.readUnsignedShort());
                     break;
-                case Constant.CONSTANT_STRING:
+                case Const.CONSTANT_String:
                 	constants[i] = new ConstantString(di.readUnsignedShort());
                 	break;
-                case Constant.CONSTANT_INTEGER:
+                case Const.CONSTANT_Integer:
                 	constants[i] = new ConstantInteger(di.readInt());
                 	break;
-                case Constant.CONSTANT_FLOAT:
+                case Const.CONSTANT_Float:
                 	constants[i] = new ConstantFloat(di.readFloat());
                 	break;
-                case Constant.CONSTANT_LONG:
+                case Const.CONSTANT_Long:
                 	constants[i++] = new ConstantLong(di.readLong());
                 	break;
-                case Constant.CONSTANT_DOUBLE:
+                case Const.CONSTANT_Double:
                 	constants[i++] = new ConstantDouble(di.readDouble());
                 	break;
-                case Constant.CONSTANT_NAMEANDTYPE:
+                case Const.CONSTANT_NameAndType:
                 	constants[i] = new ConstantNameAndType(di.readUnsignedShort(),
                 			                               di.readUnsignedShort());
                 	break;
-                case Constant.CONSTANT_UTF8:
+                case Const.CONSTANT_Utf8:
                 	constants[i] = new ConstantUtf8(di.readUTF());
                 	break;
-                case Constant.CONSTANT_INVOKEDYNAMIC:
-                case 17:
+                case Const.CONSTANT_InvokeDynamic, Const.CONSTANT_Dynamic:
                 	constants[i] = new ConstantMethodref(di.readUnsignedShort(),
                 			                             di.readUnsignedShort());
                 	break;
-                case Constant.CONSTANT_METHODHANDLE:
+                case Const.CONSTANT_MethodHandle:
                 	constants[i] = new ConstantMethodHandle(di.readByte(),
                 			                                di.readUnsignedShort());
                 	break;
-                case Constant.CONSTANT_METHODTYPE:
+                case Const.CONSTANT_MethodType:
                 	constants[i] = new ConstantMethodType(di.readUnsignedShort());
                 	break;
                 default:

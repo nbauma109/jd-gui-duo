@@ -16,18 +16,24 @@
  ******************************************************************************/
 package jd.core.model.classfile.attribute;
 
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.CodeException;
+
+import java.util.List;
+import java.util.Map.Entry;
+
 public class AttributeCode extends Attribute
 {
     //private int maxStack;
     //private int maxLocals;
     public final byte[] code;
-    public final CodeException[] exceptionTable;
+    public final List<Entry<Integer, CodeException>> exceptionTable;
     public final Attribute[] attributes;
 
     public AttributeCode(byte tag,
                          int attributeNameIndex,
                          byte[] code,
-                         CodeException[] exceptionTable,
+                         List<Entry<Integer, CodeException>> exceptionTable,
                          Attribute[] attributes)
     {
         super(tag, attributeNameIndex);
@@ -42,7 +48,7 @@ public class AttributeCode extends Attribute
     {
         if (this.attributes != null)
             for (int i=this.attributes.length-1; i>=0; --i)
-                if (this.attributes[i].tag == AttributeConstants.ATTR_NUMBER_TABLE)
+                if (this.attributes[i].tag == Const.ATTR_LINE_NUMBER_TABLE)
                     return (AttributeNumberTable)this.attributes[i];
 
         return null;
@@ -52,7 +58,7 @@ public class AttributeCode extends Attribute
     {
         if (this.attributes != null)
             for (int i=this.attributes.length-1; i>=0; --i)
-                if (this.attributes[i].tag == AttributeConstants.ATTR_LOCAL_VARIABLE_TABLE)
+                if (this.attributes[i].tag == Const.ATTR_LOCAL_VARIABLE_TABLE)
                     return (AttributeLocalVariableTable)this.attributes[i];
 
         return null;
@@ -62,7 +68,7 @@ public class AttributeCode extends Attribute
     {
         if (this.attributes != null)
             for (int i=this.attributes.length-1; i>=0; --i)
-                if (this.attributes[i].tag == AttributeConstants.ATTR_LOCAL_VARIABLE_TYPE_TABLE)
+                if (this.attributes[i].tag == Const.ATTR_LOCAL_VARIABLE_TYPE_TABLE)
                     return (AttributeLocalVariableTable)this.attributes[i];
 
         return null;

@@ -7,17 +7,21 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
+import org.apache.bcel.classfile.*;
 import org.jd.core.v1.model.classfile.ConstantPool;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.*;
-import org.jd.core.v1.model.classfile.constant.*;
+import org.jd.core.v1.model.classfile.attribute.LocalVariable;
+import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
 import org.jd.core.v1.model.javasyntax.expression.BooleanExpression;
 import org.jd.core.v1.model.javasyntax.expression.StringConstantExpression;
 import org.jd.core.v1.model.javasyntax.statement.AssertStatement;
 import org.jd.core.v1.model.javasyntax.statement.Statement;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 /**
  * Example:
@@ -218,7 +222,7 @@ public class ByteCodeWriter {
                     String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
                     ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
                     String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
-                    String descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                    String descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
 
                     sb.append(" ").append(typeName).append('.').append(name).append(" : ").append(descriptor);
                     break;
@@ -226,7 +230,7 @@ public class ByteCodeWriter {
                     constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
                     name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
 
                     sb.append(" ").append(name).append(" : ").append(descriptor);
                     break;
@@ -234,7 +238,7 @@ public class ByteCodeWriter {
                     constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
                     name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
 
                     sb.append(" ").append(name).append(" : ").append(descriptor);
 
@@ -297,20 +301,20 @@ public class ByteCodeWriter {
     protected static void writeLDC(StringBuilder sb, ConstantPool constants, Constant constant) {
         switch (constant.getClass().getSimpleName()) {
             case "ConstantInteger":
-                sb.append(' ').append(((ConstantInteger) constant).getValue());
+                sb.append(' ').append(((ConstantInteger) constant).getBytes());
                 break;
             case "ConstantFloat":
-                sb.append(' ').append(((ConstantFloat) constant).getValue());
+                sb.append(' ').append(((ConstantFloat) constant).getBytes());
                 break;
             case "ConstantClass":
                 int typeNameIndex = ((ConstantClass) constant).getNameIndex();
-                sb.append(' ').append(((ConstantUtf8)constants.getConstant(typeNameIndex)).getValue());
+                sb.append(' ').append(((ConstantUtf8)constants.getConstant(typeNameIndex)).getBytes());
                 break;
             case "ConstantLong":
-                sb.append(' ').append(((ConstantLong) constant).getValue());
+                sb.append(' ').append(((ConstantLong) constant).getBytes());
                 break;
             case "ConstantDouble":
-                sb.append(' ').append(((ConstantDouble) constant).getValue());
+                sb.append(' ').append(((ConstantDouble) constant).getBytes());
                 break;
             case "ConstantString":
                 sb.append(" '");
@@ -343,7 +347,7 @@ public class ByteCodeWriter {
             for (LineNumber lineNumber : lineNumberTable.getLineNumberTable()) {
                 sb.append(linePrefix).append("  #");
                 sb.append(lineNumber.getLineNumber()).append("\t-> ");
-                sb.append(lineNumber.getStartPc()).append('\n');
+                sb.append(lineNumber.getStartPC()).append('\n');
             }
         }
     }
@@ -365,7 +369,7 @@ public class ByteCodeWriter {
     	if (lineNumberTable != null) {
     		
     		for (LineNumber lineNumber : lineNumberTable.getLineNumberTable()) {
-    			lineNumberToOffsets.computeIfAbsent(lineNumber.getLineNumber(), k -> new ArrayList<>()).add(lineNumber.getStartPc());
+    			lineNumberToOffsets.computeIfAbsent(lineNumber.getLineNumber(), k -> new ArrayList<>()).add(lineNumber.getStartPC());
     		}
     		for (Entry<Integer, List<Integer>> entry : lineNumberToOffsets.entrySet()) {
     			int lineNumber = entry.getKey();
@@ -421,9 +425,9 @@ public class ByteCodeWriter {
 
             for (CodeException codeException : codeExceptions) {
                 sb.append(linePrefix).append("  ");
-                sb.append(codeException.getStartPc()).append('\t');
-                sb.append(codeException.getEndPc()).append('\t');
-                sb.append(codeException.getHandlerPc()).append('\t');
+                sb.append(codeException.getStartPC()).append('\t');
+                sb.append(codeException.getEndPC()).append('\t');
+                sb.append(codeException.getHandlerPC()).append('\t');
 
                 if (codeException.getCatchType() == 0) {
                     sb.append("finally");

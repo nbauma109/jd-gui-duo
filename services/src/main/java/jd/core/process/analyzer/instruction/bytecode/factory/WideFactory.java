@@ -16,8 +16,10 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.bytecode.factory;
 
-import java.util.List;
+import org.apache.bcel.Const;
+
 import java.util.Deque;
+import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Method;
@@ -36,7 +38,7 @@ public class WideFactory extends InstructionFactory
         final int opcode = code[offset+1] & 255;
         final int index = ((code[offset+2] & 255) << 8) | (code[offset+3] & 255);
 
-        if (opcode == ByteCodeConstants.IINC)
+        if (opcode == Const.IINC)
         {
             final int count =
                 (short)(((code[offset+4] & 255) << 8) | (code[offset+5] & 255));
@@ -48,7 +50,7 @@ public class WideFactory extends InstructionFactory
 
             return 5;
         }
-        if (opcode == ByteCodeConstants.RET)
+        if (opcode == Const.RET)
         {
             list.add(new Ret(opcode, offset, lineNumber, index));
         }
@@ -58,56 +60,56 @@ public class WideFactory extends InstructionFactory
 
             switch (opcode)
             {
-            case ByteCodeConstants.ILOAD:
+            case Const.ILOAD:
                 instruction = new LoadInstruction(
-                    ByteCodeConstants.ILOAD, offset, lineNumber, index, "I");
+                    Const.ILOAD, offset, lineNumber, index, "I");
                 stack.push(instruction);
                 break;
-            case ByteCodeConstants.FLOAD:
+            case Const.FLOAD:
                 instruction = new LoadInstruction(
                     ByteCodeConstants.LOAD, offset, lineNumber, index, "F");
                 stack.push(instruction);
                 break;
-            case ByteCodeConstants.ALOAD:
+            case Const.ALOAD:
                 instruction = new ALoad(
-                    ByteCodeConstants.ALOAD, offset, lineNumber, index);
+                    Const.ALOAD, offset, lineNumber, index);
                 stack.push(instruction);
                 break;
-            case ByteCodeConstants.LLOAD:
+            case Const.LLOAD:
                 instruction = new LoadInstruction(
                     ByteCodeConstants.LOAD, offset, lineNumber, index, "J");
                 stack.push(instruction);
                 break;
-            case ByteCodeConstants.DLOAD:
+            case Const.DLOAD:
                 instruction = new LoadInstruction(
                     ByteCodeConstants.LOAD, offset, lineNumber, index, "D");
                 stack.push(instruction);
                 break;
-            case ByteCodeConstants.ISTORE:
+            case Const.ISTORE:
                 instruction = new StoreInstruction(
-                    ByteCodeConstants.ISTORE, offset, lineNumber,
+                    Const.ISTORE, offset, lineNumber,
                     index, "I", stack.pop());
                 list.add(instruction);
                 break;
-            case ByteCodeConstants.FSTORE:
+            case Const.FSTORE:
                 instruction = new StoreInstruction(
                     ByteCodeConstants.STORE, offset, lineNumber,
                     index, "F", stack.pop());
                 list.add(instruction);
                 break;
-            case ByteCodeConstants.ASTORE:
+            case Const.ASTORE:
                 instruction = new AStore(
-                    ByteCodeConstants.ASTORE, offset, lineNumber,
+                    Const.ASTORE, offset, lineNumber,
                     index, stack.pop());
                 list.add(instruction);
                 break;
-            case ByteCodeConstants.LSTORE:
+            case Const.LSTORE:
                 instruction = new StoreInstruction(
                     ByteCodeConstants.STORE, offset, lineNumber,
                     index, "J", stack.pop());
                 list.add(instruction);
                 break;
-            case ByteCodeConstants.DSTORE:
+            case Const.DSTORE:
                 instruction = new StoreInstruction(
                     ByteCodeConstants.STORE, offset, lineNumber,
                     index, "D", stack.pop());

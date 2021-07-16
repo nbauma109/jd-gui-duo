@@ -16,8 +16,10 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.bytecode.factory;
 
-import java.util.List;
+import org.apache.bcel.Const;
+
 import java.util.Deque;
+import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Method;
@@ -39,13 +41,13 @@ public class ILoadFactory extends InstructionFactory
         final int opcode = code[offset] & 255;
         int index;
 
-        if (opcode == ByteCodeConstants.ILOAD)
+        if (opcode == Const.ILOAD)
             index = code[offset+1] & 255;
         else
-            index = opcode - ByteCodeConstants.ILOAD_0;
+            index = opcode - Const.ILOAD_0;
 
         Instruction instruction =
-            new ILoad(ByteCodeConstants.ILOAD, offset, lineNumber, index);
+            new ILoad(Const.ILOAD, offset, lineNumber, index);
 
         if (stack.isEmpty() || jumps[offset])
         {
@@ -56,7 +58,7 @@ public class ILoadFactory extends InstructionFactory
         {
             Instruction last = stack.peek();
 
-            if (last.opcode == ByteCodeConstants.IINC)
+            if (last.opcode == Const.IINC)
             {
                 if (((IInc)last).index == index)
                 {
@@ -89,6 +91,6 @@ public class ILoadFactory extends InstructionFactory
 
         listForAnalyze.add(instruction);
 
-        return ByteCodeConstants.NO_OF_OPERANDS[opcode];
+        return Const.getNoOfOperands(opcode);
     }
 }

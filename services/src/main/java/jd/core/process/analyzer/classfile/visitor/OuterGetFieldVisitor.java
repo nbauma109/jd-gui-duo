@@ -16,8 +16,9 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.visitor;
 
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.ConstantNameAndType;
 import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
-import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 
 import java.util.Map;
 
@@ -26,7 +27,6 @@ import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.accessor.Accessor;
 import jd.core.model.classfile.accessor.AccessorConstants;
 import jd.core.model.classfile.accessor.GetFieldAccessor;
-import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.GetField;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.Invokestatic;
@@ -46,7 +46,7 @@ public class OuterGetFieldVisitor extends OuterGetStaticVisitor
     @Override
     protected Accessor match(Instruction i)
     {
-        if (i.opcode != ByteCodeConstants.INVOKESTATIC)
+        if (i.opcode != Const.INVOKESTATIC)
             return null;
 
         Invokestatic is = (Invokestatic)i;
@@ -54,7 +54,7 @@ public class OuterGetFieldVisitor extends OuterGetStaticVisitor
         ConstantNameAndType cnat =
             constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
         String descriptor =
-            constants.getConstantUtf8(cnat.getDescriptorIndex());
+            constants.getConstantUtf8(cnat.getSignatureIndex());
 
         // Two parameters ?
         if (cmr.getNbrOfParameters() != 1)
@@ -98,7 +98,7 @@ public class OuterGetFieldVisitor extends OuterGetStaticVisitor
         Instruction objectref = is.args.remove(0);
 
         return new GetField(
-            ByteCodeConstants.GETFIELD, i.offset, i.lineNumber,
+            Const.GETFIELD, i.offset, i.lineNumber,
             cfrIndex, objectref);
     }
 }

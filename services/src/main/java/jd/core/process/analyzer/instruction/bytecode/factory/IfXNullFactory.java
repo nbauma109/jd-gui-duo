@@ -16,8 +16,10 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.bytecode.factory;
 
-import java.util.List;
+import org.apache.bcel.Const;
+
 import java.util.Deque;
+import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Method;
@@ -56,14 +58,14 @@ public class IfXNullFactory extends InstructionFactory
             if (instruction.opcode == ByteCodeConstants.DUPLOAD)
             {
                 int nextOffset =
-                    offset + ByteCodeConstants.NO_OF_OPERANDS[opcode] + 1;
+                    offset + Const.getNoOfOperands(opcode) + 1;
 
                 if (nextOffset < code.length)
                 {
                     switch (code[nextOffset] & 255)
                     {
-                    case ByteCodeConstants.POP:
-                    case ByteCodeConstants.ARETURN:
+                    case Const.POP:
+                    case Const.ARETURN:
                         // Duplicate 'DupLoad' instruction used by
                         // DotClass118BReconstructor
                         DupLoad dp = (DupLoad)instruction;
@@ -74,6 +76,6 @@ public class IfXNullFactory extends InstructionFactory
             }
         }
 
-        return ByteCodeConstants.NO_OF_OPERANDS[opcode];
+        return Const.getNoOfOperands(opcode);
     }
 }

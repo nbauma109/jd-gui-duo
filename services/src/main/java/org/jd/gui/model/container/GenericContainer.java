@@ -20,11 +20,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class GenericContainer implements Container {
     protected static final long TIMESTAMP = System.currentTimeMillis();
 
-    protected static long tmpFileCounter = 0;
+    protected static AtomicLong tmpFileCounter = new AtomicLong(0);
 
     protected API api;
     protected int rootNameCount;
@@ -173,7 +174,7 @@ public class GenericContainer implements Container {
 
         @SuppressWarnings("resource")
         protected Map<Container.EntryPath, Container.Entry> loadChildrenFromFileEntry() throws IOException {
-            StringBuilder suffix = new StringBuilder(".").append(TIMESTAMP).append('.').append(tmpFileCounter++).append('.').append(fsPath.getFileName().toString());
+            StringBuilder suffix = new StringBuilder(".").append(TIMESTAMP).append('.').append(tmpFileCounter.getAndIncrement()).append('.').append(fsPath.getFileName().toString());
             File tmpFile = File.createTempFile("jd-gui.tmp.", suffix.toString());
             Path tmpPath = Paths.get(tmpFile.toURI());
 

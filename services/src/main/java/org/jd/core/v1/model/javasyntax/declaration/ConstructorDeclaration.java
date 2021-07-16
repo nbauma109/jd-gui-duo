@@ -12,7 +12,7 @@ import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
 
-import static org.jd.core.v1.model.classfile.Constants.ACC_STATIC;
+import static org.apache.bcel.Const.ACC_STATIC;
 
 public class ConstructorDeclaration implements MemberDeclaration {
     protected BaseAnnotationReference annotationReferences;

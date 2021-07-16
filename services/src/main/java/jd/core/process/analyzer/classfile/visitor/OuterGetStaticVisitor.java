@@ -16,8 +16,9 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.visitor;
 
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.ConstantNameAndType;
 import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
-import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 
 import java.util.List;
 import java.util.Map;
@@ -50,7 +51,7 @@ public class OuterGetStaticVisitor
     {
         switch (instruction.opcode)
         {
-        case ByteCodeConstants.ARRAYLENGTH:
+        case Const.ARRAYLENGTH:
             {
                 ArrayLength al = (ArrayLength)instruction;
                 Accessor a = match(al.arrayref);
@@ -60,7 +61,7 @@ public class OuterGetStaticVisitor
                     visit(al.arrayref);
             }
             break;
-        case ByteCodeConstants.AASTORE:
+        case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
@@ -99,7 +100,7 @@ public class OuterGetStaticVisitor
                 }
             }
             break;
-        case ByteCodeConstants.ATHROW:
+        case Const.ATHROW:
             {
                 AThrow aThrow = (AThrow)instruction;
                 Accessor a = match(aThrow.value);
@@ -134,7 +135,7 @@ public class OuterGetStaticVisitor
                     visit(boi.value2);
             }
             break;
-        case ByteCodeConstants.CHECKCAST:
+        case Const.CHECKCAST:
             {
                 CheckCast checkCast = (CheckCast)instruction;
                 Accessor a = match(checkCast.objectref);
@@ -145,8 +146,8 @@ public class OuterGetStaticVisitor
             }
             break;
         case ByteCodeConstants.STORE:
-        case ByteCodeConstants.ASTORE:
-        case ByteCodeConstants.ISTORE:
+        case Const.ASTORE:
+        case Const.ISTORE:
             {
                 StoreInstruction storeInstruction = (StoreInstruction)instruction;
                 Accessor a = match(storeInstruction.valueref);
@@ -211,7 +212,7 @@ public class OuterGetStaticVisitor
                     visit(branchList.get(i));
             }
             break;
-        case ByteCodeConstants.INSTANCEOF:
+        case Const.INSTANCEOF:
             {
                 InstanceOf instanceOf = (InstanceOf)instruction;
                 Accessor a = match(instanceOf.objectref);
@@ -221,9 +222,9 @@ public class OuterGetStaticVisitor
                     visit(instanceOf.objectref);
             }
             break;
-        case ByteCodeConstants.INVOKEINTERFACE:
-        case ByteCodeConstants.INVOKESPECIAL:
-        case ByteCodeConstants.INVOKEVIRTUAL:
+        case Const.INVOKEINTERFACE:
+        case Const.INVOKESPECIAL:
+        case Const.INVOKEVIRTUAL:
             {
                 InvokeNoStaticInstruction insi =
                     (InvokeNoStaticInstruction)instruction;
@@ -234,7 +235,7 @@ public class OuterGetStaticVisitor
                     visit(insi.objectref);
             }
             // intended fall through
-        case ByteCodeConstants.INVOKESTATIC:
+        case Const.INVOKESTATIC:
         case ByteCodeConstants.INVOKENEW:
             {
                 List<Instruction> list = ((InvokeInstruction)instruction).args;
@@ -248,7 +249,7 @@ public class OuterGetStaticVisitor
                 }
             }
             break;
-        case ByteCodeConstants.LOOKUPSWITCH:
+        case Const.LOOKUPSWITCH:
             {
                 LookupSwitch ls = (LookupSwitch)instruction;
                 Accessor a = match(ls.key);
@@ -258,7 +259,7 @@ public class OuterGetStaticVisitor
                     visit(ls.key);
             }
             break;
-        case ByteCodeConstants.MONITORENTER:
+        case Const.MONITORENTER:
             {
                 MonitorEnter monitorEnter = (MonitorEnter)instruction;
                 Accessor a = match(monitorEnter.objectref);
@@ -268,7 +269,7 @@ public class OuterGetStaticVisitor
                     visit(monitorEnter.objectref);
             }
             break;
-        case ByteCodeConstants.MONITOREXIT:
+        case Const.MONITOREXIT:
             {
                 MonitorExit monitorExit = (MonitorExit)instruction;
                 Accessor a = match(monitorExit.objectref);
@@ -278,7 +279,7 @@ public class OuterGetStaticVisitor
                     visit(monitorExit.objectref);
             }
             break;
-        case ByteCodeConstants.MULTIANEWARRAY:
+        case Const.MULTIANEWARRAY:
             {
                 Instruction[] dimensions = ((MultiANewArray)instruction).dimensions;
                 for (int i=dimensions.length-1; i>=0; --i)
@@ -291,7 +292,7 @@ public class OuterGetStaticVisitor
                 }
             }
             break;
-        case ByteCodeConstants.NEWARRAY:
+        case Const.NEWARRAY:
             {
                 NewArray newArray = (NewArray)instruction;
                 Accessor a = match(newArray.dimension);
@@ -301,7 +302,7 @@ public class OuterGetStaticVisitor
                     visit(newArray.dimension);
             }
             break;
-        case ByteCodeConstants.ANEWARRAY:
+        case Const.ANEWARRAY:
             {
                 ANewArray aNewArray = (ANewArray)instruction;
                 Accessor a = match(aNewArray.dimension);
@@ -311,7 +312,7 @@ public class OuterGetStaticVisitor
                     visit(aNewArray.dimension);
             }
             break;
-        case ByteCodeConstants.POP:
+        case Const.POP:
             {
                 Pop pop = (Pop)instruction;
                 Accessor a = match(pop.objectref);
@@ -321,7 +322,7 @@ public class OuterGetStaticVisitor
                     visit(pop.objectref);
             }
             break;
-        case ByteCodeConstants.PUTFIELD:
+        case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
                 Accessor a = match(putField.objectref);
@@ -336,7 +337,7 @@ public class OuterGetStaticVisitor
                     visit(putField.valueref);
             }
             break;
-        case ByteCodeConstants.PUTSTATIC:
+        case Const.PUTSTATIC:
             {
                 PutStatic putStatic = (PutStatic)instruction;
                 Accessor a = match(putStatic.valueref);
@@ -356,7 +357,7 @@ public class OuterGetStaticVisitor
                     visit(ri.valueref);
             }
             break;
-        case ByteCodeConstants.TABLESWITCH:
+        case Const.TABLESWITCH:
             {
                 TableSwitch ts = (TableSwitch)instruction;
                 Accessor a = match(ts.key);
@@ -437,7 +438,7 @@ public class OuterGetStaticVisitor
                     visit(ii.value);
             }
             break;
-        case ByteCodeConstants.GETFIELD:
+        case Const.GETFIELD:
             {
                 GetField gf = (GetField)instruction;
                 Accessor a = match(gf.objectref);
@@ -460,28 +461,28 @@ public class OuterGetStaticVisitor
                     visit(iai.values);
             }
             break;
-        case ByteCodeConstants.ACONST_NULL:
+        case Const.ACONST_NULL:
         case ByteCodeConstants.LOAD:
-        case ByteCodeConstants.ALOAD:
-        case ByteCodeConstants.ILOAD:
-        case ByteCodeConstants.BIPUSH:
+        case Const.ALOAD:
+        case Const.ILOAD:
+        case Const.BIPUSH:
         case ByteCodeConstants.ICONST:
         case ByteCodeConstants.LCONST:
         case ByteCodeConstants.FCONST:
         case ByteCodeConstants.DCONST:
         case ByteCodeConstants.DUPLOAD:
-        case ByteCodeConstants.GETSTATIC:
+        case Const.GETSTATIC:
         case ByteCodeConstants.OUTERTHIS:
-        case ByteCodeConstants.GOTO:
-        case ByteCodeConstants.IINC:
-        case ByteCodeConstants.JSR:
-        case ByteCodeConstants.LDC:
-        case ByteCodeConstants.LDC2_W:
-        case ByteCodeConstants.NEW:
-        case ByteCodeConstants.NOP:
-        case ByteCodeConstants.SIPUSH:
-        case ByteCodeConstants.RET:
-        case ByteCodeConstants.RETURN:
+        case Const.GOTO:
+        case Const.IINC:
+        case Const.JSR:
+        case Const.LDC:
+        case Const.LDC2_W:
+        case Const.NEW:
+        case Const.NOP:
+        case Const.SIPUSH:
+        case Const.RET:
+        case Const.RETURN:
         case ByteCodeConstants.EXCEPTIONLOAD:
         case ByteCodeConstants.RETURNADDRESSLOAD:
             break;
@@ -509,7 +510,7 @@ public class OuterGetStaticVisitor
 
     protected Accessor match(Instruction i)
     {
-        if (i.opcode != ByteCodeConstants.INVOKESTATIC)
+        if (i.opcode != Const.INVOKESTATIC)
             return null;
 
         Invokestatic is = (Invokestatic)i;
@@ -517,7 +518,7 @@ public class OuterGetStaticVisitor
         ConstantNameAndType cnat =
             constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
         String descriptor =
-            constants.getConstantUtf8(cnat.getDescriptorIndex());
+            constants.getConstantUtf8(cnat.getSignatureIndex());
 
         // Zero parameter ?
         if (descriptor.charAt(1) != ')')
@@ -557,6 +558,6 @@ public class OuterGetStaticVisitor
             constants.addConstantFieldref(classIndex, cnatIndex);
 
         return new GetStatic(
-            ByteCodeConstants.GETSTATIC, i.offset, i.lineNumber, cfrIndex);
+            Const.GETSTATIC, i.offset, i.lineNumber, cfrIndex);
     }
 }

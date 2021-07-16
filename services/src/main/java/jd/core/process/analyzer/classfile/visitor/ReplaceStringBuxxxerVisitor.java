@@ -16,9 +16,10 @@
  ******************************************************************************/
 package jd.core.process.analyzer.classfile.visitor;
 
-import org.jd.core.v1.model.classfile.constant.ConstantClass;
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.ConstantClass;
+import org.apache.bcel.classfile.ConstantNameAndType;
 import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
-import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.List;
@@ -40,7 +41,7 @@ public class ReplaceStringBuxxxerVisitor
     {
         switch (instruction.opcode)
         {
-        case ByteCodeConstants.ARRAYLENGTH:
+        case Const.ARRAYLENGTH:
             {
                 ArrayLength al = (ArrayLength)instruction;
                 Instruction i = match(al.arrayref);
@@ -66,7 +67,7 @@ public class ReplaceStringBuxxxerVisitor
                     ali.indexref = i;
             }
             break;
-        case ByteCodeConstants.AASTORE:
+        case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
@@ -123,7 +124,7 @@ public class ReplaceStringBuxxxerVisitor
                     ai.value2 = i;
             }
             break;
-        case ByteCodeConstants.ATHROW:
+        case Const.ATHROW:
             {
                 AThrow aThrow = (AThrow)instruction;
                 visit(aThrow.value);
@@ -167,7 +168,7 @@ public class ReplaceStringBuxxxerVisitor
                     dupStore.objectref = i;
             }
             break;
-        case ByteCodeConstants.CHECKCAST:
+        case Const.CHECKCAST:
             {
                 CheckCast cc = (CheckCast)instruction;
                 Instruction i = match(cc.objectref);
@@ -215,7 +216,7 @@ public class ReplaceStringBuxxxerVisitor
                     ifCmpInstruction.value2 = i;
             }
             break;
-        case ByteCodeConstants.INSTANCEOF:
+        case Const.INSTANCEOF:
             {
                 InstanceOf instanceOf = (InstanceOf)instruction;
                 Instruction i = match(instanceOf.objectref);
@@ -235,7 +236,7 @@ public class ReplaceStringBuxxxerVisitor
                 }
             }
             break;
-        case ByteCodeConstants.GETFIELD:
+        case Const.GETFIELD:
             {
                 GetField getField = (GetField)instruction;
                 Instruction i = match(getField.objectref);
@@ -245,9 +246,9 @@ public class ReplaceStringBuxxxerVisitor
                     getField.objectref = i;
             }
             break;
-        case ByteCodeConstants.INVOKEVIRTUAL:
-        case ByteCodeConstants.INVOKEINTERFACE:
-        case ByteCodeConstants.INVOKESPECIAL:
+        case Const.INVOKEVIRTUAL:
+        case Const.INVOKEINTERFACE:
+        case Const.INVOKESPECIAL:
             {
                 InvokeNoStaticInstruction insi =
                     (InvokeNoStaticInstruction)instruction;
@@ -259,11 +260,11 @@ public class ReplaceStringBuxxxerVisitor
                 replaceInArgs(insi.args);
             }
             break;
-        case ByteCodeConstants.INVOKESTATIC:
+        case Const.INVOKESTATIC:
         case ByteCodeConstants.INVOKENEW:
             replaceInArgs(((InvokeInstruction)instruction).args);
             break;
-        case ByteCodeConstants.LOOKUPSWITCH:
+        case Const.LOOKUPSWITCH:
             {
                 LookupSwitch lookupSwitch = (LookupSwitch)instruction;
                 Instruction i = match(lookupSwitch.key);
@@ -273,7 +274,7 @@ public class ReplaceStringBuxxxerVisitor
                     lookupSwitch.key = i;
             }
             break;
-        case ByteCodeConstants.MULTIANEWARRAY:
+        case Const.MULTIANEWARRAY:
             {
                 MultiANewArray multiANewArray = (MultiANewArray)instruction;
                 Instruction[] dimensions = multiANewArray.dimensions;
@@ -289,7 +290,7 @@ public class ReplaceStringBuxxxerVisitor
                 }
             }
             break;
-        case ByteCodeConstants.NEWARRAY:
+        case Const.NEWARRAY:
             {
                 NewArray newArray = (NewArray)instruction;
                 Instruction i = match(newArray.dimension);
@@ -299,7 +300,7 @@ public class ReplaceStringBuxxxerVisitor
                     newArray.dimension = i;
             }
             break;
-        case ByteCodeConstants.ANEWARRAY:
+        case Const.ANEWARRAY:
             {
                 ANewArray newArray = (ANewArray)instruction;
                 Instruction i = match(newArray.dimension);
@@ -309,10 +310,10 @@ public class ReplaceStringBuxxxerVisitor
                     newArray.dimension = i;
             }
             break;
-        case ByteCodeConstants.POP:
+        case Const.POP:
             visit(((Pop)instruction).objectref);
             break;
-        case ByteCodeConstants.PUTFIELD:
+        case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
                 Instruction i = match(putField.objectref);
@@ -328,7 +329,7 @@ public class ReplaceStringBuxxxerVisitor
                     putField.valueref = i;
             }
             break;
-        case ByteCodeConstants.PUTSTATIC:
+        case Const.PUTSTATIC:
             {
                 PutStatic putStatic = (PutStatic)instruction;
                 Instruction i = match(putStatic.valueref);
@@ -350,8 +351,8 @@ public class ReplaceStringBuxxxerVisitor
             }
             break;
         case ByteCodeConstants.STORE:
-        case ByteCodeConstants.ASTORE:
-        case ByteCodeConstants.ISTORE:
+        case Const.ASTORE:
+        case Const.ISTORE:
             {
                 StoreInstruction storeInstruction =
                     (StoreInstruction)instruction;
@@ -362,7 +363,7 @@ public class ReplaceStringBuxxxerVisitor
                     storeInstruction.valueref = i;
             }
             break;
-        case ByteCodeConstants.TABLESWITCH:
+        case Const.TABLESWITCH:
             {
                 TableSwitch tableSwitch = (TableSwitch)instruction;
                 Instruction i = match(tableSwitch.key);
@@ -398,7 +399,7 @@ public class ReplaceStringBuxxxerVisitor
                     to.value2 = i;
             }
             break;
-        case ByteCodeConstants.MONITORENTER:
+        case Const.MONITORENTER:
             {
                 MonitorEnter meInstruction = (MonitorEnter)instruction;
                 Instruction i = match(meInstruction.objectref);
@@ -408,7 +409,7 @@ public class ReplaceStringBuxxxerVisitor
                     meInstruction.objectref = i;
             }
             break;
-        case ByteCodeConstants.MONITOREXIT:
+        case Const.MONITOREXIT:
             {
                 MonitorExit meInstruction = (MonitorExit)instruction;
                 Instruction i = match(meInstruction.objectref);
@@ -439,30 +440,30 @@ public class ReplaceStringBuxxxerVisitor
                 }
             }
             break;
-        case ByteCodeConstants.ACONST_NULL:
+        case Const.ACONST_NULL:
         case ByteCodeConstants.DUPLOAD:
-        case ByteCodeConstants.LDC:
-        case ByteCodeConstants.LDC2_W:
-        case ByteCodeConstants.NEW:
-        case ByteCodeConstants.RETURN:
-        case ByteCodeConstants.BIPUSH:
+        case Const.LDC:
+        case Const.LDC2_W:
+        case Const.NEW:
+        case Const.RETURN:
+        case Const.BIPUSH:
         case ByteCodeConstants.DCONST:
         case ByteCodeConstants.FCONST:
         case ByteCodeConstants.ICONST:
         case ByteCodeConstants.LCONST:
-        case ByteCodeConstants.IINC:
+        case Const.IINC:
         case ByteCodeConstants.PREINC:
         case ByteCodeConstants.POSTINC:
-        case ByteCodeConstants.JSR:
-        case ByteCodeConstants.GETSTATIC:
+        case Const.JSR:
+        case Const.GETSTATIC:
         case ByteCodeConstants.OUTERTHIS:
-        case ByteCodeConstants.SIPUSH:
+        case Const.SIPUSH:
         case ByteCodeConstants.LOAD:
-        case ByteCodeConstants.ALOAD:
-        case ByteCodeConstants.ILOAD:
-        case ByteCodeConstants.GOTO:
+        case Const.ALOAD:
+        case Const.ILOAD:
+        case Const.GOTO:
         case ByteCodeConstants.EXCEPTIONLOAD:
-        case ByteCodeConstants.RET:
+        case Const.RET:
         case ByteCodeConstants.RETURNADDRESSLOAD:
             break;
         default:
@@ -492,7 +493,7 @@ public class ReplaceStringBuxxxerVisitor
 
     private Instruction match(Instruction i)
     {
-        if (i.opcode == ByteCodeConstants.INVOKEVIRTUAL)
+        if (i.opcode == Const.INVOKEVIRTUAL)
         {
             Invokevirtual iv = (Invokevirtual)i;
             ConstantMethodref cmr = this.constants.getConstantMethodref(iv.index);
@@ -514,7 +515,7 @@ public class ReplaceStringBuxxxerVisitor
 
     private Instruction match(Instruction i, int classIndex)
     {
-        if (i.opcode == ByteCodeConstants.INVOKEVIRTUAL)
+        if (i.opcode == Const.INVOKEVIRTUAL)
         {
             InvokeNoStaticInstruction insi = (InvokeNoStaticInstruction)i;
             ConstantMethodref cmr =
@@ -552,7 +553,7 @@ public class ReplaceStringBuxxxerVisitor
                 Instruction arg0 = in.args.get(0);
 
                 // Remove String.valueOf for String
-                if (arg0.opcode == ByteCodeConstants.INVOKESTATIC)
+                if (arg0.opcode == Const.INVOKESTATIC)
                 {
                     Invokestatic is = (Invokestatic)arg0;
                     cmr = this.constants.getConstantMethodref(is.index);

@@ -7,14 +7,14 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
+import org.apache.bcel.classfile.ConstantNameAndType;
 import org.jd.core.v1.model.classfile.ConstantPool;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
-import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.*;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
@@ -59,7 +59,7 @@ public class UpdateBridgeMethodTypeVisitor extends AbstractJavaSyntaxVisitor {
                         String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
                         ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
                         String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
-                        String descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                        String descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                         Type type = typeMaker.makeFieldType(typeName, name, descriptor);
 
                         // Update returned generic type of bridge method
@@ -72,7 +72,7 @@ public class UpdateBridgeMethodTypeVisitor extends AbstractJavaSyntaxVisitor {
                         typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
                         constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
                         name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
-                        descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                        descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                         TypeMaker.MethodTypes methodTypes = typeMaker.makeMethodTypes(typeName, name, descriptor);
 
                         // Update returned generic type of bridge method

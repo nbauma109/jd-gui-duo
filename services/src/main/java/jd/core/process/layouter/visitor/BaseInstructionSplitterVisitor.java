@@ -16,6 +16,7 @@
  ******************************************************************************/
 package jd.core.process.layouter.visitor;
 
+import org.apache.bcel.Const;
 import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
 import org.jd.core.v1.util.StringConstants;
 
@@ -50,7 +51,7 @@ public abstract class BaseInstructionSplitterVisitor
     {
         switch (instruction.opcode)
         {
-        case ByteCodeConstants.ARRAYLENGTH:
+        case Const.ARRAYLENGTH:
             visit(instruction, ((ArrayLength)instruction).arrayref);
             break;
         case ByteCodeConstants.ARRAYLOAD:
@@ -60,7 +61,7 @@ public abstract class BaseInstructionSplitterVisitor
                 visit(instruction, ali.indexref);
             }
             break;
-        case ByteCodeConstants.AASTORE:
+        case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
@@ -69,7 +70,7 @@ public abstract class BaseInstructionSplitterVisitor
                 visit(instruction, asi.valueref);
             }
             break;
-        case ByteCodeConstants.ANEWARRAY:
+        case Const.ANEWARRAY:
             visit(instruction, ((ANewArray)instruction).dimension);
             break;
         case ByteCodeConstants.ASSERT:
@@ -89,7 +90,7 @@ public abstract class BaseInstructionSplitterVisitor
                 visit(instruction, boi.value2);
             }
             break;
-        case ByteCodeConstants.ATHROW:
+        case Const.ATHROW:
             visit(instruction, ((AThrow)instruction).value);
             break;
         case ByteCodeConstants.UNARYOP:
@@ -99,7 +100,7 @@ public abstract class BaseInstructionSplitterVisitor
         case ByteCodeConstants.IMPLICITCONVERT:
             visit(instruction, ((ConvertInstruction)instruction).value);
             break;
-        case ByteCodeConstants.CHECKCAST:
+        case Const.CHECKCAST:
             visit(instruction, ((CheckCast)instruction).objectref);
             break;
         case FastConstants.DECLARE:
@@ -109,7 +110,7 @@ public abstract class BaseInstructionSplitterVisitor
                     visit(instruction, fd.instruction);
             }
             break;
-        case ByteCodeConstants.GETFIELD:
+        case Const.GETFIELD:
             visit(instruction, ((GetField)instruction).objectref);
             break;
         case ByteCodeConstants.IF:
@@ -175,15 +176,15 @@ public abstract class BaseInstructionSplitterVisitor
                 //}
             }
             break;
-        case ByteCodeConstants.INSTANCEOF:
+        case Const.INSTANCEOF:
             visit(instruction, ((InstanceOf)instruction).objectref);
             break;
-        case ByteCodeConstants.INVOKEINTERFACE:
-        case ByteCodeConstants.INVOKEVIRTUAL:
-        case ByteCodeConstants.INVOKESPECIAL:
+        case Const.INVOKEINTERFACE:
+        case Const.INVOKEVIRTUAL:
+        case Const.INVOKESPECIAL:
             visit(instruction, ((InvokeNoStaticInstruction)instruction).objectref);
             // intended fall through
-        case ByteCodeConstants.INVOKESTATIC:
+        case Const.INVOKESTATIC:
             {
                 List<Instruction> args = ((InvokeInstruction)instruction).args;
                 int length = args.size();
@@ -191,11 +192,11 @@ public abstract class BaseInstructionSplitterVisitor
                     visit(instruction, args.get(i));
             }
             break;
-        case ByteCodeConstants.LOOKUPSWITCH:
-        case ByteCodeConstants.TABLESWITCH:
+        case Const.LOOKUPSWITCH:
+        case Const.TABLESWITCH:
             visit(instruction, ((Switch)instruction).key);
             break;
-        case ByteCodeConstants.MULTIANEWARRAY:
+        case Const.MULTIANEWARRAY:
             {
                 Instruction[] dimensions =
                     ((MultiANewArray)instruction).dimensions;
@@ -204,28 +205,28 @@ public abstract class BaseInstructionSplitterVisitor
                     visit(instruction, dimensions[i]);
             }
             break;
-        case ByteCodeConstants.NEWARRAY:
+        case Const.NEWARRAY:
             visit(instruction, ((NewArray)instruction).dimension);
             break;
-        case ByteCodeConstants.POP:
+        case Const.POP:
             visit(instruction, ((Pop)instruction).objectref);
             break;
-        case ByteCodeConstants.PUTFIELD:
+        case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
                 visit(instruction, putField.objectref);
                 visit(instruction, putField.valueref);
             }
             break;
-        case ByteCodeConstants.PUTSTATIC:
+        case Const.PUTSTATIC:
             visit(instruction, ((PutStatic)instruction).valueref);
             break;
         case ByteCodeConstants.XRETURN:
             visit(instruction, ((ReturnInstruction)instruction).valueref);
             break;
         case ByteCodeConstants.STORE:
-        case ByteCodeConstants.ASTORE:
-        case ByteCodeConstants.ISTORE:
+        case Const.ASTORE:
+        case Const.ISTORE:
             visit(instruction, ((StoreInstruction)instruction).valueref);
             break;
         case ByteCodeConstants.TERNARYOPSTORE:

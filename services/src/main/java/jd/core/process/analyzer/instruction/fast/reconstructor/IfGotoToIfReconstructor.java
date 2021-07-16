@@ -16,6 +16,8 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.fast.reconstructor;
 
+import org.apache.bcel.Const;
+
 import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
@@ -64,7 +66,7 @@ public class IfGotoToIfReconstructor
                 BranchInstruction bi = (BranchInstruction)i;
 
                 i = list.get(index+1);
-                if (i.opcode != ByteCodeConstants.GOTO)
+                if (i.opcode != Const.GOTO)
                     continue;
 
                 Goto g = (Goto)i;

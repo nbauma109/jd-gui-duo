@@ -16,12 +16,12 @@
  ******************************************************************************/
 package jd.core.process.layouter;
 
+import org.apache.bcel.Const;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
-import jd.core.model.classfile.ClassFileConstants;
 import jd.core.model.layout.block.*;
 import jd.core.util.CharArrayUtil;
 import jd.core.util.SignatureUtil;
@@ -53,7 +53,7 @@ public class SignatureLayouter
         newIndex = SignatureUtil.skipSignature(caSignature, length, index);
 
         if (((classFile.accessFlags &
-                (ClassFileConstants.ACC_INTERFACE|ClassFileConstants.ACC_ENUM)) == 0) &&
+                (Const.ACC_INTERFACE|Const.ACC_ENUM)) == 0) &&
             !isObjectClass(caSignature, index, newIndex))
         {
             displayExtendsOrImplementsFlag = true;
@@ -67,7 +67,7 @@ public class SignatureLayouter
         {
             displayExtendsOrImplementsFlag = true;
 
-            if ((classFile.accessFlags & ClassFileConstants.ACC_INTERFACE) != 0)
+            if ((classFile.accessFlags & Const.ACC_INTERFACE) != 0)
             {
                 layoutBlockList.add(
                     new GenericExtendsSuperInterfacesLayoutBlock(

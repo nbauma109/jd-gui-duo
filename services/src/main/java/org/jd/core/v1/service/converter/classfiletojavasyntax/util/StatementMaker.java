@@ -6,8 +6,8 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
+import org.apache.bcel.Const;
 import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.classfile.Constants;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
@@ -951,7 +951,7 @@ public class StatementMaker {
         for (ClassFileFieldDeclaration field : bodyDeclaration.getFieldDeclarations()) {
             field.getFieldDeclarators().accept(memberVisitor);
             if (memberVisitor.found()) {
-                field.setFlags(field.getFlags() | Constants.ACC_SYNTHETIC);
+                field.setFlags(field.getFlags() | Const.ACC_SYNTHETIC);
                 break;
             }
         }
@@ -962,7 +962,7 @@ public class StatementMaker {
         for (ClassFileConstructorOrMethodDeclaration member : bodyDeclaration.getMethodDeclarations()) {
             member.accept(memberVisitor);
             if (memberVisitor.found()) {
-                member.setFlags(member.getFlags() | Constants.ACC_SYNTHETIC);
+                member.setFlags(member.getFlags() | Const.ACC_SYNTHETIC);
                 break;
             }
         }
