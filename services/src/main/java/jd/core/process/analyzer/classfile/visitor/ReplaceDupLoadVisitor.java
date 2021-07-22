@@ -159,11 +159,11 @@ public class ReplaceDupLoadVisitor
             break;
         case ByteCodeConstants.DUPSTORE:
             {
-                DupStore dupStore = (DupStore)instruction;
-                if (match(dupStore, dupStore.objectref))
-                    dupStore.objectref = this.newInstruction;
+                DupStore localDupStore = (DupStore)instruction;
+                if (match(localDupStore, localDupStore.objectref))
+                    localDupStore.objectref = this.newInstruction;
                 else
-                    visit(dupStore.objectref);
+                    visit(localDupStore.objectref);
             }
             break;
         case ByteCodeConstants.CONVERT:

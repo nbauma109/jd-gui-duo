@@ -40,7 +40,7 @@ import jd.core.process.analyzer.classfile.visitor.SearchInstructionByOpcodeVisit
 import jd.core.process.analyzer.instruction.bytecode.ComparisonInstructionAnalyzer;
 import jd.core.process.analyzer.instruction.bytecode.reconstructor.AssertInstructionReconstructor;
 import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
-import jd.core.process.analyzer.instruction.fast.FastCodeExceptionAnalyzer.FastCodeException;
+import jd.core.process.analyzer.instruction.fast.FastCodeExceptionAnalyzer.FastCodeExcepcion;
 import jd.core.process.analyzer.instruction.fast.FastCodeExceptionAnalyzer.FastCodeExceptionCatch;
 import jd.core.process.analyzer.instruction.fast.reconstructor.*;
 import jd.core.process.analyzer.util.InstructionUtil;
@@ -79,7 +79,7 @@ public class FastInstructionListBuilder {
         }
 
         // Agregation des déclarations CodeException
-        List<FastCodeException> lfce = FastCodeExceptionAnalyzer.aggregateCodeExceptions(method, list);
+        List<FastCodeExcepcion> lfce = FastCodeExceptionAnalyzer.aggregateCodeExceptions(method, list);
 
         // Initialyze delaclation flags
         LocalVariables localVariables = method.getLocalVariables();
@@ -99,7 +99,7 @@ public class FastInstructionListBuilder {
 
         // Recursive call
         if (lfce != null) {
-            FastCodeException fce;
+            FastCodeExcepcion fce;
             for (int i = lfce.size() - 1; i >= 0; --i) {
                 fce = lfce.get(i);
                 if (fce.synchronizedFlag) {
@@ -211,7 +211,7 @@ public class FastInstructionListBuilder {
     }
 
     private static void createSynchronizedBlock(ReferenceMap referenceMap, ClassFile classFile, List<Instruction> list,
-            LocalVariables localVariables, FastCodeException fce) {
+            LocalVariables localVariables, FastCodeExcepcion fce) {
         int index = InstructionUtil.getIndexForOffset(list, fce.tryFromOffset);
         Instruction instruction = list.get(index);
         int synchronizedBlockJumpOffset = -1;
@@ -771,7 +771,7 @@ public class FastInstructionListBuilder {
     }
 
     private static void createFastTry(ReferenceMap referenceMap, ClassFile classFile,
-            List<Instruction> list, LocalVariables localVariables, FastCodeException fce, int returnOffset) {
+            List<Instruction> list, LocalVariables localVariables, FastCodeExcepcion fce, int returnOffset) {
         int afterListOffset = fce.afterOffset;
         int tryJumpOffset = -1;
         int lastIndex = list.size() - 1;

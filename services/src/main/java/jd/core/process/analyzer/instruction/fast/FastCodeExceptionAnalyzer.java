@@ -44,7 +44,7 @@ public class FastCodeExceptionAnalyzer
     private FastCodeExceptionAnalyzer() {
     }
 
-    public static List<FastCodeException> aggregateCodeExceptions(
+    public static List<FastCodeExcepcion> aggregateCodeExceptions(
             Method method, List<Instruction> list)
     {
         List<Entry<Integer, CodeException>> arrayOfCodeException = method.getCodeExceptions();
@@ -54,14 +54,14 @@ public class FastCodeExceptionAnalyzer
         }
 
         // Aggregation des 'finally' et des 'catch' executant le meme bloc
-        List<FastAggregatedCodeException> fastAggregatedCodeExceptions =
+        List<FastAggregatedCodeExcepcion> fastAggregatedCodeExceptions =
             new ArrayList<>(
                 arrayOfCodeException.size());
         populateListOfFastAggregatedCodeException(
             method, list, fastAggregatedCodeExceptions);
 
         int length = fastAggregatedCodeExceptions.size();
-        List<FastCodeException> fastCodeExceptions =
+        List<FastCodeExcepcion> fastCodeExceptions =
             new ArrayList<>(length);
 
         // Aggregation des blocs 'finally' aux blocs 'catch'
@@ -69,7 +69,7 @@ public class FastCodeExceptionAnalyzer
         fastCodeExceptions.add(newFastCodeException(
             list, fastAggregatedCodeExceptions.get(0)));
 
-        FastAggregatedCodeException fastAggregatedCodeException;
+        FastAggregatedCodeExcepcion fastAggregatedCodeException;
         // Add or update
         for (int i=1; i<length; ++i)
         {
@@ -89,8 +89,8 @@ public class FastCodeExceptionAnalyzer
         // par 'ComputeAfterOffset'
         Collections.sort(fastCodeExceptions);
 
-        FastCodeException fce1;
-        FastCodeException fce2;
+        FastCodeExcepcion fce1;
+        FastCodeExcepcion fce2;
         // Aggregation des blocs 'catch'
         // Reduce of FastCodeException after UpdateFastCodeException(...)
         for (int i=fastCodeExceptions.size()-1; i>=1; --i)
@@ -131,7 +131,7 @@ public class FastCodeExceptionAnalyzer
         // Search 'switch' instructions, sort case offset
         List<int[]> switchCaseOffsets = searchSwitchCaseOffsets(list);
 
-        FastCodeException fce;
+        FastCodeExcepcion fce;
         for (int i=fastCodeExceptions.size()-1; i>=0; --i)
         {
             fce = fastCodeExceptions.get(i);
@@ -169,15 +169,15 @@ public class FastCodeExceptionAnalyzer
 
     private static void populateListOfFastAggregatedCodeException(
         Method method, List<Instruction> list,
-        List<FastAggregatedCodeException> fastAggregatedCodeExceptions)
+        List<FastAggregatedCodeExcepcion> fastAggregatedCodeExceptions)
     {
         int length = method.getCode().length;
         if (length == 0) {
             return;
         }
 
-        FastAggregatedCodeException[] array =
-            new FastAggregatedCodeException[length];
+        FastAggregatedCodeExcepcion[] array =
+            new FastAggregatedCodeExcepcion[length];
 
         List<Entry<Integer, CodeException>> arrayOfCodeException = method.getCodeExceptions();
         length = arrayOfCodeException.size();
@@ -188,8 +188,8 @@ public class FastCodeExceptionAnalyzer
 
             if (array[codeException.getHandlerPC()] == null)
             {
-                FastAggregatedCodeException face =
-                    new FastAggregatedCodeException(
+                FastAggregatedCodeExcepcion face =
+                    new FastAggregatedCodeExcepcion(
                         i, codeException.getStartPC(), codeException.getEndPC(),
                         codeException.getHandlerPC(), codeException.getCatchType());
                 fastAggregatedCodeExceptions.add(face);
@@ -197,7 +197,7 @@ public class FastCodeExceptionAnalyzer
             }
             else
             {
-                FastAggregatedCodeException face = array[codeException.getHandlerPC()];
+                FastAggregatedCodeExcepcion face = array[codeException.getHandlerPC()];
                 // ATTENTION: la modification de 'endPc' implique la
                 //            reecriture de 'defineType(...) !!
                 if (face.getCatchType() == 0)
@@ -216,7 +216,7 @@ public class FastCodeExceptionAnalyzer
         }
 
         int i = fastAggregatedCodeExceptions.size();
-        FastAggregatedCodeException face;
+        FastAggregatedCodeExcepcion face;
         while (i-- > 0)
         {
             face = fastAggregatedCodeExceptions.get(i);
@@ -229,7 +229,7 @@ public class FastCodeExceptionAnalyzer
     }
 
     private static boolean isNotAlreadyStored(
-        FastAggregatedCodeException face, int catchType)
+        FastAggregatedCodeExcepcion face, int catchType)
     {
         if (face.getCatchType() == catchType) {
             return false;
@@ -251,7 +251,7 @@ public class FastCodeExceptionAnalyzer
     }
 
     private static boolean isASynchronizedBlock(
-        List<Instruction> list, FastAggregatedCodeException face)
+        List<Instruction> list, FastAggregatedCodeExcepcion face)
     {
         int index = InstructionUtil.getIndexForOffset(list, face.getStartPC());
 
@@ -352,8 +352,8 @@ public class FastCodeExceptionAnalyzer
     }
 
     private static boolean updateFastCodeException(
-            List<FastCodeException> fastCodeExceptions,
-            FastAggregatedCodeException fastAggregatedCodeException)
+            List<FastCodeExcepcion> fastCodeExceptions,
+            FastAggregatedCodeExcepcion fastAggregatedCodeException)
     {
         int length = fastCodeExceptions.size();
 
@@ -364,7 +364,7 @@ public class FastCodeExceptionAnalyzer
             // Same start and end offsets
             for (int i=0; i<length; ++i)
             {
-                FastCodeException fce = fastCodeExceptions.get(i);
+                FastCodeExcepcion fce = fastCodeExceptions.get(i);
 
                 if (fce.finallyFromOffset == UtilConstants.INVALID_OFFSET &&
                     fastAggregatedCodeException.getStartPC() == fce.tryFromOffset &&
@@ -381,7 +381,7 @@ public class FastCodeExceptionAnalyzer
                 }
             }
 
-            FastCodeException fce;
+            FastCodeExcepcion fce;
             // Old algo
             for (int i=0; i<length; ++i)
             {
@@ -416,10 +416,10 @@ public class FastCodeExceptionAnalyzer
         return false;
     }
 
-    private static FastCodeException newFastCodeException(
-        List<Instruction> list, FastAggregatedCodeException fastCodeException)
+    private static FastCodeExcepcion newFastCodeException(
+        List<Instruction> list, FastAggregatedCodeExcepcion fastCodeException)
     {
-        FastCodeException fce = new FastCodeException(
+        FastCodeExcepcion fce = new FastCodeExcepcion(
             fastCodeException.getStartPC(),
             fastCodeException.getEndPC(),
             fastCodeException.getHandlerPC(),
@@ -540,7 +540,7 @@ public class FastCodeExceptionAnalyzer
     }
 
     private static void defineType(
-            List<Instruction> list, FastCodeException fastCodeException)
+            List<Instruction> list, FastCodeExcepcion fastCodeException)
     {
         // Contains finally ?
         switch (fastCodeException.nbrFinally)
@@ -965,7 +965,7 @@ public class FastCodeExceptionAnalyzer
     }
 
     private static boolean tryBlockContainsJsr(
-        List<Instruction> list, FastCodeException fastCodeException)
+        List<Instruction> list, FastCodeExcepcion fastCodeException)
     {
         int index = InstructionUtil.getIndexForOffset(
                 list, fastCodeException.tryToOffset);
@@ -1003,7 +1003,7 @@ public class FastCodeExceptionAnalyzer
     }
 
     private static void defineTypeJikes122Or142(
-            List<Instruction> list, FastCodeException fastCodeException,
+            List<Instruction> list, FastCodeExcepcion fastCodeException,
             Instruction instruction, int index)
     {
         if (instruction.opcode == ByteCodeConstants.EXCEPTIONLOAD)
@@ -1032,8 +1032,8 @@ public class FastCodeExceptionAnalyzer
     private static void computeAfterOffset(
             Method method, List<Instruction> list,
             List<int[]> switchCaseOffsets,
-            List<FastCodeException> fastCodeExceptions,
-            FastCodeException fastCodeException, int fastCodeExceptionIndex)
+            List<FastCodeExcepcion> fastCodeExceptions,
+            FastCodeExcepcion fastCodeException, int fastCodeExceptionIndex)
     {
         switch (fastCodeException.type)
         {
@@ -1398,12 +1398,12 @@ public class FastCodeExceptionAnalyzer
                     if (instruction.offset > tryFromOffset)
                     {
                         // Saut des blocs try-catch-finally
-                        FastCodeException fce =
+                        FastCodeExcepcion fce =
                             fastCodeExceptions.get(tryIndex);
                         int afterOffsetTmp = fce.afterOffset;
 
                         int tryFromOffsetTmp;
-                        FastCodeException fceTmp;
+                        FastCodeExcepcion fceTmp;
                         // Recherche du plus grand offset de fin parmi toutes
                         // les exceptions débutant à l'offset 'tryFromOffset'
                         for (;;)
@@ -1666,7 +1666,7 @@ public class FastCodeExceptionAnalyzer
     }
 
     private static int reduceAfterOffsetWithBranchInstructions(
-        List<Instruction> list, FastCodeException fastCodeException,
+        List<Instruction> list, FastCodeExcepcion fastCodeException,
         int firstOffset, int afterOffset)
     {
         Instruction instruction;
@@ -1712,7 +1712,7 @@ public class FastCodeExceptionAnalyzer
     }
 
     private static int reduceAfterOffsetWithLineNumbers(
-        List<Instruction> list, FastCodeException fastCodeException,
+        List<Instruction> list, FastCodeExcepcion fastCodeException,
         int afterOffset)
     {
         int fromIndex = InstructionUtil.getIndexForOffset(
@@ -1858,11 +1858,11 @@ public class FastCodeExceptionAnalyzer
     }
 
     private static int reduceAfterOffsetWithExceptions(
-        List<FastCodeException> fastCodeExceptions,
+        List<FastCodeExcepcion> fastCodeExceptions,
         int fromOffset, int maxOffset, int afterOffset)
     {
         int i = fastCodeExceptions.size();
-        FastCodeException fastCodeException;
+        FastCodeExcepcion fastCodeException;
         int toOffset;
         while (i-- > 0)
         {
@@ -1898,7 +1898,7 @@ public class FastCodeExceptionAnalyzer
     }
 
     public static void formatFastTry(
-        LocalVariables localVariables, FastCodeException fce,
+        LocalVariables localVariables, FastCodeExcepcion fce,
         FastTry fastTry, int returnOffset)
     {
         switch (fce.type)
@@ -1942,7 +1942,7 @@ public class FastCodeExceptionAnalyzer
     }
 
     private static void formatCatch(
-        LocalVariables localVariables, FastCodeException fce, FastTry fastTry)
+        LocalVariables localVariables, FastCodeExcepcion fce, FastTry fastTry)
     {
         List<Instruction> tryInstructions = fastTry.instructions;
         int jumpOffset = -1;
@@ -2038,7 +2038,7 @@ public class FastCodeExceptionAnalyzer
     }
 
     private static void format118Finally(
-        LocalVariables localVariables, FastCodeException fce, FastTry fastTry)
+        LocalVariables localVariables, FastCodeExcepcion fce, FastTry fastTry)
     {
         List<Instruction> tryInstructions = fastTry.instructions;
         int length = tryInstructions.size();
@@ -2066,7 +2066,7 @@ public class FastCodeExceptionAnalyzer
     }
 
     private static void format118Finally2(
-        FastCodeException fce, FastTry fastTry)
+        FastCodeExcepcion fce, FastTry fastTry)
     {
         List<Instruction> tryInstructions = fastTry.instructions;
         int tryInstructionsLength = tryInstructions.size();
@@ -2188,7 +2188,7 @@ public class FastCodeExceptionAnalyzer
     }
 
     private static void format118CatchFinally(
-            FastCodeException fce, FastTry fastTry)
+            FastCodeExcepcion fce, FastTry fastTry)
     {
         List<Instruction> tryInstructions = fastTry.instructions;
         int tryInstructionsLength = tryInstructions.size();
@@ -2280,7 +2280,7 @@ public class FastCodeExceptionAnalyzer
     }
 
     private static void format118CatchFinally2(
-        FastCodeException fce, FastTry fastTry)
+        FastCodeExcepcion fce, FastTry fastTry)
     {
         List<Instruction> tryInstructions = fastTry.instructions;
         int tryInstructionsLength = tryInstructions.size();
@@ -2318,7 +2318,7 @@ public class FastCodeExceptionAnalyzer
      * toujours dans le block 'finally'.
      */
     private static void format131CatchFinally(
-        LocalVariables localVariables, FastCodeException fce, FastTry fastTry)
+        LocalVariables localVariables, FastCodeExcepcion fce, FastTry fastTry)
     {
         List<Instruction> tryInstructions = fastTry.instructions;
         int length = tryInstructions.size();
@@ -2459,7 +2459,7 @@ public class FastCodeExceptionAnalyzer
     }
 
     private static void format142(
-        LocalVariables localVariables, FastCodeException fce, FastTry fastTry)
+        LocalVariables localVariables, FastCodeExcepcion fce, FastTry fastTry)
     {
         List<Instruction> finallyInstructions = fastTry.finallyInstructions;
         int finallyInstructionsSize = finallyInstructions.size();
@@ -2744,7 +2744,7 @@ public class FastCodeExceptionAnalyzer
     }
 
     private static void formatJikes122(
-        LocalVariables localVariables, FastCodeException fce,
+        LocalVariables localVariables, FastCodeExcepcion fce,
         FastTry fastTry, int returnOffset)
     {
         List<Instruction> tryInstructions = fastTry.instructions;
@@ -2913,7 +2913,7 @@ public class FastCodeExceptionAnalyzer
     }
 
     private static void formatEclipse677Finally(
-        FastCodeException fce, FastTry fastTry)
+        FastCodeExcepcion fce, FastTry fastTry)
     {
         // Remove instructions in finally block
         List<Instruction> finallyInstructions = fastTry.finallyInstructions;
@@ -3052,7 +3052,7 @@ public class FastCodeExceptionAnalyzer
     }
 
     private static void formatEclipse677CatchFinally(
-        FastCodeException fce, FastTry fastTry, int returnOffset)
+        FastCodeExcepcion fce, FastTry fastTry, int returnOffset)
     {
         // Remove instructions in finally block
         List<Instruction> finallyInstructions = fastTry.finallyInstructions;
@@ -3169,8 +3169,8 @@ public class FastCodeExceptionAnalyzer
 		        ((ALoad)((CheckCast)athrow.value).objectref).index == exceptionIndex);
 	}
 
-    public static class FastCodeException
-        implements Comparable<FastCodeException>
+    public static class FastCodeExcepcion
+        implements Comparable<FastCodeExcepcion>
     {
         public int tryFromOffset;
         public int tryToOffset;
@@ -3182,7 +3182,7 @@ public class FastCodeExceptionAnalyzer
         public int type;
         public boolean synchronizedFlag;
 
-        FastCodeException(
+        FastCodeExcepcion(
             int tryFromOffset, int tryToOffset,
             int maxOffset, boolean synchronizedFlag)
         {
@@ -3198,7 +3198,7 @@ public class FastCodeExceptionAnalyzer
         }
 
         @Override
-        public int compareTo(FastCodeException other)
+        public int compareTo(FastCodeExcepcion other)
         {
             // Sort by 1)tryFromOffset 2)maxOffset 3)tryToOffset
             if (this.tryFromOffset != other.tryFromOffset) {
@@ -3237,7 +3237,7 @@ public class FastCodeExceptionAnalyzer
         }
     }
 
-    public static class FastAggregatedCodeException
+    public static class FastAggregatedCodeExcepcion
     {
         public int           otherCatchTypes[];
         public int           nbrFinally;
@@ -3245,7 +3245,7 @@ public class FastCodeExceptionAnalyzer
         public int           index;
         public CodeException codeException;
 
-        public FastAggregatedCodeException(
+        public FastAggregatedCodeExcepcion(
             int index, int startPc, int endPc, int handlerPc, int catchType)
         {
         	this.index = index;
@@ -3272,7 +3272,7 @@ public class FastCodeExceptionAnalyzer
     }
 
     public static int computeTryToIndex(
-        List<Instruction> instructions, FastCodeException fce,
+        List<Instruction> instructions, FastCodeExcepcion fce,
         int lastIndex, int maxOffset)
     {
         // Parcours

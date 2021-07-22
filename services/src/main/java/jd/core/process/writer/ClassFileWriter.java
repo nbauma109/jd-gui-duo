@@ -98,12 +98,12 @@ public class ClassFileWriter
         PUBLIC, PRIVATE, PROTECTED, STATIC
     };
 
-    private Loader loader;
-    private Printer printer;
-    private InstructionPrinter instructionPrinter;
-    private SourceWriterVisitor visitor;
-    private ReferenceMap referenceMap;
-    private List<LayoutBlock> layoutBlockList;
+    private final Loader loader;
+    private final Printer printer;
+    private final InstructionPrinter instructionPrinter;
+    private final SourceWriterVisitor visitor;
+    private final ReferenceMap referenceMap;
+    private final List<LayoutBlock> layoutBlockList;
     private int index;
     private boolean addSpace;
 
@@ -544,12 +544,12 @@ public class ClassFileWriter
                 {
                     Collections.sort(references, new ReferenceByCountComparator());
 
-                    int index = references.size();
+                    int idx = references.size();
 
                     Reference reference;
                     while (delta-- > 0) {
-                        index--;
-                        reference = references.remove(index);
+                        idx--;
+                        reference = references.remove(idx);
                         // Modification de 'ReferenceMap'
                         this.referenceMap.remove(reference.getInternalName());
                     }
@@ -724,7 +724,6 @@ public class ClassFileWriter
         {
             this.printer.debugStartOfLayoutBlock();
 
-            ReferenceMap referenceMap = this.referenceMap;
             ClassFile classFile = alb.classFile;
 
             if (alb.lineCount == 0)
@@ -732,7 +731,7 @@ public class ClassFileWriter
                 for (int i=0; i<length; i++)
                 {
                     AnnotationWriter.writeAnnotation(
-                        this.loader, this.printer, referenceMap,
+                        this.loader, this.printer, this.referenceMap,
                         classFile, annotations.get(i));
                 }
             }
@@ -750,7 +749,7 @@ public class ClassFileWriter
                 for (int i=0; i<length; i++)
                 {
                     AnnotationWriter.writeAnnotation(
-                        this.loader, this.printer, referenceMap,
+                        this.loader, this.printer, this.referenceMap,
                         classFile, annotations.get(i));
 
                     if (--j > 0)
@@ -1553,7 +1552,7 @@ public class ClassFileWriter
         ConstantPool constants = classFile.getConstantPool();
 
         AttributeSignature as = field.getAttributeSignature();
-        int signatureIndex = (as == null) ?
+        int signatureIndex = as == null ?
                 field.getDescriptorIndex() : as.signatureIndex;
 
         String signature = constants.getConstantUtf8(signatureIndex);
@@ -1763,23 +1762,23 @@ public class ClassFileWriter
         this.visitor.init(
             ilb.classFile, ilb.method, ilb.firstOffset, ilb.lastOffset);
 
-        int index = ilb.firstIndex;
+        int idx = ilb.firstIndex;
         int lastIndex = ilb.lastIndex;
         List<Instruction> instructions = ilb.instructions;
 
         Instruction instruction;
-        while (index <= lastIndex)
+        while (idx <= lastIndex)
         {
-            instruction = instructions.get(index);
+            instruction = instructions.get(idx);
 
-            if (index > ilb.firstIndex || ilb.firstOffset == 0)
+            if (idx > ilb.firstIndex || ilb.firstOffset == 0)
             {
                 this.instructionPrinter.startOfInstruction();
             }
 
             this.visitor.visit(instruction);
 
-            if (index < lastIndex || ilb.lastOffset == instruction.offset)
+            if (idx < lastIndex || ilb.lastOffset == instruction.offset)
             {
                 // Ne pas afficher de ';' si une instruction n'a pas ete
                 // entierement ecrite.
@@ -1787,7 +1786,7 @@ public class ClassFileWriter
                 this.printer.print(';');
             }
 
-            index++;
+            idx++;
         }
 
         this.instructionPrinter.release();
@@ -1935,7 +1934,7 @@ public class ClassFileWriter
 
         String signature = clb.fs.test.getReturnedSignature(
             clb.classFile.getConstantPool(), clb.method.getLocalVariables());
-        char type = (signature == null) ? 'X' : signature.charAt(0);
+        char type = signature == null ? 'X' : signature.charAt(0);
 
         FastSwitch.Pair[] pairs = clb.fs.pairs;
         int lineCount = clb.lineCount + 1;

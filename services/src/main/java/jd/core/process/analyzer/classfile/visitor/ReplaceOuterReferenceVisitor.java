@@ -453,12 +453,12 @@ public class ReplaceOuterReferenceVisitor
 
     public void visit(List<Instruction> instructions)
     {
-        for (int index=instructions.size()-1; index>=0; --index)
+        for (int idx=instructions.size()-1; idx>=0; --idx)
         {
-            Instruction i = instructions.get(index);
+            Instruction i = instructions.get(idx);
 
             if (match(i))
-                instructions.set(index, newInstruction(i));
+                instructions.set(idx, newInstruction(i));
             else
                 visit(i);
         }

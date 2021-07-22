@@ -1760,9 +1760,8 @@ public class TypeMaker {
         }
 
         public boolean search(char c) {
-            int length = array.length;
 
-            for (int i=index; i<length; i++) {
+            for (int i=index; i<array.length; i++) {
                 if (array[i] == c) {
                     index = i;
                     return true;
@@ -1773,10 +1772,9 @@ public class TypeMaker {
         }
 
         public char searchEndMarker() {
-            int length = array.length;
 
             char c;
-            while (index < length) {
+            while (index < array.length) {
                 c = array[index];
 
                 if (c == ';' || c == '<' || c == '.') {
