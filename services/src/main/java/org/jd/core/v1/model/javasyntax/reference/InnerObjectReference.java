@@ -7,9 +7,7 @@
 
 package org.jd.core.v1.model.javasyntax.reference;
 
-import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
-import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
-import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.*;
 
 public class InnerObjectReference extends InnerObjectType implements Reference {
 

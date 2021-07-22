@@ -13,14 +13,9 @@ import java.awt.Color;
 import java.awt.GridLayout;
 import java.util.Map;
 
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
+import javax.swing.*;
 
-import static org.jd.gui.util.decompiler.GuiPreferences.DISPLAY_DEFAULT_CONSTRUCTOR;
-import static org.jd.gui.util.decompiler.GuiPreferences.ESCAPE_UNICODE_CHARACTERS;
-import static org.jd.gui.util.decompiler.GuiPreferences.OMIT_THIS_PREFIX;
-import static org.jd.gui.util.decompiler.GuiPreferences.REALIGN_LINE_NUMBERS;
+import static org.jd.gui.util.decompiler.GuiPreferences.*;
 
 public class ClassFileViewerPreferencesProvider extends JPanel implements PreferencesPanel {
 

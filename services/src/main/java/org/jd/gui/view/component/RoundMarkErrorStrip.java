@@ -19,15 +19,10 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
 
-import javax.swing.JComponent;
-import javax.swing.ToolTipManager;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.text.BadLocationException;
@@ -192,48 +187,6 @@ public class RoundMarkErrorStrip extends JComponent {
     }
 
     /**
-     * Returns a "brighter" color.
-     *
-     * @param c The color.
-     * @return A brighter color.
-     */
-    private Color getBrighterColor(Color c) {
-        if (brighterColors==null) {
-            brighterColors = new HashMap<>(5); // Usually small
-        }
-        return brighterColors.computeIfAbsent(c, k-> {
-            // Don't use c.brighter() as it doesn't work well for blue, and
-            // also doesn't return something brighter "enough."
-            int r = possiblyBrighter(c.getRed());
-            int g = possiblyBrighter(c.getGreen());
-            int b = possiblyBrighter(c.getBlue());
-            return new Color(r, g, b);
-        });
-    }
-
-    /**
-     * Added for JD-GUI.
-     *
-     * Returns a "brighter" color.
-     *
-     * @param c The color.
-     * @return A brighter color.
-     */
-    private Color getDarkerColor(Color c) {
-        if (darkerColors==null) {
-            darkerColors = new HashMap<>(5); // Usually small
-        }
-        return darkerColors.computeIfAbsent(c, k -> {
-            // Don't use c.brighter() as it doesn't work well for blue, and
-            // also doesn't return something brighter "enough."
-            int r = possiblyDarker(c.getRed());
-            int g = possiblyDarker(c.getGreen());
-            int b = possiblyDarker(c.getBlue());
-            return new Color(r, g, b);
-        });
-    }
-
-    /**
      * Returns the color to use when painting the caret marker.
      *
      * @return The caret marker color.
@@ -306,20 +259,6 @@ public class RoundMarkErrorStrip extends JComponent {
             text = MessageFormat.format(text, Integer.valueOf(line+1));
         }
         return text;
-    }
-
-    /**
-     * Returns the y-offset in this component corresponding to a line in the
-     * text component.
-     *
-     * @param line The line.
-     * @return The y-offset.
-     * @see #yToLine(int)
-     */
-    private int lineToY(int line) {
-        int h = textArea.getVisibleRect().height;
-        float lineCount = textArea.getLineCount();
-        return (int)(((line-1)/(lineCount-1)) * h) - 2;
     }
 
     /**
@@ -454,7 +393,7 @@ public class RoundMarkErrorStrip extends JComponent {
      * @param color The new caret marker color.
      * @see #getCaretMarkerColor()
      */
-    public void setCaretMarkerColor(Color color) {
+    private void setCaretMarkerColor(Color color) {
         if (color!=null) {
             caretMarkerColor = color;
             listener.caretUpdate(null); // Force repaint
@@ -467,7 +406,7 @@ public class RoundMarkErrorStrip extends JComponent {
      * @param follow Whether the caret's current location should be followed.
      * @see #getFollowCaret()
      */
-    public void setFollowCaret(boolean follow) {
+    private void setFollowCaret(boolean follow) {
         if (followCaret!=follow) {
             if (followCaret) {
                 repaint(0,caretLineY, getWidth(),2); // Erase
@@ -489,7 +428,7 @@ public class RoundMarkErrorStrip extends JComponent {
      * @see #getLevelThreshold()
      * @see ParserNotice
      */
-    public void setLevelThreshold(ParserNotice.Level level) {
+    private void setLevelThreshold(ParserNotice.Level level) {
         levelThreshold = level;
         if (isDisplayable()) {
             refreshMarkers();
@@ -502,7 +441,7 @@ public class RoundMarkErrorStrip extends JComponent {
      * @param show Whether to show markers for "mark all" highlights.
      * @see #getShowMarkAll()
      */
-    public void setShowMarkAll(boolean show) {
+    private void setShowMarkAll(boolean show) {
         if (show!=showMarkAll) {
             showMarkAll = show;
             if (isDisplayable()) { // Skip this when we're first created
@@ -517,7 +456,7 @@ public class RoundMarkErrorStrip extends JComponent {
      * @param show Whether to show marked occurrences.
      * @see #getShowMarkedOccurrences()
      */
-    public void setShowMarkedOccurrences(boolean show) {
+    private void setShowMarkedOccurrences(boolean show) {
         if (show!=showMarkedOccurrences) {
             showMarkedOccurrences = show;
             if (isDisplayable()) { // Skip this when we're first created
@@ -850,5 +789,61 @@ public class RoundMarkErrorStrip extends JComponent {
             int y = lineToY(line);
             setLocation(2, y);
         }
+
+		/**
+		 * Returns a "brighter" color.
+		 *
+		 * @param c The color.
+		 * @return A brighter color.
+		 */
+		private Color getBrighterColor(Color c) {
+		    if (brighterColors==null) {
+		        brighterColors = new HashMap<>(5); // Usually small
+		    }
+		    return brighterColors.computeIfAbsent(c, k-> {
+		        // Don't use c.brighter() as it doesn't work well for blue, and
+		        // also doesn't return something brighter "enough."
+		        int r = possiblyBrighter(c.getRed());
+		        int g = possiblyBrighter(c.getGreen());
+		        int b = possiblyBrighter(c.getBlue());
+		        return new Color(r, g, b);
+		    });
+		}
+
+		/**
+		 * Added for JD-GUI.
+		 *
+		 * Returns a "brighter" color.
+		 *
+		 * @param c The color.
+		 * @return A brighter color.
+		 */
+		private Color getDarkerColor(Color c) {
+		    if (darkerColors==null) {
+		        darkerColors = new HashMap<>(5); // Usually small
+		    }
+		    return darkerColors.computeIfAbsent(c, k -> {
+		        // Don't use c.brighter() as it doesn't work well for blue, and
+		        // also doesn't return something brighter "enough."
+		        int r = possiblyDarker(c.getRed());
+		        int g = possiblyDarker(c.getGreen());
+		        int b = possiblyDarker(c.getBlue());
+		        return new Color(r, g, b);
+		    });
+		}
+
+		/**
+		 * Returns the y-offset in this component corresponding to a line in the
+		 * text component.
+		 *
+		 * @param line The line.
+		 * @return The y-offset.
+		 * @see #yToLine(int)
+		 */
+		private int lineToY(int line) {
+		    int h = textArea.getVisibleRect().height;
+		    float lineCount = textArea.getLineCount();
+		    return (int)(((line-1)/(lineCount-1)) * h) - 2;
+		}
     }
 }

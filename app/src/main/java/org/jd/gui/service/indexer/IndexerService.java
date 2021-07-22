@@ -11,9 +11,7 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.service.extension.ExtensionService;
 import org.jd.gui.spi.Indexer;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class IndexerService {
     protected static final IndexerService INDEXER_SERVICE = new IndexerService();
@@ -82,19 +80,19 @@ public class IndexerService {
     }
 
     protected static class Indexers {
-        protected Map<String, Indexer> indexers = new HashMap<>();
+        protected Map<String, Indexer> indexerMap = new HashMap<>();
         protected Indexer defaultIndexer;
 
         public void add(Indexer indexer) {
             if (indexer.getPathPattern() != null) {
-                indexers.put(indexer.getPathPattern().pattern(), indexer);
+                indexerMap.put(indexer.getPathPattern().pattern(), indexer);
             } else {
                 defaultIndexer = indexer;
             }
         }
 
         public Indexer match(String path) {
-            for (Indexer indexer : indexers.values()) {
+            for (Indexer indexer : indexerMap.values()) {
                 if (indexer.getPathPattern().matcher(path).matches()) {
                     return indexer;
                 }

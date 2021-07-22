@@ -13,9 +13,7 @@ import org.jd.gui.api.feature.SourcesSavable;
 import org.jd.gui.view.SaveAllSourcesView;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.concurrent.ScheduledExecutorService;
 
 import javax.swing.JFrame;

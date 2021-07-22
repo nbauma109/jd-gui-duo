@@ -58,8 +58,8 @@ public class ContainerLoader implements Loader {
 
     @Override
     public byte[] load(String internalName) throws LoaderException {
-        Container.Entry entry = getEntry(internalName);
-        try (InputStream inputStream = entry.getInputStream()) {
+        Container.Entry loadedEntry = getEntry(internalName);
+        try (InputStream inputStream = loadedEntry.getInputStream()) {
             return IOUtils.toByteArray(inputStream);
         } catch (IOException e) {
             throw new LoaderException(e);

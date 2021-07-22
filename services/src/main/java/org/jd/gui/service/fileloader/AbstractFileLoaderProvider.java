@@ -13,10 +13,7 @@ import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Container.Entry;
 import org.jd.gui.api.model.TreeNodeData;
-import org.jd.gui.spi.ContainerFactory;
-import org.jd.gui.spi.FileLoader;
-import org.jd.gui.spi.PanelFactory;
-import org.jd.gui.spi.TreeNodeFactory;
+import org.jd.gui.spi.*;
 
 import java.io.*;
 import java.net.URI;
@@ -107,7 +104,7 @@ public abstract class AbstractFileLoaderProvider implements FileLoader {
             }
         }
 
-        public void setChildren(Map<Container.EntryPath, Container.Entry> children) {
+        private void setChildren(Map<Container.EntryPath, Container.Entry> children) {
             this.children = children;
         }
     }

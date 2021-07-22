@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jdv1.gui.util.decompiler;
 
 import org.jd.core.v1.api.Decompiler;
@@ -18,13 +17,15 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.apache.bcel.Const.MAJOR_1_1;
+import static org.apache.bcel.Const.MAJOR_1_5;
 import static org.jd.gui.util.decompiler.GuiPreferences.*;
 
 public class LineNumberStringBuilderPrinter extends StringBuilderPrinter {
-    protected boolean showLineNumbers = false;
+    protected boolean showLineNumbers;
 
-    protected int maxLineNumber = 0;
-    protected int digitCount = 0;
+    protected int maxLineNumber;
+    protected int digitCount;
 
     protected String lineNumberBeginPrefix;
     protected String lineNumberEndPrefix;
@@ -46,7 +47,7 @@ public class LineNumberStringBuilderPrinter extends StringBuilderPrinter {
         return left;
     }
 
-    // --- Printer --- //
+    /** --- Printer --- */
     @Override
     public void start(int maxLineNumber, int majorVersion, int minorVersion) {
         super.start(maxLineNumber, majorVersion, minorVersion);
@@ -57,14 +58,10 @@ public class LineNumberStringBuilderPrinter extends StringBuilderPrinter {
             if (maxLineNumber > 0) {
                 digitCount = 1;
                 unknownLineNumberPrefix = " ";
-                int maximum = 9;
-
-                while (maximum < maxLineNumber) {
+                for (int maximum = 9; maximum < maxLineNumber; maximum = maximum*10 + 9) {
                     digitCount++;
-                    unknownLineNumberPrefix += ' ';
-                    maximum = maximum*10 + 9;
                 }
-
+                unknownLineNumberPrefix = " ".repeat(digitCount);
                 lineNumberBeginPrefix = "/* ";
                 lineNumberEndPrefix = " */ ";
             } else {
@@ -122,15 +119,13 @@ public class LineNumberStringBuilderPrinter extends StringBuilderPrinter {
     public String buildDecompiledOutput(Map<String, String> preferences, ContainerLoader loader, Container.Entry entry, Decompiler decompiler) throws LoaderException, IOException {
         // Init preferences
         boolean realignmentLineNumbers = Boolean.parseBoolean(preferences.getOrDefault(REALIGN_LINE_NUMBERS, Boolean.FALSE.toString()));
-        boolean unicodeEscape = Boolean.parseBoolean(preferences.getOrDefault(ESCAPE_UNICODE_CHARACTERS, Boolean.FALSE.toString()));
-        boolean showLineNumbers = Boolean.parseBoolean(preferences.getOrDefault(WRITE_LINE_NUMBERS, Boolean.TRUE.toString()));
 
         Map<String, Object> configuration = new HashMap<>();
         configuration.put("realignLineNumbers", realignmentLineNumbers);
 
         setRealignmentLineNumber(realignmentLineNumbers);
-        setUnicodeEscape(unicodeEscape);
-        setShowLineNumbers(showLineNumbers);
+        setUnicodeEscape(Boolean.parseBoolean(preferences.getOrDefault(ESCAPE_UNICODE_CHARACTERS, Boolean.FALSE.toString())));
+        setShowLineNumbers(Boolean.parseBoolean(preferences.getOrDefault(WRITE_LINE_NUMBERS, Boolean.TRUE.toString())));
 
         // Format internal name
         String entryPath = entry.getPath();
@@ -153,13 +148,13 @@ public class LineNumberStringBuilderPrinter extends StringBuilderPrinter {
             // Add Java compiler version
             int majorVersion = getMajorVersion();
 
-            if (majorVersion >= 45) {
+            if (majorVersion >= MAJOR_1_1) {
                 stringBuffer.append("\n * Java compiler version: ");
 
-                if (majorVersion >= 49) {
-                    stringBuffer.append(majorVersion - (49 - 5));
+                if (majorVersion >= MAJOR_1_5) {
+                    stringBuffer.append(majorVersion - (MAJOR_1_5 - 5));
                 } else {
-                    stringBuffer.append(majorVersion - (45 - 1));
+                    stringBuffer.append(majorVersion - (MAJOR_1_1 - 1));
                 }
 
                 stringBuffer.append(" (");

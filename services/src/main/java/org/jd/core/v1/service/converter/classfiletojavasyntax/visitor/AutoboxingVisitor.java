@@ -15,6 +15,8 @@ import org.jd.core.v1.util.StringConstants;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.apache.bcel.Const.MAJOR_1_5;
+
 public class AutoboxingVisitor extends AbstractUpdateExpressionVisitor {
     protected static final Map<String, String> VALUEOF_DESCRIPTOR_MAP = new HashMap<>();
 
@@ -53,7 +55,7 @@ public class AutoboxingVisitor extends AbstractUpdateExpressionVisitor {
     @Override
     public void visit(BodyDeclaration declaration) {
         ClassFileBodyDeclaration cfbd = (ClassFileBodyDeclaration)declaration;
-        boolean autoBoxingSupported = (cfbd.getClassFile().getMajorVersion() >= 49); // (majorVersion >= Java 5)
+        boolean autoBoxingSupported = (cfbd.getClassFile().getMajorVersion() >= MAJOR_1_5);
 
         if (autoBoxingSupported) {
             safeAccept(declaration.getMemberDeclarations());

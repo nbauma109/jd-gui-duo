@@ -11,10 +11,7 @@ import org.jd.core.v1.model.javafragment.*;
 import org.jd.core.v1.model.token.*;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class TokenizeJavaFragmentVisitor implements JavaFragmentVisitor {
     protected static final ImportNameComparator NAME_COMPARATOR = new ImportNameComparator();
@@ -507,7 +504,7 @@ public class TokenizeJavaFragmentVisitor implements JavaFragmentVisitor {
     }
 
     protected class KnownLineNumberTokenVisitor extends AbstractNopTokenVisitor {
-        public int currentLineNumber;
+    	private int currentLineNumber;
 
         public void reset(int firstLineNumber) {
             this.currentLineNumber = firstLineNumber;

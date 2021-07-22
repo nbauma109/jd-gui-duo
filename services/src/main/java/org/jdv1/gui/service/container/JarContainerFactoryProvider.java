@@ -13,15 +13,14 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.model.container.JarContainer;
 import org.jd.gui.spi.ContainerFactory;
 
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
+import java.nio.file.*;
 
 public class JarContainerFactoryProvider implements ContainerFactory {
     @Override
     public String getType() { return "jar"; }
 
     @Override
+    @SuppressWarnings("resource")
     public boolean accept(API api, Path rootPath) {
         if (rootPath.toUri().toString().toLowerCase().endsWith(".jar!/")) {
             // Specification: http://docs.oracle.com/javase/6/docs/technotes/guides/jar/jar.html
@@ -29,6 +28,7 @@ public class JarContainerFactoryProvider implements ContainerFactory {
         }
         // Extension: accept uncompressed JAR file containing a folder 'META-INF'
         try {
+        	// do not try to close file system due to UnsupportedOperationException
             return rootPath.getFileSystem().provider().getScheme().equals("file") && Files.exists(rootPath.resolve("META-INF"));
         } catch (InvalidPathException e) {
             assert ExceptionUtil.printStackTrace(e);

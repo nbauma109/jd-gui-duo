@@ -23,7 +23,7 @@ public class StartBodyFragment extends StartFlexibleBlockFragment implements Jav
         this.end = end;
     }
 
-    public void setLineCount(int lineCount) {
+    void setLineCount(int lineCount) {
         this.lineCount = lineCount;
     }
 

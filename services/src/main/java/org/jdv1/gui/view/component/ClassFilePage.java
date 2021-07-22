@@ -16,21 +16,15 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
-import org.jd.gui.util.decompiler.ClassFileSourcePrinter;
-import org.jd.gui.util.decompiler.ContainerLoader;
-import org.jd.gui.util.decompiler.GuiPreferences;
+import org.jd.gui.util.decompiler.*;
 import org.jd.gui.util.io.NewlineOutputStream;
-import org.jd.gui.util.parser.jdt.core.DeclarationData;
-import org.jd.gui.util.parser.jdt.core.HyperlinkReferenceData;
-import org.jd.gui.util.parser.jdt.core.StringData;
+import org.jd.gui.util.parser.jdt.core.*;
 import org.jdv1.gui.util.MethodPatcher;
 import org.jdv1.gui.util.decompiler.LineNumberStringBuilderPrinter;
 import org.jdv1.gui.util.decompiler.StringBuilderPrinter;
 
 import java.awt.Color;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,9 +33,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 
 import static org.jd.gui.util.Key.key;
-import static org.jd.gui.util.decompiler.GuiPreferences.ESCAPE_UNICODE_CHARACTERS;
-import static org.jd.gui.util.decompiler.GuiPreferences.REALIGN_LINE_NUMBERS;
-import static org.jd.gui.util.decompiler.GuiPreferences.USE_JD_CORE_V0;
+import static org.jd.gui.util.decompiler.GuiPreferences.*;
 
 import jd.core.Decompiler;
 import jd.core.process.DecompilerImpl;

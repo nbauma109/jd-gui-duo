@@ -23,6 +23,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
+import static org.apache.bcel.Const.MAJOR_1_1;
+import static org.apache.bcel.Const.MAJOR_1_5;
 import static org.jd.gui.util.decompiler.GuiPreferences.*;
 
 import jd.core.CoreConstants;
@@ -130,14 +132,14 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
 		    // Add Java compiler version
 		    int majorVersion = printer.getMajorVersion();
 
-		    if (majorVersion >= 45) {
+		    if (majorVersion >= MAJOR_1_1) {
 		        ps.println();
 		        ps.print(" * Java compiler version: ");
 
-		        if (majorVersion >= 49) {
-		            ps.print(majorVersion - (49 - 5));
+		        if (majorVersion >= MAJOR_1_5) {
+		            ps.print(majorVersion - (MAJOR_1_5 - 5));
 		        } else {
-		            ps.print(majorVersion - (45 - 1));
+		            ps.print(majorVersion - (MAJOR_1_1 - 1));
 		        }
 
 		        ps.print(" (");

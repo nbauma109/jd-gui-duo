@@ -13,19 +13,13 @@ import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileNewExpression;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileBreakContinueStatement;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForEachStatement;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForStatement;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.GenericLocalVariable;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.ObjectLocalVariable;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.*;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.ListIterator;
-import java.util.Map;
+import java.util.*;
 
+import static org.apache.bcel.Const.MAJOR_1_5;
 import static org.jd.core.v1.model.javasyntax.statement.ContinueStatement.CONTINUE;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_ITERABLE;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
@@ -56,7 +50,7 @@ public class LoopStatementMaker {
     protected static Statement makeLoop(
             int majorVersion, Map<String, BaseType> typeBounds, LocalVariableMaker localVariableMaker,
             BasicBlock loopBasicBlock, Statements statements, Expression condition, Statements subStatements) {
-        boolean forEachSupported = (majorVersion >= 49); // (majorVersion >= Java 5)
+        boolean forEachSupported = (majorVersion >= MAJOR_1_5);
 
         subStatements.accept(REMOVE_LAST_CONTINUE_STATEMENT_VISITOR);
 
@@ -268,8 +262,9 @@ public class LoopStatementMaker {
                     }
 
                     if (!init.isEmpty()) {
-                        if (init.size() > 1)
-                            Collections.reverse(init);
+                        if (init.size() > 1) {
+							Collections.reverse(init);
+						}
                         return init;
                     }
                     break;

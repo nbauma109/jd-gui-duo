@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg;
 
 import java.util.Iterator;
@@ -43,35 +42,36 @@ public class Loop {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+			return true;
+		}
+        if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
 
         Loop loop = (Loop) o;
 
-        if (!start.equals(loop.start)) return false;
-        if (!members.equals(loop.members)) return false;
-        return !(end != null ? !end.equals(loop.end) : loop.end != null);
-
+        return start.equals(loop.start) && members.equals(loop.members) && !(end != null ? !end.equals(loop.end) : loop.end != null);
     }
 
     @Override
     public int hashCode() {
         int result = 258190310 + start.hashCode();
         result = 31 * result + members.hashCode();
-        result = 31 * result + (end != null ? end.hashCode() : 0);
-        return result;
+        return 31 * result + (end != null ? end.hashCode() : 0);
     }
 
     @Override
     public String toString() {
-        String str = "Loop{start=" + start.getIndex() + ", members=[";
+        StringBuilder str = new StringBuilder("Loop{start=").append(start.getIndex()).append(", members=[");
 
-        if ((members != null) && (!members.isEmpty())) {
+        if (members != null && !members.isEmpty()) {
             Iterator<BasicBlock> iterator = members.iterator();
-            str += iterator.next().getIndex();
+            str.append(iterator.next().getIndex());
 
-            while (iterator.hasNext())
-                str += ", " + iterator.next().getIndex();
+            while (iterator.hasNext()) {
+				str.append(", ").append(iterator.next().getIndex());
+			}
         }
 
         return str + "], end=" + (end ==null ? "" : end.getIndex()) + "}";

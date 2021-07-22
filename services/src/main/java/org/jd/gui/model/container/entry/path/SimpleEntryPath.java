@@ -6,8 +6,8 @@ import java.util.Objects;
 
 public class SimpleEntryPath implements EntryPath {
 
-    private String path;
-    private boolean directory;
+    private final String path;
+    private final boolean directory;
 
     public SimpleEntryPath(EntryPath entryPath) {
         this(entryPath.getPath(), entryPath.isDirectory());
@@ -23,17 +23,9 @@ public class SimpleEntryPath implements EntryPath {
         return path;
     }
 
-    public void setPath(String path) {
-        this.path = path;
-    }
-
     @Override
     public boolean isDirectory() {
         return directory;
-    }
-
-    public void setDirectory(boolean directory) {
-        this.directory = directory;
     }
 
     @Override

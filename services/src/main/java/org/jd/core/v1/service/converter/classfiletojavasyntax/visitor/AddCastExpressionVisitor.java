@@ -13,14 +13,8 @@ import org.jd.core.v1.model.javasyntax.reference.InnerObjectReference;
 import org.jd.core.v1.model.javasyntax.reference.ObjectReference;
 import org.jd.core.v1.model.javasyntax.statement.*;
 import org.jd.core.v1.model.javasyntax.type.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorDeclaration;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMethodDeclaration;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileStaticInitializerDeclaration;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileConstructorInvocationExpression;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileMethodInvocationExpression;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileNewExpression;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileSuperConstructorInvocationExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.core.v1.util.DefaultList;
 import org.jd.core.v1.util.StringConstants;
@@ -289,10 +283,10 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         Expression exp = expression.getExpression();
 
         if (exp != null && !exp.isObjectTypeReferenceExpression()) {
-            Type type = typeMaker.makeFromInternalTypeName(expression.getInternalTypeName());
+            Type localType = typeMaker.makeFromInternalTypeName(expression.getInternalTypeName());
 
-            if (type.getName() != null) {
-                expression.setExpression(updateExpression(type, exp, false, true));
+            if (localType.getName() != null) {
+                expression.setExpression(updateExpression(localType, exp, false, true));
             }
         }
     }

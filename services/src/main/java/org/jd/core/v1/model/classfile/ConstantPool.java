@@ -7,10 +7,7 @@
 
 package org.jd.core.v1.model.classfile;
 
-import org.apache.bcel.classfile.Constant;
-import org.apache.bcel.classfile.ConstantClass;
-import org.apache.bcel.classfile.ConstantString;
-import org.apache.bcel.classfile.ConstantUtf8;
+import org.apache.bcel.classfile.*;
 
 public class ConstantPool {
     protected Constant[] constants;

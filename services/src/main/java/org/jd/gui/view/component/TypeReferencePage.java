@@ -13,9 +13,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil
 import org.jd.gui.util.parser.jdt.core.HyperlinkData;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -80,7 +78,7 @@ public abstract class TypeReferencePage extends HyperlinkPage {
 
                         for (Map.Entry<Integer, HyperlinkData> entry : hyperlinks.entrySet()) {
                             TypeHyperlinkData hyperlink = (TypeHyperlinkData)entry.getValue();
-                            String name = getMostInnerTypeName(hyperlink.internalTypeName);
+                            String name = getMostInnerTypeName(hyperlink.getInternalTypeName());
 
                             if (pattern.matcher(name).matches()) {
                                 ranges.add(new DocumentRange(hyperlink.getStartPosition(), hyperlink.getEndPosition()));
@@ -109,13 +107,25 @@ public abstract class TypeReferencePage extends HyperlinkPage {
     }
 
     public static class TypeHyperlinkData extends HyperlinkData {
-        public boolean enabled;
-        public String internalTypeName;
+    	private boolean enabled;
+    	private final String internalTypeName;
 
         public TypeHyperlinkData(int startPosition, int endPosition, String internalTypeName) {
             super(startPosition, endPosition);
-            this.enabled = false;
+            this.setEnabled(false);
             this.internalTypeName = internalTypeName;
         }
+
+		public boolean isEnabled() {
+			return enabled;
+		}
+
+		public void setEnabled(boolean enabled) {
+			this.enabled = enabled;
+		}
+
+		public String getInternalTypeName() {
+			return internalTypeName;
+		}
     }
 }

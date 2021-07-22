@@ -7,9 +7,7 @@
 
 package org.jd.gui.util.io;
 
-import java.io.FilterOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 
 public class NewlineOutputStream extends FilterOutputStream {
@@ -29,12 +27,12 @@ public class NewlineOutputStream extends FilterOutputStream {
     }
 
     @Override
-    public void write(byte b[]) throws IOException {
+    public void write(byte[] b) throws IOException {
         write(b, 0, b.length);
     }
 
     @Override
-    public void write(byte b[], int off, int len) throws IOException {
+    public void write(byte[] b, int off, int len) throws IOException {
         int i;
 
         for (i=off; i<len; i++) {

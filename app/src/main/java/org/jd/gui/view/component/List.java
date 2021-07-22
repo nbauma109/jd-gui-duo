@@ -9,10 +9,7 @@ package org.jd.gui.view.component;
 
 import org.jd.gui.api.model.TreeNodeData;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Insets;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 
 import javax.swing.*;
@@ -57,10 +54,12 @@ public class List extends JList {
             backgroundNonSelectionColor = UIManager.getColor("List.background");
             Insets margins = UIManager.getInsets("List.contentMargins");
 
-            if (textSelectionColor == null)
-                textSelectionColor = List.this.getSelectionForeground();
-            if (backgroundSelectionColor == null)
-                backgroundSelectionColor = List.this.getSelectionBackground();
+            if (textSelectionColor == null) {
+				textSelectionColor = List.this.getSelectionForeground();
+			}
+            if (backgroundSelectionColor == null) {
+				backgroundSelectionColor = List.this.getSelectionBackground();
+			}
 
             if (margins != null) {
                 label.setBorder(BorderFactory.createEmptyBorder(margins.top, margins.left, margins.bottom, margins.right));

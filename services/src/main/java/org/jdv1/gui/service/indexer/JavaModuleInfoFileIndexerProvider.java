@@ -12,18 +12,12 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.service.indexer.AbstractIndexerProvider;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.ModuleVisitor;
-import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.*;
 
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
-import static org.objectweb.asm.ClassReader.SKIP_CODE;
-import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
-import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
+import static org.objectweb.asm.ClassReader.*;
 
 /**
  * Unsafe thread implementation of class file indexer.
@@ -84,18 +78,14 @@ public class JavaModuleInfoFileIndexerProvider extends AbstractIndexerProvider {
         @Override
         public void visitExport(final String packaze, final int access, final String... modules) {
             if (modules != null) {
-                for (String module : modules) {
-                    javaModuleReferenceSet.add(module);
-                }
+            	Collections.addAll(javaModuleReferenceSet, modules);
             }
         }
 
         @Override
         public void visitOpen(final String packaze, final int access, final String... modules) {
             if (modules != null) {
-                for (String module : modules) {
-                    javaModuleReferenceSet.add(module);
-                }
+            	Collections.addAll(javaModuleReferenceSet, modules);
             }
         }
 
@@ -104,9 +94,7 @@ public class JavaModuleInfoFileIndexerProvider extends AbstractIndexerProvider {
             typeReferenceSet.add(service);
 
             if (providers != null) {
-                for (String provider : providers) {
-                    typeReferenceSet.add(provider);
-                }
+            	Collections.addAll(typeReferenceSet, providers);
             }
         }
     }

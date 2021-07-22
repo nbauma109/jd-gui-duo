@@ -13,10 +13,7 @@ import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.TypeArgument;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ClassFileBodyDeclaration extends BodyDeclaration implements ClassFileMemberDeclaration {
     protected ClassFile classFile;

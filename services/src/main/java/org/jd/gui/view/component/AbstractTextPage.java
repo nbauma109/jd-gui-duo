@@ -11,19 +11,12 @@ import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rsyntaxtextarea.folding.FoldManager;
 import org.fife.ui.rtextarea.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
-import org.jd.gui.api.feature.ContentSearchable;
-import org.jd.gui.api.feature.LineNumberNavigable;
-import org.jd.gui.api.feature.PreferencesChangeListener;
-import org.jd.gui.api.feature.UriOpenable;
+import org.jd.gui.api.feature.*;
 
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelListener;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.awt.event.*;
+import java.awt.geom.Rectangle2D;
+import java.io.*;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -75,9 +68,9 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
             }
         });
 
-        KeyStroke ctrlA = KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
-        KeyStroke ctrlC = KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
-        KeyStroke ctrlV = KeyStroke.getKeyStroke(KeyEvent.VK_V, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+        KeyStroke ctrlA = KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
+        KeyStroke ctrlC = KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
+        KeyStroke ctrlV = KeyStroke.getKeyStroke(KeyEvent.VK_V, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
         InputMap inputMap = textArea.getInputMap();
         inputMap.put(ctrlA, "none");
         inputMap.put(ctrlC, "none");
@@ -102,10 +95,10 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
         }
 
         scrollPane.addMouseWheelListener(e -> {
-            if ((e.getModifiers() & (Event.META_MASK|Event.CTRL_MASK)) != 0) {
+            if ((e.getModifiersEx() & (InputEvent.META_DOWN_MASK|InputEvent.CTRL_DOWN_MASK)) != 0) {
                 int x = e.getX() + scrollPane.getX() - textArea.getX();
                 int y = e.getY() + scrollPane.getY() - textArea.getY();
-                int offset = textArea.viewToModel(new Point(x, y));
+                int offset = textArea.viewToModel2D(new Point(x, y));
 
                 // Update font size
                 if (e.getWheelRotation() > 0) {
@@ -120,8 +113,8 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
                 }
 
                 try {
-                    Rectangle newRectangle = textArea.modelToView(offset);
-                    int newY = newRectangle.y + (newRectangle.height >> 1);
+                    Rectangle2D newRectangle = textArea.modelToView2D(offset);
+                    int newY = (int) Math.round(newRectangle.getY() + newRectangle.getHeight() / 2d);
 
                     // Scroll
                     Point viewPosition = scrollPane.getViewport().getViewPosition();
@@ -165,7 +158,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
      * @see org.fife.ui.rsyntaxtextarea.RSyntaxUtilities#selectAndPossiblyCenter
      * Force center and do not select
      */
-    public void setCaretPositionAndCenter(DocumentRange range) {
+    protected void setCaretPositionAndCenter(DocumentRange range) {
         final int start = range.getStartOffset();
         final int end = range.getEndOffset();
         boolean foldsExpanded = false;
@@ -178,7 +171,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
 
         if (!foldsExpanded) {
             try {
-                Rectangle rec = textArea.modelToView(start);
+                Rectangle2D rec = textArea.modelToView2D(start);
 
                 if (rec != null) {
                     // Visible
@@ -187,7 +180,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
                     // Not visible yet
                     SwingUtilities.invokeLater(() -> {
                         try {
-                            Rectangle r = textArea.modelToView(start);
+                            Rectangle2D r = textArea.modelToView2D(start);
                             if (r != null) {
                                 setCaretPositionAndCenter(start, end, r);
                             }
@@ -202,10 +195,10 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
         }
     }
 
-    protected void setCaretPositionAndCenter(int start, int end, Rectangle r) {
+    protected void setCaretPositionAndCenter(int start, int end, Rectangle2D rec) {
         if (end != start) {
             try {
-                r = r.union(textArea.modelToView(end));
+                rec = rec.createUnion(textArea.modelToView2D(end));
             } catch (BadLocationException e) {
                 assert ExceptionUtil.printStackTrace(e);
             }
@@ -214,7 +207,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
         Rectangle visible = textArea.getVisibleRect();
 
         // visible.x = r.x - (visible.width - r.width) / 2;
-        visible.y = r.y - (visible.height - r.height) / 2;
+        visible.y = (int) Math.round(rec.getY() - (visible.height - rec.getHeight()) / 2);
 
         Rectangle bounds = textArea.getBounds();
         Insets i = textArea.getInsets();
@@ -354,7 +347,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
             } else if (parameters.containsKey("highlightFlags")) {
                 String highlightFlags = parameters.get("highlightFlags");
 
-                if ((highlightFlags.indexOf('s') != -1) && parameters.containsKey("highlightPattern")) {
+                if (highlightFlags.indexOf('s') != -1 && parameters.containsKey("highlightPattern")) {
                     textArea.setMarkAllHighlightColor(SELECT_HIGHLIGHT_COLOR);
                     textArea.setCaretPosition(0);
 

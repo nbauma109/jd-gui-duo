@@ -11,10 +11,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Future;
 
 public class IndexesUtil {
@@ -62,7 +59,8 @@ public class IndexesUtil {
                 if (futureIndexes.isDone()) {
                     Map<String, Collection> index = futureIndexes.get().getIndex(indexName);
                     if (index != null) {
-                        Collection<Container.Entry> collection = index.get(key);
+                        @SuppressWarnings("unchecked")
+						Collection<Container.Entry> collection = index.get(key);
                         if (collection != null) {
                             entries.addAll(collection);
                         }

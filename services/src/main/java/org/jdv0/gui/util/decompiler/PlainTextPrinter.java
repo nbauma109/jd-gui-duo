@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jdv0.gui.util.decompiler;
 
 import org.jd.gui.util.decompiler.GuiPreferences;
@@ -18,12 +17,12 @@ public class PlainTextPrinter implements Printer {
     protected static final String TAB = "  ";
     protected static final String NEWLINE = System.lineSeparator();
 
-    protected GuiPreferences preferences = null;
-    protected PrintStream printStream = null;
-    protected int maxLineNumber = 0;
-    protected int majorVersion = 0;
-    protected int minorVersion = 0;
-    protected int digitCount = 0;
+    protected GuiPreferences preferences;
+    protected PrintStream printStream;
+    protected int maxLineNumber;
+    protected int majorVersion;
+    protected int minorVersion;
+    protected int digitCount;
 
     protected String lineNumberBeginPrefix;
     protected String lineNumberEndPrefix;
@@ -37,8 +36,6 @@ public class PlainTextPrinter implements Printer {
     public int getMajorVersion() { return majorVersion; }
     public int getMinorVersion() { return minorVersion; }
 
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
-
     @Override
     public void print(byte b) { this.printStream.append(String.valueOf(b)); }
     @Override
@@ -46,14 +43,16 @@ public class PlainTextPrinter implements Printer {
 
     @Override
     public void print(char c) {
-        if (this.display)
-            this.printStream.append(String.valueOf(c));
+        if (this.display) {
+			this.printStream.append(String.valueOf(c));
+		}
     }
 
     @Override
     public void print(String s) {
-        if (this.display)
-            printEscape(s);
+        if (this.display) {
+			printEscape(s);
+		}
     }
 
     @Override
@@ -64,8 +63,9 @@ public class PlainTextPrinter implements Printer {
 
     @Override
     public void printKeyword(String s) {
-        if (this.display)
-            this.printStream.append(s);
+        if (this.display) {
+			this.printStream.append(s);
+		}
     }
 
     @Override
@@ -73,8 +73,9 @@ public class PlainTextPrinter implements Printer {
 
     @Override
     public void printType(String internalName, String name, String scopeInternalName) {
-        if (this.display)
-            printEscape(name);
+        if (this.display) {
+			printEscape(name);
+		}
     }
 
     @Override
@@ -151,15 +152,10 @@ public class PlainTextPrinter implements Printer {
 
             if (maxLineNumber > 0) {
                 this.digitCount = 1;
-                this.unknownLineNumberPrefix = " ";
-                int maximum = 9;
-
-                while (maximum < maxLineNumber) {
+                for (int maximum = 9; maximum < maxLineNumber; maximum = maximum*10 + 9) {
                     this.digitCount++;
-                    this.unknownLineNumberPrefix += ' ';
-                    maximum = maximum*10 + 9;
                 }
-
+                this.unknownLineNumberPrefix = " ".repeat(digitCount);
                 this.lineNumberBeginPrefix = "/* ";
                 this.lineNumberEndPrefix = " */ ";
             } else {
@@ -184,8 +180,9 @@ public class PlainTextPrinter implements Printer {
     }
     @Override
     public void desindent() {
-        if (this.indentationCount > 0)
-            this.indentationCount--;
+        if (this.indentationCount > 0) {
+			this.indentationCount--;
+		}
     }
 
     @Override
@@ -209,8 +206,9 @@ public class PlainTextPrinter implements Printer {
             this.printStream.append(this.lineNumberEndPrefix);
         }
 
-        for (int i=0; i<indentationCount; i++)
-            this.printStream.append(TAB);
+        for (int i=0; i<indentationCount; i++) {
+			this.printStream.append(TAB);
+		}
     }
 
     @Override
@@ -271,8 +269,9 @@ public class PlainTextPrinter implements Printer {
 
     @Override
     public void startOfOptionalPrefix() {
-        if (!this.preferences.isShowPrefixThis())
-            this.display = false;
+        if (!this.preferences.isShowPrefixThis()) {
+			this.display = false;
+		}
     }
 
     @Override
@@ -280,8 +279,6 @@ public class PlainTextPrinter implements Printer {
     {
         this.display = true;
     }
-
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
 
     @Override
     public void debugStartOfLayoutBlock() {}
@@ -316,14 +313,13 @@ public class PlainTextPrinter implements Printer {
     @Override
     public void debugEndOfCaseBlockLayoutBlock() {}
 
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
-
     protected void printEscape(String s) {
         if (this.preferences.isUnicodeEscape()) {
             int length = s.length();
 
-            for (int i=0; i<length; i++) {
-                char c = s.charAt(i);
+            char c;
+			for (int i=0; i<length; i++) {
+                c = s.charAt(i);
 
                 if (c == '\t') {
                     this.printStream.append(c);
@@ -336,14 +332,14 @@ public class PlainTextPrinter implements Printer {
                     // Write octal format
                     this.printStream.append("\\u");
 
-                    int z = (c >> 12);
-                    this.printStream.append((char)((z <= 9) ? ('0' + z) : (('A' - 10) + z)));
-                    z = ((c >> 8) & 0xF);
-                    this.printStream.append((char)((z <= 9) ? ('0' + z) : (('A' - 10) + z)));
-                    z = ((c >> 4) & 0xF);
-                    this.printStream.append((char)((z <= 9) ? ('0' + z) : (('A' - 10) + z)));
-                    z = (c & 0xF);
-                    this.printStream.append((char)((z <= 9) ? ('0' + z) : (('A' - 10) + z)));
+                    int z = c >> 12;
+                    this.printStream.append((char)(z <= 9 ? '0' + z : 'A' - 10 + z));
+                    z = c >> 8 & 0xF;
+                    this.printStream.append((char)(z <= 9 ? '0' + z : 'A' - 10 + z));
+                    z = c >> 4 & 0xF;
+                    this.printStream.append((char)(z <= 9 ? '0' + z : 'A' - 10 + z));
+                    z = c & 0xF;
+                    this.printStream.append((char)(z <= 9 ? '0' + z : 'A' - 10 + z));
                 } else {
                     this.printStream.append(c);
                 }

@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.model.javasyntax.declaration;
 
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
@@ -13,7 +12,7 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 public class FieldDeclaration implements MemberDeclaration {
     protected BaseAnnotationReference annotationReferences;
     protected int flags;
-    protected Type type;
+    protected final Type type;
     protected BaseFieldDeclarator fieldDeclarators;
 
     public FieldDeclaration(int flags, Type type, BaseFieldDeclarator fieldDeclarators) {
@@ -47,10 +46,6 @@ public class FieldDeclaration implements MemberDeclaration {
         return type;
     }
 
-    public void setType(Type type) {
-        this.type = type;
-    }
-
     public BaseFieldDeclarator getFieldDeclarators() {
         return fieldDeclarators;
     }
@@ -61,18 +56,16 @@ public class FieldDeclaration implements MemberDeclaration {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof FieldDeclaration)) return false;
+        if (this == o) {
+			return true;
+		}
+        if (!(o instanceof FieldDeclaration)) {
+			return false;
+		}
 
         FieldDeclaration that = (FieldDeclaration) o;
 
-        if (flags != that.flags) return false;
-        if (annotationReferences != null ? !annotationReferences.equals(that.annotationReferences) : that.annotationReferences != null)
-            return false;
-        if (!fieldDeclarators.equals(that.fieldDeclarators)) return false;
-        if (!type.equals(that.type)) return false;
-
-        return true;
+        return flags == that.flags && (annotationReferences != null ? annotationReferences.equals(that.annotationReferences) : that.annotationReferences == null) && fieldDeclarators.equals(that.fieldDeclarators) && type.equals(that.type);
     }
 
     @Override
@@ -80,8 +73,7 @@ public class FieldDeclaration implements MemberDeclaration {
         int result = 327494460 + flags;
         result = 31 * result + (annotationReferences != null ? annotationReferences.hashCode() : 0);
         result = 31 * result + type.hashCode();
-        result = 31 * result + fieldDeclarators.hashCode();
-        return result;
+        return 31 * result + fieldDeclarators.hashCode();
     }
 
     @Override

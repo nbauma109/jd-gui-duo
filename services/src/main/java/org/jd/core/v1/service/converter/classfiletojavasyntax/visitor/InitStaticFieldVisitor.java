@@ -11,19 +11,12 @@ import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.model.javasyntax.expression.FieldReferenceExpression;
-import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
-import org.jd.core.v1.model.javasyntax.statement.Statement;
-import org.jd.core.v1.model.javasyntax.statement.Statements;
+import org.jd.core.v1.model.javasyntax.statement.*;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileFieldDeclaration;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileStaticInitializerDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
     protected SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
@@ -33,7 +26,7 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
     protected List<ClassFileConstructorOrMethodDeclaration> methods;
     protected Boolean deleteStaticDeclaration;
 
-    public void setInternalTypeName(String internalTypeName) {
+    void setInternalTypeName(String internalTypeName) {
         this.internalTypeName = internalTypeName;
     }
 

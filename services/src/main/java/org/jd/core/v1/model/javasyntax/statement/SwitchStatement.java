@@ -88,7 +88,7 @@ public class SwitchStatement implements Statement {
     }
 
     // --- Block --- //
-    public static abstract class Block implements Statement {
+    public abstract static class Block implements Statement {
         protected BaseStatement statements;
 
         protected Block(BaseStatement statements) {

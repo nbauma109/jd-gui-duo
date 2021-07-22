@@ -24,7 +24,8 @@ public class AggregateFieldsUtil {
             int size = fields.size();
 
             if (size > 1) {
-                int firstIndex=0, lastIndex=0;
+                int firstIndex=0;
+                int lastIndex=0;
                 ClassFileFieldDeclaration firstField = fields.get(0);
 
                 for (int index=1; index<size; index++) {

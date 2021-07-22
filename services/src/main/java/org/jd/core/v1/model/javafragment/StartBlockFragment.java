@@ -19,12 +19,8 @@ public class StartBlockFragment extends StartFlexibleBlockFragment implements Ja
         return end;
     }
 
-    public void setEndArrayInitializerBlockFragment(EndBlockFragment end) {
+    void setEndArrayInitializerBlockFragment(EndBlockFragment end) {
         this.end = end;
-    }
-
-    public void setLineCount(int lineCount) {
-        this.lineCount = lineCount;
     }
 
     @Override

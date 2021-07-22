@@ -48,17 +48,22 @@ public class AnnotationReference implements BaseAnnotationReference {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof AnnotationReference)) return false;
+        if (this == o) {
+			return true;
+		}
+        if (!(o instanceof AnnotationReference)) {
+			return false;
+		}
 
         AnnotationReference that = (AnnotationReference) o;
 
-        if (elementValue != null ? !elementValue.equals(that.elementValue) : that.elementValue != null) return false;
-        if (elementValuePairs != null ? !elementValuePairs.equals(that.elementValuePairs) : that.elementValuePairs != null)
-            return false;
-        if (!type.equals(that.type)) return false;
-
-        return true;
+        if (elementValue != null ? !elementValue.equals(that.elementValue) : that.elementValue != null) {
+			return false;
+		}
+        if (elementValuePairs != null ? !elementValuePairs.equals(that.elementValuePairs) : that.elementValuePairs != null) {
+			return false;
+		}
+        return type.equals(that.type);
     }
 
     @Override

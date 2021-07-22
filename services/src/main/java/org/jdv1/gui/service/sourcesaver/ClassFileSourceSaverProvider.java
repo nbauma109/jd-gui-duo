@@ -18,15 +18,15 @@ import org.jd.gui.util.decompiler.ContainerLoader;
 import org.jdv1.gui.util.MethodPatcher;
 import org.jdv1.gui.util.decompiler.LineNumberStringBuilderPrinter;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.apache.bcel.Const.MAJOR_1_1;
+import static org.apache.bcel.Const.MAJOR_1_5;
 import static org.jd.gui.util.decompiler.GuiPreferences.*;
 
 public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
@@ -116,13 +116,13 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
                 // Add Java compiler version
                 int majorVersion = printer.getMajorVersion();
 
-                if (majorVersion >= 45) {
+                if (majorVersion >= MAJOR_1_1) {
                     stringBuffer.append("\n * Java compiler version: ");
 
-                    if (majorVersion >= 49) {
-                        stringBuffer.append(majorVersion - (49 - 5));
+                    if (majorVersion >= MAJOR_1_5) {
+                        stringBuffer.append(majorVersion - (MAJOR_1_5 - 5));
                     } else {
-                        stringBuffer.append(majorVersion - (45 - 1));
+                        stringBuffer.append(majorVersion - (MAJOR_1_1 - 1));
                     }
 
                     stringBuffer.append(" (");

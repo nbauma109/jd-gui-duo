@@ -6,7 +6,6 @@
  */
 package org.jd.core.v1.service.deserializer.classfile;
 
-import org.apache.bcel.Const;
 import org.apache.bcel.classfile.*;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.loader.LoaderException;
@@ -24,18 +23,12 @@ import org.jd.core.v1.service.deserializer.classfile.attribute.InvalidAttributeL
 import org.jd.core.v1.util.DefaultList;
 import org.jd.core.v1.util.StringConstants;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInput;
-import java.io.DataInputStream;
-import java.io.IOException;
+import java.io.*;
+import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
-import static org.apache.bcel.Const.ACC_SYNTHETIC;
+import static org.apache.bcel.Const.*;
 
 import jd.core.CoreConstants;
 import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
@@ -154,39 +147,39 @@ public class ClassFileDeserializer {
             tag = reader.readByte();
 
             switch (tag) {
-                case Const.CONSTANT_Utf8:
+                case CONSTANT_Utf8:
                     constants[i] = new ConstantUtf8(reader.readUTF());
                     break;
-                case Const.CONSTANT_Integer:
+                case CONSTANT_Integer:
                     constants[i] = new ConstantInteger(reader.readInt());
                     break;
-                case Const.CONSTANT_Float:
+                case CONSTANT_Float:
                     constants[i] = new ConstantFloat(reader.readFloat());
                     break;
-                case Const.CONSTANT_Long:
+                case CONSTANT_Long:
                     constants[i] = new ConstantLong(reader.readLong());
                     i++;
                     break;
-                case Const.CONSTANT_Double:
+                case CONSTANT_Double:
                     constants[i] = new ConstantDouble(reader.readDouble());
                     i++;
                     break;
-                case Const.CONSTANT_Class, Const.CONSTANT_Module, Const.CONSTANT_Package:
+                case CONSTANT_Class, CONSTANT_Module, CONSTANT_Package:
                     constants[i] = new ConstantClass(reader.readUnsignedShort());
                     break;
-                case Const.CONSTANT_String:
+                case CONSTANT_String:
                     constants[i] = new ConstantString(reader.readUnsignedShort());
                     break;
-                case Const.CONSTANT_Fieldref, Const.CONSTANT_Methodref, Const.CONSTANT_InterfaceMethodref, Const.CONSTANT_Dynamic, Const.CONSTANT_InvokeDynamic:
+                case CONSTANT_Fieldref, CONSTANT_Methodref, CONSTANT_InterfaceMethodref, CONSTANT_Dynamic, CONSTANT_InvokeDynamic:
                     constants[i] = new ConstantMemberRef(reader.readUnsignedShort(), reader.readUnsignedShort());
                     break;
-                case Const.CONSTANT_NameAndType:
+                case CONSTANT_NameAndType:
                     constants[i] = new ConstantNameAndType(reader.readUnsignedShort(), reader.readUnsignedShort());
                     break;
-                case Const.CONSTANT_MethodHandle:
+                case CONSTANT_MethodHandle:
                     constants[i] = new ConstantMethodHandle(reader.readByte(), reader.readUnsignedShort());
                     break;
-                case Const.CONSTANT_MethodType:
+                case CONSTANT_MethodType:
                     constants[i] = new ConstantMethodType(reader.readUnsignedShort());
                     break;
                 default:
@@ -356,15 +349,13 @@ public class ClassFileDeserializer {
                 case "ModuleMainClass":
                     attributes.put(name, new AttributeModuleMainClass(constants.getConstant(reader.readUnsignedShort())));
                     break;
-                case StringConstants.RUNTIMEINVISIBLEANNOTATIONS_ATTRIBUTE_NAME:
-                case StringConstants.RUNTIMEVISIBLEANNOTATIONS_ATTRIBUTE_NAME:
+                case StringConstants.RUNTIMEINVISIBLEANNOTATIONS_ATTRIBUTE_NAME, StringConstants.RUNTIMEVISIBLEANNOTATIONS_ATTRIBUTE_NAME:
                     Annotation[] annotations = loadAnnotations(reader, constants);
                     if (annotations != null) {
                         attributes.put(name, new Annotations(annotations));
                     }
                     break;
-                case "RuntimeInvisibleParameterAnnotations":
-                case "RuntimeVisibleParameterAnnotations":
+                case "RuntimeInvisibleParameterAnnotations", "RuntimeVisibleParameterAnnotations":
                     attributes.put(name, new AttributeParameterAnnotations(loadParameterAnnotations(reader, constants)));
                     break;
                 case StringConstants.SIGNATURE_ATTRIBUTE_NAME:
@@ -398,9 +389,7 @@ public class ClassFileDeserializer {
         int type = reader.readByte();
 
         switch (type) {
-            case 'B': case 'D': case 'F':
-            case 'I': case 'J': case 'S':
-            case 'Z': case 'C': case 's':
+            case 'B', 'D', 'F', 'I', 'J', 'S', 'Z', 'C', 's':
                 int constValueIndex = reader.readUnsignedShort();
                 Constant constValue = constants.getConstant(constValueIndex);
                 return new ElementValuePrimitiveType(type, constValue);

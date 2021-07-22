@@ -6,9 +6,7 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
-import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.classfile.Field;
-import org.jd.core.v1.model.classfile.Method;
+import org.jd.core.v1.model.classfile.*;
 import org.jd.core.v1.model.classfile.attribute.*;
 import org.jd.core.v1.model.javasyntax.declaration.BaseFormalParameter;
 import org.jd.core.v1.model.javasyntax.declaration.FormalParameters;
@@ -21,10 +19,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariabl
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.*;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_STATIC;
 import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_VARARGS;
@@ -144,8 +139,8 @@ public class LocalVariableMaker {
                     }
                 }
             } else {
-                Annotations[] visiblesArray = (rvpa == null) ? null : rvpa.getParameterAnnotations();
-                Annotations[] invisiblesArray = (ripa == null) ? null : ripa.getParameterAnnotations();
+                Annotations[] visiblesArray = rvpa == null ? null : rvpa.getParameterAnnotations();
+                Annotations[] invisiblesArray = ripa == null ? null : ripa.getParameterAnnotations();
                 AnnotationConverter annotationConverter = new AnnotationConverter(typeMaker);
 
                 AbstractLocalVariable lv;
@@ -155,8 +150,8 @@ public class LocalVariableMaker {
                 for (int parameterIndex=0, variableIndex=firstVariableIndex; parameterIndex<=lastParameterIndex; parameterIndex++, variableIndex++) {
                     lv = localVariableSet.root(variableIndex);
 
-                    visibles = (visiblesArray == null || visiblesArray.length <= parameterIndex) ? null : visiblesArray[parameterIndex];
-                    invisibles = (invisiblesArray == null || invisiblesArray.length <= parameterIndex) ? null : invisiblesArray[parameterIndex];
+                    visibles = visiblesArray == null || visiblesArray.length <= parameterIndex ? null : visiblesArray[parameterIndex];
+                    invisibles = invisiblesArray == null || invisiblesArray.length <= parameterIndex ? null : invisiblesArray[parameterIndex];
                     annotationReferences = annotationConverter.convert(visibles, invisibles);
 
                     formalParameters.add(new ClassFileFormalParameter(annotationReferences, lv, varargs && parameterIndex==lastParameterIndex));
@@ -189,7 +184,7 @@ public class LocalVariableMaker {
                 AbstractLocalVariable lv;
                 for (org.jd.core.v1.model.classfile.attribute.LocalVariable localVariable : localVariableTable.getLocalVariableTable()) {
                     index = localVariable.getIndex();
-                    startPc = (!staticFlag && index==0) ? 0 : localVariable.getStartPc();
+                    startPc = !staticFlag && index==0 ? 0 : localVariable.getStartPc();
                     descriptor = localVariable.getDescriptor();
                     name = localVariable.getName();
                     if (descriptor.charAt(descriptor.length() - 1) == ';') {
@@ -273,7 +268,7 @@ public class LocalVariableMaker {
                 int length = sb.length();
                 int counter = 1;
 
-                if (typeMap.get(type)) {
+                if (Boolean.TRUE.equals(typeMap.get(type))) {
                     sb.append(counter);
                     counter++;
                 }
@@ -336,7 +331,7 @@ public class LocalVariableMaker {
         } else {
             AbstractLocalVariable lv2 = currentFrame.getLocalVariable(index);
 
-            if (lv2 != null && ((lv.getName() == null) ? (lv2.getName() == null) : lv.getName().equals(lv2.getName())) && lv.getType().equals(lv2.getType())) {
+            if (lv2 != null && (lv.getName() == null ? lv2.getName() == null : lv.getName().equals(lv2.getName())) && lv.getType().equals(lv2.getType())) {
                 lv = lv2;
             }
 
@@ -388,7 +383,7 @@ public class LocalVariableMaker {
         if (lv != null && (lv.isAssignableFrom(typeBounds, valueType) || isCompatible(lv, valueType))) {
             // Assignable, reduce type
             lv.typeOnRight(typeBounds, valueType);
-        } else if (lv == null || (!lv.getType().isGenericType() || ObjectType.TYPE_OBJECT != valueType)) {
+        } else if (lv == null || !lv.getType().isGenericType() || ObjectType.TYPE_OBJECT != valueType) {
             // Create a new local variable
             lv = createNewLocalVariable(index, offset, valueType);
         }
@@ -402,7 +397,7 @@ public class LocalVariableMaker {
     public AbstractLocalVariable getLocalVariableInNullAssignment(int index, int offset, Type valueType) {
         AbstractLocalVariable lv = searchLocalVariable(index, offset);
 
-        if (lv == null || (lv.getType().getDimension() == 0 && lv.getType().isPrimitiveType())) {
+        if (lv == null || lv.getType().getDimension() == 0 && lv.getType().isPrimitiveType()) {
             lv = createNewLocalVariable(index, offset, valueType);
         }
 
@@ -415,7 +410,7 @@ public class LocalVariableMaker {
     public AbstractLocalVariable getLocalVariableInAssignment(Map<String, BaseType> typeBounds, int index, int offset, AbstractLocalVariable valueLocalVariable) {
         AbstractLocalVariable lv = searchLocalVariable(index, offset);
 
-        if (lv == null || (!lv.isAssignableFrom(typeBounds, valueLocalVariable) && !isCompatible(lv, valueLocalVariable.getType()) && (!lv.getType().isGenericType() || ObjectType.TYPE_OBJECT != valueLocalVariable.getType()))) {
+        if (lv == null || !lv.isAssignableFrom(typeBounds, valueLocalVariable) && !isCompatible(lv, valueLocalVariable.getType()) && (!lv.getType().isGenericType() || ObjectType.TYPE_OBJECT != valueLocalVariable.getType())) {
             // Create a new local variable
             lv = createNewLocalVariable(index, offset, valueLocalVariable);
         }

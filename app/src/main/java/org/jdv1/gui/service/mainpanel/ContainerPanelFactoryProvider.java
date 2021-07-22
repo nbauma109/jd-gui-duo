@@ -4,29 +4,20 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jdv1.gui.service.mainpanel;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
-import org.jd.gui.api.feature.ContentIndexable;
-import org.jd.gui.api.feature.SourcesSavable;
-import org.jd.gui.api.feature.UriGettable;
+import org.jd.gui.api.feature.*;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
-import org.jd.gui.spi.Indexer;
-import org.jd.gui.spi.PanelFactory;
-import org.jd.gui.spi.SourceSaver;
-import org.jd.gui.spi.TreeNodeFactory;
+import org.jd.gui.spi.*;
 import org.jd.gui.view.component.panel.TreeTabbedPanel;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.*;
 
 import javax.swing.JComponent;
@@ -47,7 +38,6 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
 
     @SuppressWarnings("rawtypes")
     protected class ContainerPanel extends TreeTabbedPanel implements ContentIndexable, SourcesSavable {
-
         private static final long serialVersionUID = 1L;
         protected transient Container.Entry entry;
 
@@ -58,17 +48,18 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
 
             DefaultMutableTreeNode root = new DefaultMutableTreeNode();
 
-            for (Container.Entry entry : container.getRoot().getChildren().values()) {
-                TreeNodeFactory factory = api.getTreeNodeFactory(entry);
+            TreeNodeFactory factory;
+			for (Container.Entry nextEntry : container.getRoot().getChildren().values()) {
+                factory = api.getTreeNodeFactory(nextEntry);
                 if (factory != null) {
-                    root.add(factory.make(api, entry));
+                    root.add(factory.make(api, nextEntry));
                 }
             }
 
             tree.setModel(new DefaultTreeModel(root));
         }
 
-        // --- ContentIndexable --- //
+        /** --- ContentIndexable --- */
         @Override
         public Indexes index(API api) {
             Map<String, Map<String, Collection>> map = new HashMap<>();
@@ -88,7 +79,7 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
             return map::get;
         }
 
-        // --- SourcesSavable --- //
+        /** --- SourcesSavable --- //. */
         @Override
         public String getSourceFileName() {
             SourceSaver saver = api.getSourceSaver(entry);
@@ -101,7 +92,7 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
         @Override
         public int getFileCount() {
             SourceSaver saver = api.getSourceSaver(entry);
-            return (saver != null) ? saver.getFileCount(api, entry) : 0;
+            return saver != null ? saver.getFileCount(api, entry) : 0;
         }
 
         @Override
@@ -109,7 +100,7 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
             try {
                 Path parentPath = path.getParent();
 
-                if ((parentPath != null) && !Files.exists(parentPath)) {
+                if (parentPath != null && !Files.exists(parentPath)) {
                     Files.createDirectories(parentPath);
                 }
 
@@ -205,5 +196,31 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
 
             return value;
         }
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = super.hashCode();
+			return prime * result + (wrappers == null ? 0 : wrappers.hashCode());
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (!super.equals(obj) || getClass() != obj.getClass()) {
+				return false;
+			}
+			DelegatedMapMapWithDefault other = (DelegatedMapMapWithDefault) obj;
+			if (wrappers == null) {
+				if (other.wrappers != null) {
+					return false;
+				}
+			} else if (!wrappers.equals(other.wrappers)) {
+				return false;
+			}
+			return true;
+		}
     }
 }

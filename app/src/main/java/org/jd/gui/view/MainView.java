@@ -19,10 +19,7 @@ import org.jd.gui.view.component.IconButton;
 import org.jd.gui.view.component.panel.MainTabbedPanel;
 
 import java.awt.*;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.net.URI;
 import java.util.Arrays;
@@ -37,10 +34,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
-import static org.jd.gui.util.swing.SwingUtil.getImage;
-import static org.jd.gui.util.swing.SwingUtil.invokeLater;
-import static org.jd.gui.util.swing.SwingUtil.newAction;
-import static org.jd.gui.util.swing.SwingUtil.newImageIcon;
+import static org.jd.gui.util.swing.SwingUtil.*;
 
 @SuppressWarnings("unchecked")
 public class MainView<T extends JComponent & UriGettable> implements UriOpenable, PreferencesChangeListener {
@@ -179,7 +173,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             }
 
             // Actions //
-            boolean browser = Desktop.isDesktopSupported() ? Desktop.getDesktop().isSupported(Desktop.Action.BROWSE) : false;
+            boolean browser = Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE);
             Action openAction = newAction("Open File...", newImageIcon("/org/jd/gui/images/open.png"), true, "Open a file", openActionListener);
             closeAction = newAction("Close", false, closeActionListener);
             Action saveAction = newAction("Save", newImageIcon("/org/jd/gui/images/save.png"), false, saveActionListener);
@@ -202,7 +196,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             Action aboutAction = newAction("About...", true, "About JD-GUI", aboutActionListener);
 
             // Menu //
-            int menuShortcutKeyMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+            int menuShortcutKeyMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
             JMenuBar menuBar = new JMenuBar();
             JMenu menu = new JMenu("File");
             menuBar.add(menu);
@@ -211,12 +205,12 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             menu.add(closeAction).setAccelerator(KeyStroke.getKeyStroke('W', menuShortcutKeyMask));
             menu.addSeparator();
             menu.add(saveAction).setAccelerator(KeyStroke.getKeyStroke('S', menuShortcutKeyMask));
-            menu.add(saveAllSourcesAction).setAccelerator(KeyStroke.getKeyStroke('S', menuShortcutKeyMask|InputEvent.ALT_MASK));
+            menu.add(saveAllSourcesAction).setAccelerator(KeyStroke.getKeyStroke('S', menuShortcutKeyMask|InputEvent.ALT_DOWN_MASK));
             menu.addSeparator();
             menu.add(recentFiles);
             if (!PlatformService.getInstance().isMac()) {
                 menu.addSeparator();
-                menu.add(exitAction).setAccelerator(KeyStroke.getKeyStroke('X', InputEvent.ALT_MASK));
+                menu.add(exitAction).setAccelerator(KeyStroke.getKeyStroke('X', InputEvent.ALT_DOWN_MASK));
             }
             menu = new JMenu("Edit");
             menuBar.add(menu);
@@ -233,11 +227,11 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             menu.addSeparator();
             menu.add(goToAction).setAccelerator(KeyStroke.getKeyStroke('L', menuShortcutKeyMask));
             menu.addSeparator();
-            menu.add(backwardAction).setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, InputEvent.ALT_MASK));
-            menu.add(forwardAction).setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, InputEvent.ALT_MASK));
+            menu.add(backwardAction).setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, InputEvent.ALT_DOWN_MASK));
+            menu.add(forwardAction).setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, InputEvent.ALT_DOWN_MASK));
             menu = new JMenu("Search");
             menuBar.add(menu);
-            menu.add(searchAction).setAccelerator(KeyStroke.getKeyStroke('S', menuShortcutKeyMask|InputEvent.SHIFT_MASK));
+            menu.add(searchAction).setAccelerator(KeyStroke.getKeyStroke('S', menuShortcutKeyMask|InputEvent.SHIFT_DOWN_MASK));
             menu = new JMenu("Help");
             menuBar.add(menu);
             if (browser) {
@@ -246,7 +240,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
                 menu.add(jdCoreIssuesActionAction);
                 menu.addSeparator();
             }
-            menu.add(preferencesAction).setAccelerator(KeyStroke.getKeyStroke('P', menuShortcutKeyMask|InputEvent.SHIFT_MASK));
+            menu.add(preferencesAction).setAccelerator(KeyStroke.getKeyStroke('P', menuShortcutKeyMask|InputEvent.SHIFT_DOWN_MASK));
             if (!PlatformService.getInstance().isMac()) {
                 menu.addSeparator();
                 menu.add(aboutAction).setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
@@ -295,8 +289,8 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
                                 // Update title
                                 String path = page.getUri().getPath();
                                 int index = path.lastIndexOf('/');
-                                String name = (index == -1) ? path : path.substring(index + 1);
-                                mainFrame.setTitle((name != null) ? name + " - Java Decompiler" : JAVA_DECOMPILER);
+                                String name = index == -1 ? path : path.substring(index + 1);
+                                mainFrame.setTitle(name != null ? name + " - Java Decompiler" : JAVA_DECOMPILER);
                                 // Update history
                                 history.add(page.getUri());
                                 // Update history actions
@@ -323,12 +317,12 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
                 @Override
                 public void stateChanged(ChangeEvent e) {
                     int tabCount = mainTabbedPanel.getTabbedPane().getTabCount();
-                    boolean enabled = (tabCount > 0);
+                    boolean enabled = tabCount > 0;
 
                     closeAction.setEnabled(enabled);
                     openTypeAction.setEnabled(enabled);
                     searchAction.setEnabled(enabled);
-                    saveAllSourcesAction.setEnabled((mainTabbedPanel.getTabbedPane().getSelectedComponent() instanceof SourcesSavable));
+                    saveAllSourcesAction.setEnabled(mainTabbedPanel.getTabbedPane().getSelectedComponent() instanceof SourcesSavable);
 
                     if (tabCount < lastTabCount) {
                         panelClosedCallback.run();
@@ -371,9 +365,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     }
 
     public void addMainPanel(String title, Icon icon, String tip, T component) {
-        invokeLater(() -> {
-            mainTabbedPanel.addPage(title, icon, tip, component);
-        });
+        invokeLater(() -> mainTabbedPanel.addPage(title, icon, tip, component));
     }
 
     public List<T> getMainPanels() {
@@ -433,7 +425,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     static String reduceRecentFilePath(String path) {
         int lastSeparatorPosition = path.lastIndexOf(File.separatorChar);
 
-        if ((lastSeparatorPosition == -1) || (lastSeparatorPosition < Constants.RECENT_FILE_MAX_LENGTH)) {
+        if (lastSeparatorPosition == -1 || lastSeparatorPosition < Constants.RECENT_FILE_MAX_LENGTH) {
             return path;
         }
 

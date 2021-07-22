@@ -10,9 +10,7 @@ package org.jd.gui.service.extension;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 
 import java.io.File;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.net.*;
 import java.util.*;
 
 public class ExtensionService {

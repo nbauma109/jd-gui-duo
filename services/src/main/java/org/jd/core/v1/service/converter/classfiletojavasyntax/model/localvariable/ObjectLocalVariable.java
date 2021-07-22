@@ -6,9 +6,7 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable;
 
-import org.jd.core.v1.model.javasyntax.type.BaseType;
-import org.jd.core.v1.model.javasyntax.type.ObjectType;
-import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
 import java.util.Map;

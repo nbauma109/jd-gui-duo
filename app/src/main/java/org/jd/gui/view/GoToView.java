@@ -13,9 +13,7 @@ import org.jd.gui.util.decompiler.GuiPreferences;
 import org.jd.gui.util.swing.SwingUtil;
 
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.util.function.IntConsumer;
 
 import javax.swing.*;
@@ -124,7 +122,7 @@ public class GoToView {
                         clearErrorMessage();
                     } else {
                         try {
-                            int lineNumber = Integer.valueOf(text);
+                            int lineNumber = Integer.parseInt(text);
 
                             if (lineNumber > navigator.getMaximumLineNumber()) {
                                 goToOkButton.setEnabled(false);

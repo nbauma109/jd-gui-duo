@@ -18,11 +18,8 @@ import org.jd.gui.view.renderer.OpenTypeListCellRenderer;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 import javax.swing.*;
@@ -71,21 +68,14 @@ public class OpenTypeView {
             openTypeEnterTextField.addKeyListener(new KeyAdapter() {
                 @Override
                 public void keyTyped(KeyEvent e) {
-                    switch (e.getKeyChar()) {
-                        case '=': case '(': case ')': case '{': case '}': case '[': case ']':
-                            e.consume();
-                            break;
-                        default:
-                            if (Character.isDigit(e.getKeyChar()) && (openTypeEnterTextField.getText().isEmpty())) {
-                                // First character can not be a digit
-                                e.consume();
-                            }
-                            break;
+                    if ("=(){}[]".indexOf(e.getKeyChar()) != -1 || Character.isDigit(e.getKeyChar()) && openTypeEnterTextField.getText().isEmpty()) {
+                    	// Characters =(){}[] are ignored and 1st character and digit cannot be typed on an empty search field
+                        e.consume();
                     }
                 }
                 @Override
                 public void keyPressed(KeyEvent e) {
-                    if ((e.getKeyCode() == KeyEvent.VK_DOWN) && (openTypeList.getModel().getSize() > 0)) {
+                    if (e.getKeyCode() == KeyEvent.VK_DOWN && openTypeList.getModel().getSize() > 0) {
                         openTypeList.setSelectedIndex(0);
                         openTypeList.requestFocus();
                         e.consume();
@@ -130,7 +120,7 @@ public class OpenTypeView {
             openTypeList.addKeyListener(new KeyAdapter() {
                 @Override
                 public void keyPressed(KeyEvent e) {
-                    if ((e.getKeyCode() == KeyEvent.VK_UP) && (openTypeList.getSelectedIndex()  == 0)) {
+                    if (e.getKeyCode() == KeyEvent.VK_UP && openTypeList.getSelectedIndex()  == 0) {
                         openTypeEnterTextField.requestFocus();
                         e.consume();
                     }
@@ -255,9 +245,7 @@ public class OpenTypeView {
     }
 
     public void focus() {
-        SwingUtil.invokeLater(() -> {
-            openTypeList.requestFocus();
-        });
+        SwingUtil.invokeLater(() -> openTypeList.requestFocus());
     }
 
     protected void onTypeSelected(TriConsumer<Point, Collection<Container.Entry>, String> selectedTypeCallback) {
@@ -269,7 +257,7 @@ public class OpenTypeView {
                 Point listLocation = openTypeList.getLocationOnScreen();
                 Rectangle cellBound = openTypeList.getCellBounds(index, index);
                 Point leftBottom = new Point(listLocation.x + cellBound.x, listLocation.y + cellBound.y + cellBound.height);
-                selectedTypeCallback.accept(leftBottom, selectedCellBean.entries, selectedCellBean.typeName);
+                selectedTypeCallback.accept(leftBottom, selectedCellBean.getEntries(), selectedCellBean.getTypeName());
             }
         });
     }

@@ -16,9 +16,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
@@ -102,11 +100,10 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
                 case 'C': sb.append("char"); index++; break;
                 case 'D': sb.append("double"); index++; break;
                 case 'F': sb.append("float"); index++; break;
-                case 'I': case 'X':
-            case 'Y':
+                case 'I', 'X', 'Y':
                 sb.append("int"); index++; break;
                 case 'J': sb.append("long"); index++; break;
-                case 'L': case '.':
+                case 'L', '.':
                 index++;
                 int beginIndex = index;
                     char c = '.';

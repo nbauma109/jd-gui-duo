@@ -18,10 +18,10 @@ import org.jd.core.v1.model.javasyntax.expression.StringConstantExpression;
 import org.jd.core.v1.model.javasyntax.statement.AssertStatement;
 import org.jd.core.v1.model.javasyntax.statement.Statement;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.TreeMap;
+
+import static org.apache.bcel.Const.*;
 
 /**
  * Example:
@@ -162,32 +162,32 @@ public class ByteCodeWriter {
             sb.append(linePrefix).append("  ").append(offset).append(": ").append(OPCODE_NAMES[opcode]);
 
             switch (opcode) {
-                case 16: // BIPUSH
+                case BIPUSH:
                     sb.append(" #").append((byte) (code[++offset] & 255));
                     break;
-                case 17: // SIPUSH
+                case SIPUSH:
                     sb.append(" #").append((short)(((code[++offset] & 255) << 8) | (code[++offset] & 255)));
                     break;
-                case 18:
+                case LDC:
                     writeLDC(sb, constants, constants.getConstant(code[++offset] & 255));
                     break;
-                case 19: case 20: // LDC_W, LDC2_W
+                case LDC_W, LDC2_W:
                     writeLDC(sb, constants, constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255)));
                     break;
-                case 21: case 22: case 23: case 24: case 25: // ILOAD, LLOAD, FLOAD, DLOAD, ALOAD
-                case 54: case 55: case 56: case 57: case 58: // ISTORE, LSTORE, FSTORE, DSTORE, ASTORE
-                case 169: // RET
+                case ILOAD, LLOAD, FLOAD, DLOAD, ALOAD,
+                     ISTORE, LSTORE, FSTORE, DSTORE, ASTORE,
+                     RET:
                     sb.append(" #").append((code[++offset] & 255));
                     break;
-                case 132: // IINC
+                case IINC:
                     sb.append(" #").append((code[++offset] & 255)).append(", ").append((byte)(code[++offset] & 255));
                     break;
-                case 153: case 154: case 155: case 156: case 157: case 158: // IFEQ, IFNE, IFLT, IFGE, IFGT, IFLE
-                case 159: case 160: case 161: case 162: case 163: case 164: case 165: case 166: // IF_ICMPEQ, IF_ICMPNE, IF_ICMPLT, IF_ICMPGE, IF_ICMPGT, IF_ICMPLE, IF_ACMPEQ, IF_ACMPNE
-                case 167: case 168: // GOTO, JSR
+                case IFEQ, IFNE, IFLT, IFGE, IFGT, IFLE,
+                     IF_ICMPEQ, IF_ICMPNE, IF_ICMPLT, IF_ICMPGE, IF_ICMPGT, IF_ICMPLE, IF_ACMPEQ, IF_ACMPNE,
+                     GOTO, JSR:
                     sb.append(" -> ").append(offset + (short)(((code[++offset] & 255) << 8) | (code[++offset] & 255)));
                     break;
-                case 170: // TABLESWITCH
+                case TABLESWITCH:
                     // Skip padding
                     int i = (offset + 4) & 0xFFFC;
 
@@ -202,7 +202,7 @@ public class ByteCodeWriter {
 
                     offset = (i - 1);
                     break;
-                case 171: // LOOKUPSWITCH
+                case LOOKUPSWITCH:
                     // Skip padding
                     i = (offset + 4) & 0xFFFC;
 
@@ -217,7 +217,7 @@ public class ByteCodeWriter {
 
                     offset = (i - 1);
                     break;
-                case 178: case 179: // GETSTATIC, PUTSTATIC
+                case GETSTATIC, PUTSTATIC:
                     ConstantMemberRef constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
                     String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
                     ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
@@ -226,7 +226,7 @@ public class ByteCodeWriter {
 
                     sb.append(" ").append(typeName).append('.').append(name).append(" : ").append(descriptor);
                     break;
-                case 180: case 181: case 182: case 183: case 184: // GETFIELD, PUTFIELD, INVOKEVIRTUAL, INVOKESPECIAL, INVOKESTATIC
+                case GETFIELD, PUTFIELD, INVOKEVIRTUAL, INVOKESPECIAL, INVOKESTATIC:
                     constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
                     name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
@@ -234,7 +234,7 @@ public class ByteCodeWriter {
 
                     sb.append(" ").append(name).append(" : ").append(descriptor);
                     break;
-                case 185: case 186: // INVOKEINTERFACE, INVOKEDYNAMIC
+                case INVOKEINTERFACE, INVOKEDYNAMIC:
                     constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
                     name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
@@ -244,52 +244,52 @@ public class ByteCodeWriter {
 
                     offset += 2; // Skip 2 bytes
                     break;
-                case 187: case 189: case 192: case 193: // NEW, ANEWARRAY, CHECKCAST, INSTANCEOF
+                case NEW, ANEWARRAY, CHECKCAST, INSTANCEOF:
                     typeName = constants.getConstantTypeName(((code[++offset] & 255) << 8) | (code[++offset] & 255));
                     sb.append(" ").append(typeName);
                     break;
-                case 188: // NEWARRAY
+                case NEWARRAY:
                     switch ((code[++offset] & 255)) {
-                        case 4:  sb.append(" boolean"); break;
-                        case 5:  sb.append(" char"); break;
-                        case 6:  sb.append(" float"); break;
-                        case 7:  sb.append(" double"); break;
-                        case 8:  sb.append(" byte"); break;
-                        case 9:  sb.append(" short"); break;
-                        case 10: sb.append(" int"); break;
-                        case 11: sb.append(" long"); break;
+                        case T_BOOLEAN: sb.append(" boolean"); break;
+                        case T_CHAR:    sb.append(" char"); break;
+                        case T_FLOAT:   sb.append(" float"); break;
+                        case T_DOUBLE:  sb.append(" double"); break;
+                        case T_BYTE:    sb.append(" byte"); break;
+                        case T_SHORT:   sb.append(" short"); break;
+                        case T_INT:     sb.append(" int"); break;
+                        case T_LONG:    sb.append(" long"); break;
                     }
                     break;
-                case 196: // WIDE
+                case WIDE:
                     opcode = code[++offset] & 255;
                     i = ((code[++offset] & 255) << 8) | (code[++offset] & 255);
 
-                    if (opcode == 132) { // IINC
+                    if (opcode == IINC) {
                         sb.append(" iinc #").append(i).append(' ').append((short)(((code[++offset] & 255) << 8) | (code[++offset] & 255)));
                     } else {
                         switch (opcode) {
-                            case 21: sb.append(" iload #").append(i); break;
-                            case 22: sb.append(" lload #").append(i); break;
-                            case 23: sb.append(" fload #").append(i); break;
-                            case 24: sb.append(" dload #").append(i); break;
-                            case 25: sb.append(" aload #").append(i); break;
-                            case 54: sb.append(" istore #").append(i); break;
-                            case 55: sb.append(" lstore #").append(i); break;
-                            case 56: sb.append(" fstore #").append(i); break;
-                            case 57: sb.append(" dstore #").append(i); break;
-                            case 58: sb.append(" astore #").append(i); break;
-                            case 169: sb.append(" ret #").append(i); break;
+                            case ILOAD : sb.append(" iload #").append(i); break;
+                            case LLOAD : sb.append(" lload #").append(i); break;
+                            case FLOAD : sb.append(" fload #").append(i); break;
+                            case DLOAD : sb.append(" dload #").append(i); break;
+                            case ALOAD : sb.append(" aload #").append(i); break;
+                            case ISTORE: sb.append(" istore #").append(i); break;
+                            case LSTORE: sb.append(" lstore #").append(i); break;
+                            case FSTORE: sb.append(" fstore #").append(i); break;
+                            case DSTORE: sb.append(" dstore #").append(i); break;
+                            case ASTORE: sb.append(" astore #").append(i); break;
+                            case RET   : sb.append(" ret #").append(i); break;
                         }
                     }
                     break;
-                case 197: // MULTIANEWARRAY
+                case MULTIANEWARRAY:
                     typeName = constants.getConstantTypeName(((code[++offset] & 255) << 8) | (code[++offset] & 255));
                     sb.append(typeName).append(' ').append(code[++offset] & 255);
                     break;
-                case 198: case 199: // IFNULL, IFNONNULL
+                case IFNULL, IFNONNULL:
                     sb.append(" -> ").append(offset + (short)(((code[++offset] & 255) << 8) | (code[++offset] & 255)));
                     break;
-                case 200: case 201: // GOTO_W, JSR_W
+                case GOTO_W, JSR_W:
                     sb.append(" -> ").append(offset + (((code[++offset] & 255) << 24) | ((code[++offset] & 255) << 16) | ((code[++offset] & 255) << 8) | (code[++offset] & 255)));
                     break;
             }

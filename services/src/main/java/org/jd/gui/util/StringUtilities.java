@@ -1,6 +1,6 @@
 package org.jd.gui.util;
 
-import org.apache.commons.lang3.Range;
+import org.jboss.forge.roaster._shade.org.apache.commons.lang3.Range;
 
 import java.util.*;
 

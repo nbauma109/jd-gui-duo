@@ -26,7 +26,7 @@ public class JavaFileIndexerProvider extends AbstractIndexerProvider {
     }
 
     @Override
-    @SuppressWarnings({ "rawtypes" })
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void index(API api, Container.Entry entry, Indexes indexes) {
         Listener listener = new Listener(entry);
 
@@ -156,7 +156,8 @@ public class JavaFileIndexerProvider extends AbstractIndexerProvider {
             }
             if (node instanceof TypeDeclaration) {
                 TypeDeclaration typeDeclaration = (TypeDeclaration) node;
-                List<Type> superInterfaces = typeDeclaration.superInterfaceTypes();
+                @SuppressWarnings("unchecked")
+				List<Type> superInterfaces = typeDeclaration.superInterfaceTypes();
                 String superQualifiedInterfaceName;
                 for (Type superInteface : superInterfaces) {
                     superQualifiedInterfaceName = resolveInternalTypeName(superInteface);
@@ -199,7 +200,8 @@ public class JavaFileIndexerProvider extends AbstractIndexerProvider {
 
         @Override
         public boolean visit(FieldDeclaration node) {
-            List<VariableDeclarationFragment> fragments = node.fragments();
+            @SuppressWarnings("unchecked")
+			List<VariableDeclarationFragment> fragments = node.fragments();
             for (VariableDeclarationFragment fragment : fragments) {
                 fieldDeclarationSet.add(fragment.getName().getIdentifier());
             }

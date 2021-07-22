@@ -10,9 +10,7 @@ package org.jd.gui.view.component;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 
-import javax.swing.InputMap;
-import javax.swing.JTree;
-import javax.swing.KeyStroke;
+import javax.swing.*;
 
 public class Tree extends JTree {
 
@@ -20,9 +18,9 @@ public class Tree extends JTree {
 
     public Tree() {
         Toolkit toolkit = Toolkit.getDefaultToolkit();
-        KeyStroke ctrlA = KeyStroke.getKeyStroke(KeyEvent.VK_A, toolkit.getMenuShortcutKeyMask());
-        KeyStroke ctrlC = KeyStroke.getKeyStroke(KeyEvent.VK_C, toolkit.getMenuShortcutKeyMask());
-        KeyStroke ctrlV = KeyStroke.getKeyStroke(KeyEvent.VK_V, toolkit.getMenuShortcutKeyMask());
+        KeyStroke ctrlA = KeyStroke.getKeyStroke(KeyEvent.VK_A, toolkit.getMenuShortcutKeyMaskEx());
+        KeyStroke ctrlC = KeyStroke.getKeyStroke(KeyEvent.VK_C, toolkit.getMenuShortcutKeyMaskEx());
+        KeyStroke ctrlV = KeyStroke.getKeyStroke(KeyEvent.VK_V, toolkit.getMenuShortcutKeyMaskEx());
 
         InputMap inputMap = getInputMap();
         inputMap.put(ctrlA, "none");

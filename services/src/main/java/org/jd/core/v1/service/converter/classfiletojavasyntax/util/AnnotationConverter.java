@@ -78,22 +78,22 @@ public class AnnotationConverter implements ElementValueVisitor {
 		if (elementValuePairs.size() == 1) {
 			Entry<String, AttributeElementValue> elementValuePair = elementValuePairs.get(0);
             String elementName = elementValuePair.getKey();
-            AttributeElementValue elementValue = elementValuePair.getValue();
+            AttributeElementValue elemValue = elementValuePair.getValue();
 
             if ("value".equals(elementName)) {
-                return new AnnotationReference(ot, convert(elementValue));
+                return new AnnotationReference(ot, convert(elemValue));
             }
             return new AnnotationReference(
                     ot,
-                    new ElementValuePair(elementName, convert(elementValue)));
+                    new ElementValuePair(elementName, convert(elemValue)));
         }
 		ElementValuePairs list = new ElementValuePairs(elementValuePairs.size());
 		String elementName;
-		AttributeElementValue elementValue;
+		AttributeElementValue elemValue;
 		for (Entry<String, AttributeElementValue> elementValuePair : elementValuePairs) {
 		    elementName = elementValuePair.getKey();
-		    elementValue = elementValuePair.getValue();
-		    list.add(new ElementValuePair(elementName, convert(elementValue)));
+		    elemValue = elementValuePair.getValue();
+		    list.add(new ElementValuePair(elementName, convert(elemValue)));
 		}
 		return new AnnotationReference(ot, list);
     }

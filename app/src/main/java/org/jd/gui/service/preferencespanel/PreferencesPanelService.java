@@ -10,10 +10,7 @@ package org.jd.gui.service.preferencespanel;
 import org.jd.gui.service.extension.ExtensionService;
 import org.jd.gui.spi.PreferencesPanel;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 public class PreferencesPanelService {
     protected static final PreferencesPanelService PREFERENCES_PANEL_SERVICE = new PreferencesPanelService();

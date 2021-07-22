@@ -29,7 +29,7 @@ public class History {
             return;
         }
 
-        if (uri.getPath().toString().equals(current.getPath().toString())) {
+        if (uri.getPath().equals(current.getPath())) {
             if ((uri.getFragment() == null) && (uri.getQuery() == null)) {
                 // Ignore
             } else if ((current.getFragment() == null) && (current.getQuery() == null)) {

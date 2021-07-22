@@ -20,10 +20,7 @@ import org.objectweb.asm.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import javax.swing.Icon;
 
@@ -118,7 +115,7 @@ public class ClassFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
     }
 
     static class JavaType implements Type {
-        private Container.Entry entry;
+        private final Container.Entry entry;
         private int access;
         private String name;
         private String superName;
@@ -126,11 +123,11 @@ public class ClassFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
 
         private String displayTypeName;
         private String displayInnerTypeName;
-        private String displayPackageName;
+        private final String displayPackageName;
 
         private List<Type> innerTypes;
-        private List<Type.Field> fields = new ArrayList<>();
-        private List<Type.Method> methods = new ArrayList<>();
+        private final List<Type.Field> fields = new ArrayList<>();
+        private final List<Type.Method> methods = new ArrayList<>();
 
         protected JavaType(Container.Entry entry, ClassReader classReader, final int outerAccess) {
             this.entry = entry;
@@ -251,20 +248,20 @@ public class ClassFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
             int indexDollar = name.lastIndexOf('$');
 
             if (indexDollar > packageLength) {
-                Container.Entry entry = getEntry(name);
+                Container.Entry loadedEntry = getEntry(name);
 
-                if (entry != null) {
-                    try (InputStream is = entry.getInputStream()) {
+                if (loadedEntry != null) {
+                    try (InputStream is = loadedEntry.getInputStream()) {
                         ClassReader classReader = new ClassReader(is);
                         InnerClassVisitor classVisitor = new InnerClassVisitor(name);
 
                         classReader.accept(classVisitor, ClassReader.SKIP_CODE|ClassReader.SKIP_DEBUG|ClassReader.SKIP_FRAMES);
 
-                        String outerName = classVisitor.getOuterName();
+                        String localOuterName = classVisitor.getOuterName();
 
-                        if (outerName != null) {
+                        if (localOuterName != null) {
                             // Inner class path found => Recursive call
-                            return getDisplayTypeName(outerName, packageLength) + '.' + classVisitor.getInnerName();
+                            return getDisplayTypeName(localOuterName, packageLength) + '.' + classVisitor.getInnerName();
                         }
                     } catch (IOException e) {
                         assert ExceptionUtil.printStackTrace(e);
@@ -306,48 +303,24 @@ public class ClassFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
             return entry;
         }
 
-        public void setEntry(Container.Entry entry) {
-            this.entry = entry;
-        }
-
-        public void setFlags(int access) {
+        private void setFlags(int access) {
             this.access = access;
         }
 
-        public void setName(String name) {
+        private void setName(String name) {
             this.name = name;
         }
 
-        public void setSuperName(String superName) {
+        private void setSuperName(String superName) {
             this.superName = superName;
         }
 
-        public void setOuterName(String outerName) {
+        private void setOuterName(String outerName) {
             this.outerName = outerName;
         }
 
-        public void setDisplayTypeName(String displayTypeName) {
-            this.displayTypeName = displayTypeName;
-        }
-
-        public void setDisplayInnerTypeName(String displayInnerTypeName) {
+        private void setDisplayInnerTypeName(String displayInnerTypeName) {
             this.displayInnerTypeName = displayInnerTypeName;
-        }
-
-        public void setDisplayPackageName(String displayPackageName) {
-            this.displayPackageName = displayPackageName;
-        }
-
-        public void setInnerTypes(List<Type> innerTypes) {
-            this.innerTypes = innerTypes;
-        }
-
-        public void setFields(List<Type.Field> fields) {
-            this.fields = fields;
-        }
-
-        public void setMethods(List<Type.Method> methods) {
-            this.methods = methods;
         }
 
     }

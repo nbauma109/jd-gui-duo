@@ -1,9 +1,7 @@
 package org.jd.gui.util.parser.jdt;
 
 import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.JavaCore;
-import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.dom.AST;
-import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.dom.ASTParser;
-import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.dom.ASTVisitor;
+import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.dom.*;
 import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;
@@ -15,9 +13,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.jar.Attributes;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
+import java.util.jar.*;
 
 public class ASTParserFactory {
 
@@ -40,9 +36,9 @@ public class ASTParserFactory {
         private static final ASTParserFactory BINDING_INSTANCE = new ASTParserFactory(true, true, true);
     }
 
-    private boolean resolveBindings;
-    private boolean bindingRecovery;
-    private boolean statementRecovery;
+    private final boolean resolveBindings;
+    private final boolean bindingRecovery;
+    private final boolean statementRecovery;
 
     public ASTParser newASTParser(Container.Entry containerEntry, ASTVisitor listener) throws LoaderException {
         URI jarURI = containerEntry.getContainer().getRoot().getParent().getUri();
@@ -71,21 +67,24 @@ public class ASTParserFactory {
         }
 
         Map<String, String> options = getDefaultOptions();
-        try (JarFile jarFile = new JarFile(new File(jarURI))) {
-            Manifest manifest = jarFile.getManifest();
-            if (manifest != null) {
-                Attributes mainAttributes = manifest.getMainAttributes();
-                if (mainAttributes != null) {
-                    String jdkVersion = mainAttributes.getValue("Build-Jdk");
-                    if (jdkVersion != null) {
-                        String majorVersion = resolveJDKVersion(jdkVersion);
-                        options.put(JavaCore.COMPILER_COMPLIANCE, majorVersion);
-                        options.put(JavaCore.COMPILER_SOURCE, majorVersion);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            assert ExceptionUtil.printStackTrace(e);
+        File file = new File(jarURI);
+        if (file.isFile() && file.getName().endsWith(".jar")) {
+			try (JarFile jarFile = new JarFile(file)) {
+	            Manifest manifest = jarFile.getManifest();
+	            if (manifest != null) {
+	                Attributes mainAttributes = manifest.getMainAttributes();
+	                if (mainAttributes != null) {
+	                    String jdkVersion = mainAttributes.getValue("Build-Jdk");
+	                    if (jdkVersion != null) {
+	                        String majorVersion = resolveJDKVersion(jdkVersion);
+	                        options.put(JavaCore.COMPILER_COMPLIANCE, majorVersion);
+	                        options.put(JavaCore.COMPILER_SOURCE, majorVersion);
+	                    }
+	                }
+	            }
+	        } catch (IOException e) {
+	            assert ExceptionUtil.printStackTrace(e);
+	        }
         }
         parser.setCompilerOptions(options);
 
@@ -149,17 +148,5 @@ public class ASTParserFactory {
         }
         // default to JAVA 8
         return JavaCore.VERSION_1_8;
-    }
-
-    public void setResolveBindings(boolean resolveBindings) {
-        this.resolveBindings = resolveBindings;
-    }
-
-    public void setBindingRecovery(boolean bindingRecovery) {
-        this.bindingRecovery = bindingRecovery;
-    }
-
-    public void setStatementRecovery(boolean statementRecovery) {
-        this.statementRecovery = statementRecovery;
     }
 }

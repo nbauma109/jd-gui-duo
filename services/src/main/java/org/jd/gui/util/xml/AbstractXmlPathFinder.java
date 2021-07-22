@@ -13,10 +13,7 @@ import java.io.StringReader;
 import java.util.*;
 
 import javax.xml.XMLConstants;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.*;
 
 public abstract class AbstractXmlPathFinder {
     protected Map<String, Set<String>> tagNameToPaths = new HashMap<>();

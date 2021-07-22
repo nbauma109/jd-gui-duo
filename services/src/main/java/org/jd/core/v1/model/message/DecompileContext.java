@@ -121,16 +121,8 @@ public class DecompileContext {
         return containsByteCode;
     }
 
-    public void setContainsByteCode(boolean containsByteCode) {
-        this.containsByteCode = containsByteCode;
-    }
-
     public boolean isShowBridgeAndSynthetic() {
         return showBridgeAndSynthetic;
-    }
-
-    public void setShowBridgeAndSynthetic(boolean showBridgeAndSynthetic) {
-        this.showBridgeAndSynthetic = showBridgeAndSynthetic;
     }
 
     public ClassFile getClassFile() {

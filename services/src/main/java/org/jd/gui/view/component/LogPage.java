@@ -18,10 +18,7 @@ import org.jdv1.gui.util.index.IndexesUtil;
 
 import java.awt.Point;
 import java.net.URI;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Future;
 
 import static org.jd.gui.util.Key.key;
@@ -74,7 +71,7 @@ public class LogPage extends HyperlinkPage implements UriGettable, IndexesChange
             try {
                 // Save current position in history
                 Point location = textArea.getLocationOnScreen();
-                int offset = textArea.viewToModel(new Point(x - location.x, y - location.y));
+                int offset = textArea.viewToModel2D(new Point(x - location.x, y - location.y));
                 api.addURI(new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), "position=" + offset, null));
 
                 // Open link
@@ -145,7 +142,7 @@ public class LogPage extends HyperlinkPage implements UriGettable, IndexesChange
     }
 
     public static class LogHyperlinkData extends HyperlinkData {
-        public boolean enabled = false;
+    	private boolean enabled = false;
 
         public LogHyperlinkData(int startPosition, int endPosition) {
             super(startPosition, endPosition);

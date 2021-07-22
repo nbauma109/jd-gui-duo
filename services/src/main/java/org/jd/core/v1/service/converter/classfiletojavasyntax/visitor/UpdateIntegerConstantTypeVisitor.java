@@ -13,10 +13,7 @@ import org.jd.core.v1.model.javasyntax.reference.InnerObjectReference;
 import org.jd.core.v1.model.javasyntax.reference.ObjectReference;
 import org.jd.core.v1.model.javasyntax.statement.*;
 import org.jd.core.v1.model.javasyntax.type.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileConstructorInvocationExpression;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileMethodInvocationExpression;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileNewExpression;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileSuperConstructorInvocationExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
 import org.jd.core.v1.util.DefaultList;
 import org.jd.core.v1.util.StringConstants;
@@ -105,9 +102,7 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
         Type rightType = right.getType();
 
         switch (expression.getOperator()) {
-            case "&":
-            case "|":
-            case "^":
+            case "&", "|", "^":
                 if (leftType.isPrimitiveType() && rightType.isPrimitiveType()) {
                     Type type = PrimitiveTypeUtil.getCommonPrimitiveType((PrimitiveType) leftType, (PrimitiveType) rightType);
                     if (type == null) {
@@ -121,12 +116,7 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
                 left.accept(this);
                 expression.setRightExpression(updateExpression(leftType, right));
                 break;
-            case ">":
-            case ">=":
-            case "<":
-            case "<=":
-            case "==":
-            case "!=":
+            case ">", ">=", "<", "<=", "==", "!=":
                 if (leftType.getDimension() == 0 && rightType.getDimension() == 0) {
                     if (leftType.isPrimitiveType()) {
                         if (rightType.isPrimitiveType()) {

@@ -158,7 +158,8 @@ public abstract class AbstractUpdateExpressionVisitor extends AbstractJavaSyntax
         expression.getStatements().accept(this);
     }
 
-    @Override public void visit(LengthExpression expression) {
+    @Override 
+    public void visit(LengthExpression expression) {
         expression.setExpression(updateExpression(expression.getExpression()));
         expression.getExpression().accept(this);
     }

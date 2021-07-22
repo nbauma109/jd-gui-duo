@@ -11,14 +11,9 @@ import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.statement.*;
-import org.jd.core.v1.model.javasyntax.type.BaseType;
-import org.jd.core.v1.model.javasyntax.type.ObjectType;
-import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileConstructorInvocationExpression;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileNewExpression;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileSuperConstructorInvocationExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.core.v1.util.DefaultList;
@@ -527,7 +522,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                 if (firstParameterType.isObjectType() && !classFile.isStatic() && bodyDeclaration.getOuterTypeFieldName() != null) {
                     TypeMaker.TypeTypes superTypeTypes = typeMaker.makeTypeTypes(classFile.getSuperTypeName());
 
-                    if (superTypeTypes != null && superTypeTypes.thisType.isInnerObjectType() && typeMaker.isRawTypeAssignable(superTypeTypes.thisType.getOuterType(), (ObjectType)firstParameterType)) {
+                    if (superTypeTypes != null && superTypeTypes.getThisType().isInnerObjectType() && typeMaker.isRawTypeAssignable(superTypeTypes.getThisType().getOuterType(), (ObjectType)firstParameterType)) {
                         scie.setParameters(removeFirstItem(parameters));
                         scie.setParameterTypes(removeFirstItem(scie.getParameterTypes()));
                     }

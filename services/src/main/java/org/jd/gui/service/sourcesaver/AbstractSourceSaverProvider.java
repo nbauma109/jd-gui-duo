@@ -12,9 +12,7 @@ import org.jd.gui.spi.SourceSaver;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public abstract class AbstractSourceSaverProvider implements SourceSaver {

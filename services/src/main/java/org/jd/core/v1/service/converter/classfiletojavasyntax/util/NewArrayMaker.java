@@ -7,9 +7,7 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
-import org.jd.core.v1.model.javasyntax.declaration.ArrayVariableInitializer;
-import org.jd.core.v1.model.javasyntax.declaration.ExpressionVariableInitializer;
-import org.jd.core.v1.model.javasyntax.declaration.VariableInitializer;
+import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.statement.Statement;
 import org.jd.core.v1.model.javasyntax.statement.Statements;

@@ -12,10 +12,7 @@ import org.jd.gui.Constants;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Configuration {
     protected Point mainWindowLocation;
@@ -28,7 +25,7 @@ public class Configuration {
     protected File recentLoadDirectory;
     protected File recentSaveDirectory;
 
-    protected Map<String, String> preferences = new HashMap<>();
+    protected final Map<String, String> preferences = new HashMap<>();
 
     public Point getMainWindowLocation() {
         return mainWindowLocation;
@@ -88,10 +85,6 @@ public class Configuration {
 
     public void setRecentSaveDirectory(File recentSaveDirectory) {
         this.recentSaveDirectory = recentSaveDirectory;
-    }
-
-    public void setPreferences(Map<String, String> preferences) {
-        this.preferences = preferences;
     }
 
     public void addRecentFile(File file) {

@@ -3,9 +3,7 @@ package org.jd.gui.view.component;
 import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.dom.*;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.model.Container;
-import org.jd.gui.util.parser.jdt.core.AbstractJavaListener;
-import org.jd.gui.util.parser.jdt.core.DeclarationData;
-import org.jd.gui.util.parser.jdt.core.TypeDeclarationData;
+import org.jd.gui.util.parser.jdt.core.*;
 
 import java.util.*;
 
@@ -90,7 +88,8 @@ public class DeclarationListener extends AbstractJavaListener {
 
     @Override
     public boolean visit(FieldDeclaration node) {
-        List<VariableDeclarationFragment> fragments = node.fragments();
+        @SuppressWarnings("unchecked")
+		List<VariableDeclarationFragment> fragments = node.fragments();
         String name;
         int dimensionOnVariable;
         int position;
@@ -113,7 +112,8 @@ public class DeclarationListener extends AbstractJavaListener {
     public boolean visit(MethodDeclaration node) {
         SimpleName nodeName = node.getName();
         String name = nodeName.getIdentifier();
-        String paramDescriptors = createParamDescriptors(node.parameters());
+        @SuppressWarnings("unchecked")
+		String paramDescriptors = createParamDescriptors(node.parameters());
         String returnDescriptor = createDescriptor(node.getReturnType2(), 0);
         String descriptor = paramDescriptors + returnDescriptor;
         int position = nodeName.getStartPosition();
@@ -127,7 +127,7 @@ public class DeclarationListener extends AbstractJavaListener {
         return declarations;
     }
 
-    public void setDeclarations(Map<String, DeclarationData> declarations) {
+    void setDeclarations(Map<String, DeclarationData> declarations) {
         this.declarations = declarations;
     }
 
@@ -135,7 +135,7 @@ public class DeclarationListener extends AbstractJavaListener {
         return typeDeclarations;
     }
 
-    public void setTypeDeclarations(NavigableMap<Integer, DeclarationData> typeDeclarations) {
+    void setTypeDeclarations(NavigableMap<Integer, DeclarationData> typeDeclarations) {
         this.typeDeclarations = typeDeclarations;
     }
 

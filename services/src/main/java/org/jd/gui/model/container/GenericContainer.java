@@ -13,12 +13,11 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.model.container.entry.path.SimpleEntryPath;
 import org.jd.gui.spi.ContainerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.*;
+import java.nio.file.FileSystem;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -157,18 +156,18 @@ public class GenericContainer implements Container {
 
         protected NavigableMap<Container.EntryPath, Container.Entry> loadChildrenFromDirectoryEntry() throws IOException {
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(fsPath)) {
-                NavigableMap<Container.EntryPath, Container.Entry> children = new TreeMap<>(ContainerEntryComparator.COMPARATOR);
+                NavigableMap<Container.EntryPath, Container.Entry> sortedChildren = new TreeMap<>(ContainerEntryComparator.COMPARATOR);
                 int parentNameCount = fsPath.getNameCount();
 
                 for (Path subPath : stream) {
                     if (subPath.getNameCount() > parentNameCount) {
                         Container.Entry newChildEntry = newChildEntry(subPath);
                         Container.EntryPath newChildEntryPath = new SimpleEntryPath(newChildEntry.getPath(), newChildEntry.isDirectory());
-                        children.put(newChildEntryPath, newChildEntry);
+                        sortedChildren.put(newChildEntryPath, newChildEntry);
                     }
                 }
 
-                return Collections.unmodifiableNavigableMap(children);
+                return Collections.unmodifiableNavigableMap(sortedChildren);
             }
         }
 

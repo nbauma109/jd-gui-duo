@@ -13,21 +13,21 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.spi.ContainerFactory;
 import org.jdv1.gui.model.container.KarContainer;
 
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
+import java.nio.file.*;
 
 public class KarContainerFactoryProvider implements ContainerFactory {
     @Override
     public String getType() { return "kar"; }
 
-    @Override
+	@Override
+	@SuppressWarnings("resource")
     public boolean accept(API api, Path rootPath) {
         if (rootPath.toUri().toString().toLowerCase().endsWith(".kar!/")) {
             return true;
         }
         // Extension: accept uncompressed KAR file containing a folder 'repository'
         try {
+        	// do not try to close file system due to UnsupportedOperationException
             return rootPath.getFileSystem().provider().getScheme().equals("file") && Files.exists(rootPath.resolve("repository"));
         } catch (InvalidPathException e) {
             assert ExceptionUtil.printStackTrace(e);

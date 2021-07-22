@@ -18,15 +18,11 @@ import org.objectweb.asm.signature.SignatureReader;
 import org.objectweb.asm.signature.SignatureVisitor;
 
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
-import static org.objectweb.asm.ClassReader.SKIP_CODE;
-import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
-import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
+import static org.apache.bcel.Const.*;
+import static org.objectweb.asm.ClassReader.*;
 
 /**
  * Unsafe thread implementation of class file indexer.
@@ -93,7 +89,7 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
                     int tag = classReader.readByte(startIndex-1);
 
                     switch (tag) {
-                        case 7: // CONSTANT_Class
+                        case CONSTANT_Class:
                             String className = classReader.readUTF8(startIndex, buffer);
                             if (className.startsWith("[")) {
                                 new SignatureReader(className).acceptType(signatureIndexer);
@@ -101,25 +97,24 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
                                 typeReferenceSet.add(className);
                             }
                             break;
-                        case 8: // CONSTANT_String
+                        case CONSTANT_String:
                             String str = classReader.readUTF8(startIndex, buffer);
                             stringSet.add(str);
                             break;
-                        case 9: // CONSTANT_Fieldref
+                        case CONSTANT_Fieldref:
                             int nameAndTypeItem = classReader.readUnsignedShort(startIndex+2);
                             int nameAndTypeIndex = classReader.getItem(nameAndTypeItem);
                             tag = classReader.readByte(nameAndTypeIndex-1);
-                            if (tag == 12) { // CONSTANT_NameAndType
+                            if (tag == CONSTANT_NameAndType) {
                                 String fieldName = classReader.readUTF8(nameAndTypeIndex, buffer);
                                 fieldReferenceSet.add(fieldName);
                             }
                             break;
-                        case 10: // CONSTANT_Methodref:
-                        case 11: // CONSTANT_InterfaceMethodref:
+                        case CONSTANT_Methodref, CONSTANT_InterfaceMethodref:
                             nameAndTypeItem = classReader.readUnsignedShort(startIndex+2);
                             nameAndTypeIndex = classReader.getItem(nameAndTypeItem);
                             tag = classReader.readByte(nameAndTypeIndex-1);
-                            if (tag == 12) { // CONSTANT_NameAndType
+                            if (tag == CONSTANT_NameAndType) {
                                 String methodName = classReader.readUTF8(nameAndTypeIndex, buffer);
                                 if (StringConstants.INSTANCE_CONSTRUCTOR.equals(methodName)) {
                                     int classItem = classReader.readUnsignedShort(startIndex);

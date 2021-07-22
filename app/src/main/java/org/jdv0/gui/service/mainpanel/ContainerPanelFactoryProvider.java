@@ -8,24 +8,16 @@ package org.jdv0.gui.service.mainpanel;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
-import org.jd.gui.api.feature.ContentIndexable;
-import org.jd.gui.api.feature.SourcesSavable;
-import org.jd.gui.api.feature.UriGettable;
+import org.jd.gui.api.feature.*;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
-import org.jd.gui.spi.Indexer;
-import org.jd.gui.spi.PanelFactory;
-import org.jd.gui.spi.SourceSaver;
-import org.jd.gui.spi.TreeNodeFactory;
+import org.jd.gui.spi.*;
 import org.jd.gui.view.component.panel.TreeTabbedPanel;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.*;
 
 import javax.swing.JComponent;
@@ -57,10 +49,10 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
             DefaultMutableTreeNode root = new DefaultMutableTreeNode();
 
             TreeNodeFactory factory;
-            for (Container.Entry entry : container.getRoot().getChildren().values()) {
-                factory = api.getTreeNodeFactory(entry);
+            for (Container.Entry nextEntry : container.getRoot().getChildren().values()) {
+                factory = api.getTreeNodeFactory(nextEntry);
                 if (factory != null) {
-                    root.add(factory.make(api, entry));
+                    root.add(factory.make(api, nextEntry));
                 }
             }
 
@@ -103,7 +95,7 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
         @Override
         public int getFileCount() {
             SourceSaver saver = api.getSourceSaver(entry);
-            return (saver != null) ? saver.getFileCount(api, entry) : 0;
+            return saver != null ? saver.getFileCount(api, entry) : 0;
         }
 
         @Override
@@ -207,5 +199,32 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
 
             return value;
         }
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = super.hashCode();
+			result = prime * result + (wrappers == null ? 0 : wrappers.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (!super.equals(obj) || getClass() != obj.getClass()) {
+				return false;
+			}
+			MapMapCollectionWithDefault other = (MapMapCollectionWithDefault) obj;
+			if (wrappers == null) {
+				if (other.wrappers != null) {
+					return false;
+				}
+			} else if (!wrappers.equals(other.wrappers)) {
+				return false;
+			}
+			return true;
+		}
     }
 }

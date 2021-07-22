@@ -9,9 +9,7 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.
 
 import org.jd.core.v1.model.javasyntax.declaration.ClassDeclaration;
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
-import org.jd.core.v1.model.javasyntax.type.BaseType;
-import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
-import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.*;
 
 public class ClassFileClassDeclaration extends ClassDeclaration implements ClassFileTypeDeclaration {
     protected int firstLineNumber;

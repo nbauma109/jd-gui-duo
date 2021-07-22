@@ -14,22 +14,18 @@ import org.jd.gui.api.model.TreeNodeData;
 import org.jd.gui.view.component.Tree;
 import org.jd.gui.view.renderer.TreeNodeRenderer;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.List;
 
 import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
+import javax.swing.tree.*;
 
 public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> extends JPanel implements UriGettable, UriOpenable, PageChangeable, PageClosable, PreferencesChangeListener {
 
@@ -143,12 +139,12 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
                 updateTreeMenuEnabled = false;
 
                 // Search base tree node
-                URI uri = node.getUri();
+                URI localURI = node.getUri();
 
-                if ((uri.getFragment() == null) && (uri.getQuery() == null)) {
-                    showPage(uri, uri, node);
+                if ((localURI.getFragment() == null) && (localURI.getQuery() == null)) {
+                    showPage(localURI, localURI, node);
                 } else {
-                    URI baseUri = new URI(uri.getScheme(), uri.getHost(), uri.getPath(), null);
+                    URI baseUri = new URI(localURI.getScheme(), localURI.getHost(), localURI.getPath(), null);
                     T baseNode = node;
 
                     while ((baseNode != null) && !baseNode.getUri().equals(baseUri)) {
@@ -156,7 +152,7 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
                     }
 
                     if ((baseNode != null) && baseNode.getUri().equals(baseUri)) {
-                        showPage(uri, baseUri, baseNode);
+                        showPage(localURI, baseUri, baseNode);
                     }
                 }
             } catch (URISyntaxException e) {
@@ -332,7 +328,8 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
     }
 
     // --- PreferencesChangeListener --- //
-    @Override
+	@Override
+	@SuppressWarnings("unchecked")
     public void preferencesChanged(Map<String, String> preferences) {
         tabbedPanel.preferencesChanged(preferences);
     }

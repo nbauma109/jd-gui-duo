@@ -21,9 +21,7 @@ import java.awt.event.ActionEvent;
 import java.util.Collection;
 import java.util.Collections;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.ImageIcon;
+import javax.swing.*;
 
 public class CopyQualifiedNameContextualActionsFactory implements ContextualActionsFactory {
 

@@ -33,25 +33,17 @@ import org.jdv1.gui.api.feature.IndexesChangeListener;
 import org.jdv1.gui.service.fileloader.FileLoaderService;
 import org.jdv1.gui.service.sourceloader.SourceLoaderService;
 
-import java.awt.Desktop;
-import java.awt.Frame;
-import java.awt.Point;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.concurrent.*;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -289,7 +281,7 @@ public class MainController implements API {
         try {
             Transferable transferable = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
 
-            if ((transferable != null) && transferable.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+            if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.stringFlavor)) {
                 Object obj = transferable.getTransferData(DataFlavor.stringFlavor);
                 PasteHandler pasteHandler = PasteHandlerService.getInstance().get(obj);
 
@@ -450,7 +442,7 @@ public class MainController implements API {
             // Check input file
             if (file.exists()) {
                 FileLoader loader = getFileLoader(file);
-                if ((loader != null) && !loader.accept(this, file)) {
+                if (loader != null && !loader.accept(this, file)) {
                     errors.add("Invalid input fileloader: '" + file.getAbsolutePath() + "'");
                 }
             } else {
@@ -562,7 +554,7 @@ public class MainController implements API {
         if (uri != null) {
             boolean success = mainView.openUri(uri);
 
-            if (success == false) {
+            if (!success) {
                 UriLoader uriLoader = getUriLoader(uri);
                 if (uriLoader != null) {
                     success = uriLoader.load(this, uri);
@@ -590,7 +582,7 @@ public class MainController implements API {
             // Multiple entries -> Open a "Select location" popup
             Collection<Future<Indexes>> collectionOfFutureIndexes = getCollectionOfFutureIndexes();
             selectLocationController.show(
-                new Point(x+(16+2), y+2),
+                new Point(x+16+2, y+2),
                 entries,
                 entry -> openURI(UriUtil.createURI(this, collectionOfFutureIndexes, entry, query, fragment)), // entry selected closure
                 () -> {});                                                                                    // popup close closure
@@ -667,7 +659,7 @@ public class MainController implements API {
     @SuppressWarnings("unchecked")
     public Collection<Future<Indexes>> getCollectionOfFutureIndexes() {
         List<JComponent> mainPanels = mainView.getMainPanels();
-        List<Future<Indexes>> list = new ArrayList<Future<Indexes>>(mainPanels.size()) {
+        List<Future<Indexes>> list = new ArrayList<>(mainPanels.size()) {
 
             private static final long serialVersionUID = 1L;
 
@@ -690,6 +682,17 @@ public class MainController implements API {
                 }
                 return hashCode;
             }
+            
+            @Override
+            public boolean equals(Object o) {
+            	if (this == o) {
+            		return true;
+            	}
+            	if (o == null || o.getClass() != this.getClass()) {
+            		return false;
+            	}
+            	return super.equals(o);
+            }
         };
         for (JComponent panel : mainPanels) {
             Future<Indexes> futureIndexes = (Future<Indexes>)panel.getClientProperty(INDEXES);
@@ -702,7 +705,8 @@ public class MainController implements API {
 
     @Override
     public Collection<Indexes> getCollectionOfIndexes() {
-        List<JComponent> mainPanels = mainView.getMainPanels();
+        @SuppressWarnings("unchecked")
+		List<JComponent> mainPanels = mainView.getMainPanels();
         List<Indexes> list = new ArrayList<>(mainPanels.size());
         for (JComponent panel : mainPanels) {
             @SuppressWarnings("unchecked")
@@ -732,7 +736,7 @@ public class MainController implements API {
         executor.execute(() -> {
             String source = sourceLoaderService.loadSource(this, entry);
 
-            if ((source != null) && !source.isEmpty()) {
+            if (source != null && !source.isEmpty()) {
                 listener.sourceLoaded(source);
             }
         });

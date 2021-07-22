@@ -7,9 +7,7 @@
 
 package org.jd.core.v1.model.javasyntax.expression;
 
-import org.jd.core.v1.model.javasyntax.type.ObjectType;
-import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
-import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.*;
 
 public class InstanceOfExpression extends AbstractLineNumberExpression {
     protected Expression expression;

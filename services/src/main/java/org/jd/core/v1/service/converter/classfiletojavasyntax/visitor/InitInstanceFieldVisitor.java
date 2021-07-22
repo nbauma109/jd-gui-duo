@@ -11,10 +11,7 @@ import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.statement.Statement;
 import org.jd.core.v1.model.javasyntax.statement.Statements;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorDeclaration;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileFieldDeclaration;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMethodDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.*;
@@ -211,12 +208,12 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
         if (firstLineNumber < lastLineNumber) {
             Iterator<Expression> ite = putFields.iterator();
 
-            int lineNumber;
+            int localLineNumber;
             while (ite.hasNext()) {
-                lineNumber = ite.next().getLineNumber();
+                localLineNumber = ite.next().getLineNumber();
 
-                if (firstLineNumber <= lineNumber && lineNumber <= lastLineNumber) {
-                    if (lineNumber == lastLineNumber) {
+                if (firstLineNumber <= localLineNumber && localLineNumber <= lastLineNumber) {
+                    if (localLineNumber == lastLineNumber) {
                         lastLineNumber++;
                     }
                     ite.remove();
@@ -296,9 +293,9 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     protected static final class Data {
-        public ClassFileConstructorDeclaration declaration;
-        public Statements statements;
-        public int index;
+        private ClassFileConstructorDeclaration declaration;
+        private Statements statements;
+        private int index;
 
         public Data(ClassFileConstructorDeclaration declaration, Statements statements, int index) {
             this.declaration = declaration;

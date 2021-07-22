@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration;
 
 import org.jd.core.v1.model.javasyntax.declaration.BaseFieldDeclarator;
@@ -44,22 +43,22 @@ public class ClassFileFieldDeclaration extends FieldDeclaration implements Class
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ClassFileFieldDeclaration)) return false;
-        if (!super.equals(o)) return false;
+        if (this == o) {
+			return true;
+		}
+        if (!(o instanceof ClassFileFieldDeclaration) || !super.equals(o)) {
+			return false;
+		}
 
         ClassFileFieldDeclaration that = (ClassFileFieldDeclaration) o;
 
-        if (firstLineNumber != that.firstLineNumber) return false;
-
-        return true;
+        return firstLineNumber == that.firstLineNumber;
     }
 
     @Override
     public int hashCode() {
         int result = 65247265 + super.hashCode();
-        result = 31 * result + firstLineNumber;
-        return result;
+        return 31 * result + firstLineNumber;
     }
 
     @Override

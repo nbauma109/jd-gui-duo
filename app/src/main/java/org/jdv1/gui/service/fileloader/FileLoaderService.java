@@ -11,9 +11,7 @@ import org.jd.gui.service.extension.ExtensionService;
 import org.jd.gui.spi.FileLoader;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class FileLoaderService {
     protected static final FileLoaderService FILE_LOADER_SERVICE = new FileLoaderService();

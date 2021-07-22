@@ -12,10 +12,7 @@ import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.javasyntax.declaration.BaseFormalParameter;
 import org.jd.core.v1.model.javasyntax.declaration.StaticInitializerDeclaration;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
-import org.jd.core.v1.model.javasyntax.type.BaseType;
-import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
-import org.jd.core.v1.model.javasyntax.type.Type;
-import org.jd.core.v1.model.javasyntax.type.TypeArgument;
+import org.jd.core.v1.model.javasyntax.type.*;
 
 import java.util.Map;
 

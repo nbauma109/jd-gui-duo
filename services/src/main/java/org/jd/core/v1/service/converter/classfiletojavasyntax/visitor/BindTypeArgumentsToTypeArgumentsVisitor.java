@@ -18,7 +18,7 @@ public class BindTypeArgumentsToTypeArgumentsVisitor extends AbstractTypeArgumen
     protected Map<String, TypeArgument> bindings;
     protected BaseTypeArgument result;
 
-    public void setBindings(Map<String, TypeArgument> bindings) {
+    void setBindings(Map<String, TypeArgument> bindings) {
         this.bindings = bindings;
     }
 

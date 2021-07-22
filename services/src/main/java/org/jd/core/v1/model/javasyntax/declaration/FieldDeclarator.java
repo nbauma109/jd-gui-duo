@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.model.javasyntax.declaration;
 
 public class FieldDeclarator implements BaseFieldDeclarator {
@@ -55,25 +54,23 @@ public class FieldDeclarator implements BaseFieldDeclarator {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof FieldDeclarator)) return false;
+        if (this == o) {
+			return true;
+		}
+        if (!(o instanceof FieldDeclarator)) {
+			return false;
+		}
 
         FieldDeclarator that = (FieldDeclarator) o;
 
-        if (dimension != that.dimension) return false;
-        if (!name.equals(that.name)) return false;
-        if (variableInitializer != null ? !variableInitializer.equals(that.variableInitializer) : that.variableInitializer != null)
-            return false;
-
-        return true;
+        return dimension == that.dimension && name.equals(that.name) && (variableInitializer != null ? variableInitializer.equals(that.variableInitializer) : that.variableInitializer == null);
     }
 
     @Override
     public int hashCode() {
         int result = 544278669 + name.hashCode();
         result = 31 * result + dimension;
-        result = 31 * result + (variableInitializer != null ? variableInitializer.hashCode() : 0);
-        return result;
+        return 31 * result + (variableInitializer != null ? variableInitializer.hashCode() : 0);
     }
 
     @Override

@@ -75,13 +75,10 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
         int length = text.length();
 
         while (index < length) {
-            switch (text.charAt(index)) {
-                case ' ': case '\t': case '\n': case '\r':
-                    index++;
-                    break;
-                default:
-                    return index;
+            if (" \t\n\r".indexOf(text.charAt(index)) == -1) {
+                return index;
             }
+			index++;
         }
 
         return index;
@@ -89,37 +86,34 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
 
     public int searchEndIndexOfValue(String text, int startLineIndex, int startIndex) {
         int length = text.length();
-        int index = startIndex;
-
-        while (index < length) {
+        int index;
+		for (index = startIndex; index < length; index++) {
             // MANIFEST.MF Specification: max line length = 72
             // http://docs.oracle.com/javase/7/docs/technotes/guides/jar/jar.html
-            switch (text.charAt(index)) {
-                case '\r':
-                    // CR followed by LF ?
-                    if ((index-startLineIndex >= 70) && (index+1 < length) && (text.charAt(index+1) == ' ')) {
-                        // Multiline value
-                        startLineIndex = index+1;
-                    } else if ((index-startLineIndex >= 70) && (index+2 < length) && (text.charAt(index+1) == '\n') && (text.charAt(index+2) == ' ')) {
-                        // Multiline value
-                        index++;
-                        startLineIndex = index+1;
-                    } else {
-                        // (End of file) or (single line value) => return end index
-                        return index;
-                    }
-                    break;
-                case '\n':
-                    if ((index-startLineIndex >= 70) && (index+1 < length) && (text.charAt(index+1) == ' ')) {
-                        // Multiline value
-                        startLineIndex = index+1;
-                    } else {
-                        // (End of file) or (single line value) => return end index
-                        return index;
-                    }
-                    break;
+            char c = text.charAt(index);
+			if (c == '\r') {
+                // CR followed by LF ?
+                if (index-startLineIndex >= 70 && index+1 < length && text.charAt(index+1) == ' ') {
+                    // Multiline value
+                    startLineIndex = index+1;
+                } else if (index-startLineIndex >= 70 && index+2 < length && text.charAt(index+1) == '\n' && text.charAt(index+2) == ' ') {
+                    // Multiline value
+                    index++;
+                    startLineIndex = index+1;
+                } else {
+                    // (End of file) or (single line value) => return end index
+                    return index;
+                }
+			}
+			if (c == '\n') {
+                if (index-startLineIndex >= 70 && index+1 < length && text.charAt(index+1) == ' ') {
+                    // Multiline value
+                    startLineIndex = index+1;
+                } else {
+                    // (End of file) or (single line value) => return end index
+                    return index;
+                }
             }
-            index++;
         }
 
         return index;
@@ -136,7 +130,7 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
             try {
                 // Save current position in history
                 Point location = textArea.getLocationOnScreen();
-                int offset = textArea.viewToModel(new Point(x-location.x, y-location.y));
+                int offset = textArea.viewToModel2D(new Point(x-location.x, y-location.y));
                 URI uri = entry.getUri();
                 api.addURI(new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), "position=" + offset, null));
                 // Open link
@@ -147,9 +141,9 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
                 String rootUri = entry.getContainer().getRoot().getUri().toString();
                 List<Container.Entry> sameContainerEntries = new ArrayList<>();
 
-                for (Container.Entry entry : entries) {
-                    if (entry.getUri().toString().startsWith(rootUri)) {
-                        sameContainerEntries.add(entry);
+                for (Container.Entry nextEntry : entries) {
+                    if (nextEntry.getUri().toString().startsWith(rootUri)) {
+                        sameContainerEntries.add(nextEntry);
                     }
                 }
 
@@ -185,8 +179,8 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
         boolean refresh = false;
         String text = getText();
 
-        for (Map.Entry<Integer, HyperlinkData> entry : hyperlinks.entrySet()) {
-            ManifestHyperlinkData entryData = (ManifestHyperlinkData)entry.getValue();
+        for (Map.Entry<Integer, HyperlinkData> nextEntry : hyperlinks.entrySet()) {
+            ManifestHyperlinkData entryData = (ManifestHyperlinkData)nextEntry.getValue();
             String textLink = getValue(text, entryData.getStartPosition(), entryData.getEndPosition());
             String internalTypeName = textLink.replace('.', '/');
             boolean enabled = IndexesUtil.containsInternalTypeName(collectionOfFutureIndexes, internalTypeName);
@@ -213,8 +207,8 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
     }
 
     public static class ManifestHyperlinkData extends HyperlinkData {
-        public boolean enabled;
-        public String fragment;
+    	private boolean enabled;
+    	private final String fragment;
 
         ManifestHyperlinkData(int startPosition, int endPosition, String fragment) {
             super(startPosition, endPosition);

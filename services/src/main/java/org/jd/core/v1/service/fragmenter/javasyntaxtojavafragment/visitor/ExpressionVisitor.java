@@ -4,27 +4,24 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.visitor;
 
+import org.jboss.forge.roaster._shade.org.apache.commons.lang3.StringUtils;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.model.fragment.Fragment;
 import org.jd.core.v1.model.javafragment.*;
-import org.jd.core.v1.model.javasyntax.declaration.BaseFormalParameter;
-import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
-import org.jd.core.v1.model.javasyntax.declaration.FormalParameter;
+import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.model.token.*;
-import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.CharacterUtil;
-import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.JavaFragmentFactory;
-import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.StringUtil;
+import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.*;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.*;
 
+import static org.apache.bcel.Const.MAJOR_1_7;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_BOOLEAN;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_CHAR;
 
@@ -43,14 +40,14 @@ public class ExpressionVisitor extends TypeVisitor {
     protected LinkedList<Context> contextStack = new LinkedList<>();
     protected Fragments fragments = new Fragments();
     protected boolean diamondOperatorSupported;
-    protected boolean inExpressionFlag = false;
+    protected boolean inExpressionFlag;
     protected Set<String> currentMethodParamNames = new HashSet<>();
     protected String currentTypeName;
     protected HexaExpressionVisitor hexaExpressionVisitor = new HexaExpressionVisitor();
 
     public ExpressionVisitor(Loader loader, String mainInternalTypeName, int majorVersion, ImportsFragment importsFragment) {
         super(loader, mainInternalTypeName, majorVersion, importsFragment);
-        this.diamondOperatorSupported = (majorVersion >= 51); // (majorVersion >= Java 7)
+        this.diamondOperatorSupported = majorVersion >= MAJOR_1_7;
     }
 
     public DefaultList<Fragment> getFragments() {
@@ -67,27 +64,19 @@ public class ExpressionVisitor extends TypeVisitor {
 
     @Override
     public void visit(BinaryOperatorExpression expression) {
-        switch (expression.getOperator()) {
-            case "&":
-            case "|":
-            case "^":
-            case "&=":
-            case "|=":
-            case "^=":
-                visitHexa(expression, expression.getLeftExpression());
-                tokens.add(TextToken.SPACE);
-                tokens.add(newTextToken(expression.getOperator()));
-                tokens.add(TextToken.SPACE);
-                visitHexa(expression, expression.getRightExpression());
-                break;
-            default:
-                visit(expression, expression.getLeftExpression());
-                tokens.add(TextToken.SPACE);
-                tokens.add(newTextToken(expression.getOperator()));
-                tokens.add(TextToken.SPACE);
-                visit(expression, expression.getRightExpression());
-                break;
-        }
+        if (StringUtils.equalsAny(expression.getOperator(), "&", "|", "^", "&=", "|=", "^=")) {
+			visitHexa(expression, expression.getLeftExpression());
+			tokens.add(TextToken.SPACE);
+			tokens.add(newTextToken(expression.getOperator()));
+			tokens.add(TextToken.SPACE);
+			visitHexa(expression, expression.getRightExpression());
+		} else {
+			visit(expression, expression.getLeftExpression());
+			tokens.add(TextToken.SPACE);
+			tokens.add(newTextToken(expression.getOperator()));
+			tokens.add(TextToken.SPACE);
+			visit(expression, expression.getRightExpression());
+		}
     }
 
     @Override
@@ -364,33 +353,33 @@ public class ExpressionVisitor extends TypeVisitor {
         BaseExpression parameters = expression.getParameters();
         boolean dot = false;
 
-        if (exp.isThisExpression()) {
-            // Nothing to do : do not print 'this.method(...)'
-        } else if (exp.isObjectTypeReferenceExpression()) {
-            ObjectType ot = exp.getObjectType();
+        if (!exp.isThisExpression()) {
+			if (exp.isObjectTypeReferenceExpression()) {
+			    ObjectType ot = exp.getObjectType();
 
-            if (! ot.getInternalName().equals(currentInternalTypeName)) {
-                visit(expression, exp);
-                tokens.addLineNumberToken(expression);
-                tokens.add(TextToken.DOT);
-                dot = true;
-            }
-        } else {
-            if (exp.isFieldReferenceExpression() || exp.isLocalVariableReferenceExpression()) {
-                tokens.addLineNumberToken(expression);
-                visit(expression, exp);
-            } else {
-                visit(expression, exp);
-                tokens.addLineNumberToken(expression);
-            }
+			    if (! ot.getInternalName().equals(currentInternalTypeName)) {
+			        visit(expression, exp);
+			        tokens.addLineNumberToken(expression);
+			        tokens.add(TextToken.DOT);
+			        dot = true;
+			    }
+			} else {
+			    if (exp.isFieldReferenceExpression() || exp.isLocalVariableReferenceExpression()) {
+			        tokens.addLineNumberToken(expression);
+			        visit(expression, exp);
+			    } else {
+			        visit(expression, exp);
+			        tokens.addLineNumberToken(expression);
+			    }
 
-            tokens.add(TextToken.DOT);
-            dot = true;
-        }
+			    tokens.add(TextToken.DOT);
+			    dot = true;
+			}
+		}
 
         tokens.addLineNumberToken(expression);
 
-        if ((nonWildcardTypeArguments != null) && dot) {
+        if (nonWildcardTypeArguments != null && dot) {
             tokens.add(TextToken.LEFTANGLEBRACKET);
             nonWildcardTypeArguments.accept(this);
             tokens.add(TextToken.RIGHTANGLEBRACKET);
@@ -478,7 +467,7 @@ public class ExpressionVisitor extends TypeVisitor {
 
         ObjectType objectType = expression.getObjectType();
 
-        if ((objectType.getTypeArguments() != null) && (bodyDeclaration == null) && diamondOperatorSupported) {
+        if (objectType.getTypeArguments() != null && bodyDeclaration == null && diamondOperatorSupported) {
             objectType = objectType.createType(DiamondTypeArgument.DIAMOND);
         }
 
@@ -653,7 +642,7 @@ public class ExpressionVisitor extends TypeVisitor {
     }
 
     protected void visit(Expression parent, Expression child) {
-        if ((parent.getPriority() < child.getPriority()) || ((parent.getPriority() == 14) && (child.getPriority() == 13))) {
+        if (parent.getPriority() < child.getPriority() || parent.getPriority() == 14 && child.getPriority() == 13) {
             tokens.add(TextToken.LEFTROUNDBRACKET);
             child.accept(this);
             tokens.add(TextToken.RIGHTROUNDBRACKET);
@@ -663,7 +652,7 @@ public class ExpressionVisitor extends TypeVisitor {
     }
 
     protected void visitHexa(Expression parent, Expression child) {
-        if ((parent.getPriority() < child.getPriority()) || ((parent.getPriority() == 14) && (child.getPriority() == 13))) {
+        if (parent.getPriority() < child.getPriority() || parent.getPriority() == 14 && child.getPriority() == 13) {
             tokens.add(TextToken.LEFTROUNDBRACKET);
             child.accept(hexaExpressionVisitor);
             tokens.add(TextToken.RIGHTROUNDBRACKET);
@@ -685,7 +674,6 @@ public class ExpressionVisitor extends TypeVisitor {
     }
 
     protected static class Fragments extends DefaultList<Fragment> {
-
         private static final long serialVersionUID = 1L;
 
         public void addTokensFragment(Tokens tokens) {
@@ -706,14 +694,11 @@ public class ExpressionVisitor extends TypeVisitor {
 
             PrimitiveType pt = (PrimitiveType)expression.getType();
 
-            switch (pt.getJavaPrimitiveFlags()) {
-                case FLAG_BOOLEAN:
-                    tokens.add(new BooleanConstantToken(expression.getIntegerValue() == 1));
-                    break;
-                default:
-                    tokens.add(new NumericConstantToken("0x" + Integer.toHexString(expression.getIntegerValue()).toUpperCase()));
-                    break;
-            }
+            if (pt.getJavaPrimitiveFlags() == FLAG_BOOLEAN) {
+				tokens.add(new BooleanConstantToken(expression.getIntegerValue() == 1));
+			} else {
+				tokens.add(new NumericConstantToken("0x" + Integer.toHexString(expression.getIntegerValue()).toUpperCase()));
+			}
         }
 
         @Override

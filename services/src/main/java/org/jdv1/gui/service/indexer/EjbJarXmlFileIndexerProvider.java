@@ -16,9 +16,7 @@ import org.jd.gui.util.xml.AbstractXmlPathFinder;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 
 public class EjbJarXmlFileIndexerProvider extends XmlBasedFileIndexerProvider {
 
@@ -75,7 +73,8 @@ public class EjbJarXmlFileIndexerProvider extends XmlBasedFileIndexerProvider {
             this.index = indexes.getIndex("typeReferences");
         }
 
-        @Override
+		@Override
+		@SuppressWarnings("unchecked")
         public void handle(String path, String text, int position) {
             index.get(text.replace('.', '/')).add(entry);
         }

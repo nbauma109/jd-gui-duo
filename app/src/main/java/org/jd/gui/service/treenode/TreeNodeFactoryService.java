@@ -11,9 +11,7 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.service.extension.ExtensionService;
 import org.jd.gui.spi.TreeNodeFactory;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class TreeNodeFactoryService {
     protected static final TreeNodeFactoryService TREE_NODE_FACTORY_SERVICE = new TreeNodeFactoryService();

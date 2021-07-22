@@ -6,9 +6,7 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable;
 
-import org.jd.core.v1.model.javasyntax.type.BaseType;
-import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
-import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
 
 import java.util.Map;
@@ -92,7 +90,7 @@ public class PrimitiveLocalVariable extends AbstractLocalVariable {
         return 0;
     }
 
-    public void setType(PrimitiveType type) {
+    void setType(PrimitiveType type) {
         this.flags = type.getFlags();
     }
 

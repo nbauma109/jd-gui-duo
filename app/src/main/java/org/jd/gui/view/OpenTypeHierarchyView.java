@@ -9,10 +9,8 @@ package org.jd.gui.view;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
+import org.jd.gui.api.model.*;
 import org.jd.gui.api.model.Container;
-import org.jd.gui.api.model.Indexes;
-import org.jd.gui.api.model.TreeNodeData;
-import org.jd.gui.api.model.Type;
 import org.jd.gui.util.function.TriConsumer;
 import org.jd.gui.util.swing.SwingUtil;
 import org.jd.gui.view.component.Tree;
@@ -20,19 +18,14 @@ import org.jd.gui.view.renderer.TreeNodeRenderer;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Future;
 
 import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
+import javax.swing.tree.*;
 
 public class OpenTypeHierarchyView {
     protected static final ImageIcon ROOT_CLASS_ICON = new ImageIcon(OpenTypeHierarchyView.class.getClassLoader().getResource("org/jd/gui/images/generate_class.png"));
@@ -278,13 +271,13 @@ public class OpenTypeHierarchyView {
             }
             // Entry not found --> Most probable hypothesis : Java type entry
             int lastPackageSeparatorIndex = superTypeName.lastIndexOf('/');
-            String package_ = superTypeName.substring(0, lastPackageSeparatorIndex).replace('/', '.');
+            String packaze = superTypeName.substring(0, lastPackageSeparatorIndex).replace('/', '.');
             String name = superTypeName.substring(lastPackageSeparatorIndex + 1).replace('$', '.');
-            String label = (package_ != null) ? name + " - " + package_ : name;
+            String label = (packaze != null) ? name + " - " + packaze : name;
             Icon icon = ((type.getFlags() & Type.FLAG_INTERFACE) == 0) ? ROOT_CLASS_ICON : ROOT_INTERFACE_ICON;
             TreeNode rootTreeNode = new TreeNode(null, superTypeName, null, new TreeNodeBean(label, icon));
 
-            if (package_ != null && package_.startsWith("java.")) {
+            if (packaze != null && packaze.startsWith("java.")) {
                 // If root type is a JDK type, do not create a tree node for each child types
                 rootTreeNode.add(treeNode);
             } else {
@@ -382,7 +375,8 @@ public class OpenTypeHierarchyView {
                 if (futureIndexes.isDone()) {
                     Map<String, Collection> subTypeNames = futureIndexes.get().getIndex("subTypeNames");
                     if (subTypeNames != null) {
-                        Collection<String> collection = subTypeNames.get(typeName);
+                        @SuppressWarnings("unchecked")
+						Collection<String> collection = subTypeNames.get(typeName);
                         if (collection != null) {
                             for (String tn : collection) {
                                 if (tn != null) {
@@ -413,7 +407,8 @@ public class OpenTypeHierarchyView {
                 if (futureIndexes.isDone()) {
                     Map<String, Collection> typeDeclarations = futureIndexes.get().getIndex("typeDeclarations");
                     if (typeDeclarations != null) {
-                        Collection<Container.Entry> collection = typeDeclarations.get(typeName);
+                        @SuppressWarnings("unchecked")
+						Collection<Container.Entry> collection = typeDeclarations.get(typeName);
                         if (collection != null) {
                             for (Container.Entry e : collection) {
                                 if (e != null) {

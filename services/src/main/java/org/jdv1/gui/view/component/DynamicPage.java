@@ -15,9 +15,7 @@ import org.jdv1.gui.api.feature.IndexesChangeListener;
 
 import java.awt.BorderLayout;
 import java.awt.Point;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Map;

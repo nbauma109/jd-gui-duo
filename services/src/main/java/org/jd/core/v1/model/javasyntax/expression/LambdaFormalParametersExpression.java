@@ -12,7 +12,7 @@ import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class LambdaFormalParametersExpression extends AbstractLambdaExpression {
-    protected BaseFormalParameter formalParameters;
+    protected final BaseFormalParameter formalParameters;
 
     public LambdaFormalParametersExpression(Type type, BaseFormalParameter formalParameters, BaseStatement statements) {
         super(type, statements);
@@ -26,10 +26,6 @@ public class LambdaFormalParametersExpression extends AbstractLambdaExpression {
 
     public BaseFormalParameter getFormalParameters() {
         return formalParameters;
-    }
-
-    public void setParameters(BaseFormalParameter formalParameters) {
-        this.formalParameters = formalParameters;
     }
 
     @Override

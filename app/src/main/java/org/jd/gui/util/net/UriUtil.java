@@ -9,9 +9,7 @@ package org.jd.gui.util.net;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
-import org.jd.gui.api.model.Container;
-import org.jd.gui.api.model.Indexes;
-import org.jd.gui.api.model.Type;
+import org.jd.gui.api.model.*;
 import org.jd.gui.service.type.TypeFactoryService;
 import org.jd.gui.spi.TypeFactory;
 
@@ -58,7 +56,8 @@ public class UriUtil {
             try {
                 for (Future<Indexes> futureIndexes : collectionOfFutureIndexes) {
                     if (futureIndexes.isDone()) {
-                        Collection<Container.Entry> outerEntries = futureIndexes.get().getIndex("typeDeclarations").get(outerName);
+                        @SuppressWarnings("unchecked")
+						Collection<Container.Entry> outerEntries = futureIndexes.get().getIndex("typeDeclarations").get(outerName);
 
                         if (outerEntries != null) {
                             for (Container.Entry outerEntry : outerEntries) {

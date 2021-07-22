@@ -9,9 +9,7 @@ package org.jd.gui.view.renderer;
 
 import org.jd.gui.view.bean.OpenTypeListCellBean;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
+import java.awt.*;
 
 import javax.swing.*;
 
@@ -62,10 +60,10 @@ public class OpenTypeListCellRenderer implements ListCellRenderer<OpenTypeListCe
     public Component getListCellRendererComponent(JList<? extends OpenTypeListCellBean> list, OpenTypeListCellBean value, int index, boolean selected, boolean hasFocus) {
         if (value != null) {
             // Display first level item
-            label.setText(value.label);
-            label.setIcon(value.icon);
+            label.setText(value.getLabel());
+            label.setIcon(value.getIcon());
 
-            info.setText((value.packag != null) ? " - "+value.packag : "");
+            info.setText((value.getPackag() != null) ? " - "+value.getPackag() : "");
 
             if (selected) {
                 label.setForeground(textSelectionColor);

@@ -8,9 +8,7 @@
 package org.jd.core.v1.model.javasyntax.declaration;
 
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
-import org.jd.core.v1.model.javasyntax.type.BaseType;
-import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
-import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.*;
 
 public class ClassDeclaration extends InterfaceDeclaration {
     protected ObjectType superType;

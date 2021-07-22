@@ -11,7 +11,7 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class ThisExpression extends AbstractLineNumberExpression {
     protected Type type;
-    protected boolean explicit;
+    protected final boolean explicit;
 
     public ThisExpression(Type type) {
         this.type = type;
@@ -31,10 +31,6 @@ public class ThisExpression extends AbstractLineNumberExpression {
 
     public boolean isExplicit() {
         return explicit;
-    }
-
-    public void setExplicit(boolean explicit) {
-        this.explicit = explicit;
     }
 
     @Override

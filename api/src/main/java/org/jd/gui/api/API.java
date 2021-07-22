@@ -19,9 +19,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-import javax.swing.Action;
-import javax.swing.Icon;
-import javax.swing.JComponent;
+import javax.swing.*;
 
 public interface API {
     boolean openURI(URI uri);

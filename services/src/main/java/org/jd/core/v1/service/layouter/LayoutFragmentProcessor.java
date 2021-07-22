@@ -7,9 +7,7 @@
 
 package org.jd.core.v1.service.layouter;
 
-import org.jd.core.v1.model.fragment.FixedFragment;
-import org.jd.core.v1.model.fragment.FlexibleFragment;
-import org.jd.core.v1.model.fragment.Fragment;
+import org.jd.core.v1.model.fragment.*;
 import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.service.layouter.model.Section;
 import org.jd.core.v1.service.layouter.util.VisitorsHolder;
@@ -34,12 +32,12 @@ public class LayoutFragmentProcessor {
         boolean containsByteCode = decompileContext.containsByteCode();
         boolean showBridgeAndSynthetic = decompileContext.isShowBridgeAndSynthetic();
         Map<String, Object> configuration = decompileContext.getConfiguration();
-        Object realignLineNumbersConfiguration = (configuration == null) ? "false" : configuration.get("realignLineNumbers");
-        boolean realignLineNumbers = (realignLineNumbersConfiguration == null) ? false : "true".equals(realignLineNumbersConfiguration.toString());
+        Object realignLineNumbersConfiguration = configuration == null ? "false" : configuration.get("realignLineNumbers");
+        boolean realignLineNumbers = realignLineNumbersConfiguration != null && "true".equals(realignLineNumbersConfiguration.toString());
 
         List<Fragment> fragments = decompileContext.getBody();
 
-        if ((maxLineNumber != UNKNOWN_LINE_NUMBER) && !containsByteCode && !showBridgeAndSynthetic && realignLineNumbers) {
+        if (maxLineNumber != UNKNOWN_LINE_NUMBER && !containsByteCode && !showBridgeAndSynthetic && realignLineNumbers) {
             BuildSectionsVisitor buildSectionsVisitor = new BuildSectionsVisitor();
 
             // Create sections
@@ -79,7 +77,7 @@ public class LayoutFragmentProcessor {
                     for (Section section : sections) {
                         changed |= section.layout(false);
                     }
-                    if (changed == false) {
+                    if (!changed) {
                         // Nothing changed -> Quit loop
                         break;
                     }

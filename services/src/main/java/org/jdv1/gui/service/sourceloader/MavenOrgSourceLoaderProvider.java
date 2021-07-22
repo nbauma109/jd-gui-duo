@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jdv1.gui.service.sourceloader;
 
 import org.apache.commons.io.IOUtils;
@@ -26,9 +25,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javax.xml.XMLConstants;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.*;
 
 public class MavenOrgSourceLoaderProvider implements SourceLoader {
     protected static final String MAVENORG_SEARCH_URL_PREFIX = "https://search.maven.org/solrsearch/select?q=1:%22";
@@ -45,7 +42,7 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
         if (isActivated(api)) {
             String filters = api.getPreferences().get(MavenOrgSourceLoaderPreferencesProvider.FILTERS);
 
-            if ((filters == null) || filters.isEmpty()) {
+            if (filters == null || filters.isEmpty()) {
                 filters = MavenOrgSourceLoaderPreferencesProvider.DEFAULT_FILTERS_VALUE;
             }
 
@@ -62,7 +59,7 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
         if (isActivated(api)) {
             String filters = api.getPreferences().get(MavenOrgSourceLoaderPreferencesProvider.FILTERS);
 
-            if ((filters == null) || filters.isEmpty()) {
+            if (filters == null || filters.isEmpty()) {
                 filters = MavenOrgSourceLoaderPreferencesProvider.DEFAULT_FILTERS_VALUE;
             }
 
@@ -85,7 +82,6 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
 
     protected String searchSource(Container.Entry entry, File sourceJarFile) {
         if (sourceJarFile != null) {
-
             try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(sourceJarFile)))) {
                 ZipEntry ze = zis.getNextEntry();
                 String name = entry.getPath();
@@ -149,38 +145,36 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
                     XMLStreamReader reader = factory.createXMLStreamReader(is);
                     String name = "";
 
-                    while (reader.hasNext()) {
-                        switch (reader.next()) {
-                            case XMLStreamConstants.START_ELEMENT:
-                                if ("str".equals(reader.getLocalName())) {
-                                    if ("id".equals(reader.getAttributeValue(null, "name"))) {
-                                        name = "id";
-                                    } else {
-                                        name = "str";
-                                    }
-                                } else if ("result".equals(reader.getLocalName())) {
-                                    numFound = reader.getAttributeValue(null, "numFound");
-                                } else {
-                                    name = "";
-                                }
-                                break;
-                            case XMLStreamConstants.CHARACTERS:
-                                switch (name) {
-                                    case "id":
-                                        id = reader.getText().trim();
-                                        break;
-                                    case "str":
-                                        sourceAvailable |= MAVENORG_LOAD_URL_SUFFIX.equals(reader.getText().trim());
-                                        break;
-                                }
-                                break;
-                        }
+                    int next;
+					while (reader.hasNext()) {
+                        next = reader.next();
+						if (next == XMLStreamConstants.START_ELEMENT) {
+							if ("str".equals(reader.getLocalName())) {
+							    if ("id".equals(reader.getAttributeValue(null, "name"))) {
+							        name = "id";
+							    } else {
+							        name = "str";
+							    }
+							} else if ("result".equals(reader.getLocalName())) {
+							    numFound = reader.getAttributeValue(null, "numFound");
+							} else {
+							    name = "";
+							}
+						} else if (next == XMLStreamConstants.CHARACTERS) {
+							if ("id".equals(name)) {
+								id = reader.getText().trim();
+							} else if ("str".equals(name)) {
+								sourceAvailable |= MAVENORG_LOAD_URL_SUFFIX.equals(reader.getText().trim());
+							}
+						}
                     }
 
                     reader.close();
                 }
 
-                String groupId=null, artifactId=null, version=null;
+                String groupId=null;
+                String artifactId=null;
+                String version=null;
 
                 if ("0".equals(numFound)) {
                     // File not indexed by Apache Solr of maven.org -> Try to found groupId, artifactId, version in 'pom.properties'
@@ -257,14 +251,15 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
         return null;
     }
 
-    private static char hexa(int i) { return (char)( (i <= 9) ? ('0' + i) : (('a' - 10) + i) ); }
+    private static char hexa(int i) { return (char)( i <= 9 ? '0' + i : 'a' - 10 + i ); }
 
     protected boolean accepted(String filters, String path) {
         // 'filters' example : '+org +com.google +com.ibm +com.jcraft +com.springsource +com.sun -com +java +javax +sun +sunw'
         StringTokenizer tokenizer = new StringTokenizer(filters);
 
-        while (tokenizer.hasMoreTokens()) {
-            String filter = tokenizer.nextToken();
+        String filter;
+		while (tokenizer.hasMoreTokens()) {
+            filter = tokenizer.nextToken();
 
             if (filter.length() > 1) {
                 String prefix = filter.substring(1).replace('.', '/');
@@ -274,7 +269,7 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
                 }
 
                 if (path.startsWith(prefix)) {
-                    return (filter.charAt(0) == '+');
+                    return filter.charAt(0) == '+';
                 }
             }
         }

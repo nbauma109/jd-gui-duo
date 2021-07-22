@@ -6,7 +6,6 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
-import org.apache.bcel.Const;
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
@@ -14,28 +13,22 @@ import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
 import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.statement.*;
-import org.jd.core.v1.model.javasyntax.type.BaseType;
-import org.jd.core.v1.model.javasyntax.type.ObjectType;
-import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
-import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.ExceptionHandler;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.SwitchCase;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileFieldDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileBreakContinueStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileTryStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.*;
-import org.jd.core.v1.util.DefaultList;
-import org.jd.core.v1.util.DefaultStack;
-import org.jd.core.v1.util.StringConstants;
+import org.jd.core.v1.util.*;
 
 import java.util.*;
 
+import static org.apache.bcel.Const.*;
 import static org.jd.core.v1.model.javasyntax.expression.Expression.UNKNOWN_LINE_NUMBER;
 import static org.jd.core.v1.model.javasyntax.expression.NoExpression.NO_EXPRESSION;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
@@ -169,16 +162,13 @@ public class StatementMaker {
             case TYPE_RETURN:
                 statements.add(ReturnStatement.RETURN);
                 break;
-            case TYPE_RETURN_VALUE:
-            case TYPE_GOTO_IN_TERNARY_OPERATOR:
-            case TYPE_RET:
+            case TYPE_RETURN_VALUE, TYPE_GOTO_IN_TERNARY_OPERATOR, TYPE_RET:
             parseByteCode(basicBlock, statements);
                 break;
             case TYPE_SWITCH:
                 parseSwitch(watchdog, basicBlock, statements, jumps);
                 break;
-            case TYPE_SWITCH_BREAK:
-            case TYPE_LOOP_END:
+            case TYPE_SWITCH_BREAK, TYPE_LOOP_END:
             statements.add(BreakStatement.BREAK);
                 break;
             case TYPE_TRY:
@@ -269,8 +259,7 @@ public class StatementMaker {
             case TYPE_LOOP:
                 parseLoop(watchdog, basicBlock, statements, jumps);
                 break;
-            case TYPE_LOOP_START:
-            case TYPE_LOOP_CONTINUE:
+            case TYPE_LOOP_START, TYPE_LOOP_CONTINUE:
                 statements.add(ContinueStatement.CONTINUE);
                 break;
         case TYPE_JUMP:
@@ -460,8 +449,8 @@ public class StatementMaker {
                 int offset = bb.getFromOffset();
                 byte[] code = bb.getControlFlowGraph().getMethod().<AttributeCode>getAttribute("Code").getCode();
 
-                if (code[offset] == 58) {
-                    offset += 2; // ASTORE
+                if (code[offset] == ASTORE) {
+                    offset += 2;
                 } else {
                     offset++;    // POP, ASTORE_1 ... ASTORE_3
                 }
@@ -500,7 +489,7 @@ public class StatementMaker {
         if (finallyStatements != null && !finallyStatements.isEmpty() && finallyStatements.getFirst().isMonitorExitStatement()) {
             statement = SynchronizedStatementMaker.make(localVariableMaker, statements, tryStatements);
         } else {
-            if (majorVersion >= 51) { // (majorVersion >= Java 7)
+            if (majorVersion >= MAJOR_1_7) {
                 assert !jsr;
                 statement = TryWithResourcesStatementMaker.make(localVariableMaker, statements, tryStatements, catchClauses, finallyStatements);
             }
@@ -707,17 +696,14 @@ public class StatementMaker {
                         count += countStartLoop(switchCase.getBasicBlock());
                     }
                     break;
-                case TYPE_TRY:
-                case TYPE_TRY_JSR:
-                case TYPE_TRY_ECLIPSE:
+                case TYPE_TRY, TYPE_TRY_JSR, TYPE_TRY_ECLIPSE:
                     count += countStartLoop(bb.getSub1());
 
                     for (ExceptionHandler exceptionHandler : bb.getExceptionHandlers()) {
                         count += countStartLoop(exceptionHandler.getBasicBlock());
                     }
                     break;
-                case TYPE_IF_ELSE:
-                case TYPE_TERNARY_OPERATOR:
+                case TYPE_IF_ELSE, TYPE_TERNARY_OPERATOR:
                     count += countStartLoop(bb.getSub2());
                     // intended fall through
                 case TYPE_IF:
@@ -774,30 +760,21 @@ public class StatementMaker {
             visited.set(basicBlock.getIndex());
 
             switch (basicBlock.getType()) {
-                case TYPE_CONDITIONAL_BRANCH:
-                case TYPE_JSR:
-                case TYPE_CONDITION:
+                case TYPE_CONDITIONAL_BRANCH, TYPE_JSR, TYPE_CONDITION:
                     if (basicBlock.getBranch() == LOOP_END) {
                         basicBlock.setBranch(LOOP_START);
                     } else {
                         changeEndLoopToStartLoop(visited, basicBlock.getBranch());
                     }
                     // intended fall through
-                case TYPE_START:
-                case TYPE_STATEMENTS:
-                case TYPE_GOTO:
-                case TYPE_GOTO_IN_TERNARY_OPERATOR:
-                case TYPE_LOOP:
+                case TYPE_START, TYPE_STATEMENTS, TYPE_GOTO, TYPE_GOTO_IN_TERNARY_OPERATOR, TYPE_LOOP:
                     if (basicBlock.getNext() == LOOP_END) {
                         basicBlock.setNext(LOOP_START);
                     } else {
                         changeEndLoopToStartLoop(visited, basicBlock.getNext());
                     }
                     break;
-                case TYPE_TRY_DECLARATION:
-                case TYPE_TRY:
-                case TYPE_TRY_JSR:
-                case TYPE_TRY_ECLIPSE:
+                case TYPE_TRY_DECLARATION, TYPE_TRY, TYPE_TRY_JSR, TYPE_TRY_ECLIPSE:
                     for (ExceptionHandler exceptionHandler : basicBlock.getExceptionHandlers()) {
                         if (exceptionHandler.getBasicBlock() == LOOP_END) {
                             exceptionHandler.setBasicBlock(LOOP_START);
@@ -806,8 +783,7 @@ public class StatementMaker {
                         }
                     }
                     break;
-                case TYPE_IF_ELSE:
-                case TYPE_TERNARY_OPERATOR:
+                case TYPE_IF_ELSE, TYPE_TERNARY_OPERATOR:
                     if (basicBlock.getSub2() == LOOP_END) {
                         basicBlock.setSub2(LOOP_START);
                     } else {
@@ -826,8 +802,7 @@ public class StatementMaker {
                         changeEndLoopToStartLoop(visited, basicBlock.getNext());
                     }
                     break;
-                case TYPE_SWITCH:
-                case TYPE_SWITCH_DECLARATION:
+                case TYPE_SWITCH, TYPE_SWITCH_DECLARATION:
                     for (SwitchCase switchCase : basicBlock.getSwitchCases()) {
                         if (switchCase.getBasicBlock() == LOOP_END) {
                             switchCase.setBasicBlock(LOOP_START);
@@ -951,7 +926,7 @@ public class StatementMaker {
         for (ClassFileFieldDeclaration field : bodyDeclaration.getFieldDeclarations()) {
             field.getFieldDeclarators().accept(memberVisitor);
             if (memberVisitor.found()) {
-                field.setFlags(field.getFlags() | Const.ACC_SYNTHETIC);
+                field.setFlags(field.getFlags() | ACC_SYNTHETIC);
                 break;
             }
         }
@@ -962,7 +937,7 @@ public class StatementMaker {
         for (ClassFileConstructorOrMethodDeclaration member : bodyDeclaration.getMethodDeclarations()) {
             member.accept(memberVisitor);
             if (memberVisitor.found()) {
-                member.setFlags(member.getFlags() | Const.ACC_SYNTHETIC);
+                member.setFlags(member.getFlags() | ACC_SYNTHETIC);
                 break;
             }
         }

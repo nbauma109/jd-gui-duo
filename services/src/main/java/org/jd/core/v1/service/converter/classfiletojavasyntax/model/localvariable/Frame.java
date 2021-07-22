@@ -8,20 +8,13 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariab
 
 import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
-import org.jd.core.v1.model.javasyntax.statement.ExpressionStatement;
-import org.jd.core.v1.model.javasyntax.statement.LocalVariableDeclarationStatement;
-import org.jd.core.v1.model.javasyntax.statement.Statement;
-import org.jd.core.v1.model.javasyntax.statement.Statements;
+import org.jd.core.v1.model.javasyntax.statement.*;
 import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileLocalVariableDeclarator;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForStatement;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.LocalVariableMaker;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.CreateLocalVariableVisitor;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchLocalVariableVisitor;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchUndeclaredLocalVariableVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.*;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.*;
@@ -100,9 +93,9 @@ public class Frame {
         }
 
         if (alvToMerge != null
-                && ((!lv.isAssignableFrom(typeBounds, alvToMerge) && !alvToMerge.isAssignableFrom(typeBounds, lv))
-                        || (lv.getName() != null && alvToMerge.getName() != null
-                                && !lv.getName().equals(alvToMerge.getName())))) {
+                && (!lv.isAssignableFrom(typeBounds, alvToMerge) && !alvToMerge.isAssignableFrom(typeBounds, lv)
+                        || lv.getName() != null && alvToMerge.getName() != null
+                                && !lv.getName().equals(alvToMerge.getName()))) {
             alvToMerge = null;
         }
 
@@ -414,14 +407,14 @@ public class Frame {
         if (!map.isEmpty()) {
             SearchUndeclaredLocalVariableVisitor searchUndeclaredLocalVariableVisitor = new SearchUndeclaredLocalVariableVisitor();
 
-            Statements statements;
+            Statements localStatements;
             ListIterator<Statement> iterator;
             Set<AbstractLocalVariable> undeclaredLocalVariables;
             Statement statement;
             Set<AbstractLocalVariable> undeclaredLocalVariablesInStatement;
             for (Map.Entry<Frame, Set<AbstractLocalVariable>> entry : map.entrySet()) {
-                statements = entry.getKey().statements;
-                iterator = statements.listIterator();
+                localStatements = entry.getKey().statements;
+                iterator = localStatements.listIterator();
                 undeclaredLocalVariables = entry.getValue();
 
                 while (iterator.hasNext()) {
@@ -554,7 +547,7 @@ public class Frame {
         Type type = localVariable.getType();
         VariableInitializer variableInitializer;
 
-        if (!boe.getRightExpression().isNewInitializedArray() || (type.isObjectType() && ((ObjectType)type).getTypeArguments() != null)) {
+        if (!boe.getRightExpression().isNewInitializedArray() || type.isObjectType() && ((ObjectType)type).getTypeArguments() != null) {
             variableInitializer = new ExpressionVariableInitializer(boe.getRightExpression());
         } else {
             variableInitializer = ((NewInitializedArray) boe.getRightExpression()).getArrayInitializer();
@@ -1006,7 +999,7 @@ public class Frame {
             int length = sb.length();
             int counter = 1;
 
-            if (types.get(type)) {
+            if (Boolean.TRUE.equals(types.get(type))) {
                 sb.append(counter);
                 counter++;
             }
@@ -1039,11 +1032,6 @@ public class Frame {
         @Override
         public int compare(AbstractLocalVariable alv1, AbstractLocalVariable alv2) {
             return alv1.getIndex() - alv2.getIndex();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            return false;
         }
     }
 }

@@ -8,14 +8,9 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
-import org.jd.core.v1.model.javasyntax.declaration.FieldDeclaration;
-import org.jd.core.v1.model.javasyntax.declaration.FormalParameter;
-import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclaration;
-import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
-import org.jd.core.v1.model.javasyntax.statement.ForEachStatement;
-import org.jd.core.v1.model.javasyntax.statement.SwitchStatement;
-import org.jd.core.v1.model.javasyntax.statement.TryStatement;
+import org.jd.core.v1.model.javasyntax.statement.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
 import org.jd.core.v1.util.DefaultList;

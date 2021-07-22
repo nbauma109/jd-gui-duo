@@ -11,20 +11,14 @@ import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.statement.Statement;
-import org.jd.core.v1.model.javasyntax.type.BaseType;
-import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
-import org.jd.core.v1.model.javasyntax.type.Type;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMethodDeclaration;
+import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileMethodInvocationExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_STATIC;
 
@@ -99,13 +93,12 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
             if (methodTypes != null) {
                 if (mie2.getExpression().isObjectTypeReferenceExpression()) {
                     // Static method invocation
-                    return new ClassFileMethodInvocationExpression(mie1.getLineNumber(), null, methodTypes.returnedType, mie2.getExpression(), mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor(), methodTypes.parameterTypes, mie1.getParameters());
+                    return new ClassFileMethodInvocationExpression(mie1.getLineNumber(), null, methodTypes.getReturnedType(), mie2.getExpression(), mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor(), methodTypes.getParameterTypes(), mie1.getParameters());
                 }
                 BaseExpression mie1Parameters = mie1.getParameters();
                 BaseExpression newParameters = null;
                 switch (mie1Parameters.size()) {
-                    case 0:
-                    case 1:
+                    case 0, 1:
                         break;
                     case 2:
                         newParameters = mie1Parameters.getList().get(1);
@@ -115,7 +108,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
                         newParameters = new Expressions(p.subList(1, p.size()));
                         break;
                 }
-                return new ClassFileMethodInvocationExpression(mie1.getLineNumber(), null, methodTypes.returnedType, mie1Parameters.getFirst(), mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor(), methodTypes.parameterTypes, newParameters);
+                return new ClassFileMethodInvocationExpression(mie1.getLineNumber(), null, methodTypes.getReturnedType(), mie1Parameters.getFirst(), mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor(), methodTypes.getParameterTypes(), newParameters);
             }
         } else if (exp.isBinaryOperatorExpression()) {
             FieldReferenceExpression fre = getFieldReferenceExpression(exp.getLeftExpression());

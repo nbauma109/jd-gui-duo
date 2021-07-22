@@ -7,10 +7,7 @@
 
 package org.jd.core.v1.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class DefaultList<E> extends ArrayList<E> {
 

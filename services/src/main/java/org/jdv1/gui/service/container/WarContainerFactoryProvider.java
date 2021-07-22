@@ -13,21 +13,21 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.model.container.WarContainer;
 import org.jd.gui.spi.ContainerFactory;
 
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
+import java.nio.file.*;
 
 public class WarContainerFactoryProvider implements ContainerFactory {
     @Override
     public String getType() { return "war"; }
 
-    @Override
+	@Override
+	@SuppressWarnings("resource")
     public boolean accept(API api, Path rootPath) {
         if (rootPath.toUri().toString().toLowerCase().endsWith(".war!/")) {
             return true;
         }
         // Extension: accept uncompressed WAR file containing a folder 'WEB-INF'
         try {
+        	// do not try to close file system due to UnsupportedOperationException
             return rootPath.getFileSystem().provider().getScheme().equals("file") && Files.exists(rootPath.resolve("WEB-INF"));
         } catch (InvalidPathException e) {
             assert ExceptionUtil.printStackTrace(e);

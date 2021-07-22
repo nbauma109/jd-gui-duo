@@ -5,9 +5,8 @@ dependencies {
     implementation 'org.ow2.asm:asm:9.1'
     implementation 'org.apache.bcel:bcel:6.5.0'
     implementation 'commons-io:commons-io:2.10.0'
-    implementation 'org.apache.commons:commons-lang3:3.12.0'
-    implementation 'org.jboss.forge.roaster:roaster-jdt:2.23.0.Final'
-    implementation 'org.jboss.forge.roaster:roaster-api:2.23.0.Final'
+    implementation 'com.github.nbauma109.roaster:roaster-api:908430c'
+    implementation 'com.github.nbauma109.roaster:roaster-jdt:908430c'
     implementation project(':api')
     testImplementation 'junit:junit:4.12'
 }

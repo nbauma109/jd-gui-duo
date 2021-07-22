@@ -11,10 +11,7 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.feature.*;
 import org.jd.gui.service.platform.PlatformService;
 
-import java.awt.CardLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
+import java.awt.*;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +57,7 @@ public class MainTabbedPanel<T extends JComponent & UriGettable> extends TabbedP
         box.add(Box.createVerticalGlue());
 
         JLabel title = newLabel("No files are open", fontColor);
-        title.setFont(title.getFont().deriveFont(Font.BOLD, title.getFont().getSize()+8));
+        title.setFont(title.getFont().deriveFont(Font.BOLD, title.getFont().getSize()+8F));
 
         box.add(title);
         box.add(newLabel("Open a file with menu \"File > Open File...\"", fontColor));

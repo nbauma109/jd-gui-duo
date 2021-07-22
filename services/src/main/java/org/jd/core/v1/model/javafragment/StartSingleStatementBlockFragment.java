@@ -15,7 +15,7 @@ public class StartSingleStatementBlockFragment extends StartFlexibleBlockFragmen
         super(minimalLineCount, lineCount, maximalLineCount, weight, label);
     }
 
-    public void setLineCount(int lineCount) {
+    void setLineCount(int lineCount) {
         this.lineCount = lineCount;
     }
 
@@ -23,7 +23,7 @@ public class StartSingleStatementBlockFragment extends StartFlexibleBlockFragmen
         return end;
     }
 
-    public void setEndSingleStatementBlockFragment(EndSingleStatementBlockFragment end) {
+    void setEndSingleStatementBlockFragment(EndSingleStatementBlockFragment end) {
         this.end = end;
     }
 

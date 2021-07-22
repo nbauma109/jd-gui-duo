@@ -10,9 +10,7 @@ package org.jd.core.v1.model.javasyntax.declaration;
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
 import org.jd.core.v1.model.javasyntax.reference.BaseElementValue;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
-import org.jd.core.v1.model.javasyntax.type.BaseType;
-import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
-import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.*;
 
 import static org.apache.bcel.Const.ACC_STATIC;
 

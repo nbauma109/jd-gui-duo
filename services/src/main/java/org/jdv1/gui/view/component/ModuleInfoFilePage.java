@@ -15,10 +15,7 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.util.decompiler.ContainerLoader;
-import org.jd.gui.util.parser.jdt.core.DeclarationData;
-import org.jd.gui.util.parser.jdt.core.HyperlinkData;
-import org.jd.gui.util.parser.jdt.core.HyperlinkReferenceData;
-import org.jd.gui.util.parser.jdt.core.ReferenceData;
+import org.jd.gui.util.parser.jdt.core.*;
 import org.jdv1.gui.util.decompiler.StringBuilderPrinter;
 import org.jdv1.gui.util.index.IndexesUtil;
 
@@ -31,9 +28,7 @@ import java.util.regex.Pattern;
 
 import javax.swing.text.Segment;
 
-import static org.jd.core.v1.api.printer.Printer.MODULE;
-import static org.jd.core.v1.api.printer.Printer.PACKAGE;
-import static org.jd.core.v1.api.printer.Printer.TYPE;
+import static org.jd.core.v1.api.printer.Printer.*;
 import static org.jd.gui.util.decompiler.GuiPreferences.ESCAPE_UNICODE_CHARACTERS;
 
 public class ModuleInfoFilePage extends ClassFilePage {
@@ -94,7 +89,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
             try {
                 // Save current position in history
                 Point location = textArea.getLocationOnScreen();
-                int offset = textArea.viewToModel(new Point(x - location.x, y - location.y));
+                int offset = textArea.viewToModel2D(new Point(x - location.x, y - location.y));
                 URI uri = entry.getUri();
                 api.addURI(new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), "position=" + offset, null));
 
@@ -170,14 +165,14 @@ public class ModuleInfoFilePage extends ClassFilePage {
                 Pattern pattern = Pattern.compile(regexp + ".*");
 
                 boolean t = (highlightFlags.indexOf('t') != -1); // Highlight types
-                boolean M = (highlightFlags.indexOf('M') != -1); // Highlight modules
+                boolean m = (highlightFlags.indexOf('M') != -1); // Highlight modules
 
                 if (highlightFlags.indexOf('d') != -1) {
                     // Highlight declarations
                     for (Map.Entry<String, DeclarationData> entry : listener.getDeclarations().entrySet()) {
                         DeclarationData declaration = entry.getValue();
 
-                        if (M) {
+                        if (m) {
                             matchAndAddDocumentRange(pattern, declaration.getName(), declaration.getStartPosition(), declaration.getEndPosition(), ranges);
                         }
                     }
@@ -193,7 +188,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
                         if (t && (moduleInfoReferenceData.type == TYPE)) {
                             matchAndAddDocumentRange(pattern, getMostInnerTypeName(moduleInfoReferenceData.getTypeName()), hyperlink.getStartPosition(), hyperlink.getEndPosition(), ranges);
                         }
-                        if (M && (moduleInfoReferenceData.type == MODULE)) {
+                        if (m && (moduleInfoReferenceData.type == MODULE)) {
                             matchAndAddDocumentRange(pattern, moduleInfoReferenceData.getName(), hyperlink.getStartPosition(), hyperlink.getEndPosition(), ranges);
                         }
                     }
@@ -271,7 +266,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
     }
 
     protected static class ModuleInfoReferenceData extends ReferenceData {
-        public int type;
+        private int type;
 
         public ModuleInfoReferenceData(int type, String typeName, String name, String descriptor, String owner) {
             super(typeName, name, descriptor, owner);
@@ -280,7 +275,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
     }
 
     public class ModuleInfoFilePrinter extends StringBuilderPrinter {
-        protected Map<String, ReferenceData> referencesCache = new HashMap<>();
+        private Map<String, ReferenceData> referencesCache = new HashMap<>();
 
         @Override
         public void start(int maxLineNumber, int majorVersion, int minorVersion) {}

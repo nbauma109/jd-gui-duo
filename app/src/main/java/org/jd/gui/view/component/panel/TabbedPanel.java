@@ -8,9 +8,7 @@
 package org.jd.gui.view.component.panel;
 
 import org.jd.gui.api.API;
-import org.jd.gui.api.feature.ContainerEntryGettable;
-import org.jd.gui.api.feature.PreferencesChangeListener;
-import org.jd.gui.api.feature.UriGettable;
+import org.jd.gui.api.feature.*;
 import org.jd.gui.service.platform.PlatformService;
 
 import java.awt.*;

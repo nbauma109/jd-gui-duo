@@ -76,7 +76,7 @@ public abstract class AbstractIndexerProvider implements Indexer {
     @Override
     public Pattern getPathPattern() { return externalPathPattern; }
 
-    @SuppressWarnings({ "rawtypes" })
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     protected static void addToIndexes(Indexes indexes, String indexName, Set<String> set, Container.Entry entry) {
         if (!set.isEmpty()) {
             Map<String, Collection> index = indexes.getIndex(indexName);

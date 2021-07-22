@@ -13,13 +13,9 @@ import java.awt.Color;
 import java.awt.GridLayout;
 import java.util.Map;
 
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
+import javax.swing.*;
 
-import static org.jd.gui.util.decompiler.GuiPreferences.USE_JD_CORE_V0;
-import static org.jd.gui.util.decompiler.GuiPreferences.WRITE_LINE_NUMBERS;
-import static org.jd.gui.util.decompiler.GuiPreferences.WRITE_METADATA;
+import static org.jd.gui.util.decompiler.GuiPreferences.*;
 
 public class ClassFileSaverPreferencesProvider extends JPanel implements PreferencesPanel {
 

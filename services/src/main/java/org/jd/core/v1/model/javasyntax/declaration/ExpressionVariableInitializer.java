@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.model.javasyntax.declaration;
 
 import org.jd.core.v1.model.javasyntax.expression.Expression;
@@ -32,14 +31,16 @@ public class ExpressionVariableInitializer implements VariableInitializer {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ExpressionVariableInitializer)) return false;
+        if (this == o) {
+			return true;
+		}
+        if (!(o instanceof ExpressionVariableInitializer)) {
+			return false;
+		}
 
         ExpressionVariableInitializer that = (ExpressionVariableInitializer) o;
 
-        if (expression != null ? !expression.equals(that.expression) : that.expression != null) return false;
-
-        return true;
+        return expression != null ? expression.equals(that.expression) : that.expression == null;
     }
 
     @Override

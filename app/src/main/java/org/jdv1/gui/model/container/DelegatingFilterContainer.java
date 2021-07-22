@@ -51,8 +51,8 @@ public class DelegatingFilterContainer implements Container {
     }
 
     protected DelegatedContainer getDelegatedContainer(Container container) {
-        Entry root = container.getRoot();
-        URI uri = (root == null) ? DEFAULT_ROOT_URI : root.getUri();
+        Entry localRoot = container.getRoot();
+        URI uri = (localRoot == null) ? DEFAULT_ROOT_URI : localRoot.getUri();
         return uriToDelegatedContainer.computeIfAbsent(uri, k -> new DelegatedContainer(container));
     }
 
@@ -104,6 +104,22 @@ public class DelegatingFilterContainer implements Container {
                 }
             }
             return entry.getPath().compareTo(other.getPath());
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+        	if (this == obj) {
+        		return true;
+        	}
+        	if (obj == null || obj.getClass() != this.getClass()) {
+        		return false;
+        	}
+        	return obj instanceof DelegatedEntry && compareTo((DelegatedEntry) obj) == 0;
+        }
+        
+        @Override
+        public int hashCode() {
+        	return Objects.hash(entry.isDirectory(), entry.getPath());
         }
     }
 

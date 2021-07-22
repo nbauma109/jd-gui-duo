@@ -35,7 +35,7 @@ public class JavaModuleFileIndexerProvider extends AbstractIndexerProvider {
         }
     }
 
-    @SuppressWarnings({ "rawtypes" })
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     protected static void index(API api, Container.Entry entry, Indexes indexes, Map<String, Collection> packageDeclarationIndex) {
         for (Container.Entry e : entry.getChildren().values()) {
             if (e.isDirectory()) {

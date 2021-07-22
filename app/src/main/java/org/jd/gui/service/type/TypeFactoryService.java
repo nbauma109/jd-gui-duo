@@ -11,9 +11,7 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.service.extension.ExtensionService;
 import org.jd.gui.spi.TypeFactory;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

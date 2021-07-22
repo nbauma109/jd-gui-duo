@@ -11,13 +11,9 @@ import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.dom.*;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.model.Container;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static org.jd.gui.api.model.Type.FLAG_ANNOTATION;
-import static org.jd.gui.api.model.Type.FLAG_ENUM;
-import static org.jd.gui.api.model.Type.FLAG_INTERFACE;
+import static org.jd.gui.api.model.Type.*;
 
 public abstract class AbstractJavaListener extends ASTVisitor {
     protected Container.Entry entry;

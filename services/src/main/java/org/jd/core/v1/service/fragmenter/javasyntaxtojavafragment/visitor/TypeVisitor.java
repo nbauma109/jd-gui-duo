@@ -15,10 +15,9 @@ import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.model.token.*;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import static org.apache.bcel.Const.MAJOR_1_5;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
 
 public class TypeVisitor extends AbstractJavaSyntaxVisitor {
@@ -57,11 +56,11 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
 
     public TypeVisitor(Loader loader, String mainInternalTypeName, int majorVersion, ImportsFragment importsFragment) {
         this.loader = loader;
-        this.genericTypesSupported = majorVersion >= 49; // (majorVersion >= Java 5)
+        this.genericTypesSupported = majorVersion >= MAJOR_1_5;
         this.importsFragment = importsFragment;
 
         int index = mainInternalTypeName.lastIndexOf('/');
-        this.internalPackageName = (index == -1) ? "" : mainInternalTypeName.substring(0, index+1);
+        this.internalPackageName = index == -1 ? "" : mainInternalTypeName.substring(0, index+1);
     }
 
     @Override
@@ -121,7 +120,7 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(InnerObjectType type) {
-        if (currentInternalTypeName == null || (!currentInternalTypeName.equals(type.getInternalName()) && !currentInternalTypeName.equals(type.getOuterType().getInternalName()))) {
+        if (currentInternalTypeName == null || !currentInternalTypeName.equals(type.getInternalName()) && !currentInternalTypeName.equals(type.getOuterType().getInternalName())) {
             BaseType outerType = type.getOuterType();
 
             outerType.accept(this);
@@ -312,5 +311,29 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
                 maxLineNumber = currentLineNumber = lineNumber;
             }
         }
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = super.hashCode();
+			result = prime * result + getEnclosingInstance().hashCode();
+			return prime * result + currentLineNumber;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (!super.equals(obj) || getClass() != obj.getClass()) {
+				return false;
+			}
+			Tokens other = (Tokens) obj;
+			return getEnclosingInstance().equals(other.getEnclosingInstance()) && currentLineNumber == other.currentLineNumber;
+		}
+
+		private TypeVisitor getEnclosingInstance() {
+			return TypeVisitor.this;
+		}
     }
 }

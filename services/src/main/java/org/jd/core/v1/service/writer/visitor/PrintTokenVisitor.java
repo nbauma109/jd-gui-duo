@@ -12,8 +12,9 @@ import org.jd.core.v1.model.token.*;
 
 import java.util.List;
 
+import static org.jd.core.v1.api.printer.Printer.UNKNOWN_LINE_NUMBER;
+
 public class PrintTokenVisitor implements TokenVisitor {
-    public static int UNKNOWN_LINE_NUMBER = Printer.UNKNOWN_LINE_NUMBER;
 
     protected SearchLineNumberVisitor searchLineNumberVisitor = new SearchLineNumberVisitor();
 
@@ -187,8 +188,8 @@ public class PrintTokenVisitor implements TokenVisitor {
     }
 
     protected static class SearchLineNumberVisitor extends AbstractNopTokenVisitor {
-        public int lineNumber;
-        public int newLineCounter;
+    	private int lineNumber;
+    	private int newLineCounter;
 
         public void reset() {
             this.lineNumber = UNKNOWN_LINE_NUMBER;

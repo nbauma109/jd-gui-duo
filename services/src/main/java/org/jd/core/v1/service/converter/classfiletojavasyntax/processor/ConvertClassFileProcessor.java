@@ -26,10 +26,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.PopulateBi
 import org.jd.core.v1.util.DefaultList;
 import org.jd.core.v1.util.StringConstants;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.apache.bcel.Const.ACC_PUBLIC;
 import static org.apache.bcel.Const.ACC_STATIC;
@@ -78,46 +75,46 @@ public class ConvertClassFileProcessor {
     protected ClassFileInterfaceDeclaration convertInterfaceDeclaration(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
         BaseAnnotationReference annotationReferences = convertAnnotationReferences(converter, classFile);
         TypeMaker.TypeTypes typeTypes = parser.parseClassFileSignature(classFile);
-        ClassFileBodyDeclaration bodyDeclaration = convertBodyDeclaration(parser, converter, classFile, typeTypes.typeParameters, outerClassFileBodyDeclaration);
+        ClassFileBodyDeclaration bodyDeclaration = convertBodyDeclaration(parser, converter, classFile, typeTypes.getTypeParameters(), outerClassFileBodyDeclaration);
 
         return new ClassFileInterfaceDeclaration(
                 annotationReferences, classFile.getAccessFlags(),
-                typeTypes.thisType.getInternalName(), typeTypes.thisType.getName(),
-                typeTypes.typeParameters, typeTypes.interfaces, bodyDeclaration);
+                typeTypes.getThisType().getInternalName(), typeTypes.getThisType().getName(),
+                typeTypes.getTypeParameters(), typeTypes.getInterfaces(), bodyDeclaration);
     }
 
     protected ClassFileEnumDeclaration convertEnumDeclaration(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
         BaseAnnotationReference annotationReferences = convertAnnotationReferences(converter, classFile);
         TypeMaker.TypeTypes typeTypes = parser.parseClassFileSignature(classFile);
-        ClassFileBodyDeclaration bodyDeclaration = convertBodyDeclaration(parser, converter, classFile, typeTypes.typeParameters, outerClassFileBodyDeclaration);
+        ClassFileBodyDeclaration bodyDeclaration = convertBodyDeclaration(parser, converter, classFile, typeTypes.getTypeParameters(), outerClassFileBodyDeclaration);
 
         return new ClassFileEnumDeclaration(
                 annotationReferences, classFile.getAccessFlags(),
-                typeTypes.thisType.getInternalName(), typeTypes.thisType.getName(),
-                typeTypes.interfaces, bodyDeclaration);
+                typeTypes.getThisType().getInternalName(), typeTypes.getThisType().getName(),
+                typeTypes.getInterfaces(), bodyDeclaration);
     }
 
     protected ClassFileAnnotationDeclaration convertAnnotationDeclaration(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
         BaseAnnotationReference annotationReferences = convertAnnotationReferences(converter, classFile);
         TypeMaker.TypeTypes typeTypes = parser.parseClassFileSignature(classFile);
-        ClassFileBodyDeclaration bodyDeclaration = convertBodyDeclaration(parser, converter, classFile, typeTypes.typeParameters, outerClassFileBodyDeclaration);
+        ClassFileBodyDeclaration bodyDeclaration = convertBodyDeclaration(parser, converter, classFile, typeTypes.getTypeParameters(), outerClassFileBodyDeclaration);
 
         return new ClassFileAnnotationDeclaration(
                 annotationReferences, classFile.getAccessFlags(),
-                typeTypes.thisType.getInternalName(), typeTypes.thisType.getName(),
+                typeTypes.getThisType().getInternalName(), typeTypes.getThisType().getName(),
                 bodyDeclaration);
     }
 
     protected ClassFileClassDeclaration convertClassDeclaration(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
         BaseAnnotationReference annotationReferences = convertAnnotationReferences(converter, classFile);
         TypeMaker.TypeTypes typeTypes = parser.parseClassFileSignature(classFile);
-        ClassFileBodyDeclaration bodyDeclaration = convertBodyDeclaration(parser, converter, classFile, typeTypes.typeParameters, outerClassFileBodyDeclaration);
+        ClassFileBodyDeclaration bodyDeclaration = convertBodyDeclaration(parser, converter, classFile, typeTypes.getTypeParameters(), outerClassFileBodyDeclaration);
 
         return new ClassFileClassDeclaration(
                 annotationReferences, classFile.getAccessFlags(),
-                typeTypes.thisType.getInternalName(), typeTypes.thisType.getName(),
-                typeTypes.typeParameters, typeTypes.superType,
-                typeTypes.interfaces, bodyDeclaration);
+                typeTypes.getThisType().getInternalName(), typeTypes.getThisType().getName(),
+                typeTypes.getTypeParameters(), typeTypes.getSuperType(),
+                typeTypes.getInterfaces(), bodyDeclaration);
     }
 
     protected ClassFileBodyDeclaration convertBodyDeclaration(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, BaseTypeParameter typeParameters, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
@@ -205,11 +202,11 @@ public class ConvertClassFileProcessor {
                 typeBounds = Collections.emptyMap();
             }
 
-            if (methodTypes.typeParameters != null) {
+            if (methodTypes.getTypeParameters() != null) {
                 bindings=new HashMap<>(bindings);
                 typeBounds=new HashMap<>(typeBounds);
                 populateBindingsWithTypeParameterVisitor.init(bindings, typeBounds);
-                methodTypes.typeParameters.accept(populateBindingsWithTypeParameterVisitor);
+                methodTypes.getTypeParameters().accept(populateBindingsWithTypeParameterVisitor);
            }
 
             code = method.getAttribute("Code");
@@ -224,14 +221,14 @@ public class ConvertClassFileProcessor {
 
             if (StringConstants.INSTANCE_CONSTRUCTOR.equals(name)) {
                 list.add(new ClassFileConstructorDeclaration(
-                        bodyDeclaration, classFile, method, annotationReferences, methodTypes.typeParameters,
-                        methodTypes.parameterTypes, methodTypes.exceptionTypes, bindings, typeBounds, firstLineNumber));
+                        bodyDeclaration, classFile, method, annotationReferences, methodTypes.getTypeParameters(),
+                        methodTypes.getParameterTypes(), methodTypes.getExceptionTypes(), bindings, typeBounds, firstLineNumber));
             } else if ("<clinit>".equals(name)) {
                 list.add(new ClassFileStaticInitializerDeclaration(bodyDeclaration, classFile, method, bindings, typeBounds, firstLineNumber));
             } else {
                 ClassFileMethodDeclaration methodDeclaration = new ClassFileMethodDeclaration(
-                        bodyDeclaration, classFile, method, annotationReferences, name, methodTypes.typeParameters,
-                        methodTypes.returnedType, methodTypes.parameterTypes, methodTypes.exceptionTypes, defaultAnnotationValue,
+                        bodyDeclaration, classFile, method, annotationReferences, name, methodTypes.getTypeParameters(),
+                        methodTypes.getReturnedType(), methodTypes.getParameterTypes(), methodTypes.getExceptionTypes(), defaultAnnotationValue,
                         bindings, typeBounds, firstLineNumber);
                 if (classFile.isInterface() && methodDeclaration.getFlags() == ACC_PUBLIC) {
                     // For interfaces, add 'default' access flag on public methods

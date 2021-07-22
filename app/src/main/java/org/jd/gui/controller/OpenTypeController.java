@@ -152,7 +152,8 @@ public class OpenTypeController implements IndexesChangeListener {
 
             for (Map.Entry<String, Collection> mapEntry : index.entrySet()) {
                 String typeName = mapEntry.getKey();
-                Collection<Container.Entry> entries = mapEntry.getValue();
+                @SuppressWarnings("unchecked")
+				Collection<Container.Entry> entries = mapEntry.getValue();
                 // Search last package separator
                 int lastPackageSeparatorIndex = typeName.lastIndexOf('/') + 1;
                 int lastTypeNameSeparatorIndex = typeName.lastIndexOf('$') + 1;
@@ -169,7 +170,8 @@ public class OpenTypeController implements IndexesChangeListener {
         } else {
             for (Map.Entry<String, Collection> mapEntry : index.entrySet()) {
                 String typeName = mapEntry.getKey();
-                Collection<Container.Entry> entries = mapEntry.getValue();
+                @SuppressWarnings("unchecked")
+				Collection<Container.Entry> entries = mapEntry.getValue();
                 // Search last package separator
                 int lastPackageSeparatorIndex = typeName.lastIndexOf('/') + 1;
                 int lastTypeNameSeparatorIndex = typeName.lastIndexOf('$') + 1;
@@ -224,7 +226,8 @@ public class OpenTypeController implements IndexesChangeListener {
     protected static void match(Pattern regExpPattern, Map<String, Collection> index, Map<String, Collection> result) {
         for (Map.Entry<String, Collection> mapEntry : index.entrySet()) {
             String typeName = mapEntry.getKey();
-            Collection<Container.Entry> entries = mapEntry.getValue();
+            @SuppressWarnings("unchecked")
+			Collection<Container.Entry> entries = mapEntry.getValue();
             // Search last package separator
             int lastPackageSeparatorIndex = typeName.lastIndexOf('/') + 1;
             int lastTypeNameSeparatorIndex = typeName.lastIndexOf('$') + 1;
@@ -236,7 +239,7 @@ public class OpenTypeController implements IndexesChangeListener {
         }
     }
 
-    @SuppressWarnings({ "rawtypes" })
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     protected static void add(Map<String, Collection> map, String key, Collection value) {
         map.computeIfAbsent(key, k -> new HashSet<>()).addAll(value);
     }
@@ -250,8 +253,8 @@ public class OpenTypeController implements IndexesChangeListener {
             selectLocationController.show(
                 new Point(leftBottom.x+(16+2), leftBottom.y+2),
                 entries,
-                (entry) -> openCallback.accept(UriUtil.createURI(api, collectionOfFutureIndexes, entry, null, typeName)), // entry selected callback
-                () -> openTypeView.focus());                                                                              // popup close callback
+                entry -> openCallback.accept(UriUtil.createURI(api, collectionOfFutureIndexes, entry, null, typeName)), // entry selected callback
+                () -> openTypeView.focus());                                                                            // popup close callback
         }
     }
 

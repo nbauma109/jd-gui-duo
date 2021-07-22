@@ -15,15 +15,18 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.view.data.TreeNodeBean;
 import org.jdv1.gui.view.component.DynamicPage;
 
-import java.io.EOFException;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
+
+import static org.apache.bcel.Const.MAJOR_1_1;
+import static org.apache.bcel.Const.MAJOR_1_5;
+
+import jd.core.CoreConstants;
+import jd.core.process.deserializer.ClassFormatException;
 
 public class ClassFileTreeNodeFactoryProvider extends AbstractTypeFileTreeNodeFactoryProvider {
     protected static final ImageIcon CLASS_FILE_ICON = new ImageIcon(ClassFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/classf_obj.png"));
@@ -72,16 +75,19 @@ public class ClassFileTreeNodeFactoryProvider extends AbstractTypeFileTreeNodeFa
             tip.append(location);
             tip.append("<br>Java compiler version: ");
 
-            try (InputStream is = entry.getInputStream()) {
-                is.skip(4); // Skip magic number
+            try (DataInputStream is = new DataInputStream(entry.getInputStream())) {
+                int magic = is.readInt();
+                if (magic != CoreConstants.JAVA_MAGIC_NUMBER) {
+                    throw new ClassFormatException("Invalid CLASS file");
+                }
                 int minorVersion = readUnsignedShort(is);
                 int majorVersion = readUnsignedShort(is);
 
-                if (majorVersion >= 49) {
-                    tip.append(majorVersion - (49-5));
-                } else if (majorVersion >= 45) {
+                if (majorVersion >= MAJOR_1_5) {
+                    tip.append(majorVersion - (MAJOR_1_5-5));
+                } else if (majorVersion >= MAJOR_1_1) {
                     tip.append("1.");
-                    tip.append(majorVersion - (45-1));
+                    tip.append(majorVersion - (MAJOR_1_1-1));
                 }
                 tip.append(" (");
                 tip.append(majorVersion);
@@ -103,9 +109,10 @@ public class ClassFileTreeNodeFactoryProvider extends AbstractTypeFileTreeNodeFa
         protected int readUnsignedShort(InputStream is) throws IOException {
             int ch1 = is.read();
             int ch2 = is.read();
-            if ((ch1 | ch2) < 0)
-                throw new EOFException();
-            return (ch1 << 8) + (ch2 << 0);
+            if ((ch1 | ch2) < 0) {
+				throw new EOFException();
+			}
+            return (ch1 << 8) + ch2;
         }
     }
 }

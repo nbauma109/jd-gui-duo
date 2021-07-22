@@ -7,10 +7,7 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
-import org.jd.core.v1.model.javasyntax.type.AbstractNopTypeArgumentVisitor;
-import org.jd.core.v1.model.javasyntax.type.GenericType;
-import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
-import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.*;
 
 import java.util.Set;
 

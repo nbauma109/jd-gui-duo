@@ -12,9 +12,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.FocusedTypeGettable;
 import org.jd.gui.api.feature.UriGettable;
-import org.jd.gui.api.model.Container;
-import org.jd.gui.api.model.Indexes;
-import org.jd.gui.api.model.Type;
+import org.jd.gui.api.model.*;
 import org.jd.gui.util.matcher.DescriptorMatcher;
 import org.jd.gui.util.parser.jdt.ASTParserFactory;
 import org.jd.gui.util.parser.jdt.core.*;
@@ -29,7 +27,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -67,7 +65,7 @@ public abstract class TypePage extends CustomLineNumbersPage
             try {
                 // Save current position in history
                 Point location = textArea.getLocationOnScreen();
-                int offset = textArea.viewToModel(new Point(x - location.x, y - location.y));
+                int offset = textArea.viewToModel2D(new Point(x - location.x, y - location.y));
                 URI uri = entry.getUri();
                 api.addURI(new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), "position=" + offset, null));
 
@@ -90,9 +88,9 @@ public abstract class TypePage extends CustomLineNumbersPage
                     String rootUri = entry.getContainer().getRoot().getUri().toString();
                     List<Container.Entry> sameContainerEntries = new ArrayList<>();
 
-                    for (Container.Entry entry : entries) {
-                        if (entry.getUri().toString().startsWith(rootUri)) {
-                            sameContainerEntries.add(entry);
+                    for (Container.Entry nextEntry : entries) {
+                        if (nextEntry.getUri().toString().startsWith(rootUri)) {
+                            sameContainerEntries.add(nextEntry);
                         }
                     }
 
@@ -191,7 +189,7 @@ public abstract class TypePage extends CustomLineNumbersPage
             } else {
                 String prefix = fragment.substring(0, lastDash + 1);
                 String suffix = fragment.substring(lastDash + 1);
-                BiFunction<String, String, Boolean> matchDescriptors;
+                BiPredicate<String, String> matchDescriptors;
 
                 if (suffix.charAt(0) == '(') {
                     matchDescriptors = DescriptorMatcher::matchMethodDescriptors;
@@ -208,7 +206,7 @@ public abstract class TypePage extends CustomLineNumbersPage
                         String key = entry.getKey();
                         if ((key.indexOf(slashAndTypeNameAndName) != -1) || (key.startsWith(typeNameAndName))) {
                             int index = key.lastIndexOf('-') + 1;
-                            if (matchDescriptors.apply(suffix, key.substring(index))) {
+                            if (matchDescriptors.test(suffix, key.substring(index))) {
                                 ranges.add(new DocumentRange(entry.getValue().getStartPosition(),
                                         entry.getValue().getEndPosition()));
                             }
@@ -220,7 +218,7 @@ public abstract class TypePage extends CustomLineNumbersPage
                         String key = entry.getKey();
                         if (key.startsWith(prefix)) {
                             int index = key.lastIndexOf('-') + 1;
-                            if (matchDescriptors.apply(suffix, key.substring(index))) {
+                            if (matchDescriptors.test(suffix, key.substring(index))) {
                                 ranges.add(new DocumentRange(entry.getValue().getStartPosition(),
                                         entry.getValue().getEndPosition()));
                             }
@@ -341,11 +339,11 @@ public abstract class TypePage extends CustomLineNumbersPage
     // --- FocusedTypeGettable --- //
     @Override
     public String getFocusedTypeName() {
-        Map.Entry<Integer, DeclarationData> entry = listener.getTypeDeclarations()
+        Map.Entry<Integer, DeclarationData> nextEntry = listener.getTypeDeclarations()
                 .floorEntry(textArea.getCaretPosition());
 
-        if (entry != null) {
-            DeclarationData data = entry.getValue();
+        if (nextEntry != null) {
+            DeclarationData data = nextEntry.getValue();
             if (data != null) {
                 return data.getTypeName();
             }
@@ -430,7 +428,8 @@ public abstract class TypePage extends CustomLineNumbersPage
                 if (futureIndexes.isDone()) {
                     Map<String, Collection> index = futureIndexes.get().getIndex("typeDeclarations");
                     if (index != null) {
-                        Collection<Container.Entry> collection = index.get(typeName);
+                        @SuppressWarnings("unchecked")
+						Collection<Container.Entry> collection = index.get(typeName);
                         if (collection != null) {
                             entries.addAll(collection);
                         }
@@ -462,8 +461,8 @@ public abstract class TypePage extends CustomLineNumbersPage
 
     protected String searchTypeHavingMember(String typeName, String name, String descriptor,
             List<Container.Entry> entries) {
-        for (Container.Entry entry : entries) {
-            Type type = api.getTypeFactory(entry).make(api, entry, typeName);
+        for (Container.Entry nextEntry : entries) {
+            Type type = api.getTypeFactory(nextEntry).make(api, nextEntry, typeName);
 
             if (type != null) {
                 if (descriptor.indexOf('(') == -1) {
@@ -487,7 +486,7 @@ public abstract class TypePage extends CustomLineNumbersPage
                 }
 
                 // Not found -> Search in super type
-                String typeOwnerName = searchTypeHavingMember(type.getSuperName(), name, descriptor, entry);
+                String typeOwnerName = searchTypeHavingMember(type.getSuperName(), name, descriptor, nextEntry);
                 if (typeOwnerName != null) {
                     return typeOwnerName;
                 }

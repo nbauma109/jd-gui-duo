@@ -6,37 +6,28 @@
  */
 package org.jd.gui.view.component;
 
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaEditorKit;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaUI;
-import org.fife.ui.rsyntaxtextarea.RSyntaxUtilities;
+import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rsyntaxtextarea.folding.Fold;
 import org.fife.ui.rsyntaxtextarea.folding.FoldManager;
-import org.fife.ui.rtextarea.Gutter;
-import org.fife.ui.rtextarea.LineNumberList;
-import org.fife.ui.rtextarea.RTextArea;
-import org.fife.ui.rtextarea.RTextAreaUI;
+import org.fife.ui.rtextarea.*;
 
 import java.awt.*;
 import java.util.Arrays;
 import java.util.Map;
 
 import javax.swing.JComponent;
-import javax.swing.text.EditorKit;
-import javax.swing.text.Element;
-import javax.swing.text.JTextComponent;
-import javax.swing.text.View;
+import javax.swing.text.*;
 
 public abstract class CustomLineNumbersPage extends HyperlinkPage {
     private static final long serialVersionUID = 1L;
     protected Color errorForeground = Color.RED;
     protected boolean showMisalignment = true;
 
-    public void setErrorForeground(Color color) {
+    protected void setErrorForeground(Color color) {
         errorForeground = color;
     }
 
-    public void setShowMisalignment(boolean b) {
+    protected void setShowMisalignment(boolean b) {
         showMisalignment = b;
     }
 
@@ -183,9 +174,9 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
             int cellHeight = rTextArea.getLineHeight();
             int ascent = rTextArea.getMaxAscent();
             FoldManager fm = ((RSyntaxTextArea)rTextArea).getFoldManager();
-            int RHS_BORDER_WIDTH = getRhsBorderWidth();
+            int rhsBorderWidth = ((RSyntaxTextArea)rTextArea).isCodeFoldingEnabled() ? 0 : 4;
             FontMetrics metrics = g.getFontMetrics();
-            int rhs = getWidth() - RHS_BORDER_WIDTH;
+            int rhs = getWidth() - rhsBorderWidth;
 
             if (getParent() instanceof Gutter) { // Should always be true
                 g.setColor(getParent().getBackground());
@@ -205,7 +196,7 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
                 View v = ui.getRootView(rTextArea).getView(0);
                 Element root = rTextArea.getDocument().getDefaultRootElement();
                 int lineCount = root.getElementCount();
-                int topPosition = rTextArea.viewToModel(visibleRect.getLocation());
+                int topPosition = rTextArea.viewToModel2D(visibleRect.getLocation());
                 int topLine = root.getElementIndex(topPosition);
                 Rectangle visibleEditorRect = ui.getVisibleEditorRect();
                 @SuppressWarnings("all")
@@ -290,7 +281,7 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
             int originalLineNumber;
 
             if (getLineNumberMap() != null) {
-                originalLineNumber = (lineNumber < getLineNumberMap().length) ? getLineNumberMap()[lineNumber] : 0;
+                originalLineNumber = lineNumber < getLineNumberMap().length ? getLineNumberMap()[lineNumber] : 0;
             } else {
                 originalLineNumber = lineNumber;
             }
@@ -302,8 +293,6 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
                 g.drawString(number, x-strWidth, y);
             }
         }
-
-        public int getRhsBorderWidth() { return ((RSyntaxTextArea)rTextArea).isCodeFoldingEnabled() ? 0 : 4; }
 
         @Override
         public Dimension getPreferredSize() {

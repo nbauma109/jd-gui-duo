@@ -13,21 +13,21 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.spi.ContainerFactory;
 import org.jdv1.gui.model.container.JavaModuleContainer;
 
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
+import java.nio.file.*;
 
 public class JavaModuleContainerFactoryProvider implements ContainerFactory {
     @Override
     public String getType() { return "jmod"; }
 
-    @Override
+	@Override
+	@SuppressWarnings("resource")
     public boolean accept(API api, Path rootPath) {
         if (rootPath.toUri().toString().toLowerCase().endsWith(".jmod!/")) {
             return true;
         }
         // Extension: accept uncompressed JMOD file containing a folder 'classes'
         try {
+        	// do not try to close file system due to UnsupportedOperationException
             return rootPath.getFileSystem().provider().getScheme().equals("file") && Files.exists(rootPath.resolve("classes"));
         } catch (InvalidPathException e) {
             assert ExceptionUtil.printStackTrace(e);

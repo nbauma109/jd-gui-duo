@@ -7,9 +7,7 @@
 package org.jd.gui.view;
 
 import org.jd.gui.api.API;
-import org.jd.gui.api.feature.ContainerEntryGettable;
-import org.jd.gui.api.feature.TreeNodeExpandable;
-import org.jd.gui.api.feature.UriGettable;
+import org.jd.gui.api.feature.*;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.spi.TreeNodeFactory;
 import org.jd.gui.util.function.TriConsumer;
@@ -18,23 +16,16 @@ import org.jd.gui.view.component.Tree;
 import org.jd.gui.view.renderer.TreeNodeRenderer;
 import org.jdv1.gui.model.container.DelegatingFilterContainer;
 
-import java.awt.BorderLayout;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.*;
 import java.net.URI;
 import java.util.*;
+import java.util.List;
 import java.util.function.ObjIntConsumer;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.event.TreeExpansionEvent;
-import javax.swing.event.TreeExpansionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
+import javax.swing.event.*;
+import javax.swing.tree.*;
 
 public class SearchInConstantPoolsView<T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> {
     protected static final ContainerComparator CONTAINER_COMPARATOR = new ContainerComparator();

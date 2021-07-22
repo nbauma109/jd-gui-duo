@@ -10,9 +10,7 @@ import org.jd.core.v1.model.javasyntax.declaration.MemberDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.MemberDeclarations;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMemberDeclaration;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class MergeMembersUtil {
     private MergeMembersUtil() {

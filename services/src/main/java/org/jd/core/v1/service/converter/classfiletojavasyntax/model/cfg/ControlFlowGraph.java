@@ -14,7 +14,7 @@ import java.util.Set;
 
 public class ControlFlowGraph {
     protected Method method;
-    protected DefaultList<BasicBlock> list = new DefaultList<BasicBlock>() {
+    protected DefaultList<BasicBlock> list = new DefaultList<>() {
 
         private static final long serialVersionUID = 1L;
 

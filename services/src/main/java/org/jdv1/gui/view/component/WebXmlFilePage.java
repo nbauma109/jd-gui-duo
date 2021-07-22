@@ -55,17 +55,17 @@ public class WebXmlFilePage extends TypeReferencePage implements UriGettable, In
     public String getSyntaxStyle() { return SyntaxConstants.SYNTAX_STYLE_XML; }
 
     @Override
-    protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return ((TypeHyperlinkData)hyperlinkData).enabled; }
+    protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return ((TypeHyperlinkData)hyperlinkData).isEnabled(); }
 
     @Override
     protected void openHyperlink(int x, int y, HyperlinkData hyperlinkData) {
         TypeHyperlinkData data = (TypeHyperlinkData)hyperlinkData;
 
-        if (data.enabled) {
+        if (data.isEnabled()) {
             try {
                 // Save current position in history
                 Point location = textArea.getLocationOnScreen();
-                int offset = textArea.viewToModel(new Point(x-location.x, y-location.y));
+                int offset = textArea.viewToModel2D(new Point(x-location.x, y-location.y));
                 URI uri = entry.getUri();
                 api.addURI(new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), "position=" + offset, null));
 
@@ -73,26 +73,26 @@ public class WebXmlFilePage extends TypeReferencePage implements UriGettable, In
                 if (hyperlinkData instanceof PathHyperlinkData) {
                     PathHyperlinkData d = (PathHyperlinkData)hyperlinkData;
                     String path = d.path;
-                    Container.Entry entry = searchEntry(this.entry.getContainer().getRoot(), path);
-                    if (entry != null) {
-                        api.openURI(x, y, Collections.singletonList(entry), null, path);
+                    Container.Entry nextEntry = searchEntry(this.entry.getContainer().getRoot(), path);
+                    if (nextEntry != null) {
+                        api.openURI(x, y, Collections.singletonList(nextEntry), null, path);
                     }
                 } else {
-                    String internalTypeName = data.internalTypeName;
+                    String internalTypeName = data.getInternalTypeName();
                     List<Container.Entry> entries = IndexesUtil.findInternalTypeName(collectionOfFutureIndexes, internalTypeName);
                     String rootUri = entry.getContainer().getRoot().getUri().toString();
                     List<Container.Entry> sameContainerEntries = new ArrayList<>();
 
-                    for (Container.Entry entry : entries) {
-                        if (entry.getUri().toString().startsWith(rootUri)) {
-                            sameContainerEntries.add(entry);
+                    for (Container.Entry nextEntry : entries) {
+                        if (nextEntry.getUri().toString().startsWith(rootUri)) {
+                            sameContainerEntries.add(nextEntry);
                         }
                     }
 
                     if (!sameContainerEntries.isEmpty()) {
-                        api.openURI(x, y, sameContainerEntries, null, data.internalTypeName);
+                        api.openURI(x, y, sameContainerEntries, null, data.getInternalTypeName());
                     } else if (!entries.isEmpty()) {
-                        api.openURI(x, y, entries, null, data.internalTypeName);
+                        api.openURI(x, y, entries, null, data.getInternalTypeName());
                     }
                 }
             } catch (URISyntaxException e) {
@@ -150,20 +150,20 @@ public class WebXmlFilePage extends TypeReferencePage implements UriGettable, In
         // Refresh links
         boolean refresh = false;
 
-        for (Map.Entry<Integer, HyperlinkData> entry : hyperlinks.entrySet()) {
-            TypeHyperlinkData data = (TypeHyperlinkData)entry.getValue();
+        for (Map.Entry<Integer, HyperlinkData> nextEntry : hyperlinks.entrySet()) {
+            TypeHyperlinkData data = (TypeHyperlinkData)nextEntry.getValue();
             boolean enabled;
 
             if (data instanceof PathHyperlinkData) {
                 PathHyperlinkData d = (PathHyperlinkData)data;
                 enabled = searchEntry(this.entry.getContainer().getRoot(), d.path) != null;
             } else {
-                String internalTypeName = data.internalTypeName;
+                String internalTypeName = data.getInternalTypeName();
                 enabled = IndexesUtil.containsInternalTypeName(collectionOfFutureIndexes, internalTypeName);
             }
 
-            if (data.enabled != enabled) {
-                data.enabled = enabled;
+            if (data.isEnabled() != enabled) {
+                data.setEnabled(enabled);
                 refresh = true;
             }
         }
@@ -174,7 +174,7 @@ public class WebXmlFilePage extends TypeReferencePage implements UriGettable, In
     }
 
     public static class PathHyperlinkData extends TypeHyperlinkData {
-        public String path;
+    	private String path;
 
         PathHyperlinkData(int startPosition, int endPosition, String path) {
             super(startPosition, endPosition, null);

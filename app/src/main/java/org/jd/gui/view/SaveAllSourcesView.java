@@ -9,10 +9,7 @@ package org.jd.gui.view;
 
 import org.jd.gui.util.swing.SwingUtil;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.io.File;
 
 import javax.swing.*;
@@ -117,8 +114,6 @@ public class SaveAllSourcesView {
     }
 
     public void showActionFailedDialog() {
-        SwingUtil.invokeLater(() -> {
-            JOptionPane.showMessageDialog(saveAllSourcesDialog, "'Save All Sources' action failed.", "Error", JOptionPane.ERROR_MESSAGE);
-        });
+        SwingUtil.invokeLater(() -> JOptionPane.showMessageDialog(saveAllSourcesDialog, "'Save All Sources' action failed.", "Error", JOptionPane.ERROR_MESSAGE));
     }
 }

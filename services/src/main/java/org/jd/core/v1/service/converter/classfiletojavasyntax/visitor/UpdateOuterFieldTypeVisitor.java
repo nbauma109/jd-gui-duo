@@ -14,14 +14,11 @@ import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.*;
-import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
-import org.jd.core.v1.model.javasyntax.type.GenericType;
-import org.jd.core.v1.model.javasyntax.type.TypeArguments;
-import org.jd.core.v1.model.javasyntax.type.TypeParameter;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorDeclaration;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileFieldDeclaration;
+import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
+
+import static org.apache.bcel.Const.*;
 
 public class UpdateOuterFieldTypeVisitor extends AbstractJavaSyntaxVisitor {
     protected TypeMaker typeMaker;
@@ -53,19 +50,19 @@ public class UpdateOuterFieldTypeVisitor extends AbstractJavaSyntaxVisitor {
                 int offset = 0;
                 int opcode = code[offset] & 255;
 
-                if (opcode != 42) { // ALOAD_0
+                if (opcode != ALOAD_0) {
                     return;
                 }
 
                 opcode = code[++offset] & 255;
 
-                if (opcode != 43) { // ALOAD_1
+                if (opcode != ALOAD_1) {
                     return;
                 }
 
                 opcode = code[++offset] & 255;
 
-                if (opcode != 181) { // PUTFIELD
+                if (opcode != PUTFIELD) {
                     return;
                 }
 
@@ -77,7 +74,7 @@ public class UpdateOuterFieldTypeVisitor extends AbstractJavaSyntaxVisitor {
                 String descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                 TypeMaker.TypeTypes typeTypes = typeMaker.makeTypeTypes(descriptor.substring(1, descriptor.length() - 1));
 
-                if ((typeTypes != null) && (typeTypes.typeParameters != null)) {
+                if ((typeTypes != null) && (typeTypes.getTypeParameters() != null)) {
                     String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
                     searchFieldVisitor.init(name);
 
@@ -86,18 +83,18 @@ public class UpdateOuterFieldTypeVisitor extends AbstractJavaSyntaxVisitor {
                         if (searchFieldVisitor.found()) {
                             BaseTypeArgument typeArguments;
 
-                            if (typeTypes.typeParameters.isList()) {
-                                TypeArguments tas = new TypeArguments(typeTypes.typeParameters.size());
-                                for (TypeParameter typeParameter : typeTypes.typeParameters) {
+                            if (typeTypes.getTypeParameters().isList()) {
+                                TypeArguments tas = new TypeArguments(typeTypes.getTypeParameters().size());
+                                for (TypeParameter typeParameter : typeTypes.getTypeParameters()) {
                                     tas.add(new GenericType(typeParameter.getIdentifier()));
                                 }
                                 typeArguments = tas;
                             } else {
-                                typeArguments = new GenericType(typeTypes.typeParameters.getFirst().getIdentifier());
+                                typeArguments = new GenericType(typeTypes.getTypeParameters().getFirst().getIdentifier());
                             }
 
                             // Update generic type of outer field reference
-                            typeMaker.setFieldType(typeName, name, typeTypes.thisType.createType(typeArguments));
+                            typeMaker.setFieldType(typeName, name, typeTypes.getThisType().createType(typeArguments));
                             break;
                         }
                     }

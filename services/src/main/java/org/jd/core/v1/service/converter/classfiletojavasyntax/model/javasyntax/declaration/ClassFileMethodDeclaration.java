@@ -14,10 +14,7 @@ import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
 import org.jd.core.v1.model.javasyntax.reference.BaseElementValue;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
-import org.jd.core.v1.model.javasyntax.type.BaseType;
-import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
-import org.jd.core.v1.model.javasyntax.type.Type;
-import org.jd.core.v1.model.javasyntax.type.TypeArgument;
+import org.jd.core.v1.model.javasyntax.type.*;
 
 import java.util.Map;
 

@@ -14,11 +14,11 @@ import java.util.Collection;
 import javax.swing.Icon;
 
 public class OpenTypeListCellBean {
-    public String label;
-    public String packag;
-    public Icon icon;
-    public Collection<Container.Entry> entries;
-    public String typeName;
+    private final String label;
+    private String packag;
+    private Icon icon;
+    private final Collection<Container.Entry> entries;
+    private final String typeName;
 
     public OpenTypeListCellBean(String label, Collection<Container.Entry> entries, String typeName) {
         this.label = label;
@@ -33,4 +33,24 @@ public class OpenTypeListCellBean {
         this.entries = entries;
         this.typeName = typeName;
     }
+
+	public Collection<Container.Entry> getEntries() {
+		return entries;
+	}
+
+	public String getTypeName() {
+		return typeName;
+	}
+
+	public String getLabel() {
+		return label;
+	}
+
+	public String getPackag() {
+		return packag;
+	}
+
+	public Icon getIcon() {
+		return icon;
+	}
 }

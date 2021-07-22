@@ -12,13 +12,9 @@ import org.fife.ui.rsyntaxtextarea.Token;
 import org.jd.gui.util.parser.jdt.core.HyperlinkData;
 
 import java.awt.Cursor;
-import java.awt.Event;
 import java.awt.Point;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.TreeMap;
+import java.awt.event.*;
+import java.util.*;
 
 public abstract class HyperlinkPage extends TextPage {
 
@@ -36,13 +32,13 @@ public abstract class HyperlinkPage extends TextPage {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                if ((e.getClickCount() == 1) && ((e.getModifiers() & (Event.ALT_MASK|Event.META_MASK|Event.SHIFT_MASK)) == 0)) {
-                    int offset = textArea.viewToModel(new Point(e.getX(), e.getY()));
+                if (e.getClickCount() == 1 && (e.getModifiersEx() & (InputEvent.ALT_DOWN_MASK|InputEvent.META_DOWN_MASK|InputEvent.SHIFT_DOWN_MASK)) == 0) {
+                    int offset = textArea.viewToModel2D(new Point(e.getX(), e.getY()));
                     if (offset != -1) {
                         Map.Entry<Integer, HyperlinkData> entry = hyperlinks.floorEntry(offset);
                         if (entry != null) {
                             HyperlinkData entryData = entry.getValue();
-                            if ((entryData != null) && (offset < entryData.getEndPosition()) && (offset >= entryData.getStartPosition()) && isHyperlinkEnabled(entryData)) {
+                            if (entryData != null && offset < entryData.getEndPosition() && offset >= entryData.getStartPosition() && isHyperlinkEnabled(entryData)) {
                                 openHyperlink(e.getXOnScreen(), e.getYOnScreen(), entryData);
                             }
                         }
@@ -52,18 +48,18 @@ public abstract class HyperlinkPage extends TextPage {
 
             @Override
             public void mouseMoved(MouseEvent e) {
-                if ((e.getX() != lastX) || (e.getY() != lastY) || (lastModifiers != e.getModifiers())) {
+                if (e.getX() != lastX || e.getY() != lastY || lastModifiers != e.getModifiersEx()) {
                     lastX = e.getX();
                     lastY = e.getY();
-                    lastModifiers = e.getModifiers();
+                    lastModifiers = e.getModifiersEx();
 
-                    if ((e.getModifiers() & (Event.ALT_MASK|Event.META_MASK|Event.SHIFT_MASK)) == 0) {
-                        int offset = textArea.viewToModel(new Point(e.getX(), e.getY()));
+                    if ((e.getModifiersEx() & (InputEvent.ALT_DOWN_MASK|InputEvent.META_DOWN_MASK|InputEvent.SHIFT_DOWN_MASK)) == 0) {
+                        int offset = textArea.viewToModel2D(new Point(e.getX(), e.getY()));
                         if (offset != -1) {
                             Map.Entry<Integer, HyperlinkData> entry = hyperlinks.floorEntry(offset);
                             if (entry != null) {
                                 HyperlinkData entryData = entry.getValue();
-                                if ((entryData != null) && (offset < entryData.getEndPosition()) && (offset >= entryData.getStartPosition()) && isHyperlinkEnabled(entryData)) {
+                                if (entryData != null && offset < entryData.getEndPosition() && offset >= entryData.getStartPosition() && isHyperlinkEnabled(entryData)) {
                                     if (textArea.getCursor() != HAND_CURSOR) {
                                         textArea.setCursor(HAND_CURSOR);
                                     }
@@ -111,7 +107,7 @@ public abstract class HyperlinkPage extends TextPage {
             Map.Entry<Integer, HyperlinkData> entry = hyperlinks.floorEntry(t.getOffset());
             if (entry != null) {
                 HyperlinkData entryData = entry.getValue();
-                if ((entryData != null) && (t.getOffset() < entryData.getEndPosition()) && (t.getOffset() >= entryData.getStartPosition()) && isHyperlinkEnabled(entryData)) {
+                if (entryData != null && t.getOffset() < entryData.getEndPosition() && t.getOffset() >= entryData.getStartPosition() && isHyperlinkEnabled(entryData)) {
                     return true;
                 }
             }

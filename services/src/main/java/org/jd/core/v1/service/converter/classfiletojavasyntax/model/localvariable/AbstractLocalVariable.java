@@ -11,9 +11,7 @@ import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public abstract class AbstractLocalVariable {
     protected Frame frame;
@@ -40,10 +38,10 @@ public abstract class AbstractLocalVariable {
     }
 
     public Frame getFrame() { return frame; }
-    public void setFrame(Frame frame) { this.frame = frame; }
+    void setFrame(Frame frame) { this.frame = frame; }
 
     public AbstractLocalVariable getNext() { return next; }
-    public void setNext(AbstractLocalVariable next) { this.next = next; }
+    void setNext(AbstractLocalVariable next) { this.next = next; }
 
     public boolean isDeclared() { return declared; }
     public void setDeclared(boolean declared) { this.declared = declared; }
@@ -52,7 +50,7 @@ public abstract class AbstractLocalVariable {
 
     public int getFromOffset() { return fromOffset; }
 
-    public void setFromOffset(int fromOffset) {
+    void setFromOffset(int fromOffset) {
         if (fromOffset > toOffset) {
             throw new IllegalArgumentException("fromOffset > toOffset");
         }
@@ -68,7 +66,7 @@ public abstract class AbstractLocalVariable {
             this.toOffset = offset;
     }
 
-    public void setToOffset(int offset) {
+    void setToOffset(int offset) {
         this.toOffset = offset;
     }
 

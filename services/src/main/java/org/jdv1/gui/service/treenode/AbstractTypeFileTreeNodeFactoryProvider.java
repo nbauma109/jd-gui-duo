@@ -9,10 +9,7 @@ package org.jdv1.gui.service.treenode;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
-import org.jd.gui.api.feature.ContainerEntryGettable;
-import org.jd.gui.api.feature.PageCreator;
-import org.jd.gui.api.feature.TreeNodeExpandable;
-import org.jd.gui.api.feature.UriGettable;
+import org.jd.gui.api.feature.*;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Type;
 import org.jd.gui.spi.TypeFactory;
@@ -20,10 +17,7 @@ import org.jd.gui.view.data.TreeNodeBean;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import javax.swing.Icon;
 import javax.swing.JComponent;
@@ -47,8 +41,8 @@ public abstract class AbstractTypeFileTreeNodeFactoryProvider extends AbstractTr
 
             if (fragment != null) {
                 try {
-                    URI uri = entry.getUri();
-                    this.uri = new URI(uri.getScheme(), uri.getHost(), uri.getPath(), fragment);
+                    URI localURI = entry.getUri();
+                    this.uri = new URI(localURI.getScheme(), localURI.getHost(), localURI.getPath(), fragment);
                 } catch (URISyntaxException e) {
                     assert ExceptionUtil.printStackTrace(e);
                 }
@@ -198,8 +192,9 @@ public abstract class AbstractTypeFileTreeNodeFactoryProvider extends AbstractTr
     }
 
     protected static class FieldOrMethodBean {
-        public String fragment, label;
-        public Icon icon;
+    	private final String fragment;
+    	private final String label;
+    	private final Icon icon;
 
         public FieldOrMethodBean(String fragment, String label, Icon icon) {
             this.fragment = fragment;

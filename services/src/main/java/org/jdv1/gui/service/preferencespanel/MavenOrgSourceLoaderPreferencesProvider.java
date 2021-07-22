@@ -9,9 +9,7 @@ package org.jdv1.gui.service.preferencespanel;
 
 import org.jd.gui.spi.PreferencesPanel;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Map;

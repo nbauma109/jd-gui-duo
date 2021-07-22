@@ -17,8 +17,8 @@ public class ReferenceListener extends AbstractJavaListener {
 
     protected DeclarationListener declarationListener;
 
-    protected List<ReferenceData> references = new ArrayList<>();
-    protected List<StringData> strings = new ArrayList<>();
+    protected final List<ReferenceData> references = new ArrayList<>();
+    protected final List<StringData> strings = new ArrayList<>();
     protected SortedMap<Integer, HyperlinkData> hyperlinks = new TreeMap<>();
 
     public ReferenceListener(Container.Entry entry) {
@@ -83,7 +83,8 @@ public class ReferenceListener extends AbstractJavaListener {
     }
 
     protected void enterFormalParameters(MethodDeclaration node) {
-        List<SingleVariableDeclaration> formalParameters = node.parameters();
+        @SuppressWarnings("unchecked")
+		List<SingleVariableDeclaration> formalParameters = node.parameters();
         int dimensionOnParameter;
         String descriptor;
         String name;
@@ -132,7 +133,8 @@ public class ReferenceListener extends AbstractJavaListener {
 
     @Override
     public boolean visit(VariableDeclarationStatement node) {
-        List<VariableDeclarationFragment> fragments = node.fragments();
+        @SuppressWarnings("unchecked")
+		List<VariableDeclarationFragment> fragments = node.fragments();
         int dimensionOnVariable;
         String descriptor;
         String name;
@@ -162,7 +164,8 @@ public class ReferenceListener extends AbstractJavaListener {
         String internalTypeName = resolveInternalTypeName(type);
         int position = node.getStartPosition();
         // Constructor call -> Add a link to the constructor declaration
-        List<Expression> expressionList = node.arguments();
+        @SuppressWarnings("unchecked")
+		List<Expression> expressionList = node.arguments();
         String descriptor = (expressionList != null) ? getParametersDescriptor(expressionList).append('V').toString()
                 : "()V";
 
@@ -213,7 +216,8 @@ public class ReferenceListener extends AbstractJavaListener {
 
     @Override
     public boolean visit(ConstructorInvocation node) {
-        List<Expression> args = node.arguments();
+        @SuppressWarnings("unchecked")
+		List<Expression> args = node.arguments();
         String methodDescriptor = (args != null) ? getParametersDescriptor(args).append('?').toString() : "()?";
         ReferenceData refData = newReferenceData(currentInternalTypeName, StringConstants.INSTANCE_CONSTRUCTOR, methodDescriptor);
         int position = node.getStartPosition();
@@ -223,7 +227,8 @@ public class ReferenceListener extends AbstractJavaListener {
 
     @Override
     public boolean visit(SuperConstructorInvocation node) {
-        List<Expression> args = node.arguments();
+        @SuppressWarnings("unchecked")
+		List<Expression> args = node.arguments();
         String methodDescriptor = (args != null) ? getParametersDescriptor(args).append('?').toString() : "()?";
         DeclarationData data = getDeclarations().get(currentInternalTypeName);
 
@@ -245,7 +250,8 @@ public class ReferenceListener extends AbstractJavaListener {
             String binaryName = declaringClass.getBinaryName();
             if (binaryName != null) {
                 String methodTypeName = binaryName.replace('.', '/');
-                List<Expression> args = node.arguments();
+                @SuppressWarnings("unchecked")
+				List<Expression> args = node.arguments();
                 String methodDescriptor = !args.isEmpty() ? getParametersDescriptor(args).append('?').toString()
                         : "()?";
                 ReferenceData refData = newReferenceData(methodTypeName, methodName, methodDescriptor);
@@ -291,16 +297,8 @@ public class ReferenceListener extends AbstractJavaListener {
         return references;
     }
 
-    public void setReferences(List<ReferenceData> references) {
-        this.references = references;
-    }
-
     public List<StringData> getStrings() {
         return strings;
-    }
-
-    public void setStrings(List<StringData> strings) {
-        this.strings = strings;
     }
 
     public SortedMap<Integer, HyperlinkData> getHyperlinks() {
@@ -330,16 +328,8 @@ public class ReferenceListener extends AbstractJavaListener {
         return declarationListener.getDeclarations();
     }
 
-    public void setDeclarations(Map<String, DeclarationData> declarations) {
-        declarationListener.setDeclarations(declarations);
-    }
-
     public NavigableMap<Integer, DeclarationData> getTypeDeclarations() {
         return declarationListener.getTypeDeclarations();
-    }
-
-    public void setTypeDeclarations(NavigableMap<Integer, DeclarationData> typeDeclarations) {
-        declarationListener.setTypeDeclarations(typeDeclarations);
     }
 
     public void addTypeDeclaration(int position, String internalName, DeclarationData data) {

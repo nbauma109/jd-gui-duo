@@ -17,7 +17,7 @@ public class EndSingleStatementBlockFragment extends EndFlexibleBlockFragment im
         start.setEndSingleStatementBlockFragment(this);
     }
 
-    public void setLineCount(int lineCount) {
+    void setLineCount(int lineCount) {
         this.lineCount = lineCount;
     }
 

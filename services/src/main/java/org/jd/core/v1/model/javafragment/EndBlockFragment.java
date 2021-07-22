@@ -18,7 +18,7 @@ public class EndBlockFragment extends EndFlexibleBlockFragment implements JavaFr
         start.setEndArrayInitializerBlockFragment(this);
     }
 
-    public void setLineCount(int lineCount) {
+    void setLineCount(int lineCount) {
         this.lineCount = lineCount;
     }
 

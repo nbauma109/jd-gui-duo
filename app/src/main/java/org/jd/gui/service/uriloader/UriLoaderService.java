@@ -12,9 +12,7 @@ import org.jd.gui.service.extension.ExtensionService;
 import org.jd.gui.spi.UriLoader;
 
 import java.net.URI;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class UriLoaderService {
     protected static final UriLoaderService URI_LOADER_SERVICE = new UriLoaderService();

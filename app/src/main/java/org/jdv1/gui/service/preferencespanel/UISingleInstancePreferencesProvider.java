@@ -14,9 +14,7 @@ import java.awt.Color;
 import java.awt.GridLayout;
 import java.util.Map;
 
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 /**
  * Single instance is the default mode on Mac OSX, so this panel is not activated.

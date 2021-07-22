@@ -12,9 +12,9 @@ import org.jd.gui.api.model.TreeNodeData;
 import javax.swing.Icon;
 
 public class TreeNodeBean implements TreeNodeData {
-    protected String label;
+    protected final String label;
     protected String tip;
-    protected Icon icon;
+    protected final Icon icon;
     protected Icon openIcon;
 
     public TreeNodeBean(String label, Icon icon) {
@@ -41,20 +41,8 @@ public class TreeNodeBean implements TreeNodeData {
         this.openIcon = openIcon;
     }
 
-    public void setLabel(String label) {
-        this.label = label;
-    }
-
     public void setTip(String tip) {
         this.tip = tip;
-    }
-
-    public void setIcon(Icon icon) {
-        this.icon = icon;
-    }
-
-    public void setOpenIcon(Icon openIcon) {
-        this.openIcon = openIcon;
     }
 
     @Override

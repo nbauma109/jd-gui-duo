@@ -18,9 +18,7 @@ import org.jdv1.gui.api.feature.IndexesChangeListener;
 import org.jdv1.gui.util.index.IndexesUtil;
 
 import java.awt.Point;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -67,36 +65,36 @@ public class OneTypeReferencePerLinePage extends TypeReferencePage implements Ur
     }
 
     @Override
-    protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return ((TypeHyperlinkData)hyperlinkData).enabled; }
+    protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return ((TypeHyperlinkData)hyperlinkData).isEnabled(); }
 
     @Override
     protected void openHyperlink(int x, int y, HyperlinkData hyperlinkData) {
         TypeHyperlinkData data = (TypeHyperlinkData)hyperlinkData;
 
-        if (data.enabled) {
+        if (data.isEnabled()) {
             try {
                 // Save current position in history
                 Point location = textArea.getLocationOnScreen();
-                int offset = textArea.viewToModel(new Point(x-location.x, y-location.y));
+                int offset = textArea.viewToModel2D(new Point(x-location.x, y-location.y));
                 URI uri = entry.getUri();
                 api.addURI(new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), "position=" + offset, null));
 
                 // Open link
-                String internalTypeName = data.internalTypeName;
+                String internalTypeName = data.getInternalTypeName();
                 List<Container.Entry> entries = IndexesUtil.findInternalTypeName(collectionOfFutureIndexes, internalTypeName);
                 String rootUri = entry.getContainer().getRoot().getUri().toString();
                 List<Container.Entry> sameContainerEntries = new ArrayList<>();
 
-                for (Container.Entry entry : entries) {
-                    if (entry.getUri().toString().startsWith(rootUri)) {
-                        sameContainerEntries.add(entry);
+                for (Container.Entry nextEntry : entries) {
+                    if (nextEntry.getUri().toString().startsWith(rootUri)) {
+                        sameContainerEntries.add(nextEntry);
                     }
                 }
 
                 if (!sameContainerEntries.isEmpty()) {
-                    api.openURI(x, y, sameContainerEntries, null, data.internalTypeName);
+                    api.openURI(x, y, sameContainerEntries, null, data.getInternalTypeName());
                 } else if (!entries.isEmpty()) {
-                    api.openURI(x, y, entries, null, data.internalTypeName);
+                    api.openURI(x, y, entries, null, data.getInternalTypeName());
                 }
             } catch (URISyntaxException e) {
                 assert ExceptionUtil.printStackTrace(e);
@@ -124,13 +122,13 @@ public class OneTypeReferencePerLinePage extends TypeReferencePage implements Ur
         // Refresh links
         boolean refresh = false;
 
-        for (Map.Entry<Integer, HyperlinkData> entry : hyperlinks.entrySet()) {
-            TypeHyperlinkData entryData = (TypeHyperlinkData)entry.getValue();
-            String internalTypeName = entryData.internalTypeName;
+        for (Map.Entry<Integer, HyperlinkData> nextEntry : hyperlinks.entrySet()) {
+            TypeHyperlinkData entryData = (TypeHyperlinkData)nextEntry.getValue();
+            String internalTypeName = entryData.getInternalTypeName();
             boolean enabled = IndexesUtil.containsInternalTypeName(collectionOfFutureIndexes, internalTypeName);
 
-            if (entryData.enabled != enabled) {
-                entryData.enabled = enabled;
+            if (entryData.isEnabled() != enabled) {
+                entryData.setEnabled(enabled);
                 refresh = true;
             }
         }

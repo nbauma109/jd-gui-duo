@@ -53,7 +53,7 @@ public class TokensFragment extends FlexibleFragment implements JavaFragment {
     }
 
     protected static class LineCountVisitor extends AbstractNopTokenVisitor {
-        public int lineCount;
+    	private int lineCount;
 
         @Override
         public void visit(LineNumberToken token) {

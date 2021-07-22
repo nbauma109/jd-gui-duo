@@ -6,15 +6,14 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.ExceptionHandler;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.SwitchCase;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.Loop;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.*;
 
+import static org.apache.bcel.Const.MONITORENTER;
 import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.*;
 
 public class ControlFlowGraphLoopReducer {
@@ -89,8 +88,7 @@ public class ControlFlowGraphLoopReducer {
                         arrayOfMemberIndexes[index] = searchLoopMemberIndexes(length, arrayOfMemberIndexes[index], current, current.getBranch());
                     }
                     // intended fall through
-                case TYPE_STATEMENTS:
-                case TYPE_GOTO:
+                case TYPE_STATEMENTS, TYPE_GOTO:
                     index = current.getNext().getIndex();
 
                     if (index >= 0 && dominatorIndexes.get(index)) {
@@ -340,8 +338,7 @@ public class ControlFlowGraphLoopReducer {
                         break;
                     }
                     // intended fall through
-                case TYPE_STATEMENTS:
-                case TYPE_GOTO:
+                case TYPE_STATEMENTS, TYPE_GOTO:
                     bb = member.getNext();
                     if (!memberIndexes.get(bb.getIndex()) && maxOffset < bb.getFromOffset()) {
                         end = bb;
@@ -422,7 +419,7 @@ public class ControlFlowGraphLoopReducer {
     }
 
     private static int checkSynchronizedBlockOffset(BasicBlock basicBlock) {
-        if (basicBlock.getNext().getType() == TYPE_TRY_DECLARATION && ByteCodeUtil.getLastOpcode(basicBlock) == 194) { // MONITORENTER
+        if (basicBlock.getNext().getType() == TYPE_TRY_DECLARATION && ByteCodeUtil.getLastOpcode(basicBlock) == MONITORENTER) {
             return checkThrowBlockOffset(basicBlock.getNext().getExceptionHandlers().getFirst().getBasicBlock());
         }
 

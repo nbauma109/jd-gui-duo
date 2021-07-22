@@ -18,17 +18,16 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.cfg.MinDepthC
 
 import java.util.*;
 
+import static org.apache.bcel.Const.*;
 import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.*;
 
 public abstract class ControlFlowGraphReducer {
-
-    private ControlFlowGraph controlFlowGraph;
+    private final ControlFlowGraph controlFlowGraph;
 
     protected ControlFlowGraphReducer(Method method) {
         controlFlowGraph = ControlFlowGraphMaker.make(method);
     }
-    
-    public boolean reduce() {
+        public boolean reduce() {
         if (controlFlowGraph != null) {
             ControlFlowGraphGotoReducer.reduce(controlFlowGraph);
             ControlFlowGraphLoopReducer.reduce(controlFlowGraph);
@@ -45,21 +44,21 @@ public abstract class ControlFlowGraphReducer {
             visited.set(basicBlock.getIndex());
 
             switch (basicBlock.getType()) {
-                case TYPE_START:
-                case TYPE_STATEMENTS:
-                case TYPE_IF:
-                case TYPE_IF_ELSE:
-                case TYPE_SWITCH:
-                case TYPE_TRY:
-                case TYPE_TRY_JSR:
-                case TYPE_TRY_ECLIPSE:
-                case TYPE_GOTO_IN_TERNARY_OPERATOR:
+                case TYPE_START,
+                     TYPE_STATEMENTS,
+                     TYPE_IF,
+                     TYPE_IF_ELSE,
+                     TYPE_SWITCH,
+                     TYPE_TRY,
+                     TYPE_TRY_JSR,
+                     TYPE_TRY_ECLIPSE,
+                     TYPE_GOTO_IN_TERNARY_OPERATOR:
                     return reduce(visited, basicBlock.getNext(), jsrTargets);
-                case TYPE_CONDITIONAL_BRANCH:
-                case TYPE_CONDITION:
-                case TYPE_CONDITION_OR:
-                case TYPE_CONDITION_AND:
-                case TYPE_CONDITION_TERNARY_OPERATOR:
+                case TYPE_CONDITIONAL_BRANCH,
+                     TYPE_CONDITION,
+                     TYPE_CONDITION_OR,
+                     TYPE_CONDITION_AND,
+                     TYPE_CONDITION_TERNARY_OPERATOR:
                     return reduceConditionalBranch(visited, basicBlock, jsrTargets);
                 case TYPE_SWITCH_DECLARATION:
                     return reduceSwitchDeclaration(visited, basicBlock, jsrTargets);
@@ -284,8 +283,7 @@ public abstract class ControlFlowGraphReducer {
     protected abstract boolean needToUpdateCondition(BasicBlock basicBlock, BasicBlock nextNext);
     protected abstract boolean needToCreateIf(BasicBlock branch, BasicBlock nextNext, int maxOffset);
     protected abstract boolean needToCreateIfElse(BasicBlock branch, BasicBlock nextNext, BasicBlock branchNext);
-    
-    protected boolean aggregateConditionalBranches(BasicBlock basicBlock) {
+        protected boolean aggregateConditionalBranches(BasicBlock basicBlock) {
         boolean change = false;
 
         BasicBlock next = basicBlock.getNext();
@@ -306,7 +304,7 @@ public abstract class ControlFlowGraphReducer {
                         return true;
                     }
                 }
-                if ((nextNext.getNext() == branch && checkJdk118TernaryOperatorPattern(next, nextNext, 153)) || (nextNext.getBranch() == branch && checkJdk118TernaryOperatorPattern(next, nextNext, 154))) { // IFNE
+                if (nextNext.getNext() == branch && checkJdk118TernaryOperatorPattern(next, nextNext, 153) || nextNext.getBranch() == branch && checkJdk118TernaryOperatorPattern(next, nextNext, 154)) { // IFNE
                     convertConditionalBranchToGotoInTernaryOperator(basicBlock, next, nextNext);
                     return true;
                 }
@@ -557,13 +555,13 @@ public abstract class ControlFlowGraphReducer {
     }
 
     protected boolean checkJdk118TernaryOperatorPattern(BasicBlock next, BasicBlock nextNext, int ifByteCode) {
-        if ((nextNext.getToOffset() - nextNext.getFromOffset()) == 3) {
+        if (nextNext.getToOffset() - nextNext.getFromOffset() == 3) {
             byte[] code = next.getControlFlowGraph().getMethod().<AttributeCode>getAttribute("Code").getCode();
             int nextFromOffset = next.getFromOffset();
             int nextNextFromOffset = nextNext.getFromOffset();
-            return code[nextFromOffset] == 3 &&                                                               // ICONST_0
-                    ((code[nextFromOffset + 1] & 255) == 167 || (code[nextFromOffset + 1] & 255) == 200) && // GOTO or GOTO_W
-                    (code[nextNextFromOffset] & 255) == ifByteCode &&                                         // IFEQ or IFNE
+            return code[nextFromOffset] == ICONST_0 &&
+                    ((code[nextFromOffset + 1] & 255) == GOTO || (code[nextFromOffset + 1] & 255) == GOTO_W) &&
+                    (code[nextNextFromOffset] & 255) == ifByteCode && // IFEQ or IFNE
                     nextNextFromOffset + 3 == nextNext.getToOffset();
         }
 
@@ -850,7 +848,7 @@ public abstract class ControlFlowGraphReducer {
                 if (bb == end) {
                     exceptionHandler.setBasicBlock(END);
                 } else {
-                    int offset = (bb.getFromOffset() == maxOffset) ? end.getFromOffset() : maxOffset;
+                    int offset = bb.getFromOffset() == maxOffset ? end.getFromOffset() : maxOffset;
 
                     if (offset == 0) {
                         offset = Integer.MAX_VALUE;
@@ -902,8 +900,8 @@ public abstract class ControlFlowGraphReducer {
         int nextOpcode = ByteCodeUtil.searchNextOpcode(basicBlock, maxOffset);
 
         if (nextOpcode == 0   ||
-            nextOpcode == 167 || // GOTO
-            nextOpcode == 200) { // GOTO_W
+            nextOpcode == GOTO ||
+            nextOpcode == GOTO_W) {
             return true;
         }
 
@@ -950,7 +948,7 @@ public abstract class ControlFlowGraphReducer {
         if (!last.matchType(GROUP_END)) {
             BasicBlock next = last.getNext();
 
-            if (next.getFromOffset() >= maxOffset || (!next.matchType(TYPE_END|TYPE_RETURN|TYPE_SWITCH_BREAK|TYPE_LOOP_START|TYPE_LOOP_CONTINUE|TYPE_LOOP_END) && next.getToOffset() < basicBlock.getFromOffset())) {
+            if (next.getFromOffset() >= maxOffset || !next.matchType(TYPE_END|TYPE_RETURN|TYPE_SWITCH_BREAK|TYPE_LOOP_START|TYPE_LOOP_CONTINUE|TYPE_LOOP_END) && next.getToOffset() < basicBlock.getFromOffset()) {
                 return next;
             }
 
@@ -967,7 +965,7 @@ public abstract class ControlFlowGraphReducer {
                 if (!last.matchType(GROUP_END)) {
                     BasicBlock next = last.getNext();
 
-                    if (next.getFromOffset() >= maxOffset || (!next.matchType(TYPE_END | TYPE_RETURN | TYPE_SWITCH_BREAK | TYPE_LOOP_START | TYPE_LOOP_CONTINUE | TYPE_LOOP_END) && next.getToOffset() < basicBlock.getFromOffset())) {
+                    if (next.getFromOffset() >= maxOffset || !next.matchType(TYPE_END | TYPE_RETURN | TYPE_SWITCH_BREAK | TYPE_LOOP_START | TYPE_LOOP_CONTINUE | TYPE_LOOP_END) && next.getToOffset() < basicBlock.getFromOffset()) {
                         return next;
                     }
 
@@ -1099,13 +1097,13 @@ public abstract class ControlFlowGraphReducer {
             if (delta > 3) {
                 int opcode = ByteCodeUtil.getLastOpcode(basicBlock);
 
-                if (opcode == 168) { // JSR
+                if (opcode == JSR) {
                     basicBlock.setType(TYPE_STATEMENTS);
                     basicBlock.setToOffset(basicBlock.getToOffset() - 3);
                     branch.getPredecessors().remove(basicBlock);
                     return true;
                 }
-                if (delta > 5) { // JSR_W
+                if (delta > JSR_W) {
                     basicBlock.setType(TYPE_STATEMENTS);
                     basicBlock.setToOffset(basicBlock.getToOffset() - 5);
                     branch.getPredecessors().remove(basicBlock);
@@ -1224,38 +1222,39 @@ public abstract class ControlFlowGraphReducer {
         if (!basicBlock.matchType(GROUP_END) && !visited.get(basicBlock.getIndex())) {
             visited.set(basicBlock.getIndex());
 
-            switch (basicBlock.getType()) {
-                case TYPE_START:
-                case TYPE_STATEMENTS:
-                case TYPE_SWITCH_DECLARATION:
-                case TYPE_TRY_DECLARATION:
-                case TYPE_JSR:
-                case TYPE_LOOP:
-                case TYPE_IF_ELSE:
-                case TYPE_SWITCH:
-                case TYPE_TRY:
-                case TYPE_TRY_JSR:
-                case TYPE_TRY_ECLIPSE:
-                    return getLastConditionalBranch(visited, basicBlock.getNext());
-                case TYPE_IF:
-                case TYPE_CONDITIONAL_BRANCH:
-                case TYPE_CONDITION:
-                case TYPE_CONDITION_OR:
-                case TYPE_CONDITION_AND:
-                    BasicBlock bb = getLastConditionalBranch(visited, basicBlock.getBranch());
+            int basicBlockType = basicBlock.getType();
+			if (basicBlockType == TYPE_START
+             || basicBlockType == TYPE_STATEMENTS
+             || basicBlockType == TYPE_SWITCH_DECLARATION
+             || basicBlockType == TYPE_TRY_DECLARATION
+             || basicBlockType == TYPE_JSR
+             || basicBlockType == TYPE_LOOP
+             || basicBlockType == TYPE_IF_ELSE
+             || basicBlockType == TYPE_SWITCH
+             || basicBlockType == TYPE_TRY
+             || basicBlockType == TYPE_TRY_JSR
+             || basicBlockType == TYPE_TRY_ECLIPSE) {
+				return getLastConditionalBranch(visited, basicBlock.getNext());
+			}
+			if (basicBlockType == TYPE_IF
+             || basicBlockType == TYPE_CONDITIONAL_BRANCH
+             || basicBlockType == TYPE_CONDITION
+             || basicBlockType == TYPE_CONDITION_OR
+             || basicBlockType == TYPE_CONDITION_AND) {
+				BasicBlock bb = getLastConditionalBranch(visited, basicBlock.getBranch());
 
-                    if (bb != null) {
-                        return bb;
-                    }
+				if (bb != null) {
+				    return bb;
+				}
 
-                    bb = getLastConditionalBranch(visited, basicBlock.getNext());
+				bb = getLastConditionalBranch(visited, basicBlock.getNext());
 
-                    if (bb != null) {
-                        return bb;
-                    }
+				if (bb != null) {
+				    return bb;
+				}
 
-                    return basicBlock;
-            }
+				return basicBlock;
+			}
         }
 
         return null;
@@ -1268,21 +1267,13 @@ public abstract class ControlFlowGraphReducer {
             visited.set(basicBlock.getIndex());
 
             switch (basicBlock.getType()) {
-                case TYPE_CONDITIONAL_BRANCH:
-                case TYPE_JSR:
-                case TYPE_CONDITION:
+                case TYPE_CONDITIONAL_BRANCH, TYPE_JSR, TYPE_CONDITION:
                     visit(visited, basicBlock.getBranch(), maxOffset, ends);
                     // intended fall through
-                case TYPE_START:
-                case TYPE_STATEMENTS:
-                case TYPE_GOTO:
-                case TYPE_GOTO_IN_TERNARY_OPERATOR:
-                case TYPE_LOOP:
+                case TYPE_START, TYPE_STATEMENTS, TYPE_GOTO, TYPE_GOTO_IN_TERNARY_OPERATOR, TYPE_LOOP:
                     visit(visited, basicBlock.getNext(), maxOffset, ends);
                     break;
-                case TYPE_TRY:
-                case TYPE_TRY_JSR:
-                case TYPE_TRY_ECLIPSE:
+                case TYPE_TRY, TYPE_TRY_JSR, TYPE_TRY_ECLIPSE:
                     visit(visited, basicBlock.getSub1(), maxOffset, ends);
                     // intended fall through
                 case TYPE_TRY_DECLARATION:
@@ -1291,16 +1282,14 @@ public abstract class ControlFlowGraphReducer {
                     }
                     visit(visited, basicBlock.getNext(), maxOffset, ends);
                     break;
-                case TYPE_IF_ELSE:
-                case TYPE_TERNARY_OPERATOR:
+                case TYPE_IF_ELSE, TYPE_TERNARY_OPERATOR:
                     visit(visited, basicBlock.getSub2(), maxOffset, ends);
                     // intended fall through
                 case TYPE_IF:
                     visit(visited, basicBlock.getSub1(), maxOffset, ends);
                     visit(visited, basicBlock.getNext(), maxOffset, ends);
                     break;
-                case TYPE_CONDITION_OR:
-                case TYPE_CONDITION_AND:
+                case TYPE_CONDITION_OR, TYPE_CONDITION_AND:
                     visit(visited, basicBlock.getSub1(), maxOffset, ends);
                     visit(visited, basicBlock.getSub2(), maxOffset, ends);
                     break;
@@ -1322,21 +1311,13 @@ public abstract class ControlFlowGraphReducer {
             basicBlock.replace(LOOP_START, SWITCH_BREAK);
 
             switch (basicBlock.getType()) {
-                case TYPE_CONDITIONAL_BRANCH:
-                case TYPE_JSR:
-                case TYPE_CONDITION:
+                case TYPE_CONDITIONAL_BRANCH, TYPE_JSR, TYPE_CONDITION:
                     replaceLoopStartWithSwitchBreak(visited, basicBlock.getBranch());
                     // intended fall through
-                case TYPE_START:
-                case TYPE_STATEMENTS:
-                case TYPE_GOTO:
-                case TYPE_GOTO_IN_TERNARY_OPERATOR:
-                case TYPE_LOOP:
+                case TYPE_START, TYPE_STATEMENTS, TYPE_GOTO, TYPE_GOTO_IN_TERNARY_OPERATOR, TYPE_LOOP:
                     replaceLoopStartWithSwitchBreak(visited, basicBlock.getNext());
                     break;
-                case TYPE_TRY:
-                case TYPE_TRY_JSR:
-                case TYPE_TRY_ECLIPSE:
+                case TYPE_TRY, TYPE_TRY_JSR, TYPE_TRY_ECLIPSE:
                     replaceLoopStartWithSwitchBreak(visited, basicBlock.getSub1());
                     // intended fall through
                 case TYPE_TRY_DECLARATION:
@@ -1344,16 +1325,14 @@ public abstract class ControlFlowGraphReducer {
                         replaceLoopStartWithSwitchBreak(visited, exceptionHandler.getBasicBlock());
                     }
                     break;
-                case TYPE_IF_ELSE:
-                case TYPE_TERNARY_OPERATOR:
+                case TYPE_IF_ELSE, TYPE_TERNARY_OPERATOR:
                     replaceLoopStartWithSwitchBreak(visited, basicBlock.getSub2());
                     // intended fall through
                 case TYPE_IF:
                     replaceLoopStartWithSwitchBreak(visited, basicBlock.getSub1());
                     replaceLoopStartWithSwitchBreak(visited, basicBlock.getNext());
                     break;
-                case TYPE_CONDITION_OR:
-                case TYPE_CONDITION_AND:
+                case TYPE_CONDITION_OR, TYPE_CONDITION_AND:
                     replaceLoopStartWithSwitchBreak(visited, basicBlock.getSub1());
                     replaceLoopStartWithSwitchBreak(visited, basicBlock.getSub2());
                     break;
@@ -1376,24 +1355,15 @@ public abstract class ControlFlowGraphReducer {
             visited.set(basicBlock.getIndex());
 
             switch (basicBlock.getType()) {
-                case TYPE_CONDITIONAL_BRANCH:
-                case TYPE_JSR:
-                case TYPE_CONDITION:
-                case TYPE_CONDITION_TERNARY_OPERATOR:
+                case TYPE_CONDITIONAL_BRANCH, TYPE_JSR, TYPE_CONDITION, TYPE_CONDITION_TERNARY_OPERATOR:
                     updateBasicBlock = searchUpdateBlockAndCreateContinueLoop(visited, basicBlock, basicBlock.getBranch());
                     // intended fall through
-                case TYPE_START:
-                case TYPE_STATEMENTS:
-                case TYPE_GOTO:
-                case TYPE_GOTO_IN_TERNARY_OPERATOR:
-                case TYPE_LOOP:
+                case TYPE_START, TYPE_STATEMENTS, TYPE_GOTO, TYPE_GOTO_IN_TERNARY_OPERATOR, TYPE_LOOP:
                     if (updateBasicBlock == null) {
                         updateBasicBlock = searchUpdateBlockAndCreateContinueLoop(visited, basicBlock, basicBlock.getNext());
                     }
                     break;
-                case TYPE_TRY:
-                case TYPE_TRY_JSR:
-                case TYPE_TRY_ECLIPSE:
+                case TYPE_TRY, TYPE_TRY_JSR, TYPE_TRY_ECLIPSE:
                     updateBasicBlock = searchUpdateBlockAndCreateContinueLoop(visited, basicBlock, basicBlock.getSub1());
                     // intended fall through
                 case TYPE_TRY_DECLARATION:
@@ -1406,8 +1376,7 @@ public abstract class ControlFlowGraphReducer {
                         updateBasicBlock = searchUpdateBlockAndCreateContinueLoop(visited, basicBlock, basicBlock.getNext());
                     }
                     break;
-                case TYPE_IF_ELSE:
-                case TYPE_TERNARY_OPERATOR:
+                case TYPE_IF_ELSE, TYPE_TERNARY_OPERATOR:
                     updateBasicBlock = searchUpdateBlockAndCreateContinueLoop(visited, basicBlock, basicBlock.getSub2());
                     // intended fall through
                 case TYPE_IF:
@@ -1418,8 +1387,7 @@ public abstract class ControlFlowGraphReducer {
                         updateBasicBlock = searchUpdateBlockAndCreateContinueLoop(visited, basicBlock, basicBlock.getNext());
                     }
                     break;
-                case TYPE_CONDITION_OR:
-                case TYPE_CONDITION_AND:
+                case TYPE_CONDITION_OR, TYPE_CONDITION_AND:
                     updateBasicBlock = searchUpdateBlockAndCreateContinueLoop(visited, basicBlock, basicBlock.getSub1());
                     if (updateBasicBlock == null) {
                         updateBasicBlock = searchUpdateBlockAndCreateContinueLoop(visited, basicBlock, basicBlock.getSub2());
@@ -1489,29 +1457,21 @@ public abstract class ControlFlowGraphReducer {
             visited.set(basicBlock.getIndex());
 
             switch (basicBlock.getType()) {
-                case TYPE_CONDITIONAL_BRANCH:
-                case TYPE_JSR:
-                case TYPE_CONDITION:
+                case TYPE_CONDITIONAL_BRANCH, TYPE_JSR, TYPE_CONDITION:
                     if (basicBlock.getBranch() == LOOP_END) {
                         basicBlock.setBranch(newJumpBasicBlock(basicBlock, target));
                     } else {
                         changeEndLoopToJump(visited, target, basicBlock.getBranch());
                     }
                     // intended fall through
-                case TYPE_START:
-                case TYPE_STATEMENTS:
-                case TYPE_GOTO:
-                case TYPE_GOTO_IN_TERNARY_OPERATOR:
-                case TYPE_LOOP:
+                case TYPE_START, TYPE_STATEMENTS, TYPE_GOTO, TYPE_GOTO_IN_TERNARY_OPERATOR, TYPE_LOOP:
                     if (basicBlock.getNext() == LOOP_END) {
                         basicBlock.setNext(newJumpBasicBlock(basicBlock, target));
                     } else {
                         changeEndLoopToJump(visited, target, basicBlock.getNext());
                     }
                     break;
-                case TYPE_TRY:
-                case TYPE_TRY_JSR:
-                case TYPE_TRY_ECLIPSE:
+                case TYPE_TRY, TYPE_TRY_JSR, TYPE_TRY_ECLIPSE:
                     if (basicBlock.getSub1() == LOOP_END) {
                         basicBlock.setSub1(newJumpBasicBlock(basicBlock, target));
                     } else {
@@ -1527,8 +1487,7 @@ public abstract class ControlFlowGraphReducer {
                         }
                     }
                     break;
-                case TYPE_IF_ELSE:
-                case TYPE_TERNARY_OPERATOR:
+                case TYPE_IF_ELSE, TYPE_TERNARY_OPERATOR:
                     if (basicBlock.getSub2() == LOOP_END) {
                         basicBlock.setSub2(newJumpBasicBlock(basicBlock, target));
                     } else {
@@ -1547,8 +1506,7 @@ public abstract class ControlFlowGraphReducer {
                         changeEndLoopToJump(visited, target, basicBlock.getNext());
                     }
                     break;
-                case TYPE_CONDITION_OR:
-                case TYPE_CONDITION_AND:
+                case TYPE_CONDITION_OR, TYPE_CONDITION_AND:
                     if (basicBlock.getSub1() == LOOP_END) {
                         basicBlock.setSub1(newJumpBasicBlock(basicBlock, target));
                     } else {

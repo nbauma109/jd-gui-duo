@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.gui.service.configuration;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
@@ -12,12 +11,11 @@ import org.jd.gui.Constants;
 import org.jd.gui.model.configuration.Configuration;
 import org.jd.gui.service.platform.PlatformService;
 
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+import java.util.List;
 import java.util.jar.Manifest;
 
 import javax.swing.UIManager;
@@ -28,7 +26,6 @@ import static org.jd.gui.util.decompiler.GuiPreferences.ERROR_BACKGROUND_COLOR;
 import static org.jd.gui.util.decompiler.GuiPreferences.JD_CORE_VERSION;
 
 public class ConfigurationXmlPersisterProvider implements ConfigurationPersister {
-
     private static final String NEW_LINE_2_TABS = "\n\t\t";
     private static final String NEW_LINE_3_TABS = "\n\t\t\t";
     protected static final File FILE = getConfigFile();
@@ -76,8 +73,8 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
         // Default values
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
-        int w = (screenSize.width>Constants.DEFAULT_WIDTH) ? Constants.DEFAULT_WIDTH : screenSize.width;
-        int h = (screenSize.height>Constants.DEFAULT_HEIGHT) ? Constants.DEFAULT_HEIGHT : screenSize.height;
+        int w = screenSize.width>Constants.DEFAULT_WIDTH ? Constants.DEFAULT_WIDTH : screenSize.width;
+        int h = screenSize.height>Constants.DEFAULT_HEIGHT ? Constants.DEFAULT_HEIGHT : screenSize.height;
         int x = (screenSize.width-w)/2;
         int y = (screenSize.height-h)/2;
 
@@ -88,7 +85,7 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
 
         String defaultLaf = System.getProperty("swing.defaultlaf");
 
-        config.setLookAndFeel((defaultLaf != null) ? defaultLaf : UIManager.getSystemLookAndFeelClassName());
+        config.setLookAndFeel(defaultLaf != null ? defaultLaf : UIManager.getSystemLookAndFeelClassName());
 
         File recentSaveDirectory = new File(System.getProperty("user.dir"));
 
@@ -113,17 +110,14 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
                     switch (reader.next()) {
                         case XMLStreamConstants.START_ELEMENT:
                             names.push(name);
-                            name += '/' + reader.getLocalName();
-                            switch (name) {
-                                case "/configuration/gui/mainWindow/location":
-                                    x = Integer.parseInt(reader.getAttributeValue(null, "x"));
-                                    y = Integer.parseInt(reader.getAttributeValue(null, "y"));
-                                    break;
-                                case "/configuration/gui/mainWindow/size":
-                                    w = Integer.parseInt(reader.getAttributeValue(null, "w"));
-                                    h = Integer.parseInt(reader.getAttributeValue(null, "h"));
-                                    break;
-                            }
+                            name = String.join("/", name, reader.getLocalName());
+						if ("/configuration/gui/mainWindow/location".equals(name)) {
+							x = Integer.parseInt(reader.getAttributeValue(null, "x"));
+							y = Integer.parseInt(reader.getAttributeValue(null, "y"));
+						} else if ("/configuration/gui/mainWindow/size".equals(name)) {
+							w = Integer.parseInt(reader.getAttributeValue(null, "w"));
+							h = Integer.parseInt(reader.getAttributeValue(null, "h"));
+						}
                             break;
                         case XMLStreamConstants.END_ELEMENT:
                             name = names.pop();
@@ -171,7 +165,7 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
                 }
                 config.setRecentFiles(recentFiles);
 
-                if ((x >= 0) && (y >= 0) && (x + w < screenSize.width) && (y + h < screenSize.height)) {
+                if (x >= 0 && y >= 0 && x + w < screenSize.width && y + h < screenSize.height) {
                     // Update preferences
                     config.setMainWindowLocation(new Point(x, y));
                     config.setMainWindowSize(new Dimension(w, h));

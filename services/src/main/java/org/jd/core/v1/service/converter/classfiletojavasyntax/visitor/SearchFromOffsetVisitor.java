@@ -30,10 +30,10 @@ public class SearchFromOffsetVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(LocalVariableReferenceExpression expression) {
-        int offset = ((ClassFileLocalVariableReferenceExpression) expression).getOffset();
+        int localOffset = ((ClassFileLocalVariableReferenceExpression) expression).getOffset();
 
-        if (this.offset > offset) {
-            this.offset = offset;
+        if (this.offset > localOffset) {
+            this.offset = localOffset;
         }
     }
 

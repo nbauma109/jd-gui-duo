@@ -11,9 +11,7 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.service.extension.ExtensionService;
 import org.jd.gui.spi.SourceSaver;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class SourceSaverService {
     protected static final SourceSaverService SOURCE_SAVER_SERVICE = new SourceSaverService();

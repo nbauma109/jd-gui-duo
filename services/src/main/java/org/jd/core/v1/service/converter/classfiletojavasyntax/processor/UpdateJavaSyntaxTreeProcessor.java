@@ -9,9 +9,7 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.processor;
 
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.UpdateJavaSyntaxTreeStep0Visitor;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.UpdateJavaSyntaxTreeStep1Visitor;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.UpdateJavaSyntaxTreeStep2Visitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.*;
 
 /**
  * Create statements, init fields, merge declarations.<br><br>

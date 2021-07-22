@@ -14,15 +14,9 @@ import org.jd.gui.api.model.Indexes;
 import org.jd.gui.service.indexer.AbstractIndexerProvider;
 
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.*;
 
 public class XmlBasedFileIndexerProvider extends AbstractIndexerProvider {
     protected XMLInputFactory factory;
@@ -80,10 +74,7 @@ public class XmlBasedFileIndexerProvider extends AbstractIndexerProvider {
                         stringSet.add(reader.getLocalName());
                         stringSet.add(reader.getText());
                         break;
-                    case XMLStreamConstants.COMMENT:
-                    case XMLStreamConstants.DTD:
-                    case XMLStreamConstants.CDATA:
-                    case XMLStreamConstants.CHARACTERS:
+                    case XMLStreamConstants.COMMENT, XMLStreamConstants.DTD, XMLStreamConstants.CDATA, XMLStreamConstants.CHARACTERS:
                         stringSet.add(reader.getText().trim());
                         break;
                     case XMLStreamConstants.NAMESPACE:
@@ -106,13 +97,17 @@ public class XmlBasedFileIndexerProvider extends AbstractIndexerProvider {
             }
         }
 
-        @SuppressWarnings("all")
-        Map<String, Collection> stringIndex = indexes.getIndex("strings");
+        indexStrings(entry, indexes, stringSet);
+    }
+
+    @SuppressWarnings("all")
+    private void indexStrings(Container.Entry entry, Indexes indexes, Set<String> stringSet) {
+		Map<String, Collection> stringIndex = indexes.getIndex("strings");
 
         for (String string : stringSet) {
-            if ((string != null) && !string.isEmpty()) {
+            if (string != null && !string.isEmpty()) {
                 stringIndex.get(string).add(entry);
             }
         }
-    }
+	}
 }

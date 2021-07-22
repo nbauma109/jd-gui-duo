@@ -8,9 +8,7 @@
 package org.jdv1.gui.service.treenode;
 
 import org.jd.gui.api.API;
-import org.jd.gui.api.feature.ContainerEntryGettable;
-import org.jd.gui.api.feature.TreeNodeExpandable;
-import org.jd.gui.api.feature.UriGettable;
+import org.jd.gui.api.feature.*;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Container.Entry;
 import org.jd.gui.spi.TreeNodeFactory;
@@ -96,10 +94,10 @@ public class DirectoryTreeNodeFactoryProvider extends AbstractTreeNodeFactoryPro
                     entries = child.getChildren().values();
                 }
 
-                for (Entry entry : entries) {
-                    TreeNodeFactory factory = api.getTreeNodeFactory(entry);
+                for (Entry nextEntry : entries) {
+                    TreeNodeFactory factory = api.getTreeNodeFactory(nextEntry);
                     if (factory != null) {
-                        add(factory.make(api, entry));
+                        add(factory.make(api, nextEntry));
                     }
                 }
 
