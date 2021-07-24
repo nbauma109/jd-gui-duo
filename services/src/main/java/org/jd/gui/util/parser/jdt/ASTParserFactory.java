@@ -1,7 +1,7 @@
 package org.jd.gui.util.parser.jdt;
 
-import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.JavaCore;
-import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.dom.*;
 import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;

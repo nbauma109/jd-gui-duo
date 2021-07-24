@@ -7,7 +7,7 @@
 
 package org.jd.gui.util.parser.jdt.core;
 
-import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.*;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.model.Container;
 

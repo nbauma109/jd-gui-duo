@@ -1,6 +1,6 @@
 package org.jd.gui.util;
 
-import org.jboss.forge.roaster._shade.org.apache.commons.lang3.Range;
+import org.jd.util.Range;
 
 import java.util.*;
 
@@ -36,13 +36,13 @@ public class StringUtilities {
         return sb.toString();
     }
 
-    public static String applyModifications(final String text, final Map<Range<Integer>, String> replacementMap) {
+    public static String applyModifications(final String text, final Map<Range, String> replacementMap) {
         List<Integer> indexes = collectIndexes(replacementMap.keySet(), text.length());
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < indexes.size() - 1; i++) {
             Integer fromIdx = indexes.get(i);
             Integer toIdx = indexes.get(i + 1);
-            Range<Integer> range = Range.between(fromIdx, toIdx);
+            Range range = Range.between(fromIdx, toIdx);
             String modification = replacementMap.get(range);
             if (modification == null) {
                 sb.append(text.substring(fromIdx, toIdx));
@@ -53,10 +53,10 @@ public class StringUtilities {
         return sb.toString();
     }
 
-    private static List<Integer> collectIndexes(final Set<Range<Integer>> ranges, final int length) {
+    private static List<Integer> collectIndexes(final Set<Range> ranges, final int length) {
         Set<Integer> indexes = new TreeSet<>();
         indexes.add(0);
-        for (Range<Integer> range : ranges) {
+        for (Range range : ranges) {
             indexes.add(range.getMinimum());
             indexes.add(range.getMaximum());
         }

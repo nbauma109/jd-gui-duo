@@ -8,7 +8,6 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.*;
-import org.jboss.forge.roaster._shade.org.apache.commons.lang3.Range;
 import org.jd.core.v1.model.classfile.ConstantPool;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
@@ -18,6 +17,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlo
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.SwitchCase;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
 import org.jd.core.v1.util.DefaultList;
+import org.jd.util.Range;
 
 import java.util.*;
 
@@ -492,7 +492,7 @@ public class ControlFlowGraphMaker {
         }
         // --- Create try-catch-finally basic blocks --- //
         if (codeExceptions != null) {
-            Map<Range<Integer>, BasicBlock> cache = new HashMap<>();
+            Map<Range, BasicBlock> cache = new HashMap<>();
             ConstantPool constantPool = method.getConstants();
             // Reuse arrays
             int[] handlePcToStartPc = branchOffsets;

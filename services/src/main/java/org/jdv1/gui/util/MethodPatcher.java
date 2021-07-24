@@ -1,11 +1,11 @@
 package org.jdv1.gui.util;
 
-import org.jboss.forge.roaster._shade.org.apache.commons.lang3.Range;
-import org.jboss.forge.roaster._shade.org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeWriter;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.util.StringUtilities;
 import org.jd.gui.util.parser.jdt.ASTParserFactory;
+import org.jd.util.Range;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -18,7 +18,7 @@ public class MethodPatcher {
 	}
 
 	public static String patchCode(String sourceCodeV1, String sourceCodeV0, Container.Entry entry) {
-		Map<String, Range<Integer>> methodKeyPositionRanges = new HashMap<>();
+		Map<String, Range> methodKeyPositionRanges = new HashMap<>();
 		URI jarURI = entry.getContainer().getRoot().getParent().getUri();
 		String unitName = entry.getPath();
 		ASTParserFactory.getInstanceWithBindings().newASTParser(sourceCodeV1.toCharArray(), unitName, jarURI, new ASTVisitor() {
@@ -38,7 +38,7 @@ public class MethodPatcher {
 				return super.visit(node);
 			}
 		});
-		Map<Range<Integer>, String> replacementMap = new HashMap<>();
+		Map<Range, String> replacementMap = new HashMap<>();
 		ASTParserFactory.getInstanceWithBindings().newASTParser(sourceCodeV0.toCharArray(), unitName, jarURI, new ASTVisitor() {
 			
 			@Override
@@ -49,7 +49,7 @@ public class MethodPatcher {
 		        IMethodBinding methodBinding = node.resolveBinding();
 		        if (methodBinding != null) {
 					String methodKey = methodBinding.getKey();
-					Range<Integer> rangeV1 = methodKeyPositionRanges.get(methodKey);
+					Range rangeV1 = methodKeyPositionRanges.get(methodKey);
 			        if (rangeV1 != null) {
 			        	String methodV1 = sourceCodeV1.substring(rangeV1.getMinimum(), rangeV1.getMaximum());
 			        	int methodV0LineCount = (int) methodV0.lines().count();

@@ -6,7 +6,6 @@
  */
 package org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.visitor;
 
-import org.jboss.forge.roaster._shade.org.apache.commons.lang3.StringUtils;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.model.fragment.Fragment;
@@ -26,6 +25,7 @@ import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_BOOLEAN;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_CHAR;
 
 public class ExpressionVisitor extends TypeVisitor {
+	
     public static final KeywordToken CLASS = new KeywordToken("class");
     public static final KeywordToken FALSE = new KeywordToken("false");
     public static final KeywordToken INSTANCEOF = new KeywordToken("instanceof");
@@ -64,18 +64,21 @@ public class ExpressionVisitor extends TypeVisitor {
 
     @Override
     public void visit(BinaryOperatorExpression expression) {
-        if (StringUtils.equalsAny(expression.getOperator(), "&", "|", "^", "&=", "|=", "^=")) {
-			visitHexa(expression, expression.getLeftExpression());
-			tokens.add(TextToken.SPACE);
-			tokens.add(newTextToken(expression.getOperator()));
-			tokens.add(TextToken.SPACE);
-			visitHexa(expression, expression.getRightExpression());
-		} else {
-			visit(expression, expression.getLeftExpression());
-			tokens.add(TextToken.SPACE);
-			tokens.add(newTextToken(expression.getOperator()));
-			tokens.add(TextToken.SPACE);
-			visit(expression, expression.getRightExpression());
+        switch (expression.getOperator()) {
+            case "&", "|", "^", "&=", "|=", "^=":
+				visitHexa(expression, expression.getLeftExpression());
+				tokens.add(TextToken.SPACE);
+				tokens.add(newTextToken(expression.getOperator()));
+				tokens.add(TextToken.SPACE);
+				visitHexa(expression, expression.getRightExpression());
+                break;
+            default:
+				visit(expression, expression.getLeftExpression());
+				tokens.add(TextToken.SPACE);
+				tokens.add(newTextToken(expression.getOperator()));
+				tokens.add(TextToken.SPACE);
+				visit(expression, expression.getRightExpression());
+                break;
 		}
     }
 

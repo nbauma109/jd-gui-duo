@@ -79,7 +79,7 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
             return map::get;
         }
 
-        /** --- SourcesSavable --- //. */
+        /** --- SourcesSavable --- */
         @Override
         public String getSourceFileName() {
             SourceSaver saver = api.getSourceSaver(entry);
