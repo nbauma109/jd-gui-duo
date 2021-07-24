@@ -14,7 +14,7 @@ import org.jd.gui.view.SaveAllSourcesView;
 
 import java.io.File;
 import java.nio.file.*;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.*;
 
 import javax.swing.JFrame;
 
@@ -35,7 +35,7 @@ public class SaveAllSourcesController implements SourcesSavable.Controller, Sour
         // Show
         this.saveAllSourcesView.show(file);
         // Execute background task
-        executor.execute(() -> {
+        Future<?> futureResult = executor.submit(() -> {
             int fileCount = savable.getFileCount();
 
             saveAllSourcesView.updateProgressBar(0);
@@ -67,6 +67,25 @@ public class SaveAllSourcesController implements SourcesSavable.Controller, Sour
 
             saveAllSourcesView.hide();
         });
+        /* Throwable instances from the Error hierarchy (i.e. NoSuchMethodError, etc...)
+        /* are reported by Future.get() as cause of an ExecutionException.
+         * FutureTask.run() catches Throwable and stores it in an outcome Object which
+         * becomes the cause of the thrown ExecutionException.
+         * We'll use Future.get() as below as opposed to catching Throwable.
+         * As we are in the event dispatch thread here, we'll wait for errors in a 
+         * separate by submitting a new task to avoid freezing the GUI.
+         */
+        executor.submit(() -> {
+	        try {
+				futureResult.get();
+			} catch (InterruptedException e) {
+				assert ExceptionUtil.printStackTrace(e);
+			    // Restore interrupted state...
+			    Thread.currentThread().interrupt();
+			} catch (ExecutionException e) {
+				assert ExceptionUtil.printStackTrace(e);
+			}
+        });
     }
 
 	private void trySave(SourcesSavable savable, Path path) {
@@ -90,7 +109,7 @@ public class SaveAllSourcesController implements SourcesSavable.Controller, Sour
     // --- SourcesSavable.Listener --- //
     @Override
     public void pathSaved(Path path) {
-        if (((counter++) & mask) == 0) {
+        if ((counter++ & mask) == 0) {
             saveAllSourcesView.updateProgressBar(counter++);
         }
     }
