@@ -23,8 +23,8 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 public class DeclareLayoutBlock extends LayoutBlock
 {
     private final ClassFile classFile;
-    private Method method;
-    private Instruction instruction;
+    private final Method method;
+    private final Instruction instruction;
 
     public DeclareLayoutBlock(
         ClassFile classFile, Method method, Instruction instruction)
@@ -34,8 +34,8 @@ public class DeclareLayoutBlock extends LayoutBlock
             Instruction.UNKNOWN_LINE_NUMBER, Instruction.UNKNOWN_LINE_NUMBER,
             0, 0, 0);
         this.classFile = classFile;
-        this.setMethod(method);
-        this.setInstruction(instruction);
+        this.method = method;
+        this.instruction = instruction;
     }
 
 	public ClassFile getClassFile() {
@@ -46,15 +46,7 @@ public class DeclareLayoutBlock extends LayoutBlock
 		return instruction;
 	}
 
-	public void setInstruction(Instruction instruction) {
-		this.instruction = instruction;
-	}
-
 	public Method getMethod() {
 		return method;
-	}
-
-	public void setMethod(Method method) {
-		this.method = method;
 	}
 }

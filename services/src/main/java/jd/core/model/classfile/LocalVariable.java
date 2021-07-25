@@ -126,12 +126,12 @@ public class LocalVariable
 
         return this.getIndex() - other.getIndex();
     }
-    
+
     @Override
     public int hashCode() {
     	return Objects.hash(nameIndex, length, startPc, index);
     }
-    
+
     @Override
     public boolean equals(Object obj) {
     	if (this == obj) {
@@ -183,7 +183,7 @@ public class LocalVariable
 		return startPc;
 	}
 
-	public void setStartPc(int startPc) {
+	private void setStartPc(int startPc) {
 		this.startPc = startPc;
 	}
 

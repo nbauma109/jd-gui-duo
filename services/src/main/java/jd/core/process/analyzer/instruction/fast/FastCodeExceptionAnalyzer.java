@@ -3214,7 +3214,7 @@ public class FastCodeExceptionAnalyzer
 			return finallyFromOffset;
 		}
 
-		public void setFinallyFromOffset(int finallyFromOffset) {
+		private void setFinallyFromOffset(int finallyFromOffset) {
 			this.finallyFromOffset = finallyFromOffset;
 		}
 
@@ -3222,7 +3222,7 @@ public class FastCodeExceptionAnalyzer
 			return afterOffset;
 		}
 
-		public void setAfterOffset(int afterOffset) {
+		private void setAfterOffset(int afterOffset) {
 			this.afterOffset = afterOffset;
 		}
 
@@ -3230,7 +3230,7 @@ public class FastCodeExceptionAnalyzer
 			return type;
 		}
 
-		public void setType(int type) {
+		private void setType(int type) {
 			this.type = type;
 		}
 
@@ -3238,7 +3238,7 @@ public class FastCodeExceptionAnalyzer
 			return tryToOffset;
 		}
 
-		public void setTryToOffset(int tryToOffset) {
+		private void setTryToOffset(int tryToOffset) {
 			this.tryToOffset = tryToOffset;
 		}
 	}

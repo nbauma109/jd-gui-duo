@@ -147,7 +147,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
         return scrollPane;
     }
 
-    public void setText(String text) {
+    protected void setText(String text) {
         textArea.setText(text);
         textArea.setCaretPosition(0);
     }

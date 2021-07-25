@@ -18,7 +18,7 @@ package jd.core.model.layout.section;
 
 public class LayoutSection implements Comparable<LayoutSection>
 {
-    private int index;
+    private final int index;
     private int firstBlockIndex;
     private int lastBlockIndex;
 
@@ -26,7 +26,7 @@ public class LayoutSection implements Comparable<LayoutSection>
 
     private boolean relayout;
     private int score;
-    private boolean containsError;
+    private final boolean containsError;
 
     public LayoutSection(
         int index,
@@ -34,13 +34,13 @@ public class LayoutSection implements Comparable<LayoutSection>
         int firstLineNumber, int lastLineNumber,
         boolean containsError)
     {
-        this.setIndex(index);
+    	this.index = index;
         this.setFirstBlockIndex(firstBlockIndex);
         this.setLastBlockIndex(lastBlockIndex);
         this.originalLineCount = lastLineNumber - firstLineNumber;
         this.setRelayout(true);
         this.setScore(0);
-        this.setContainsError(containsError);
+        this.containsError = containsError;
     }
 
     @Override
@@ -48,12 +48,12 @@ public class LayoutSection implements Comparable<LayoutSection>
     {
         return o.getScore() - this.getScore();
     }
-    
+
     @Override
     public int hashCode() {
     	return score;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
     	if (this == obj) {
@@ -105,15 +105,7 @@ public class LayoutSection implements Comparable<LayoutSection>
 		return containsError;
 	}
 
-	public void setContainsError(boolean containsError) {
-		this.containsError = containsError;
-	}
-
 	public int getIndex() {
 		return index;
-	}
-
-	public void setIndex(int index) {
-		this.index = index;
 	}
 }

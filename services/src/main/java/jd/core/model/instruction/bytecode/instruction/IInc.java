@@ -22,25 +22,27 @@ import jd.core.model.classfile.LocalVariables;
 
 public class IInc extends IndexInstruction
 {
-    private int count;
+    private final int count;
 
     public IInc(int opcode, int offset, int lineNumber, int index, int count)
     {
         super(opcode, offset, lineNumber, index);
-        this.setCount(count);
+        this.count = count;
     }
 
     @Override
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        if ((constants == null) || (localVariables == null))
-            return null;
+        if (constants == null || localVariables == null) {
+			return null;
+		}
 
         LocalVariable lv = localVariables.getLocalVariableWithIndexAndOffset(this.getIndex(), this.getOffset());
 
-        if ((lv == null) || (lv.getSignatureIndex() <= 0))
-            return null;
+        if (lv == null || lv.getSignatureIndex() <= 0) {
+			return null;
+		}
 
         return constants.getConstantUtf8(lv.getSignatureIndex());
     }
@@ -48,18 +50,15 @@ public class IInc extends IndexInstruction
     @Override
     public int getPriority()
     {
-        if ((this.getCount() == 1) || (this.getCount() == -1))
-            // Operator '++' or '--'
+        if (this.getCount() == 1 || this.getCount() == -1) {
+			// Operator '++' or '--'
             return 2;
+		}
         // Operator '+=' or '-='
         return 14;
     }
 
 	public int getCount() {
 		return count;
-	}
-
-	public void setCount(int count) {
-		this.count = count;
 	}
 }

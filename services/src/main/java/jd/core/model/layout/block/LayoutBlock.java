@@ -90,7 +90,7 @@ public class LayoutBlock {
 		return tag;
 	}
 
-	public void setTag(byte tag) {
+	protected void setTag(byte tag) {
 		this.tag = tag;
 	}
 

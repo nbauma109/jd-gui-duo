@@ -22,14 +22,14 @@ import jd.core.model.classfile.LocalVariables;
 public class IncInstruction extends Instruction
 {
     private Instruction value;
-    private int count;
+    private final int count;
 
     public IncInstruction(
         int opcode, int offset, int lineNumber, Instruction value, int count)
     {
         super(opcode, offset, lineNumber);
         this.setValue(value);
-        this.setCount(count);
+        this.count = count;
     }
 
     @Override
@@ -53,10 +53,6 @@ public class IncInstruction extends Instruction
 
 	public int getCount() {
 		return count;
-	}
-
-	public void setCount(int count) {
-		this.count = count;
 	}
 
 	public Instruction getValue() {

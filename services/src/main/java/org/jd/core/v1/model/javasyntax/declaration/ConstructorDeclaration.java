@@ -43,6 +43,7 @@ public class ConstructorDeclaration implements MemberDeclaration {
     public int getFlags() {
         return flags;
     }
+
     public void setFlags(int flags) {
         this.flags = flags;
     }

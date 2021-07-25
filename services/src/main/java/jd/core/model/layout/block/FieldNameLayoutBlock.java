@@ -23,7 +23,7 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 public class FieldNameLayoutBlock extends LayoutBlock
 {
     private final ClassFile classFile;
-    private Field field;
+    private final Field field;
 
     public FieldNameLayoutBlock(ClassFile classFile, Field field)
     {
@@ -32,7 +32,7 @@ public class FieldNameLayoutBlock extends LayoutBlock
             Instruction.UNKNOWN_LINE_NUMBER, Instruction.UNKNOWN_LINE_NUMBER,
             0, 0, 0);
         this.classFile = classFile;
-        this.setField(field);
+        this.field = field;
     }
 
 	public ClassFile getClassFile() {
@@ -41,9 +41,5 @@ public class FieldNameLayoutBlock extends LayoutBlock
 
 	public Field getField() {
 		return field;
-	}
-
-	public void setField(Field field) {
-		this.field = field;
 	}
 }

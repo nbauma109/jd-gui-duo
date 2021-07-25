@@ -18,21 +18,17 @@ package jd.core.model.instruction.bytecode.instruction;
 
 public class TableSwitch extends Switch
 {
-    private int low;
+    private final int low;
 
     public TableSwitch(
             int opcode, int offset, int lineNumber, Instruction key,
             int defaultOffset, int[] offsets, int low)
     {
         super(opcode, offset, lineNumber, key, defaultOffset, offsets);
-        this.setLow(low);
+        this.low = low;
     }
 
 	public int getLow() {
 		return low;
-	}
-
-	public void setLow(int low) {
-		this.low = low;
 	}
 }

@@ -42,7 +42,7 @@ public class InvokeNew extends InvokeInstruction
 		return enumValueFieldRefIndex;
 	}
 
-	public void setEnumValueFieldRefIndex(int enumValueFieldRefIndex) {
+	private void setEnumValueFieldRefIndex(int enumValueFieldRefIndex) {
 		this.enumValueFieldRefIndex = enumValueFieldRefIndex;
 	}
 }

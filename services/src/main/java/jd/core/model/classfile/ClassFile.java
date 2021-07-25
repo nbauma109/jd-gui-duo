@@ -403,6 +403,7 @@ public class ClassFile extends Base
     {
         return enumValues;
     }
+
     public void setEnumValues(List<Instruction> enumValues)
     {
         this.enumValues = enumValues;

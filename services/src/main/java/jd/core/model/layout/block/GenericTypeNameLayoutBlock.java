@@ -21,7 +21,7 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class GenericTypeNameLayoutBlock extends TypeNameLayoutBlock
 {
-    private String signature;
+    private final String signature;
 
     public GenericTypeNameLayoutBlock(
         ClassFile classFile, String signature)
@@ -30,14 +30,10 @@ public class GenericTypeNameLayoutBlock extends TypeNameLayoutBlock
             LayoutBlockConstants.GENERIC_TYPE_NAME,
             Instruction.UNKNOWN_LINE_NUMBER, Instruction.UNKNOWN_LINE_NUMBER,
             0, 0, 0, classFile);
-        this.setSignature(signature);
+        this.signature = signature;
     }
 
 	public String getSignature() {
 		return signature;
-	}
-
-	public void setSignature(String signature) {
-		this.signature = signature;
 	}
 }

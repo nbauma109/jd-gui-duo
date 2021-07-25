@@ -157,6 +157,7 @@ public class Method extends FieldOrMethod
     {
         return fastNodes;
     }
+
     public void setFastNodes(List<Instruction> fastNodes)
     {
         this.fastNodes = fastNodes;

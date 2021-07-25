@@ -25,12 +25,12 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 public class InstructionsLayoutBlock extends LayoutBlock
 {
     private final ClassFile classFile;
-    private Method method;
+    private final Method method;
     private final List<Instruction> instructions;
-    private int firstIndex;
-    private int lastIndex;
-    private int firstOffset;
-    private int lastOffset;
+    private final int firstIndex;
+    private final int lastIndex;
+    private final int firstOffset;
+    private final int lastOffset;
 
     public InstructionsLayoutBlock(
         int firstLineNumber, int lastLineNumber,
@@ -46,12 +46,12 @@ public class InstructionsLayoutBlock extends LayoutBlock
             firstLineNumber, lastLineNumber,
             minimalLineCount, maximalLineCount, preferedLineCount);
         this.classFile = classFile;
-        this.setMethod(method);
+        this.method = method;
         this.instructions = instructions;
-        this.setFirstIndex(firstIndex);
-        this.setLastIndex(lastIndex);
-        this.setFirstOffset(firstOffset);
-        this.setLastOffset(lastOffset);
+        this.firstIndex = firstIndex;
+        this.lastIndex = lastIndex;
+        this.firstOffset = firstOffset;
+        this.lastOffset = lastOffset;
     }
 
 	public ClassFile getClassFile() {
@@ -62,40 +62,20 @@ public class InstructionsLayoutBlock extends LayoutBlock
 		return method;
 	}
 
-	public void setMethod(Method method) {
-		this.method = method;
-	}
-
 	public int getFirstOffset() {
 		return firstOffset;
-	}
-
-	public void setFirstOffset(int firstOffset) {
-		this.firstOffset = firstOffset;
 	}
 
 	public int getLastOffset() {
 		return lastOffset;
 	}
 
-	public void setLastOffset(int lastOffset) {
-		this.lastOffset = lastOffset;
-	}
-
 	public int getFirstIndex() {
 		return firstIndex;
 	}
 
-	public void setFirstIndex(int firstIndex) {
-		this.firstIndex = firstIndex;
-	}
-
 	public int getLastIndex() {
 		return lastIndex;
-	}
-
-	public void setLastIndex(int lastIndex) {
-		this.lastIndex = lastIndex;
 	}
 
 	public List<Instruction> getInstructions() {
