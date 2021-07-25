@@ -60,11 +60,11 @@ public class InitInstanceFieldsReconstructor
         {
             final Method method = methods[--methodIndex];
 
-            if ((method.accessFlags & (Const.ACC_SYNTHETIC|Const.ACC_BRIDGE)) != 0 ||
+            if ((method.getAccessFlags() & (Const.ACC_SYNTHETIC|Const.ACC_BRIDGE)) != 0 ||
                 method.getCode() == null ||
                 method.getFastNodes() == null ||
                 method.containsError() ||
-                method.getNameIndex() != constants.instanceConstructorIndex) {
+                method.getNameIndex() != constants.getInstanceConstructorIndex()) {
 				continue;
 			}
 
@@ -86,43 +86,43 @@ public class InitInstanceFieldsReconstructor
                 j++;
 
                 int lineNumberBefore = j > 0 ?
-                    list.get(j-1).lineNumber : Instruction.UNKNOWN_LINE_NUMBER;
+                    list.get(j-1).getLineNumber() : Instruction.UNKNOWN_LINE_NUMBER;
                 Instruction instruction = null;
 
                 // Store init values
                 while (j < length)
                 {
                     instruction = list.get(j++);
-                    if (instruction.opcode != Const.PUTFIELD) {
+                    if (instruction.getOpcode() != Const.PUTFIELD) {
 						break;
 					}
 
                     PutField putField = (PutField)instruction;
-                    ConstantFieldref cfr = constants.getConstantFieldref(putField.index);
+                    ConstantFieldref cfr = constants.getConstantFieldref(putField.getIndex());
 
                     if (cfr.getClassIndex() != classFile.getThisClassIndex() ||
-                        putField.objectref.opcode != Const.ALOAD) {
+                        putField.getObjectref().getOpcode() != Const.ALOAD) {
 						break;
 					}
 
-                    ALoad aLaod = (ALoad)putField.objectref;
-                    if (aLaod.index != 0) {
+                    ALoad aLaod = (ALoad)putField.getObjectref();
+                    if (aLaod.getIndex() != 0) {
 						break;
 					}
 
                     Instruction valueInstruction =
                         SearchInstructionByOpcodeVisitor.visit(
-                                putField.valueref, Const.ALOAD);
+                                putField.getValueref(), Const.ALOAD);
                     if (valueInstruction != null &&
-                        ((ALoad)valueInstruction).index != 0) {
+                        ((ALoad)valueInstruction).getIndex() != 0) {
 						break;
 					}
                     if (SearchInstructionByOpcodeVisitor.visit(
-                            putField.valueref, ByteCodeConstants.LOAD) != null) {
+                            putField.getValueref(), ByteCodeConstants.LOAD) != null) {
 						break;
 					}
                     if (SearchInstructionByOpcodeVisitor.visit(
-                            putField.valueref, Const.ILOAD) != null) {
+                            putField.getValueref(), Const.ILOAD) != null) {
 						break;
 					}
 
@@ -135,19 +135,19 @@ public class InitInstanceFieldsReconstructor
                     instruction != null)
                 {
                     int i = putFieldList.size();
-                    int lineNumberAfter = instruction.lineNumber;
+                    int lineNumberAfter = instruction.getLineNumber();
 
                     // Si l'instruction qui suit la serie de 'PUTFIELD' est une
                     // 'RETURN' ayant le meme numero de ligne que le dernier
                     // 'PUTFIELD', le constructeur est synthetique et ne sera
                     // pas filtre.
-                    if (instruction.opcode != Const.RETURN ||
+                    if (instruction.getOpcode() != Const.RETURN ||
                         j != length || i == 0 ||
-                        lineNumberAfter != putFieldList.get(i-1).lineNumber)
+                        lineNumberAfter != putFieldList.get(i-1).getLineNumber())
                     {
                         while (i-- > 0)
                         {
-                            int lineNumber = putFieldList.get(i).lineNumber;
+                            int lineNumber = putFieldList.get(i).getLineNumber();
 
                             if (lineNumberBefore <= lineNumber &&
                                 lineNumber <= lineNumberAfter)
@@ -171,14 +171,14 @@ public class InitInstanceFieldsReconstructor
         {
             final Method method = methods[--methodIndex];
 
-            if ((method.accessFlags &
+            if ((method.getAccessFlags() &
                     (Const.ACC_SYNTHETIC|Const.ACC_BRIDGE)) != 0) {
 				continue;
 			}
             if (method.getCode() == null) {
 				continue;
 			}
-            if (method.getNameIndex() != constants.instanceConstructorIndex) {
+            if (method.getNameIndex() != constants.getInstanceConstructorIndex()) {
 				continue;
 			}
 
@@ -208,7 +208,7 @@ public class InitInstanceFieldsReconstructor
                     Instruction initFieldInstruction = putFieldList.get(i);
                     Instruction instruction = list.get(firstPutFieldIndex+i);
 
-                    if (initFieldInstruction.lineNumber != instruction.lineNumber ||
+                    if (initFieldInstruction.getLineNumber() != instruction.getLineNumber() ||
                         !visitor.visit(initFieldInstruction, instruction))
                     {
                         while (i < putFieldListLength) {
@@ -232,7 +232,7 @@ public class InitInstanceFieldsReconstructor
             while (putFieldListIndex-- > 0)
             {
                 PutField putField = putFieldList.get(putFieldListIndex);
-                ConstantFieldref cfr = constants.getConstantFieldref(putField.index);
+                ConstantFieldref cfr = constants.getConstantFieldref(putField.getIndex());
                 ConstantNameAndType cnat =
                     constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
                 int fieldIndex;
@@ -243,13 +243,13 @@ public class InitInstanceFieldsReconstructor
 
                     if (cnat.getNameIndex() == field.getNameIndex() &&
                         cnat.getSignatureIndex() == field.getDescriptorIndex() &&
-                        (field.accessFlags & Const.ACC_STATIC) == 0)
+                        (field.getAccessFlags() & Const.ACC_STATIC) == 0)
                     {
                         // Field found
-                        Instruction valueref = putField.valueref;
+                        Instruction valueref = putField.getValueref();
                         field.setValueAndMethod(valueref, putFieldListMethod);
-                        if (valueref.opcode == ByteCodeConstants.NEWANDINITARRAY) {
-							valueref.opcode = ByteCodeConstants.INITARRAY;
+                        if (valueref.getOpcode() == ByteCodeConstants.NEWANDINITARRAY) {
+							valueref.setOpcode(ByteCodeConstants.INITARRAY);
 						}
                         break;
                     }
@@ -273,14 +273,14 @@ public class InitInstanceFieldsReconstructor
                 {
                     final Method method = methods[methodIndex];
 
-                    if ((method.accessFlags &
+                    if ((method.getAccessFlags() &
                             (Const.ACC_SYNTHETIC|Const.ACC_BRIDGE)) != 0) {
 						continue;
 					}
                     if (method.getCode() == null) {
 						continue;
 					}
-                    if (method.getNameIndex() != constants.instanceConstructorIndex) {
+                    if (method.getNameIndex() != constants.getInstanceConstructorIndex()) {
 						continue;
 					}
 
@@ -290,28 +290,28 @@ public class InitInstanceFieldsReconstructor
                     {
                         // Remove instructions
                         putFieldListIndex = 0;
-                        int putFieldIndex = putFieldList.get(putFieldListIndex).index;
+                        int putFieldIndex = putFieldList.get(putFieldListIndex).getIndex();
 
                         for (int index=0; index<list.size(); index++)
                         {
                             Instruction instruction = list.get(index);
-                            if (instruction.opcode != Const.PUTFIELD) {
+                            if (instruction.getOpcode() != Const.PUTFIELD) {
 								continue;
 							}
 
                             PutField putField = (PutField)instruction;
-                            if (putField.index != putFieldIndex) {
+                            if (putField.getIndex() != putFieldIndex) {
 								continue;
 							}
 
-                            ConstantFieldref cfr = constants.getConstantFieldref(putField.index);
+                            ConstantFieldref cfr = constants.getConstantFieldref(putField.getIndex());
                             if (cfr.getClassIndex() != classFile.getThisClassIndex() ||
-                                putField.objectref.opcode != Const.ALOAD) {
+                                putField.getObjectref().getOpcode() != Const.ALOAD) {
 								continue;
 							}
 
-                            ALoad aLoad = (ALoad)putField.objectref;
-                            if (aLoad.index != 0) {
+                            ALoad aLoad = (ALoad)putField.getObjectref();
+                            if (aLoad.getIndex() != 0) {
 								continue;
 							}
 
@@ -320,7 +320,7 @@ public class InitInstanceFieldsReconstructor
                              * If field is assigned to a constructor parameter, the instruction can only be
                              * inside the constructor.
                              */
-                            if (putField.valueref instanceof ALoad && ((ALoad)putField.valueref).index != 0) {
+                            if (putField.getValueref() instanceof ALoad && ((ALoad)putField.getValueref()).getIndex() != 0) {
 								continue;
 							}
                             
@@ -330,7 +330,7 @@ public class InitInstanceFieldsReconstructor
 								break;
 							}
                             putFieldIndex =
-                                putFieldList.get(putFieldListIndex).index;
+                                putFieldList.get(putFieldListIndex).getIndex();
 
                         }
                     }
@@ -348,22 +348,22 @@ public class InitInstanceFieldsReconstructor
         {
             Instruction instruction = list.get(i);
 
-            if (instruction.opcode != Const.INVOKESPECIAL) {
+            if (instruction.getOpcode() != Const.INVOKESPECIAL) {
 				continue;
 			}
 
             Invokespecial is = (Invokespecial)instruction;
 
-            if (is.objectref.opcode != Const.ALOAD ||
-                ((ALoad)is.objectref).index != 0) {
+            if (is.getObjectref().getOpcode() != Const.ALOAD ||
+                ((ALoad)is.getObjectref()).getIndex() != 0) {
 				continue;
 			}
 
-            ConstantMethodref cmr = constants.getConstantMethodref(is.index);
+            ConstantMethodref cmr = constants.getConstantMethodref(is.getIndex());
             ConstantNameAndType cnat =
                 constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 
-            if (cnat.getNameIndex() != constants.instanceConstructorIndex) {
+            if (cnat.getNameIndex() != constants.getInstanceConstructorIndex()) {
 				continue;
 			}
 

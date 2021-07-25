@@ -28,6 +28,6 @@ public class ImplicitConvertInstruction extends ConvertInstruction
     @Override
     public int getPriority()
     {
-        return this.value.getPriority();
+        return this.getValue().getPriority();
     }
 }

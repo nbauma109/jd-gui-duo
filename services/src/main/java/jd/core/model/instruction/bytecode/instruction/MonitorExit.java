@@ -21,13 +21,13 @@ import jd.core.model.classfile.LocalVariables;
 
 public class MonitorExit extends Instruction
 {
-    public Instruction objectref;
+    private Instruction objectref;
 
     public MonitorExit(
         int opcode, int offset, int lineNumber, Instruction objectref)
     {
         super(opcode, offset, lineNumber);
-        this.objectref = objectref;
+        this.setObjectref(objectref);
     }
 
     @Override
@@ -36,4 +36,12 @@ public class MonitorExit extends Instruction
     {
         return null;
     }
+
+	public Instruction getObjectref() {
+		return objectref;
+	}
+
+	public void setObjectref(Instruction objectref) {
+		this.objectref = objectref;
+	}
 }

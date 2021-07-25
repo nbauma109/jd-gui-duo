@@ -28,22 +28,22 @@ public class LayoutBlockComparator implements Comparator<LayoutBlock>
 {
     @Override
     public int compare(LayoutBlock lb1, LayoutBlock lb2) {
-        if (lb1.lastLineNumber == Instruction.UNKNOWN_LINE_NUMBER)
+        if (lb1.getLastLineNumber() == Instruction.UNKNOWN_LINE_NUMBER)
         {
-            if (lb2.lastLineNumber == Instruction.UNKNOWN_LINE_NUMBER)
+            if (lb2.getLastLineNumber() == Instruction.UNKNOWN_LINE_NUMBER)
             {
                 // Tri par l'index pour éviter les ecarts de tri entre la
                 // version Java et C++
-                return lb1.index - lb2.index;
+                return lb1.getIndex() - lb2.getIndex();
             }
             // lb1 > lb2
             return 1;
         }
-        if (lb2.lastLineNumber == Instruction.UNKNOWN_LINE_NUMBER)
+        if (lb2.getLastLineNumber() == Instruction.UNKNOWN_LINE_NUMBER)
         {
             // lb1 < lb2
             return -1;
         }
-        return lb1.lastLineNumber - lb2.lastLineNumber;
+        return lb1.getLastLineNumber() - lb2.getLastLineNumber();
     }
 }

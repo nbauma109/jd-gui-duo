@@ -62,7 +62,7 @@ public class GotoFactory implements InstructionFactory
         {
             Instruction previousInstruction = list.get(i);
 
-            switch (previousInstruction.opcode)
+            switch (previousInstruction.getOpcode())
             {
             case ByteCodeConstants.IF:
             case ByteCodeConstants.IFCMP:
@@ -75,7 +75,7 @@ public class GotoFactory implements InstructionFactory
                     final Instruction value0 = stack.pop();
                     TernaryOpStore tos = new TernaryOpStore(
                         ByteCodeConstants.TERNARYOPSTORE, offset-1,
-                        value0.lineNumber, value0, ternaryOp2ndValueOffset);
+                        value0.getLineNumber(), value0, ternaryOp2ndValueOffset);
 
                     list.add(tos);
                     listForAnalyze.add(tos);

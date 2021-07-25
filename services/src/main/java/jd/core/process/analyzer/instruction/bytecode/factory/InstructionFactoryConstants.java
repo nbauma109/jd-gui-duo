@@ -26,8 +26,12 @@ public class InstructionFactoryConstants
         super();
     }
 
-    public static final InstructionFactory[] FACTORIES;
+    private static final InstructionFactory[] FACTORIES;
 
+    public static InstructionFactory getInstructionFactory(int opcode) {
+    	return FACTORIES[opcode];
+    }
+    
     static
     {
         FACTORIES   = new InstructionFactory[256];

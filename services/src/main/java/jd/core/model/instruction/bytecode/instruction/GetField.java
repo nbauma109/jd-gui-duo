@@ -24,14 +24,14 @@ import jd.core.model.classfile.LocalVariables;
 
 public class GetField extends IndexInstruction
 {
-    public Instruction objectref;
+    private Instruction objectref;
 
     public GetField(
         int opcode, int offset, int lineNumber,
         int index, Instruction objectref)
     {
         super(opcode, offset, lineNumber, index);
-        this.objectref = objectref;
+        this.setObjectref(objectref);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class GetField extends IndexInstruction
 			return null;
 		}
 
-        ConstantFieldref cfr = constants.getConstantFieldref(this.index);
+        ConstantFieldref cfr = constants.getConstantFieldref(this.getIndex());
         if (cfr == null) {
 			return null;
 		}
@@ -55,4 +55,12 @@ public class GetField extends IndexInstruction
 
         return constants.getConstantUtf8(cnat.getSignatureIndex());
     }
+
+	public Instruction getObjectref() {
+		return objectref;
+	}
+
+	public void setObjectref(Instruction objectref) {
+		this.objectref = objectref;
+	}
 }

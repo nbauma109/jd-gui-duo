@@ -53,99 +53,99 @@ public class ReferenceVisitor
 
         String internalName;
 
-        switch (instruction.opcode)
+        switch (instruction.getOpcode())
         {
         case Const.ARRAYLENGTH:
             {
                 ArrayLength al = (ArrayLength)instruction;
-                visit(al.arrayref);
+                visit(al.getArrayref());
             }
             break;
         case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
-                visit(asi.valueref);
+                visit(asi.getValueref());
             }
             break;
         case ByteCodeConstants.ASSERT:
             {
                 AssertInstruction ai = (AssertInstruction)instruction;
-                visit(ai.test);
-                visit(ai.msg);
+                visit(ai.getTest());
+                visit(ai.getMsg());
             }
             break;
         case Const.ATHROW:
             {
                 AThrow aThrow = (AThrow)instruction;
-                visit(aThrow.value);
+                visit(aThrow.getValue());
             }
             break;
         case ByteCodeConstants.UNARYOP:
             {
                 UnaryOperatorInstruction uoi = (UnaryOperatorInstruction)instruction;
-                visit(uoi.value);
+                visit(uoi.getValue());
             }
             break;
         case ByteCodeConstants.BINARYOP:
         case ByteCodeConstants.ASSIGNMENT:
             {
                 BinaryOperatorInstruction boi = (BinaryOperatorInstruction)instruction;
-                visit(boi.value1);
-                visit(boi.value2);
+                visit(boi.getValue1());
+                visit(boi.getValue2());
             }
             break;
         case Const.CHECKCAST:
             {
                 CheckCast checkCast = (CheckCast)instruction;
-                visitCheckCastAndMultiANewArray(checkCast.index);
-                visit(checkCast.objectref);
+                visitCheckCastAndMultiANewArray(checkCast.getIndex());
+                visit(checkCast.getObjectref());
             }
             break;
         case ByteCodeConstants.STORE:
         case Const.ISTORE:
             {
                 StoreInstruction storeInstruction = (StoreInstruction)instruction;
-                visit(storeInstruction.valueref);
+                visit(storeInstruction.getValueref());
             }
             break;
         case Const.ASTORE:
             {
                 StoreInstruction storeInstruction = (StoreInstruction)instruction;
-                visit(storeInstruction.valueref);
+                visit(storeInstruction.getValueref());
             }
             break;
         case ByteCodeConstants.DUPSTORE:
             {
                 DupStore dupStore = (DupStore)instruction;
-                visit(dupStore.objectref);
+                visit(dupStore.getObjectref());
             }
             break;
         case ByteCodeConstants.CONVERT:
         case ByteCodeConstants.IMPLICITCONVERT:
             {
                 ConvertInstruction ci = (ConvertInstruction)instruction;
-                visit(ci.value);
+                visit(ci.getValue());
             }
             break;
         case ByteCodeConstants.IFCMP:
             {
                 IfCmp ifCmp = (IfCmp)instruction;
-                visit(ifCmp.value1);
-                visit(ifCmp.value2);
+                visit(ifCmp.getValue1());
+                visit(ifCmp.getValue2());
             }
             break;
         case ByteCodeConstants.IF:
         case ByteCodeConstants.IFXNULL:
             {
                 IfInstruction iff = (IfInstruction)instruction;
-                visit(iff.value);
+                visit(iff.getValue());
             }
             break;
         case ByteCodeConstants.COMPLEXIF:
             {
                 List<Instruction> branchList =
-                    ((ComplexConditionalBranchInstruction)instruction).instructions;
+                    ((ComplexConditionalBranchInstruction)instruction).getInstructions();
                 for (int i=branchList.size()-1; i>=0; --i) {
 					visit(branchList.get(i));
 				}
@@ -154,8 +154,8 @@ public class ReferenceVisitor
         case Const.INSTANCEOF:
             {
                 InstanceOf instanceOf = (InstanceOf)instruction;
-                visitCheckCastAndMultiANewArray(instanceOf.index);
-                visit(instanceOf.objectref);
+                visitCheckCastAndMultiANewArray(instanceOf.getIndex());
+                visit(instanceOf.getObjectref());
             }
             break;
         case Const.INVOKEINTERFACE:
@@ -163,41 +163,41 @@ public class ReferenceVisitor
         case Const.INVOKEVIRTUAL:
             InvokeNoStaticInstruction insi =
                 (InvokeNoStaticInstruction)instruction;
-                visit(insi.objectref);
+                visit(insi.getObjectref());
                 // intended fall through
         case Const.INVOKESTATIC:
         case ByteCodeConstants.INVOKENEW:
             {
                 InvokeInstruction ii = (InvokeInstruction)instruction;
-                ConstantMethodref cmr = constants.getConstantMethodref(ii.index);
+                ConstantMethodref cmr = constants.getConstantMethodref(ii.getIndex());
                 internalName = constants.getConstantClassName(cmr.getClassIndex());
                 addReference(internalName);
-                visit(ii.args);
+                visit(ii.getArgs());
             }
             break;
         case Const.LOOKUPSWITCH:
             {
                 LookupSwitch ls = (LookupSwitch)instruction;
-                visit(ls.key);
+                visit(ls.getKey());
             }
             break;
         case Const.MONITORENTER:
             {
                 MonitorEnter monitorEnter = (MonitorEnter)instruction;
-                visit(monitorEnter.objectref);
+                visit(monitorEnter.getObjectref());
             }
             break;
         case Const.MONITOREXIT:
             {
                 MonitorExit monitorExit = (MonitorExit)instruction;
-                visit(monitorExit.objectref);
+                visit(monitorExit.getObjectref());
             }
             break;
         case Const.MULTIANEWARRAY:
             {
                 MultiANewArray multiANewArray = (MultiANewArray)instruction;
-                visitCheckCastAndMultiANewArray(multiANewArray.index);
-                Instruction[] dimensions = multiANewArray.dimensions;
+                visitCheckCastAndMultiANewArray(multiANewArray.getIndex());
+                Instruction[] dimensions = multiANewArray.getDimensions();
                 for (int i=dimensions.length-1; i>=0; --i) {
 					visit(dimensions[i]);
 				}
@@ -206,77 +206,77 @@ public class ReferenceVisitor
         case Const.NEWARRAY:
             {
                 NewArray newArray = (NewArray)instruction;
-                visit(newArray.dimension);
+                visit(newArray.getDimension());
             }
             break;
         case Const.NEW:
             {
                 New aNew = (New)instruction;
-                addReference(this.constants.getConstantClassName(aNew.index));
+                addReference(this.constants.getConstantClassName(aNew.getIndex()));
             }
             break;
         case Const.ANEWARRAY:
             {
                 ANewArray aNewArray = (ANewArray)instruction;
                 addReference(
-                    this.constants.getConstantClassName(aNewArray.index));
-                visit(aNewArray.dimension);
+                    this.constants.getConstantClassName(aNewArray.getIndex()));
+                visit(aNewArray.getDimension());
             }
             break;
         case Const.POP:
             {
                 Pop pop = (Pop)instruction;
-                visit(pop.objectref);
+                visit(pop.getObjectref());
             }
             break;
         case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
-                visit(putField.objectref);
-                visit(putField.valueref);
+                visit(putField.getObjectref());
+                visit(putField.getValueref());
             }
             break;
         case Const.PUTSTATIC:
             {
                 PutStatic putStatic = (PutStatic)instruction;
-                visit(putStatic.valueref);
+                visit(putStatic.getValueref());
             }
             break;
         case ByteCodeConstants.XRETURN:
             {
                 ReturnInstruction ri = (ReturnInstruction)instruction;
-                visit(ri.valueref);
+                visit(ri.getValueref());
             }
             break;
         case Const.TABLESWITCH:
             {
                 TableSwitch ts = (TableSwitch)instruction;
-                visit(ts.key);
+                visit(ts.getKey());
             }
             break;
         case ByteCodeConstants.TERNARYOPSTORE:
             {
                 TernaryOpStore tos = (TernaryOpStore)instruction;
-                visit(tos.objectref);
+                visit(tos.getObjectref());
             }
             break;
         case ByteCodeConstants.TERNARYOP:
             {
                 TernaryOperator to = (TernaryOperator)instruction;
-                visit(to.test);
-                visit(to.value1);
-                visit(to.value2);
+                visit(to.getTest());
+                visit(to.getValue1());
+                visit(to.getValue2());
             }
             break;
         case Const.GETFIELD:
             GetField getField = (GetField)instruction;
-            visit(getField.objectref);
+            visit(getField.getObjectref());
             // intended fall through
         case Const.GETSTATIC:
         case ByteCodeConstants.OUTERTHIS:
             {
                 IndexInstruction indexInstruction = (IndexInstruction)instruction;
-                ConstantFieldref cfr = constants.getConstantFieldref(indexInstruction.index);
+                ConstantFieldref cfr = constants.getConstantFieldref(indexInstruction.getIndex());
                 internalName = constants.getConstantClassName(cfr.getClassIndex());
                 addReference(internalName);
             }
@@ -285,44 +285,44 @@ public class ReferenceVisitor
         case ByteCodeConstants.NEWANDINITARRAY:
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
-                visit(iai.newArray);
-                for (int index=iai.values.size()-1; index>=0; --index) {
-					visit(iai.values.get(index));
+                visit(iai.getNewArray());
+                for (int index=iai.getValues().size()-1; index>=0; --index) {
+					visit(iai.getValues().get(index));
 				}
             }
             break;
         case FastConstants.FOR:
             FastFor ff = (FastFor)instruction;
-            visit(ff.init);
-            visit(ff.inc);
+            visit(ff.getInit());
+            visit(ff.getInc());
             // intended fall through
         case FastConstants.WHILE:
         case FastConstants.DO_WHILE:
         case FastConstants.IF_SIMPLE:
             FastTestList ftl = (FastTestList)instruction;
-            visit(ftl.test);
+            visit(ftl.getTest());
             // intended fall through
         case FastConstants.INFINITE_LOOP:
             {
                 List<Instruction> instructions =
-                        ((FastList)instruction).instructions;
+                        ((FastList)instruction).getInstructions();
                 visit(instructions);
             }
             break;
         case FastConstants.FOREACH:
             {
                 FastForEach ffe = (FastForEach)instruction;
-                visit(ffe.variable);
-                visit(ffe.values);
-                visit(ffe.instructions);
+                visit(ffe.getVariable());
+                visit(ffe.getValues());
+                visit(ffe.getInstructions());
             }
             break;
         case FastConstants.IF_ELSE:
             {
                 FastTest2Lists ft2l = (FastTest2Lists)instruction;
-                visit(ft2l.test);
-                visit(ft2l.instructions);
-                visit(ft2l.instructions2);
+                visit(ft2l.getTest());
+                visit(ft2l.getInstructions());
+                visit(ft2l.getInstructions2());
             }
             break;
         case FastConstants.IF_CONTINUE:
@@ -333,7 +333,7 @@ public class ReferenceVisitor
         case FastConstants.GOTO_LABELED_BREAK:
             {
                 FastInstruction fi = (FastInstruction)instruction;
-                visit(fi.instruction);
+                visit(fi.getInstruction());
             }
             break;
         case FastConstants.SWITCH:
@@ -341,8 +341,8 @@ public class ReferenceVisitor
         case FastConstants.SWITCH_STRING:
             {
                 FastSwitch fs = (FastSwitch)instruction;
-                visit(fs.test);
-                Pair[] pairs = fs.pairs;
+                visit(fs.getTest());
+                Pair[] pairs = fs.getPairs();
                 for (int i=pairs.length-1; i>=0; --i)
                 {
                     List<Instruction> instructions = pairs[i].getInstructions();
@@ -353,37 +353,37 @@ public class ReferenceVisitor
         case FastConstants.DECLARE:
             {
                 FastDeclaration fd = (FastDeclaration)instruction;
-                visit(fd.instruction);
+                visit(fd.getInstruction());
             }
             break;
         case FastConstants.TRY:
             {
                 FastTry ft = (FastTry)instruction;
-                visit(ft.instructions);
-                List<FastCatch> catches = ft.catches;
+                visit(ft.getInstructions());
+                List<FastCatch> catches = ft.getCatches();
                 for (int i=catches.size()-1; i>=0; --i) {
-					visit(catches.get(i).instructions);
+					visit(catches.get(i).getInstructions());
 				}
-                visit(ft.finallyInstructions);
+                visit(ft.getFinallyInstructions());
             }
             break;
         case FastConstants.SYNCHRONIZED:
             {
                 FastSynchronized fsy = (FastSynchronized)instruction;
-                visit(fsy.monitor);
-                visit(fsy.instructions);
+                visit(fsy.getMonitor());
+                visit(fsy.getInstructions());
             }
             break;
         case FastConstants.LABEL:
             {
                 FastLabel fla = (FastLabel)instruction;
-                visit(fla.instruction);
+                visit(fla.getInstruction());
             }
             break;
         case Const.LDC:
             {
                 IndexInstruction indexInstruction = (IndexInstruction)instruction;
-                Constant cst = constants.get(indexInstruction.index);
+                Constant cst = constants.get(indexInstruction.getIndex());
                 if (cst instanceof ConstantClass cc)
                 {
                     internalName = constants.getConstantUtf8(cc.getNameIndex());
@@ -419,7 +419,7 @@ public class ReferenceVisitor
             System.err.println(
                     "Can not count reference in " +
                     instruction.getClass().getName() +
-                    ", opcode=" + instruction.opcode);
+                    ", opcode=" + instruction.getOpcode());
         }
     }
 

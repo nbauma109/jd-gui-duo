@@ -23,15 +23,15 @@ import jd.core.model.classfile.LocalVariables;
 
 public class InitArrayInstruction extends Instruction
 {
-    public Instruction newArray;
-    public final List<Instruction> values;
+    private Instruction newArray;
+    private final List<Instruction> values;
 
     public InitArrayInstruction(
             int opcode, int offset, int lineNumber,
             Instruction newArray, List<Instruction> values)
     {
         super(opcode, offset, lineNumber);
-        this.newArray = newArray;
+        this.setNewArray(newArray);
         this.values = values;
     }
 
@@ -39,6 +39,18 @@ public class InitArrayInstruction extends Instruction
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        return this.newArray.getReturnedSignature(constants, localVariables);
+        return this.getNewArray().getReturnedSignature(constants, localVariables);
     }
+
+	public List<Instruction> getValues() {
+		return values;
+	}
+
+	public Instruction getNewArray() {
+		return newArray;
+	}
+
+	public void setNewArray(Instruction newArray) {
+		this.newArray = newArray;
+	}
 }

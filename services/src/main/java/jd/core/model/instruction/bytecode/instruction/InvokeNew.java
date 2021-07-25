@@ -22,19 +22,27 @@ import jd.core.model.instruction.fast.FastConstants;
 
 public class InvokeNew extends InvokeInstruction
 {
-    public int enumValueFieldRefIndex;
+    private int enumValueFieldRefIndex;
 
     public InvokeNew(
         int opcode, int offset, int lineNumber,
         int index, List<Instruction> args)
     {
         super(opcode, offset, lineNumber, index, args);
-        this.enumValueFieldRefIndex = 0;
+        this.setEnumValueFieldRefIndex(0);
     }
 
     public void transformToEnumValue(GetStatic getStatic)
     {
-        this.opcode = FastConstants.ENUMVALUE;
-        this.enumValueFieldRefIndex = getStatic.index;
+        this.setOpcode(FastConstants.ENUMVALUE);
+        this.setEnumValueFieldRefIndex(getStatic.getIndex());
     }
+
+	public int getEnumValueFieldRefIndex() {
+		return enumValueFieldRefIndex;
+	}
+
+	public void setEnumValueFieldRefIndex(int enumValueFieldRefIndex) {
+		this.enumValueFieldRefIndex = enumValueFieldRefIndex;
+	}
 }

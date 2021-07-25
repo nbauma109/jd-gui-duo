@@ -21,13 +21,13 @@ import jd.core.model.classfile.LocalVariables;
 
 public class ConditionalBranchInstruction extends BranchInstruction
 {
-    public int cmp;
+    private int cmp;
 
     public ConditionalBranchInstruction(
         int opcode, int offset, int lineNumber, int cmp, int branch)
     {
         super(opcode, offset, lineNumber, branch);
-        this.cmp = cmp;
+        this.setCmp(cmp);
     }
 
     @Override
@@ -36,4 +36,12 @@ public class ConditionalBranchInstruction extends BranchInstruction
     {
         return "Z";
     }
+
+	public int getCmp() {
+		return cmp;
+	}
+
+	public void setCmp(int cmp) {
+		this.cmp = cmp;
+	}
 }

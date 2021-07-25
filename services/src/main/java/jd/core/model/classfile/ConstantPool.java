@@ -33,41 +33,41 @@ public class ConstantPool
     private StringToIndexMap constantUtf8ToIndex;
     private IndexToIndexMap constantClassToIndex;
 
-    public final int instanceConstructorIndex;
-    public final int classConstructorIndex;
-    public final int internalDeprecatedSignatureIndex;
-    public final int toStringIndex;
-    public final int valueOfIndex;
-    public final int appendIndex;
+    private final int instanceConstructorIndex;
+    private final int classConstructorIndex;
+    private final int internalDeprecatedSignatureIndex;
+    private final int toStringIndex;
+    private final int valueOfIndex;
+    private final int appendIndex;
 
-    public final int objectClassIndex;
+    private final int objectClassIndex;
 
-    public final int objectClassNameIndex;
-    public final int stringClassNameIndex;
-    public final int stringBufferClassNameIndex;
-    public final int stringBuilderClassNameIndex;
+    private final int objectClassNameIndex;
+    private final int stringClassNameIndex;
+    private final int stringBufferClassNameIndex;
+    private final int stringBuilderClassNameIndex;
 
-    public final int objectSignatureIndex;
+    private final int objectSignatureIndex;
 
-    public final int thisLocalVariableNameIndex;
+    private final int thisLocalVariableNameIndex;
 
-    public final int annotationDefaultAttributeNameIndex;
-    public final int codeAttributeNameIndex;
-    public final int constantValueAttributeNameIndex;
-    public final int deprecatedAttributeNameIndex;
-    public final int enclosingMethodAttributeNameIndex;
-    public final int exceptionsAttributeNameIndex;
-    public final int innerClassesAttributeNameIndex;
-    public final int lineNumberTableAttributeNameIndex;
-    public final int localVariableTableAttributeNameIndex;
-    public final int localVariableTypeTableAttributeNameIndex;
-    public final int runtimeInvisibleAnnotationsAttributeNameIndex;
-    public final int runtimeVisibleAnnotationsAttributeNameIndex;
-    public final int runtimeInvisibleParameterAnnotationsAttributeNameIndex;
-    public final int runtimeVisibleParameterAnnotationsAttributeNameIndex;
-    public final int signatureAttributeNameIndex;
-    public final int sourceFileAttributeNameIndex;
-    public final int syntheticAttributeNameIndex;
+    private final int annotationDefaultAttributeNameIndex;
+    private final int codeAttributeNameIndex;
+    private final int constantValueAttributeNameIndex;
+    private final int deprecatedAttributeNameIndex;
+    private final int enclosingMethodAttributeNameIndex;
+    private final int exceptionsAttributeNameIndex;
+    private final int innerClassesAttributeNameIndex;
+    private final int lineNumberTableAttributeNameIndex;
+    private final int localVariableTableAttributeNameIndex;
+    private final int localVariableTypeTableAttributeNameIndex;
+    private final int runtimeInvisibleAnnotationsAttributeNameIndex;
+    private final int runtimeVisibleAnnotationsAttributeNameIndex;
+    private final int runtimeInvisibleParameterAnnotationsAttributeNameIndex;
+    private final int runtimeVisibleParameterAnnotationsAttributeNameIndex;
+    private final int signatureAttributeNameIndex;
+    private final int sourceFileAttributeNameIndex;
+    private final int syntheticAttributeNameIndex;
 
     public ConstantPool(Constant[] constants)
     {
@@ -121,7 +121,7 @@ public class ConstantPool
         this.objectClassNameIndex =
             addConstantUtf8(StringConstants.JAVA_LANG_OBJECT);
         this.objectClassIndex =
-            addConstantClass(this.objectClassNameIndex);
+            addConstantClass(this.getObjectClassNameIndex());
         this.objectSignatureIndex =
             addConstantUtf8(StringConstants.INTERNAL_OBJECT_SIGNATURE);
 
@@ -383,4 +383,124 @@ public class ConstantPool
     {
         return (ConstantInteger)this.listOfConstants.get(index);
     }
+
+	public int getAnnotationDefaultAttributeNameIndex() {
+		return annotationDefaultAttributeNameIndex;
+	}
+
+	public int getCodeAttributeNameIndex() {
+		return codeAttributeNameIndex;
+	}
+
+	public int getConstantValueAttributeNameIndex() {
+		return constantValueAttributeNameIndex;
+	}
+
+	public int getAppendIndex() {
+		return appendIndex;
+	}
+
+	public int getClassConstructorIndex() {
+		return classConstructorIndex;
+	}
+
+	public int getDeprecatedAttributeNameIndex() {
+		return deprecatedAttributeNameIndex;
+	}
+
+	public int getEnclosingMethodAttributeNameIndex() {
+		return enclosingMethodAttributeNameIndex;
+	}
+
+	public int getExceptionsAttributeNameIndex() {
+		return exceptionsAttributeNameIndex;
+	}
+
+	public int getInnerClassesAttributeNameIndex() {
+		return innerClassesAttributeNameIndex;
+	}
+
+	public int getLineNumberTableAttributeNameIndex() {
+		return lineNumberTableAttributeNameIndex;
+	}
+
+	public int getLocalVariableTableAttributeNameIndex() {
+		return localVariableTableAttributeNameIndex;
+	}
+
+	public int getLocalVariableTypeTableAttributeNameIndex() {
+		return localVariableTypeTableAttributeNameIndex;
+	}
+
+	public int getInstanceConstructorIndex() {
+		return instanceConstructorIndex;
+	}
+
+	public int getInternalDeprecatedSignatureIndex() {
+		return internalDeprecatedSignatureIndex;
+	}
+
+	public int getObjectClassIndex() {
+		return objectClassIndex;
+	}
+
+	public int getObjectClassNameIndex() {
+		return objectClassNameIndex;
+	}
+
+	public int getObjectSignatureIndex() {
+		return objectSignatureIndex;
+	}
+
+	public int getRuntimeInvisibleAnnotationsAttributeNameIndex() {
+		return runtimeInvisibleAnnotationsAttributeNameIndex;
+	}
+
+	public int getRuntimeVisibleAnnotationsAttributeNameIndex() {
+		return runtimeVisibleAnnotationsAttributeNameIndex;
+	}
+
+	public int getRuntimeInvisibleParameterAnnotationsAttributeNameIndex() {
+		return runtimeInvisibleParameterAnnotationsAttributeNameIndex;
+	}
+
+	public int getRuntimeVisibleParameterAnnotationsAttributeNameIndex() {
+		return runtimeVisibleParameterAnnotationsAttributeNameIndex;
+	}
+
+	public int getSignatureAttributeNameIndex() {
+		return signatureAttributeNameIndex;
+	}
+
+	public int getSourceFileAttributeNameIndex() {
+		return sourceFileAttributeNameIndex;
+	}
+
+	public int getSyntheticAttributeNameIndex() {
+		return syntheticAttributeNameIndex;
+	}
+
+	public int getStringBufferClassNameIndex() {
+		return stringBufferClassNameIndex;
+	}
+
+	public int getStringBuilderClassNameIndex() {
+		return stringBuilderClassNameIndex;
+	}
+
+	public int getToStringIndex() {
+		return toStringIndex;
+	}
+
+	public int getStringClassNameIndex() {
+		return stringClassNameIndex;
+	}
+
+	public int getValueOfIndex() {
+		return valueOfIndex;
+	}
+
+	public int getThisLocalVariableNameIndex() {
+		return thisLocalVariableNameIndex;
+	}
 }

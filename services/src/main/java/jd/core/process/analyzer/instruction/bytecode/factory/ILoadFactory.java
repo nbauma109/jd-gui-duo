@@ -58,9 +58,9 @@ public class ILoadFactory implements InstructionFactory
         {
             Instruction last = stack.peek();
 
-            if (last.opcode == Const.IINC)
+            if (last.getOpcode() == Const.IINC)
             {
-                if (((IInc)last).index == index)
+                if (((IInc)last).getIndex() == index)
                 {
                     listForAnalyze.add(instruction);
 
@@ -68,8 +68,8 @@ public class ILoadFactory implements InstructionFactory
                     IInc iinc = (IInc)last;
                     stack.pop();
                     instruction = new IncInstruction(
-                            ByteCodeConstants.PREINC, iinc.offset,
-                            iinc.lineNumber, instruction, iinc.count);
+                            ByteCodeConstants.PREINC, iinc.getOffset(),
+                            iinc.getLineNumber(), instruction, iinc.getCount());
                     stack.push(instruction);
                 }
                 else

@@ -33,83 +33,83 @@ public class MaxLineNumberVisitor
 
     public static int visit(Instruction instruction)
     {
-        int maxLineNumber = instruction.lineNumber;
+        int maxLineNumber = instruction.getLineNumber();
 
-        switch (instruction.opcode)
+        switch (instruction.getOpcode())
         {
         case ByteCodeConstants.ARRAYLOAD:
-            maxLineNumber = visit(((ArrayLoadInstruction)instruction).indexref);
+            maxLineNumber = visit(((ArrayLoadInstruction)instruction).getIndexref());
             break;
         case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
-            maxLineNumber = visit(((ArrayStoreInstruction)instruction).valueref);
+            maxLineNumber = visit(((ArrayStoreInstruction)instruction).getValueref());
             break;
         case ByteCodeConstants.ASSERT:
             {
                 AssertInstruction ai = (AssertInstruction)instruction;
-                maxLineNumber = visit((ai.msg == null) ? ai.test : ai.msg);
+                maxLineNumber = visit((ai.getMsg() == null) ? ai.getTest() : ai.getMsg());
             }
             break;
         case Const.ATHROW:
-            maxLineNumber = visit(((AThrow)instruction).value);
+            maxLineNumber = visit(((AThrow)instruction).getValue());
             break;
         case ByteCodeConstants.UNARYOP:
-            maxLineNumber = visit(((UnaryOperatorInstruction)instruction).value);
+            maxLineNumber = visit(((UnaryOperatorInstruction)instruction).getValue());
             break;
         case ByteCodeConstants.BINARYOP:
         case ByteCodeConstants.ASSIGNMENT:
-            maxLineNumber = visit(((BinaryOperatorInstruction)instruction).value2);
+            maxLineNumber = visit(((BinaryOperatorInstruction)instruction).getValue2());
             break;
         case Const.CHECKCAST:
-            maxLineNumber = visit(((CheckCast)instruction).objectref);
+            maxLineNumber = visit(((CheckCast)instruction).getObjectref());
             break;
         case ByteCodeConstants.STORE:
         case Const.ASTORE:
         case Const.ISTORE:
-            maxLineNumber = visit(((StoreInstruction)instruction).valueref);
+            maxLineNumber = visit(((StoreInstruction)instruction).getValueref());
             break;
         case ByteCodeConstants.DUPSTORE:
-            maxLineNumber = visit(((DupStore)instruction).objectref);
+            maxLineNumber = visit(((DupStore)instruction).getObjectref());
             break;
         case ByteCodeConstants.CONVERT:
         case ByteCodeConstants.IMPLICITCONVERT:
-            maxLineNumber = visit(((ConvertInstruction)instruction).value);
+            maxLineNumber = visit(((ConvertInstruction)instruction).getValue());
             break;
         case FastConstants.DECLARE:
             {
                 FastDeclaration fd = (FastDeclaration)instruction;
-                if (fd.instruction != null)
-                    maxLineNumber = visit(fd.instruction);
+                if (fd.getInstruction() != null)
+                    maxLineNumber = visit(fd.getInstruction());
             }
             break;
         case ByteCodeConstants.IFCMP:
-            maxLineNumber = visit(((IfCmp)instruction).value2);
+            maxLineNumber = visit(((IfCmp)instruction).getValue2());
             break;
         case ByteCodeConstants.IF:
         case ByteCodeConstants.IFXNULL:
-            maxLineNumber = visit(((IfInstruction)instruction).value);
+            maxLineNumber = visit(((IfInstruction)instruction).getValue());
             break;
         case ByteCodeConstants.COMPLEXIF:
             {
                 List<Instruction> branchList =
-                    ((ComplexConditionalBranchInstruction)instruction).instructions;
+                    ((ComplexConditionalBranchInstruction)instruction).getInstructions();
                 maxLineNumber = visit(branchList.get(branchList.size()-1));
             }
             break;
         case Const.INSTANCEOF:
-            maxLineNumber = visit(((InstanceOf)instruction).objectref);
+            maxLineNumber = visit(((InstanceOf)instruction).getObjectref());
             break;
         case Const.INVOKEINTERFACE:
         case Const.INVOKESPECIAL:
         case Const.INVOKEVIRTUAL:
         case Const.INVOKESTATIC:
             {
-                List<Instruction> list = ((InvokeInstruction)instruction).args;
+                List<Instruction> list = ((InvokeInstruction)instruction).getArgs();
                 int length = list.size();
 
                 if (length == 0)
                 {
-                    maxLineNumber = instruction.lineNumber;
+                    maxLineNumber = instruction.getLineNumber();
                 }
                 else
                 {
@@ -129,12 +129,12 @@ public class MaxLineNumberVisitor
         case ByteCodeConstants.INVOKENEW:
         case FastConstants.ENUMVALUE:
             {
-                List<Instruction> list = ((InvokeNew)instruction).args;
+                List<Instruction> list = ((InvokeNew)instruction).getArgs();
                 int length = list.size();
 
                 if (length == 0)
                 {
-                    maxLineNumber = instruction.lineNumber;
+                    maxLineNumber = instruction.getLineNumber();
                 }
                 else
                 {
@@ -152,71 +152,71 @@ public class MaxLineNumberVisitor
             }
             break;
         case Const.LOOKUPSWITCH:
-            maxLineNumber = visit(((LookupSwitch)instruction).key);
+            maxLineNumber = visit(((LookupSwitch)instruction).getKey());
             break;
         case Const.MONITORENTER:
-            maxLineNumber = visit(((MonitorEnter)instruction).objectref);
+            maxLineNumber = visit(((MonitorEnter)instruction).getObjectref());
             break;
         case Const.MONITOREXIT:
-            maxLineNumber = visit(((MonitorExit)instruction).objectref);
+            maxLineNumber = visit(((MonitorExit)instruction).getObjectref());
             break;
         case Const.MULTIANEWARRAY:
             {
-                Instruction[] dimensions = ((MultiANewArray)instruction).dimensions;
+                Instruction[] dimensions = ((MultiANewArray)instruction).getDimensions();
                 int length = dimensions.length;
                 if (length > 0)
                     maxLineNumber = visit(dimensions[length-1]);
             }
             break;
         case Const.NEWARRAY:
-            maxLineNumber = visit(((NewArray)instruction).dimension);
+            maxLineNumber = visit(((NewArray)instruction).getDimension());
             break;
         case Const.ANEWARRAY:
-            maxLineNumber = visit(((ANewArray)instruction).dimension);
+            maxLineNumber = visit(((ANewArray)instruction).getDimension());
             break;
         case Const.POP:
-            maxLineNumber = visit(((Pop)instruction).objectref);
+            maxLineNumber = visit(((Pop)instruction).getObjectref());
             break;
         case Const.PUTFIELD:
-            maxLineNumber = visit(((PutField)instruction).valueref);
+            maxLineNumber = visit(((PutField)instruction).getValueref());
             break;
         case Const.PUTSTATIC:
-            maxLineNumber = visit(((PutStatic)instruction).valueref);
+            maxLineNumber = visit(((PutStatic)instruction).getValueref());
             break;
         case ByteCodeConstants.XRETURN:
-            maxLineNumber = visit(((ReturnInstruction)instruction).valueref);
+            maxLineNumber = visit(((ReturnInstruction)instruction).getValueref());
             break;
         case Const.TABLESWITCH:
-            maxLineNumber = visit(((TableSwitch)instruction).key);
+            maxLineNumber = visit(((TableSwitch)instruction).getKey());
             break;
         case ByteCodeConstants.TERNARYOPSTORE:
-            maxLineNumber = visit(((TernaryOpStore)instruction).objectref);
+            maxLineNumber = visit(((TernaryOpStore)instruction).getObjectref());
             break;
         case ByteCodeConstants.PREINC:
         case ByteCodeConstants.POSTINC:
             IncInstruction ii = (IncInstruction)instruction;
-            maxLineNumber = visit(ii.value);
+            maxLineNumber = visit(ii.getValue());
             break;
         case ByteCodeConstants.INITARRAY:
         case ByteCodeConstants.NEWANDINITARRAY:
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
-                int length = iai.values.size();
+                int length = iai.getValues().size();
                 if (length > 0)
-                    maxLineNumber = visit(iai.values.get(length-1));
+                    maxLineNumber = visit(iai.getValues().get(length-1));
             }
             break;
         case ByteCodeConstants.TERNARYOP:
-            maxLineNumber = visit(((TernaryOperator)instruction).value2);
+            maxLineNumber = visit(((TernaryOperator)instruction).getValue2());
             break;
         }
 
         // Autre curieux bug : les constantes finales passees en parametres
         // peuvent avoir un numero de ligne plus petit que le numero de ligne
         // de l'instruction INVOKE*
-        if (maxLineNumber < instruction.lineNumber)
+        if (maxLineNumber < instruction.getLineNumber())
         {
-            return instruction.lineNumber;
+            return instruction.getLineNumber();
         }
         return maxLineNumber;
     }

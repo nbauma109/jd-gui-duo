@@ -22,11 +22,11 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class InstructionLayoutBlock extends LayoutBlock
 {
-    public final ClassFile classFile;
-    public Method method;
-    public Instruction instruction;
-    public int firstOffset;
-    public int lastOffset;
+    private final ClassFile classFile;
+    private Method method;
+    private Instruction instruction;
+    private int firstOffset;
+    private int lastOffset;
 
     public InstructionLayoutBlock(
         byte tag, int firstLineNumber, int lastLineNumber,
@@ -40,9 +40,45 @@ public class InstructionLayoutBlock extends LayoutBlock
             tag, firstLineNumber, lastLineNumber,
             minimalLineCount, maximalLineCount, preferedLineCount);
         this.classFile = classFile;
-        this.method = method;
-        this.instruction = instruction;
-        this.firstOffset = firstOffset;
-        this.lastOffset = lastOffset;
+        this.setMethod(method);
+        this.setInstruction(instruction);
+        this.setFirstOffset(firstOffset);
+        this.setLastOffset(lastOffset);
     }
+
+	public ClassFile getClassFile() {
+		return classFile;
+	}
+
+	public Method getMethod() {
+		return method;
+	}
+
+	public void setMethod(Method method) {
+		this.method = method;
+	}
+
+	public int getFirstOffset() {
+		return firstOffset;
+	}
+
+	public void setFirstOffset(int firstOffset) {
+		this.firstOffset = firstOffset;
+	}
+
+	public int getLastOffset() {
+		return lastOffset;
+	}
+
+	public void setLastOffset(int lastOffset) {
+		this.lastOffset = lastOffset;
+	}
+
+	public Instruction getInstruction() {
+		return instruction;
+	}
+
+	public void setInstruction(Instruction instruction) {
+		this.instruction = instruction;
+	}
 }

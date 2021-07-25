@@ -25,8 +25,8 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
  */
 public class FastTry extends FastList
 {
-    public final List<FastCatch>   catches;
-    public final List<Instruction> finallyInstructions;
+    private final List<FastCatch>   catches;
+    private final List<Instruction> finallyInstructions;
 
     public FastTry(
             int opcode, int offset, int lineNumber, int branch,
@@ -38,13 +38,21 @@ public class FastTry extends FastList
         this.finallyInstructions = finallyInstructions;
     }
 
-    public static class FastCatch
+    public List<FastCatch> getCatches() {
+		return catches;
+	}
+
+	public List<Instruction> getFinallyInstructions() {
+		return finallyInstructions;
+	}
+
+	public static class FastCatch
     {
-        public final int exceptionOffset;
-        public final int exceptionTypeIndex;
-        public final int[] otherExceptionTypeIndexes;
-        public final int localVarIndex;
-        public final List<Instruction> instructions;
+        private final int exceptionOffset;
+        private final int exceptionTypeIndex;
+        private final int[] otherExceptionTypeIndexes;
+        private final int localVarIndex;
+        private final List<Instruction> instructions;
 
         public FastCatch(int exceptionOffset, int exceptionTypeIndex,
                 int[] otherExceptionTypeIndexes, int localVarIndex,
@@ -56,5 +64,25 @@ public class FastTry extends FastList
             this.localVarIndex = localVarIndex;
             this.instructions = instructions;
         }
+
+		public int getExceptionTypeIndex() {
+			return exceptionTypeIndex;
+		}
+
+		public int[] getOtherExceptionTypeIndexes() {
+			return otherExceptionTypeIndexes;
+		}
+
+		public List<Instruction> getInstructions() {
+			return instructions;
+		}
+
+		public int getLocalVarIndex() {
+			return localVarIndex;
+		}
+
+		public int getExceptionOffset() {
+			return exceptionOffset;
+		}
     }
 }

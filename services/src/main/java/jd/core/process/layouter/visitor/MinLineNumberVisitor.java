@@ -29,57 +29,57 @@ public class MinLineNumberVisitor
 
     public static int visit(Instruction instruction)
     {
-        switch (instruction.opcode)
+        switch (instruction.getOpcode())
         {
         case ByteCodeConstants.ARRAYLOAD:
-            return visit(((ArrayLoadInstruction)instruction).arrayref);
+            return visit(((ArrayLoadInstruction)instruction).getArrayref());
         case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
-            return visit(((ArrayStoreInstruction)instruction).arrayref);
+            return visit(((ArrayStoreInstruction)instruction).getArrayref());
         case ByteCodeConstants.ASSIGNMENT:
-            return visit(((AssignmentInstruction)instruction).value1);
+            return visit(((AssignmentInstruction)instruction).getValue1());
         case ByteCodeConstants.BINARYOP:
-            return visit(((BinaryOperatorInstruction)instruction).value1);
+            return visit(((BinaryOperatorInstruction)instruction).getValue1());
         case ByteCodeConstants.PREINC:
             {
                 IncInstruction ii = (IncInstruction)instruction;
 
-                switch (ii.count)
+                switch (ii.getCount())
                 {
                 case -1:
                 case 1:
-                    return instruction.lineNumber;
+                    return instruction.getLineNumber();
                 default:
-                    return visit(ii.value);
+                    return visit(ii.getValue());
                 }
             }
         case ByteCodeConstants.POSTINC:
             {
                 IncInstruction ii = (IncInstruction)instruction;
 
-                switch (ii.count)
+                switch (ii.getCount())
                 {
                 case -1:
                 case 1:
-                    return visit(ii.value);
+                    return visit(ii.getValue());
                 default:
-                    return instruction.lineNumber;
+                    return instruction.getLineNumber();
                 }
             }
         case Const.INSTANCEOF:
-            return visit(((InstanceOf)instruction).objectref);
+            return visit(((InstanceOf)instruction).getObjectref());
         case Const.INVOKEINTERFACE:
         case Const.INVOKEVIRTUAL:
         case Const.INVOKESPECIAL:
-            return visit(((InvokeNoStaticInstruction)instruction).objectref);
+            return visit(((InvokeNoStaticInstruction)instruction).getObjectref());
         case Const.POP:
-            return visit(((Pop)instruction).objectref);
+            return visit(((Pop)instruction).getObjectref());
         case Const.PUTFIELD:
-            return visit(((PutField)instruction).objectref);
+            return visit(((PutField)instruction).getObjectref());
         case ByteCodeConstants.TERNARYOP:
-            return visit(((TernaryOperator)instruction).test);
+            return visit(((TernaryOperator)instruction).getTest());
         }
 
-        return instruction.lineNumber;
+        return instruction.getLineNumber();
     }
 }

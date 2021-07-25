@@ -34,66 +34,66 @@ public class SearchInstructionByOffsetVisitor
 
     public static Instruction visit(Instruction instruction, int offset)
     {
-        if (instruction.offset == offset)
+        if (instruction.getOffset() == offset)
             return instruction;
 
-        switch (instruction.opcode)
+        switch (instruction.getOpcode())
         {
         case Const.ARRAYLENGTH:
-            return visit(((ArrayLength)instruction).arrayref, offset);
+            return visit(((ArrayLength)instruction).getArrayref(), offset);
         case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
-            return visit(((ArrayStoreInstruction)instruction).arrayref, offset);
+            return visit(((ArrayStoreInstruction)instruction).getArrayref(), offset);
         case ByteCodeConstants.ASSERT:
             {
                 AssertInstruction ai = (AssertInstruction)instruction;
-                instruction = visit(ai.test, offset);
+                instruction = visit(ai.getTest(), offset);
                 if (instruction != null)
                     return instruction;
-                if (ai.msg == null)
+                if (ai.getMsg() == null)
                     return null;
-                return visit(ai.msg, offset);
+                return visit(ai.getMsg(), offset);
             }
         case Const.ATHROW:
-            return visit(((AThrow)instruction).value, offset);
+            return visit(((AThrow)instruction).getValue(), offset);
         case ByteCodeConstants.UNARYOP:
-            return visit(((UnaryOperatorInstruction)instruction).value, offset);
+            return visit(((UnaryOperatorInstruction)instruction).getValue(), offset);
         case ByteCodeConstants.BINARYOP:
         case ByteCodeConstants.ASSIGNMENT:
             {
                 BinaryOperatorInstruction boi =
                     (BinaryOperatorInstruction)instruction;
-                instruction = visit(boi.value1, offset);
+                instruction = visit(boi.getValue1(), offset);
                 if (instruction != null)
                     return instruction;
-                return visit(boi.value2, offset);
+                return visit(boi.getValue2(), offset);
             }
         case Const.CHECKCAST:
-            return visit(((CheckCast)instruction).objectref, offset);
+            return visit(((CheckCast)instruction).getObjectref(), offset);
         case ByteCodeConstants.STORE:
         case Const.ASTORE:
         case Const.ISTORE:
-            return visit(((StoreInstruction)instruction).valueref, offset);
+            return visit(((StoreInstruction)instruction).getValueref(), offset);
         case ByteCodeConstants.DUPSTORE:
-            return visit(((DupStore)instruction).objectref, offset);
+            return visit(((DupStore)instruction).getObjectref(), offset);
         case ByteCodeConstants.CONVERT:
         case ByteCodeConstants.IMPLICITCONVERT:
-            return visit(((ConvertInstruction)instruction).value, offset);
+            return visit(((ConvertInstruction)instruction).getValue(), offset);
         case ByteCodeConstants.IFCMP:
             {
                 IfCmp ifCmp = (IfCmp)instruction;
-                instruction = visit(ifCmp.value1, offset);
+                instruction = visit(ifCmp.getValue1(), offset);
                 if (instruction != null)
                     return instruction;
-                return visit(ifCmp.value2, offset);
+                return visit(ifCmp.getValue2(), offset);
             }
         case ByteCodeConstants.IF:
         case ByteCodeConstants.IFXNULL:
-            return visit(((IfInstruction)instruction).value, offset);
+            return visit(((IfInstruction)instruction).getValue(), offset);
         case ByteCodeConstants.COMPLEXIF:
             {
                 List<Instruction> branchList =
-                    ((ComplexConditionalBranchInstruction)instruction).instructions;
+                    ((ComplexConditionalBranchInstruction)instruction).getInstructions();
                 for (int i=branchList.size()-1; i>=0; --i)
                 {
                     instruction = visit(branchList.get(i), offset);
@@ -103,13 +103,13 @@ public class SearchInstructionByOffsetVisitor
             }
             break;
         case Const.INSTANCEOF:
-            return visit(((InstanceOf)instruction).objectref, offset);
+            return visit(((InstanceOf)instruction).getObjectref(), offset);
         case Const.INVOKEINTERFACE:
         case Const.INVOKESPECIAL:
         case Const.INVOKEVIRTUAL:
             {
                 Instruction result = visit(
-                    ((InvokeNoStaticInstruction)instruction).objectref, offset);
+                    ((InvokeNoStaticInstruction)instruction).getObjectref(), offset);
                 if (result != null)
                     return result;
             }
@@ -117,7 +117,7 @@ public class SearchInstructionByOffsetVisitor
         case Const.INVOKESTATIC:
         case ByteCodeConstants.INVOKENEW:
             {
-                List<Instruction> list = ((InvokeInstruction)instruction).args;
+                List<Instruction> list = ((InvokeInstruction)instruction).getArgs();
                 for (int i=list.size()-1; i>=0; --i)
                 {
                     instruction = visit(list.get(i), offset);
@@ -127,14 +127,14 @@ public class SearchInstructionByOffsetVisitor
             }
             break;
         case Const.LOOKUPSWITCH:
-            return visit(((LookupSwitch)instruction).key, offset);
+            return visit(((LookupSwitch)instruction).getKey(), offset);
         case Const.MONITORENTER:
-            return visit(((MonitorEnter)instruction).objectref, offset);
+            return visit(((MonitorEnter)instruction).getObjectref(), offset);
         case Const.MONITOREXIT:
-            return visit(((MonitorExit)instruction).objectref, offset);
+            return visit(((MonitorExit)instruction).getObjectref(), offset);
         case Const.MULTIANEWARRAY:
             {
-                Instruction[] dimensions = ((MultiANewArray)instruction).dimensions;
+                Instruction[] dimensions = ((MultiANewArray)instruction).getDimensions();
                 for (int i=dimensions.length-1; i>=0; --i)
                 {
                     instruction = visit(dimensions[i], offset);
@@ -144,41 +144,41 @@ public class SearchInstructionByOffsetVisitor
             }
             break;
         case Const.NEWARRAY:
-            return visit(((NewArray)instruction).dimension, offset);
+            return visit(((NewArray)instruction).getDimension(), offset);
         case Const.ANEWARRAY:
-            return visit(((ANewArray)instruction).dimension, offset);
+            return visit(((ANewArray)instruction).getDimension(), offset);
         case Const.POP:
-            return visit(((Pop)instruction).objectref, offset);
+            return visit(((Pop)instruction).getObjectref(), offset);
         case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
-                instruction = visit(putField.objectref, offset);
+                instruction = visit(putField.getObjectref(), offset);
                 if (instruction != null)
                     return instruction;
-                return visit(putField.valueref, offset);
+                return visit(putField.getValueref(), offset);
             }
         case Const.PUTSTATIC:
-            return visit(((PutStatic)instruction).valueref, offset);
+            return visit(((PutStatic)instruction).getValueref(), offset);
         case ByteCodeConstants.XRETURN:
-            return visit(((ReturnInstruction)instruction).valueref, offset);
+            return visit(((ReturnInstruction)instruction).getValueref(), offset);
         case Const.TABLESWITCH:
-            return visit(((TableSwitch)instruction).key, offset);
+            return visit(((TableSwitch)instruction).getKey(), offset);
         case ByteCodeConstants.TERNARYOPSTORE:
-            return visit(((TernaryOpStore)instruction).objectref, offset);
+            return visit(((TernaryOpStore)instruction).getObjectref(), offset);
         case ByteCodeConstants.PREINC:
         case ByteCodeConstants.POSTINC:
-            return visit(((IncInstruction)instruction).value, offset);
+            return visit(((IncInstruction)instruction).getValue(), offset);
         case Const.GETFIELD:
-            return visit(((GetField)instruction).objectref, offset);
+            return visit(((GetField)instruction).getObjectref(), offset);
         case ByteCodeConstants.INITARRAY:
         case ByteCodeConstants.NEWANDINITARRAY:
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
-                instruction = visit(iai.newArray, offset);
+                instruction = visit(iai.getNewArray(), offset);
                 if (instruction != null)
                     return instruction;
-                if (iai.values != null)
-                    return visit(iai.values, offset);
+                if (iai.getValues() != null)
+                    return visit(iai.getValues(), offset);
             }
             break;
         case Const.ACONST_NULL:
@@ -211,7 +211,7 @@ public class SearchInstructionByOffsetVisitor
             System.err.println(
                     "Can not search instruction in " +
                     instruction.getClass().getName() +
-                    ", opcode=" + instruction.opcode);
+                    ", opcode=" + instruction.getOpcode());
         }
 
         return null;

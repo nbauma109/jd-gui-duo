@@ -21,8 +21,8 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class MarkerLayoutBlock extends LayoutBlock
 {
-    public final ClassFile classFile;
-    public MarkerLayoutBlock other;
+    private final ClassFile classFile;
+    private MarkerLayoutBlock other;
 
     public MarkerLayoutBlock(byte tag, ClassFile classFile)
     {
@@ -31,6 +31,18 @@ public class MarkerLayoutBlock extends LayoutBlock
             Instruction.UNKNOWN_LINE_NUMBER, Instruction.UNKNOWN_LINE_NUMBER,
             0, 0, 0);
         this.classFile = classFile;
-        this.other = null;
+        this.setOther(null);
     }
+
+	public ClassFile getClassFile() {
+		return classFile;
+	}
+
+	public MarkerLayoutBlock getOther() {
+		return other;
+	}
+
+	public void setOther(MarkerLayoutBlock other) {
+		this.other = other;
+	}
 }

@@ -83,16 +83,16 @@ public class AccessorAnalyzer
             return false;
 
         Instruction instruction = list.get(0);
-        if (instruction.opcode != ByteCodeConstants.XRETURN)
+        if (instruction.getOpcode() != ByteCodeConstants.XRETURN)
             return false;
 
-        instruction = ((ReturnInstruction)instruction).valueref;
-        if (instruction.opcode != Const.GETSTATIC)
+        instruction = ((ReturnInstruction)instruction).getValueref();
+        if (instruction.getOpcode() != Const.GETSTATIC)
             return false;
 
         ConstantPool constants = classFile.getConstantPool();
         ConstantFieldref cfr = constants.getConstantFieldref(
-            ((GetStatic)instruction).index);
+            ((GetStatic)instruction).getIndex());
 
         if (cfr.getClassIndex() != classFile.getThisClassIndex())
             return false;
@@ -135,16 +135,16 @@ public class AccessorAnalyzer
         if (list.size() != 2)
             return false;
 
-        if (list.get(1).opcode != Const.RETURN)
+        if (list.get(1).getOpcode() != Const.RETURN)
             return false;
 
         Instruction instruction = list.get(0);
-        if (instruction.opcode != Const.PUTSTATIC)
+        if (instruction.getOpcode() != Const.PUTSTATIC)
             return false;
 
         ConstantPool constants = classFile.getConstantPool();
         ConstantFieldref cfr = constants.getConstantFieldref(
-            ((PutStatic)instruction).index);
+            ((PutStatic)instruction).getIndex());
 
         if (cfr.getClassIndex() != classFile.getThisClassIndex())
             return false;
@@ -190,16 +190,16 @@ public class AccessorAnalyzer
             return false;
 
         Instruction instruction = list.get(0);
-        if (instruction.opcode != ByteCodeConstants.XRETURN)
+        if (instruction.getOpcode() != ByteCodeConstants.XRETURN)
             return false;
 
-        instruction = ((ReturnInstruction)instruction).valueref;
-        if (instruction.opcode != Const.GETFIELD)
+        instruction = ((ReturnInstruction)instruction).getValueref();
+        if (instruction.getOpcode() != Const.GETFIELD)
             return false;
 
         ConstantPool constants = classFile.getConstantPool();
         ConstantFieldref cfr = constants.getConstantFieldref(
-            ((GetField)instruction).index);
+            ((GetField)instruction).getIndex());
 
         if (cfr.getClassIndex() != classFile.getThisClassIndex())
             return false;
@@ -248,11 +248,11 @@ public class AccessorAnalyzer
         {
         case 2:
             {
-                if (list.get(1).opcode != Const.RETURN)
+                if (list.get(1).getOpcode() != Const.RETURN)
                     return false;
 
                 Instruction instruction = list.get(0);
-                if (instruction.opcode != Const.PUTFIELD)
+                if (instruction.getOpcode() != Const.PUTFIELD)
                     return false;
 
                 pf = (PutField)instruction;
@@ -260,14 +260,14 @@ public class AccessorAnalyzer
             break;
         case 3:
             {
-                if (list.get(0).opcode != ByteCodeConstants.DUPSTORE)
+                if (list.get(0).getOpcode() != ByteCodeConstants.DUPSTORE)
                     return false;
 
-                if (list.get(2).opcode != ByteCodeConstants.XRETURN)
+                if (list.get(2).getOpcode() != ByteCodeConstants.XRETURN)
                     return false;
 
                 Instruction instruction = list.get(1);
-                if (instruction.opcode != Const.PUTFIELD)
+                if (instruction.getOpcode() != Const.PUTFIELD)
                     return false;
 
                 pf = (PutField)instruction;
@@ -278,7 +278,7 @@ public class AccessorAnalyzer
         }
 
         ConstantPool constants = classFile.getConstantPool();
-        ConstantFieldref cfr = constants.getConstantFieldref(pf.index);
+        ConstantFieldref cfr = constants.getConstantFieldref(pf.getIndex());
 
         if (cfr.getClassIndex() != classFile.getThisClassIndex())
             return false;
@@ -329,13 +329,13 @@ public class AccessorAnalyzer
         {
         case 1:
             instruction = list.get(0);
-            if (instruction.opcode != ByteCodeConstants.XRETURN)
+            if (instruction.getOpcode() != ByteCodeConstants.XRETURN)
                 return false;
-            instruction = ((ReturnInstruction)instruction).valueref;
+            instruction = ((ReturnInstruction)instruction).getValueref();
             break;
         case 2:
             instruction = list.get(1);
-            if (instruction.opcode != Const.RETURN)
+            if (instruction.getOpcode() != Const.RETURN)
                 return false;
             instruction = list.get(0);
             break;
@@ -345,7 +345,7 @@ public class AccessorAnalyzer
 
         InvokeInstruction ii;
 
-        switch (instruction.opcode)
+        switch (instruction.getOpcode())
         {
         case Const.INVOKEVIRTUAL:
         case Const.INVOKESPECIAL:
@@ -353,8 +353,8 @@ public class AccessorAnalyzer
             InvokeNoStaticInstruction insi =
                 (InvokeNoStaticInstruction)instruction;
 
-            if ((insi.objectref.opcode != Const.ALOAD) ||
-                (((ALoad)insi.objectref).index != 0))
+            if ((insi.getObjectref().getOpcode() != Const.ALOAD) ||
+                (((ALoad)insi.getObjectref()).getIndex() != 0))
                 return false;
 
             ii = insi;
@@ -372,7 +372,7 @@ public class AccessorAnalyzer
         String methodDescriptor =
             constants.getConstantUtf8(method.getDescriptorIndex());
 
-        ConstantMethodref cmr = constants.getConstantMethodref(ii.index);
+        ConstantMethodref cmr = constants.getConstantMethodref(ii.getIndex());
         ConstantNameAndType cnat = constants.getConstantNameAndType(
             cmr.getNameAndTypeIndex());
 
@@ -384,7 +384,7 @@ public class AccessorAnalyzer
         classFile.addAccessor(methodName, methodDescriptor,
             new InvokeMethodAccessor(
                 AccessorConstants.ACCESSOR_INVOKEMETHOD, classFile.getThisClassName(),
-                ii.opcode, targetMethodName, targetMethodDescriptor,
+                ii.getOpcode(), targetMethodName, targetMethodDescriptor,
                 cmr.getListOfParameterSignatures(),
                 cmr.getReturnedSignature()));
 

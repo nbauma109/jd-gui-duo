@@ -62,10 +62,10 @@ import jd.core.model.classfile.LocalVariables;
 public class BinaryOperatorInstruction extends Instruction
 {
     private final int priority;
-    public final String signature;
-    public final String operator;
-    public Instruction value1;
-    public Instruction value2;
+    private final String signature;
+    private final String operator;
+    private Instruction value1;
+    private Instruction value2;
 
     public BinaryOperatorInstruction(
             int opcode, int offset, int lineNumber, int priority,
@@ -76,15 +76,15 @@ public class BinaryOperatorInstruction extends Instruction
         this.priority = priority;
         this.signature = signature;
         this.operator = operator;
-        this.value1 = value1;
-        this.value2 = value2;
+        this.setValue1(value1);
+        this.setValue2(value2);
     }
 
     @Override
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        return this.signature;
+        return this.getSignature();
     }
 
     @Override
@@ -92,4 +92,28 @@ public class BinaryOperatorInstruction extends Instruction
     {
         return this.priority;
     }
+
+	public String getSignature() {
+		return signature;
+	}
+
+	public String getOperator() {
+		return operator;
+	}
+
+	public Instruction getValue1() {
+		return value1;
+	}
+
+	public void setValue1(Instruction value1) {
+		this.value1 = value1;
+	}
+
+	public Instruction getValue2() {
+		return value2;
+	}
+
+	public void setValue2(Instruction value2) {
+		this.value2 = value2;
+	}
 }

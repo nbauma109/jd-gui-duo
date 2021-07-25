@@ -665,9 +665,9 @@ public class ExpressionVisitor extends TypeVisitor {
     }
 
     protected static class Context {
-        public final String currentInternalTypeName;
-        public final String currentTypeName;
-        public final Set<String> currentMethodParamNames;
+        private final String currentInternalTypeName;
+        private final String currentTypeName;
+        private final Set<String> currentMethodParamNames;
 
         public Context(String currentInternalTypeName, String currentTypeName, Set<String> currentMethodParamNames) {
             this.currentInternalTypeName = currentInternalTypeName;

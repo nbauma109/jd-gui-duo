@@ -25,7 +25,7 @@ import jd.core.model.classfile.LocalVariables;
 
 public abstract class InvokeInstruction extends IndexInstruction
 {
-    public final List<Instruction> args;
+    private final List<Instruction> args;
 
     protected InvokeInstruction(
         int opcode, int offset, int lineNumber,
@@ -43,7 +43,7 @@ public abstract class InvokeInstruction extends IndexInstruction
 			return null;
 		}
 
-        ConstantMethodref cmr = constants.getConstantMethodref(this.index);
+        ConstantMethodref cmr = constants.getConstantMethodref(this.getIndex());
 
         return cmr.getReturnedSignature();
     }
@@ -54,8 +54,12 @@ public abstract class InvokeInstruction extends IndexInstruction
 			return null;
 		}
 
-        ConstantMethodref cmr = constants.getConstantMethodref(this.index);
+        ConstantMethodref cmr = constants.getConstantMethodref(this.getIndex());
 
         return cmr.getListOfParameterSignatures();
     }
+
+	public List<Instruction> getArgs() {
+		return args;
+	}
 }

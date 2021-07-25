@@ -46,7 +46,7 @@ public class TernaryOpReconstructor
         {
             Instruction i = list.get(index);
 
-            if (i.opcode == ByteCodeConstants.TERNARYOPSTORE &&
+            if (i.getOpcode() == ByteCodeConstants.TERNARYOPSTORE &&
                 index+2<length)
             {
                 // Search test
@@ -58,7 +58,7 @@ public class TernaryOpReconstructor
                 while (indexTest-- > 0)
                 {
                     Instruction instruction = list.get(indexTest);
-                    int opcode = instruction.opcode;
+                    int opcode = instruction.getOpcode();
 
                     if (opcode == ByteCodeConstants.IF ||
                         opcode == ByteCodeConstants.IFCMP ||
@@ -67,8 +67,8 @@ public class TernaryOpReconstructor
                     {
                         int jumpOffset =
                             ((BranchInstruction)instruction).getJumpOffset();
-                        if (gi.offset < jumpOffset &&
-                            jumpOffset <= afterGi.offset)
+                        if (gi.getOffset() < jumpOffset &&
+                            jumpOffset <= afterGi.getOffset())
                         {
                             test = instruction;
                             break;
@@ -86,28 +86,28 @@ public class TernaryOpReconstructor
 
                 TernaryOperator fto = new TernaryOperator(
                     ByteCodeConstants.TERNARYOP,
-                    value1.ternaryOp2ndValueOffset, test.lineNumber,
-                    test, value1.objectref, null);
+                    value1.getTernaryOp2ndValueOffset(), test.getLineNumber(),
+                    test, value1.getObjectref(), null);
 
                 ReplaceInstructionVisitor visitor =
                     new ReplaceInstructionVisitor(
-                            value1.ternaryOp2ndValueOffset, fto);
+                            value1.getTernaryOp2ndValueOffset(), fto);
 
                 int indexVisitor = index+2;
                 while (indexVisitor<length && visitor.getOldInstruction()==null) {
 					visitor.visit(list.get(indexVisitor++));
 				}
 
-                fto.value2 = visitor.getOldInstruction();
+                fto.setValue2(visitor.getOldInstruction());
 
-                if (isBooleanConstant(fto.value1) &&
-                    isBooleanConstant(fto.value2))
+                if (isBooleanConstant(fto.getValue1()) &&
+                    isBooleanConstant(fto.getValue2()))
                 {
-                    if (((IConst)fto.value1).value == 0) {
-						ComparisonInstructionAnalyzer.inverseComparison(fto.test);
+                    if (((IConst)fto.getValue1()).getValue() == 0) {
+						ComparisonInstructionAnalyzer.inverseComparison(fto.getTest());
 					}
 
-                    visitor.init(fto.offset, fto.test);
+                    visitor.init(fto.getOffset(), fto.getTest());
 
                     indexVisitor = index+2;
                     while (indexVisitor<length && visitor.getOldInstruction()==null) {
@@ -133,7 +133,7 @@ public class TernaryOpReconstructor
         if (instruction == null) {
 			return false;
 		}
-        switch (instruction.opcode)
+        switch (instruction.getOpcode())
         {
         case Const.BIPUSH:
         case ByteCodeConstants.ICONST:

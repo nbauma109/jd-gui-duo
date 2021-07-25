@@ -42,25 +42,25 @@ public class DupStoreThisReconstructor
     {
         for (int dupStoreIndex=0; dupStoreIndex<list.size(); dupStoreIndex++)
         {
-            if (list.get(dupStoreIndex).opcode != ByteCodeConstants.DUPSTORE)
+            if (list.get(dupStoreIndex).getOpcode() != ByteCodeConstants.DUPSTORE)
                 continue;
 
             // DupStore trouvé
             DupStore dupStore = (DupStore)list.get(dupStoreIndex);
 
-            if ((dupStore.objectref.opcode != Const.ALOAD) ||
-                (((ALoad)dupStore.objectref).index != 0))
+            if ((dupStore.getObjectref().getOpcode() != Const.ALOAD) ||
+                (((ALoad)dupStore.getObjectref()).getIndex() != 0))
                 continue;
 
             // Fait-il parti d'un motif 'synchronized' ?
             if (dupStoreIndex+2 < list.size())
             {
                 Instruction instruction = list.get(dupStoreIndex+2);
-                if (instruction.opcode == Const.MONITORENTER)
+                if (instruction.getOpcode() == Const.MONITORENTER)
                 {
                     MonitorEnter me = (MonitorEnter)instruction;
-                    if ((me.objectref.opcode == ByteCodeConstants.DUPLOAD) &&
-                        (((DupLoad)me.objectref).dupStore == dupStore))
+                    if ((me.getObjectref().getOpcode() == ByteCodeConstants.DUPLOAD) &&
+                        (((DupLoad)me.getObjectref()).getDupStore() == dupStore))
                     {
                         // On passe
                         continue;
@@ -69,7 +69,7 @@ public class DupStoreThisReconstructor
             }
 
             ReplaceDupLoadVisitor visitor =
-                new ReplaceDupLoadVisitor(dupStore, dupStore.objectref);
+                new ReplaceDupLoadVisitor(dupStore, dupStore.getObjectref());
 
             int length = list.size();
             int index = dupStoreIndex+1;
@@ -81,7 +81,7 @@ public class DupStoreThisReconstructor
                     break;
             }
 
-            visitor.init(dupStore, dupStore.objectref);
+            visitor.init(dupStore, dupStore.getObjectref());
 
             for (; index<length; index++)
             {

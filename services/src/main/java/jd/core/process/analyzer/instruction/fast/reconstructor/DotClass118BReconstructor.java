@@ -79,85 +79,85 @@ public class DotClass118BReconstructor
         {
             Instruction instruction = list.get(i);
 
-            if (instruction.opcode != ByteCodeConstants.DUPSTORE)
+            if (instruction.getOpcode() != ByteCodeConstants.DUPSTORE)
                 continue;
 
             DupStore ds = (DupStore)instruction;
 
-            if (ds.objectref.opcode != Const.GETSTATIC)
+            if (ds.getObjectref().getOpcode() != Const.GETSTATIC)
                 continue;
 
-            GetStatic gs = (GetStatic)ds.objectref;
+            GetStatic gs = (GetStatic)ds.getObjectref();
 
-            ConstantFieldref cfr = constants.getConstantFieldref(gs.index);
+            ConstantFieldref cfr = constants.getConstantFieldref(gs.getIndex());
 
             if (cfr.getClassIndex() != classFile.getThisClassIndex())
                 continue;
 
             instruction = list.get(i+1);
 
-            if (instruction.opcode != ByteCodeConstants.IFXNULL)
+            if (instruction.getOpcode() != ByteCodeConstants.IFXNULL)
                 continue;
 
             IfInstruction ii = (IfInstruction)instruction;
 
-            if ((ii.value.opcode != ByteCodeConstants.DUPLOAD) ||
-                (ds.offset != ii.value.offset))
+            if ((ii.getValue().getOpcode() != ByteCodeConstants.DUPLOAD) ||
+                (ds.getOffset() != ii.getValue().getOffset()))
                 continue;
 
             instruction = list.get(i+2);
 
-            if (instruction.opcode != Const.POP)
+            if (instruction.getOpcode() != Const.POP)
                 continue;
 
             Pop pop = (Pop)instruction;
 
-            if ((pop.objectref.opcode != ByteCodeConstants.DUPLOAD) ||
-                (ds.offset != pop.objectref.offset))
+            if ((pop.getObjectref().getOpcode() != ByteCodeConstants.DUPLOAD) ||
+                (ds.getOffset() != pop.getObjectref().getOffset()))
                 continue;
 
             instruction = list.get(i+3);
 
-            if (instruction.opcode != FastConstants.TRY)
+            if (instruction.getOpcode() != FastConstants.TRY)
                 continue;
 
             FastTry ft = (FastTry)instruction;
 
-            if ((ft.finallyInstructions != null) ||
-                (ft.instructions.size() != 1) ||
-                (ft.catches.size() != 1))
+            if ((ft.getFinallyInstructions() != null) ||
+                (ft.getInstructions().size() != 1) ||
+                (ft.getCatches().size() != 1))
                 continue;
 
             List<Instruction> catchInstructions =
-                ft.catches.get(0).instructions;
+                ft.getCatches().get(0).getInstructions();
 
             if ((catchInstructions.size() != 1) ||
-                (catchInstructions.get(0).opcode != Const.ATHROW))
+                (catchInstructions.get(0).getOpcode() != Const.ATHROW))
                 continue;
 
-            instruction = ft.instructions.get(0);
+            instruction = ft.getInstructions().get(0);
 
-            if (instruction.opcode != ByteCodeConstants.TERNARYOPSTORE)
+            if (instruction.getOpcode() != ByteCodeConstants.TERNARYOPSTORE)
                 continue;
 
             TernaryOpStore tos = (TernaryOpStore)instruction;
 
-            if (tos.objectref.opcode != ByteCodeConstants.ASSIGNMENT)
+            if (tos.getObjectref().getOpcode() != ByteCodeConstants.ASSIGNMENT)
                 continue;
 
-            AssignmentInstruction ai = (AssignmentInstruction)tos.objectref;
+            AssignmentInstruction ai = (AssignmentInstruction)tos.getObjectref();
 
-            if (ai.value2.opcode != Const.INVOKESTATIC)
+            if (ai.getValue2().getOpcode() != Const.INVOKESTATIC)
                 continue;
 
-            Invokestatic is = (Invokestatic)ai.value2;
+            Invokestatic is = (Invokestatic)ai.getValue2();
 
-            if (is.args.size() != 1)
+            if (is.getArgs().size() != 1)
                 continue;
 
-            instruction = is.args.get(0);
+            instruction = is.getArgs().get(0);
 
-            if (instruction.opcode != Const.LDC)
+            if (instruction.getOpcode() != Const.LDC)
                 continue;
 
             ConstantNameAndType cnatField = constants.getConstantNameAndType(
@@ -174,7 +174,7 @@ public class DotClass118BReconstructor
             if (! nameField.startsWith(StringConstants.CLASS_DOLLAR))
                 continue;
 
-            ConstantMethodref cmr = constants.getConstantMethodref(is.index);
+            ConstantMethodref cmr = constants.getConstantMethodref(is.getIndex());
 
             String className =
                 constants.getConstantClassName(cmr.getClassIndex());
@@ -191,7 +191,7 @@ public class DotClass118BReconstructor
                 continue;
 
             Ldc ldc = (Ldc)instruction;
-            Constant cv = constants.getConstantValue(ldc.index);
+            Constant cv = constants.getConstantValue(ldc.getIndex());
 
             if (!(cv instanceof ConstantString))
                 continue;
@@ -210,8 +210,8 @@ public class DotClass118BReconstructor
             // Ajout d'une nouvelle classe
             index = constants.addConstantClass(index);
             ldc = new Ldc(
-                Const.LDC, ii.offset,
-                ii.lineNumber, index);
+                Const.LDC, ii.getOffset(),
+                ii.getLineNumber(), index);
 
             // Remplacement de l'intruction GetStatic par l'instruction Ldc
             ReplaceDupLoadVisitor visitor = new ReplaceDupLoadVisitor(ds, ldc);
@@ -237,7 +237,7 @@ public class DotClass118BReconstructor
 
                 if (field.getNameIndex() == cnatField.getNameIndex())
                 {
-                    field.accessFlags |= Const.ACC_SYNTHETIC;
+                    field.setAccessFlags(field.getAccessFlags() | Const.ACC_SYNTHETIC);
                     break;
                 }
             }

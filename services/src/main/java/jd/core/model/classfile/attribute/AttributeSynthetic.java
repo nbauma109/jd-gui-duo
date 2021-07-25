@@ -18,8 +18,8 @@ package jd.core.model.classfile.attribute;
 
 public class AttributeSynthetic extends Attribute
 {
-    public AttributeSynthetic(byte tag, int attributeNameIndex)
+    public AttributeSynthetic(byte tag)
     {
-        super(tag, attributeNameIndex);
+        super(tag);
     }
 }

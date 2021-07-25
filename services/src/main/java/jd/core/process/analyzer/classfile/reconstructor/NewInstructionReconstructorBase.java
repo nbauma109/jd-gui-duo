@@ -41,7 +41,7 @@ public class NewInstructionReconstructorBase
         ClassFile classFile, Method method, InvokeNew invokeNew)
     {
         ConstantPool constants = classFile.getConstantPool();
-        ConstantMethodref cmr = constants.getConstantMethodref(invokeNew.index);
+        ConstantMethodref cmr = constants.getConstantMethodref(invokeNew.getIndex());
         String internalClassName = constants.getConstantClassName(
             cmr.getClassIndex());
         ClassFile innerClassFile =
@@ -55,28 +55,27 @@ public class NewInstructionReconstructorBase
             if (innerFields != null)
             {
                 int i = innerFields.length;
-                int argsLength = invokeNew.args.size();
+                int argsLength = invokeNew.getArgs().size();
                 ConstantPool innerConstants = innerClassFile.getConstantPool();
                 LocalVariables localVariables = method.getLocalVariables();
 
                 while (i-- > 0)
                 {
                     Field innerField = innerFields[i];
-                    int index = innerField.anonymousClassConstructorParameterIndex;
+                    int index = innerField.getAnonymousClassConstructorParameterIndex();
 
                     if (index != UtilConstants.INVALID_INDEX)
                     {
-                        innerField.anonymousClassConstructorParameterIndex =
-                            UtilConstants.INVALID_INDEX;
+                        innerField.setAnonymousClassConstructorParameterIndex(UtilConstants.INVALID_INDEX);
 
                         if (index < argsLength)
                         {
-                            Instruction arg = invokeNew.args.get(index);
+                            Instruction arg = invokeNew.getArgs().get(index);
 
-                            if (arg.opcode == Const.CHECKCAST)
-                                arg = ((CheckCast)arg).objectref;
+                            if (arg.getOpcode() == Const.CHECKCAST)
+                                arg = ((CheckCast)arg).getObjectref();
 
-                            switch (arg.opcode)
+                            switch (arg.getOpcode())
                             {
                             case ByteCodeConstants.LOAD:
                             case Const.ALOAD:
@@ -84,21 +83,20 @@ public class NewInstructionReconstructorBase
                                 LocalVariable lv =
                                     localVariables
                                         .getLocalVariableWithIndexAndOffset(
-                                            ((IndexInstruction)arg).index,
-                                            arg.offset);
+                                            ((IndexInstruction)arg).getIndex(),
+                                            arg.getOffset());
 
                                 if (lv != null)
                                 {
                                     // Ajout du nom du parametre au ConstantPool
                                     // de la class anonyme
                                     String name =
-                                        constants.getConstantUtf8(lv.nameIndex);
-                                    innerField.outerMethodLocalVariableNameIndex =
-                                        innerConstants.addConstantUtf8(name);
+                                        constants.getConstantUtf8(lv.getNameIndex());
+                                    innerField.setOuterMethodLocalVariableNameIndex(innerConstants.addConstantUtf8(name));
                                     // Ajout du flag 'final' sur la variable
                                     // locale de la méthode contenant
                                     // l'instruction "new"
-                                    lv.finalFlag = true;
+                                    lv.setFinalFlag(true);
                                 }
                             }
                         }

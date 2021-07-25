@@ -20,13 +20,21 @@ import java.util.List;
 
 public abstract class InvokeNoStaticInstruction extends InvokeInstruction
 {
-    public Instruction objectref;
+    private Instruction objectref;
 
     protected InvokeNoStaticInstruction(
             int opcode, int offset, int lineNumber, int index,
             Instruction objectref, List<Instruction> args)
     {
         super(opcode, offset, lineNumber, index, args);
-        this.objectref = objectref;
+        this.setObjectref(objectref);
     }
+
+	public Instruction getObjectref() {
+		return objectref;
+	}
+
+	public void setObjectref(Instruction objectref) {
+		this.objectref = objectref;
+	}
 }

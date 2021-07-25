@@ -22,19 +22,27 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class FastLabel extends Instruction
 {
-    public Instruction instruction;
+    private Instruction instruction;
 
     public FastLabel(
         int opcode, int offset, int lineNumber, Instruction instruction)
     {
         super(opcode, offset, lineNumber);
-        this.instruction = instruction;
+        this.setInstruction(instruction);
     }
 
     @Override
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        return this.instruction.getReturnedSignature(constants, localVariables);
+        return this.getInstruction().getReturnedSignature(constants, localVariables);
     }
+
+	public Instruction getInstruction() {
+		return instruction;
+	}
+
+	public void setInstruction(Instruction instruction) {
+		this.instruction = instruction;
+	}
 }

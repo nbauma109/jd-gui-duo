@@ -21,12 +21,12 @@ import jd.core.model.classfile.LocalVariables;
 
 public class Pop extends Instruction
 {
-    public Instruction objectref;
+    private Instruction objectref;
 
     public Pop(int opcode, int offset, int lineNumber, Instruction objectref)
     {
         super(opcode, offset, lineNumber);
-        this.objectref = objectref;
+        this.setObjectref(objectref);
     }
 
     @Override
@@ -35,4 +35,12 @@ public class Pop extends Instruction
     {
         return null;
     }
+
+	public Instruction getObjectref() {
+		return objectref;
+	}
+
+	public void setObjectref(Instruction objectref) {
+		this.objectref = objectref;
+	}
 }

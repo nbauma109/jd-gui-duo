@@ -20,12 +20,15 @@ import org.apache.bcel.classfile.LineNumber;
 
 public class AttributeNumberTable extends Attribute
 {
-    public final LineNumber[] lineNumberTable;
+    private final LineNumber[] lineNumberTable;
 
-    public AttributeNumberTable(byte tag, int attributeNameIndex,
-                                LineNumber[] lineNumberTable)
+    public AttributeNumberTable(byte tag, LineNumber[] lineNumberTable)
     {
-        super(tag, attributeNameIndex);
+        super(tag);
         this.lineNumberTable = lineNumberTable;
     }
+
+	public LineNumber[] getLineNumberTable() {
+		return lineNumberTable;
+	}
 }

@@ -21,13 +21,13 @@ import jd.core.model.classfile.LocalVariables;
 
 public class ReturnInstruction extends Instruction
 {
-    public Instruction valueref;
+    private Instruction valueref;
 
     public ReturnInstruction(
         int opcode, int offset, int lineNumber, Instruction valueref)
     {
         super(opcode, offset, lineNumber);
-        this.valueref = valueref;
+        this.setValueref(valueref);
     }
 
     @Override
@@ -36,4 +36,12 @@ public class ReturnInstruction extends Instruction
     {
         return null;
     }
+
+	public Instruction getValueref() {
+		return valueref;
+	}
+
+	public void setValueref(Instruction valueref) {
+		this.valueref = valueref;
+	}
 }

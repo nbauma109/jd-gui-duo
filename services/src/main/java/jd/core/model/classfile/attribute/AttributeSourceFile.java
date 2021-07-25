@@ -18,12 +18,8 @@ package jd.core.model.classfile.attribute;
 
 public class AttributeSourceFile extends Attribute
 {
-    public final int sourcefileIndex;
-
-    public AttributeSourceFile(
-            byte tag, int attributeNameIndex, int sourcefileIndex)
+    public AttributeSourceFile(byte tag)
     {
-        super(tag, attributeNameIndex);
-        this.sourcefileIndex = sourcefileIndex;
+        super(tag);
     }
 }

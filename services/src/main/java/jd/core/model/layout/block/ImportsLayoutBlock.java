@@ -21,7 +21,7 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class ImportsLayoutBlock extends LayoutBlock
 {
-    public final ClassFile classFile;
+    private final ClassFile classFile;
 
     public ImportsLayoutBlock(ClassFile classFile, int maxLineCount)
     {
@@ -31,4 +31,8 @@ public class ImportsLayoutBlock extends LayoutBlock
             0, maxLineCount, maxLineCount);
         this.classFile = classFile;
     }
+
+	public ClassFile getClassFile() {
+		return classFile;
+	}
 }

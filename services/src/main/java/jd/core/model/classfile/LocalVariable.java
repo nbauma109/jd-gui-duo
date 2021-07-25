@@ -16,23 +16,25 @@
  ******************************************************************************/
 package jd.core.model.classfile;
 
+import java.util.Objects;
+
 public class LocalVariable
     implements Comparable<LocalVariable>
 {
-	public int startPc;
-    public int length;
-    public int nameIndex;
-    public int signatureIndex;
-    public final int index;
-    public boolean exceptionOrReturnAddress;
+	private int startPc;
+    private int length;
+    private int nameIndex;
+    private int signatureIndex;
+    private final int index;
+    private boolean exceptionOrReturnAddress;
     // Champ de bits utilisé pour determiner le type de la variable (byte, char,
     // short, int).
-    public int typesBitField;
+    private int typesBitField;
     // Champs utilisé lors de la génération des déclarations de variables
     // locales (FastDeclarationAnalyzer.Analyze).
-    public boolean declarationFlag = false;
+    private boolean declarationFlag = false;
 
-    public boolean finalFlag = false;
+    private boolean finalFlag = false;
 
     private boolean toBeRemoved;
 
@@ -62,44 +64,44 @@ public class LocalVariable
         int startPc, int length, int nameIndex, int signatureIndex,
         int index, boolean exceptionOrReturnAddress, int typesBitField)
     {
-        this.startPc = startPc;
-        this.length = length;
-        this.nameIndex = nameIndex;
-        this.signatureIndex = signatureIndex;
+        this.setStartPc(startPc);
+        this.setLength(length);
+        this.setNameIndex(nameIndex);
+        this.setSignatureIndex(signatureIndex);
         this.index = index;
-        this.exceptionOrReturnAddress = exceptionOrReturnAddress;
-        this.declarationFlag = exceptionOrReturnAddress;
-        this.typesBitField = typesBitField;
+        this.setExceptionOrReturnAddress(exceptionOrReturnAddress);
+        this.setDeclarationFlag(exceptionOrReturnAddress);
+        this.setTypesBitField(typesBitField);
     }
 
     public void updateRange(int offset)
     {
-        if (offset < this.startPc)
+        if (offset < this.getStartPc())
         {
-            this.length += this.startPc - offset;
-            this.startPc = offset;
+            this.setLength(this.getLength() + this.getStartPc() - offset);
+            this.setStartPc(offset);
         }
 
-        if (offset >= this.startPc+this.length)
+        if (offset >= this.getStartPc()+this.getLength())
         {
-            this.length = offset - this.startPc + 1;
+            this.setLength(offset - this.getStartPc() + 1);
         }
     }
 
     public void updateSignatureIndex(int signatureIndex)
     {
-        this.signatureIndex = signatureIndex;
+        this.setSignatureIndex(signatureIndex);
     }
 
     @Override
     public String toString()
     {
         return
-            "LocalVariable{startPc=" + startPc +
-            ", length=" + length +
-            ", nameIndex=" + nameIndex +
-            ", signatureIndex=" + signatureIndex +
-            ", index=" + index +
+            "LocalVariable{startPc=" + getStartPc() +
+            ", length=" + getLength() +
+            ", nameIndex=" + getNameIndex() +
+            ", signatureIndex=" + getSignatureIndex() +
+            ", index=" + getIndex() +
             "}";
     }
 
@@ -110,19 +112,35 @@ public class LocalVariable
 			return -1;
 		}
 
-        if (this.nameIndex != other.nameIndex) {
-			return this.nameIndex - other.nameIndex;
+        if (this.getNameIndex() != other.getNameIndex()) {
+			return this.getNameIndex() - other.getNameIndex();
 		}
 
-        if (this.length != other.length) {
-			return this.length - other.length;
+        if (this.getLength() != other.getLength()) {
+			return this.getLength() - other.getLength();
 		}
 
-        if (this.startPc != other.startPc) {
-			return this.startPc - other.startPc;
+        if (this.getStartPc() != other.getStartPc()) {
+			return this.getStartPc() - other.getStartPc();
 		}
 
-        return this.index - other.index;
+        return this.getIndex() - other.getIndex();
+    }
+    
+    @Override
+    public int hashCode() {
+    	return Objects.hash(nameIndex, length, startPc, index);
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+    	if (this == obj) {
+    		return true;
+    	}
+    	if (obj == null || getClass() != obj.getClass()) {
+    		return false;
+    	}
+    	return obj instanceof LocalVariable lv && compareTo(lv) == 0;
     }
 
 	public boolean isToBeRemoved() {
@@ -131,5 +149,73 @@ public class LocalVariable
 
 	public void setToBeRemoved(boolean toBeRemoved) {
 		this.toBeRemoved = toBeRemoved;
+	}
+
+	public int getIndex() {
+		return index;
+	}
+
+	public int getSignatureIndex() {
+		return signatureIndex;
+	}
+
+	public void setSignatureIndex(int signatureIndex) {
+		this.signatureIndex = signatureIndex;
+	}
+
+	public boolean isExceptionOrReturnAddress() {
+		return exceptionOrReturnAddress;
+	}
+
+	public void setExceptionOrReturnAddress(boolean exceptionOrReturnAddress) {
+		this.exceptionOrReturnAddress = exceptionOrReturnAddress;
+	}
+
+	public int getLength() {
+		return length;
+	}
+
+	public void setLength(int length) {
+		this.length = length;
+	}
+
+	public int getStartPc() {
+		return startPc;
+	}
+
+	public void setStartPc(int startPc) {
+		this.startPc = startPc;
+	}
+
+	public int getNameIndex() {
+		return nameIndex;
+	}
+
+	public void setNameIndex(int nameIndex) {
+		this.nameIndex = nameIndex;
+	}
+
+	public int getTypesBitField() {
+		return typesBitField;
+	}
+
+	public void setTypesBitField(int typesBitField) {
+		this.typesBitField = typesBitField;
+	}
+
+	public boolean hasDeclarationFlag() {
+		return declarationFlag;
+	}
+
+	public void setDeclarationFlag(boolean declarationFlag) {
+		this.declarationFlag = declarationFlag;
+	}
+
+	public boolean hasFinalFlag() {
+		return finalFlag;
+	}
+
+	public void setFinalFlag(boolean finalFlag) {
+		this.finalFlag = finalFlag;
 	}
 }

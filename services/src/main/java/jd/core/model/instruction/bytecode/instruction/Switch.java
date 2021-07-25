@@ -21,16 +21,16 @@ import jd.core.model.classfile.LocalVariables;
 
 public class Switch extends Instruction
 {
-    public Instruction key;
-    public final int   defaultOffset;
-    public final int[] offsets;
+    private Instruction key;
+    private final int   defaultOffset;
+    private final int[] offsets;
 
     public Switch(
             int opcode, int offset, int lineNumber,
             Instruction key, int defaultOffset, int[] offsets)
     {
         super(opcode, offset, lineNumber);
-        this.key = key;
+        this.setKey(key);
         this.defaultOffset = defaultOffset;
         this.offsets = offsets;
     }
@@ -41,4 +41,24 @@ public class Switch extends Instruction
     {
         return null;
     }
+
+	public int getDefaultOffset() {
+		return defaultOffset;
+	}
+
+	public int[] getOffsets() {
+		return offsets;
+	}
+
+	public int getOffset(int i) {
+		return offsets[i];
+	}
+
+	public Instruction getKey() {
+		return key;
+	}
+
+	public void setKey(Instruction key) {
+		this.key = key;
+	}
 }

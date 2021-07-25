@@ -18,7 +18,7 @@ package jd.core.model.instruction.bytecode.instruction;
 
 public class LookupSwitch extends Switch
 {
-    public int[] keys;
+    private final int[] keys;
 
     public LookupSwitch(
             int opcode, int offset, int lineNumber, Instruction key,
@@ -27,4 +27,12 @@ public class LookupSwitch extends Switch
         super(opcode, offset, lineNumber, key, defaultOffset, offsets);
         this.keys = keys;
     }
+
+	public int[] getKeys() {
+		return keys;
+	}
+
+	public int getKey(int i) {
+		return keys[i];
+	}
 }

@@ -18,14 +18,8 @@ package jd.core.model.classfile.attribute;
 
 public class AttributeEnclosingMethod extends Attribute
 {
-    public final int classIndex;
-    public final int methodIndex;
-
-    public AttributeEnclosingMethod(byte tag, int attributeNameIndex,
-                                    int classIndex, int methodIndex)
+    public AttributeEnclosingMethod(byte tag)
     {
-        super(tag, attributeNameIndex);
-        this.classIndex = classIndex;
-        this.methodIndex = methodIndex;
+        super(tag);
     }
 }

@@ -44,63 +44,63 @@ public class CountDupLoadVisitor
 
     public void visit(Instruction instruction)
     {
-        switch (instruction.opcode)
+        switch (instruction.getOpcode())
         {
         case Const.ARRAYLENGTH:
-            visit(((ArrayLength)instruction).arrayref);
+            visit(((ArrayLength)instruction).getArrayref());
             break;
         case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
-                visit(asi.arrayref);
-                visit(asi.indexref);
-                visit(asi.valueref);
+                visit(asi.getArrayref());
+                visit(asi.getIndexref());
+                visit(asi.getValueref());
             }
             break;
         case Const.ATHROW:
-            visit(((AThrow)instruction).value);
+            visit(((AThrow)instruction).getValue());
             break;
         case ByteCodeConstants.UNARYOP:
-            visit(((UnaryOperatorInstruction)instruction).value);
+            visit(((UnaryOperatorInstruction)instruction).getValue());
             break;
         case ByteCodeConstants.BINARYOP:
             {
                 BinaryOperatorInstruction boi = (BinaryOperatorInstruction)instruction;
-                visit(boi.value1);
-                visit(boi.value2);
+                visit(boi.getValue1());
+                visit(boi.getValue2());
             }
             break;
         case Const.CHECKCAST:
-            visit(((CheckCast)instruction).objectref);
+            visit(((CheckCast)instruction).getObjectref());
             break;
         case ByteCodeConstants.STORE:
         case Const.ASTORE:
         case Const.ISTORE:
-            visit(((StoreInstruction)instruction).valueref);
+            visit(((StoreInstruction)instruction).getValueref());
             break;
         case ByteCodeConstants.DUPSTORE:
-            visit(((DupStore)instruction).objectref);
+            visit(((DupStore)instruction).getObjectref());
             break;
         case ByteCodeConstants.CONVERT:
         case ByteCodeConstants.IMPLICITCONVERT:
-            visit(((ConvertInstruction)instruction).value);
+            visit(((ConvertInstruction)instruction).getValue());
             break;
         case ByteCodeConstants.IFCMP:
             {
                 IfCmp ifCmp = (IfCmp)instruction;
-                visit(ifCmp.value1);
-                visit(ifCmp.value2);
+                visit(ifCmp.getValue1());
+                visit(ifCmp.getValue2());
             }
             break;
         case ByteCodeConstants.IF:
         case ByteCodeConstants.IFXNULL:
-            visit(((IfInstruction)instruction).value);
+            visit(((IfInstruction)instruction).getValue());
             break;
         case ByteCodeConstants.COMPLEXIF:
             {
                 List<Instruction> branchList =
-                    ((ComplexConditionalBranchInstruction)instruction).instructions;
+                    ((ComplexConditionalBranchInstruction)instruction).getInstructions();
                 for (int i=branchList.size()-1; i>=0; --i)
                 {
                     visit(branchList.get(i));
@@ -108,16 +108,16 @@ public class CountDupLoadVisitor
             }
             break;
         case Const.INSTANCEOF:
-            visit(((InstanceOf)instruction).objectref);
+            visit(((InstanceOf)instruction).getObjectref());
             break;
         case Const.INVOKEINTERFACE:
         case Const.INVOKESPECIAL:
         case Const.INVOKEVIRTUAL:
-            visit(((InvokeNoStaticInstruction)instruction).objectref);
+            visit(((InvokeNoStaticInstruction)instruction).getObjectref());
             // intended fall through
         case Const.INVOKESTATIC:
             {
-                List<Instruction> list = ((InvokeInstruction)instruction).args;
+                List<Instruction> list = ((InvokeInstruction)instruction).getArgs();
                 for (int i=list.size()-1; i>=0; --i)
                 {
                     visit(list.get(i));
@@ -126,7 +126,7 @@ public class CountDupLoadVisitor
             break;
         case ByteCodeConstants.INVOKENEW:
             {
-                List<Instruction> list = ((InvokeNew)instruction).args;
+                List<Instruction> list = ((InvokeNew)instruction).getArgs();
                 for (int i=list.size()-1; i>=0; --i)
                 {
                     visit(list.get(i));
@@ -134,17 +134,17 @@ public class CountDupLoadVisitor
             }
             break;
         case Const.LOOKUPSWITCH:
-            visit(((LookupSwitch)instruction).key);
+            visit(((LookupSwitch)instruction).getKey());
             break;
         case Const.MONITORENTER:
-            visit(((MonitorEnter)instruction).objectref);
+            visit(((MonitorEnter)instruction).getObjectref());
             break;
         case Const.MONITOREXIT:
-            visit(((MonitorExit)instruction).objectref);
+            visit(((MonitorExit)instruction).getObjectref());
             break;
         case Const.MULTIANEWARRAY:
             {
-                Instruction[] dimensions = ((MultiANewArray)instruction).dimensions;
+                Instruction[] dimensions = ((MultiANewArray)instruction).getDimensions();
                 for (int i=dimensions.length-1; i>=0; --i)
                 {
                     visit(dimensions[i]);
@@ -152,64 +152,64 @@ public class CountDupLoadVisitor
             }
             break;
         case Const.NEWARRAY:
-            visit(((NewArray)instruction).dimension);
+            visit(((NewArray)instruction).getDimension());
             break;
         case Const.ANEWARRAY:
-            visit(((ANewArray)instruction).dimension);
+            visit(((ANewArray)instruction).getDimension());
             break;
         case Const.POP:
-            visit(((Pop)instruction).objectref);
+            visit(((Pop)instruction).getObjectref());
             break;
         case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
-                visit(putField.objectref);
-                visit(putField.valueref);
+                visit(putField.getObjectref());
+                visit(putField.getValueref());
             }
             break;
         case Const.PUTSTATIC:
-            visit(((PutStatic)instruction).valueref);
+            visit(((PutStatic)instruction).getValueref());
             break;
         case ByteCodeConstants.XRETURN:
-            visit(((ReturnInstruction)instruction).valueref);
+            visit(((ReturnInstruction)instruction).getValueref());
             break;
         case Const.TABLESWITCH:
-            visit(((TableSwitch)instruction).key);
+            visit(((TableSwitch)instruction).getKey());
             break;
         case ByteCodeConstants.TERNARYOPSTORE:
-            visit(((TernaryOpStore)instruction).objectref);
+            visit(((TernaryOpStore)instruction).getObjectref());
             break;
         case ByteCodeConstants.TERNARYOP:
             {
                 TernaryOperator to = (TernaryOperator)instruction;
-                visit(to.value1);
-                visit(to.value2);
+                visit(to.getValue1());
+                visit(to.getValue2());
             }
             break;
         case ByteCodeConstants.ASSIGNMENT:
             {
                 AssignmentInstruction ai = (AssignmentInstruction)instruction;
-                visit(ai.value1);
-                visit(ai.value2);
+                visit(ai.getValue1());
+                visit(ai.getValue2());
             }
             break;
         case ByteCodeConstants.ARRAYLOAD:
             {
                 ArrayLoadInstruction ali = (ArrayLoadInstruction)instruction;
-                visit(ali.arrayref);
-                visit(ali.indexref);
+                visit(ali.getArrayref());
+                visit(ali.getIndexref());
             }
             break;
         case ByteCodeConstants.PREINC:
         case ByteCodeConstants.POSTINC:
-            visit(((IncInstruction)instruction).value);
+            visit(((IncInstruction)instruction).getValue());
             break;
         case Const.GETFIELD:
-            visit(((GetField)instruction).objectref);
+            visit(((GetField)instruction).getObjectref());
             break;
         case ByteCodeConstants.DUPLOAD:
             {
-                if (((DupLoad)instruction).dupStore == this.dupStore)
+                if (((DupLoad)instruction).getDupStore() == this.dupStore)
                     this.counter++;
             }
             break;
@@ -217,25 +217,25 @@ public class CountDupLoadVisitor
         case ByteCodeConstants.NEWANDINITARRAY:
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
-                visit(iai.newArray);
-                if (iai.values != null)
-                    visit(iai.values);
+                visit(iai.getNewArray());
+                if (iai.getValues() != null)
+                    visit(iai.getValues());
             }
             break;
         case FastConstants.FOR:
             {
                 FastFor ff = (FastFor)instruction;
-                if (ff.init != null)
-                    visit(ff.init);
-                if (ff.inc != null)
-                    visit(ff.inc);
+                if (ff.getInit() != null)
+                    visit(ff.getInit());
+                if (ff.getInc() != null)
+                    visit(ff.getInc());
             }
             // intended fall through
         case FastConstants.WHILE:
         case FastConstants.DO_WHILE:
         case FastConstants.IF_SIMPLE:
             {
-                Instruction test = ((FastTestList)instruction).test;
+                Instruction test = ((FastTestList)instruction).getTest();
                 if (test != null)
                     visit(test);
             }
@@ -243,7 +243,7 @@ public class CountDupLoadVisitor
         case FastConstants.INFINITE_LOOP:
             {
                 List<Instruction> instructions =
-                    ((FastList)instruction).instructions;
+                    ((FastList)instruction).getInstructions();
                 if (instructions != null)
                     visit(instructions);
             }
@@ -251,17 +251,17 @@ public class CountDupLoadVisitor
         case FastConstants.FOREACH:
             {
                 FastForEach ffe = (FastForEach)instruction;
-                visit(ffe.variable);
-                visit(ffe.values);
-                visit(ffe.instructions);
+                visit(ffe.getVariable());
+                visit(ffe.getValues());
+                visit(ffe.getInstructions());
             }
             break;
         case FastConstants.IF_ELSE:
             {
                 FastTest2Lists ft2l = (FastTest2Lists)instruction;
-                visit(ft2l.test);
-                visit(ft2l.instructions);
-                visit(ft2l.instructions2);
+                visit(ft2l.getTest());
+                visit(ft2l.getInstructions());
+                visit(ft2l.getInstructions2());
             }
             break;
         case FastConstants.IF_CONTINUE:
@@ -272,8 +272,8 @@ public class CountDupLoadVisitor
         case FastConstants.GOTO_LABELED_BREAK:
             {
                 FastInstruction fi = (FastInstruction)instruction;
-                if (fi.instruction != null)
-                    visit(fi.instruction);
+                if (fi.getInstruction() != null)
+                    visit(fi.getInstruction());
             }
             break;
         case FastConstants.SWITCH:
@@ -281,8 +281,8 @@ public class CountDupLoadVisitor
         case FastConstants.SWITCH_STRING:
             {
                 FastSwitch fs = (FastSwitch)instruction;
-                visit(fs.test);
-                FastSwitch.Pair[] pairs = fs.pairs;
+                visit(fs.getTest());
+                FastSwitch.Pair[] pairs = fs.getPairs();
                 for (int i=pairs.length-1; i>=0; --i)
                 {
                     List<Instruction> instructions = pairs[i].getInstructions();
@@ -294,33 +294,33 @@ public class CountDupLoadVisitor
         case FastConstants.TRY:
             {
                 FastTry ft = (FastTry)instruction;
-                visit(ft.instructions);
-                if (ft.finallyInstructions != null)
-                    visit(ft.finallyInstructions);
-                List<FastCatch> catchs = ft.catches;
+                visit(ft.getInstructions());
+                if (ft.getFinallyInstructions() != null)
+                    visit(ft.getFinallyInstructions());
+                List<FastCatch> catchs = ft.getCatches();
                 for (int i=catchs.size()-1; i>=0; --i)
-                    visit(catchs.get(i).instructions);
+                    visit(catchs.get(i).getInstructions());
             }
             break;
         case FastConstants.SYNCHRONIZED:
             {
                 FastSynchronized fsd = (FastSynchronized)instruction;
-                visit(fsd.monitor);
-                visit(fsd.instructions);
+                visit(fsd.getMonitor());
+                visit(fsd.getInstructions());
             }
             break;
         case FastConstants.LABEL:
             {
                 FastLabel fl = (FastLabel)instruction;
-                if (fl.instruction != null)
-                    visit(fl.instruction);
+                if (fl.getInstruction() != null)
+                    visit(fl.getInstruction());
             }
             break;
         case FastConstants.DECLARE:
             {
                 FastDeclaration fd = (FastDeclaration)instruction;
-                if (fd.instruction != null)
-                    visit(fd.instruction);
+                if (fd.getInstruction() != null)
+                    visit(fd.getInstruction());
             }
             break;
         case Const.GETSTATIC:
@@ -351,7 +351,7 @@ public class CountDupLoadVisitor
             System.err.println(
                     "Can not count DupLoad in " +
                     instruction.getClass().getName() +
-                    ", opcode=" + instruction.opcode);
+                    ", opcode=" + instruction.getOpcode());
         }
     }
 

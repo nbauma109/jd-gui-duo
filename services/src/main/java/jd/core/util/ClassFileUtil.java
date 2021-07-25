@@ -46,11 +46,11 @@ public class ClassFileUtil
         {
             Method method = methods[i];
 
-            if ((method.accessFlags &
+            if ((method.getAccessFlags() &
                  (Const.ACC_SYNTHETIC|Const.ACC_BRIDGE)) != 0)
                 continue;
 
-            if (method.getNameIndex() == constants.instanceConstructorIndex)
+            if (method.getNameIndex() == constants.getInstanceConstructorIndex())
             {
                 if (flag)
                     // A other constructor has been found
@@ -68,7 +68,7 @@ public class ClassFileUtil
     {
         ConstantPool constants = classFile.getConstantPool();
 
-        if ((method.accessFlags & (Const.ACC_PUBLIC|Const.ACC_STATIC)) ==
+        if ((method.getAccessFlags() & (Const.ACC_PUBLIC|Const.ACC_STATIC)) ==
             (Const.ACC_PUBLIC|Const.ACC_STATIC))
         {
             String methodName = constants.getConstantUtf8(method.getNameIndex());

@@ -36,7 +36,7 @@ public class InstructionUtil
         if ((list == null) || (list.isEmpty()))
             return null;
 
-        if (list.get(0).offset >= offset)
+        if (list.get(0).getOffset() >= offset)
             return list.get(0);
 
         int length = list.size();
@@ -44,7 +44,7 @@ public class InstructionUtil
         if (length == 1)
             return null;
 
-        if (list.get(length-1).offset < offset)
+        if (list.get(length-1).getOffset() < offset)
             return null;
 
         int firstIndex = 0;
@@ -55,9 +55,9 @@ public class InstructionUtil
             int medIndex = (lastIndex + firstIndex) / 2;
             Instruction i = list.get(medIndex);
 
-            if (i.offset < offset)
+            if (i.getOffset() < offset)
                 firstIndex = medIndex+1;
-            else if (list.get(medIndex-1).offset >= offset)
+            else if (list.get(medIndex-1).getOffset() >= offset)
                 lastIndex = medIndex-1;
             else
                 return i;
@@ -73,7 +73,7 @@ public class InstructionUtil
         if ((list == null) || (list.isEmpty()))
             return -1;
 
-        if (list.get(0).offset >= offset)
+        if (list.get(0).getOffset() >= offset)
             return 0;
 
         int length = list.size();
@@ -81,7 +81,7 @@ public class InstructionUtil
         if (length == 1)
             return -1;
 
-        if (list.get(length-1).offset < offset)
+        if (list.get(length-1).getOffset() < offset)
             return -1;
 
         int firstIndex = 0;
@@ -92,9 +92,9 @@ public class InstructionUtil
             int medIndex = (lastIndex + firstIndex) / 2;
             Instruction i = list.get(medIndex);
 
-            if (i.offset < offset)
+            if (i.getOffset() < offset)
                 firstIndex = medIndex+1;
-            else if (list.get(medIndex-1).offset >= offset)
+            else if (list.get(medIndex-1).getOffset() >= offset)
                 lastIndex = medIndex-1;
             else
                 return medIndex;
@@ -109,7 +109,7 @@ public class InstructionUtil
             {
                 Instruction i = list.get(index);
 
-                switch (i.opcode)
+                switch (i.getOpcode())
                 {
                 case ByteCodeConstants.IF:
                 case ByteCodeConstants.IFCMP:

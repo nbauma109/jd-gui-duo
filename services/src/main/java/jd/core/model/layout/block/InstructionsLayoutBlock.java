@@ -24,13 +24,13 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class InstructionsLayoutBlock extends LayoutBlock
 {
-    public final ClassFile classFile;
-    public Method method;
-    public List<Instruction> instructions;
-    public int firstIndex;
-    public int lastIndex;
-    public int firstOffset;
-    public int lastOffset;
+    private final ClassFile classFile;
+    private Method method;
+    private final List<Instruction> instructions;
+    private int firstIndex;
+    private int lastIndex;
+    private int firstOffset;
+    private int lastOffset;
 
     public InstructionsLayoutBlock(
         int firstLineNumber, int lastLineNumber,
@@ -46,11 +46,59 @@ public class InstructionsLayoutBlock extends LayoutBlock
             firstLineNumber, lastLineNumber,
             minimalLineCount, maximalLineCount, preferedLineCount);
         this.classFile = classFile;
-        this.method = method;
+        this.setMethod(method);
         this.instructions = instructions;
-        this.firstIndex = firstIndex;
-        this.lastIndex = lastIndex;
-        this.firstOffset = firstOffset;
-        this.lastOffset = lastOffset;
+        this.setFirstIndex(firstIndex);
+        this.setLastIndex(lastIndex);
+        this.setFirstOffset(firstOffset);
+        this.setLastOffset(lastOffset);
     }
+
+	public ClassFile getClassFile() {
+		return classFile;
+	}
+
+	public Method getMethod() {
+		return method;
+	}
+
+	public void setMethod(Method method) {
+		this.method = method;
+	}
+
+	public int getFirstOffset() {
+		return firstOffset;
+	}
+
+	public void setFirstOffset(int firstOffset) {
+		this.firstOffset = firstOffset;
+	}
+
+	public int getLastOffset() {
+		return lastOffset;
+	}
+
+	public void setLastOffset(int lastOffset) {
+		this.lastOffset = lastOffset;
+	}
+
+	public int getFirstIndex() {
+		return firstIndex;
+	}
+
+	public void setFirstIndex(int firstIndex) {
+		this.firstIndex = firstIndex;
+	}
+
+	public int getLastIndex() {
+		return lastIndex;
+	}
+
+	public void setLastIndex(int lastIndex) {
+		this.lastIndex = lastIndex;
+	}
+
+	public List<Instruction> getInstructions() {
+		return instructions;
+	}
 }

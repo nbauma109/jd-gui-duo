@@ -20,14 +20,14 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class BlockLayoutBlock extends LayoutBlock
 {
-    public BlockLayoutBlock other;
+    private BlockLayoutBlock other;
 
     public BlockLayoutBlock(byte tag, int lineCount)
     {
         super(
             tag, Instruction.UNKNOWN_LINE_NUMBER,
             Instruction.UNKNOWN_LINE_NUMBER, lineCount);
-        this.other = null;
+        this.setOther(null);
     }
 
     public BlockLayoutBlock(
@@ -38,6 +38,14 @@ public class BlockLayoutBlock extends LayoutBlock
             tag,
             Instruction.UNKNOWN_LINE_NUMBER, Instruction.UNKNOWN_LINE_NUMBER,
             minimalLineCount, maximalLineCount, preferedLineCount);
-        this.other = null;
+        this.setOther(null);
     }
+
+	public BlockLayoutBlock getOther() {
+		return other;
+	}
+
+	public void setOther(BlockLayoutBlock other) {
+		this.other = other;
+	}
 }

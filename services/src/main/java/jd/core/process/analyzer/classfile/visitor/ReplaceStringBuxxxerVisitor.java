@@ -39,197 +39,197 @@ public class ReplaceStringBuxxxerVisitor
 
     public void visit(Instruction instruction)
     {
-        switch (instruction.opcode)
+        switch (instruction.getOpcode())
         {
         case Const.ARRAYLENGTH:
             {
                 ArrayLength al = (ArrayLength)instruction;
-                Instruction i = match(al.arrayref);
+                Instruction i = match(al.getArrayref());
                 if (i == null)
-                    visit(al.arrayref);
+                    visit(al.getArrayref());
                 else
-                    al.arrayref = i;
+                    al.setArrayref(i);
             }
             break;
         case ByteCodeConstants.ARRAYLOAD:
             {
                 ArrayLoadInstruction ali = (ArrayLoadInstruction)instruction;
-                Instruction i = match(ali.arrayref);
+                Instruction i = match(ali.getArrayref());
                 if (i == null)
-                    visit(ali.arrayref);
+                    visit(ali.getArrayref());
                 else
-                    ali.arrayref = i;
+                    ali.setArrayref(i);
 
-                i = match(ali.indexref);
+                i = match(ali.getIndexref());
                 if (i == null)
-                    visit(ali.indexref);
+                    visit(ali.getIndexref());
                 else
-                    ali.indexref = i;
+                    ali.setIndexref(i);
             }
             break;
         case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
-                Instruction i = match(asi.arrayref);
+                Instruction i = match(asi.getArrayref());
                 if (i == null)
-                    visit(asi.arrayref);
+                    visit(asi.getArrayref());
                 else
-                    asi.arrayref = i;
+                    asi.setArrayref(i);
 
-                i = match(asi.indexref);
+                i = match(asi.getIndexref());
                 if (i == null)
-                    visit(asi.indexref);
+                    visit(asi.getIndexref());
                 else
-                    asi.indexref = i;
+                    asi.setIndexref(i);
 
-                i = match(asi.valueref);
+                i = match(asi.getValueref());
                 if (i == null)
-                    visit(asi.valueref);
+                    visit(asi.getValueref());
                 else
-                    asi.valueref = i;
+                    asi.setValueref(i);
             }
             break;
         case ByteCodeConstants.ASSERT:
             {
                 AssertInstruction ai = (AssertInstruction)instruction;
-                Instruction i = match(ai.test);
+                Instruction i = match(ai.getTest());
                 if (i == null)
-                    visit(ai.test);
+                    visit(ai.getTest());
                 else
-                    ai.test = i;
-                if (ai.msg != null)
+                    ai.setTest(i);
+                if (ai.getMsg() != null)
                 {
-                    i = match(ai.msg);
+                    i = match(ai.getMsg());
                     if (i == null)
-                        visit(ai.msg);
+                        visit(ai.getMsg());
                     else
-                        ai.msg = i;
+                        ai.setMsg(i);
                 }
             }
             break;
         case ByteCodeConstants.ASSIGNMENT:
             {
                 AssignmentInstruction ai = (AssignmentInstruction)instruction;
-                Instruction i = match(ai.value1);
+                Instruction i = match(ai.getValue1());
                 if (i == null)
-                    visit(ai.value1);
+                    visit(ai.getValue1());
                 else
-                    ai.value1 = i;
+                    ai.setValue1(i);
 
-                i = match(ai.value2);
+                i = match(ai.getValue2());
                 if (i == null)
-                    visit(ai.value2);
+                    visit(ai.getValue2());
                 else
-                    ai.value2 = i;
+                    ai.setValue2(i);
             }
             break;
         case Const.ATHROW:
             {
                 AThrow aThrow = (AThrow)instruction;
-                visit(aThrow.value);
+                visit(aThrow.getValue());
             }
             break;
         case ByteCodeConstants.BINARYOP:
             {
                 BinaryOperatorInstruction boi =
                     (BinaryOperatorInstruction)instruction;
-                Instruction i = match(boi.value1);
+                Instruction i = match(boi.getValue1());
                 if (i == null)
-                    visit(boi.value1);
+                    visit(boi.getValue1());
                 else
-                    boi.value1 = i;
+                    boi.setValue1(i);
 
-                i = match(boi.value2);
+                i = match(boi.getValue2());
                 if (i == null)
-                    visit(boi.value2);
+                    visit(boi.getValue2());
                 else
-                    boi.value2 = i;
+                    boi.setValue2(i);
             }
             break;
         case ByteCodeConstants.UNARYOP:
             {
                 UnaryOperatorInstruction uoi =
                     (UnaryOperatorInstruction)instruction;
-                Instruction i = match(uoi.value);
+                Instruction i = match(uoi.getValue());
                 if (i == null)
-                    visit(uoi.value);
+                    visit(uoi.getValue());
                 else
-                    uoi.value = i;
+                    uoi.setValue(i);
             }
             break;
         case ByteCodeConstants.DUPSTORE:
             {
                 DupStore dupStore = (DupStore)instruction;
-                Instruction i = match(dupStore.objectref);
+                Instruction i = match(dupStore.getObjectref());
                 if (i == null)
-                    visit(dupStore.objectref);
+                    visit(dupStore.getObjectref());
                 else
-                    dupStore.objectref = i;
+                    dupStore.setObjectref(i);
             }
             break;
         case Const.CHECKCAST:
             {
                 CheckCast cc = (CheckCast)instruction;
-                Instruction i = match(cc.objectref);
+                Instruction i = match(cc.getObjectref());
                 if (i == null)
-                    visit(cc.objectref);
+                    visit(cc.getObjectref());
                 else
-                    cc.objectref = i;
+                    cc.setObjectref(i);
             }
             break;
         case ByteCodeConstants.CONVERT:
         case ByteCodeConstants.IMPLICITCONVERT:
             {
                 ConvertInstruction ci = (ConvertInstruction)instruction;
-                Instruction i = match(ci.value);
+                Instruction i = match(ci.getValue());
                 if (i == null)
-                    visit(ci.value);
+                    visit(ci.getValue());
                 else
-                    ci.value = i;
+                    ci.setValue(i);
             }
             break;
         case ByteCodeConstants.IF:
         case ByteCodeConstants.IFXNULL:
             {
                 IfInstruction ifInstruction = (IfInstruction)instruction;
-                Instruction i = match(ifInstruction.value);
+                Instruction i = match(ifInstruction.getValue());
                 if (i == null)
-                    visit(ifInstruction.value);
+                    visit(ifInstruction.getValue());
                 else
-                    ifInstruction.value = i;
+                    ifInstruction.setValue(i);
             }
             break;
         case ByteCodeConstants.IFCMP:
             {
                 IfCmp ifCmpInstruction = (IfCmp)instruction;
-                Instruction i = match(ifCmpInstruction.value1);
+                Instruction i = match(ifCmpInstruction.getValue1());
                 if (i == null)
-                    visit(ifCmpInstruction.value1);
+                    visit(ifCmpInstruction.getValue1());
                 else
-                    ifCmpInstruction.value1 = i;
+                    ifCmpInstruction.setValue1(i);
 
-                i = match(ifCmpInstruction.value2);
+                i = match(ifCmpInstruction.getValue2());
                 if (i == null)
-                    visit(ifCmpInstruction.value2);
+                    visit(ifCmpInstruction.getValue2());
                 else
-                    ifCmpInstruction.value2 = i;
+                    ifCmpInstruction.setValue2(i);
             }
             break;
         case Const.INSTANCEOF:
             {
                 InstanceOf instanceOf = (InstanceOf)instruction;
-                Instruction i = match(instanceOf.objectref);
+                Instruction i = match(instanceOf.getObjectref());
                 if (i == null)
-                    visit(instanceOf.objectref);
+                    visit(instanceOf.getObjectref());
                 else
-                    instanceOf.objectref = i;
+                    instanceOf.setObjectref(i);
             }
             break;
         case ByteCodeConstants.COMPLEXIF:
             {
                 ComplexConditionalBranchInstruction complexIf = (ComplexConditionalBranchInstruction)instruction;
-                List<Instruction> branchList = complexIf.instructions;
+                List<Instruction> branchList = complexIf.getInstructions();
                 for (int i=branchList.size()-1; i>=0; --i)
                 {
                     visit(branchList.get(i));
@@ -239,11 +239,11 @@ public class ReplaceStringBuxxxerVisitor
         case Const.GETFIELD:
             {
                 GetField getField = (GetField)instruction;
-                Instruction i = match(getField.objectref);
+                Instruction i = match(getField.getObjectref());
                 if (i == null)
-                    visit(getField.objectref);
+                    visit(getField.getObjectref());
                 else
-                    getField.objectref = i;
+                    getField.setObjectref(i);
             }
             break;
         case Const.INVOKEVIRTUAL:
@@ -252,32 +252,32 @@ public class ReplaceStringBuxxxerVisitor
             {
                 InvokeNoStaticInstruction insi =
                     (InvokeNoStaticInstruction)instruction;
-                Instruction i = match(insi.objectref);
+                Instruction i = match(insi.getObjectref());
                 if (i == null)
-                    visit(insi.objectref);
+                    visit(insi.getObjectref());
                 else
-                    insi.objectref = i;
-                replaceInArgs(insi.args);
+                    insi.setObjectref(i);
+                replaceInArgs(insi.getArgs());
             }
             break;
         case Const.INVOKESTATIC:
         case ByteCodeConstants.INVOKENEW:
-            replaceInArgs(((InvokeInstruction)instruction).args);
+            replaceInArgs(((InvokeInstruction)instruction).getArgs());
             break;
         case Const.LOOKUPSWITCH:
             {
                 LookupSwitch lookupSwitch = (LookupSwitch)instruction;
-                Instruction i = match(lookupSwitch.key);
+                Instruction i = match(lookupSwitch.getKey());
                 if (i == null)
-                    visit(lookupSwitch.key);
+                    visit(lookupSwitch.getKey());
                 else
-                    lookupSwitch.key = i;
+                    lookupSwitch.setKey(i);
             }
             break;
         case Const.MULTIANEWARRAY:
             {
                 MultiANewArray multiANewArray = (MultiANewArray)instruction;
-                Instruction[] dimensions = multiANewArray.dimensions;
+                Instruction[] dimensions = multiANewArray.getDimensions();
                 Instruction ins;
 
                 for (int i=dimensions.length-1; i>=0; i--)
@@ -293,61 +293,61 @@ public class ReplaceStringBuxxxerVisitor
         case Const.NEWARRAY:
             {
                 NewArray newArray = (NewArray)instruction;
-                Instruction i = match(newArray.dimension);
+                Instruction i = match(newArray.getDimension());
                 if (i == null)
-                    visit(newArray.dimension);
+                    visit(newArray.getDimension());
                 else
-                    newArray.dimension = i;
+                    newArray.setDimension(i);
             }
             break;
         case Const.ANEWARRAY:
             {
                 ANewArray newArray = (ANewArray)instruction;
-                Instruction i = match(newArray.dimension);
+                Instruction i = match(newArray.getDimension());
                 if (i == null)
-                    visit(newArray.dimension);
+                    visit(newArray.getDimension());
                 else
-                    newArray.dimension = i;
+                    newArray.setDimension(i);
             }
             break;
         case Const.POP:
-            visit(((Pop)instruction).objectref);
+            visit(((Pop)instruction).getObjectref());
             break;
         case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
-                Instruction i = match(putField.objectref);
+                Instruction i = match(putField.getObjectref());
                 if (i == null)
-                    visit(putField.objectref);
+                    visit(putField.getObjectref());
                 else
-                    putField.objectref = i;
+                    putField.setObjectref(i);
 
-                i = match(putField.valueref);
+                i = match(putField.getValueref());
                 if (i == null)
-                    visit(putField.valueref);
+                    visit(putField.getValueref());
                 else
-                    putField.valueref = i;
+                    putField.setValueref(i);
             }
             break;
         case Const.PUTSTATIC:
             {
                 PutStatic putStatic = (PutStatic)instruction;
-                Instruction i = match(putStatic.valueref);
+                Instruction i = match(putStatic.getValueref());
                 if (i == null)
-                    visit(putStatic.valueref);
+                    visit(putStatic.getValueref());
                 else
-                    putStatic.valueref = i;
+                    putStatic.setValueref(i);
             }
             break;
         case ByteCodeConstants.XRETURN:
             {
                 ReturnInstruction returnInstruction =
                     (ReturnInstruction)instruction;
-                Instruction i = match(returnInstruction.valueref);
+                Instruction i = match(returnInstruction.getValueref());
                 if (i == null)
-                    visit(returnInstruction.valueref);
+                    visit(returnInstruction.getValueref());
                 else
-                    returnInstruction.valueref = i;
+                    returnInstruction.setValueref(i);
             }
             break;
         case ByteCodeConstants.STORE:
@@ -356,67 +356,67 @@ public class ReplaceStringBuxxxerVisitor
             {
                 StoreInstruction storeInstruction =
                     (StoreInstruction)instruction;
-                Instruction i = match(storeInstruction.valueref);
+                Instruction i = match(storeInstruction.getValueref());
                 if (i == null)
-                    visit(storeInstruction.valueref);
+                    visit(storeInstruction.getValueref());
                 else
-                    storeInstruction.valueref = i;
+                    storeInstruction.setValueref(i);
             }
             break;
         case Const.TABLESWITCH:
             {
                 TableSwitch tableSwitch = (TableSwitch)instruction;
-                Instruction i = match(tableSwitch.key);
+                Instruction i = match(tableSwitch.getKey());
                 if (i == null)
-                    visit(tableSwitch.key);
+                    visit(tableSwitch.getKey());
                 else
-                    tableSwitch.key = i;
+                    tableSwitch.setKey(i);
             }
             break;
         case ByteCodeConstants.TERNARYOPSTORE:
             {
                 TernaryOpStore tosInstruction = (TernaryOpStore)instruction;
-                Instruction i = match(tosInstruction.objectref);
+                Instruction i = match(tosInstruction.getObjectref());
                 if (i == null)
-                    visit(tosInstruction.objectref);
+                    visit(tosInstruction.getObjectref());
                 else
-                    tosInstruction.objectref = i;
+                    tosInstruction.setObjectref(i);
             }
             break;
         case ByteCodeConstants.TERNARYOP:
             {
                 TernaryOperator to = (TernaryOperator)instruction;
-                Instruction i = match(to.value1);
+                Instruction i = match(to.getValue1());
                 if (i == null)
-                    visit(to.value1);
+                    visit(to.getValue1());
                 else
-                    to.value1 = i;
+                    to.setValue1(i);
 
-                i = match(to.value2);
+                i = match(to.getValue2());
                 if (i == null)
-                    visit(to.value2);
+                    visit(to.getValue2());
                 else
-                    to.value2 = i;
+                    to.setValue2(i);
             }
             break;
         case Const.MONITORENTER:
             {
                 MonitorEnter meInstruction = (MonitorEnter)instruction;
-                Instruction i = match(meInstruction.objectref);
+                Instruction i = match(meInstruction.getObjectref());
                 if (i == null)
-                    visit(meInstruction.objectref);
+                    visit(meInstruction.getObjectref());
                 else
-                    meInstruction.objectref = i;
+                    meInstruction.setObjectref(i);
             }
             break;
         case Const.MONITOREXIT:
             {
                 MonitorExit meInstruction = (MonitorExit)instruction;
-                Instruction i = match(meInstruction.objectref);
+                Instruction i = match(meInstruction.getObjectref());
                 if (i == null)
-                    visit(meInstruction.objectref);
+                    visit(meInstruction.getObjectref());
                 else
-                    meInstruction.objectref = i;
+                    meInstruction.setObjectref(i);
             }
             break;
         case ByteCodeConstants.INITARRAY:
@@ -424,19 +424,19 @@ public class ReplaceStringBuxxxerVisitor
             {
                 InitArrayInstruction iaInstruction =
                     (InitArrayInstruction)instruction;
-                Instruction i = match(iaInstruction.newArray);
+                Instruction i = match(iaInstruction.getNewArray());
                 if (i == null)
-                    visit(iaInstruction.newArray);
+                    visit(iaInstruction.getNewArray());
                 else
-                    iaInstruction.newArray = i;
+                    iaInstruction.setNewArray(i);
 
-                for (int index=iaInstruction.values.size()-1; index>=0; --index)
+                for (int index=iaInstruction.getValues().size()-1; index>=0; --index)
                 {
-                    i = match(iaInstruction.values.get(index));
+                    i = match(iaInstruction.getValues().get(index));
                     if (i == null)
-                        visit(iaInstruction.values.get(index));
+                        visit(iaInstruction.getValues().get(index));
                     else
-                        iaInstruction.values.set(index, i);
+                        iaInstruction.getValues().set(index, i);
                 }
             }
             break;
@@ -470,7 +470,7 @@ public class ReplaceStringBuxxxerVisitor
             System.err.println(
                     "Can not replace StringBuxxxer in " +
                     instruction.getClass().getName() + " " +
-                    instruction.opcode);
+                    instruction.getOpcode());
         }
     }
 
@@ -493,20 +493,20 @@ public class ReplaceStringBuxxxerVisitor
 
     private Instruction match(Instruction i)
     {
-        if (i.opcode == Const.INVOKEVIRTUAL)
+        if (i.getOpcode() == Const.INVOKEVIRTUAL)
         {
             Invokevirtual iv = (Invokevirtual)i;
-            ConstantMethodref cmr = this.constants.getConstantMethodref(iv.index);
+            ConstantMethodref cmr = this.constants.getConstantMethodref(iv.getIndex());
             ConstantClass cc = this.constants.getConstantClass(cmr.getClassIndex());
 
-            if ((cc.getNameIndex() == constants.stringBufferClassNameIndex) ||
-                (cc.getNameIndex() == constants.stringBuilderClassNameIndex))
+            if ((cc.getNameIndex() == constants.getStringBufferClassNameIndex()) ||
+                (cc.getNameIndex() == constants.getStringBuilderClassNameIndex()))
             {
                 ConstantNameAndType cnat =
                     constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 
-                if (cnat.getNameIndex() == constants.toStringIndex)
-                    return match(iv.objectref, cmr.getClassIndex());
+                if (cnat.getNameIndex() == constants.getToStringIndex())
+                    return match(iv.getObjectref(), cmr.getClassIndex());
             }
         }
 
@@ -515,58 +515,58 @@ public class ReplaceStringBuxxxerVisitor
 
     private Instruction match(Instruction i, int classIndex)
     {
-        if (i.opcode == Const.INVOKEVIRTUAL)
+        if (i.getOpcode() == Const.INVOKEVIRTUAL)
         {
             InvokeNoStaticInstruction insi = (InvokeNoStaticInstruction)i;
             ConstantMethodref cmr =
-                this.constants.getConstantMethodref(insi.index);
+                this.constants.getConstantMethodref(insi.getIndex());
 
             if (cmr.getClassIndex() == classIndex)
             {
                 ConstantNameAndType cnat =
                     constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 
-                if ((cnat.getNameIndex() == this.constants.appendIndex) &&
-                    (insi.args.size() == 1))
+                if ((cnat.getNameIndex() == this.constants.getAppendIndex()) &&
+                    (insi.getArgs().size() == 1))
                 {
-                    Instruction result = match(insi.objectref, cmr.getClassIndex());
+                    Instruction result = match(insi.getObjectref(), cmr.getClassIndex());
 
                     if (result == null)
                     {
-                        return insi.args.get(0);
+                        return insi.getArgs().get(0);
                     }
                     return new BinaryOperatorInstruction(
-                        ByteCodeConstants.BINARYOP, i.offset, i.lineNumber,
+                        ByteCodeConstants.BINARYOP, i.getOffset(), i.getLineNumber(),
                         4,  StringConstants.INTERNAL_STRING_SIGNATURE, "+",
-                        result, insi.args.get(0));
+                        result, insi.getArgs().get(0));
                 }
             }
         }
-        else if (i.opcode == ByteCodeConstants.INVOKENEW)
+        else if (i.getOpcode() == ByteCodeConstants.INVOKENEW)
         {
             InvokeNew in = (InvokeNew)i;
             ConstantMethodref cmr =
-                this.constants.getConstantMethodref(in.index);
+                this.constants.getConstantMethodref(in.getIndex());
 
-            if ((cmr.getClassIndex() == classIndex) && (in.args.size() == 1))
+            if ((cmr.getClassIndex() == classIndex) && (in.getArgs().size() == 1))
             {
-                Instruction arg0 = in.args.get(0);
+                Instruction arg0 = in.getArgs().get(0);
 
                 // Remove String.valueOf for String
-                if (arg0.opcode == Const.INVOKESTATIC)
+                if (arg0.getOpcode() == Const.INVOKESTATIC)
                 {
                     Invokestatic is = (Invokestatic)arg0;
-                    cmr = this.constants.getConstantMethodref(is.index);
+                    cmr = this.constants.getConstantMethodref(is.getIndex());
                     ConstantClass cc = this.constants.getConstantClass(cmr.getClassIndex());
 
-                    if (cc.getNameIndex() == this.constants.stringClassNameIndex)
+                    if (cc.getNameIndex() == this.constants.getStringClassNameIndex())
                     {
                         ConstantNameAndType cnat =
                             this.constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 
-                        if ((cnat.getNameIndex() == this.constants.valueOfIndex) &&
-                            (is.args.size() == 1))
-                            return is.args.get(0);
+                        if ((cnat.getNameIndex() == this.constants.getValueOfIndex()) &&
+                            (is.getArgs().size() == 1))
+                            return is.getArgs().get(0);
                     }
                 }
 

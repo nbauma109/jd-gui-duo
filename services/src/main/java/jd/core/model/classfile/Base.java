@@ -25,12 +25,12 @@ import jd.core.model.classfile.attribute.AttributeSignature;
 
 public class Base
 {
-	public int accessFlags;
-	public final Attribute[] attributes;
+	private int accessFlags;
+	private final Attribute[] attributes;
 
 	public Base(int accessFlags, Attribute[] attributes)
 	{
-		this.accessFlags = accessFlags;
+		this.setAccessFlags(accessFlags);
 		this.attributes = attributes;
 	}
 
@@ -39,7 +39,7 @@ public class Base
 		if (this.attributes != null)
 		{
 			for (int i=this.attributes.length-1; i>=0; --i) {
-				if (this.attributes[i].tag == Const.ATTR_SIGNATURE) {
+				if (this.attributes[i].getTag() == Const.ATTR_SIGNATURE) {
 					return (AttributeSignature)this.attributes[i];
 				}
 			}
@@ -53,7 +53,7 @@ public class Base
 		if (this.attributes != null)
 		{
 			for (int i=this.attributes.length-1; i>=0; --i) {
-				if (this.attributes[i].tag == Const.ATTR_DEPRECATED) {
+				if (this.attributes[i].getTag() == Const.ATTR_DEPRECATED) {
 					return true;
 				}
 			}
@@ -68,9 +68,9 @@ public class Base
 		{
 			for (int i=this.attributes.length-1; i>=0; --i)
 			{
-				if (this.attributes[i].tag == Const.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS || this.attributes[i].tag == Const.ATTR_RUNTIME_VISIBLE_ANNOTATIONS) {
+				if (this.attributes[i].getTag() == Const.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS || this.attributes[i].getTag() == Const.ATTR_RUNTIME_VISIBLE_ANNOTATIONS) {
 					Annotation[]annotations =
-							((AttributeRuntimeAnnotations)attributes[i]).annotations;
+							((AttributeRuntimeAnnotations)attributes[i]).getAnnotations();
 					if (containsAnnotationDeprecated(classFile, annotations)) {
 						return true;
 					}
@@ -87,15 +87,33 @@ public class Base
 		if (annotations != null)
 		{
 			int idsIndex =
-					classFile.getConstantPool().internalDeprecatedSignatureIndex;
+					classFile.getConstantPool().getInternalDeprecatedSignatureIndex();
 
 			for (int i=annotations.length-1; i>=0; --i) {
-				if (idsIndex == annotations[i].typeIndex) {
+				if (idsIndex == annotations[i].getTypeIndex()) {
 					return true;
 				}
 			}
 		}
 
 		return false;
+	}
+
+    public Attribute[] getAttributes()
+    {
+        return this.attributes;
+    }
+
+    public Attribute getAttribute(int i)
+    {
+    	return this.attributes[i];
+    }
+
+	public int getAccessFlags() {
+		return accessFlags;
+	}
+
+	public void setAccessFlags(int accessFlags) {
+		this.accessFlags = accessFlags;
 	}
 }

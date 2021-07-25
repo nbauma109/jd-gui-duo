@@ -18,11 +18,15 @@ package jd.core.model.classfile.attribute;
 
 public class ElementValueAnnotationValue extends ElementValue
 {
-    public final Annotation annotationValue;
+    private final Annotation annotationValue;
 
     public ElementValueAnnotationValue(byte tag, Annotation annotationValue)
     {
         super(tag);
         this.annotationValue = annotationValue;
     }
+
+	public Annotation getAnnotationValue() {
+		return annotationValue;
+	}
 }

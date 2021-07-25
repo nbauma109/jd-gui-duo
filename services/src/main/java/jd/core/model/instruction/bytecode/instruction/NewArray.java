@@ -22,23 +22,35 @@ import jd.core.util.SignatureUtil;
 
 public class NewArray extends Instruction
 {
-    public final int type;
-    public Instruction dimension;
+    private final int type;
+    private Instruction dimension;
 
     public NewArray(
         int opcode, int offset, int lineNumber, int type, Instruction dimension)
     {
         super(opcode, offset, lineNumber);
         this.type = type;
-        this.dimension = dimension;
+        this.setDimension(dimension);
     }
 
     @Override
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        String signature = SignatureUtil.getSignatureFromType(this.type);
+        String signature = SignatureUtil.getSignatureFromType(this.getType());
 
         return signature == null ? null : "[" + signature;
     }
+
+	public int getType() {
+		return type;
+	}
+
+	public Instruction getDimension() {
+		return dimension;
+	}
+
+	public void setDimension(Instruction dimension) {
+		this.dimension = dimension;
+	}
 }

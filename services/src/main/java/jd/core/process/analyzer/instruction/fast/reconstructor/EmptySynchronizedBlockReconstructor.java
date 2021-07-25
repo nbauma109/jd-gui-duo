@@ -45,27 +45,27 @@ public class EmptySynchronizedBlockReconstructor
         {
             Instruction monitorExit = list.get(index);
 
-            if (monitorExit.opcode != Const.MONITOREXIT)
+            if (monitorExit.getOpcode() != Const.MONITOREXIT)
                 continue;
 
             Instruction instruction = list.get(index-1);
 
-            if (instruction.opcode != Const.MONITORENTER)
+            if (instruction.getOpcode() != Const.MONITORENTER)
                 continue;
 
             MonitorEnter me = (MonitorEnter)instruction;
 
-            if (me.objectref.opcode != ByteCodeConstants.DUPLOAD)
+            if (me.getObjectref().getOpcode() != ByteCodeConstants.DUPLOAD)
                 continue;
 
             DupStore dupStore;
             instruction = list.get(index-2);
 
-            if (instruction.opcode == ByteCodeConstants.DUPSTORE)
+            if (instruction.getOpcode() == ByteCodeConstants.DUPSTORE)
             {
                 dupStore = (DupStore)instruction;
             }
-            else if (instruction.opcode == Const.ASTORE)
+            else if (instruction.getOpcode() == Const.ASTORE)
             {
                 if (index <= 2)
                     continue;
@@ -73,14 +73,14 @@ public class EmptySynchronizedBlockReconstructor
                 AStore astore = (AStore)instruction;
 
                 instruction = list.get(index-3);
-                if (instruction.opcode != ByteCodeConstants.DUPSTORE)
+                if (instruction.getOpcode() != ByteCodeConstants.DUPSTORE)
                     continue;
 
                 dupStore = (DupStore)instruction;
 
                 // Remove local variable for monitor
                 localVariables.removeLocalVariableWithIndexAndOffset(
-                        astore.index, astore.offset);
+                        astore.getIndex(), astore.getOffset());
                 // Remove MonitorExit
                 list.remove(index--);
             }
@@ -90,9 +90,9 @@ public class EmptySynchronizedBlockReconstructor
             }
 
             FastSynchronized fastSynchronized = new FastSynchronized(
-                FastConstants.SYNCHRONIZED, monitorExit.offset,
-                instruction.lineNumber,  1, new ArrayList<>());
-            fastSynchronized.monitor = dupStore.objectref;
+                FastConstants.SYNCHRONIZED, monitorExit.getOffset(),
+                instruction.getLineNumber(),  1, new ArrayList<>());
+            fastSynchronized.setMonitor(dupStore.getObjectref());
 
             // Remove MonitorExit/MonitorEnter
             list.remove(index--);

@@ -45,89 +45,89 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
 
     public void visit(Instruction instruction)
     {
-        switch (instruction.opcode)
+        switch (instruction.getOpcode())
         {
         case Const.ARRAYLENGTH:
-            visit(((ArrayLength)instruction).arrayref);
+            visit(((ArrayLength)instruction).getArrayref());
             break;
         case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
-            visit(((ArrayStoreInstruction)instruction).arrayref);
+            visit(((ArrayStoreInstruction)instruction).getArrayref());
             break;
         case ByteCodeConstants.ASSERT:
             {
                 AssertInstruction ai = (AssertInstruction)instruction;
-                visit(ai.test);
-                if (ai.msg != null)
-                    visit(ai.msg);
+                visit(ai.getTest());
+                if (ai.getMsg() != null)
+                    visit(ai.getMsg());
             }
             break;
         case Const.ATHROW:
-            visit(((AThrow)instruction).value);
+            visit(((AThrow)instruction).getValue());
             break;
         case ByteCodeConstants.UNARYOP:
-            visit(((UnaryOperatorInstruction)instruction).value);
+            visit(((UnaryOperatorInstruction)instruction).getValue());
             break;
         case ByteCodeConstants.BINARYOP:
         case ByteCodeConstants.ASSIGNMENT:
             {
                 BinaryOperatorInstruction boi =
                     (BinaryOperatorInstruction)instruction;
-                visit(boi.value1);
-                visit(boi.value2);
+                visit(boi.getValue1());
+                visit(boi.getValue2());
             }
             break;
         case Const.CHECKCAST:
-            visit(((CheckCast)instruction).objectref);
+            visit(((CheckCast)instruction).getObjectref());
             break;
         case ByteCodeConstants.STORE:
         case Const.ASTORE:
         case Const.ISTORE:
-            visit(((StoreInstruction)instruction).valueref);
+            visit(((StoreInstruction)instruction).getValueref());
             break;
         case ByteCodeConstants.DUPSTORE:
-            visit(((DupStore)instruction).objectref);
+            visit(((DupStore)instruction).getObjectref());
             break;
         case ByteCodeConstants.CONVERT:
         case ByteCodeConstants.IMPLICITCONVERT:
-            visit(((ConvertInstruction)instruction).value);
+            visit(((ConvertInstruction)instruction).getValue());
             break;
         case ByteCodeConstants.IFCMP:
             {
                 IfCmp ifCmp = (IfCmp)instruction;
-                visit(ifCmp.value1);
-                visit(ifCmp.value2);
+                visit(ifCmp.getValue1());
+                visit(ifCmp.getValue2());
             }
             break;
         case ByteCodeConstants.IF:
         case ByteCodeConstants.IFXNULL:
-            visit(((IfInstruction)instruction).value);
+            visit(((IfInstruction)instruction).getValue());
             break;
         case ByteCodeConstants.COMPLEXIF:
             {
                 List<Instruction> branchList =
-                    ((ComplexConditionalBranchInstruction)instruction).instructions;
+                    ((ComplexConditionalBranchInstruction)instruction).getInstructions();
                 for (int i=branchList.size()-1; i>=0; --i)
                     visit(branchList.get(i));
             }
             break;
         case Const.INSTANCEOF:
-            visit(((InstanceOf)instruction).objectref);
+            visit(((InstanceOf)instruction).getObjectref());
             break;
         case Const.INVOKEVIRTUAL:
             {
                 Invokevirtual iv = (Invokevirtual)instruction;
                 ConstantMethodref cmr =
-                    this.constants.getConstantMethodref(iv.index);
+                    this.constants.getConstantMethodref(iv.getIndex());
                 ConstantClass cc = this.constants.getConstantClass(cmr.getClassIndex());
 
-                if (cc.getNameIndex() == this.constants.stringClassNameIndex)
+                if (cc.getNameIndex() == this.constants.getStringClassNameIndex())
                 {
-                    int nbrOfParameters = iv.args.size();
+                    int nbrOfParameters = iv.getArgs().size();
 
                     if ((1 <= nbrOfParameters) && (nbrOfParameters <= 2))
                     {
-                        int opcode = iv.args.get(0).opcode;
+                        int opcode = iv.getArgs().get(0).getOpcode();
 
                         if (((opcode==Const.BIPUSH) ||
                              (opcode==Const.SIPUSH)) &&
@@ -144,7 +144,7 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
                                 "lastIndexOf".equals(name))
                             {
                                 // Change constant type
-                                IConst ic = (IConst)iv.args.get(0);
+                                IConst ic = (IConst)iv.getArgs().get(0);
                                 ic.setReturnedSignature("C");
                                 break;
                             }
@@ -155,74 +155,74 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
             // intended fall through
         case Const.INVOKEINTERFACE:
         case Const.INVOKESPECIAL:
-            visit(((InvokeNoStaticInstruction)instruction).objectref);
+            visit(((InvokeNoStaticInstruction)instruction).getObjectref());
             // intended fall through
         case Const.INVOKESTATIC:
         case ByteCodeConstants.INVOKENEW:
             {
-                List<Instruction> list = ((InvokeInstruction)instruction).args;
+                List<Instruction> list = ((InvokeInstruction)instruction).getArgs();
                 for (int i=list.size()-1; i>=0; --i)
                     visit(list.get(i));
             }
             break;
         case Const.LOOKUPSWITCH:
-            visit(((LookupSwitch)instruction).key);
+            visit(((LookupSwitch)instruction).getKey());
             break;
         case Const.MONITORENTER:
-            visit(((MonitorEnter)instruction).objectref);
+            visit(((MonitorEnter)instruction).getObjectref());
             break;
         case Const.MONITOREXIT:
-            visit(((MonitorExit)instruction).objectref);
+            visit(((MonitorExit)instruction).getObjectref());
             break;
         case Const.MULTIANEWARRAY:
             {
-                Instruction[] dimensions = ((MultiANewArray)instruction).dimensions;
+                Instruction[] dimensions = ((MultiANewArray)instruction).getDimensions();
                 for (int i=dimensions.length-1; i>=0; --i)
                     visit(dimensions[i]);
             }
             break;
         case Const.NEWARRAY:
-            visit(((NewArray)instruction).dimension);
+            visit(((NewArray)instruction).getDimension());
             break;
         case Const.ANEWARRAY:
-            visit(((ANewArray)instruction).dimension);
+            visit(((ANewArray)instruction).getDimension());
             break;
         case Const.POP:
-            visit(((Pop)instruction).objectref);
+            visit(((Pop)instruction).getObjectref());
             break;
         case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
-                visit(putField.objectref);
-                visit(putField.valueref);
+                visit(putField.getObjectref());
+                visit(putField.getValueref());
             }
             break;
         case Const.PUTSTATIC:
-            visit(((PutStatic)instruction).valueref);
+            visit(((PutStatic)instruction).getValueref());
             break;
         case ByteCodeConstants.XRETURN:
-            visit(((ReturnInstruction)instruction).valueref);
+            visit(((ReturnInstruction)instruction).getValueref());
             break;
         case Const.TABLESWITCH:
-            visit(((TableSwitch)instruction).key);
+            visit(((TableSwitch)instruction).getKey());
             break;
         case ByteCodeConstants.TERNARYOPSTORE:
-            visit(((TernaryOpStore)instruction).objectref);
+            visit(((TernaryOpStore)instruction).getObjectref());
             break;
         case ByteCodeConstants.PREINC:
         case ByteCodeConstants.POSTINC:
-            visit(((IncInstruction)instruction).value);
+            visit(((IncInstruction)instruction).getValue());
             break;
         case Const.GETFIELD:
-            visit(((GetField)instruction).objectref);
+            visit(((GetField)instruction).getObjectref());
             break;
         case ByteCodeConstants.INITARRAY:
         case ByteCodeConstants.NEWANDINITARRAY:
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
-                visit(iai.newArray);
-                if (iai.values != null)
-                    visit(iai.values);
+                visit(iai.getNewArray());
+                if (iai.getValues() != null)
+                    visit(iai.getValues());
             }
             break;
         case Const.ACONST_NULL:
@@ -255,7 +255,7 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
             System.err.println(
                     "Can not search String.indexOf in " +
                     instruction.getClass().getName() +
-                    ", opcode=" + instruction.opcode);
+                    ", opcode=" + instruction.getOpcode());
         }
     }
 

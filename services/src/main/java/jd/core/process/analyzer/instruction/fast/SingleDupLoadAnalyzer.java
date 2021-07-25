@@ -46,7 +46,7 @@ public class SingleDupLoadAnalyzer
         // Effacement des instructions DupStore et DupLoad
         for (int dupStoreIndex=0; dupStoreIndex<length; dupStoreIndex++)
         {
-            if (list.get(dupStoreIndex).opcode != ByteCodeConstants.DUPSTORE)
+            if (list.get(dupStoreIndex).getOpcode() != ByteCodeConstants.DUPSTORE)
                 continue;
 
             DupStore dupStore = (DupStore)list.get(dupStoreIndex);
@@ -65,7 +65,7 @@ public class SingleDupLoadAnalyzer
             {
                 if (counter > 0)
                 {
-                    replaceDupLoadVisitor.init(dupStore, dupStore.objectref);
+                    replaceDupLoadVisitor.init(dupStore, dupStore.getObjectref());
                     for (int index=dupStoreIndex+1; index<length; ++index)
                         replaceDupLoadVisitor.visit(list.get(index));
                 }

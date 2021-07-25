@@ -20,13 +20,16 @@ import org.apache.bcel.classfile.InnerClass;
 
 public class AttributeInnerClasses extends Attribute
 {
-    public final InnerClass[] classes;
+    private final InnerClass[] classes;
 
     public AttributeInnerClasses(byte tag,
-                                 int attributeNameIndex,
                                  InnerClass[] classes)
     {
-        super(tag, attributeNameIndex);
+        super(tag);
         this.classes = classes;
     }
+
+	public InnerClass[] getClasses() {
+		return classes;
+	}
 }

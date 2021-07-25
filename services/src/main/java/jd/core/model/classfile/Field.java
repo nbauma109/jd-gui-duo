@@ -33,32 +33,32 @@ public class Field extends FieldOrMethod
      * 1) ClassFileAnalyzer.AnalyseAndModifyConstructors(...) pour y placer le
      *    numero (position) du parametre du constructeur initialisant le champs.
      */
-    public int anonymousClassConstructorParameterIndex;
+    private int anonymousClassConstructorParameterIndex;
     /*
      * 2) NewInstructionReconstructorBase.InitAnonymousClassConstructorParameterName(...)
      *    pour y placer l'index du nom du parametre.
      * 3) SourceWriterVisitor.writeGetField(...) pour afficher le nom du
      *    parameter de la classe englobante.
      */
-    public int outerMethodLocalVariableNameIndex;
+    private int outerMethodLocalVariableNameIndex;
 
     public Field(
         int accessFlags, int nameIndex,
         int descriptorIndex, Attribute[] attributes)
     {
         super(accessFlags, nameIndex, descriptorIndex, attributes);
-        this.anonymousClassConstructorParameterIndex = UtilConstants.INVALID_INDEX;
-        this.outerMethodLocalVariableNameIndex = UtilConstants.INVALID_INDEX;
+        this.setAnonymousClassConstructorParameterIndex(UtilConstants.INVALID_INDEX);
+        this.setOuterMethodLocalVariableNameIndex(UtilConstants.INVALID_INDEX);
     }
 
     public Constant getConstantValue(ConstantPool constants)
     {
-        if (this.attributes != null) {
-			for (Attribute attribute : this.attributes) {
-				if (attribute.tag == Const.ATTR_CONSTANT_VALUE)
+        if (this.getAttributes() != null) {
+			for (Attribute attribute : this.getAttributes()) {
+				if (attribute.getTag() == Const.ATTR_CONSTANT_VALUE)
                 {
                     AttributeConstantValue acv = (AttributeConstantValue)attribute;
-                    return constants.getConstantValue(acv.constantvalueIndex);
+                    return constants.getConstantValue(acv.getConstantvalueIndex());
                 }
 			}
 		}
@@ -76,7 +76,23 @@ public class Field extends FieldOrMethod
         this.valueAndMethod = new ValueAndMethod(value, method);
     }
 
-    public static class ValueAndMethod
+    public int getAnonymousClassConstructorParameterIndex() {
+		return anonymousClassConstructorParameterIndex;
+	}
+
+	public void setAnonymousClassConstructorParameterIndex(int anonymousClassConstructorParameterIndex) {
+		this.anonymousClassConstructorParameterIndex = anonymousClassConstructorParameterIndex;
+	}
+
+	public int getOuterMethodLocalVariableNameIndex() {
+		return outerMethodLocalVariableNameIndex;
+	}
+
+	public void setOuterMethodLocalVariableNameIndex(int outerMethodLocalVariableNameIndex) {
+		this.outerMethodLocalVariableNameIndex = outerMethodLocalVariableNameIndex;
+	}
+
+	public static class ValueAndMethod
     {
         private final Instruction value;
         private final Method method;

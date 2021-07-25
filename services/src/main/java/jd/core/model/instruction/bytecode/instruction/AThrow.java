@@ -21,19 +21,27 @@ import jd.core.model.classfile.LocalVariables;
 
 public class AThrow extends Instruction
 {
-    public Instruction value;
+    private Instruction value;
 
     public AThrow(
         int opcode, int offset, int lineNumber, Instruction value)
     {
         super(opcode, offset, lineNumber);
-        this.value = value;
+        this.setValue(value);
     }
 
     @Override
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        return this.value.getReturnedSignature(constants, localVariables);
+        return this.getValue().getReturnedSignature(constants, localVariables);
     }
+
+	public Instruction getValue() {
+		return value;
+	}
+
+	public void setValue(Instruction value) {
+		this.value = value;
+	}
 }

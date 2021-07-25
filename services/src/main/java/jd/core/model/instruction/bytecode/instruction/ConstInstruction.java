@@ -18,11 +18,19 @@ package jd.core.model.instruction.bytecode.instruction;
 
 public abstract class ConstInstruction extends Instruction
 {
-    public int value;
+    private int value;
 
     protected ConstInstruction(int opcode, int offset, int lineNumber, int value)
     {
         super(opcode, offset, lineNumber);
-        this.value = value;
+        this.setValue(value);
     }
+
+	public int getValue() {
+		return value;
+	}
+
+	public void setValue(int value) {
+		this.value = value;
+	}
 }

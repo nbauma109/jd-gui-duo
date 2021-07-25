@@ -18,11 +18,19 @@ package jd.core.model.instruction.bytecode.instruction;
 
 public abstract class IndexInstruction extends Instruction
 {
-    public int index;
+    private int index;
 
     protected IndexInstruction(int opcode, int offset, int lineNumber, int index)
     {
         super(opcode, offset, lineNumber);
-        this.index = index;
+        this.setIndex(index);
     }
+
+	public int getIndex() {
+		return index;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
+	}
 }

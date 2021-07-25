@@ -138,7 +138,7 @@ public class InstructionListBuilder
 				{
 					int opcode = code[offset] & 255;
 					InstructionFactory factory =
-							InstructionFactoryConstants.FACTORIES[opcode];
+							InstructionFactoryConstants.getInstructionFactory(opcode);
 
 					if (factory == null) {
 						String msg = "No factory for " +

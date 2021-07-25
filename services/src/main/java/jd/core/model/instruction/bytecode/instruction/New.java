@@ -35,6 +35,6 @@ public class New extends IndexInstruction
             return null;
 
         return SignatureUtil.createTypeName(
-            constants.getConstantClassName(this.index));
+            constants.getConstantClassName(this.getIndex()));
     }
 }

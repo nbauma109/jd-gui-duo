@@ -40,20 +40,20 @@ public class TernaryOpInReturnReconstructor
     {
         for (int index=list.size()-1; index>=0; --index)
         {
-            if (list.get(index).opcode != ByteCodeConstants.XRETURN)
+            if (list.get(index).getOpcode() != ByteCodeConstants.XRETURN)
                 continue;
 
             ReturnInstruction ri1 = (ReturnInstruction)list.get(index);
-            int opcode = ri1.valueref.opcode;
+            int opcode = ri1.getValueref().getOpcode();
 
             if ((opcode != Const.SIPUSH) &&
                 (opcode != Const.BIPUSH) &&
                 (opcode != ByteCodeConstants.ICONST))
                 continue;
 
-            IConst iConst1 = (IConst)ri1.valueref;
+            IConst iConst1 = (IConst)ri1.getValueref();
 
-            if (!"Z".equals(iConst1.signature))
+            if (!"Z".equals(iConst1.getSignature()))
                 continue;
 
             if (index <= 0)
@@ -61,25 +61,25 @@ public class TernaryOpInReturnReconstructor
 
             int index2 = index - 1;
 
-            if (list.get(index2).opcode != ByteCodeConstants.XRETURN)
+            if (list.get(index2).getOpcode() != ByteCodeConstants.XRETURN)
                 continue;
 
             ReturnInstruction ri2 = (ReturnInstruction)list.get(index2);
 
-            if ((ri1.lineNumber != Instruction.UNKNOWN_LINE_NUMBER) &&
-                (ri1.lineNumber > ri2.lineNumber))
+            if ((ri1.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER) &&
+                (ri1.getLineNumber() > ri2.getLineNumber()))
                 continue;
 
-            opcode = ri2.valueref.opcode;
+            opcode = ri2.getValueref().getOpcode();
 
             if ((opcode != Const.SIPUSH) &&
                 (opcode != Const.BIPUSH) &&
                 (opcode != ByteCodeConstants.ICONST))
                 continue;
 
-            IConst iConst2 = (IConst)ri2.valueref;
+            IConst iConst2 = (IConst)ri2.getValueref();
 
-            if (!"Z".equals(iConst2.signature))
+            if (!"Z".equals(iConst2.getSignature()))
                 continue;
 
             if (index2 <= 0)
@@ -87,7 +87,7 @@ public class TernaryOpInReturnReconstructor
 
             Instruction instruction = list.get(--index2);
 
-            opcode = instruction.opcode;
+            opcode = instruction.getOpcode();
 
             if ((opcode != ByteCodeConstants.IF) &&
                 (opcode != ByteCodeConstants.IFCMP) &&
@@ -98,7 +98,7 @@ public class TernaryOpInReturnReconstructor
             BranchInstruction bi = (BranchInstruction)instruction;
             int offset = bi.getJumpOffset();
 
-            if ((ri2.offset >= offset) || (offset > ri1.offset))
+            if ((ri2.getOffset() >= offset) || (offset > ri1.getOffset()))
                 continue;
 
             // Verification qu'aucune instruction saute sur 'ri1'
@@ -108,12 +108,12 @@ public class TernaryOpInReturnReconstructor
             while (i-- > 0)
             {
                 instruction = list.get(i);
-                opcode = instruction.opcode;
+                opcode = instruction.getOpcode();
 
                 if (opcode == Const.GOTO)
                 {
                     int jumpOffset = ((Goto)instruction).getJumpOffset();
-                    if ((ri2.offset < jumpOffset) && (jumpOffset <= ri1.offset))
+                    if ((ri2.getOffset() < jumpOffset) && (jumpOffset <= ri1.getOffset()))
                     {
                         found = true;
                         break;
@@ -126,7 +126,7 @@ public class TernaryOpInReturnReconstructor
                 {
                     int jumpOffset =
                         ((BranchInstruction)instruction).getJumpOffset();
-                    if ((ri2.offset < jumpOffset) && (jumpOffset <= ri1.offset))
+                    if ((ri2.getOffset() < jumpOffset) && (jumpOffset <= ri1.getOffset()))
                     {
                         found = true;
                         break;
@@ -137,13 +137,13 @@ public class TernaryOpInReturnReconstructor
             if (found)
                 continue;
 
-            if (iConst2.value == 1)
+            if (iConst2.getValue() == 1)
                 ComparisonInstructionAnalyzer.inverseComparison( bi );
 
             list.remove(index);
             list.remove(index2);
 
-            ri2.valueref = bi;
+            ri2.setValueref(bi);
 
             index -= 3;
         }

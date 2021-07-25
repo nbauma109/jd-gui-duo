@@ -21,14 +21,14 @@ import jd.core.model.classfile.LocalVariables;
 
 public class InstanceOf extends IndexInstruction
 {
-    public Instruction objectref;
+    private Instruction objectref;
 
     public InstanceOf(
         int opcode, int offset, int lineNumber,
         int index, Instruction objectref)
     {
         super(opcode, offset, lineNumber, index);
-        this.objectref = objectref;
+        this.setObjectref(objectref);
     }
 
     @Override
@@ -43,4 +43,12 @@ public class InstanceOf extends IndexInstruction
     {
         return 6;
     }
+
+	public Instruction getObjectref() {
+		return objectref;
+	}
+
+	public void setObjectref(Instruction objectref) {
+		this.objectref = objectref;
+	}
 }

@@ -22,9 +22,9 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class ThrowsLayoutBlock extends LayoutBlock
 {
-    public final ClassFile classFile;
-    public final Method method;
-    public final boolean nullCodeFlag;
+    private final ClassFile classFile;
+    private final Method method;
+    private final boolean nullCodeFlag;
 
     public ThrowsLayoutBlock(
         ClassFile classFile, Method method, boolean nullCodeFlag)
@@ -37,4 +37,16 @@ public class ThrowsLayoutBlock extends LayoutBlock
         this.method = method;
         this.nullCodeFlag = nullCodeFlag;
     }
+
+	public ClassFile getClassFile() {
+		return classFile;
+	}
+
+	public Method getMethod() {
+		return method;
+	}
+
+	public boolean hasNullCodeFlag() {
+		return nullCodeFlag;
+	}
 }

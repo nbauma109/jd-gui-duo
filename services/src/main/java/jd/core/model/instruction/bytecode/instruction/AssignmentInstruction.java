@@ -34,6 +34,6 @@ public class AssignmentInstruction extends BinaryOperatorInstruction
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        return this.value2.getReturnedSignature(constants, localVariables);
+        return this.getValue2().getReturnedSignature(constants, localVariables);
     }
 }

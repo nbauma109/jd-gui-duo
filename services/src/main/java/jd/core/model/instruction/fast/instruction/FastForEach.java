@@ -22,8 +22,8 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class FastForEach extends FastList
 {
-    public Instruction variable;
-    public Instruction values;
+    private Instruction variable;
+    private Instruction values;
 
     public FastForEach(
         int opcode, int offset, int lineNumber, int branch,
@@ -31,7 +31,23 @@ public class FastForEach extends FastList
         List<Instruction> instructions)
     {
         super(opcode, offset, lineNumber, branch, instructions);
-        this.variable = declaration;
-        this.values = values;
+        this.setVariable(declaration);
+        this.setValues(values);
     }
+
+	public Instruction getVariable() {
+		return variable;
+	}
+
+	public void setVariable(Instruction variable) {
+		this.variable = variable;
+	}
+
+	public Instruction getValues() {
+		return values;
+	}
+
+	public void setValues(Instruction values) {
+		this.values = values;
+	}
 }

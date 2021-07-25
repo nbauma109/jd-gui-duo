@@ -62,11 +62,11 @@ public class InitStaticFieldsReconstructor
         {
             Instruction instruction = list.get(indexInstruction);
 
-            if (instruction.opcode != Const.PUTSTATIC)
+            if (instruction.getOpcode() != Const.PUTSTATIC)
                 break;
 
             PutStatic putStatic = (PutStatic)instruction;
-            ConstantFieldref cfr = constants.getConstantFieldref(putStatic.index);
+            ConstantFieldref cfr = constants.getConstantFieldref(putStatic.getIndex());
 
             if (cfr.getClassIndex() != classFile.getThisClassIndex())
                 break;
@@ -80,11 +80,11 @@ public class InitStaticFieldsReconstructor
             {
                 Field field = fields[indexField++];
 
-                if (((field.accessFlags & Const.ACC_STATIC) != 0) &&
+                if (((field.getAccessFlags() & Const.ACC_STATIC) != 0) &&
                     (cnat.getSignatureIndex() == field.getDescriptorIndex()) &&
                     (cnat.getNameIndex() == field.getNameIndex()))
                 {
-                    Instruction valueref = putStatic.valueref;
+                    Instruction valueref = putStatic.getValueref();
 
                     if (SearchInstructionByOpcodeVisitor.visit(
                             valueref, Const.ALOAD) != null)
@@ -97,8 +97,8 @@ public class InitStaticFieldsReconstructor
                         break;
 
                     field.setValueAndMethod(valueref, method);
-                    if (valueref.opcode == ByteCodeConstants.NEWANDINITARRAY)
-                        valueref.opcode = ByteCodeConstants.INITARRAY;
+                    if (valueref.getOpcode() == ByteCodeConstants.NEWANDINITARRAY)
+                        valueref.setOpcode(ByteCodeConstants.INITARRAY);
                     list.remove(indexInstruction--);
                     break;
                 }
@@ -127,11 +127,11 @@ public class InitStaticFieldsReconstructor
             {
                 Instruction instruction = list.get(indexInstruction);
 
-                if (instruction.opcode != Const.PUTSTATIC)
+                if (instruction.getOpcode() != Const.PUTSTATIC)
                     break;
 
                 PutStatic putStatic = (PutStatic)instruction;
-                ConstantFieldref cfr = constants.getConstantFieldref(putStatic.index);
+                ConstantFieldref cfr = constants.getConstantFieldref(putStatic.getIndex());
 
                 if (cfr.getClassIndex() != classFile.getThisClassIndex())
                     break;
@@ -145,11 +145,11 @@ public class InitStaticFieldsReconstructor
                 {
                     Field field = fields[indexField];
 
-                    if (((field.accessFlags & Const.ACC_STATIC) != 0) &&
+                    if (((field.getAccessFlags() & Const.ACC_STATIC) != 0) &&
                         (cnat.getSignatureIndex() == field.getDescriptorIndex()) &&
                         (cnat.getNameIndex() == field.getNameIndex()))
                     {
-                        Instruction valueref = putStatic.valueref;
+                        Instruction valueref = putStatic.getValueref();
 
                         if (SearchInstructionByOpcodeVisitor.visit(
                                 valueref, Const.ALOAD) != null)
@@ -162,8 +162,8 @@ public class InitStaticFieldsReconstructor
                             break;
 
                         field.setValueAndMethod(valueref, method);
-                        if (valueref.opcode == ByteCodeConstants.NEWANDINITARRAY)
-                            valueref.opcode = ByteCodeConstants.INITARRAY;
+                        if (valueref.getOpcode() == ByteCodeConstants.NEWANDINITARRAY)
+                            valueref.setOpcode(ByteCodeConstants.INITARRAY);
                         list.remove(indexInstruction);
                         break;
                     }

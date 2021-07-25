@@ -1280,7 +1280,7 @@ public class ByteCodeParser {
         TypeMaker.MethodTypes indyMethodTypes = typeMaker.makeMethodTypes(indyDescriptor);
 
         BaseExpression indyParameters = extractParametersFromStack(statements, stack, indyMethodTypes.getParameterTypes());
-        BootstrapMethod bootstrapMethod = attributeBootstrapMethods.getBootstrapMethods()[constantMemberRef.getClassIndex()];
+        BootstrapMethod bootstrapMethod = attributeBootstrapMethods.getBootstrapMethod(constantMemberRef.getClassIndex());
         int[] bootstrapArguments = bootstrapMethod.getBootstrapArguments();
 
         if ("makeConcatWithConstants".equals(indyMethodName)) {

@@ -21,16 +21,16 @@ import jd.core.model.classfile.LocalVariables;
 
 public class AssertInstruction extends Instruction
 {
-    public Instruction test;
-    public Instruction msg;
+    private Instruction test;
+    private Instruction msg;
 
     public AssertInstruction(
         int opcode, int offset, int lineNumber,
         Instruction test, Instruction msg)
     {
         super(opcode, offset, lineNumber);
-        this.test = test;
-        this.msg = msg;
+        this.setTest(test);
+        this.setMsg(msg);
     }
 
     @Override
@@ -39,4 +39,20 @@ public class AssertInstruction extends Instruction
     {
         return null;
     }
+
+	public Instruction getTest() {
+		return test;
+	}
+
+	public void setTest(Instruction test) {
+		this.test = test;
+	}
+
+	public Instruction getMsg() {
+		return msg;
+	}
+
+	public void setMsg(Instruction msg) {
+		this.msg = msg;
+	}
 }

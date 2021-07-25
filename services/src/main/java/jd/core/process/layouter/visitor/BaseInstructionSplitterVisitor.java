@@ -49,36 +49,36 @@ public abstract class BaseInstructionSplitterVisitor
 
     protected void visit(Instruction parent, Instruction instruction)
     {
-        switch (instruction.opcode)
+        switch (instruction.getOpcode())
         {
         case Const.ARRAYLENGTH:
-            visit(instruction, ((ArrayLength)instruction).arrayref);
+            visit(instruction, ((ArrayLength)instruction).getArrayref());
             break;
         case ByteCodeConstants.ARRAYLOAD:
             {
                 ArrayLoadInstruction ali = (ArrayLoadInstruction)instruction;
-                visit(instruction, ali.arrayref);
-                visit(instruction, ali.indexref);
+                visit(instruction, ali.getArrayref());
+                visit(instruction, ali.getIndexref());
             }
             break;
         case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
-                visit(instruction, asi.arrayref);
-                visit(instruction, asi.indexref);
-                visit(instruction, asi.valueref);
+                visit(instruction, asi.getArrayref());
+                visit(instruction, asi.getIndexref());
+                visit(instruction, asi.getValueref());
             }
             break;
         case Const.ANEWARRAY:
-            visit(instruction, ((ANewArray)instruction).dimension);
+            visit(instruction, ((ANewArray)instruction).getDimension());
             break;
         case ByteCodeConstants.ASSERT:
             {
                 AssertInstruction ai = (AssertInstruction)instruction;
-                visit(instruction, ai.test);
-                if (ai.msg != null)
-                    visit(instruction, ai.msg);
+                visit(instruction, ai.getTest());
+                if (ai.getMsg() != null)
+                    visit(instruction, ai.getMsg());
             }
             break;
         case ByteCodeConstants.ASSIGNMENT:
@@ -86,48 +86,48 @@ public abstract class BaseInstructionSplitterVisitor
             {
                 BinaryOperatorInstruction boi =
                     (BinaryOperatorInstruction)instruction;
-                visit(instruction, boi.value1);
-                visit(instruction, boi.value2);
+                visit(instruction, boi.getValue1());
+                visit(instruction, boi.getValue2());
             }
             break;
         case Const.ATHROW:
-            visit(instruction, ((AThrow)instruction).value);
+            visit(instruction, ((AThrow)instruction).getValue());
             break;
         case ByteCodeConstants.UNARYOP:
-            visit(instruction, ((UnaryOperatorInstruction)instruction).value);
+            visit(instruction, ((UnaryOperatorInstruction)instruction).getValue());
             break;
         case ByteCodeConstants.CONVERT:
         case ByteCodeConstants.IMPLICITCONVERT:
-            visit(instruction, ((ConvertInstruction)instruction).value);
+            visit(instruction, ((ConvertInstruction)instruction).getValue());
             break;
         case Const.CHECKCAST:
-            visit(instruction, ((CheckCast)instruction).objectref);
+            visit(instruction, ((CheckCast)instruction).getObjectref());
             break;
         case FastConstants.DECLARE:
             {
                 FastDeclaration fd = (FastDeclaration)instruction;
-                if (fd.instruction != null)
-                    visit(instruction, fd.instruction);
+                if (fd.getInstruction() != null)
+                    visit(instruction, fd.getInstruction());
             }
             break;
         case Const.GETFIELD:
-            visit(instruction, ((GetField)instruction).objectref);
+            visit(instruction, ((GetField)instruction).getObjectref());
             break;
         case ByteCodeConstants.IF:
         case ByteCodeConstants.IFXNULL:
-            visit(instruction, ((IfInstruction)instruction).value);
+            visit(instruction, ((IfInstruction)instruction).getValue());
             break;
         case ByteCodeConstants.IFCMP:
             {
                 IfCmp ic = (IfCmp)instruction;
-                visit(instruction, ic.value1);
-                visit(instruction, ic.value2);
+                visit(instruction, ic.getValue1());
+                visit(instruction, ic.getValue2());
             }
             break;
         case ByteCodeConstants.COMPLEXIF:
             {
                 List<Instruction> branchList =
-                    ((ComplexConditionalBranchInstruction)instruction).instructions;
+                    ((ComplexConditionalBranchInstruction)instruction).getInstructions();
                 int length = branchList.size();
                 for (int i=0; i<length; i++)
                     visit(instruction, branchList.get(i));
@@ -135,18 +135,18 @@ public abstract class BaseInstructionSplitterVisitor
             break;
         case ByteCodeConstants.PREINC:
         case ByteCodeConstants.POSTINC:
-            visit(instruction, ((IncInstruction)instruction).value);
+            visit(instruction, ((IncInstruction)instruction).getValue());
             break;
         case ByteCodeConstants.INVOKENEW:
             {
                 InvokeNew in = (InvokeNew)instruction;
-                List<Instruction> args = in.args;
+                List<Instruction> args = in.getArgs();
                 int length = args.size();
                 for (int i=0; i<length; i++)
                     visit(instruction, args.get(i));
 
                 ConstantMethodref cmr =
-                    this.constants.getConstantMethodref(in.index);
+                    this.constants.getConstantMethodref(in.getIndex());
                 String internalClassName =
                     this.constants.getConstantClassName(cmr.getClassIndex());
                 String prefix =
@@ -177,16 +177,16 @@ public abstract class BaseInstructionSplitterVisitor
             }
             break;
         case Const.INSTANCEOF:
-            visit(instruction, ((InstanceOf)instruction).objectref);
+            visit(instruction, ((InstanceOf)instruction).getObjectref());
             break;
         case Const.INVOKEINTERFACE:
         case Const.INVOKEVIRTUAL:
         case Const.INVOKESPECIAL:
-            visit(instruction, ((InvokeNoStaticInstruction)instruction).objectref);
+            visit(instruction, ((InvokeNoStaticInstruction)instruction).getObjectref());
             // intended fall through
         case Const.INVOKESTATIC:
             {
-                List<Instruction> args = ((InvokeInstruction)instruction).args;
+                List<Instruction> args = ((InvokeInstruction)instruction).getArgs();
                 int length = args.size();
                 for (int i=0; i<length; i++)
                     visit(instruction, args.get(i));
@@ -194,58 +194,58 @@ public abstract class BaseInstructionSplitterVisitor
             break;
         case Const.LOOKUPSWITCH:
         case Const.TABLESWITCH:
-            visit(instruction, ((Switch)instruction).key);
+            visit(instruction, ((Switch)instruction).getKey());
             break;
         case Const.MULTIANEWARRAY:
             {
                 Instruction[] dimensions =
-                    ((MultiANewArray)instruction).dimensions;
+                    ((MultiANewArray)instruction).getDimensions();
                 int length = dimensions.length;
                 for (int i=0; i<length; i++)
                     visit(instruction, dimensions[i]);
             }
             break;
         case Const.NEWARRAY:
-            visit(instruction, ((NewArray)instruction).dimension);
+            visit(instruction, ((NewArray)instruction).getDimension());
             break;
         case Const.POP:
-            visit(instruction, ((Pop)instruction).objectref);
+            visit(instruction, ((Pop)instruction).getObjectref());
             break;
         case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
-                visit(instruction, putField.objectref);
-                visit(instruction, putField.valueref);
+                visit(instruction, putField.getObjectref());
+                visit(instruction, putField.getValueref());
             }
             break;
         case Const.PUTSTATIC:
-            visit(instruction, ((PutStatic)instruction).valueref);
+            visit(instruction, ((PutStatic)instruction).getValueref());
             break;
         case ByteCodeConstants.XRETURN:
-            visit(instruction, ((ReturnInstruction)instruction).valueref);
+            visit(instruction, ((ReturnInstruction)instruction).getValueref());
             break;
         case ByteCodeConstants.STORE:
         case Const.ASTORE:
         case Const.ISTORE:
-            visit(instruction, ((StoreInstruction)instruction).valueref);
+            visit(instruction, ((StoreInstruction)instruction).getValueref());
             break;
         case ByteCodeConstants.TERNARYOPSTORE:
-            visit(instruction, ((TernaryOpStore)instruction).objectref);
+            visit(instruction, ((TernaryOpStore)instruction).getObjectref());
             break;
         case ByteCodeConstants.TERNARYOP:
             {
                 TernaryOperator tp = (TernaryOperator)instruction;
-                visit(instruction, tp.test);
-                visit(instruction, tp.value1);
-                visit(instruction, tp.value2);
+                visit(instruction, tp.getTest());
+                visit(instruction, tp.getValue1());
+                visit(instruction, tp.getValue2());
             }
             break;
         case ByteCodeConstants.INITARRAY:
         case ByteCodeConstants.NEWANDINITARRAY:
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
-                visit(instruction, iai.newArray);
-                List<Instruction> values = iai.values;
+                visit(instruction, iai.getNewArray());
+                List<Instruction> values = iai.getValues();
                 int length = values.size();
                 for (int i=0; i<length; i++)
                     visit(instruction, values.get(i));

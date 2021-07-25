@@ -55,7 +55,7 @@ public class InstructionSplitterVisitor extends BaseInstructionSplitterVisitor
     public void end()
     {
         // S'il reste un fragment d'instruction a traiter...
-        if ((this.offset1 == 0) || (this.offset1 != this.instruction.offset))
+        if ((this.offset1 == 0) || (this.offset1 != this.instruction.getOffset()))
         {
             // Add last part of instruction
             int lastLineNumber = MaxLineNumberVisitor.visit(instruction);
@@ -76,7 +76,7 @@ public class InstructionSplitterVisitor extends BaseInstructionSplitterVisitor
                 this.firstLineNumber, lastLineNumber,
                 preferedLineNumber, preferedLineNumber, preferedLineNumber,
                 this.classFile, this.method, this.instruction,
-                this.offset1, this.instruction.offset));
+                this.offset1, this.instruction.getOffset()));
         }
     }
 
@@ -103,10 +103,10 @@ public class InstructionSplitterVisitor extends BaseInstructionSplitterVisitor
             this.firstLineNumber, lastLineNumber,
             preferedLineNumber, preferedLineNumber, preferedLineNumber,
             this.classFile, this.method, this.instruction,
-            this.offset1, in.offset));
+            this.offset1, in.getOffset()));
 
-        this.firstLineNumber = parent.lineNumber;
-        this.offset1 = in.offset;
+        this.firstLineNumber = parent.getLineNumber();
+        this.offset1 = in.getOffset();
 
         // Add blocks for inner class body
         ClassFileLayouter.createBlocksForBodyOfAnonymousClass(

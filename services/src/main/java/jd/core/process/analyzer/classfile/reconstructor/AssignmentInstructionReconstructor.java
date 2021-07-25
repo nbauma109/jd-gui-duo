@@ -46,7 +46,7 @@ public class AssignmentInstructionReconstructor
     {
         for (int dupStoreIndex=0; dupStoreIndex<list.size(); dupStoreIndex++)
         {
-            if (list.get(dupStoreIndex).opcode != ByteCodeConstants.DUPSTORE) {
+            if (list.get(dupStoreIndex).getOpcode() != ByteCodeConstants.DUPSTORE) {
 				continue;
 			}
 
@@ -64,12 +64,12 @@ public class AssignmentInstructionReconstructor
                 Instruction i = list.get(dupStoreIndex+1);
 
                 // Recherche de ?AStore ( DupLoad, index, value )
-                if (i.opcode == Const.AASTORE ||
-                    i.opcode == ByteCodeConstants.ARRAYSTORE)
+                if (i.getOpcode() == Const.AASTORE ||
+                    i.getOpcode() == ByteCodeConstants.ARRAYSTORE)
                 {
-                    i = ((ArrayStoreInstruction)i).arrayref;
-                    if (i.opcode == ByteCodeConstants.DUPLOAD &&
-                        ((DupLoad)i).dupStore == dupStore) {
+                    i = ((ArrayStoreInstruction)i).getArrayref();
+                    if (i.getOpcode() == ByteCodeConstants.DUPLOAD &&
+                        ((DupLoad)i).getDupStore() == dupStore) {
 						continue;
 					}
                 }
@@ -83,7 +83,7 @@ public class AssignmentInstructionReconstructor
                     list.get(xstorePutfieldPutstaticIndex);
                 Instruction dupload1 = null;
 
-                switch (xstorePutfieldPutstatic.opcode)
+                switch (xstorePutfieldPutstatic.getOpcode())
                 {
                 case Const.ASTORE:
                 case Const.ISTORE:
@@ -95,8 +95,8 @@ public class AssignmentInstructionReconstructor
                     {
                         Instruction i =
                             ((ValuerefAttribute)xstorePutfieldPutstatic).getValueref();
-                        if (i.opcode == ByteCodeConstants.DUPLOAD &&
-                            ((DupLoad)i).dupStore == dupStore)
+                        if (i.getOpcode() == ByteCodeConstants.DUPLOAD &&
+                            ((DupLoad)i).getDupStore() == dupStore)
                         {
                             // 1er DupLoad trouvé
                             dupload1 = i;
@@ -131,7 +131,7 @@ public class AssignmentInstructionReconstructor
 					continue;
 				}
 
-                if (dupload1.lineNumber == dupload2.lineNumber)
+                if (dupload1.getLineNumber() == dupload2.getLineNumber())
                 {
                     // Assignation multiple sur une seule ligne : a = b = c;
                     Instruction newInstruction = createAssignmentInstruction(
@@ -156,13 +156,13 @@ public class AssignmentInstructionReconstructor
 
                     while (j-- > 0)
                     {
-                        if (list.get(j).opcode == ByteCodeConstants.TERNARYOPSTORE)
+                        if (list.get(j).getOpcode() == ByteCodeConstants.TERNARYOPSTORE)
                         {
                             // TernaryOpStore trouvé
                             TernaryOpStore tos = (TernaryOpStore)list.get(j);
-                            if (tos.ternaryOp2ndValueOffset == dupStore.offset)
+                            if (tos.getTernaryOp2ndValueOffset() == dupStore.getOffset())
                             {
-                                tos.ternaryOp2ndValueOffset = newInstruction.offset;
+                                tos.setTernaryOp2ndValueOffset(newInstruction.getOffset());
                                 break;
                             }
                         }
@@ -186,7 +186,7 @@ public class AssignmentInstructionReconstructor
                     {
                         // Remplacement du 1er DupLoad
                         ReplaceDupLoadVisitor visitor =
-                            new ReplaceDupLoadVisitor(dupStore, dupStore.objectref);
+                            new ReplaceDupLoadVisitor(dupStore, dupStore.getObjectref());
                         visitor.visit(xstorePutfieldPutstatic);
 
                         // Remplacement du 2eme DupLoad
@@ -205,55 +205,55 @@ public class AssignmentInstructionReconstructor
     private static Instruction createInstruction(
         Instruction xstorePutfieldPutstatic)
     {
-        switch (xstorePutfieldPutstatic.opcode)
+        switch (xstorePutfieldPutstatic.getOpcode())
         {
         case Const.ASTORE:
             return new ALoad(
                 Const.ALOAD,
-                xstorePutfieldPutstatic.offset,
-                xstorePutfieldPutstatic.lineNumber,
-                ((AStore)xstorePutfieldPutstatic).index);
+                xstorePutfieldPutstatic.getOffset(),
+                xstorePutfieldPutstatic.getLineNumber(),
+                ((AStore)xstorePutfieldPutstatic).getIndex());
         case Const.ISTORE:
             return new ILoad(
                 Const.ILOAD,
-                xstorePutfieldPutstatic.offset,
-                xstorePutfieldPutstatic.lineNumber,
-                ((IStore)xstorePutfieldPutstatic).index);
+                xstorePutfieldPutstatic.getOffset(),
+                xstorePutfieldPutstatic.getLineNumber(),
+                ((IStore)xstorePutfieldPutstatic).getIndex());
         case ByteCodeConstants.STORE:
             return new LoadInstruction(
                 ByteCodeConstants.LOAD,
-                xstorePutfieldPutstatic.offset,
-                xstorePutfieldPutstatic.lineNumber,
-                ((StoreInstruction)xstorePutfieldPutstatic).index,
+                xstorePutfieldPutstatic.getOffset(),
+                xstorePutfieldPutstatic.getLineNumber(),
+                ((StoreInstruction)xstorePutfieldPutstatic).getIndex(),
                 xstorePutfieldPutstatic.getReturnedSignature(null, null));
         case Const.PUTFIELD:
             return new GetField(
                 Const.GETFIELD,
-                xstorePutfieldPutstatic.offset,
-                xstorePutfieldPutstatic.lineNumber,
-                ((PutField)xstorePutfieldPutstatic).index,
-                ((PutField)xstorePutfieldPutstatic).objectref);
+                xstorePutfieldPutstatic.getOffset(),
+                xstorePutfieldPutstatic.getLineNumber(),
+                ((PutField)xstorePutfieldPutstatic).getIndex(),
+                ((PutField)xstorePutfieldPutstatic).getObjectref());
         case Const.PUTSTATIC:
             return new GetStatic(
                 Const.GETSTATIC,
-                xstorePutfieldPutstatic.offset,
-                xstorePutfieldPutstatic.lineNumber,
-                ((PutStatic)xstorePutfieldPutstatic).index);
+                xstorePutfieldPutstatic.getOffset(),
+                xstorePutfieldPutstatic.getLineNumber(),
+                ((PutStatic)xstorePutfieldPutstatic).getIndex());
         case Const.AASTORE:
             return new AALoad(
                 ByteCodeConstants.ARRAYLOAD,
-                xstorePutfieldPutstatic.offset,
-                xstorePutfieldPutstatic.lineNumber,
-                ((AAStore)xstorePutfieldPutstatic).arrayref,
-                ((AAStore)xstorePutfieldPutstatic).indexref);
+                xstorePutfieldPutstatic.getOffset(),
+                xstorePutfieldPutstatic.getLineNumber(),
+                ((AAStore)xstorePutfieldPutstatic).getArrayref(),
+                ((AAStore)xstorePutfieldPutstatic).getIndexref());
         case ByteCodeConstants.ARRAYSTORE:
             return new ArrayLoadInstruction(
                 ByteCodeConstants.ARRAYLOAD,
-                xstorePutfieldPutstatic.offset,
-                xstorePutfieldPutstatic.lineNumber,
-                ((ArrayStoreInstruction)xstorePutfieldPutstatic).arrayref,
-                ((ArrayStoreInstruction)xstorePutfieldPutstatic).indexref,
-                ((ArrayStoreInstruction)xstorePutfieldPutstatic).signature);
+                xstorePutfieldPutstatic.getOffset(),
+                xstorePutfieldPutstatic.getLineNumber(),
+                ((ArrayStoreInstruction)xstorePutfieldPutstatic).getArrayref(),
+                ((ArrayStoreInstruction)xstorePutfieldPutstatic).getIndexref(),
+                ((ArrayStoreInstruction)xstorePutfieldPutstatic).getSignature());
         default:
             return null;
         }
@@ -262,66 +262,66 @@ public class AssignmentInstructionReconstructor
     private static Instruction createAssignmentInstruction(
         Instruction xstorePutfieldPutstatic, DupStore dupStore)
     {
-        if (dupStore.objectref.opcode == ByteCodeConstants.BINARYOP)
+        if (dupStore.getObjectref().getOpcode() == ByteCodeConstants.BINARYOP)
         {
             // Reconstruction de "a = b += c"
             Instruction value1 =
-                ((BinaryOperatorInstruction)dupStore.objectref).value1;
+                ((BinaryOperatorInstruction)dupStore.getObjectref()).getValue1();
 
-            if (xstorePutfieldPutstatic.lineNumber == value1.lineNumber)
+            if (xstorePutfieldPutstatic.getLineNumber() == value1.getLineNumber())
             {
-                switch (xstorePutfieldPutstatic.opcode)
+                switch (xstorePutfieldPutstatic.getOpcode())
                 {
                 case Const.ASTORE:
-                    if (value1.opcode == Const.ALOAD &&
-                        ((StoreInstruction)xstorePutfieldPutstatic).index ==
-                            ((LoadInstruction)value1).index) {
+                    if (value1.getOpcode() == Const.ALOAD &&
+                        ((StoreInstruction)xstorePutfieldPutstatic).getIndex() ==
+                            ((LoadInstruction)value1).getIndex()) {
 						return createBinaryOperatorAssignmentInstruction(
                             xstorePutfieldPutstatic, dupStore);
 					}
                     break;
                 case Const.ISTORE:
-                    if (value1.opcode == Const.ILOAD &&
-                        ((StoreInstruction)xstorePutfieldPutstatic).index ==
-                            ((LoadInstruction)value1).index) {
+                    if (value1.getOpcode() == Const.ILOAD &&
+                        ((StoreInstruction)xstorePutfieldPutstatic).getIndex() ==
+                            ((LoadInstruction)value1).getIndex()) {
 						return createBinaryOperatorAssignmentInstruction(
                             xstorePutfieldPutstatic, dupStore);
 					}
                     break;
                 case ByteCodeConstants.STORE:
-                    if (value1.opcode == ByteCodeConstants.LOAD &&
-                        ((StoreInstruction)xstorePutfieldPutstatic).index ==
-                            ((LoadInstruction)value1).index) {
+                    if (value1.getOpcode() == ByteCodeConstants.LOAD &&
+                        ((StoreInstruction)xstorePutfieldPutstatic).getIndex() ==
+                            ((LoadInstruction)value1).getIndex()) {
 						return createBinaryOperatorAssignmentInstruction(
                             xstorePutfieldPutstatic, dupStore);
 					}
                     break;
                 case Const.PUTFIELD:
-                    if (value1.opcode == Const.GETFIELD &&
-                        ((PutField)xstorePutfieldPutstatic).index ==
-                            ((GetField)value1).index)
+                    if (value1.getOpcode() == Const.GETFIELD &&
+                        ((PutField)xstorePutfieldPutstatic).getIndex() ==
+                            ((GetField)value1).getIndex())
                     {
                         CompareInstructionVisitor visitor =
                             new CompareInstructionVisitor();
 
                         if (visitor.visit(
-                                ((PutField)xstorePutfieldPutstatic).objectref,
-                                ((GetField)value1).objectref)) {
+                                ((PutField)xstorePutfieldPutstatic).getObjectref(),
+                                ((GetField)value1).getObjectref())) {
 							return createBinaryOperatorAssignmentInstruction(
                                 xstorePutfieldPutstatic, dupStore);
 						}
                     }
                     break;
                 case Const.PUTSTATIC:
-                    if (value1.opcode == Const.GETFIELD &&
-                        ((PutStatic)xstorePutfieldPutstatic).index ==
-                            ((GetStatic)value1).index) {
+                    if (value1.getOpcode() == Const.GETFIELD &&
+                        ((PutStatic)xstorePutfieldPutstatic).getIndex() ==
+                            ((GetStatic)value1).getIndex()) {
 						return createBinaryOperatorAssignmentInstruction(
                             xstorePutfieldPutstatic, dupStore);
 					}
                     break;
                 case Const.AASTORE:
-                    if (value1.opcode == Const.AALOAD)
+                    if (value1.getOpcode() == Const.AALOAD)
                     {
                         ArrayStoreInstruction aas =
                             (ArrayStoreInstruction)xstorePutfieldPutstatic;
@@ -331,16 +331,16 @@ public class AssignmentInstructionReconstructor
                             new CompareInstructionVisitor();
 
                         if (visitor.visit(
-                                aas.arrayref, aal.arrayref) &&
+                                aas.getArrayref(), aal.getArrayref()) &&
                             visitor.visit(
-                                aas.indexref, aal.indexref)) {
+                                aas.getIndexref(), aal.getIndexref())) {
 							return createBinaryOperatorAssignmentInstruction(
                                     xstorePutfieldPutstatic, dupStore);
 						}
                     }
                     break;
                 case ByteCodeConstants.ARRAYSTORE:
-                    if (value1.opcode == ByteCodeConstants.ARRAYLOAD)
+                    if (value1.getOpcode() == ByteCodeConstants.ARRAYLOAD)
                     {
                         ArrayStoreInstruction aas =
                             (ArrayStoreInstruction)xstorePutfieldPutstatic;
@@ -350,9 +350,9 @@ public class AssignmentInstructionReconstructor
                             new CompareInstructionVisitor();
 
                         if (visitor.visit(
-                                aas.arrayref, aal.arrayref) &&
+                                aas.getArrayref(), aal.getArrayref()) &&
                             visitor.visit(
-                                aas.indexref, aal.indexref)) {
+                                aas.getIndexref(), aal.getIndexref())) {
 							return createBinaryOperatorAssignmentInstruction(
                                     xstorePutfieldPutstatic, dupStore);
 						}
@@ -369,22 +369,22 @@ public class AssignmentInstructionReconstructor
 
         Instruction newInstruction = createInstruction(xstorePutfieldPutstatic);
         return new AssignmentInstruction(
-            ByteCodeConstants.ASSIGNMENT, xstorePutfieldPutstatic.offset,
-            dupStore.lineNumber, 14, "=",
-            newInstruction, dupStore.objectref);
+            ByteCodeConstants.ASSIGNMENT, xstorePutfieldPutstatic.getOffset(),
+            dupStore.getLineNumber(), 14, "=",
+            newInstruction, dupStore.getObjectref());
     }
 
     private static AssignmentInstruction createBinaryOperatorAssignmentInstruction(
             Instruction xstorePutfieldPutstatic, DupStore dupstore)
     {
         BinaryOperatorInstruction boi =
-            (BinaryOperatorInstruction)dupstore.objectref;
+            (BinaryOperatorInstruction)dupstore.getObjectref();
 
-        String newOperator = boi.operator + "=";
+        String newOperator = boi.getOperator() + "=";
 
         return new AssignmentInstruction(
-                ByteCodeConstants.ASSIGNMENT, xstorePutfieldPutstatic.offset,
-                dupstore.lineNumber, boi.getPriority(), newOperator,
-                createInstruction(xstorePutfieldPutstatic), boi.value2);
+                ByteCodeConstants.ASSIGNMENT, xstorePutfieldPutstatic.getOffset(),
+                dupstore.getLineNumber(), boi.getPriority(), newOperator,
+                createInstruction(xstorePutfieldPutstatic), boi.getValue2());
     }
 }

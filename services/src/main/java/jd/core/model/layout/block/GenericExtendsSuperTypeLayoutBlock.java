@@ -22,8 +22,8 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 public class GenericExtendsSuperTypeLayoutBlock
     extends ExtendsSuperTypeLayoutBlock
 {
-    public final char[] caSignature;
-    public final int signatureIndex;
+    private final char[] caSignature;
+    private final int signatureIndex;
 
     public GenericExtendsSuperTypeLayoutBlock(
         ClassFile classFile, char[] caSignature, int signatureIndex)
@@ -35,4 +35,12 @@ public class GenericExtendsSuperTypeLayoutBlock
         this.caSignature = caSignature;
         this.signatureIndex = signatureIndex;
     }
+
+	public char[] getCaSignature() {
+		return caSignature;
+	}
+
+	public int getSignatureIndex() {
+		return signatureIndex;
+	}
 }

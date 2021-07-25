@@ -20,24 +20,21 @@ import jd.core.model.instruction.bytecode.instruction.attribute.ValuerefAttribut
 
 public class PutStatic extends GetStatic implements ValuerefAttribute
 {
-    public Instruction valueref;
+    private Instruction valueref;
 
     public PutStatic(
         int opcode, int offset, int lineNumber, int index, Instruction valueref)
     {
         super(opcode, offset, lineNumber, index);
-        this.valueref = valueref;
+        this.setValueref(valueref);
     }
 
-    @Override
-    public Instruction getValueref()
-    {
-        return valueref;
-    }
+	@Override
+	public Instruction getValueref() {
+		return valueref;
+	}
 
-    @Override
-    public void setValueref(Instruction valueref)
-    {
-        this.valueref = valueref;
-    }
+	public void setValueref(Instruction valueref) {
+		this.valueref = valueref;
+	}
 }

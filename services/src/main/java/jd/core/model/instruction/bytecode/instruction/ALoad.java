@@ -36,10 +36,10 @@ public class ALoad extends LoadInstruction
         if ((constants == null) || (localVariables == null))
             return null;
 
-        LocalVariable lv = localVariables.getLocalVariableWithIndexAndOffset(this.index, this.offset);
+        LocalVariable lv = localVariables.getLocalVariableWithIndexAndOffset(this.getIndex(), this.getOffset());
 
-        if ((lv != null) && (lv.signatureIndex > 0))
-            return constants.getConstantUtf8(lv.signatureIndex);
+        if ((lv != null) && (lv.getSignatureIndex() > 0))
+            return constants.getConstantUtf8(lv.getSignatureIndex());
 
         return StringConstants.INTERNAL_OBJECT_SIGNATURE;
     }

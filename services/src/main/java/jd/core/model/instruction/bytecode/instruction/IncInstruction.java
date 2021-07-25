@@ -21,33 +21,49 @@ import jd.core.model.classfile.LocalVariables;
 
 public class IncInstruction extends Instruction
 {
-    public Instruction value;
-    public int count;
+    private Instruction value;
+    private int count;
 
     public IncInstruction(
         int opcode, int offset, int lineNumber, Instruction value, int count)
     {
         super(opcode, offset, lineNumber);
-        this.value = value;
-        this.count = count;
+        this.setValue(value);
+        this.setCount(count);
     }
 
     @Override
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        return this.value == null ? null :
-            this.value.getReturnedSignature(constants, localVariables);
+        return this.getValue() == null ? null :
+            this.getValue().getReturnedSignature(constants, localVariables);
     }
 
     @Override
     public int getPriority()
     {
-        if (this.count == 1 || this.count == -1) {
+        if (this.getCount() == 1 || this.getCount() == -1) {
 			// Operator '++' or '--'
             return 2;
 		}
         // Operator '+=' or '-='
         return 14;
     }
+
+	public int getCount() {
+		return count;
+	}
+
+	public void setCount(int count) {
+		this.count = count;
+	}
+
+	public Instruction getValue() {
+		return value;
+	}
+
+	public void setValue(Instruction value) {
+		this.value = value;
+	}
 }

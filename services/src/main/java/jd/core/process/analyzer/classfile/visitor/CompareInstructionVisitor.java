@@ -29,101 +29,88 @@ public class CompareInstructionVisitor
 {
     public boolean visit(Instruction i1, Instruction i2)
     {
-        if (i1.opcode != i2.opcode)
-            return false;
+        if (i1.getOpcode() != i2.getOpcode()) {
+			return false;
+		}
 
-        switch (i1.opcode)
+        switch (i1.getOpcode())
         {
         case Const.ARRAYLENGTH:
             return visit(
-                ((ArrayLength)i1).arrayref, ((ArrayLength)i2).arrayref);
+                ((ArrayLength)i1).getArrayref(), ((ArrayLength)i2).getArrayref());
         case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             {
-                if (Objects.compare(((ArrayStoreInstruction)i1).signature,
-                        ((ArrayStoreInstruction)i2).signature, Comparator.naturalOrder()) != 0)
-                    return false;
-
-                if (! visit(
-                        ((ArrayStoreInstruction)i1).arrayref,
-                        ((ArrayStoreInstruction)i2).arrayref))
-                    return false;
-
-                if (! visit(
-                        ((ArrayStoreInstruction)i1).indexref,
-                        ((ArrayStoreInstruction)i2).indexref))
-                    return false;
+                if ((Objects.compare(((ArrayStoreInstruction)i1).getSignature(),
+                        ((ArrayStoreInstruction)i2).getSignature(), Comparator.naturalOrder()) != 0) || ! visit(
+                        ((ArrayStoreInstruction)i1).getArrayref(),
+                        ((ArrayStoreInstruction)i2).getArrayref()) || ! visit(
+                        ((ArrayStoreInstruction)i1).getIndexref(),
+                        ((ArrayStoreInstruction)i2).getIndexref())) {
+					return false;
+				}
 
                 return visit(
-                        ((ArrayStoreInstruction)i1).valueref,
-                        ((ArrayStoreInstruction)i2).valueref);
+                        ((ArrayStoreInstruction)i1).getValueref(),
+                        ((ArrayStoreInstruction)i2).getValueref());
             }
         case ByteCodeConstants.ASSERT:
             {
                 if (! visit(
-                        ((AssertInstruction)i1).test,
-                        ((AssertInstruction)i2).test))
-                    return false;
+                        ((AssertInstruction)i1).getTest(),
+                        ((AssertInstruction)i2).getTest())) {
+					return false;
+				}
 
-                Instruction msg1 = ((AssertInstruction)i1).msg;
-                Instruction msg2 = ((AssertInstruction)i2).msg;
+                Instruction msg1 = ((AssertInstruction)i1).getMsg();
+                Instruction msg2 = ((AssertInstruction)i2).getMsg();
 
-                if (msg1 == msg2)
-                    return true;
-                if ((msg1 == null) || (msg2 == null))
-                    return false;
+                if (msg1 == msg2) {
+					return true;
+				}
+                if (msg1 == null || msg2 == null) {
+					return false;
+				}
                 return visit(msg1, msg2);
             }
         case Const.ATHROW:
-            return visit(((AThrow)i1).value, ((AThrow)i2).value);
+            return visit(((AThrow)i1).getValue(), ((AThrow)i2).getValue());
         case ByteCodeConstants.UNARYOP:
             {
-                if (((UnaryOperatorInstruction)i1).getPriority() !=
-                    ((UnaryOperatorInstruction)i2).getPriority())
-                    return false;
-
-                if (((UnaryOperatorInstruction)i1).signature.compareTo(
-                        ((UnaryOperatorInstruction)i2).signature) != 0)
-                    return false;
-
-                if (((UnaryOperatorInstruction)i1).operator.compareTo(
-                        ((UnaryOperatorInstruction)i2).operator) != 0)
-                    return false;
+                if ((((UnaryOperatorInstruction)i1).getPriority() !=
+                    ((UnaryOperatorInstruction)i2).getPriority()) || (((UnaryOperatorInstruction)i1).getSignature().compareTo(
+                        ((UnaryOperatorInstruction)i2).getSignature()) != 0) || (((UnaryOperatorInstruction)i1).getOperator().compareTo(
+                        ((UnaryOperatorInstruction)i2).getOperator()) != 0)) {
+					return false;
+				}
 
                 return visit(
-                    ((UnaryOperatorInstruction)i1).value,
-                    ((UnaryOperatorInstruction)i2).value);
+                    ((UnaryOperatorInstruction)i1).getValue(),
+                    ((UnaryOperatorInstruction)i2).getValue());
             }
         case ByteCodeConstants.BINARYOP:
             {
-                if (((BinaryOperatorInstruction)i1).getPriority() !=
-                    ((BinaryOperatorInstruction)i2).getPriority())
-                    return false;
-
-                if (((BinaryOperatorInstruction)i1).signature.compareTo(
-                        ((BinaryOperatorInstruction)i2).signature) != 0)
-                    return false;
-
-                if (((BinaryOperatorInstruction)i1).operator.compareTo(
-                        ((BinaryOperatorInstruction)i2).operator) != 0)
-                    return false;
-
-                if (! visit(
-                        ((BinaryOperatorInstruction)i1).value1,
-                        ((BinaryOperatorInstruction)i2).value1))
-                    return false;
+                if ((((BinaryOperatorInstruction)i1).getPriority() !=
+                    ((BinaryOperatorInstruction)i2).getPriority()) || (((BinaryOperatorInstruction)i1).getSignature().compareTo(
+                        ((BinaryOperatorInstruction)i2).getSignature()) != 0) || (((BinaryOperatorInstruction)i1).getOperator().compareTo(
+                        ((BinaryOperatorInstruction)i2).getOperator()) != 0) || ! visit(
+                        ((BinaryOperatorInstruction)i1).getValue1(),
+                        ((BinaryOperatorInstruction)i2).getValue1())) {
+					return false;
+				}
 
                 return visit(
-                    ((BinaryOperatorInstruction)i1).value2,
-                    ((BinaryOperatorInstruction)i2).value2);
+                    ((BinaryOperatorInstruction)i1).getValue2(),
+                    ((BinaryOperatorInstruction)i2).getValue2());
             }
         case Const.CHECKCAST:
             {
-                if (((CheckCast)i1).index != ((CheckCast)i2).index)
-                    return false;
+                if (((CheckCast)i1).getIndex() != ((CheckCast)i2).getIndex()) {
+					return false;
+				}
 
                 return visit(
-                    ((CheckCast)i1).objectref, ((CheckCast)i2).objectref);
+                    ((CheckCast)i1).getObjectref(), ((CheckCast)i2).getObjectref());
             }
         case ByteCodeConstants.STORE:
         case Const.ASTORE:
@@ -131,181 +118,185 @@ public class CompareInstructionVisitor
             {
                 String rs1 = ((StoreInstruction)i1).getReturnedSignature(null, null);
                 String rs2 = ((StoreInstruction)i2).getReturnedSignature(null, null);
-                if ((rs1 == null) ? (rs2 != null) : (rs1.compareTo(rs2) != 0))
-                    return false;
+                if (rs1 == null ? rs2 != null : rs1.compareTo(rs2) != 0) {
+					return false;
+				}
 
                 return visit(
-                    ((StoreInstruction)i1).valueref,
-                    ((StoreInstruction)i2).valueref);
+                    ((StoreInstruction)i1).getValueref(),
+                    ((StoreInstruction)i2).getValueref());
             }
         case ByteCodeConstants.DUPSTORE:
             return visit(
-                ((DupStore)i1).objectref, ((DupStore)i2).objectref);
+                ((DupStore)i1).getObjectref(), ((DupStore)i2).getObjectref());
         case ByteCodeConstants.CONVERT:
         case ByteCodeConstants.IMPLICITCONVERT:
             {
-                if (((ConvertInstruction)i1).signature.compareTo(
-                        ((ConvertInstruction)i2).signature) != 0)
-                    return false;
+                if (((ConvertInstruction)i1).getSignature().compareTo(
+                        ((ConvertInstruction)i2).getSignature()) != 0) {
+					return false;
+				}
 
                 return visit(
-                    ((ConvertInstruction)i1).value,
-                    ((ConvertInstruction)i2).value);
+                    ((ConvertInstruction)i1).getValue(),
+                    ((ConvertInstruction)i2).getValue());
             }
         case ByteCodeConstants.IFCMP:
             {
-                if (((IfCmp)i1).cmp != ((IfCmp)i2).cmp)
-                    return false;
+                
 
                 // Ce test perturbe le retrait des instructions 'finally' dans
                 // les blocs 'try' et 'catch'.
                 //  if (((IfCmp)i1).branch != ((IfCmp)i2).branch)
                 //	  return false;
 
-                if (! visit(((IfCmp)i1).value1, ((IfCmp)i2).value1))
-                    return false;
+                if ((((IfCmp)i1).getCmp() != ((IfCmp)i2).getCmp()) || ! visit(((IfCmp)i1).getValue1(), ((IfCmp)i2).getValue1())) {
+					return false;
+				}
 
-                return visit(((IfCmp)i1).value2, ((IfCmp)i2).value2);
+                return visit(((IfCmp)i1).getValue2(), ((IfCmp)i2).getValue2());
             }
         case ByteCodeConstants.IF:
         case ByteCodeConstants.IFXNULL:
             {
-                if (((IfInstruction)i1).cmp != ((IfInstruction)i2).cmp)
-                    return false;
+                if (((IfInstruction)i1).getCmp() != ((IfInstruction)i2).getCmp()) {
+					return false;
+				}
 
                 return visit(
-                    ((IfInstruction)i1).value, ((IfInstruction)i2).value);
+                    ((IfInstruction)i1).getValue(), ((IfInstruction)i2).getValue());
             }
         case ByteCodeConstants.COMPLEXIF:
             {
-                if (((ComplexConditionalBranchInstruction)i1).cmp != ((ComplexConditionalBranchInstruction)i2).cmp)
-                    return false;
-
-                if (((ComplexConditionalBranchInstruction)i1).branch != ((ComplexConditionalBranchInstruction)i2).branch)
-                    return false;
+                if ((((ComplexConditionalBranchInstruction)i1).getCmp() != ((ComplexConditionalBranchInstruction)i2).getCmp()) || (((ComplexConditionalBranchInstruction)i1).getBranch() != ((ComplexConditionalBranchInstruction)i2).getBranch())) {
+					return false;
+				}
 
                 return visit(
-                        ((ComplexConditionalBranchInstruction)i1).instructions,
-                        ((ComplexConditionalBranchInstruction)i2).instructions);
+                        ((ComplexConditionalBranchInstruction)i1).getInstructions(),
+                        ((ComplexConditionalBranchInstruction)i2).getInstructions());
             }
         case Const.INSTANCEOF:
             {
-                if (((InstanceOf)i1).index != ((InstanceOf)i2).index)
-                    return false;
+                if (((InstanceOf)i1).getIndex() != ((InstanceOf)i2).getIndex()) {
+					return false;
+				}
 
                 return visit(
-                    ((InstanceOf)i1).objectref, ((InstanceOf)i2).objectref);
+                    ((InstanceOf)i1).getObjectref(), ((InstanceOf)i2).getObjectref());
             }
         case Const.INVOKEINTERFACE:
         case Const.INVOKESPECIAL:
         case Const.INVOKEVIRTUAL:
             {
                 if (! visit(
-                        ((InvokeNoStaticInstruction)i1).objectref,
-                        ((InvokeNoStaticInstruction)i2).objectref))
-                    return false;
+                        ((InvokeNoStaticInstruction)i1).getObjectref(),
+                        ((InvokeNoStaticInstruction)i2).getObjectref())) {
+					return false;
+				}
             }
             // intended fall through
         case Const.INVOKESTATIC:
             return visit(
-                ((InvokeInstruction)i1).args, ((InvokeInstruction)i2).args);
+                ((InvokeInstruction)i1).getArgs(), ((InvokeInstruction)i2).getArgs());
         case ByteCodeConstants.INVOKENEW:
             {
-                if (((InvokeNew)i1).index != ((InvokeNew)i2).index)
-                    return false;
+                if (((InvokeNew)i1).getIndex() != ((InvokeNew)i2).getIndex()) {
+					return false;
+				}
 
                 return visit(
-                    ((InvokeNew)i1).args, ((InvokeNew)i2).args);
+                    ((InvokeNew)i1).getArgs(), ((InvokeNew)i2).getArgs());
             }
         case Const.MULTIANEWARRAY:
             {
-                if (((MultiANewArray)i1).index != ((MultiANewArray)i2).index)
-                    return false;
+                if (((MultiANewArray)i1).getIndex() != ((MultiANewArray)i2).getIndex()) {
+					return false;
+				}
 
-                Instruction[] dimensions1 = ((MultiANewArray)i1).dimensions;
-                Instruction[] dimensions2 = ((MultiANewArray)i2).dimensions;
+                Instruction[] dimensions1 = ((MultiANewArray)i1).getDimensions();
+                Instruction[] dimensions2 = ((MultiANewArray)i2).getDimensions();
 
-                if (dimensions1.length != dimensions2.length)
-                    return false;
+                if (dimensions1.length != dimensions2.length) {
+					return false;
+				}
 
                 for (int i=dimensions1.length-1; i>=0; --i)
                 {
-                    if (! visit(dimensions1[i], dimensions2[i]))
-                        return false;
+                    if (! visit(dimensions1[i], dimensions2[i])) {
+						return false;
+					}
                 }
 
                 return true;
             }
         case Const.NEWARRAY:
             {
-                if (((NewArray)i1).type != ((NewArray)i2).type)
-                    return false;
+                if (((NewArray)i1).getType() != ((NewArray)i2).getType()) {
+					return false;
+				}
 
                 return visit(
-                    ((NewArray)i1).dimension, ((NewArray)i2).dimension);
+                    ((NewArray)i1).getDimension(), ((NewArray)i2).getDimension());
             }
         case Const.ANEWARRAY:
             {
-                if (((ANewArray)i1).index != ((ANewArray)i2).index)
-                    return false;
+                if (((ANewArray)i1).getIndex() != ((ANewArray)i2).getIndex()) {
+					return false;
+				}
 
                 return visit(
-                    ((ANewArray)i1).dimension, ((ANewArray)i2).dimension);
+                    ((ANewArray)i1).getDimension(), ((ANewArray)i2).getDimension());
             }
         case Const.PUTFIELD:
             {
                 if (! visit(
-                        ((PutField)i1).objectref,
-                        ((PutField)i2).objectref))
-                    return false;
+                        ((PutField)i1).getObjectref(),
+                        ((PutField)i2).getObjectref())) {
+					return false;
+				}
 
                 return visit(
-                        ((PutField)i1).valueref, ((PutField)i2).valueref);
+                        ((PutField)i1).getValueref(), ((PutField)i2).getValueref());
             }
         case ByteCodeConstants.TERNARYOPSTORE:
             {
-                if (((TernaryOpStore)i1).ternaryOp2ndValueOffset-i1.offset !=
-                    ((TernaryOpStore)i2).ternaryOp2ndValueOffset-i2.offset)
-                    return false;
+                if (((TernaryOpStore)i1).getTernaryOp2ndValueOffset()-i1.getOffset() !=
+                    ((TernaryOpStore)i2).getTernaryOp2ndValueOffset()-i2.getOffset()) {
+					return false;
+				}
 
                 return visit(
-                    ((TernaryOpStore)i1).objectref,
-                    ((TernaryOpStore)i2).objectref);
+                    ((TernaryOpStore)i1).getObjectref(),
+                    ((TernaryOpStore)i2).getObjectref());
             }
         case ByteCodeConstants.TERNARYOP:
             {
                 if (! visit(
-                        ((TernaryOperator)i1).test,
-                        ((TernaryOperator)i2).test))
-                    return false;
-
-                if (! visit(
-                        ((TernaryOperator)i1).value1,
-                        ((TernaryOperator)i2).value1))
-                    return false;
+                        ((TernaryOperator)i1).getTest(),
+                        ((TernaryOperator)i2).getTest()) || ! visit(
+                        ((TernaryOperator)i1).getValue1(),
+                        ((TernaryOperator)i2).getValue1())) {
+					return false;
+				}
 
                 return visit(
-                        ((TernaryOperator)i1).value2,
-                        ((TernaryOperator)i2).value2);
+                        ((TernaryOperator)i1).getValue2(),
+                        ((TernaryOperator)i2).getValue2());
             }
         case ByteCodeConstants.ASSIGNMENT:
             {
-                if (((AssignmentInstruction)i1).getPriority() !=
-                    ((AssignmentInstruction)i2).getPriority())
-                    return false;
-
-                if (((AssignmentInstruction)i1).operator.compareTo(
-                        ((AssignmentInstruction)i2).operator) != 0)
-                    return false;
-
-                if (! visit(
-                        ((AssignmentInstruction)i1).value1,
-                        ((AssignmentInstruction)i2).value1))
-                    return false;
+                if ((((AssignmentInstruction)i1).getPriority() !=
+                    ((AssignmentInstruction)i2).getPriority()) || (((AssignmentInstruction)i1).getOperator().compareTo(
+                        ((AssignmentInstruction)i2).getOperator()) != 0) || ! visit(
+                        ((AssignmentInstruction)i1).getValue1(),
+                        ((AssignmentInstruction)i2).getValue1())) {
+					return false;
+				}
 
                 return visit(
-                    ((AssignmentInstruction)i1).value2,
-                    ((AssignmentInstruction)i2).value2);
+                    ((AssignmentInstruction)i1).getValue2(),
+                    ((AssignmentInstruction)i2).getValue2());
             }
         case ByteCodeConstants.ARRAYLOAD:
             {
@@ -314,77 +305,80 @@ public class CompareInstructionVisitor
 
                 if (s1 == null)
                 {
-                    if (s2 != null)
-                        return false;
-                }
-                else
-                {
-                    if (s1.compareTo(s2) != 0)
-                        return false;
-                }
+                    if (s2 != null) {
+						return false;
+					}
+                } else if (s1.compareTo(s2) != 0) {
+					return false;
+				}
 
                 if (! visit(
-                        ((ArrayLoadInstruction)i1).arrayref,
-                        ((ArrayLoadInstruction)i2).arrayref))
-                    return false;
+                        ((ArrayLoadInstruction)i1).getArrayref(),
+                        ((ArrayLoadInstruction)i2).getArrayref())) {
+					return false;
+				}
 
                 return visit(
-                    ((ArrayLoadInstruction)i1).indexref,
-                    ((ArrayLoadInstruction)i2).indexref);
+                    ((ArrayLoadInstruction)i1).getIndexref(),
+                    ((ArrayLoadInstruction)i2).getIndexref());
             }
         case ByteCodeConstants.PREINC:
         case ByteCodeConstants.POSTINC:
             {
-                if (((IncInstruction)i1).count != ((IncInstruction)i2).count)
-                    return false;
+                if (((IncInstruction)i1).getCount() != ((IncInstruction)i2).getCount()) {
+					return false;
+				}
 
                 return visit(
-                        ((IncInstruction)i1).value,
-                        ((IncInstruction)i2).value);
+                        ((IncInstruction)i1).getValue(),
+                        ((IncInstruction)i2).getValue());
             }
         case Const.GETFIELD:
             {
-                if (((GetField)i1).index != ((GetField)i2).index)
-                    return false;
+                if (((GetField)i1).getIndex() != ((GetField)i2).getIndex()) {
+					return false;
+				}
 
                 return visit(
-                    ((GetField)i1).objectref, ((GetField)i2).objectref);
+                    ((GetField)i1).getObjectref(), ((GetField)i2).getObjectref());
             }
         case ByteCodeConstants.INITARRAY:
         case ByteCodeConstants.NEWANDINITARRAY:
             {
                 if (! visit(
-                        ((InitArrayInstruction)i1).newArray,
-                        ((InitArrayInstruction)i2).newArray))
-                    return false;
+                        ((InitArrayInstruction)i1).getNewArray(),
+                        ((InitArrayInstruction)i2).getNewArray())) {
+					return false;
+				}
 
-                return visit(((InitArrayInstruction)i1).values,
-                        ((InitArrayInstruction)i2).values);
+                return visit(((InitArrayInstruction)i1).getValues(),
+                        ((InitArrayInstruction)i2).getValues());
             }
         case Const.ALOAD:
         case Const.ILOAD:
             {
                 String rs1 = ((LoadInstruction)i1).getReturnedSignature(null, null);
                 String rs2 = ((LoadInstruction)i2).getReturnedSignature(null, null);
-                return (rs1 == null) ? (rs2 == null) : (rs1.compareTo(rs2) == 0);
+                return rs1 == null ? rs2 == null : rs1.compareTo(rs2) == 0;
             }
         case ByteCodeConstants.ICONST:
         case Const.BIPUSH:
         case Const.SIPUSH:
             {
-                if (((IConst)i1).value != ((IConst)i2).value)
-                    return false;
+                if (((IConst)i1).getValue() != ((IConst)i2).getValue()) {
+					return false;
+				}
 
                 return
-                    ((IConst)i1).signature.compareTo(
-                        ((IConst)i2).signature) == 0;
+                    ((IConst)i1).getSignature().compareTo(
+                        ((IConst)i2).getSignature()) == 0;
             }
         case ByteCodeConstants.DCONST:
         case ByteCodeConstants.LCONST:
         case ByteCodeConstants.FCONST:
-            return ((ConstInstruction)i1).value == ((ConstInstruction)i2).value;
+            return ((ConstInstruction)i1).getValue() == ((ConstInstruction)i2).getValue();
         case ByteCodeConstants.DUPLOAD:
-            return ((DupLoad)i1).dupStore == ((DupLoad)i2).dupStore;
+            return ((DupLoad)i1).getDupStore() == ((DupLoad)i2).getDupStore();
         case Const.TABLESWITCH:
         case ByteCodeConstants.XRETURN:
         case Const.PUTSTATIC:
@@ -421,13 +415,15 @@ public class CompareInstructionVisitor
     {
         int i = l1.size();
 
-        if (i != l2.size())
-            return false;
+        if (i != l2.size()) {
+			return false;
+		}
 
         while (i-- > 0)
         {
-            if (! visit(l1.get(i), l2.get(i)))
-                return false;
+            if (! visit(l1.get(i), l2.get(i))) {
+				return false;
+			}
         }
 
         return true;

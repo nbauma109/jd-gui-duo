@@ -37,75 +37,75 @@ public class CheckCastAndConvertInstructionVisitor
 
     private static void visit(ConstantPool constants, Instruction instruction)
     {
-        switch (instruction.opcode)
+        switch (instruction.getOpcode())
         {
         case Const.ARRAYLENGTH:
-            visit(constants, ((ArrayLength)instruction).arrayref);
+            visit(constants, ((ArrayLength)instruction).getArrayref());
             break;
         case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
-            visit(constants, ((ArrayStoreInstruction)instruction).arrayref);
+            visit(constants, ((ArrayStoreInstruction)instruction).getArrayref());
             break;
         case ByteCodeConstants.ASSERT:
             {
                 AssertInstruction ai = (AssertInstruction)instruction;
-                visit(constants, ai.test);
-                if (ai.msg != null)
-                    visit(constants, ai.msg);
+                visit(constants, ai.getTest());
+                if (ai.getMsg() != null)
+                    visit(constants, ai.getMsg());
             }
             break;
         case Const.ATHROW:
-            visit(constants, ((AThrow)instruction).value);
+            visit(constants, ((AThrow)instruction).getValue());
             break;
         case ByteCodeConstants.UNARYOP:
-            visit(constants, ((UnaryOperatorInstruction)instruction).value);
+            visit(constants, ((UnaryOperatorInstruction)instruction).getValue());
             break;
         case ByteCodeConstants.BINARYOP:
         case ByteCodeConstants.ASSIGNMENT:
             {
                 BinaryOperatorInstruction boi =
                     (BinaryOperatorInstruction)instruction;
-                visit(constants, boi.value1);
-                visit(constants, boi.value2);
+                visit(constants, boi.getValue1());
+                visit(constants, boi.getValue2());
             }
             break;
         case Const.CHECKCAST:
             {
                 CheckCast cc = (CheckCast)instruction;
-                if (cc.objectref.opcode == Const.CHECKCAST)
+                if (cc.getObjectref().getOpcode() == Const.CHECKCAST)
                 {
-                    cc.objectref = ((CheckCast)cc.objectref).objectref;
+                    cc.setObjectref(((CheckCast)cc.getObjectref()).getObjectref());
                 }
-                visit(constants, cc.objectref);
+                visit(constants, cc.getObjectref());
             }
             break;
         case ByteCodeConstants.STORE:
         case Const.ASTORE:
         case Const.ISTORE:
-            visit(constants, ((StoreInstruction)instruction).valueref);
+            visit(constants, ((StoreInstruction)instruction).getValueref());
             break;
         case ByteCodeConstants.DUPSTORE:
-            visit(constants, ((DupStore)instruction).objectref);
+            visit(constants, ((DupStore)instruction).getObjectref());
             break;
         case ByteCodeConstants.CONVERT:
         case ByteCodeConstants.IMPLICITCONVERT:
-            visit(constants, ((ConvertInstruction)instruction).value);
+            visit(constants, ((ConvertInstruction)instruction).getValue());
             break;
         case ByteCodeConstants.IFCMP:
             {
                 IfCmp ifCmp = (IfCmp)instruction;
-                visit(constants, ifCmp.value1);
-                visit(constants, ifCmp.value2);
+                visit(constants, ifCmp.getValue1());
+                visit(constants, ifCmp.getValue2());
             }
             break;
         case ByteCodeConstants.IF:
         case ByteCodeConstants.IFXNULL:
-            visit(constants, ((IfInstruction)instruction).value);
+            visit(constants, ((IfInstruction)instruction).getValue());
             break;
         case ByteCodeConstants.COMPLEXIF:
             {
                 List<Instruction> branchList =
-                    ((ComplexConditionalBranchInstruction)instruction).instructions;
+                    ((ComplexConditionalBranchInstruction)instruction).getInstructions();
                 for (int i=branchList.size()-1; i>=0; --i)
                 {
                     visit(constants, branchList.get(i));
@@ -113,13 +113,13 @@ public class CheckCastAndConvertInstructionVisitor
             }
             break;
         case Const.INSTANCEOF:
-            visit(constants, ((InstanceOf)instruction).objectref);
+            visit(constants, ((InstanceOf)instruction).getObjectref());
             break;
         case Const.INVOKEINTERFACE:
         case Const.INVOKESPECIAL:
         case Const.INVOKEVIRTUAL:
             {
-                visit(constants, ((InvokeNoStaticInstruction)instruction).objectref);
+                visit(constants, ((InvokeNoStaticInstruction)instruction).getObjectref());
             }
             // intended fall through
         case Const.INVOKESTATIC:
@@ -132,7 +132,7 @@ public class CheckCastAndConvertInstructionVisitor
                 if (parameterSignatures != null)
                 {
                     List<Instruction> args =
-                        ((InvokeInstruction)instruction).args;
+                        ((InvokeInstruction)instruction).getArgs();
                     int i = parameterSignatures.size();
                     int j = args.size();
 
@@ -140,7 +140,7 @@ public class CheckCastAndConvertInstructionVisitor
                     {
                         Instruction arg = args.get(j);
 
-                        switch (arg.opcode)
+                        switch (arg.getOpcode())
                         {
                         case Const.SIPUSH:
                         case Const.BIPUSH:
@@ -163,7 +163,7 @@ public class CheckCastAndConvertInstructionVisitor
                                         // sont differents
                                         args.set(j, new ConvertInstruction(
                                             ByteCodeConstants.CONVERT,
-                                            arg.offset-1, arg.lineNumber,
+                                            arg.getOffset()-1, arg.getLineNumber(),
                                             arg, parameterSignature));
                                     }
                                 }
@@ -177,7 +177,7 @@ public class CheckCastAndConvertInstructionVisitor
                                         // parametres numeriques de type byte ou short
                                         args.set(j, new ConvertInstruction(
                                             ByteCodeConstants.CONVERT,
-                                            arg.offset-1, arg.lineNumber,
+                                            arg.getOffset()-1, arg.getLineNumber(),
                                             arg, parameterSignature));
                                         break;
                                     default:
@@ -194,17 +194,17 @@ public class CheckCastAndConvertInstructionVisitor
             }
             break;
         case Const.LOOKUPSWITCH:
-            visit(constants, ((LookupSwitch)instruction).key);
+            visit(constants, ((LookupSwitch)instruction).getKey());
             break;
         case Const.MONITORENTER:
-            visit(constants, ((MonitorEnter)instruction).objectref);
+            visit(constants, ((MonitorEnter)instruction).getObjectref());
             break;
         case Const.MONITOREXIT:
-            visit(constants, ((MonitorExit)instruction).objectref);
+            visit(constants, ((MonitorExit)instruction).getObjectref());
             break;
         case Const.MULTIANEWARRAY:
             {
-                Instruction[] dimensions = ((MultiANewArray)instruction).dimensions;
+                Instruction[] dimensions = ((MultiANewArray)instruction).getDimensions();
                 for (int i=dimensions.length-1; i>=0; --i)
                 {
                     visit(constants, dimensions[i]);
@@ -212,47 +212,47 @@ public class CheckCastAndConvertInstructionVisitor
             }
             break;
         case Const.NEWARRAY:
-            visit(constants, ((NewArray)instruction).dimension);
+            visit(constants, ((NewArray)instruction).getDimension());
             break;
         case Const.ANEWARRAY:
-            visit(constants, ((ANewArray)instruction).dimension);
+            visit(constants, ((ANewArray)instruction).getDimension());
             break;
         case Const.POP:
-            visit(constants, ((Pop)instruction).objectref);
+            visit(constants, ((Pop)instruction).getObjectref());
             break;
         case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
-                visit(constants, putField.objectref);
-                visit(constants, putField.valueref);
+                visit(constants, putField.getObjectref());
+                visit(constants, putField.getValueref());
             }
             break;
         case Const.PUTSTATIC:
-            visit(constants, ((PutStatic)instruction).valueref);
+            visit(constants, ((PutStatic)instruction).getValueref());
             break;
         case ByteCodeConstants.XRETURN:
-            visit(constants, ((ReturnInstruction)instruction).valueref);
+            visit(constants, ((ReturnInstruction)instruction).getValueref());
             break;
         case Const.TABLESWITCH:
-            visit(constants, ((TableSwitch)instruction).key);
+            visit(constants, ((TableSwitch)instruction).getKey());
             break;
         case ByteCodeConstants.TERNARYOPSTORE:
-            visit(constants, ((TernaryOpStore)instruction).objectref);
+            visit(constants, ((TernaryOpStore)instruction).getObjectref());
             break;
         case ByteCodeConstants.PREINC:
         case ByteCodeConstants.POSTINC:
-            visit(constants, ((IncInstruction)instruction).value);
+            visit(constants, ((IncInstruction)instruction).getValue());
             break;
         case Const.GETFIELD:
-            visit(constants, ((GetField)instruction).objectref);
+            visit(constants, ((GetField)instruction).getObjectref());
             break;
         case ByteCodeConstants.INITARRAY:
         case ByteCodeConstants.NEWANDINITARRAY:
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
-                visit(constants, iai.newArray);
-                if (iai.values != null)
-                    visit(constants, iai.values);
+                visit(constants, iai.getNewArray());
+                if (iai.getValues() != null)
+                    visit(constants, iai.getValues());
             }
             break;
         case Const.ACONST_NULL:
@@ -285,7 +285,7 @@ public class CheckCastAndConvertInstructionVisitor
             System.err.println(
                     "Can not check cast and convert instruction in " +
                     instruction.getClass().getName() +
-                    ", opcode=" + instruction.opcode);
+                    ", opcode=" + instruction.getOpcode());
         }
     }
 

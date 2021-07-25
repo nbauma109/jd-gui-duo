@@ -38,7 +38,7 @@ public class AnnotationWriter
             return;
         }
 
-        Annotation[] annotations = parameterAnnotation.annotations;
+        Annotation[] annotations = parameterAnnotation.getAnnotations();
 
         if (annotations == null) {
             return;
@@ -59,18 +59,18 @@ public class AnnotationWriter
         printer.startOfAnnotationName();
         printer.print('@');
         String annotationName =
-            classFile.getConstantPool().getConstantUtf8(annotation.typeIndex);
+            classFile.getConstantPool().getConstantUtf8(annotation.getTypeIndex());
         SignatureWriter.writeSignature(
             loader, printer, referenceMap, classFile, annotationName);
         printer.endOfAnnotationName();
 
-        ElementValuePair[] evps = annotation.elementValuePairs;
+        ElementValuePair[] evps = annotation.getElementValuePairs();
         if (evps != null && evps.length > 0)
         {
             printer.print('(');
 
             ConstantPool constants = classFile.getConstantPool();
-            String name = constants.getConstantUtf8(evps[0].elementNameIndex);
+            String name = constants.getConstantUtf8(evps[0].getElementNameIndex());
 
             if (evps.length > 1 || !"value".equals(name))
             {
@@ -79,18 +79,18 @@ public class AnnotationWriter
             }
             ElementValueWriter.writeElementValue(
                 loader, printer, referenceMap,
-                classFile, evps[0].elementValue);
+                classFile, evps[0].getElementValue());
 
             for (int j=1; j<evps.length; j++)
             {
-                name = constants.getConstantUtf8(evps[j].elementNameIndex);
+                name = constants.getConstantUtf8(evps[j].getElementNameIndex());
 
                 printer.print(", ");
                 printer.print(name);
                 printer.print('=');
                 ElementValueWriter.writeElementValue(
                     loader, printer, referenceMap,
-                    classFile, evps[j].elementValue);
+                    classFile, evps[j].getElementValue());
             }
 
             printer.print(')');

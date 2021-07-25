@@ -25,8 +25,8 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
  */
 public class FastFor extends FastTestList
 {
-    public Instruction init;
-    public Instruction inc;
+    private Instruction init;
+    private Instruction inc;
 
     public FastFor(
             int opcode, int offset, int lineNumber, int branch,
@@ -34,7 +34,23 @@ public class FastFor extends FastTestList
             List<Instruction> instructions)
     {
         super(opcode, offset, lineNumber, branch, test, instructions);
-        this.init = init;
-        this.inc = inc;
+        this.setInit(init);
+        this.setInc(inc);
     }
+
+	public Instruction getInc() {
+		return inc;
+	}
+
+	public void setInc(Instruction inc) {
+		this.inc = inc;
+	}
+
+	public Instruction getInit() {
+		return init;
+	}
+
+	public void setInit(Instruction init) {
+		this.init = init;
+	}
 }

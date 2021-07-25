@@ -18,13 +18,15 @@ package jd.core.model.classfile.attribute;
 
 public class AttributeRuntimeAnnotations extends Attribute
 {
-    public final Annotation[] annotations;
+    private final Annotation[] annotations;
 
-    public AttributeRuntimeAnnotations(byte tag,
-                                                int attributeNameIndex,
-                                                Annotation[] annotations)
+    public AttributeRuntimeAnnotations(byte tag, Annotation[] annotations)
     {
-        super(tag, attributeNameIndex);
+        super(tag);
         this.annotations = annotations;
     }
+
+	public Annotation[] getAnnotations() {
+		return annotations;
+	}
 }

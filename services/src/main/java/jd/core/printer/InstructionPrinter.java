@@ -33,8 +33,8 @@ public class InstructionPrinter implements Printer
      * --> Optimisation: utilisation de Boolean a la place de State.
     private static class State
     {
-        public boolean newInstruction;
-        public boolean multiLineInstruction;
+        private boolean newInstruction;
+        private boolean multiLineInstruction;
 
         public State(boolean newInstruction, boolean multiLineInstruction)
         {

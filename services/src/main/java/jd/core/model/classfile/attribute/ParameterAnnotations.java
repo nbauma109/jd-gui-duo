@@ -18,10 +18,14 @@ package jd.core.model.classfile.attribute;
 
 public class ParameterAnnotations
 {
-    public final Annotation[] annotations;
+    private final Annotation[] annotations;
 
     public ParameterAnnotations(Annotation[] annotations)
     {
         this.annotations = annotations;
     }
+
+	public Annotation[] getAnnotations() {
+		return annotations;
+	}
 }

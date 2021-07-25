@@ -38,10 +38,10 @@ public class ElementValuePrimitiveTypeWriter
     {
         ConstantPool constants = classFile.getConstantPool();
 
-        if (evpt.type == 's')
+        if (evpt.getType() == 's')
         {
             String constValue =
-                constants.getConstantUtf8(evpt.constValueIndex);
+                constants.getConstantUtf8(evpt.getConstValueIndex());
             String escapedString =
                 StringUtil.escapeStringAndAppendQuotationMark(constValue);
             printer.printString(escapedString, classFile.getThisClassName());
@@ -49,9 +49,9 @@ public class ElementValuePrimitiveTypeWriter
         else
         {
             Constant cv = constants.getConstantValue(
-                evpt.constValueIndex);
+                evpt.getConstValueIndex());
             ConstantValueWriter.write(
-                loader, printer, referenceMap, classFile, cv, evpt.type);
+                loader, printer, referenceMap, classFile, cv, evpt.getType());
         }
     }
 }

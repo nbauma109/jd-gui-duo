@@ -47,64 +47,64 @@ public class FastCompareInstructionVisitor extends CompareInstructionVisitor
     @Override
     public boolean visit(Instruction i1, Instruction i2)
     {
-        if (i1.opcode != i2.opcode) {
+        if (i1.getOpcode() != i2.getOpcode()) {
 			return false;
 		}
-        switch (i1.opcode)
+        switch (i1.getOpcode())
         {
         case FastConstants.TRY:
             {
                 FastTry ft1 = (FastTry)i1;
                 FastTry ft2 = (FastTry)i2;
 
-                int i = ft1.catches.size();
+                int i = ft1.getCatches().size();
 
-                if (i != ft2.catches.size()) {
+                if (i != ft2.getCatches().size()) {
 					return false;
 				}
 
-                if (ft1.finallyInstructions == null)
+                if (ft1.getFinallyInstructions() == null)
                 {
-                    if (ft2.finallyInstructions != null) {
+                    if (ft2.getFinallyInstructions() != null) {
 						return false;
 					}
                 }
-                else if (ft2.finallyInstructions == null)
+                else if (ft2.getFinallyInstructions() == null)
                 {
-                    if (ft1.finallyInstructions != null) {
+                    if (ft1.getFinallyInstructions() != null) {
 						return false;
 					}
                 } else if (! visit(
-				        ft1.finallyInstructions,
-				        ft2.finallyInstructions)) {
+				        ft1.getFinallyInstructions(),
+				        ft2.getFinallyInstructions())) {
 					return false;
 				}
 
                 while (i-- > 0)
                 {
-                    FastCatch fc1 = ft1.catches.get(i);
-                    FastCatch fc2 = ft2.catches.get(i);
+                    FastCatch fc1 = ft1.getCatches().get(i);
+                    FastCatch fc2 = ft2.getCatches().get(i);
 
-                    if (fc1.exceptionTypeIndex != fc2.exceptionTypeIndex ||
-                        ! visit(fc1.instructions, fc2.instructions) ||
+                    if (fc1.getExceptionTypeIndex() != fc2.getExceptionTypeIndex() ||
+                        ! visit(fc1.getInstructions(), fc2.getInstructions()) ||
                         ! compareExceptionTypeIndexes(
-                            fc1.otherExceptionTypeIndexes, fc2.otherExceptionTypeIndexes)) {
+                            fc1.getOtherExceptionTypeIndexes(), fc2.getOtherExceptionTypeIndexes())) {
 						return false;
 					}
                 }
 
-                return visit(ft1.instructions, ft2.instructions);
+                return visit(ft1.getInstructions(), ft2.getInstructions());
             }
         case FastConstants.SYNCHRONIZED:
             {
                 FastSynchronized fs1 = (FastSynchronized)i1;
                 FastSynchronized fs2 = (FastSynchronized)i2;
 
-                if (! visit(fs1.monitor, fs2.monitor)) {
+                if (! visit(fs1.getMonitor(), fs2.getMonitor())) {
 					return false;
 				}
 
-                return visit(fs1.instructions, fs2.instructions);
+                return visit(fs1.getInstructions(), fs2.getInstructions());
             }
         default:
             return super.visit(i1, i2);

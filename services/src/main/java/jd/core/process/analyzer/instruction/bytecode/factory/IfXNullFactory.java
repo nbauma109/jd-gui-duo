@@ -30,7 +30,7 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class IfXNullFactory implements InstructionFactory
 {
-	public int cmp;
+	private int cmp;
 
 	public IfXNullFactory(int cmp)
 	{
@@ -55,7 +55,7 @@ public class IfXNullFactory implements InstructionFactory
 		if (!stack.isEmpty())
 		{
 			Instruction instruction = stack.peek();
-			if (instruction.opcode == ByteCodeConstants.DUPLOAD)
+			if (instruction.getOpcode() == ByteCodeConstants.DUPLOAD)
 			{
 				int nextOffset =
 						offset + Const.getNoOfOperands(opcode) + 1;
@@ -66,7 +66,7 @@ public class IfXNullFactory implements InstructionFactory
 					// DotClass118BReconstructor
 					DupLoad dp = (DupLoad)instruction;
 					stack.push(new DupLoad(
-							dp.opcode, dp.offset, dp.lineNumber, dp.dupStore));
+							dp.getOpcode(), dp.getOffset(), dp.getLineNumber(), dp.getDupStore()));
 				}
 			}
 		}

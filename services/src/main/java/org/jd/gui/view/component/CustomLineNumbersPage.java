@@ -37,11 +37,11 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
 
     protected void setMaxLineNumber(int maxLineNumber) {
         if (maxLineNumber > 0) {
-            if (getLineNumberMap() == null) {
+            if (lineNumberMap == null) {
                 lineNumberMap = new int[maxLineNumber+1];
-            } else if (getLineNumberMap().length <= maxLineNumber) {
+            } else if (lineNumberMap.length <= maxLineNumber) {
                 int[] tmp = new int[maxLineNumber+1];
-                System.arraycopy(getLineNumberMap(), 0, tmp, 0, getLineNumberMap().length);
+                System.arraycopy(lineNumberMap, 0, tmp, 0, lineNumberMap.length);
                 lineNumberMap = tmp;
             }
 
@@ -65,7 +65,7 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
             setMaxLineNumber(mln);
 
             for (int i=1; i<=maxLineNumber; i++) {
-                getLineNumberMap()[i] = i;
+                lineNumberMap[i] = i;
             }
         }
     }
@@ -73,13 +73,13 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
     protected void setLineNumber(int textAreaLineNumber, int originalLineNumber) {
         if (originalLineNumber > 0) {
             setMaxLineNumber(textAreaLineNumber);
-            getLineNumberMap()[textAreaLineNumber] = originalLineNumber;
+            lineNumberMap[textAreaLineNumber] = originalLineNumber;
         }
     }
 
     protected void clearLineNumbers() {
-        if (getLineNumberMap() != null) {
-            Arrays.fill(getLineNumberMap(), 0);
+        if (lineNumberMap != null) {
+            Arrays.fill(lineNumberMap, 0);
         }
     }
 
@@ -88,11 +88,11 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
     protected int getTextAreaLineNumber(int originalLineNumber) {
         int textAreaLineNumber = 1;
         int greatestLowerSourceLineNumber = 0;
-        int i = getLineNumberMap().length;
+        int i = lineNumberMap.length;
 
         int sln;
         while (i-- > 0) {
-            sln = getLineNumberMap()[i];
+            sln = lineNumberMap[i];
             if (sln <= originalLineNumber && greatestLowerSourceLineNumber < sln) {
                 greatestLowerSourceLineNumber = sln;
                 textAreaLineNumber = i;
@@ -104,10 +104,6 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
 
     @Override
     protected RSyntaxTextArea newSyntaxTextArea() { return new SourceSyntaxTextArea(); }
-
-    public int[] getLineNumberMap() {
-        return lineNumberMap;
-    }
 
     public class SourceSyntaxTextArea extends HyperlinkSyntaxTextArea {
         private static final long serialVersionUID = 1L;
@@ -280,8 +276,8 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
         protected void paintLineNumber(Graphics g, FontMetrics metrics, int x, int y, int lineNumber) {
             int originalLineNumber;
 
-            if (getLineNumberMap() != null) {
-                originalLineNumber = lineNumber < getLineNumberMap().length ? getLineNumberMap()[lineNumber] : 0;
+            if (lineNumberMap != null) {
+                originalLineNumber = lineNumber < lineNumberMap.length ? lineNumberMap[lineNumber] : 0;
             } else {
                 originalLineNumber = lineNumber;
             }

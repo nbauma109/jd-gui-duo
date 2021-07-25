@@ -48,12 +48,12 @@ public class NewInstructionReconstructor extends NewInstructionReconstructorBase
     {
         for (int dupStoreIndex=0; dupStoreIndex<list.size(); dupStoreIndex++)
         {
-            if (list.get(dupStoreIndex).opcode != ByteCodeConstants.DUPSTORE)
+            if (list.get(dupStoreIndex).getOpcode() != ByteCodeConstants.DUPSTORE)
                 continue;
 
             DupStore ds = (DupStore)list.get(dupStoreIndex);
 
-            if (ds.objectref.opcode != Const.NEW)
+            if (ds.getObjectref().getOpcode() != Const.NEW)
                 continue;
 
             int invokespecialIndex = dupStoreIndex;
@@ -63,30 +63,30 @@ public class NewInstructionReconstructor extends NewInstructionReconstructorBase
             {
                 Instruction instruction = list.get(invokespecialIndex);
 
-                if (instruction.opcode != Const.INVOKESPECIAL)
+                if (instruction.getOpcode() != Const.INVOKESPECIAL)
                     continue;
 
                 Invokespecial is = (Invokespecial)instruction;
 
-                if (is.objectref.opcode != ByteCodeConstants.DUPLOAD)
+                if (is.getObjectref().getOpcode() != ByteCodeConstants.DUPLOAD)
                     continue;
 
-                DupLoad dl = (DupLoad)is.objectref;
+                DupLoad dl = (DupLoad)is.getObjectref();
 
-                if (dl.offset != ds.offset)
+                if (dl.getOffset() != ds.getOffset())
                     continue;
 
                 ConstantPool constants = classFile.getConstantPool();
-                ConstantMethodref cmr = constants.getConstantMethodref(is.index);
+                ConstantMethodref cmr = constants.getConstantMethodref(is.getIndex());
                 ConstantNameAndType cnat =
                     constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 
-                if (cnat.getNameIndex() == constants.instanceConstructorIndex)
+                if (cnat.getNameIndex() == constants.getInstanceConstructorIndex())
                 {
-                    New nw = (New)ds.objectref;
+                    New nw = (New)ds.getObjectref();
                     InvokeNew invokeNew = new InvokeNew(
-                        ByteCodeConstants.INVOKENEW, is.offset,
-                        nw.lineNumber, is.index, is.args);
+                        ByteCodeConstants.INVOKENEW, is.getOffset(),
+                        nw.getLineNumber(), is.getIndex(), is.getArgs());
 
                     Instruction parentFound = ReconstructorUtil.replaceDupLoad(
                         list, invokespecialIndex+1, ds, invokeNew);

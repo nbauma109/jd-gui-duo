@@ -93,28 +93,28 @@ public class SourceWriterVisitor
         else
         {
             this.constants = classFile.getConstantPool();
-            this.methodAccessFlags = method.accessFlags;
+            this.methodAccessFlags = method.getAccessFlags();
             this.localVariables = method.getLocalVariables();
         }
     }
 
     public int visit(Instruction instruction)
     {
-        int lineNumber = instruction.lineNumber;
+        int lineNumber = instruction.getLineNumber();
 
-        if (instruction.offset < this.firstOffset ||
+        if (instruction.getOffset() < this.firstOffset ||
             this.previousOffset > this.lastOffset) {
             return lineNumber;
         }
 
-        switch (instruction.opcode)
+        switch (instruction.getOpcode())
         {
         case Const.ARRAYLENGTH:
             {
-                lineNumber = visit(instruction, ((ArrayLength)instruction).arrayref);
+                lineNumber = visit(instruction, ((ArrayLength)instruction).getArrayref());
 
                 if (this.firstOffset <= this.previousOffset &&
-                    instruction.offset <= this.lastOffset)
+                    instruction.getOffset() <= this.lastOffset)
                 {
                     this.printer.print(lineNumber, '.');
                     this.printer.printJavaWord("length");
@@ -124,14 +124,14 @@ public class SourceWriterVisitor
         case ByteCodeConstants.ARRAYLOAD:
             {
                 ArrayLoadInstruction ali = (ArrayLoadInstruction)instruction;
-                lineNumber = writeArray(ali, ali.arrayref, ali.indexref);
+                lineNumber = writeArray(ali, ali.getArrayref(), ali.getIndexref());
             }
             break;
         case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
-                lineNumber = writeArray(asi, asi.arrayref, asi.indexref);
+                lineNumber = writeArray(asi, asi.getArrayref(), asi.getIndexref());
 
                 int nextOffset = this.previousOffset + 1;
                 if (this.firstOffset <= nextOffset &&
@@ -139,15 +139,15 @@ public class SourceWriterVisitor
                     this.printer.print(lineNumber, " = ");
                 }
 
-                lineNumber = visit(asi, asi.valueref);
+                lineNumber = visit(asi, asi.getValueref());
             }
             break;
         case Const.ANEWARRAY:
             {
                 ANewArray newArray = (ANewArray)instruction;
-                Instruction dimension = newArray.dimension;
+                Instruction dimension = newArray.getDimension();
 
-                String signature = constants.getConstantClassName(newArray.index);
+                String signature = constants.getConstantClassName(newArray.getIndex());
 
                 if (signature.charAt(0) != '[') {
                     signature = SignatureUtil.createTypeName(signature);
@@ -174,7 +174,7 @@ public class SourceWriterVisitor
                 lineNumber = visit(dimension);
 
                 if (this.firstOffset <= this.previousOffset &&
-                    instruction.offset <= this.lastOffset)
+                    instruction.getOffset() <= this.lastOffset)
                 {
                     this.printer.print(lineNumber, ']');
 
@@ -190,7 +190,7 @@ public class SourceWriterVisitor
         case Const.ACONST_NULL:
             {
                 if (this.firstOffset <= this.previousOffset &&
-                    instruction.offset <= this.lastOffset) {
+                    instruction.getOffset() <= this.lastOffset) {
                     this.printer.printKeyword(lineNumber, "null");
                 }
             }
@@ -208,17 +208,17 @@ public class SourceWriterVisitor
                     this.printer.print(' ');
                 }
 
-                lineNumber = visit(ai, ai.test);
+                lineNumber = visit(ai, ai.getTest());
 
-                if (ai.msg != null)
+                if (ai.getMsg() != null)
                 {
 
                     if (this.firstOffset <= this.previousOffset &&
-                        ai.msg.offset <= this.lastOffset) {
+                        ai.getMsg().getOffset() <= this.lastOffset) {
                         this.printer.print(lineNumber, " : ");
                     }
 
-                    lineNumber = visit(ai, ai.msg);
+                    lineNumber = visit(ai, ai.getMsg());
                 }
             }
             break;
@@ -238,7 +238,7 @@ public class SourceWriterVisitor
                     this.printer.print(' ');
                 }
 
-                lineNumber = visit(athrow, athrow.value);
+                lineNumber = visit(athrow, athrow.getValue());
             }
             break;
         case ByteCodeConstants.UNARYOP:
@@ -250,10 +250,10 @@ public class SourceWriterVisitor
 
                 if (this.firstOffset <= this.previousOffset &&
                     nextOffset <= this.lastOffset) {
-                    this.printer.print(lineNumber, ioi.operator);
+                    this.printer.print(lineNumber, ioi.getOperator());
                 }
 
-                lineNumber = visit(ioi, ioi.value);
+                lineNumber = visit(ioi, ioi.getValue());
             }
             break;
         case ByteCodeConstants.BINARYOP:
@@ -267,18 +267,18 @@ public class SourceWriterVisitor
             break;
         case ByteCodeConstants.LCONST:
             if (this.firstOffset <= this.previousOffset &&
-                instruction.offset <= this.lastOffset)
+                instruction.getOffset() <= this.lastOffset)
             {
                 this.printer.printNumeric(lineNumber,
-                    String.valueOf(((ConstInstruction)instruction).value) + 'L');
+                    String.valueOf(((ConstInstruction)instruction).getValue()) + 'L');
             }
             break;
         case ByteCodeConstants.FCONST:
             if (this.firstOffset <= this.previousOffset &&
-                instruction.offset <= this.lastOffset)
+                instruction.getOffset() <= this.lastOffset)
             {
                 String value =
-                    String.valueOf(((ConstInstruction)instruction).value);
+                    String.valueOf(((ConstInstruction)instruction).getValue());
                 if (value.indexOf('.') == -1) {
                     value += ".0";
                 }
@@ -287,10 +287,10 @@ public class SourceWriterVisitor
             break;
         case ByteCodeConstants.DCONST:
             if (this.firstOffset <= this.previousOffset &&
-                instruction.offset <= this.lastOffset)
+                instruction.getOffset() <= this.lastOffset)
             {
                 String value =
-                    String.valueOf(((ConstInstruction)instruction).value);
+                    String.valueOf(((ConstInstruction)instruction).getValue());
                 if (value.indexOf('.') == -1) {
                     value += ".0";
                 }
@@ -302,7 +302,7 @@ public class SourceWriterVisitor
                 (ConvertInstruction)instruction);
             break;
         case ByteCodeConstants.IMPLICITCONVERT:
-            lineNumber = visit(((ConvertInstruction)instruction).value);
+            lineNumber = visit(((ConvertInstruction)instruction).getValue());
             break;
         case Const.CHECKCAST:
             {
@@ -316,7 +316,7 @@ public class SourceWriterVisitor
                     this.printer.print(lineNumber, '(');
 
                     String signature;
-                    Constant c = constants.get(checkCast.index);
+                    Constant c = constants.get(checkCast.getIndex());
 
                     if (c instanceof ConstantUtf8 cutf8)
                     {
@@ -338,7 +338,7 @@ public class SourceWriterVisitor
                     this.printer.print(')');
                 }
 
-                lineNumber = visit(checkCast, checkCast.objectref);
+                lineNumber = visit(checkCast, checkCast.getObjectref());
             }
             break;
         case FastConstants.DECLARE:
@@ -355,14 +355,14 @@ public class SourceWriterVisitor
                 {
                     this.printer.print(
                         lineNumber, StringConstants.TMP_LOCAL_VARIABLE_NAME);
-                    this.printer.print(instruction.offset);
+                    this.printer.print(instruction.getOffset());
                     this.printer.print('_');
                     this.printer.print(
-                        ((DupStore)instruction).objectref.offset);
+                        ((DupStore)instruction).getObjectref().getOffset());
                     this.printer.print(" = ");
                 }
 
-                lineNumber = visit(instruction, dupStore.objectref);
+                lineNumber = visit(instruction, dupStore.getObjectref());
             }
             break;
         case ByteCodeConstants.DUPLOAD:
@@ -374,10 +374,10 @@ public class SourceWriterVisitor
                 {
                     this.printer.print(
                         lineNumber, StringConstants.TMP_LOCAL_VARIABLE_NAME);
-                    this.printer.print(instruction.offset);
+                    this.printer.print(instruction.getOffset());
                     this.printer.print('_');
                     this.printer.print(
-                        ((DupLoad)instruction).dupStore.objectref.offset);
+                        ((DupLoad)instruction).getDupStore().getObjectref().getOffset());
                 }
             }
             break;
@@ -396,7 +396,7 @@ public class SourceWriterVisitor
         case Const.GOTO:
             {
                 if (this.firstOffset <= this.previousOffset &&
-                    instruction.offset <= this.lastOffset)
+                    instruction.getOffset() <= this.lastOffset)
                 {
                     Goto gotoInstruction = (Goto)instruction;
                     this.printer.printKeyword(lineNumber, "goto");
@@ -408,14 +408,14 @@ public class SourceWriterVisitor
             break;
         case FastConstants.GOTO_CONTINUE:
             if (this.firstOffset <= this.previousOffset &&
-                instruction.offset <= this.lastOffset)
+                instruction.getOffset() <= this.lastOffset)
             {
                 this.printer.printKeyword(lineNumber, "continue");
             }
             break;
         case FastConstants.GOTO_BREAK:
             if (this.firstOffset <= this.previousOffset &&
-                instruction.offset <= this.lastOffset)
+                instruction.getOffset() <= this.lastOffset)
             {
                 this.printer.printKeyword(lineNumber, "break");
             }
@@ -449,10 +449,10 @@ public class SourceWriterVisitor
             {
                 InstanceOf instanceOf = (InstanceOf)instruction;
 
-                lineNumber = visit(instanceOf, instanceOf.objectref);
+                lineNumber = visit(instanceOf, instanceOf.getObjectref());
 
                 if (this.firstOffset <= this.previousOffset &&
-                    instruction.offset <= this.lastOffset)
+                    instruction.getOffset() <= this.lastOffset)
                 {
                     this.printer.print(lineNumber, ' ');
                     this.printer.printKeyword("instanceof");
@@ -460,7 +460,7 @@ public class SourceWriterVisitor
 
                     // reference to a class, array, or interface
                     String signature =
-                        constants.getConstantClassName(instanceOf.index);
+                        constants.getConstantClassName(instanceOf.getIndex());
 
                     if (signature.charAt(0) != '[') {
                         signature = SignatureUtil.createTypeName(signature);
@@ -487,11 +487,11 @@ public class SourceWriterVisitor
         case Const.JSR:
             {
                 if (this.firstOffset <= this.previousOffset &&
-                    instruction.offset <= this.lastOffset)
+                    instruction.getOffset() <= this.lastOffset)
                 {
                     this.printer.printKeyword(lineNumber, "jsr");
                     this.printer.print(' ');
-                    this.printer.print((short)((Jsr)instruction).branch);
+                    this.printer.print((short)((Jsr)instruction).getBranch());
                 }
             }
             break;
@@ -517,10 +517,10 @@ public class SourceWriterVisitor
                     this.printer.print(" (");
                 }
 
-                lineNumber = visit(lookupSwitch.key);
+                lineNumber = visit(lookupSwitch.getKey());
 
                 if (this.firstOffset <= this.previousOffset &&
-                    instruction.offset <= this.lastOffset)
+                    instruction.getOffset() <= this.lastOffset)
                 {
                     this.printer.print(lineNumber, ')');
                 }
@@ -539,10 +539,10 @@ public class SourceWriterVisitor
                     this.printer.print(" (");
                 }
 
-                lineNumber = visit(tableSwitch.key);
+                lineNumber = visit(tableSwitch.getKey());
 
                 if (this.firstOffset <= this.previousOffset &&
-                    instruction.offset <= this.lastOffset)
+                    instruction.getOffset() <= this.lastOffset)
                 {
                     this.printer.print(lineNumber, ')');
                 }
@@ -551,7 +551,7 @@ public class SourceWriterVisitor
         case Const.MONITORENTER:
             {
                 if (this.firstOffset <= this.previousOffset &&
-                    instruction.offset <= this.lastOffset)
+                    instruction.getOffset() <= this.lastOffset)
                 {
                     this.printer.startOfError();
                     this.printer.printKeyword(lineNumber, "monitorenter");
@@ -562,7 +562,7 @@ public class SourceWriterVisitor
         case Const.MONITOREXIT:
             {
                 if (this.firstOffset <= this.previousOffset &&
-                    instruction.offset <= this.lastOffset)
+                    instruction.getOffset() <= this.lastOffset)
                 {
                     this.printer.startOfError();
                     this.printer.printKeyword(lineNumber, "monitorexit");
@@ -576,13 +576,13 @@ public class SourceWriterVisitor
         case Const.NEW:
             {
                 if (this.firstOffset <= this.previousOffset &&
-                    instruction.offset <= this.lastOffset)
+                    instruction.getOffset() <= this.lastOffset)
                 {
                     this.printer.printKeyword(lineNumber, "new");
                     this.printer.print(' ');
                     this.printer.print(
                         lineNumber, constants.getConstantClassName(
-                            ((IndexInstruction)instruction).index));
+                            ((IndexInstruction)instruction).getIndex()));
                 }
             }
             break;
@@ -599,26 +599,26 @@ public class SourceWriterVisitor
                     SignatureWriter.writeSignature(
                         this.loader, this.printer,
                         this.referenceMap, this.classFile,
-                        SignatureUtil.getSignatureFromType(newArray.type));
+                        SignatureUtil.getSignatureFromType(newArray.getType()));
                     this.printer.print(lineNumber, '[');
                 }
 
-                lineNumber = visit(newArray.dimension);
+                lineNumber = visit(newArray.getDimension());
 
                 if (this.firstOffset <= this.previousOffset &&
-                    instruction.offset <= this.lastOffset) {
+                    instruction.getOffset() <= this.lastOffset) {
                     this.printer.print(lineNumber, ']');
                 }
             }
             break;
         case Const.POP:
-            lineNumber = visit(instruction, ((Pop)instruction).objectref);
+            lineNumber = visit(instruction, ((Pop)instruction).getObjectref());
             break;
         case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
 
-                ConstantFieldref cfr = constants.getConstantFieldref(putField.index);
+                ConstantFieldref cfr = constants.getConstantFieldref(putField.getIndex());
                 ConstantNameAndType cnat =
                     constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
 
@@ -626,19 +626,19 @@ public class SourceWriterVisitor
 
                 if (this.localVariables.containsLocalVariableWithNameIndex(cnat.getNameIndex()))
                 {
-                    if (putField.objectref.opcode == Const.ALOAD) {
-                        if (((ALoad)putField.objectref).index == 0) {
+                    if (putField.getObjectref().getOpcode() == Const.ALOAD) {
+                        if (((ALoad)putField.getObjectref()).getIndex() == 0) {
                             displayPrefix = true;
                         }
-                    } else if (putField.objectref.opcode == ByteCodeConstants.OUTERTHIS && !needAPrefixForThisField(
+                    } else if (putField.getObjectref().getOpcode() == ByteCodeConstants.OUTERTHIS && !needAPrefixForThisField(
                             cnat.getNameIndex(), cnat.getSignatureIndex(),
-                            (GetStatic)putField.objectref)) {
+                            (GetStatic)putField.getObjectref())) {
                         displayPrefix = true;
                     }
                 }
 
                 if (this.firstOffset <= this.previousOffset &&
-                    putField.objectref.offset <= this.lastOffset)
+                    putField.getObjectref().getOffset() <= this.lastOffset)
                 {
                     if (!displayPrefix)
                     {
@@ -646,7 +646,7 @@ public class SourceWriterVisitor
                         this.printer.startOfOptionalPrefix();
                     }
 
-                    lineNumber = visit(putField, putField.objectref);
+                    lineNumber = visit(putField, putField.getObjectref());
                     this.printer.print(lineNumber, '.');
 
                     if (!displayPrefix)
@@ -676,7 +676,7 @@ public class SourceWriterVisitor
                     this.printer.print(" = ");
                 }
 
-                lineNumber = visit(putField, putField.valueref);
+                lineNumber = visit(putField, putField.getValueref());
             }
             break;
         case Const.PUTSTATIC:
@@ -685,7 +685,7 @@ public class SourceWriterVisitor
         case Const.RET:
             {
                 if (this.firstOffset <= this.previousOffset &&
-                    instruction.offset <= this.lastOffset)
+                    instruction.getOffset() <= this.lastOffset)
                 {
                     this.printer.startOfError();
                     this.printer.printKeyword(lineNumber, "ret");
@@ -696,7 +696,7 @@ public class SourceWriterVisitor
         case Const.RETURN:
             {
                 if (this.firstOffset <= this.previousOffset &&
-                    instruction.offset <= this.lastOffset) {
+                    instruction.getOffset() <= this.lastOffset) {
                     this.printer.printKeyword(lineNumber, "return");
                 }
             }
@@ -706,13 +706,13 @@ public class SourceWriterVisitor
                 ReturnInstruction ri = (ReturnInstruction)instruction;
 
                 if (this.firstOffset <= this.previousOffset &&
-                    instruction.offset <= this.lastOffset)
+                    instruction.getOffset() <= this.lastOffset)
                 {
-                    this.printer.printKeyword(ri.lineNumber, "return");
+                    this.printer.printKeyword(ri.getLineNumber(), "return");
                     this.printer.print(' ');
                 }
 
-                lineNumber = visit(ri.valueref);
+                lineNumber = visit(ri.getValueref());
             }
             break;
         case ByteCodeConstants.STORE:
@@ -726,7 +726,7 @@ public class SourceWriterVisitor
         case ByteCodeConstants.RETURNADDRESSLOAD:
             {
                 if (this.firstOffset <= this.previousOffset &&
-                    instruction.offset <= this.lastOffset)
+                    instruction.getOffset() <= this.lastOffset)
                 {
                     this.printer.startOfError();
                     this.printer.printKeyword(lineNumber, "returnAddress");
@@ -748,14 +748,14 @@ public class SourceWriterVisitor
                 }
 
                 lineNumber = visit(
-                    instruction, ((TernaryOpStore)instruction).objectref);
+                    instruction, ((TernaryOpStore)instruction).getObjectref());
             }
             break;
         case ByteCodeConstants.TERNARYOP:
             {
                 TernaryOperator tp = (TernaryOperator)instruction;
 
-                lineNumber = visit(tp.test);
+                lineNumber = visit(tp.getTest());
 
                 int nextOffset = this.previousOffset + 1;
 
@@ -764,7 +764,7 @@ public class SourceWriterVisitor
                     this.printer.print(lineNumber, " ? ");
                 }
 
-                lineNumber = visit(tp, tp.value1);
+                lineNumber = visit(tp, tp.getValue1());
 
                 nextOffset = this.previousOffset + 1;
 
@@ -773,7 +773,7 @@ public class SourceWriterVisitor
                     this.printer.print(lineNumber, " : ");
                 }
 
-                lineNumber = visit(tp, tp.value2);
+                lineNumber = visit(tp, tp.getValue2());
             }
             break;
         case ByteCodeConstants.INITARRAY:
@@ -790,10 +790,10 @@ public class SourceWriterVisitor
             System.err.println(
                     "Can not write code for " +
                     instruction.getClass().getName() +
-                    ", opcode=" + instruction.opcode);
+                    ", opcode=" + instruction.getOpcode());
         }
 
-        this.previousOffset = instruction.offset;
+        this.previousOffset = instruction.getOffset();
 
         return lineNumber;
     }
@@ -811,7 +811,7 @@ public class SourceWriterVisitor
         int nextOffset = this.previousOffset + 1;
         if (this.firstOffset <= this.previousOffset &&
             nextOffset <= this.lastOffset) {
-            this.printer.print(child.lineNumber, '(');
+            this.printer.print(child.getLineNumber(), '(');
         }
         int lineNumber = visit(child);
         nextOffset = this.previousOffset + 1;
@@ -833,7 +833,7 @@ public class SourceWriterVisitor
         }
 
         ConstantFieldref cfr =
-            this.constants.getConstantFieldref(getStatic.index);
+            this.constants.getConstantFieldref(getStatic.getIndex());
         String getStaticOuterClassName =
             this.constants.getConstantClassName(cfr.getClassIndex());
         String fieldName = this.constants.getConstantUtf8(fieldNameIndex);
@@ -865,12 +865,12 @@ public class SourceWriterVisitor
 
     private int writeBIPushSIPushIConst(IConst iconst)
     {
-        int lineNumber = iconst.lineNumber;
+        int lineNumber = iconst.getLineNumber();
 
         if (this.firstOffset <= this.previousOffset &&
-            iconst.offset <= this.lastOffset)
+            iconst.getOffset() <= this.lastOffset)
         {
-            int value = iconst.value;
+            int value = iconst.getValue();
             String signature = iconst.getSignature();
 
             if ("S".equals(signature))
@@ -957,7 +957,7 @@ public class SourceWriterVisitor
         lineNumber = visit(parent, indexref);
 
         if (this.firstOffset <= this.previousOffset &&
-            parent.offset <= this.lastOffset) {
+            parent.getOffset() <= this.lastOffset) {
             this.printer.print(lineNumber, ']');
         }
 
@@ -969,15 +969,15 @@ public class SourceWriterVisitor
     {
         int lineNumber;
 
-        if (boi.operator.length() == 1)
+        if (boi.getOperator().length() == 1)
         {
-            switch (boi.operator.charAt(0))
+            switch (boi.getOperator().charAt(0))
             {
             case '&': case '|': case '^':
                 {
                     // Binary operators
                     lineNumber =
-                        writeBinaryOperatorParameterInHexaOrBoolean(boi, boi.value1);
+                        writeBinaryOperatorParameterInHexaOrBoolean(boi, boi.getValue1());
 
                     int nextOffset = this.previousOffset + 1;
 
@@ -985,18 +985,18 @@ public class SourceWriterVisitor
                         nextOffset <= this.lastOffset)
                     {
                         this.printer.print(lineNumber, ' ');
-                        this.printer.print(lineNumber, boi.operator);
+                        this.printer.print(lineNumber, boi.getOperator());
                         this.printer.print(lineNumber, ' ');
                     }
 
                     return
-                        writeBinaryOperatorParameterInHexaOrBoolean(boi, boi.value2);
+                        writeBinaryOperatorParameterInHexaOrBoolean(boi, boi.getValue2());
                 }
             }
         }
 
         // Other operators
-        lineNumber = visit(boi, boi.value1);
+        lineNumber = visit(boi, boi.getValue1());
 
         int nextOffset = this.previousOffset + 1;
 
@@ -1004,20 +1004,20 @@ public class SourceWriterVisitor
             nextOffset <= this.lastOffset)
         {
             this.printer.print(lineNumber, ' ');
-            this.printer.print(lineNumber, boi.operator);
+            this.printer.print(lineNumber, boi.getOperator());
             this.printer.print(lineNumber, ' ');
         }
 
-        if (boi.getPriority() > boi.value2.getPriority()) {
-            return visit(boi.value2);
+        if (boi.getPriority() > boi.getValue2().getPriority()) {
+            return visit(boi.getValue2());
         }
         if (this.firstOffset <= this.previousOffset &&
             nextOffset <= this.lastOffset) {
             this.printer.print(lineNumber, '(');
         }
-        lineNumber = visit(boi.value2);
+        lineNumber = visit(boi.getValue2());
         if (this.firstOffset <= this.previousOffset &&
-            boi.offset <= this.lastOffset) {
+            boi.getOffset() <= this.lastOffset) {
             this.printer.print(lineNumber, ')');
         }
         return lineNumber;
@@ -1032,7 +1032,7 @@ public class SourceWriterVisitor
         int nextOffset = this.previousOffset + 1;
         if (this.firstOffset <= this.previousOffset &&
             nextOffset <= this.lastOffset) {
-            this.printer.print(child.lineNumber, '(');
+            this.printer.print(child.getLineNumber(), '(');
         }
         int lineNumber = writeBinaryOperatorParameterInHexaOrBoolean(child);
         nextOffset = this.previousOffset + 1;
@@ -1045,21 +1045,21 @@ public class SourceWriterVisitor
 
     private int writeBinaryOperatorParameterInHexaOrBoolean(Instruction value)
     {
-        int lineNumber = value.lineNumber;
+        int lineNumber = value.getLineNumber();
 
         if (this.firstOffset <= this.previousOffset &&
-            value.offset <= this.lastOffset)
+            value.getOffset() <= this.lastOffset)
         {
-            switch (value.opcode)
+            switch (value.getOpcode())
             {
             case Const.BIPUSH:
             case ByteCodeConstants.ICONST:
             case Const.SIPUSH:
                 {
                     IConst iconst = (IConst)value;
-                    if ("Z".equals(iconst.signature))
+                    if ("Z".equals(iconst.getSignature()))
                     {
-                        if (iconst.value == 0) {
+                        if (iconst.getValue() == 0) {
                             this.printer.printKeyword(lineNumber, "false");
                         } else {
                             this.printer.printKeyword(lineNumber, "true");
@@ -1069,14 +1069,14 @@ public class SourceWriterVisitor
                     {
                         this.printer.printNumeric(
                             lineNumber,
-                            "0x" + Integer.toHexString(iconst.value).toUpperCase());
+                            "0x" + Integer.toHexString(iconst.getValue()).toUpperCase());
                     }
                 }
                 break;
             case Const.LDC:
             case Const.LDC2_W:
                 this.printer.addNewLinesAndPrefix(lineNumber);
-                Constant cst = constants.get( ((IndexInstruction)value).index );
+                Constant cst = constants.get( ((IndexInstruction)value).getIndex() );
                 ConstantValueWriter.writeHexa(
                     this.loader, this.printer, this.referenceMap,
                     this.classFile, cst);
@@ -1093,21 +1093,21 @@ public class SourceWriterVisitor
     protected int writeIfTest(IfInstruction ifInstruction)
     {
         String signature =
-            ifInstruction.value.getReturnedSignature(constants, localVariables);
+            ifInstruction.getValue().getReturnedSignature(constants, localVariables);
 
         if (signature != null && signature.charAt(0) == 'Z')
         {
-            if (ifInstruction.cmp == ByteCodeConstants.CMP_EQ || ifInstruction.cmp == ByteCodeConstants.CMP_LE
-                    || ifInstruction.cmp == ByteCodeConstants.CMP_GE) {
+            if (ifInstruction.getCmp() == ByteCodeConstants.CMP_EQ || ifInstruction.getCmp() == ByteCodeConstants.CMP_LE
+                    || ifInstruction.getCmp() == ByteCodeConstants.CMP_GE) {
                 int nextOffset = this.previousOffset + 1;
 
                 if (this.firstOffset <= this.previousOffset &&
                     nextOffset <= this.lastOffset) {
-                    this.printer.print(ifInstruction.lineNumber, "!");
+                    this.printer.print(ifInstruction.getLineNumber(), "!");
                 }
             }
 
-            return visit(2, ifInstruction.value);
+            return visit(2, ifInstruction.getValue());
 
 //			visit(ifInstruction, ifInstruction.value);
 //			switch (ifInstruction.cmp)
@@ -1121,12 +1121,12 @@ public class SourceWriterVisitor
 //				spw.print(" == true");
 //			}
         }
-        int lineNumber = visit(6, ifInstruction.value);
+        int lineNumber = visit(6, ifInstruction.getValue());
         if (this.firstOffset <= this.previousOffset &&
-            ifInstruction.offset <= this.lastOffset)
+            ifInstruction.getOffset() <= this.lastOffset)
         {
             this.printer.print(' ');
-            this.printer.print(CMP_NAMES[ifInstruction.cmp]);
+            this.printer.print(CMP_NAMES[ifInstruction.getCmp()]);
             this.printer.print(' ');
             this.printer.printNumeric("0");
         }
@@ -1135,7 +1135,7 @@ public class SourceWriterVisitor
 
     protected int writeIfCmpTest(IfCmp ifCmpInstruction)
     {
-        int lineNumber = visit(6, ifCmpInstruction.value1);
+        int lineNumber = visit(6, ifCmpInstruction.getValue1());
 
         int nextOffset = this.previousOffset + 1;
 
@@ -1143,22 +1143,22 @@ public class SourceWriterVisitor
             nextOffset <= this.lastOffset)
         {
             this.printer.print(lineNumber, ' ');
-            this.printer.print(CMP_NAMES[ifCmpInstruction.cmp]);
+            this.printer.print(CMP_NAMES[ifCmpInstruction.getCmp()]);
             this.printer.print(' ');
         }
 
-        return visit(6, ifCmpInstruction.value2);
+        return visit(6, ifCmpInstruction.getValue2());
     }
 
     protected int writeIfXNullTest(IfInstruction ifXNull)
     {
-        int lineNumber = visit(6, ifXNull.value);
+        int lineNumber = visit(6, ifXNull.getValue());
 
         if (this.firstOffset <= this.previousOffset &&
-            ifXNull.offset <= this.lastOffset)
+            ifXNull.getOffset() <= this.lastOffset)
         {
             this.printer.print(lineNumber, ' ');
-            this.printer.print(CMP_NAMES[ifXNull.cmp]);
+            this.printer.print(CMP_NAMES[ifXNull.getCmp()]);
             this.printer.print(' ');
             this.printer.printKeyword("null");
         }
@@ -1169,15 +1169,15 @@ public class SourceWriterVisitor
     protected int writeComplexConditionalBranchInstructionTest(
         ComplexConditionalBranchInstruction ccbi)
     {
-        List<Instruction> branchList = ccbi.instructions;
+        List<Instruction> branchList = ccbi.getInstructions();
         int length = branchList.size();
 
         if (length > 1)
         {
             String operator =
-                ccbi.cmp==ByteCodeConstants.CMP_AND ? " && " : " || ";
+                ccbi.getCmp()==ByteCodeConstants.CMP_AND ? " && " : " || ";
             Instruction instruction = branchList.get(0);
-            int lineNumber = instruction.lineNumber;
+            int lineNumber = instruction.getLineNumber();
 
             int nextOffset = this.previousOffset + 1;
 
@@ -1205,13 +1205,13 @@ public class SourceWriterVisitor
                     nextOffset <= this.lastOffset)
                 {
                     this.printer.print(lineNumber, operator);
-                    this.printer.print(instruction.lineNumber, '(');
+                    this.printer.print(instruction.getLineNumber(), '(');
                 }
 
                 lineNumber = visit(instruction);
 
                 if (this.firstOffset <= this.previousOffset &&
-                    ccbi.offset <= this.lastOffset) {
+                    ccbi.getOffset() <= this.lastOffset) {
                     this.printer.print(lineNumber, ')');
                 }
             }
@@ -1227,20 +1227,20 @@ public class SourceWriterVisitor
 
     private int writeIInc(IInc iinc)
     {
-        int lineNumber = iinc.lineNumber;
+        int lineNumber = iinc.getLineNumber();
 
         if (this.firstOffset <= this.previousOffset &&
-            iinc.offset <= this.lastOffset)
+            iinc.getOffset() <= this.lastOffset)
         {
             String lvName = null;
 
             LocalVariable lv =
                 this.localVariables.getLocalVariableWithIndexAndOffset(
-                        iinc.index, iinc.offset);
+                        iinc.getIndex(), iinc.getOffset());
 
             if (lv != null)
             {
-                int lvNameIndex = lv.nameIndex;
+                int lvNameIndex = lv.getNameIndex();
                 if (lvNameIndex > 0) {
                     lvName = constants.getConstantUtf8(lvNameIndex);
                 }
@@ -1259,7 +1259,7 @@ public class SourceWriterVisitor
                 this.printer.print(lineNumber, lvName);
             }
 
-            switch (iinc.count)
+            switch (iinc.getCount())
             {
             case -1:
                 this.printer.print(lineNumber, "--");
@@ -1268,15 +1268,15 @@ public class SourceWriterVisitor
                 this.printer.print(lineNumber, "++");
                 break;
             default:
-                if (iinc.count >= 0)
+                if (iinc.getCount() >= 0)
                 {
                     this.printer.print(lineNumber, " += ");
-                    this.printer.printNumeric(lineNumber, String.valueOf(iinc.count));
+                    this.printer.printNumeric(lineNumber, String.valueOf(iinc.getCount()));
                 }
                 else
                 {
                     this.printer.print(lineNumber, " -= ");
-                    this.printer.printNumeric(lineNumber, String.valueOf(-iinc.count));
+                    this.printer.printNumeric(lineNumber, String.valueOf(-iinc.getCount()));
                 }
             }
         }
@@ -1286,33 +1286,33 @@ public class SourceWriterVisitor
 
     private int writePreInc(IncInstruction ii)
     {
-        int lineNumber = ii.lineNumber;
+        int lineNumber = ii.getLineNumber();
 
         if (this.firstOffset <= this.previousOffset &&
-            ii.offset <= this.lastOffset)
+            ii.getOffset() <= this.lastOffset)
         {
-            switch (ii.count)
+            switch (ii.getCount())
             {
             case -1:
                 this.printer.print(lineNumber, "--");
-                lineNumber = visit(ii.value);
+                lineNumber = visit(ii.getValue());
                 break;
             case 1:
                 this.printer.print(lineNumber, "++");
-                lineNumber = visit(ii.value);
+                lineNumber = visit(ii.getValue());
                 break;
             default:
-                lineNumber = visit(ii.value);
+                lineNumber = visit(ii.getValue());
 
-                if (ii.count >= 0)
+                if (ii.getCount() >= 0)
                 {
                     this.printer.print(lineNumber, " += ");
-                    this.printer.printNumeric(lineNumber, String.valueOf(ii.count));
+                    this.printer.printNumeric(lineNumber, String.valueOf(ii.getCount()));
                 }
                 else
                 {
                     this.printer.print(lineNumber, " -= ");
-                    this.printer.printNumeric(lineNumber, String.valueOf(-ii.count));
+                    this.printer.printNumeric(lineNumber, String.valueOf(-ii.getCount()));
                 }
                 break;
             }
@@ -1323,23 +1323,23 @@ public class SourceWriterVisitor
 
     private int writePostInc(IncInstruction ii)
     {
-        int lineNumber = ii.lineNumber;
+        int lineNumber = ii.getLineNumber();
 
         if (this.firstOffset <= this.previousOffset &&
-            ii.offset <= this.lastOffset)
+            ii.getOffset() <= this.lastOffset)
         {
-            switch (ii.count)
+            switch (ii.getCount())
             {
             case -1:
-                lineNumber = visit(ii.value);
+                lineNumber = visit(ii.getValue());
                 this.printer.print(lineNumber, "--");
                 break;
             case 1:
-                lineNumber = visit(ii.value);
+                lineNumber = visit(ii.getValue());
                 this.printer.print(lineNumber, "++");
                 break;
             default:
-                new RuntimeException("PostInc with value=" + ii.count)
+                new RuntimeException("PostInc with value=" + ii.getCount())
                     .printStackTrace();
             }
         }
@@ -1349,7 +1349,7 @@ public class SourceWriterVisitor
 
     private int writeInvokeNewInstruction(InvokeNew in)
     {
-        ConstantMethodref cmr = this.constants.getConstantMethodref(in.index);
+        ConstantMethodref cmr = this.constants.getConstantMethodref(in.getIndex());
         String internalClassName =
             this.constants.getConstantClassName(cmr.getClassIndex());
         String prefix =
@@ -1363,9 +1363,9 @@ public class SourceWriterVisitor
             innerClassFile = null;
         }
 
-        int lineNumber = in.lineNumber;
+        int lineNumber = in.getLineNumber();
         int firstIndex;
-        int length = in.args.size();
+        int length = in.getArgs().size();
 
         ConstantNameAndType cnat =
             this.constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
@@ -1380,7 +1380,7 @@ public class SourceWriterVisitor
         else if (innerClassFile.getInternalAnonymousClassName() == null)
         {
             // Inner class new invoke
-            firstIndex = computeFirstIndex(innerClassFile.accessFlags, in);
+            firstIndex = computeFirstIndex(innerClassFile.getAccessFlags(), in);
         }
         else
         {
@@ -1424,17 +1424,17 @@ public class SourceWriterVisitor
             }
         }
 
-        return writeArgs(in.lineNumber, firstIndex, length, in.args);
+        return writeArgs(in.getLineNumber(), firstIndex, length, in.getArgs());
     }
 
     private static int computeFirstIndex(int accessFlags, InvokeNew in)
     {
-        if ((accessFlags & Const.ACC_STATIC) != 0 || in.args.isEmpty()) {
+        if ((accessFlags & Const.ACC_STATIC) != 0 || in.getArgs().isEmpty()) {
             return 0;
         }
-        Instruction arg0 = in.args.get(0);
-        if (arg0.opcode == Const.ALOAD &&
-            ((ALoad)arg0).index == 0)
+        Instruction arg0 = in.getArgs().get(0);
+        if (arg0.getOpcode() == Const.ALOAD &&
+            ((ALoad)arg0).getIndex() == 0)
         {
             return 1;
         }
@@ -1443,9 +1443,9 @@ public class SourceWriterVisitor
 
     private int writeEnumValueInstruction(InvokeNew in)
     {
-        int lineNumber = in.lineNumber;
+        int lineNumber = in.getLineNumber();
 
-        ConstantFieldref cfr = constants.getConstantFieldref(in.enumValueFieldRefIndex);
+        ConstantFieldref cfr = constants.getConstantFieldref(in.getEnumValueFieldRefIndex());
         ConstantNameAndType cnat = constants.getConstantNameAndType(
             cfr.getNameAndTypeIndex());
 
@@ -1457,8 +1457,8 @@ public class SourceWriterVisitor
         this.printer.printStaticFieldDeclaration(
             internalClassName, name, descriptor);
 
-        if (in.args.size() > 2) {
-            lineNumber = writeArgs(lineNumber, 2, in.args.size(), in.args);
+        if (in.getArgs().size() > 2) {
+            lineNumber = writeArgs(lineNumber, 2, in.getArgs().size(), in.getArgs());
         }
 
         return lineNumber;
@@ -1466,25 +1466,25 @@ public class SourceWriterVisitor
 
     private int writeGetField(GetField getField)
     {
-        int lineNumber = getField.lineNumber;
-        ConstantFieldref cfr = constants.getConstantFieldref(getField.index);
+        int lineNumber = getField.getLineNumber();
+        ConstantFieldref cfr = constants.getConstantFieldref(getField.getIndex());
         ConstantNameAndType cnat =
             constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
         Field field =
             this.classFile.getField(cnat.getNameIndex(), cnat.getSignatureIndex());
 
         if (field != null &&
-            field.outerMethodLocalVariableNameIndex != UtilConstants.INVALID_INDEX)
+            field.getOuterMethodLocalVariableNameIndex() != UtilConstants.INVALID_INDEX)
         {
             // Specificite des classes anonymes : affichage du nom du champs de
             // la méthode englobante plutot que le nom du champs
             if (this.firstOffset <= this.previousOffset &&
-                getField.offset <= this.lastOffset)
+                getField.getOffset() <= this.lastOffset)
             {
                 String internalClassName =
                     this.constants.getConstantClassName(cfr.getClassIndex());
                 String fieldName = this.constants.getConstantUtf8(
-                    field.outerMethodLocalVariableNameIndex);
+                    field.getOuterMethodLocalVariableNameIndex());
                 if (this.keywordSet.contains(fieldName)) {
                     fieldName = StringConstants.JD_FIELD_PREFIX + fieldName;
                 }
@@ -1502,19 +1502,19 @@ public class SourceWriterVisitor
 
             if (this.localVariables.containsLocalVariableWithNameIndex(cnat.getNameIndex()))
             {
-                if (getField.objectref.opcode == Const.ALOAD) {
-                    if (((ALoad)getField.objectref).index == 0) {
+                if (getField.getObjectref().getOpcode() == Const.ALOAD) {
+                    if (((ALoad)getField.getObjectref()).getIndex() == 0) {
                         displayPrefix = true;
                     }
-                } else if (getField.objectref.opcode == ByteCodeConstants.OUTERTHIS && !needAPrefixForThisField(
+                } else if (getField.getObjectref().getOpcode() == ByteCodeConstants.OUTERTHIS && !needAPrefixForThisField(
                         cnat.getNameIndex(), cnat.getSignatureIndex(),
-                        (GetStatic)getField.objectref)) {
+                        (GetStatic)getField.getObjectref())) {
                     displayPrefix = true;
                 }
             }
 
             if (this.firstOffset <= this.previousOffset &&
-                getField.objectref.offset <= this.lastOffset)
+                getField.getObjectref().getOffset() <= this.lastOffset)
             {
                 if (!displayPrefix)
                 {
@@ -1522,7 +1522,7 @@ public class SourceWriterVisitor
                     this.printer.startOfOptionalPrefix();
                 }
 
-                lineNumber = visit(getField, getField.objectref);
+                lineNumber = visit(getField, getField.getObjectref());
                 this.printer.print(lineNumber, '.');
 
                 if (!displayPrefix)
@@ -1532,7 +1532,7 @@ public class SourceWriterVisitor
             }
 
             if (this.firstOffset <= this.previousOffset &&
-                getField.offset <= this.lastOffset)
+                getField.getOffset() <= this.lastOffset)
             {
                 String internalClassName =
                     this.constants.getConstantClassName(cfr.getClassIndex());
@@ -1554,22 +1554,22 @@ public class SourceWriterVisitor
 
     private int writeInvokeNoStaticInstruction(InvokeNoStaticInstruction insi)
     {
-        ConstantMethodref cmr = constants.getConstantMethodref(insi.index);
+        ConstantMethodref cmr = constants.getConstantMethodref(insi.getIndex());
         ConstantNameAndType cnat =
             constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
         boolean thisInvoke = false;
 
-        if (insi.objectref.opcode == Const.ALOAD &&
-            ((ALoad)insi.objectref).index == 0)
+        if (insi.getObjectref().getOpcode() == Const.ALOAD &&
+            ((ALoad)insi.getObjectref()).getIndex() == 0)
         {
-            ALoad aload = (ALoad)insi.objectref;
+            ALoad aload = (ALoad)insi.getObjectref();
             LocalVariable lv =
                 this.localVariables.getLocalVariableWithIndexAndOffset(
-                        aload.index, aload.offset);
+                        aload.getIndex(), aload.getOffset());
 
             if (lv != null)
             {
-                String name = this.constants.getConstantUtf8(lv.nameIndex);
+                String name = this.constants.getConstantUtf8(lv.getNameIndex());
                 if (StringConstants.THIS_LOCAL_VARIABLE_NAME.equals(name)) {
                     thisInvoke = true;
                 }
@@ -1593,19 +1593,19 @@ public class SourceWriterVisitor
                     this.constants.getConstantUtf8(cnat.getSignatureIndex());
                 // Methode de la classe courante : elimination du prefix 'this.'
                 this.printer.printMethod(
-                    insi.lineNumber, internalClassName, methodName,
+                    insi.getLineNumber(), internalClassName, methodName,
                     descriptor, this.classFile.getThisClassName());
             }
         }
         else
         {
             boolean displayPrefix =
-                insi.objectref.opcode != ByteCodeConstants.OUTERTHIS ||
+                insi.getObjectref().getOpcode() != ByteCodeConstants.OUTERTHIS ||
             needAPrefixForThisMethod(
                 cnat.getNameIndex(), cnat.getSignatureIndex(),
-                (GetStatic)insi.objectref);
+                (GetStatic)insi.getObjectref());
 
-            int lineNumber = insi.objectref.lineNumber;
+            int lineNumber = insi.getObjectref().getLineNumber();
 
             if (!displayPrefix)
             {
@@ -1613,10 +1613,10 @@ public class SourceWriterVisitor
                 this.printer.startOfOptionalPrefix();
             }
 
-            visit(insi, insi.objectref);
+            visit(insi, insi.getObjectref());
 
             int nextOffset = this.previousOffset + 1;
-            lineNumber = insi.lineNumber;
+            lineNumber = insi.getLineNumber();
 
             if (this.firstOffset <= this.previousOffset &&
                 nextOffset <= this.lastOffset)
@@ -1648,7 +1648,7 @@ public class SourceWriterVisitor
             }
         }
 
-        return writeArgs(insi.lineNumber, 0, insi.args.size(), insi.args);
+        return writeArgs(insi.getLineNumber(), 0, insi.getArgs().size(), insi.getArgs());
     }
 
     private boolean needAPrefixForThisMethod(
@@ -1662,7 +1662,7 @@ public class SourceWriterVisitor
         }
 
         ConstantFieldref cfr =
-            this.constants.getConstantFieldref(getStatic.index);
+            this.constants.getConstantFieldref(getStatic.getIndex());
         String getStaticOuterClassName =
             this.constants.getConstantClassName(cfr.getClassIndex());
         String methodName = this.constants.getConstantUtf8(methodNameIndex);
@@ -1694,37 +1694,37 @@ public class SourceWriterVisitor
 
     private int writeInvokespecial(InvokeNoStaticInstruction insi)
     {
-        ConstantMethodref cmr = constants.getConstantMethodref(insi.index);
+        ConstantMethodref cmr = constants.getConstantMethodref(insi.getIndex());
         ConstantNameAndType cnat =
             constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
         boolean thisInvoke = false;
         int firstIndex;
 
-        if (insi.objectref.opcode == Const.ALOAD &&
-            ((ALoad)insi.objectref).index == 0)
+        if (insi.getObjectref().getOpcode() == Const.ALOAD &&
+            ((ALoad)insi.getObjectref()).getIndex() == 0)
         {
-            ALoad aload = (ALoad)insi.objectref;
+            ALoad aload = (ALoad)insi.getObjectref();
             LocalVariable lv =
                 this.localVariables.getLocalVariableWithIndexAndOffset(
-                        aload.index, aload.offset);
+                        aload.getIndex(), aload.getOffset());
 
             if (lv != null &&
-                lv.nameIndex == this.constants.thisLocalVariableNameIndex)
+                lv.getNameIndex() == this.constants.getThisLocalVariableNameIndex())
             {
                 thisInvoke = true;
             }
         }
 
         // Appel d'un constructeur?
-        if (thisInvoke && cnat.getNameIndex() == constants.instanceConstructorIndex)
+        if (thisInvoke && cnat.getNameIndex() == constants.getInstanceConstructorIndex())
         {
             if (cmr.getClassIndex() == classFile.getThisClassIndex())
             {
                 // Appel d'un constructeur de la classe courante
-                if ((this.classFile.accessFlags & Const.ACC_ENUM) == 0)
+                if ((this.classFile.getAccessFlags() & Const.ACC_ENUM) == 0)
                 {
                     if (this.classFile.isAInnerClass() &&
-                        (this.classFile.accessFlags & Const.ACC_STATIC) == 0)
+                        (this.classFile.getAccessFlags() & Const.ACC_STATIC) == 0)
                     {
                         // inner class: firstIndex=1
                         firstIndex = 1;
@@ -1767,10 +1767,10 @@ public class SourceWriterVisitor
             if (this.firstOffset <= this.previousOffset &&
                 nextOffset <= this.lastOffset)
             {
-                int lineNumber = insi.lineNumber;
+                int lineNumber = insi.getLineNumber();
 
                 // Appel d'un constructeur?
-                if (cnat.getNameIndex() == constants.instanceConstructorIndex)
+                if (cnat.getNameIndex() == constants.getInstanceConstructorIndex())
                 {
                     if (cmr.getClassIndex() == classFile.getThisClassIndex())
                     {
@@ -1790,7 +1790,7 @@ public class SourceWriterVisitor
                         cnat.getNameIndex(), cnat.getSignatureIndex());
 
                     if (method == null ||
-                        (method.accessFlags & Const.ACC_PRIVATE) == 0)
+                        (method.getAccessFlags() & Const.ACC_PRIVATE) == 0)
                     {
                         // Methode de la classe mere
                         this.printer.printKeyword(lineNumber, "super");
@@ -1817,9 +1817,9 @@ public class SourceWriterVisitor
         }
         else
         {
-            int lineNumber = insi.lineNumber;
+            int lineNumber = insi.getLineNumber();
 
-            visit(insi, insi.objectref);
+            visit(insi, insi.getObjectref());
 
             int nextOffset = this.previousOffset + 1;
 
@@ -1844,7 +1844,7 @@ public class SourceWriterVisitor
         }
 
         return writeArgs(
-            insi.lineNumber, firstIndex, insi.args.size(), insi.args);
+            insi.getLineNumber(), firstIndex, insi.getArgs().size(), insi.getArgs());
     }
 
     private int writeInvokestatic(Invokestatic invokestatic)
@@ -1854,9 +1854,9 @@ public class SourceWriterVisitor
         if (this.firstOffset <= this.previousOffset &&
             nextOffset <= this.lastOffset)
         {
-            int lineNumber = invokestatic.lineNumber;
+            int lineNumber = invokestatic.getLineNumber();
 
-            ConstantMethodref cmr = constants.getConstantMethodref(invokestatic.index);
+            ConstantMethodref cmr = constants.getConstantMethodref(invokestatic.getIndex());
 
             String internalClassName =
                 this.constants.getConstantClassName(cmr.getClassIndex());
@@ -1891,8 +1891,8 @@ public class SourceWriterVisitor
         }
 
         return writeArgs(
-            invokestatic.lineNumber, 0,
-            invokestatic.args.size(), invokestatic.args);
+            invokestatic.getLineNumber(), 0,
+            invokestatic.getArgs().size(), invokestatic.getArgs());
     }
 
     private int writeArgs(
@@ -1944,12 +1944,12 @@ public class SourceWriterVisitor
 
     private int writeGetStatic(GetStatic getStatic)
     {
-        int lineNumber = getStatic.lineNumber;
+        int lineNumber = getStatic.getLineNumber();
 
         if (this.firstOffset <= this.previousOffset &&
-            getStatic.offset <= this.lastOffset)
+            getStatic.getOffset() <= this.lastOffset)
         {
-            ConstantFieldref cfr = constants.getConstantFieldref(getStatic.index);
+            ConstantFieldref cfr = constants.getConstantFieldref(getStatic.getIndex());
             String internalClassName =
                 constants.getConstantClassName(cfr.getClassIndex());
 
@@ -1984,12 +1984,12 @@ public class SourceWriterVisitor
 
     private int writeOuterThis(GetStatic getStatic)
     {
-        int lineNumber = getStatic.lineNumber;
+        int lineNumber = getStatic.getLineNumber();
 
         if (this.firstOffset <= this.previousOffset &&
-            getStatic.offset <= this.lastOffset)
+            getStatic.getOffset() <= this.lastOffset)
         {
-            ConstantFieldref cfr = constants.getConstantFieldref(getStatic.index);
+            ConstantFieldref cfr = constants.getConstantFieldref(getStatic.getIndex());
 
             if (cfr.getClassIndex() != classFile.getThisClassIndex())
             {
@@ -2016,16 +2016,16 @@ public class SourceWriterVisitor
 
     private int writeLcdInstruction(IndexInstruction ii)
     {
-        int lineNumber = ii.lineNumber;
+        int lineNumber = ii.getLineNumber();
 
         if (this.firstOffset <= this.previousOffset &&
-            ii.offset <= this.lastOffset)
+            ii.getOffset() <= this.lastOffset)
         {
             // Dans les specs, LDC pointe vers une constante du pool. Lors de la
             // declaration d'enumeration, le byte code de la méthode
             // 'Enum.valueOf(Class<T> enumType, String name)' contient une
             // instruction LDC pointant un objet de type 'ConstantClass'.
-            Constant cst = constants.get(ii.index);
+            Constant cst = constants.get(ii.getIndex());
 
             if (cst instanceof ConstantClass cc)
             {
@@ -2055,16 +2055,16 @@ public class SourceWriterVisitor
 
     private int writeLoadInstruction(LoadInstruction loadInstruction)
     {
-        int lineNumber = loadInstruction.lineNumber;
+        int lineNumber = loadInstruction.getLineNumber();
 
         if (this.firstOffset <= this.previousOffset &&
-            loadInstruction.offset <= this.lastOffset)
+            loadInstruction.getOffset() <= this.lastOffset)
         {
             LocalVariable lv =
                 this.localVariables.getLocalVariableWithIndexAndOffset(
-                    loadInstruction.index, loadInstruction.offset);
+                    loadInstruction.getIndex(), loadInstruction.getOffset());
 
-            if (lv == null || lv.nameIndex <= 0)
+            if (lv == null || lv.getNameIndex() <= 0)
             {
                 // Error
                 this.printer.startOfError();
@@ -2073,17 +2073,17 @@ public class SourceWriterVisitor
             }
             else
             {
-                int nameIndex = lv.nameIndex;
+                int nameIndex = lv.getNameIndex();
 
-                if (nameIndex == this.constants.thisLocalVariableNameIndex)
+                if (nameIndex == this.constants.getThisLocalVariableNameIndex())
                 {
                     this.printer.printKeyword(
-                        lineNumber, constants.getConstantUtf8(lv.nameIndex));
+                        lineNumber, constants.getConstantUtf8(lv.getNameIndex()));
                 }
                 else
                 {
                     this.printer.print(
-                        lineNumber, constants.getConstantUtf8(lv.nameIndex));
+                        lineNumber, constants.getConstantUtf8(lv.getNameIndex()));
                 }
             }
         }
@@ -2093,9 +2093,9 @@ public class SourceWriterVisitor
 
     private int writeMultiANewArray(MultiANewArray multiANewArray)
     {
-        int lineNumber = multiANewArray.lineNumber;
+        int lineNumber = multiANewArray.getLineNumber();
 
-        String signature = constants.getConstantClassName(multiANewArray.index);
+        String signature = constants.getConstantClassName(multiANewArray.getIndex());
 
         int nextOffset = this.previousOffset + 1;
 
@@ -2110,7 +2110,7 @@ public class SourceWriterVisitor
                 SignatureUtil.cutArrayDimensionPrefix(signature));
         }
 
-        Instruction[] dimensions = multiANewArray.dimensions;
+        Instruction[] dimensions = multiANewArray.getDimensions();
 
         for (int i=dimensions.length-1; i>=0; i--)
         {
@@ -2153,9 +2153,9 @@ public class SourceWriterVisitor
         if (this.firstOffset <= this.previousOffset &&
             nextOffset <= this.lastOffset)
         {
-            int lineNumber = putStatic.lineNumber;
+            int lineNumber = putStatic.getLineNumber();
 
-            ConstantFieldref cfr = constants.getConstantFieldref(putStatic.index);
+            ConstantFieldref cfr = constants.getConstantFieldref(putStatic.getIndex());
 
             if (cfr.getClassIndex() != classFile.getThisClassIndex())
             {
@@ -2189,7 +2189,7 @@ public class SourceWriterVisitor
 
         // Est-il necessaire de parenthéser l'expression ?
         // visit(putStatic, putStatic.valueref);
-        return visit(putStatic.valueref);
+        return visit(putStatic.getValueref());
     }
 
     private int writeStoreInstruction(StoreInstruction storeInstruction)
@@ -2199,13 +2199,13 @@ public class SourceWriterVisitor
         if (this.firstOffset <= this.previousOffset &&
             nextOffset <= this.lastOffset)
         {
-            int lineNumber = storeInstruction.lineNumber;
+            int lineNumber = storeInstruction.getLineNumber();
 
             LocalVariable lv =
                 this.localVariables.getLocalVariableWithIndexAndOffset(
-                    storeInstruction.index, storeInstruction.offset);
+                    storeInstruction.getIndex(), storeInstruction.getOffset());
 
-            if (lv == null || lv.nameIndex <= 0)
+            if (lv == null || lv.getNameIndex() <= 0)
             {
                 this.printer.startOfError();
                 this.printer.print(lineNumber, "???");
@@ -2214,7 +2214,7 @@ public class SourceWriterVisitor
             else
             {
                 this.printer.print(
-                    lineNumber, constants.getConstantUtf8(lv.nameIndex));
+                    lineNumber, constants.getConstantUtf8(lv.getNameIndex()));
             }
 
             this.printer.print(lineNumber, " = ");
@@ -2222,18 +2222,18 @@ public class SourceWriterVisitor
 
         // Est-il necessaire de parenthéser l'expression ?
         // visit(storeInstruction, storeInstruction.valueref);
-        return visit(storeInstruction.valueref);
+        return visit(storeInstruction.getValueref());
     }
 
     private int writeExceptionLoad(ExceptionLoad exceptionLoad)
     {
-        int lineNumber = exceptionLoad.lineNumber;
+        int lineNumber = exceptionLoad.getLineNumber();
         int nextOffset = this.previousOffset + 1;
 
         if (this.firstOffset <= this.previousOffset &&
             nextOffset <= this.lastOffset)
         {
-            if (exceptionLoad.exceptionNameIndex == 0)
+            if (exceptionLoad.getExceptionNameIndex() == 0)
             {
                 this.printer.printKeyword(lineNumber, "finally");
             }
@@ -2241,9 +2241,9 @@ public class SourceWriterVisitor
             {
                 LocalVariable lv =
                     this.localVariables.getLocalVariableWithIndexAndOffset(
-                        exceptionLoad.index, exceptionLoad.offset);
+                        exceptionLoad.getIndex(), exceptionLoad.getOffset());
 
-                if (lv == null || lv.nameIndex == 0)
+                if (lv == null || lv.getNameIndex() == 0)
                 {
                     this.printer.startOfError();
                     this.printer.print(lineNumber, "???");
@@ -2252,7 +2252,7 @@ public class SourceWriterVisitor
                 else
                 {
                     this.printer.print(
-                        lineNumber, constants.getConstantUtf8(lv.nameIndex));
+                        lineNumber, constants.getConstantUtf8(lv.getNameIndex()));
                 }
             }
         }
@@ -2262,10 +2262,10 @@ public class SourceWriterVisitor
 
     private int writeAssignmentInstruction(AssignmentInstruction ai)
     {
-        int lineNumber = ai.lineNumber;
+        int lineNumber = ai.getLineNumber();
         int previousOffsetBackup = this.previousOffset;
 
-        visit(ai.value1);
+        visit(ai.getValue1());
 
         this.previousOffset = previousOffsetBackup;
         int nextOffset = this.previousOffset + 1;
@@ -2274,22 +2274,22 @@ public class SourceWriterVisitor
             nextOffset <= this.lastOffset)
         {
             this.printer.print(lineNumber, ' ');
-            this.printer.print(lineNumber, ai.operator);
+            this.printer.print(lineNumber, ai.getOperator());
             this.printer.print(lineNumber, ' ');
         }
 
         /* +=, -=, *=, /=, %=, <<=, >>=, >>>=, &=, |=, ^= */
-        if (!ai.operator.isEmpty())
+        if (!ai.getOperator().isEmpty())
         {
-            switch (ai.operator.charAt(0))
+            switch (ai.getOperator().charAt(0))
             {
             case '&': case '|': case '^':
                 // Binary operators
-                return writeBinaryOperatorParameterInHexaOrBoolean(ai, ai.value2);
+                return writeBinaryOperatorParameterInHexaOrBoolean(ai, ai.getValue2());
             }
         }
 
-        return visit(ai, ai.value2);
+        return visit(ai, ai.getValue2());
     }
 
     private int writeConvertInstruction(ConvertInstruction instruction)
@@ -2299,9 +2299,9 @@ public class SourceWriterVisitor
         if (this.firstOffset <= this.previousOffset &&
             nextOffset <= this.lastOffset)
         {
-            int lineNumber = instruction.lineNumber;
+            int lineNumber = instruction.getLineNumber();
 
-            switch (instruction.signature.charAt(0))
+            switch (instruction.getSignature().charAt(0))
             {
             case 'C':
                 this.printer.print(lineNumber, '(');
@@ -2341,20 +2341,20 @@ public class SourceWriterVisitor
             }
         }
 
-        return visit(instruction, instruction.value);
+        return visit(instruction, instruction.getValue());
     }
 
     private int writeDeclaration(FastDeclaration fd)
     {
-        int lineNumber = fd.lineNumber;
+        int lineNumber = fd.getLineNumber();
 
         LocalVariable lv =
             localVariables.getLocalVariableWithIndexAndOffset(
-                fd.lv.index, fd.offset);
+                fd.getLv().getIndex(), fd.getOffset());
 
         if (lv == null)
         {
-            if (fd.instruction == null)
+            if (fd.getInstruction() == null)
             {
                 int nextOffset = this.previousOffset + 1;
 
@@ -2368,7 +2368,7 @@ public class SourceWriterVisitor
             }
             else
             {
-                lineNumber = visit(fd.instruction);
+                lineNumber = visit(fd.getInstruction());
             }
         }
         else
@@ -2380,13 +2380,13 @@ public class SourceWriterVisitor
             {
                 this.printer.addNewLinesAndPrefix(lineNumber);
                 String signature =
-                    this.constants.getConstantUtf8(lv.signatureIndex);
+                    this.constants.getConstantUtf8(lv.getSignatureIndex());
                 String internalName =
                         SignatureUtil.getInternalName(signature);
                 ClassFile innerClassFile =
                     this.classFile.getInnerClassFile(internalName);
 
-                if (lv.finalFlag)
+                if (lv.hasFinalFlag())
                 {
                     this.printer.printKeyword("final");
                     this.printer.print(' ');
@@ -2411,19 +2411,19 @@ public class SourceWriterVisitor
                 this.printer.print(' ');
             }
 
-            if (fd.instruction == null)
+            if (fd.getInstruction() == null)
             {
                 nextOffset = this.previousOffset + 1;
 
                 if (this.firstOffset <= this.previousOffset &&
                     nextOffset <= this.lastOffset) {
                     this.printer.print(
-                        lineNumber, constants.getConstantUtf8(lv.nameIndex));
+                        lineNumber, constants.getConstantUtf8(lv.getNameIndex()));
                 }
             }
             else
             {
-                lineNumber = visit(fd.instruction);
+                lineNumber = visit(fd.getInstruction());
             }
         }
 
@@ -2437,7 +2437,7 @@ public class SourceWriterVisitor
      */
     private int writeInitArrayInstruction(InitArrayInstruction iai)
     {
-        int lineNumber = iai.lineNumber;
+        int lineNumber = iai.getLineNumber();
 
         // Affichage des valeurs
         int nextOffset = this.previousOffset + 1;
@@ -2447,7 +2447,7 @@ public class SourceWriterVisitor
             this.printer.print(lineNumber, "{");
         }
 
-        List<Instruction> values = iai.values;
+        List<Instruction> values = iai.getValues();
         final int length = values.size();
 
         if (length > 0)
@@ -2455,7 +2455,7 @@ public class SourceWriterVisitor
             Instruction instruction = values.get(0);
 
             if (this.firstOffset <= this.previousOffset &&
-                nextOffset <= this.lastOffset && lineNumber == instruction.lineNumber) {
+                nextOffset <= this.lastOffset && lineNumber == instruction.getLineNumber()) {
                 this.printer.print(" ");
             }
 
@@ -2496,21 +2496,21 @@ public class SourceWriterVisitor
         if (this.firstOffset <= this.previousOffset &&
             nextOffset <= this.lastOffset)
         {
-            int lineNumber = iai.lineNumber;
+            int lineNumber = iai.getLineNumber();
 
             // Affichage de l'instruction 'new'
             this.printer.printKeyword(lineNumber, "new");
             this.printer.print(' ');
 
-            if (iai.newArray.opcode == Const.NEWARRAY) {
-                NewArray na = (NewArray)iai.newArray;
+            if (iai.getNewArray().getOpcode() == Const.NEWARRAY) {
+                NewArray na = (NewArray)iai.getNewArray();
                 SignatureWriter.writeSignature(
                     this.loader, this.printer,
                     this.referenceMap, this.classFile,
-                    SignatureUtil.getSignatureFromType(na.type));
-            } else if (iai.newArray.opcode == Const.ANEWARRAY) {
-                ANewArray ana = (ANewArray)iai.newArray;
-                String signature = constants.getConstantClassName(ana.index);
+                    SignatureUtil.getSignatureFromType(na.getType()));
+            } else if (iai.getNewArray().getOpcode() == Const.ANEWARRAY) {
+                ANewArray ana = (ANewArray)iai.getNewArray();
+                String signature = constants.getConstantClassName(ana.getIndex());
 
                 if (signature.charAt(0) != '[') {
                     signature = SignatureUtil.createTypeName(signature);

@@ -20,13 +20,16 @@ import jd.core.model.classfile.LocalVariable;
 
 public class AttributeLocalVariableTable extends Attribute
 {
-    public final LocalVariable[] localVariableTable;
+    private final LocalVariable[] localVariableTable;
 
     public AttributeLocalVariableTable(byte tag,
-                                       int attributeNameIndex,
                                        LocalVariable[] localVariableTable)
     {
-        super(tag, attributeNameIndex);
+        super(tag);
         this.localVariableTable = localVariableTable;
     }
+
+	public LocalVariable[] getLocalVariableTable() {
+		return localVariableTable;
+	}
 }

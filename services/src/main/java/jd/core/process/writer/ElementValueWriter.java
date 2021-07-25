@@ -37,7 +37,7 @@ public class ElementValueWriter
     {
         ConstantPool constants = classFile.getConstantPool();
 
-        switch (ev.tag)
+        switch (ev.getTag())
         {
         case ElementValueContants.EV_PRIMITIVE_TYPE:
             ElementValuePrimitiveType evpt = (ElementValuePrimitiveType)ev;
@@ -48,7 +48,7 @@ public class ElementValueWriter
         case ElementValueContants.EV_CLASS_INFO:
             ElementValueClassInfo evci = (ElementValueClassInfo)ev;
             String signature =
-                constants.getConstantUtf8(evci.classInfoIndex);
+                constants.getConstantUtf8(evci.getClassInfoIndex());
             SignatureWriter.writeSignature(
                 loader, printer, referenceMap, classFile, signature);
             printer.print('.');
@@ -59,12 +59,12 @@ public class ElementValueWriter
             ElementValueAnnotationValue evav = (ElementValueAnnotationValue)ev;
             AnnotationWriter.writeAnnotation(
                 loader, printer, referenceMap,
-                classFile, evav.annotationValue);
+                classFile, evav.getAnnotationValue());
             break;
 
         case ElementValueContants.EV_ARRAY_VALUE:
             ElementValueArrayValue evarv = (ElementValueArrayValue)ev;
-            ElementValue[] values = evarv.values;
+            ElementValue[] values = evarv.getValues();
             printer.print('{');
 
             if ((values != null) && (values.length > 0))
@@ -83,8 +83,8 @@ public class ElementValueWriter
 
         case ElementValueContants.EV_ENUM_CONST_VALUE:
             ElementValueEnumConstValue evecv = (ElementValueEnumConstValue)ev;
-            signature = constants.getConstantUtf8(evecv.typeNameIndex);
-            String constName = constants.getConstantUtf8(evecv.constNameIndex);
+            signature = constants.getConstantUtf8(evecv.getTypeNameIndex());
+            String constName = constants.getConstantUtf8(evecv.getConstNameIndex());
             String internalClassName = SignatureUtil.getInternalName(signature);
 
             SignatureWriter.writeSignature(

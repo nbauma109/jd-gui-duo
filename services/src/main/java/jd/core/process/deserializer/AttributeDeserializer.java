@@ -54,145 +54,126 @@ public class AttributeDeserializer
             int attributeNameIndex = di.readUnsignedShort();
             int attributeLength = di.readInt();
 
-            if (attributeNameIndex == constants.annotationDefaultAttributeNameIndex)
+            if (attributeNameIndex == constants.getAnnotationDefaultAttributeNameIndex())
             {
                 attributes[i] = new AttributeAnnotationDefault(
                         Const.ATTR_ANNOTATION_DEFAULT,
-                        attributeNameIndex,
                         AnnotationDeserializer.deserializeElementValue(di));
             }
-            else if (attributeNameIndex == constants.codeAttributeNameIndex)
+            else if (attributeNameIndex == constants.getCodeAttributeNameIndex())
             {
                 // skip max stack (1 short) and max locals (1 short) => skip 2 shorts = 4 bytes
                 di.skipBytes(4);
                 attributes[i] = new AttributeCode(
                         Const.ATTR_CODE,
-                        attributeNameIndex,
                         deserializeCode(di),
                         deserializeCodeExceptions(di),
                         deserialize(di, constants));
             }
-            else if (attributeNameIndex == constants.constantValueAttributeNameIndex)
+            else if (attributeNameIndex == constants.getConstantValueAttributeNameIndex())
             {
                 if (attributeLength != 2)
                     throw new InvalidAttributeLengthException();
                 attributes[i] = new AttributeConstantValue(
                         Const.ATTR_CONSTANT_VALUE,
-                        attributeNameIndex,
                         di.readUnsignedShort());
             }
-            else if (attributeNameIndex == constants.deprecatedAttributeNameIndex)
+            else if (attributeNameIndex == constants.getDeprecatedAttributeNameIndex())
             {
                 if (attributeLength != 0)
                     throw new InvalidAttributeLengthException();
                 attributes[i] = new AttributeDeprecated(
-                        Const.ATTR_DEPRECATED,
-                        attributeNameIndex);
+                        Const.ATTR_DEPRECATED);
             }
-            else if (attributeNameIndex == constants.enclosingMethodAttributeNameIndex)
+            else if (attributeNameIndex == constants.getEnclosingMethodAttributeNameIndex())
             {
                 if (attributeLength != 4)
                     throw new InvalidAttributeLengthException();
+                di.skipBytes(attributeLength);
                 attributes[i] = new AttributeEnclosingMethod(
-                        Const.ATTR_ENCLOSING_METHOD,
-                        attributeNameIndex,
-                        di.readUnsignedShort(),
-                        di.readUnsignedShort());
+                        Const.ATTR_ENCLOSING_METHOD);
             }
-            else if (attributeNameIndex == constants.exceptionsAttributeNameIndex)
+            else if (attributeNameIndex == constants.getExceptionsAttributeNameIndex())
             {
                 attributes[i] = new AttributeExceptions(
                         Const.ATTR_EXCEPTIONS,
-                        attributeNameIndex,
                         deserializeExceptionIndexTable(di));
             }
-            else if (attributeNameIndex == constants.innerClassesAttributeNameIndex)
+            else if (attributeNameIndex == constants.getInnerClassesAttributeNameIndex())
             {
                 attributes[i] = new AttributeInnerClasses(
                         Const.ATTR_INNER_CLASSES,
-                        attributeNameIndex,
                         deserializeInnerClasses(di));
             }
-            else if (attributeNameIndex == constants.lineNumberTableAttributeNameIndex)
+            else if (attributeNameIndex == constants.getLineNumberTableAttributeNameIndex())
             {
                 attributes[i] = new AttributeNumberTable(
                         Const.ATTR_LINE_NUMBER_TABLE,
-                        attributeNameIndex,
                         deserializeLineNumbers(di));
             }
-            else if (attributeNameIndex == constants.localVariableTableAttributeNameIndex)
+            else if (attributeNameIndex == constants.getLocalVariableTableAttributeNameIndex())
             {
                 attributes[i] = new AttributeLocalVariableTable(
                         Const.ATTR_LOCAL_VARIABLE_TABLE,
-                        attributeNameIndex,
                         deserializeLocalVariable(di));
             }
-            else if (attributeNameIndex == constants.localVariableTypeTableAttributeNameIndex)
+            else if (attributeNameIndex == constants.getLocalVariableTypeTableAttributeNameIndex())
             {
                 attributes[i] = new AttributeLocalVariableTable(
                         Const.ATTR_LOCAL_VARIABLE_TYPE_TABLE,
-                        attributeNameIndex,
                         deserializeLocalVariable(di));
             }
-            else if (attributeNameIndex == constants.runtimeInvisibleAnnotationsAttributeNameIndex)
+            else if (attributeNameIndex == constants.getRuntimeInvisibleAnnotationsAttributeNameIndex())
             {
                 attributes[i] = new AttributeRuntimeAnnotations(
                         Const.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS,
-                        attributeNameIndex,
                         AnnotationDeserializer.deserialize(di));
             }
-            else if (attributeNameIndex == constants.runtimeVisibleAnnotationsAttributeNameIndex)
+            else if (attributeNameIndex == constants.getRuntimeVisibleAnnotationsAttributeNameIndex())
             {
                 attributes[i] = new AttributeRuntimeAnnotations(
                         Const.ATTR_RUNTIME_VISIBLE_ANNOTATIONS,
-                        attributeNameIndex,
                         AnnotationDeserializer.deserialize(di));
             }
-            else if (attributeNameIndex == constants.runtimeInvisibleParameterAnnotationsAttributeNameIndex)
+            else if (attributeNameIndex == constants.getRuntimeInvisibleParameterAnnotationsAttributeNameIndex())
             {
                 attributes[i] = new AttributeRuntimeParameterAnnotations(
                         Const.ATTR_RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS,
-                        attributeNameIndex,
                         deserializeParameterAnnotations(di));
             }
-            else if (attributeNameIndex == constants.runtimeVisibleParameterAnnotationsAttributeNameIndex)
+            else if (attributeNameIndex == constants.getRuntimeVisibleParameterAnnotationsAttributeNameIndex())
             {
                 attributes[i] = new AttributeRuntimeParameterAnnotations(
                         Const.ATTR_RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS,
-                        attributeNameIndex,
                         deserializeParameterAnnotations(di));
             }
-            else if (attributeNameIndex == constants.signatureAttributeNameIndex)
+            else if (attributeNameIndex == constants.getSignatureAttributeNameIndex())
             {
                 if (attributeLength != 2)
                     throw new InvalidAttributeLengthException();
                 attributes[i] = new AttributeSignature(
                         Const.ATTR_SIGNATURE,
-                        attributeNameIndex,
                         di.readUnsignedShort());
             }
-            else if (attributeNameIndex == constants.sourceFileAttributeNameIndex)
+            else if (attributeNameIndex == constants.getSourceFileAttributeNameIndex())
             {
                 if (attributeLength != 2)
                     throw new InvalidAttributeLengthException();
+                di.skipBytes(attributeLength);
                 attributes[i] = new AttributeSourceFile(
-                        Const.ATTR_SOURCE_FILE,
-                        attributeNameIndex,
-                        di.readUnsignedShort());
+                        Const.ATTR_SOURCE_FILE);
             }
-            else if (attributeNameIndex == constants.syntheticAttributeNameIndex)
+            else if (attributeNameIndex == constants.getSyntheticAttributeNameIndex())
             {
                 if (attributeLength != 0)
                     throw new InvalidAttributeLengthException();
                 attributes[i] = new AttributeSynthetic(
-                        Const.ATTR_SYNTHETIC,
-                        attributeNameIndex);
+                        Const.ATTR_SYNTHETIC);
             }
             else
             {
                 attributes[i] = new UnknowAttribute(
-                        Const.ATTR_UNKNOWN,
-                        attributeNameIndex);
+                        Const.ATTR_UNKNOWN);
                 for (int j=0; j<attributeLength; j++)
                     di.readByte();
             }

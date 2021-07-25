@@ -20,20 +20,20 @@ import jd.core.model.instruction.bytecode.ByteCodeConstants;
 
 public class IfInstruction extends ConditionalBranchInstruction
 {
-    public Instruction value;
+    private Instruction value;
 
     public IfInstruction(
         int opcode, int offset, int lineNumber,
         int cmp, Instruction value, int branch)
     {
         super(opcode, offset, lineNumber, cmp, branch);
-        this.value = value;
+        this.setValue(value);
     }
 
     @Override
     public int getPriority()
     {
-        switch (this.cmp)
+        switch (this.getCmp())
         {
         case ByteCodeConstants.CMP_EQ:
         case ByteCodeConstants.CMP_NE:
@@ -42,4 +42,12 @@ public class IfInstruction extends ConditionalBranchInstruction
             return 6;
         }
     }
+
+	public Instruction getValue() {
+		return value;
+	}
+
+	public void setValue(Instruction value) {
+		this.value = value;
+	}
 }

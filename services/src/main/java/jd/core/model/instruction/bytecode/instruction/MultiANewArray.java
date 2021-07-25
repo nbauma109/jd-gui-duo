@@ -21,7 +21,7 @@ import jd.core.model.classfile.LocalVariables;
 
 public class MultiANewArray extends IndexInstruction
 {
-	public final Instruction[] dimensions;
+	private final Instruction[] dimensions;
 
 	public MultiANewArray(
 			int opcode, int offset, int lineNumber,
@@ -39,6 +39,10 @@ public class MultiANewArray extends IndexInstruction
 			return null;
 		}
 
-		return constants.getConstantClassName(this.index);
+		return constants.getConstantClassName(this.getIndex());
+	}
+
+	public Instruction[] getDimensions() {
+		return dimensions;
 	}
 }

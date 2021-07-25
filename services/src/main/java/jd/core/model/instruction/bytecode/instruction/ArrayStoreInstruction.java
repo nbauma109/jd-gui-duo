@@ -21,25 +21,22 @@ import jd.core.model.instruction.bytecode.instruction.attribute.ValuerefAttribut
 public class ArrayStoreInstruction
     extends ArrayLoadInstruction implements ValuerefAttribute
 {
-    public Instruction valueref;
+    private Instruction valueref;
 
     public ArrayStoreInstruction(
             int opcode, int offset, int lineNumber, Instruction arrayref,
             Instruction indexref, String signature, Instruction valueref)
     {
         super(opcode, offset, lineNumber, arrayref, indexref, signature);
-        this.valueref = valueref;
+        this.setValueref(valueref);
     }
 
-    @Override
-    public Instruction getValueref()
-    {
-        return this.valueref;
-    }
+	@Override
+	public Instruction getValueref() {
+		return valueref;
+	}
 
-    @Override
-    public void setValueref(Instruction valueref)
-    {
-        this.valueref = valueref;
-    }
+	public void setValueref(Instruction valueref) {
+		this.valueref = valueref;
+	}
 }

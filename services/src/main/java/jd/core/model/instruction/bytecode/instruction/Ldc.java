@@ -37,7 +37,7 @@ public class Ldc extends LdcInstruction
 			return null;
 		}
 
-        Constant c = constants.get(this.index);
+        Constant c = constants.get(this.getIndex());
 
         if (c == null) {
 			return null;

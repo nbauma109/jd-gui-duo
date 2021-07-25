@@ -23,11 +23,11 @@ import jd.core.model.instruction.fast.instruction.FastSwitch;
 
 public class CaseLayoutBlock extends LayoutBlock
 {
-    public final ClassFile classFile;
-    public Method method;
-    public FastSwitch fs;
-    public int firstIndex;
-    public int lastIndex;
+    private final ClassFile classFile;
+    private Method method;
+    private FastSwitch fs;
+    private int firstIndex;
+    private int lastIndex;
 
     public CaseLayoutBlock(
         byte tag, ClassFile classFile, Method method,
@@ -49,9 +49,45 @@ public class CaseLayoutBlock extends LayoutBlock
             0, preferedLineCount, preferedLineCount);
 
         this.classFile = classFile;
-        this.method = method;
-        this.fs = fs;
-        this.firstIndex = firstIndex;
-        this.lastIndex = lastIndex;
+        this.setMethod(method);
+        this.setFs(fs);
+        this.setFirstIndex(firstIndex);
+        this.setLastIndex(lastIndex);
     }
+
+	public ClassFile getClassFile() {
+		return classFile;
+	}
+
+	public FastSwitch getFs() {
+		return fs;
+	}
+
+	public void setFs(FastSwitch fs) {
+		this.fs = fs;
+	}
+
+	public int getFirstIndex() {
+		return firstIndex;
+	}
+
+	public void setFirstIndex(int firstIndex) {
+		this.firstIndex = firstIndex;
+	}
+
+	public int getLastIndex() {
+		return lastIndex;
+	}
+
+	public void setLastIndex(int lastIndex) {
+		this.lastIndex = lastIndex;
+	}
+
+	public Method getMethod() {
+		return method;
+	}
+
+	public void setMethod(Method method) {
+		this.method = method;
+	}
 }

@@ -20,12 +20,12 @@ import java.util.List;
 
 public class InvokeMethodAccessor extends Accessor
 {
-    public final String className;
-    public final int methodOpcode;
-    public final String methodName;
-    public final String methodDescriptor;
-    public final List<String> listOfParameterSignatures;
-    public final String returnedSignature;
+    private final String className;
+    private final int methodOpcode;
+    private final String methodName;
+    private final String methodDescriptor;
+    private final List<String> listOfParameterSignatures;
+    private final String returnedSignature;
 
     public InvokeMethodAccessor(
         byte tag, String className, int methodOpcode,
@@ -40,4 +40,28 @@ public class InvokeMethodAccessor extends Accessor
         this.listOfParameterSignatures = listOfParameterSignatures;
         this.returnedSignature = returnedSignature;
     }
+
+	public String getMethodName() {
+		return methodName;
+	}
+
+	public String getMethodDescriptor() {
+		return methodDescriptor;
+	}
+
+	public String getClassName() {
+		return className;
+	}
+
+	public List<String> getListOfParameterSignatures() {
+		return listOfParameterSignatures;
+	}
+
+	public String getReturnedSignature() {
+		return returnedSignature;
+	}
+
+	public int getMethodOpcode() {
+		return methodOpcode;
+	}
 }

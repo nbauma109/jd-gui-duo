@@ -24,7 +24,7 @@ import jd.core.model.instruction.bytecode.ByteCodeConstants;
 
 public class ComplexConditionalBranchInstruction extends ConditionalBranchInstruction
 {
-    public List<Instruction> instructions;
+    private final List<Instruction> instructions;
 
     public ComplexConditionalBranchInstruction(
             int opcode, int offset, int lineNumber, int cmp,
@@ -44,6 +44,10 @@ public class ComplexConditionalBranchInstruction extends ConditionalBranchInstru
     @Override
     public int getPriority()
     {
-        return (this.cmp == ByteCodeConstants.CMP_AND) ? 12 : 13;
+        return (this.getCmp() == ByteCodeConstants.CMP_AND) ? 12 : 13;
     }
+
+	public List<Instruction> getInstructions() {
+		return instructions;
+	}
 }

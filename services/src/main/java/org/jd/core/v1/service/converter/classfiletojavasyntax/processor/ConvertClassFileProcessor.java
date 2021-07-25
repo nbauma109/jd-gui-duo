@@ -215,7 +215,7 @@ public class ConvertClassFileProcessor {
             if (code != null) {
                 AttributeLineNumberTable lineNumberTable = code.getAttribute("LineNumberTable");
                 if (lineNumberTable != null) {
-                    firstLineNumber = lineNumberTable.getLineNumberTable()[0].getLineNumber();
+                    firstLineNumber = lineNumberTable.getLineNumberTable(0).getLineNumber();
                 }
             }
 

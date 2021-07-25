@@ -17,6 +17,7 @@
 package jd.core.model.instruction.fast.instruction;
 
 import java.util.List;
+import java.util.Objects;
 
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.LocalVariables;
@@ -26,15 +27,15 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 /** While, do-while & if. */
 public class FastSwitch extends BranchInstruction
 {
-    public Instruction test;
-    public final Pair[] pairs;
+    private Instruction test;
+    private final Pair[] pairs;
 
     public FastSwitch(
         int opcode, int offset, int lineNumber, int branch,
         Instruction test, Pair[] pairs)
     {
         super(opcode, offset, lineNumber, branch);
-        this.test = test;
+        this.setTest(test);
         this.pairs = pairs;
     }
 
@@ -98,6 +99,22 @@ public class FastSwitch extends BranchInstruction
             }
             return this.key - p.key;
         }
+        
+        @Override
+        public int hashCode() {
+        	return Objects.hash(offset, key);
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+        	if (this == obj) {
+        		return true;
+        	}
+        	if (obj == null || getClass() != obj.getClass()) {
+        		return false;
+        	}
+        	return obj instanceof Pair p && compareTo(p) == 0;
+        }
     }
 
     @Override
@@ -106,4 +123,20 @@ public class FastSwitch extends BranchInstruction
     {
         return null;
     }
+
+	public Pair[] getPairs() {
+		return pairs;
+	}
+
+	public Pair getPair(int i) {
+		return pairs[i];
+	}
+
+	public Instruction getTest() {
+		return test;
+	}
+
+	public void setTest(Instruction test) {
+		this.test = test;
+	}
 }

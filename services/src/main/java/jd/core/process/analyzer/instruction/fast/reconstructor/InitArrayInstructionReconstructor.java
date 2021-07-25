@@ -52,12 +52,12 @@ public class InitArrayInstructionReconstructor
 		{
 			i = list.get(index);
 
-			if (i.opcode != ByteCodeConstants.DUPSTORE) {
+			if (i.getOpcode() != ByteCodeConstants.DUPSTORE) {
 				continue;
 			}
 
 			dupStore = (DupStore)i;
-			opcode = dupStore.objectref.opcode;
+			opcode = dupStore.getObjectref().getOpcode();
 
 			if (opcode != Const.NEWARRAY &&
 					opcode != Const.ANEWARRAY) {
@@ -88,15 +88,15 @@ public class InitArrayInstructionReconstructor
 			i = list.get(index);
 
 			// Recherche de ?AStore ( DupLoad, index, value )
-			if (i.opcode != Const.AASTORE &&
-					i.opcode != ByteCodeConstants.ARRAYSTORE) {
+			if (i.getOpcode() != Const.AASTORE &&
+					i.getOpcode() != ByteCodeConstants.ARRAYSTORE) {
 				break;
 			}
 
 			asi = (ArrayStoreInstruction)i;
 
-			if (asi.arrayref.opcode != ByteCodeConstants.DUPLOAD ||
-					asi.arrayref.offset != lastDupStore.offset) {
+			if (asi.getArrayref().getOpcode() != ByteCodeConstants.DUPLOAD ||
+					asi.getArrayref().getOffset() != lastDupStore.getOffset()) {
 				break;
 			}
 
@@ -105,15 +105,15 @@ public class InitArrayInstructionReconstructor
 			// Si les premieres cases d'un tableau ont pour valeur 0, elles
 			// ne sont pas initialisee ! La boucle suivante reconstruit
 			// l'initialisation des valeurs 0.
-			indexOfArrayStoreInstruction = getArrayIndex(asi.indexref);
+			indexOfArrayStoreInstruction = getArrayIndex(asi.getIndexref());
 			while (indexOfArrayStoreInstruction > arrayIndex)
 			{
 				values.add(new IConst(
-						ByteCodeConstants.ICONST, asi.offset, asi.lineNumber, 0));
+						ByteCodeConstants.ICONST, asi.getOffset(), asi.getLineNumber(), 0));
 				arrayIndex++;
 			}
 
-			values.add(asi.valueref);
+			values.add(asi.getValueref());
 			arrayIndex++;
 
 			index++;
@@ -124,14 +124,14 @@ public class InitArrayInstructionReconstructor
 
 			i = list.get(index);
 
-			if (i.opcode != ByteCodeConstants.DUPSTORE) {
+			if (i.getOpcode() != ByteCodeConstants.DUPSTORE) {
 				break;
 			}
 
 			nextDupStore = (DupStore)i;
 
-			if (nextDupStore.objectref.opcode != ByteCodeConstants.DUPLOAD ||
-					nextDupStore.objectref.offset != lastDupStore.offset) {
+			if (nextDupStore.getObjectref().getOpcode() != ByteCodeConstants.DUPLOAD ||
+					nextDupStore.getObjectref().getOffset() != lastDupStore.getOffset()) {
 				break;
 			}
 
@@ -142,15 +142,15 @@ public class InitArrayInstructionReconstructor
 		{
 			// Instanciation d'une instruction InitArrayInstruction
 			InitArrayInstruction iai = new InitArrayInstruction(
-					ByteCodeConstants.NEWANDINITARRAY, lastAsi.offset,
-					dupStore.lineNumber, dupStore.objectref, values);
+					ByteCodeConstants.NEWANDINITARRAY, lastAsi.getOffset(),
+					dupStore.getLineNumber(), dupStore.getObjectref(), values);
 
 			// Recherche de l'instruction 'DupLoad' suivante
 			Instruction parent = ReconstructorUtil.replaceDupLoad(
 					list, index, lastDupStore, iai);
 
-			if (parent != null && parent.opcode == Const.AASTORE) {
-				iai.opcode = ByteCodeConstants.INITARRAY;
+			if (parent != null && parent.getOpcode() == Const.AASTORE) {
+				iai.setOpcode(ByteCodeConstants.INITARRAY);
 			}
 			// Retrait des instructions de la liste
 			while (firstDupStoreIndex < index) {
@@ -159,25 +159,25 @@ public class InitArrayInstructionReconstructor
 			}
 
 			// Initialisation des types de constantes entieres
-			if (iai.newArray.opcode == Const.NEWARRAY)
+			if (iai.getNewArray().getOpcode() == Const.NEWARRAY)
 			{
-				NewArray na = (NewArray)iai.newArray;
-				switch (na.type)
+				NewArray na = (NewArray)iai.getNewArray();
+				switch (na.getType())
 				{
 				case Const.T_BOOLEAN:
-					setContantTypes("Z", iai.values);
+					setContantTypes("Z", iai.getValues());
 					break;
 				case Const.T_CHAR:
-					setContantTypes("C", iai.values);
+					setContantTypes("C", iai.getValues());
 					break;
 				case Const.T_BYTE:
-					setContantTypes("B", iai.values);
+					setContantTypes("B", iai.getValues());
 					break;
 				case Const.T_SHORT:
-					setContantTypes("S", iai.values);
+					setContantTypes("S", iai.getValues());
 					break;
 				case Const.T_INT:
-					setContantTypes("I", iai.values);
+					setContantTypes("I", iai.getValues());
 					break;
 				}
 			}
@@ -193,8 +193,8 @@ public class InitArrayInstructionReconstructor
 		for (int i=0; i<length; i++)
 		{
 			value = values.get(i);
-			if (value.opcode == Const.BIPUSH || value.opcode == ByteCodeConstants.ICONST
-					|| value.opcode == Const.SIPUSH) {
+			if (value.getOpcode() == Const.BIPUSH || value.getOpcode() == ByteCodeConstants.ICONST
+					|| value.getOpcode() == Const.SIPUSH) {
 				((IConst)value).setReturnedSignature(signature);
 			}
 		}
@@ -202,14 +202,14 @@ public class InitArrayInstructionReconstructor
 
 	private static int getArrayIndex(Instruction i)
 	{
-		switch (i.opcode)
+		switch (i.getOpcode())
 		{
 		case ByteCodeConstants.ICONST:
-			return ((IConst)i).value;
+			return ((IConst)i).getValue();
 		case Const.BIPUSH:
-			return ((BIPush)i).value;
+			return ((BIPush)i).getValue();
 		case Const.SIPUSH:
-			return ((SIPush)i).value;
+			return ((SIPush)i).getValue();
 		default:
 			return -1;
 		}

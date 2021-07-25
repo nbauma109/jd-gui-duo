@@ -18,8 +18,8 @@ package jd.core.model.classfile.attribute;
 
 public class UnknowAttribute extends Attribute
 {
-    public UnknowAttribute(byte tag, int attributeNameIndex)
+    public UnknowAttribute(byte tag)
     {
-        super(tag, attributeNameIndex);
+        super(tag);
     }
 }

@@ -18,8 +18,8 @@ package jd.core.model.classfile.attribute;
 
 public class AttributeDeprecated extends Attribute
 {
-    public AttributeDeprecated(byte tag, int attributeNameIndex)
+    public AttributeDeprecated(byte tag)
     {
-        super(tag, attributeNameIndex);
+        super(tag);
     }
 }

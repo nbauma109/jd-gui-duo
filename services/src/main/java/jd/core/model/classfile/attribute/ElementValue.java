@@ -18,10 +18,14 @@ package jd.core.model.classfile.attribute;
 
 public class ElementValue
 {
-    public final byte tag;
+    private final byte tag;
 
     public ElementValue(byte tag)
     {
         this.tag = tag;
     }
+
+	public byte getTag() {
+		return tag;
+	}
 }

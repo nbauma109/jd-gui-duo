@@ -25,7 +25,7 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
  */
 public class FastTest2Lists extends FastTestList
 {
-    public List<Instruction> instructions2;
+    private final List<Instruction> instructions2;
 
     public FastTest2Lists(
             int opcode, int offset, int lineNumber, int branch,
@@ -35,4 +35,8 @@ public class FastTest2Lists extends FastTestList
         super(opcode, offset, lineNumber, branch, test, instructions1);
         this.instructions2 = instructions2;
     }
+
+	public List<Instruction> getInstructions2() {
+		return instructions2;
+	}
 }

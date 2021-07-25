@@ -27,46 +27,103 @@ import jd.core.model.layout.section.LayoutSection;
  */
 public class LayoutBlock {
 
-    public byte tag;
+    private byte tag;
 
-    public final int firstLineNumber;
-    public final int lastLineNumber;
+    private final int firstLineNumber;
+    private final int lastLineNumber;
 
-    public final int minimalLineCount;
-    public final int maximalLineCount;
-    public int preferedLineCount;
+    private final int minimalLineCount;
+    private final int maximalLineCount;
+    private int preferedLineCount;
 
-    public int lineCount;
+    private int lineCount;
 
-    public int index;
-    public LayoutSection section;
+    private int index;
+    private LayoutSection section;
 
     public LayoutBlock(
         byte tag, int firstLineNumber, int lastLineNumber, int lineCount)
     {
-        this.tag = tag;
+        this.setTag(tag);
         this.firstLineNumber = firstLineNumber;
         this.lastLineNumber = lastLineNumber;
         this.minimalLineCount = lineCount;
         this.maximalLineCount = lineCount;
-        this.preferedLineCount = lineCount;
-        this.lineCount = lineCount;
-        this.index = 0;
-        this.section = null;
+        this.setPreferedLineCount(lineCount);
+        this.setLineCount(lineCount);
+        this.setIndex(0);
+        this.setSection(null);
     }
 
     public LayoutBlock(
         byte tag, int firstLineNumber, int lastLineNumber,
         int minimalLineCount, int maximalLineCount, int preferedLineCount)
     {
-        this.tag = tag;
+        this.setTag(tag);
         this.firstLineNumber = firstLineNumber;
         this.lastLineNumber = lastLineNumber;
         this.minimalLineCount = minimalLineCount;
         this.maximalLineCount = maximalLineCount;
-        this.preferedLineCount = preferedLineCount;
-        this.lineCount = preferedLineCount;
-        this.index = 0;
-        this.section = null;
+        this.setPreferedLineCount(preferedLineCount);
+        this.setLineCount(preferedLineCount);
+        this.setIndex(0);
+        this.setSection(null);
     }
+
+	public int getLastLineNumber() {
+		return lastLineNumber;
+	}
+
+	public int getMaximalLineCount() {
+		return maximalLineCount;
+	}
+
+	public int getMinimalLineCount() {
+		return minimalLineCount;
+	}
+
+	public int getFirstLineNumber() {
+		return firstLineNumber;
+	}
+
+	public byte getTag() {
+		return tag;
+	}
+
+	public void setTag(byte tag) {
+		this.tag = tag;
+	}
+
+	public int getLineCount() {
+		return lineCount;
+	}
+
+	public int setLineCount(int lineCount) {
+		this.lineCount = lineCount;
+		return lineCount;
+	}
+
+	public int getIndex() {
+		return index;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
+	}
+
+	public LayoutSection getSection() {
+		return section;
+	}
+
+	public void setSection(LayoutSection section) {
+		this.section = section;
+	}
+
+	public int getPreferedLineCount() {
+		return preferedLineCount;
+	}
+
+	public void setPreferedLineCount(int preferedLineCount) {
+		this.preferedLineCount = preferedLineCount;
+	}
 }

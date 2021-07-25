@@ -24,15 +24,15 @@ public abstract class Instruction
     public static final int UNKNOWN_LINE_NUMBER = 0;
     public static final int ZERO_PRIORITY = 0;
 
-    public int opcode;
-    public final int offset;
-    public int lineNumber;
+    private int opcode;
+    private final int offset;
+    private int lineNumber;
 
     protected Instruction(int opcode, int offset, int lineNumber)
     {
         this.opcode = opcode;
         this.offset = offset;
-        this.lineNumber = lineNumber;
+        this.setLineNumber(lineNumber);
     }
 
     public abstract String getReturnedSignature(
@@ -42,4 +42,24 @@ public abstract class Instruction
     {
         return ZERO_PRIORITY;
     }
+
+	public int getOffset() {
+		return offset;
+	}
+
+	public int getLineNumber() {
+		return lineNumber;
+	}
+
+	public void setLineNumber(int lineNumber) {
+		this.lineNumber = lineNumber;
+	}
+
+	public int getOpcode() {
+		return opcode;
+	}
+	
+	public void setOpcode(int opcode) {
+		this.opcode = opcode;
+	}
 }

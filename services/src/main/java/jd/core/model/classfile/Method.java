@@ -67,54 +67,54 @@ public class Method extends FieldOrMethod
         {
             AttributeCode ac = null;
 
-            for (int i=this.attributes.length-1; i>=0; --i)
+            for (int i=this.getAttributes().length-1; i>=0; --i)
             {
-                Attribute attribute =  this.attributes[i];
-                switch (attribute.tag)
+                Attribute attribute =  this.getAttribute(i);
+                switch (attribute.getTag())
                 {
                 case Const.ATTR_EXCEPTIONS:
                     this.exceptionIndexes =
-                        ((AttributeExceptions)attribute).exceptionIndexTable;
+                        ((AttributeExceptions)attribute).getExceptionIndexTable();
                     break;
                 case Const.ATTR_CODE:
                     ac = (AttributeCode)attributes[i];
                     break;
                 case Const.ATTR_RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS:
                     this.visibleParameterAnnotations =
-                        ((AttributeRuntimeParameterAnnotations)attribute).parameterAnnotations;
+                        ((AttributeRuntimeParameterAnnotations)attribute).getParameterAnnotations();
                     break;
                 case Const.ATTR_RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS:
                     this.invisibleParameterAnnotations =
-                        ((AttributeRuntimeParameterAnnotations)attribute).parameterAnnotations;
+                        ((AttributeRuntimeParameterAnnotations)attribute).getParameterAnnotations();
                     break;
                 case Const.ATTR_ANNOTATION_DEFAULT:
                     this.defaultAnnotationValue =
-                        ((AttributeAnnotationDefault)attribute).defaultValue;
+                        ((AttributeAnnotationDefault)attribute).getDefaultValue();
                     break;
                 }
             }
 
             if (ac != null)
             {
-                this.code = ByteCodeUtil.cleanUpByteCode(ac.code);
+                this.code = ByteCodeUtil.cleanUpByteCode(ac.getCode());
 
                 // localVariables
                 AttributeLocalVariableTable alvt = ac.getAttributeLocalVariableTable();
-                if (alvt != null && alvt.localVariableTable != null)
+                if (alvt != null && alvt.getLocalVariableTable() != null)
                 {
                     AttributeLocalVariableTable alvtt = ac.getAttributeLocalVariableTypeTable();
                     LocalVariable[] localVariableTypeTable =
-                        alvtt == null ? null : alvtt.localVariableTable;
+                        alvtt == null ? null : alvtt.getLocalVariableTable();
                     this.localVariables = new LocalVariables(
-                        alvt.localVariableTable, localVariableTypeTable);
+                        alvt.getLocalVariableTable(), localVariableTypeTable);
                 }
 
                 // lineNumbers
                 AttributeNumberTable ant = ac.getAttributeLineNumberTable();
-                this.lineNumbers = ant == null ? null : ant.lineNumberTable;
+                this.lineNumbers = ant == null ? null : ant.getLineNumberTable();
 
                 // codeExceptions
-                this.codeExceptions = ac.exceptionTable;
+                this.codeExceptions = ac.getExceptionTable();
             }
         }
     }

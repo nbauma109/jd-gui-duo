@@ -25,13 +25,21 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
  */
 public class FastSynchronized extends FastList
 {
-    public Instruction monitor;
+    private Instruction monitor;
 
     public FastSynchronized(
         int opcode, int offset, int lineNumber,
         int branch, List<Instruction> instructions)
     {
         super(opcode, offset, lineNumber, branch, instructions);
-        this.monitor = null;
+        this.setMonitor(null);
     }
+
+	public Instruction getMonitor() {
+		return monitor;
+	}
+
+	public void setMonitor(Instruction monitor) {
+		this.monitor = monitor;
+	}
 }

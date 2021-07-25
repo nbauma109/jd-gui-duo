@@ -46,11 +46,11 @@ public class OuterPutStaticVisitor extends OuterGetStaticVisitor
     @Override
     protected Accessor match(Instruction i)
     {
-        if (i.opcode != Const.INVOKESTATIC)
+        if (i.getOpcode() != Const.INVOKESTATIC)
             return null;
 
         Invokestatic is = (Invokestatic)i;
-        ConstantMethodref cmr = constants.getConstantMethodref(is.index);
+        ConstantMethodref cmr = constants.getConstantMethodref(is.getIndex());
         ConstantNameAndType cnat =
             constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
         String descriptor =
@@ -71,7 +71,7 @@ public class OuterPutStaticVisitor extends OuterGetStaticVisitor
         Accessor accessor = classFile.getAccessor(name, descriptor);
 
         if ((accessor == null) ||
-            (accessor.tag != AccessorConstants.ACCESSOR_PUTSTATIC))
+            (accessor.getTag() != AccessorConstants.ACCESSOR_PUTSTATIC))
             return null;
 
         return accessor;
@@ -83,22 +83,22 @@ public class OuterPutStaticVisitor extends OuterGetStaticVisitor
         PutStaticAccessor psa = (PutStaticAccessor)a;
         Invokestatic is = (Invokestatic)i;
 
-        int nameIndex = this.constants.addConstantUtf8(psa.fieldName);
+        int nameIndex = this.constants.addConstantUtf8(psa.getFieldName());
         int descriptorIndex =
-            this.constants.addConstantUtf8(psa.fieldDescriptor);
+            this.constants.addConstantUtf8(psa.getFieldDescriptor());
         int cnatIndex =
             this.constants.addConstantNameAndType(nameIndex, descriptorIndex);
 
-        int classNameIndex = this.constants.addConstantUtf8(psa.className);
+        int classNameIndex = this.constants.addConstantUtf8(psa.getClassName());
         int classIndex = this.constants.addConstantClass(classNameIndex);
 
         int cfrIndex =
              this.constants.addConstantFieldref(classIndex, cnatIndex);
 
-        Instruction valueref = is.args.remove(0);
+        Instruction valueref = is.getArgs().remove(0);
 
         return new PutStatic(
-            Const.PUTSTATIC, i.offset, i.lineNumber,
+            Const.PUTSTATIC, i.getOffset(), i.getLineNumber(),
             cfrIndex, valueref);
     }
 }

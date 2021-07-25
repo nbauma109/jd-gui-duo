@@ -18,9 +18,9 @@ package jd.core.model.classfile.accessor;
 
 public class GetStaticAccessor extends Accessor
 {
-    public final String className;
-    public final String fieldName;
-    public final String fieldDescriptor;
+    private final String className;
+    private final String fieldName;
+    private final String fieldDescriptor;
 
     public GetStaticAccessor(
         byte tag, String className, String fieldName, String fieldDescriptor)
@@ -30,4 +30,16 @@ public class GetStaticAccessor extends Accessor
         this.fieldName = fieldName;
         this.fieldDescriptor = fieldDescriptor;
     }
+
+	public String getFieldName() {
+		return fieldName;
+	}
+
+	public String getFieldDescriptor() {
+		return fieldDescriptor;
+	}
+
+	public String getClassName() {
+		return className;
+	}
 }

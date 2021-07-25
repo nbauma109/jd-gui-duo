@@ -26,14 +26,14 @@ import jd.core.util.SignatureUtil;
 
 public class CheckCast extends IndexInstruction
 {
-    public Instruction objectref;
+    private Instruction objectref;
 
     public CheckCast(
         int opcode, int offset, int lineNumber,
         int index, Instruction objectref)
     {
         super(opcode, offset, lineNumber, index);
-        this.objectref = objectref;
+        this.setObjectref(objectref);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class CheckCast extends IndexInstruction
 			return null;
 		}
 
-        Constant c = constants.get(this.index);
+        Constant c = constants.get(this.getIndex());
 
         if (c instanceof ConstantUtf8 cutf8)
         {
@@ -63,4 +63,12 @@ public class CheckCast extends IndexInstruction
     {
         return 2;
     }
+
+	public Instruction getObjectref() {
+		return objectref;
+	}
+
+	public void setObjectref(Instruction objectref) {
+		this.objectref = objectref;
+	}
 }

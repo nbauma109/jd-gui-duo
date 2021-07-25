@@ -18,8 +18,8 @@ package jd.core.model.classfile.attribute;
 
 public class ElementValueEnumConstValue extends ElementValue
 {
-    public final int typeNameIndex;
-    public final int constNameIndex;
+    private final int typeNameIndex;
+    private final int constNameIndex;
 
     public ElementValueEnumConstValue(byte tag,
                                       int typeNameIndex,
@@ -29,4 +29,12 @@ public class ElementValueEnumConstValue extends ElementValue
         this.typeNameIndex = typeNameIndex;
         this.constNameIndex = constNameIndex;
     }
+
+	public int getTypeNameIndex() {
+		return typeNameIndex;
+	}
+
+	public int getConstNameIndex() {
+		return constNameIndex;
+	}
 }

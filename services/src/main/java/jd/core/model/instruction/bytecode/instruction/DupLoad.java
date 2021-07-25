@@ -21,21 +21,29 @@ import jd.core.model.classfile.LocalVariables;
 
 public class DupLoad extends Instruction
 {
-    public DupStore dupStore;
+    private DupStore dupStore;
 
     public DupLoad(int opcode, int offset, int lineNumber, DupStore dupStore)
     {
         super(opcode, offset, lineNumber);
-        this.dupStore = dupStore;
+        this.setDupStore(dupStore);
     }
 
     @Override
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        if (dupStore == null)
+        if (getDupStore() == null)
             throw new IllegalStateException("DupLoad without DupStore");
 
-        return dupStore.getReturnedSignature(constants, localVariables);
+        return getDupStore().getReturnedSignature(constants, localVariables);
     }
+
+	public DupStore getDupStore() {
+		return dupStore;
+	}
+
+	public void setDupStore(DupStore dupStore) {
+		this.dupStore = dupStore;
+	}
 }

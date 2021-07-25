@@ -34,84 +34,84 @@ public class SearchDupLoadInstructionVisitor
 
     public static DupLoad visit(Instruction instruction, DupStore dupStore)
     {
-        switch (instruction.opcode)
+        switch (instruction.getOpcode())
         {
         case Const.ARRAYLENGTH:
-            return visit(((ArrayLength)instruction).arrayref, dupStore);
+            return visit(((ArrayLength)instruction).getArrayref(), dupStore);
         case ByteCodeConstants.ARRAYLOAD:
             {
                 ArrayLoadInstruction ali = (ArrayLoadInstruction)instruction;
-                DupLoad dupLoad = visit(ali.arrayref, dupStore);
+                DupLoad dupLoad = visit(ali.getArrayref(), dupStore);
                 if (dupLoad != null)
                     return dupLoad;
-                return visit(ali.indexref, dupStore);
+                return visit(ali.getIndexref(), dupStore);
             }
         case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
-                DupLoad dupLoad = visit(asi.arrayref, dupStore);
+                DupLoad dupLoad = visit(asi.getArrayref(), dupStore);
                 if (dupLoad != null)
                     return dupLoad;
-                dupLoad = visit(asi.indexref, dupStore);
+                dupLoad = visit(asi.getIndexref(), dupStore);
                 if (dupLoad != null)
                     return dupLoad;
-                return visit(asi.valueref, dupStore);
+                return visit(asi.getValueref(), dupStore);
             }
         case ByteCodeConstants.ASSERT:
             {
                 AssertInstruction ai = (AssertInstruction)instruction;
-                DupLoad dupLoad = visit(ai.test, dupStore);
+                DupLoad dupLoad = visit(ai.getTest(), dupStore);
                 if (dupLoad != null)
                     return dupLoad;
-                if (ai.msg == null)
+                if (ai.getMsg() == null)
                     return null;
-                return visit(ai.msg, dupStore);
+                return visit(ai.getMsg(), dupStore);
             }
         case Const.ATHROW:
-            return visit(((AThrow)instruction).value, dupStore);
+            return visit(((AThrow)instruction).getValue(), dupStore);
         case ByteCodeConstants.UNARYOP:
-            return visit(((UnaryOperatorInstruction)instruction).value, dupStore);
+            return visit(((UnaryOperatorInstruction)instruction).getValue(), dupStore);
         case ByteCodeConstants.BINARYOP:
         case ByteCodeConstants.ASSIGNMENT:
             {
                 BinaryOperatorInstruction boi =
                     (BinaryOperatorInstruction)instruction;
-                DupLoad dupLoad = visit(boi.value1, dupStore);
+                DupLoad dupLoad = visit(boi.getValue1(), dupStore);
                 if (dupLoad != null)
                     return dupLoad;
-                return visit(boi.value2, dupStore);
+                return visit(boi.getValue2(), dupStore);
             }
         case Const.CHECKCAST:
-            return visit(((CheckCast)instruction).objectref, dupStore);
+            return visit(((CheckCast)instruction).getObjectref(), dupStore);
         case ByteCodeConstants.STORE:
         case Const.ASTORE:
         case Const.ISTORE:
-            return visit(((StoreInstruction)instruction).valueref, dupStore);
+            return visit(((StoreInstruction)instruction).getValueref(), dupStore);
         case ByteCodeConstants.DUPLOAD:
-            if (((DupLoad)instruction).dupStore == dupStore)
+            if (((DupLoad)instruction).getDupStore() == dupStore)
                 return (DupLoad)instruction;
             break;
         case ByteCodeConstants.DUPSTORE:
-            return visit(((DupStore)instruction).objectref, dupStore);
+            return visit(((DupStore)instruction).getObjectref(), dupStore);
         case ByteCodeConstants.CONVERT:
         case ByteCodeConstants.IMPLICITCONVERT:
-            return visit(((ConvertInstruction)instruction).value, dupStore);
+            return visit(((ConvertInstruction)instruction).getValue(), dupStore);
         case ByteCodeConstants.IFCMP:
             {
                 IfCmp ifCmp = (IfCmp)instruction;
-                DupLoad dupLoad = visit(ifCmp.value1, dupStore);
+                DupLoad dupLoad = visit(ifCmp.getValue1(), dupStore);
                 if (dupLoad != null)
                     return dupLoad;
-                return visit(ifCmp.value2, dupStore);
+                return visit(ifCmp.getValue2(), dupStore);
             }
         case ByteCodeConstants.IF:
         case ByteCodeConstants.IFXNULL:
-            return visit(((IfInstruction)instruction).value, dupStore);
+            return visit(((IfInstruction)instruction).getValue(), dupStore);
         case ByteCodeConstants.COMPLEXIF:
             {
                 List<Instruction> branchList =
-                    ((ComplexConditionalBranchInstruction)instruction).instructions;
+                    ((ComplexConditionalBranchInstruction)instruction).getInstructions();
                 for (int i=branchList.size()-1; i>=0; --i)
                 {
                     DupLoad dupLoad = visit(branchList.get(i), dupStore);
@@ -121,13 +121,13 @@ public class SearchDupLoadInstructionVisitor
             }
             break;
         case Const.INSTANCEOF:
-            return visit(((InstanceOf)instruction).objectref, dupStore);
+            return visit(((InstanceOf)instruction).getObjectref(), dupStore);
         case Const.INVOKEINTERFACE:
         case Const.INVOKESPECIAL:
         case Const.INVOKEVIRTUAL:
             {
                 DupLoad dupLoad = visit(
-                    ((InvokeNoStaticInstruction)instruction).objectref, dupStore);
+                    ((InvokeNoStaticInstruction)instruction).getObjectref(), dupStore);
                 if (dupLoad != null)
                     return dupLoad;
             }
@@ -135,7 +135,7 @@ public class SearchDupLoadInstructionVisitor
         case Const.INVOKESTATIC:
         case ByteCodeConstants.INVOKENEW:
             {
-                List<Instruction> list = ((InvokeInstruction)instruction).args;
+                List<Instruction> list = ((InvokeInstruction)instruction).getArgs();
                 for (int i=list.size()-1; i>=0; --i)
                 {
                     DupLoad dupLoad = visit(list.get(i), dupStore);
@@ -145,14 +145,14 @@ public class SearchDupLoadInstructionVisitor
             }
             break;
         case Const.LOOKUPSWITCH:
-            return visit(((LookupSwitch)instruction).key, dupStore);
+            return visit(((LookupSwitch)instruction).getKey(), dupStore);
         case Const.MONITORENTER:
-            return visit(((MonitorEnter)instruction).objectref, dupStore);
+            return visit(((MonitorEnter)instruction).getObjectref(), dupStore);
         case Const.MONITOREXIT:
-            return visit(((MonitorExit)instruction).objectref, dupStore);
+            return visit(((MonitorExit)instruction).getObjectref(), dupStore);
         case Const.MULTIANEWARRAY:
             {
-                Instruction[] dimensions = ((MultiANewArray)instruction).dimensions;
+                Instruction[] dimensions = ((MultiANewArray)instruction).getDimensions();
                 for (int i=dimensions.length-1; i>=0; --i)
                 {
                     DupLoad dupLoad = visit(dimensions[i], dupStore);
@@ -162,41 +162,41 @@ public class SearchDupLoadInstructionVisitor
             }
             break;
         case Const.NEWARRAY:
-            return visit(((NewArray)instruction).dimension, dupStore);
+            return visit(((NewArray)instruction).getDimension(), dupStore);
         case Const.ANEWARRAY:
-            return visit(((ANewArray)instruction).dimension, dupStore);
+            return visit(((ANewArray)instruction).getDimension(), dupStore);
         case Const.POP:
-            return visit(((Pop)instruction).objectref, dupStore);
+            return visit(((Pop)instruction).getObjectref(), dupStore);
         case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
-                DupLoad dupLoad = visit(putField.objectref, dupStore);
+                DupLoad dupLoad = visit(putField.getObjectref(), dupStore);
                 if (dupLoad != null)
                     return dupLoad;
-                return visit(putField.valueref, dupStore);
+                return visit(putField.getValueref(), dupStore);
             }
         case Const.PUTSTATIC:
-            return visit(((PutStatic)instruction).valueref, dupStore);
+            return visit(((PutStatic)instruction).getValueref(), dupStore);
         case ByteCodeConstants.XRETURN:
-            return visit(((ReturnInstruction)instruction).valueref, dupStore);
+            return visit(((ReturnInstruction)instruction).getValueref(), dupStore);
         case Const.TABLESWITCH:
-            return visit(((TableSwitch)instruction).key, dupStore);
+            return visit(((TableSwitch)instruction).getKey(), dupStore);
         case ByteCodeConstants.TERNARYOPSTORE:
-            return visit(((TernaryOpStore)instruction).objectref, dupStore);
+            return visit(((TernaryOpStore)instruction).getObjectref(), dupStore);
         case ByteCodeConstants.PREINC:
         case ByteCodeConstants.POSTINC:
-            return visit(((IncInstruction)instruction).value, dupStore);
+            return visit(((IncInstruction)instruction).getValue(), dupStore);
         case Const.GETFIELD:
-            return visit(((GetField)instruction).objectref, dupStore);
+            return visit(((GetField)instruction).getObjectref(), dupStore);
         case ByteCodeConstants.INITARRAY:
         case ByteCodeConstants.NEWANDINITARRAY:
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
-                DupLoad dupLoad = visit(iai.newArray, dupStore);
+                DupLoad dupLoad = visit(iai.getNewArray(), dupStore);
                 if (dupLoad != null)
                     return dupLoad;
-                if (iai.values != null)
-                    return visit(iai.values, dupStore);
+                if (iai.getValues() != null)
+                    return visit(iai.getValues(), dupStore);
             }
             break;
         case Const.ACONST_NULL:
@@ -227,7 +227,7 @@ public class SearchDupLoadInstructionVisitor
             System.err.println(
                     "Can not search DupLoad instruction in " +
                     instruction.getClass().getName() +
-                    ", opcode=" + instruction.opcode);
+                    ", opcode=" + instruction.getOpcode());
         }
 
         return null;

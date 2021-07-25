@@ -18,21 +18,29 @@ package jd.core.model.instruction.bytecode.instruction;
 
 public abstract class BranchInstruction extends Instruction
 {
-    public int branch;
+    private int branch;
 
     protected BranchInstruction(int opcode, int offset, int lineNumber, int branch)
     {
         super(opcode, offset, lineNumber);
-        this.branch = branch;
+        this.setBranch(branch);
     }
 
     public int getJumpOffset()
     {
-        return this.offset + this.branch;
+        return this.getOffset() + this.getBranch();
     }
 
     public void setJumpOffset(int jumpOffset)
     {
-        this.branch = jumpOffset - this.offset;
+        this.setBranch(jumpOffset - this.getOffset());
     }
+
+	public int getBranch() {
+		return branch;
+	}
+
+	public void setBranch(int branch) {
+		this.branch = branch;
+	}
 }

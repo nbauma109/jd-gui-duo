@@ -21,7 +21,7 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class ExtendsSuperTypeLayoutBlock extends LayoutBlock
 {
-    public final ClassFile classFile;
+    private final ClassFile classFile;
 
     public ExtendsSuperTypeLayoutBlock(ClassFile classFile)
     {
@@ -41,4 +41,8 @@ public class ExtendsSuperTypeLayoutBlock extends LayoutBlock
             minimalLineCount, maximalLineCount, preferedLineCount);
         this.classFile = classFile;
     }
+
+	public ClassFile getClassFile() {
+		return classFile;
+	}
 }

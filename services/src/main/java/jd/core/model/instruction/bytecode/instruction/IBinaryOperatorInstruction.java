@@ -38,20 +38,20 @@ public class IBinaryOperatorInstruction extends BinaryOperatorInstruction
             ConstantPool constants, LocalVariables localVariables)
     {
         String signature;
-        switch (this.value1.opcode)
+        switch (this.getValue1().getOpcode())
         {
         case ByteCodeConstants.ICONST:
         case Const.BIPUSH:
         case Const.SIPUSH:
-            signature = this.value2.getReturnedSignature(constants, localVariables);
+            signature = this.getValue2().getReturnedSignature(constants, localVariables);
             if (signature == null) {
-				signature = this.value1.getReturnedSignature(constants, localVariables);
+				signature = this.getValue1().getReturnedSignature(constants, localVariables);
 			}
             return signature;
         default:
-            signature = this.value1.getReturnedSignature(constants, localVariables);
+            signature = this.getValue1().getReturnedSignature(constants, localVariables);
             if (signature == null) {
-				signature = this.value2.getReturnedSignature(constants, localVariables);
+				signature = this.getValue2().getReturnedSignature(constants, localVariables);
 			}
             return signature;
         }

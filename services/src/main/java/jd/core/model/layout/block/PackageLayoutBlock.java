@@ -21,7 +21,7 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class PackageLayoutBlock extends LayoutBlock
 {
-    public final ClassFile classFile;
+    private final ClassFile classFile;
 
     public PackageLayoutBlock(ClassFile classFile)
     {
@@ -31,4 +31,8 @@ public class PackageLayoutBlock extends LayoutBlock
             0, 0, 0);
         this.classFile = classFile;
     }
+
+	public ClassFile getClassFile() {
+		return classFile;
+	}
 }

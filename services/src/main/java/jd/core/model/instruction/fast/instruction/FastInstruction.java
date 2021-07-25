@@ -22,13 +22,13 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class FastInstruction extends Instruction
 {
-    public Instruction instruction;
+    private Instruction instruction;
 
     public FastInstruction(
         int opcode, int offset, int lineNumber, Instruction instruction)
     {
         super(opcode, offset, lineNumber);
-        this.instruction = instruction;
+        this.setInstruction(instruction);
     }
 
     @Override
@@ -37,4 +37,12 @@ public class FastInstruction extends Instruction
     {
         return null;
     }
+
+	public Instruction getInstruction() {
+		return instruction;
+	}
+
+	public void setInstruction(Instruction instruction) {
+		this.instruction = instruction;
+	}
 }

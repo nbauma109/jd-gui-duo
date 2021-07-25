@@ -42,56 +42,56 @@ public class SearchInstructionByOpcodeVisitor
         if (instruction == null)
             throw new IllegalStateException("Null instruction");
 
-        if (instruction.opcode == opcode)
+        if (instruction.getOpcode() == opcode)
             return instruction;
 
-        switch (instruction.opcode)
+        switch (instruction.getOpcode())
         {
         case Const.ARRAYLENGTH:
-            return visit(((ArrayLength)instruction).arrayref, opcode);
+            return visit(((ArrayLength)instruction).getArrayref(), opcode);
         case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
-            return visit(((ArrayStoreInstruction)instruction).arrayref, opcode);
+            return visit(((ArrayStoreInstruction)instruction).getArrayref(), opcode);
         case Const.ATHROW:
-            return visit(((AThrow)instruction).value, opcode);
+            return visit(((AThrow)instruction).getValue(), opcode);
         case ByteCodeConstants.UNARYOP:
-            return visit(((UnaryOperatorInstruction)instruction).value, opcode);
+            return visit(((UnaryOperatorInstruction)instruction).getValue(), opcode);
         case ByteCodeConstants.BINARYOP:
         case ByteCodeConstants.ASSIGNMENT:
             {
                 BinaryOperatorInstruction boi =
                     (BinaryOperatorInstruction)instruction;
-                Instruction tmp = visit(boi.value1, opcode);
+                Instruction tmp = visit(boi.getValue1(), opcode);
                 if (tmp != null)
                     return tmp;
-                return visit(boi.value2, opcode);
+                return visit(boi.getValue2(), opcode);
             }
         case Const.CHECKCAST:
-            return visit(((CheckCast)instruction).objectref, opcode);
+            return visit(((CheckCast)instruction).getObjectref(), opcode);
         case ByteCodeConstants.STORE:
         case Const.ASTORE:
         case Const.ISTORE:
-            return visit(((StoreInstruction)instruction).valueref, opcode);
+            return visit(((StoreInstruction)instruction).getValueref(), opcode);
         case ByteCodeConstants.DUPSTORE:
-            return visit(((DupStore)instruction).objectref, opcode);
+            return visit(((DupStore)instruction).getObjectref(), opcode);
         case ByteCodeConstants.CONVERT:
         case ByteCodeConstants.IMPLICITCONVERT:
-            return visit(((ConvertInstruction)instruction).value, opcode);
+            return visit(((ConvertInstruction)instruction).getValue(), opcode);
         case ByteCodeConstants.IFCMP:
             {
                 IfCmp ifCmp = (IfCmp)instruction;
-                Instruction tmp = visit(ifCmp.value1, opcode);
+                Instruction tmp = visit(ifCmp.getValue1(), opcode);
                 if (tmp != null)
                     return tmp;
-                return visit(ifCmp.value2, opcode);
+                return visit(ifCmp.getValue2(), opcode);
             }
         case ByteCodeConstants.IF:
         case ByteCodeConstants.IFXNULL:
-            return visit(((IfInstruction)instruction).value, opcode);
+            return visit(((IfInstruction)instruction).getValue(), opcode);
         case ByteCodeConstants.COMPLEXIF:
             {
                 List<Instruction> branchList =
-                    ((ComplexConditionalBranchInstruction)instruction).instructions;
+                    ((ComplexConditionalBranchInstruction)instruction).getInstructions();
                 for (int i=branchList.size()-1; i>=0; --i)
                 {
                     Instruction tmp = visit(branchList.get(i), opcode);
@@ -101,13 +101,13 @@ public class SearchInstructionByOpcodeVisitor
             }
             break;
         case Const.INSTANCEOF:
-            return visit(((InstanceOf)instruction).objectref, opcode);
+            return visit(((InstanceOf)instruction).getObjectref(), opcode);
         case Const.INVOKEINTERFACE:
         case Const.INVOKESPECIAL:
         case Const.INVOKEVIRTUAL:
             {
                 Instruction result = visit(
-                    ((InvokeNoStaticInstruction)instruction).objectref, opcode);
+                    ((InvokeNoStaticInstruction)instruction).getObjectref(), opcode);
                 if (result != null)
                     return result;
             }
@@ -115,7 +115,7 @@ public class SearchInstructionByOpcodeVisitor
         case Const.INVOKESTATIC:
         case ByteCodeConstants.INVOKENEW:
             {
-                List<Instruction> list = ((InvokeInstruction)instruction).args;
+                List<Instruction> list = ((InvokeInstruction)instruction).getArgs();
                 for (int i=list.size()-1; i>=0; --i)
                 {
                     Instruction tmp = visit(list.get(i), opcode);
@@ -125,14 +125,14 @@ public class SearchInstructionByOpcodeVisitor
             }
             break;
         case Const.LOOKUPSWITCH:
-            return visit(((LookupSwitch)instruction).key, opcode);
+            return visit(((LookupSwitch)instruction).getKey(), opcode);
         case Const.MONITORENTER:
-            return visit(((MonitorEnter)instruction).objectref, opcode);
+            return visit(((MonitorEnter)instruction).getObjectref(), opcode);
         case Const.MONITOREXIT:
-            return visit(((MonitorExit)instruction).objectref, opcode);
+            return visit(((MonitorExit)instruction).getObjectref(), opcode);
         case Const.MULTIANEWARRAY:
             {
-                Instruction[] dimensions = ((MultiANewArray)instruction).dimensions;
+                Instruction[] dimensions = ((MultiANewArray)instruction).getDimensions();
                 for (int i=dimensions.length-1; i>=0; --i)
                 {
                     Instruction tmp = visit(dimensions[i], opcode);
@@ -142,88 +142,88 @@ public class SearchInstructionByOpcodeVisitor
             }
             break;
         case Const.NEWARRAY:
-            return visit(((NewArray)instruction).dimension, opcode);
+            return visit(((NewArray)instruction).getDimension(), opcode);
         case Const.ANEWARRAY:
-            return visit(((ANewArray)instruction).dimension, opcode);
+            return visit(((ANewArray)instruction).getDimension(), opcode);
         case Const.POP:
-            return visit(((Pop)instruction).objectref, opcode);
+            return visit(((Pop)instruction).getObjectref(), opcode);
         case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
-                Instruction tmp = visit(putField.objectref, opcode);
+                Instruction tmp = visit(putField.getObjectref(), opcode);
                 if (tmp != null)
                     return tmp;
-                return visit(putField.valueref, opcode);
+                return visit(putField.getValueref(), opcode);
             }
         case Const.PUTSTATIC:
-            return visit(((PutStatic)instruction).valueref, opcode);
+            return visit(((PutStatic)instruction).getValueref(), opcode);
         case ByteCodeConstants.XRETURN:
-            return visit(((ReturnInstruction)instruction).valueref, opcode);
+            return visit(((ReturnInstruction)instruction).getValueref(), opcode);
         case Const.TABLESWITCH:
-            return visit(((TableSwitch)instruction).key, opcode);
+            return visit(((TableSwitch)instruction).getKey(), opcode);
         case ByteCodeConstants.TERNARYOPSTORE:
-            return visit(((TernaryOpStore)instruction).objectref, opcode);
+            return visit(((TernaryOpStore)instruction).getObjectref(), opcode);
         case ByteCodeConstants.PREINC:
         case ByteCodeConstants.POSTINC:
-            return visit(((IncInstruction)instruction).value, opcode);
+            return visit(((IncInstruction)instruction).getValue(), opcode);
         case Const.GETFIELD:
-            return visit(((GetField)instruction).objectref, opcode);
+            return visit(((GetField)instruction).getObjectref(), opcode);
         case ByteCodeConstants.INITARRAY:
         case ByteCodeConstants.NEWANDINITARRAY:
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
-                Instruction tmp = visit(iai.newArray, opcode);
+                Instruction tmp = visit(iai.getNewArray(), opcode);
                 if (tmp != null)
                     return tmp;
-                if (iai.values != null)
-                    return visit(iai.values, opcode);
+                if (iai.getValues() != null)
+                    return visit(iai.getValues(), opcode);
             }
             break;
         case ByteCodeConstants.TERNARYOP:
             {
                 TernaryOperator to = (TernaryOperator)instruction;
-                Instruction tmp = visit(to.value1, opcode);
+                Instruction tmp = visit(to.getValue1(), opcode);
                 if (tmp != null)
                     return tmp;
-                return visit(to.value2, opcode);
+                return visit(to.getValue2(), opcode);
             }
         case FastConstants.TRY:
             {
                 FastTry ft = (FastTry)instruction;
-                Instruction tmp = visit(ft.instructions, opcode);
+                Instruction tmp = visit(ft.getInstructions(), opcode);
                 if (tmp != null)
                     return tmp;
-                List<FastCatch> catches = ft.catches;
+                List<FastCatch> catches = ft.getCatches();
                 for (int i=catches.size()-1; i>=0; --i)
                 {
-                    tmp = visit(catches.get(i).instructions, opcode);
+                    tmp = visit(catches.get(i).getInstructions(), opcode);
                     if (tmp != null)
                         return tmp;
                 }
-                if (ft.finallyInstructions != null)
-                    return visit(ft.finallyInstructions, opcode);
+                if (ft.getFinallyInstructions() != null)
+                    return visit(ft.getFinallyInstructions(), opcode);
             }
             break;
         case FastConstants.SYNCHRONIZED:
             {
                 FastSynchronized fsy = (FastSynchronized)instruction;
-                Instruction tmp = visit(fsy.monitor, opcode);
+                Instruction tmp = visit(fsy.getMonitor(), opcode);
                 if (tmp != null)
                     return tmp;
-                return visit(fsy.instructions, opcode);
+                return visit(fsy.getInstructions(), opcode);
             }
         case FastConstants.FOR:
             {
                 FastFor ff = (FastFor)instruction;
-                if (ff.init != null)
+                if (ff.getInit() != null)
                 {
-                    Instruction tmp = visit(ff.init, opcode);
+                    Instruction tmp = visit(ff.getInit(), opcode);
                     if (tmp != null)
                         return tmp;
                 }
-                if (ff.inc != null)
+                if (ff.getInc() != null)
                 {
-                    Instruction tmp = visit(ff.inc, opcode);
+                    Instruction tmp = visit(ff.getInc(), opcode);
                     if (tmp != null)
                         return tmp;
                 }
@@ -234,9 +234,9 @@ public class SearchInstructionByOpcodeVisitor
         case FastConstants.IF_SIMPLE:
             {
                 FastTestList ftl = (FastTestList)instruction;
-                if (ftl.test != null)
+                if (ftl.getTest() != null)
                 {
-                    Instruction tmp = visit(ftl.test, opcode);
+                    Instruction tmp = visit(ftl.getTest(), opcode);
                     if (tmp != null)
                         return tmp;
                 }
@@ -245,7 +245,7 @@ public class SearchInstructionByOpcodeVisitor
         case FastConstants.INFINITE_LOOP:
             {
                 List<Instruction> instructions =
-                        ((FastList)instruction).instructions;
+                        ((FastList)instruction).getInstructions();
                 if (instructions != null)
                     return visit(instructions, opcode);
             }
@@ -253,24 +253,24 @@ public class SearchInstructionByOpcodeVisitor
         case FastConstants.FOREACH:
             {
                 FastForEach ffe = (FastForEach)instruction;
-                Instruction tmp = visit(ffe.variable, opcode);
+                Instruction tmp = visit(ffe.getVariable(), opcode);
                 if (tmp != null)
                     return tmp;
-                tmp = visit(ffe.values, opcode);
+                tmp = visit(ffe.getValues(), opcode);
                 if (tmp != null)
                     return tmp;
-                return visit(ffe.instructions, opcode);
+                return visit(ffe.getInstructions(), opcode);
             }
         case FastConstants.IF_ELSE:
             {
                 FastTest2Lists ft2l = (FastTest2Lists)instruction;
-                Instruction tmp = visit(ft2l.test, opcode);
+                Instruction tmp = visit(ft2l.getTest(), opcode);
                 if (tmp != null)
                     return tmp;
-                tmp = visit(ft2l.instructions, opcode);
+                tmp = visit(ft2l.getInstructions(), opcode);
                 if (tmp != null)
                     return tmp;
-                return visit(ft2l.instructions2, opcode);
+                return visit(ft2l.getInstructions2(), opcode);
             }
         case FastConstants.IF_CONTINUE:
         case FastConstants.IF_BREAK:
@@ -280,15 +280,15 @@ public class SearchInstructionByOpcodeVisitor
         case FastConstants.GOTO_LABELED_BREAK:
             {
                 FastInstruction fi = (FastInstruction)instruction;
-                if (fi.instruction != null)
-                    return visit(fi.instruction, opcode);
+                if (fi.getInstruction() != null)
+                    return visit(fi.getInstruction(), opcode);
             }
             break;
         case FastConstants.DECLARE:
             {
                 FastDeclaration fd = (FastDeclaration)instruction;
-                if (fd.instruction != null)
-                    return visit(fd.instruction, opcode);
+                if (fd.getInstruction() != null)
+                    return visit(fd.getInstruction(), opcode);
             }
             break;
         case FastConstants.SWITCH:
@@ -296,11 +296,11 @@ public class SearchInstructionByOpcodeVisitor
         case FastConstants.SWITCH_STRING:
             {
                 FastSwitch fs = (FastSwitch)instruction;
-                Instruction tmp = visit(fs.test, opcode);
+                Instruction tmp = visit(fs.getTest(), opcode);
                 if (tmp != null)
                     return tmp;
 
-                Pair[] pairs = fs.pairs;
+                Pair[] pairs = fs.getPairs();
                 for (int i=pairs.length-1; i>=0; --i)
                 {
                     List<Instruction> instructions = pairs[i].getInstructions();
@@ -316,8 +316,8 @@ public class SearchInstructionByOpcodeVisitor
         case FastConstants.LABEL:
             {
                 FastLabel fla = (FastLabel)instruction;
-                if (fla.instruction != null)
-                    return visit(fla.instruction, opcode);
+                if (fla.getInstruction() != null)
+                    return visit(fla.getInstruction(), opcode);
             }
             break;
         case Const.ACONST_NULL:
@@ -350,7 +350,7 @@ public class SearchInstructionByOpcodeVisitor
             System.err.println(
                     "Can not search instruction in " +
                     instruction.getClass().getName() +
-                    ", opcode=" + instruction.opcode);
+                    ", opcode=" + instruction.getOpcode());
         }
 
         return null;

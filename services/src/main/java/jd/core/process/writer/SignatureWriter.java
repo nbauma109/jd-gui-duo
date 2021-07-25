@@ -92,9 +92,9 @@ public class SignatureWriter
         ConstantPool constants = classFile.getConstantPool();
         String internalClassName = classFile.getThisClassName();
         String descriptor = constants.getConstantUtf8(method.getDescriptorIndex());
-        boolean staticMethodFlag = (method.accessFlags & Const.ACC_STATIC) != 0;
+        boolean staticMethodFlag = (method.getAccessFlags() & Const.ACC_STATIC) != 0;
 
-        if (method.getNameIndex() == constants.instanceConstructorIndex)
+        if (method.getNameIndex() == constants.getInstanceConstructorIndex())
         {
             printer.printConstructorDeclaration(internalClassName, classFile.getClassName(), descriptor);
         }
@@ -140,14 +140,14 @@ public class SignatureWriter
         int variableIndex = staticMethodFlag ? 0 : 1;
         int firstVisibleParameterIndex = 0;
 
-        if (method.getNameIndex() == constants.instanceConstructorIndex) {
-            if ((classFile.accessFlags & Const.ACC_ENUM) != 0) {
+        if (method.getNameIndex() == constants.getInstanceConstructorIndex()) {
+            if ((classFile.getAccessFlags() & Const.ACC_ENUM) != 0) {
                 if (descriptorFlag) {
                     firstVisibleParameterIndex = 2;
                 } else {
                     variableIndex = 3;
                 }
-            } else if (classFile.isAInnerClass() && (classFile.accessFlags & Const.ACC_STATIC) == 0) {
+            } else if (classFile.isAInnerClass() && (classFile.getAccessFlags() & Const.ACC_STATIC) == 0) {
                 firstVisibleParameterIndex = 1;
             }
         }
@@ -158,7 +158,7 @@ public class SignatureWriter
         int parameterIndex = 0;
         int varargsParameterIndex;
 
-        if ((method.accessFlags & Const.ACC_VARARGS) == 0)
+        if ((method.getAccessFlags() & Const.ACC_VARARGS) == 0)
         {
             varargsParameterIndex = Integer.MAX_VALUE;
         }
@@ -197,7 +197,7 @@ public class SignatureWriter
                 if (method.getLocalVariables() != null) {
                     lv = method.getLocalVariables().searchLocalVariableWithIndexAndOffset(variableIndex, 0);
 
-                    if (lv != null && lv.finalFlag) {
+                    if (lv != null && lv.hasFinalFlag()) {
                         printer.printKeyword("final");
                         printer.print(' ');
                     }
@@ -210,12 +210,12 @@ public class SignatureWriter
 
                 if (lv != null) {
                     printer.print(' ');
-                    if (lv.nameIndex == -1) {
+                    if (lv.getNameIndex() == -1) {
                         printer.startOfError();
                         printer.print("???");
                         printer.endOfError();
                     } else {
-                        printer.print(constants.getConstantUtf8(lv.nameIndex));
+                        printer.print(constants.getConstantUtf8(lv.getNameIndex()));
                     }
                 } else {
                     printer.print(" arg");

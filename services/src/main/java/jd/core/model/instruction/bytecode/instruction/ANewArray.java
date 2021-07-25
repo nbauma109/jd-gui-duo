@@ -21,14 +21,14 @@ import jd.core.model.classfile.LocalVariables;
 
 public class ANewArray extends IndexInstruction
 {
-    public Instruction dimension;
+    private Instruction dimension;
 
     public ANewArray(
         int opcode, int offset, int lineNumber,
         int index, Instruction dimension)
     {
         super(opcode, offset, lineNumber, index);
-        this.dimension = dimension;
+        this.setDimension(dimension);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class ANewArray extends IndexInstruction
         if (constants == null)
             return null;
 
-        String str = constants.getConstantClassName(this.index);
+        String str = constants.getConstantClassName(this.getIndex());
 
         if (str.isEmpty())
         {
@@ -46,11 +46,19 @@ public class ANewArray extends IndexInstruction
         }
         else if (str.charAt(0) == '[')
         {
-            return "[" + constants.getConstantClassName(this.index);
+            return "[" + constants.getConstantClassName(this.getIndex());
         }
         else
         {
-            return "[L" + constants.getConstantClassName(this.index) + ';';
+            return "[L" + constants.getConstantClassName(this.getIndex()) + ';';
         }
     }
+
+	public Instruction getDimension() {
+		return dimension;
+	}
+
+	public void setDimension(Instruction dimension) {
+		this.dimension = dimension;
+	}
 }

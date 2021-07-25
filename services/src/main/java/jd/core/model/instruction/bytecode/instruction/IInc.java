@@ -22,12 +22,12 @@ import jd.core.model.classfile.LocalVariables;
 
 public class IInc extends IndexInstruction
 {
-    public int count;
+    private int count;
 
     public IInc(int opcode, int offset, int lineNumber, int index, int count)
     {
         super(opcode, offset, lineNumber, index);
-        this.count = count;
+        this.setCount(count);
     }
 
     @Override
@@ -37,21 +37,29 @@ public class IInc extends IndexInstruction
         if ((constants == null) || (localVariables == null))
             return null;
 
-        LocalVariable lv = localVariables.getLocalVariableWithIndexAndOffset(this.index, this.offset);
+        LocalVariable lv = localVariables.getLocalVariableWithIndexAndOffset(this.getIndex(), this.getOffset());
 
-        if ((lv == null) || (lv.signatureIndex <= 0))
+        if ((lv == null) || (lv.getSignatureIndex() <= 0))
             return null;
 
-        return constants.getConstantUtf8(lv.signatureIndex);
+        return constants.getConstantUtf8(lv.getSignatureIndex());
     }
 
     @Override
     public int getPriority()
     {
-        if ((this.count == 1) || (this.count == -1))
+        if ((this.getCount() == 1) || (this.getCount() == -1))
             // Operator '++' or '--'
             return 2;
         // Operator '+=' or '-='
         return 14;
     }
+
+	public int getCount() {
+		return count;
+	}
+
+	public void setCount(int count) {
+		this.count = count;
+	}
 }

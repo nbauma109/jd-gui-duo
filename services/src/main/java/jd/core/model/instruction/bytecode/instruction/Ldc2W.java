@@ -36,7 +36,7 @@ public class Ldc2W extends LdcInstruction
         if (constants == null)
             return null;
 
-        Constant cv = constants.getConstantValue(this.index);
+        Constant cv = constants.getConstantValue(this.getIndex());
 
         if (cv == null)
             return null;

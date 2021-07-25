@@ -66,7 +66,7 @@ public class ClassFileDeserializer
             internalClassPathPrefix + StringConstants.INTERNAL_INNER_SEPARATOR;
         ConstantPool constants = classFile.getConstantPool();
 
-        InnerClass[] cs = aics.classes;
+        InnerClass[] cs = aics.getClasses();
         int length = cs.length;
         List<ClassFile> innerClassFiles = new ArrayList<>(length);
 

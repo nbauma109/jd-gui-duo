@@ -54,8 +54,8 @@ public class IIncFactory implements InstructionFactory
         {
             instruction = stack.peek();
 
-            if (instruction.opcode == Const.ILOAD &&
-                ((ILoad)instruction).index == index)
+            if (instruction.getOpcode() == Const.ILOAD &&
+                ((ILoad)instruction).getIndex() == index)
             {
                 // Replace IInc instruction by a post-inc instruction
                 stack.pop();

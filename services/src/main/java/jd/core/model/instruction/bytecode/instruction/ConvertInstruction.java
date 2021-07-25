@@ -21,14 +21,14 @@ import jd.core.model.classfile.LocalVariables;
 
 public class ConvertInstruction extends Instruction
 {
-    public final String signature;
-    public Instruction value;
+    private final String signature;
+    private Instruction value;
 
     public ConvertInstruction(
             int opcode, int offset, int lineNumber, Instruction value, String signature)
     {
         super(opcode, offset, lineNumber);
-        this.value = value;
+        this.setValue(value);
         this.signature = signature;
     }
 
@@ -36,7 +36,7 @@ public class ConvertInstruction extends Instruction
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        return this.signature;
+        return this.getSignature();
     }
 
     @Override
@@ -44,4 +44,16 @@ public class ConvertInstruction extends Instruction
     {
         return 2;
     }
+
+	public String getSignature() {
+		return signature;
+	}
+
+	public Instruction getValue() {
+		return value;
+	}
+
+	public void setValue(Instruction value) {
+		this.value = value;
+	}
 }

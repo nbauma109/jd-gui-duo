@@ -28,28 +28,28 @@ import jd.core.model.classfile.LocalVariables;
  */
 public class TernaryOperator extends Instruction
 {
-    public Instruction test;
-    public Instruction value1;
-    public Instruction value2;
+    private Instruction test;
+    private Instruction value1;
+    private Instruction value2;
 
     public TernaryOperator(
             int opcode, int offset, int lineNumber,
             Instruction test, Instruction value1, Instruction value2)
     {
         super(opcode, offset, lineNumber);
-        this.test = test;
-        this.value1 = value1;
-        this.value2 = value2;
+        this.setTest(test);
+        this.setValue1(value1);
+        this.setValue2(value2);
     }
 
     @Override
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        if (this.value1 != null) {
-			return this.value1.getReturnedSignature(constants, localVariables);
+        if (this.getValue1() != null) {
+			return this.getValue1().getReturnedSignature(constants, localVariables);
 		}
-        return this.value2.getReturnedSignature(constants, localVariables);
+        return this.getValue2().getReturnedSignature(constants, localVariables);
     }
 
     @Override
@@ -57,4 +57,28 @@ public class TernaryOperator extends Instruction
     {
         return 13;
     }
+
+	public Instruction getValue1() {
+		return value1;
+	}
+
+	public void setValue1(Instruction value1) {
+		this.value1 = value1;
+	}
+
+	public Instruction getValue2() {
+		return value2;
+	}
+
+	public void setValue2(Instruction value2) {
+		this.value2 = value2;
+	}
+
+	public Instruction getTest() {
+		return test;
+	}
+
+	public void setTest(Instruction test) {
+		this.test = test;
+	}
 }

@@ -18,12 +18,20 @@ package jd.core.model.instruction.bytecode.instruction;
 
 public abstract class ArrayInstruction extends Instruction
 {
-    public Instruction arrayref;
+    private Instruction arrayref;
 
     protected ArrayInstruction(
         int opcode, int offset, int lineNumber, Instruction arrayref)
     {
         super(opcode, offset, lineNumber);
-        this.arrayref = arrayref;
+        this.setArrayref(arrayref);
     }
+
+	public Instruction getArrayref() {
+		return arrayref;
+	}
+
+	public void setArrayref(Instruction arrayref) {
+		this.arrayref = arrayref;
+	}
 }

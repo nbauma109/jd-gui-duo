@@ -28,7 +28,7 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
  */
 public class FastList extends BranchInstruction
 {
-    public List<Instruction> instructions;
+    private final List<Instruction> instructions;
 
     public FastList(
         int opcode, int offset, int lineNumber,
@@ -44,4 +44,8 @@ public class FastList extends BranchInstruction
     {
         return null;
     }
+
+	public List<Instruction> getInstructions() {
+		return instructions;
+	}
 }

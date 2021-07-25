@@ -22,11 +22,11 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class MethodNameLayoutBlock extends LayoutBlock
 {
-    public final ClassFile classFile;
-    public final Method method;
-    public final String signature;
-    public final boolean descriptorFlag;
-    public final boolean nullCodeFlag;
+    private final ClassFile classFile;
+    private final Method method;
+    private final String signature;
+    private final boolean descriptorFlag;
+    private final boolean nullCodeFlag;
 
     public MethodNameLayoutBlock(
         ClassFile classFile, Method method,
@@ -42,4 +42,24 @@ public class MethodNameLayoutBlock extends LayoutBlock
         this.descriptorFlag = descriptorFlag;
         this.nullCodeFlag = nullCodeFlag;
     }
+
+	public ClassFile getClassFile() {
+		return classFile;
+	}
+
+	public Method getMethod() {
+		return method;
+	}
+
+	public boolean hasNullCodeFlag() {
+		return nullCodeFlag;
+	}
+
+	public String getSignature() {
+		return signature;
+	}
+
+	public boolean hasDescriptorFlag() {
+		return descriptorFlag;
+	}
 }

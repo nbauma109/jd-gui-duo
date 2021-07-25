@@ -22,8 +22,8 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class ByteCodeLayoutBlock extends LayoutBlock
 {
-    public final ClassFile classFile;
-    public Method method;
+    private final ClassFile classFile;
+    private Method method;
 
     public ByteCodeLayoutBlock(ClassFile classFile, Method method)
     {
@@ -32,6 +32,18 @@ public class ByteCodeLayoutBlock extends LayoutBlock
             Instruction.UNKNOWN_LINE_NUMBER, Instruction.UNKNOWN_LINE_NUMBER,
             0, 0, 0);
         this.classFile = classFile;
-        this.method = method;
+        this.setMethod(method);
     }
+
+	public ClassFile getClassFile() {
+		return classFile;
+	}
+
+	public Method getMethod() {
+		return method;
+	}
+
+	public void setMethod(Method method) {
+		this.method = method;
+	}
 }

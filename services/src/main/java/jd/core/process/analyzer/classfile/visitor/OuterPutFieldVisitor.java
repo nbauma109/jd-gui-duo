@@ -46,11 +46,11 @@ public class OuterPutFieldVisitor extends OuterGetStaticVisitor
     @Override
     protected Accessor match(Instruction i)
     {
-        if (i.opcode != Const.INVOKESTATIC)
+        if (i.getOpcode() != Const.INVOKESTATIC)
             return null;
 
         Invokestatic is = (Invokestatic)i;
-        ConstantMethodref cmr = constants.getConstantMethodref(is.index);
+        ConstantMethodref cmr = constants.getConstantMethodref(is.getIndex());
         ConstantNameAndType cnat =
             constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
         String descriptor =
@@ -71,7 +71,7 @@ public class OuterPutFieldVisitor extends OuterGetStaticVisitor
         Accessor accessor = classFile.getAccessor(name, descriptor);
 
         if ((accessor == null) ||
-            (accessor.tag != AccessorConstants.ACCESSOR_PUTFIELD))
+            (accessor.getTag() != AccessorConstants.ACCESSOR_PUTFIELD))
             return null;
 
         return accessor;
@@ -83,23 +83,23 @@ public class OuterPutFieldVisitor extends OuterGetStaticVisitor
         PutFieldAccessor pfa = (PutFieldAccessor)a;
         Invokestatic is = (Invokestatic)i;
 
-        int nameIndex = this.constants.addConstantUtf8(pfa.fieldName);
+        int nameIndex = this.constants.addConstantUtf8(pfa.getFieldName());
         int descriptorIndex =
-            this.constants.addConstantUtf8(pfa.fieldDescriptor);
+            this.constants.addConstantUtf8(pfa.getFieldDescriptor());
         int cnatIndex =
             this.constants.addConstantNameAndType(nameIndex, descriptorIndex);
 
-        int classNameIndex = this.constants.addConstantUtf8(pfa.className);
+        int classNameIndex = this.constants.addConstantUtf8(pfa.getClassName());
         int classIndex = this.constants.addConstantClass(classNameIndex);
 
         int cfrIndex =
              this.constants.addConstantFieldref(classIndex, cnatIndex);
 
-        Instruction valueref = is.args.remove(1);
-        Instruction objectref = is.args.remove(0);
+        Instruction valueref = is.getArgs().remove(1);
+        Instruction objectref = is.getArgs().remove(0);
 
         return new PutField(
-            Const.PUTFIELD, i.offset, i.lineNumber, cfrIndex,
+            Const.PUTFIELD, i.getOffset(), i.getLineNumber(), cfrIndex,
             objectref, valueref);
     }
 }

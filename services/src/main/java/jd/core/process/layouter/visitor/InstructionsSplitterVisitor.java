@@ -60,7 +60,7 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
 
     public void end()
     {
-        int lastOffset = this.list.get(this.index2).offset;
+        int lastOffset = this.list.get(this.index2).getOffset();
 
         // S'il reste un fragment d'instruction a traiter...
         if ((this.index1 != this.index2) || (this.offset1 != lastOffset))
@@ -71,7 +71,7 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
             for (int j=index2; j>=index1; j--)
             {
                 Instruction instruction = list.get(j);
-                if (instruction.lineNumber != Instruction.UNKNOWN_LINE_NUMBER)
+                if (instruction.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER)
                 {
                     lastLineNumber = MaxLineNumberVisitor.visit(instruction);
                     break;
@@ -100,22 +100,22 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
             // Methode d'exemple :
             //   java.io.ObjectInputStream, auditSubclass(...)
             int initialFirstLineNumber =
-                this.list.get(this.initialIndex1).lineNumber;
+                this.list.get(this.initialIndex1).getLineNumber();
 
             if (initialFirstLineNumber != Instruction.UNKNOWN_LINE_NUMBER)
             {
                 // Si la méthode possède des numeros de lignes
-                if (initialFirstLineNumber < instruction.lineNumber)
+                if (initialFirstLineNumber < instruction.getLineNumber())
                 {
                     // Cas d'un statement qui suit un statement dont la derniere
                     //   instruction est 'AnonymousNewInvoke' ==> on fait
                     //   commencer le bloc a la ligne precedent.
-                    this.firstLineNumber = instruction.lineNumber - 1;
+                    this.firstLineNumber = instruction.getLineNumber() - 1;
                 }
                 else
                 {
                     // Cas du 1er statement
-                    this.firstLineNumber = instruction.lineNumber;
+                    this.firstLineNumber = instruction.getLineNumber();
                 }
             }
         }
@@ -126,25 +126,25 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
     @Override
     protected void visit(Instruction parent, Instruction instruction)
     {
-        if (instruction.lineNumber == Instruction.UNKNOWN_LINE_NUMBER)
+        if (instruction.getLineNumber() == Instruction.UNKNOWN_LINE_NUMBER)
         {
-            instruction.lineNumber = this.maxLineNumber;
+            instruction.setLineNumber(this.maxLineNumber);
         }
         else if (this.maxLineNumber == Instruction.UNKNOWN_LINE_NUMBER)
         {
-            this.maxLineNumber = instruction.lineNumber;
+            this.maxLineNumber = instruction.getLineNumber();
         }
-        else if (instruction.lineNumber < this.maxLineNumber)
+        else if (instruction.getLineNumber() < this.maxLineNumber)
         {
             // Modification du numero de ligne fournit dans le fichier CLASS !
-            instruction.lineNumber = this.maxLineNumber;
+            instruction.setLineNumber(this.maxLineNumber);
         }
 
         if (this.firstLineNumber == Instruction.UNKNOWN_LINE_NUMBER)
         {
             // Bloc executé si une instruction 'AnonymousNewInvoke' vient
             // d'être traitee.
-            this.firstLineNumber = instruction.lineNumber;
+            this.firstLineNumber = instruction.getLineNumber();
         }
 
         super.visit(parent, instruction);
@@ -155,7 +155,7 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
         Instruction parent, InvokeNew in, ClassFile innerClassFile)
     {
         // Add a new part of instruction
-        addInstructionsLayoutBlock(in.lineNumber, in.offset);
+        addInstructionsLayoutBlock(in.getLineNumber(), in.getOffset());
 
         // Add blocks for inner class body
         this.maxLineNumber =
@@ -164,7 +164,7 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
 
         this.firstLineNumber = Instruction.UNKNOWN_LINE_NUMBER;
         this.index1 = this.index2;
-        this.offset1 = in.offset;
+        this.offset1 = in.getOffset();
     }
 
     protected void addInstructionsLayoutBlock(int lastLineNumber, int lastOffset)

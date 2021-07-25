@@ -44,18 +44,18 @@ public class ReplaceMultipleOuterReferenceVisitor
     @Override
     protected ClassFile match(Instruction instruction)
     {
-        if (instruction.opcode != Const.GETFIELD) {
+        if (instruction.getOpcode() != Const.GETFIELD) {
 			return null;
 		}
 
         GetField gf = (GetField)instruction;
 
-        switch (gf.objectref.opcode)
+        switch (gf.getObjectref().getOpcode())
         {
         case Const.ALOAD:
             {
-                ALoad aload = (ALoad)gf.objectref;
-                if (aload.index != 0) {
+                ALoad aload = (ALoad)gf.getObjectref();
+                if (aload.getIndex() != 0) {
 					return null;
 				}
                 Field field = this.classFile.getOuterThisField();
@@ -63,7 +63,7 @@ public class ReplaceMultipleOuterReferenceVisitor
 					return null;
 				}
                 ConstantPool constants = classFile.getConstantPool();
-                ConstantFieldref cfr = constants.getConstantFieldref(gf.index);
+                ConstantFieldref cfr = constants.getConstantFieldref(gf.getIndex());
                 if (cfr.getClassIndex() != classFile.getThisClassIndex()) {
 					return null;
 				}
@@ -78,8 +78,8 @@ public class ReplaceMultipleOuterReferenceVisitor
         case ByteCodeConstants.OUTERTHIS:
             {
                 ConstantPool constants = this.classFile.getConstantPool();
-                GetStatic gs = (GetStatic)gf.objectref;
-                ConstantFieldref cfr = constants.getConstantFieldref(gs.index);
+                GetStatic gs = (GetStatic)gf.getObjectref();
+                ConstantFieldref cfr = constants.getConstantFieldref(gs.getIndex());
                 String className =
                     constants.getConstantClassName(cfr.getClassIndex());
                 ClassFile outerClass = this.classFile.getOuterClass();
@@ -94,7 +94,7 @@ public class ReplaceMultipleOuterReferenceVisitor
 							return null;
 						}
 
-                        cfr = constants.getConstantFieldref(gf.index);
+                        cfr = constants.getConstantFieldref(gf.getIndex());
                         ConstantNameAndType cnat =
                             constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
                         String fieldName =
@@ -129,7 +129,7 @@ public class ReplaceMultipleOuterReferenceVisitor
         case Const.GETFIELD:
             {
                 ConstantPool constants = this.classFile.getConstantPool();
-                ConstantFieldref cfr = constants.getConstantFieldref(gf.index);
+                ConstantFieldref cfr = constants.getConstantFieldref(gf.getIndex());
                 ConstantNameAndType cnat =
                     constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
                 String descriptorName =
@@ -138,7 +138,7 @@ public class ReplaceMultipleOuterReferenceVisitor
 					return null;
 				}
 
-                ClassFile matchedClassFile = match(gf.objectref);
+                ClassFile matchedClassFile = match(gf.getObjectref());
                 if (matchedClassFile == null ||
                     !matchedClassFile.isAInnerClass()) {
 					return null;

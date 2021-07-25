@@ -18,17 +18,15 @@ package jd.core.model.layout.section;
 
 public class LayoutSection implements Comparable<LayoutSection>
 {
-    public int index;
-    public int firstBlockIndex;
-    public int lastBlockIndex;
+    private int index;
+    private int firstBlockIndex;
+    private int lastBlockIndex;
 
-    public final int originalLineCount;
+    private final int originalLineCount;
 
-    public boolean relayout;
-    public int score;
-    public boolean containsError;
-    //
-    public int debugFirstLineNumber;
+    private boolean relayout;
+    private int score;
+    private boolean containsError;
 
     public LayoutSection(
         int index,
@@ -36,20 +34,86 @@ public class LayoutSection implements Comparable<LayoutSection>
         int firstLineNumber, int lastLineNumber,
         boolean containsError)
     {
-        this.index = index;
-        this.firstBlockIndex = firstBlockIndex;
-        this.lastBlockIndex = lastBlockIndex;
+        this.setIndex(index);
+        this.setFirstBlockIndex(firstBlockIndex);
+        this.setLastBlockIndex(lastBlockIndex);
         this.originalLineCount = lastLineNumber - firstLineNumber;
-        this.relayout = true;
-        this.score = 0;
-        this.containsError = containsError;
-        //
-        this.debugFirstLineNumber = firstLineNumber;
+        this.setRelayout(true);
+        this.setScore(0);
+        this.setContainsError(containsError);
     }
 
     @Override
     public int compareTo(LayoutSection o)
     {
-        return o.score - this.score;
+        return o.getScore() - this.getScore();
     }
+    
+    @Override
+    public int hashCode() {
+    	return score;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+    	if (this == obj) {
+    		return true;
+    	}
+    	if (obj == null || getClass() != obj.getClass()) {
+    		return false;
+    	}
+    	return obj instanceof LayoutSection ls && compareTo(ls) == 0;
+    }
+
+	public int getOriginalLineCount() {
+		return originalLineCount;
+	}
+
+	public int getScore() {
+		return score;
+	}
+
+	public void setScore(int score) {
+		this.score = score;
+	}
+
+	public boolean isRelayout() {
+		return relayout;
+	}
+
+	public void setRelayout(boolean relayout) {
+		this.relayout = relayout;
+	}
+
+	public int getFirstBlockIndex() {
+		return firstBlockIndex;
+	}
+
+	public void setFirstBlockIndex(int firstBlockIndex) {
+		this.firstBlockIndex = firstBlockIndex;
+	}
+
+	public int getLastBlockIndex() {
+		return lastBlockIndex;
+	}
+
+	public void setLastBlockIndex(int lastBlockIndex) {
+		this.lastBlockIndex = lastBlockIndex;
+	}
+
+	public boolean containsError() {
+		return containsError;
+	}
+
+	public void setContainsError(boolean containsError) {
+		this.containsError = containsError;
+	}
+
+	public int getIndex() {
+		return index;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
+	}
 }

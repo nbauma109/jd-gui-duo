@@ -34,11 +34,11 @@ public class ILoad extends LoadInstruction
         if ((constants == null) || (localVariables == null))
             return null;
 
-        LocalVariable lv = localVariables.getLocalVariableWithIndexAndOffset(this.index, this.offset);
+        LocalVariable lv = localVariables.getLocalVariableWithIndexAndOffset(this.getIndex(), this.getOffset());
 
-        if ((lv == null) || (lv.signatureIndex < 0))
+        if ((lv == null) || (lv.getSignatureIndex() < 0))
             return null;
 
-        return constants.getConstantUtf8(lv.signatureIndex);
+        return constants.getConstantUtf8(lv.getSignatureIndex());
     }
 }

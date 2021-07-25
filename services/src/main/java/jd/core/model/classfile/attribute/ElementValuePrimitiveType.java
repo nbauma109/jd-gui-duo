@@ -21,8 +21,8 @@ public class ElementValuePrimitiveType extends ElementValue
     /*
      * type = {'B', 'D', 'F', 'I', 'J', 'S', 'Z', 'C', 's'}
      */
-    public final byte type;
-    public final int constValueIndex;
+    private final byte type;
+    private final int constValueIndex;
 
     public ElementValuePrimitiveType(byte tag, byte type, int constValueIndex)
     {
@@ -30,4 +30,12 @@ public class ElementValuePrimitiveType extends ElementValue
         this.type = type;
         this.constValueIndex = constValueIndex;
     }
+
+	public byte getType() {
+		return type;
+	}
+
+	public int getConstValueIndex() {
+		return constValueIndex;
+	}
 }

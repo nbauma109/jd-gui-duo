@@ -21,15 +21,15 @@ import jd.core.model.classfile.LocalVariables;
 
 public class ArrayLoadInstruction extends ArrayInstruction
 {
-    public final String signature;
-    public Instruction indexref;
+    private final String signature;
+    private Instruction indexref;
 
     public ArrayLoadInstruction(
             int opcode, int offset, int lineNumber, Instruction arrayref,
             Instruction indexref, String signature)
     {
         super(opcode, offset, lineNumber, arrayref);
-        this.indexref = indexref;
+        this.setIndexref(indexref);
         this.signature = signature;
     }
 
@@ -37,6 +37,18 @@ public class ArrayLoadInstruction extends ArrayInstruction
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        return this.signature;
+        return this.getSignature();
     }
+
+	public String getSignature() {
+		return signature;
+	}
+
+	public Instruction getIndexref() {
+		return indexref;
+	}
+
+	public void setIndexref(Instruction indexref) {
+		this.indexref = indexref;
+	}
 }

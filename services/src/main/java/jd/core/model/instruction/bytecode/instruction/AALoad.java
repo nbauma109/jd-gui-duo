@@ -33,7 +33,7 @@ public class AALoad extends ArrayLoadInstruction
             ConstantPool constants, LocalVariables localVariables)
     {
         String signature =
-            this.arrayref.getReturnedSignature(constants, localVariables);
+            this.getArrayref().getReturnedSignature(constants, localVariables);
 
         if ((signature == null) || (signature.isEmpty()) ||
             (signature.charAt(0) != '['))

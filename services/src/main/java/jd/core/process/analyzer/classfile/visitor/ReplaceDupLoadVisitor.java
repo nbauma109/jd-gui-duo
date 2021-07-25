@@ -53,45 +53,45 @@ public class ReplaceDupLoadVisitor
 
     public void visit(Instruction instruction)
     {
-        switch (instruction.opcode)
+        switch (instruction.getOpcode())
         {
         case Const.ARRAYLENGTH:
             {
                 ArrayLength al = (ArrayLength)instruction;
-                if (match(al, al.arrayref))
-                    al.arrayref = this.newInstruction;
+                if (match(al, al.getArrayref()))
+                    al.setArrayref(this.newInstruction);
                 else
-                    visit(al.arrayref);
+                    visit(al.getArrayref());
             }
             break;
         case Const.AASTORE:
         case ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
-                if (match(asi, asi.arrayref))
+                if (match(asi, asi.getArrayref()))
                 {
-                    asi.arrayref = this.newInstruction;
+                    asi.setArrayref(this.newInstruction);
                 }
                 else
                 {
-                    visit(asi.arrayref);
+                    visit(asi.getArrayref());
 
                     if (this.parentFound == null)
                     {
-                        if (match(asi, asi.indexref))
+                        if (match(asi, asi.getIndexref()))
                         {
-                            asi.indexref = this.newInstruction;
+                            asi.setIndexref(this.newInstruction);
                         }
                         else
                         {
-                            visit(asi.indexref);
+                            visit(asi.getIndexref());
 
                             if (this.parentFound == null)
                             {
-                                if (match(asi, asi.valueref))
-                                    asi.valueref = this.newInstruction;
+                                if (match(asi, asi.getValueref()))
+                                    asi.setValueref(this.newInstruction);
                                 else
-                                    visit(asi.valueref);
+                                    visit(asi.getValueref());
                             }
                         }
                     }
@@ -101,38 +101,38 @@ public class ReplaceDupLoadVisitor
         case Const.ATHROW:
             {
                 AThrow aThrow = (AThrow)instruction;
-                if (match(aThrow, aThrow.value))
-                    aThrow.value = this.newInstruction;
+                if (match(aThrow, aThrow.getValue()))
+                    aThrow.setValue(this.newInstruction);
                 else
-                    visit(aThrow.value);
+                    visit(aThrow.getValue());
             }
             break;
         case ByteCodeConstants.UNARYOP:
             {
                 UnaryOperatorInstruction uoi = (UnaryOperatorInstruction)instruction;
-                if (match(uoi, uoi.value))
-                    uoi.value = this.newInstruction;
+                if (match(uoi, uoi.getValue()))
+                    uoi.setValue(this.newInstruction);
                 else
-                    visit(uoi.value);
+                    visit(uoi.getValue());
             }
             break;
         case ByteCodeConstants.BINARYOP:
             {
                 BinaryOperatorInstruction boi = (BinaryOperatorInstruction)instruction;
-                if (match(boi, boi.value1))
+                if (match(boi, boi.getValue1()))
                 {
-                    boi.value1 = this.newInstruction;
+                    boi.setValue1(this.newInstruction);
                 }
                 else
                 {
-                    visit(boi.value1);
+                    visit(boi.getValue1());
 
                     if (this.parentFound == null)
                     {
-                        if (match(boi, boi.value2))
-                            boi.value2 = this.newInstruction;
+                        if (match(boi, boi.getValue2()))
+                            boi.setValue2(this.newInstruction);
                         else
-                            visit(boi.value2);
+                            visit(boi.getValue2());
                     }
                 }
             }
@@ -140,10 +140,10 @@ public class ReplaceDupLoadVisitor
         case Const.CHECKCAST:
             {
                 CheckCast checkCast = (CheckCast)instruction;
-                if (match(checkCast, checkCast.objectref))
-                    checkCast.objectref = this.newInstruction;
+                if (match(checkCast, checkCast.getObjectref()))
+                    checkCast.setObjectref(this.newInstruction);
                 else
-                    visit(checkCast.objectref);
+                    visit(checkCast.getObjectref());
             }
             break;
         case ByteCodeConstants.STORE:
@@ -151,48 +151,48 @@ public class ReplaceDupLoadVisitor
         case Const.ISTORE:
             {
                 StoreInstruction storeInstruction = (StoreInstruction)instruction;
-                if (match(storeInstruction, storeInstruction.valueref))
-                    storeInstruction.valueref = this.newInstruction;
+                if (match(storeInstruction, storeInstruction.getValueref()))
+                    storeInstruction.setValueref(this.newInstruction);
                 else
-                    visit(storeInstruction.valueref);
+                    visit(storeInstruction.getValueref());
             }
             break;
         case ByteCodeConstants.DUPSTORE:
             {
                 DupStore localDupStore = (DupStore)instruction;
-                if (match(localDupStore, localDupStore.objectref))
-                    localDupStore.objectref = this.newInstruction;
+                if (match(localDupStore, localDupStore.getObjectref()))
+                    localDupStore.setObjectref(this.newInstruction);
                 else
-                    visit(localDupStore.objectref);
+                    visit(localDupStore.getObjectref());
             }
             break;
         case ByteCodeConstants.CONVERT:
         case ByteCodeConstants.IMPLICITCONVERT:
             {
                 ConvertInstruction ci = (ConvertInstruction)instruction;
-                if (match(ci, ci.value))
-                    ci.value = this.newInstruction;
+                if (match(ci, ci.getValue()))
+                    ci.setValue(this.newInstruction);
                 else
-                    visit(ci.value);
+                    visit(ci.getValue());
             }
             break;
         case ByteCodeConstants.IFCMP:
             {
                 IfCmp ifCmp = (IfCmp)instruction;
-                if (match(ifCmp, ifCmp.value1))
+                if (match(ifCmp, ifCmp.getValue1()))
                 {
-                    ifCmp.value1 = this.newInstruction;
+                    ifCmp.setValue1(this.newInstruction);
                 }
                 else
                 {
-                    visit(ifCmp.value1);
+                    visit(ifCmp.getValue1());
 
                     if (this.parentFound == null)
                     {
-                        if (match(ifCmp, ifCmp.value2))
-                            ifCmp.value2 = this.newInstruction;
+                        if (match(ifCmp, ifCmp.getValue2()))
+                            ifCmp.setValue2(this.newInstruction);
                         else
-                            visit(ifCmp.value2);
+                            visit(ifCmp.getValue2());
                     }
                 }
             }
@@ -201,16 +201,16 @@ public class ReplaceDupLoadVisitor
         case ByteCodeConstants.IFXNULL:
             {
                 IfInstruction iff = (IfInstruction)instruction;
-                if (match(iff, iff.value))
-                    iff.value = this.newInstruction;
+                if (match(iff, iff.getValue()))
+                    iff.setValue(this.newInstruction);
                 else
-                    visit(iff.value);
+                    visit(iff.getValue());
             }
             break;
         case ByteCodeConstants.COMPLEXIF:
             {
                 List<Instruction> branchList =
-                    ((ComplexConditionalBranchInstruction)instruction).instructions;
+                    ((ComplexConditionalBranchInstruction)instruction).getInstructions();
                 for (int i=branchList.size()-1; (i>=0) && (this.parentFound == null); --i)
                 {
                     visit(branchList.get(i));
@@ -220,10 +220,10 @@ public class ReplaceDupLoadVisitor
         case Const.INSTANCEOF:
             {
                 InstanceOf instanceOf = (InstanceOf)instruction;
-                if (match(instanceOf, instanceOf.objectref))
-                    instanceOf.objectref = this.newInstruction;
+                if (match(instanceOf, instanceOf.getObjectref()))
+                    instanceOf.setObjectref(this.newInstruction);
                 else
-                    visit(instanceOf.objectref);
+                    visit(instanceOf.getObjectref());
             }
             break;
         case Const.INVOKEINTERFACE:
@@ -232,16 +232,16 @@ public class ReplaceDupLoadVisitor
             {
                 InvokeNoStaticInstruction insi =
                     (InvokeNoStaticInstruction)instruction;
-                if (match(insi, insi.objectref))
-                    insi.objectref = this.newInstruction;
+                if (match(insi, insi.getObjectref()))
+                    insi.setObjectref(this.newInstruction);
                 else
-                    visit(insi.objectref);
+                    visit(insi.getObjectref());
             }
             // intended fall through
         case Const.INVOKESTATIC:
         case ByteCodeConstants.INVOKENEW:
             {
-                List<Instruction> list = ((InvokeInstruction)instruction).args;
+                List<Instruction> list = ((InvokeInstruction)instruction).getArgs();
                 for (int i=list.size()-1; (i>=0) && (this.parentFound == null); --i)
                 {
                     if (match(instruction, list.get(i)))
@@ -254,33 +254,33 @@ public class ReplaceDupLoadVisitor
         case Const.LOOKUPSWITCH:
             {
                 LookupSwitch ls = (LookupSwitch)instruction;
-                if (match(ls, ls.key))
-                    ls.key = this.newInstruction;
+                if (match(ls, ls.getKey()))
+                    ls.setKey(this.newInstruction);
                 else
-                    visit(ls.key);
+                    visit(ls.getKey());
             }
             break;
         case Const.MONITORENTER:
             {
                 MonitorEnter monitorEnter = (MonitorEnter)instruction;
-                if (match(monitorEnter, monitorEnter.objectref))
-                    monitorEnter.objectref = this.newInstruction;
+                if (match(monitorEnter, monitorEnter.getObjectref()))
+                    monitorEnter.setObjectref(this.newInstruction);
                 else
-                    visit(monitorEnter.objectref);
+                    visit(monitorEnter.getObjectref());
             }
             break;
         case Const.MONITOREXIT:
             {
                 MonitorExit monitorExit = (MonitorExit)instruction;
-                if (match(monitorExit, monitorExit.objectref))
-                    monitorExit.objectref = this.newInstruction;
+                if (match(monitorExit, monitorExit.getObjectref()))
+                    monitorExit.setObjectref(this.newInstruction);
                 else
-                    visit(monitorExit.objectref);
+                    visit(monitorExit.getObjectref());
             }
             break;
         case Const.MULTIANEWARRAY:
             {
-                Instruction[] dimensions = ((MultiANewArray)instruction).dimensions;
+                Instruction[] dimensions = ((MultiANewArray)instruction).getDimensions();
                 for (int i=dimensions.length-1; (i>=0) && (this.parentFound == null); --i)
                 {
                     if (match(instruction, dimensions[i]))
@@ -293,47 +293,47 @@ public class ReplaceDupLoadVisitor
         case Const.NEWARRAY:
             {
                 NewArray newArray = (NewArray)instruction;
-                if (match(newArray, newArray.dimension))
-                    newArray.dimension = this.newInstruction;
+                if (match(newArray, newArray.getDimension()))
+                    newArray.setDimension(this.newInstruction);
                 else
-                    visit(newArray.dimension);
+                    visit(newArray.getDimension());
             }
             break;
         case Const.ANEWARRAY:
             {
                 ANewArray aNewArray = (ANewArray)instruction;
-                if (match(aNewArray, aNewArray.dimension))
-                    aNewArray.dimension = this.newInstruction;
+                if (match(aNewArray, aNewArray.getDimension()))
+                    aNewArray.setDimension(this.newInstruction);
                 else
-                    visit(aNewArray.dimension);
+                    visit(aNewArray.getDimension());
             }
             break;
         case Const.POP:
             {
                 Pop pop = (Pop)instruction;
-                if (match(pop, pop.objectref))
-                    pop.objectref = this.newInstruction;
+                if (match(pop, pop.getObjectref()))
+                    pop.setObjectref(this.newInstruction);
                 else
-                    visit(pop.objectref);
+                    visit(pop.getObjectref());
             }
             break;
         case Const.PUTFIELD:
             {
                 PutField putField = (PutField)instruction;
-                if (match(putField, putField.objectref))
+                if (match(putField, putField.getObjectref()))
                 {
-                    putField.objectref = this.newInstruction;
+                    putField.setObjectref(this.newInstruction);
                 }
                 else
                 {
-                    visit(putField.objectref);
+                    visit(putField.getObjectref());
 
                     if (this.parentFound == null)
                     {
-                        if (match(putField, putField.valueref))
-                            putField.valueref = this.newInstruction;
+                        if (match(putField, putField.getValueref()))
+                            putField.setValueref(this.newInstruction);
                         else
-                            visit(putField.valueref);
+                            visit(putField.getValueref());
                     }
                 }
             }
@@ -341,56 +341,56 @@ public class ReplaceDupLoadVisitor
         case Const.PUTSTATIC:
             {
                 PutStatic putStatic = (PutStatic)instruction;
-                if (match(putStatic, putStatic.valueref))
-                    putStatic.valueref = this.newInstruction;
+                if (match(putStatic, putStatic.getValueref()))
+                    putStatic.setValueref(this.newInstruction);
                 else
-                    visit(putStatic.valueref);
+                    visit(putStatic.getValueref());
             }
             break;
         case ByteCodeConstants.XRETURN:
             {
                 ReturnInstruction ri = (ReturnInstruction)instruction;
-                if (match(ri, ri.valueref))
-                    ri.valueref = this.newInstruction;
+                if (match(ri, ri.getValueref()))
+                    ri.setValueref(this.newInstruction);
                 else
-                    visit(ri.valueref);
+                    visit(ri.getValueref());
             }
             break;
         case Const.TABLESWITCH:
             {
                 TableSwitch ts = (TableSwitch)instruction;
-                if (match(ts, ts.key))
-                    ts.key = this.newInstruction;
+                if (match(ts, ts.getKey()))
+                    ts.setKey(this.newInstruction);
                 else
-                    visit(ts.key);
+                    visit(ts.getKey());
             }
             break;
         case ByteCodeConstants.TERNARYOPSTORE:
             {
                 TernaryOpStore tos = (TernaryOpStore)instruction;
-                if (match(tos, tos.objectref))
-                    tos.objectref = this.newInstruction;
+                if (match(tos, tos.getObjectref()))
+                    tos.setObjectref(this.newInstruction);
                 else
-                    visit(tos.objectref);
+                    visit(tos.getObjectref());
             }
             break;
         case ByteCodeConstants.TERNARYOP:
             {
                 TernaryOperator to = (TernaryOperator)instruction;
-                if (match(to, to.value1))
+                if (match(to, to.getValue1()))
                 {
-                    to.value1 = this.newInstruction;
+                    to.setValue1(this.newInstruction);
                 }
                 else
                 {
-                    visit(to.value1);
+                    visit(to.getValue1());
 
                     if (this.parentFound == null)
                     {
-                        if (match(to, to.value2))
-                            to.value2 = this.newInstruction;
+                        if (match(to, to.getValue2()))
+                            to.setValue2(this.newInstruction);
                         else
-                            visit(to.value2);
+                            visit(to.getValue2());
                     }
                 }
             }
@@ -398,20 +398,20 @@ public class ReplaceDupLoadVisitor
         case ByteCodeConstants.ASSIGNMENT:
             {
                 AssignmentInstruction ai = (AssignmentInstruction)instruction;
-                if (match(ai, ai.value1))
+                if (match(ai, ai.getValue1()))
                 {
-                    ai.value1 = this.newInstruction;
+                    ai.setValue1(this.newInstruction);
                 }
                 else
                 {
-                    visit(ai.value1);
+                    visit(ai.getValue1());
 
                     if (this.parentFound == null)
                     {
-                        if (match(ai, ai.value2))
-                            ai.value2 = this.newInstruction;
+                        if (match(ai, ai.getValue2()))
+                            ai.setValue2(this.newInstruction);
                         else
-                            visit(ai.value2);
+                            visit(ai.getValue2());
                     }
                 }
             }
@@ -419,20 +419,20 @@ public class ReplaceDupLoadVisitor
         case ByteCodeConstants.ARRAYLOAD:
             {
                 ArrayLoadInstruction ali = (ArrayLoadInstruction)instruction;
-                if (match(ali, ali.arrayref))
+                if (match(ali, ali.getArrayref()))
                 {
-                    ali.arrayref = this.newInstruction;
+                    ali.setArrayref(this.newInstruction);
                 }
                 else
                 {
-                    visit(ali.arrayref);
+                    visit(ali.getArrayref());
 
                     if (this.parentFound == null)
                     {
-                        if (match(ali, ali.indexref))
-                            ali.indexref = this.newInstruction;
+                        if (match(ali, ali.getIndexref()))
+                            ali.setIndexref(this.newInstruction);
                         else
-                            visit(ali.indexref);
+                            visit(ali.getIndexref());
                     }
                 }
             }
@@ -441,35 +441,35 @@ public class ReplaceDupLoadVisitor
         case ByteCodeConstants.POSTINC:
             {
                 IncInstruction ii = (IncInstruction)instruction;
-                if (match(ii, ii.value))
-                    ii.value = this.newInstruction;
+                if (match(ii, ii.getValue()))
+                    ii.setValue(this.newInstruction);
                 else
-                    visit(ii.value);
+                    visit(ii.getValue());
             }
             break;
         case Const.GETFIELD:
             {
                 GetField gf = (GetField)instruction;
-                if (match(gf, gf.objectref))
-                    gf.objectref = this.newInstruction;
+                if (match(gf, gf.getObjectref()))
+                    gf.setObjectref(this.newInstruction);
                 else
-                    visit(gf.objectref);
+                    visit(gf.getObjectref());
             }
             break;
         case ByteCodeConstants.INITARRAY:
         case ByteCodeConstants.NEWANDINITARRAY:
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
-                if (match(iai, iai.newArray))
+                if (match(iai, iai.getNewArray()))
                 {
-                    iai.newArray = this.newInstruction;
+                    iai.setNewArray(this.newInstruction);
                 }
                 else
                 {
-                    visit(iai.newArray);
+                    visit(iai.getNewArray());
 
-                    if ((this.parentFound == null) && (iai.values != null))
-                        visit(iai.values);
+                    if ((this.parentFound == null) && (iai.getValues() != null))
+                        visit(iai.getValues());
                 }
             }
             break;
@@ -477,20 +477,20 @@ public class ReplaceDupLoadVisitor
             {
                 FastFor ff = (FastFor)instruction;
 
-                if (ff.init != null)
+                if (ff.getInit() != null)
                 {
-                    if (match(ff, ff.init))
-                        ff.init = this.newInstruction;
+                    if (match(ff, ff.getInit()))
+                        ff.setInit(this.newInstruction);
                     else
-                        visit(ff.init);
+                        visit(ff.getInit());
                 }
 
-                if ((this.parentFound == null) && (ff.inc != null))
+                if ((this.parentFound == null) && (ff.getInc() != null))
                 {
-                    if (match(ff, ff.inc))
-                        ff.inc = this.newInstruction;
+                    if (match(ff, ff.getInc()))
+                        ff.setInc(this.newInstruction);
                     else
-                        visit(ff.inc);
+                        visit(ff.getInc());
                 }
             }
             // intended fall through
@@ -499,19 +499,19 @@ public class ReplaceDupLoadVisitor
         case FastConstants.IF_SIMPLE:
             {
                 FastTestList ftl = (FastTestList)instruction;
-                if (ftl.test != null)
+                if (ftl.getTest() != null)
                 {
-                    if (match(ftl, ftl.test))
-                        ftl.test = this.newInstruction;
+                    if (match(ftl, ftl.getTest()))
+                        ftl.setTest(this.newInstruction);
                     else
-                        visit(ftl.test);
+                        visit(ftl.getTest());
                 }
             }
             // intended fall through
         case FastConstants.INFINITE_LOOP:
             {
                 List<Instruction> instructions =
-                        ((FastList)instruction).instructions;
+                        ((FastList)instruction).getInstructions();
                 if (instructions != null)
                     visit(instructions);
             }
@@ -519,26 +519,26 @@ public class ReplaceDupLoadVisitor
         case FastConstants.FOREACH:
             {
                 FastForEach ffe = (FastForEach)instruction;
-                if (match(ffe, ffe.variable))
+                if (match(ffe, ffe.getVariable()))
                 {
-                    ffe.variable = this.newInstruction;
+                    ffe.setVariable(this.newInstruction);
                 }
                 else
                 {
-                    visit(ffe.variable);
+                    visit(ffe.getVariable());
 
                     if (this.parentFound == null)
                     {
-                        if (match(ffe, ffe.values))
+                        if (match(ffe, ffe.getValues()))
                         {
-                            ffe.values = this.newInstruction;
+                            ffe.setValues(this.newInstruction);
                         }
                         else
                         {
-                            visit(ffe.values);
+                            visit(ffe.getValues());
 
                             if (this.parentFound == null)
-                                visit(ffe.instructions);
+                                visit(ffe.getInstructions());
                         }
                     }
                 }
@@ -547,20 +547,20 @@ public class ReplaceDupLoadVisitor
         case FastConstants.IF_ELSE:
             {
                 FastTest2Lists ft2l = (FastTest2Lists)instruction;
-                if (match(ft2l, ft2l.test))
+                if (match(ft2l, ft2l.getTest()))
                 {
-                    ft2l.test = this.newInstruction;
+                    ft2l.setTest(this.newInstruction);
                 }
                 else
                 {
-                    visit(ft2l.test);
+                    visit(ft2l.getTest());
 
                     if (this.parentFound == null)
                     {
-                        visit(ft2l.instructions);
+                        visit(ft2l.getInstructions());
 
                         if (this.parentFound == null)
-                            visit(ft2l.instructions2);
+                            visit(ft2l.getInstructions2());
                     }
                 }
             }
@@ -573,12 +573,12 @@ public class ReplaceDupLoadVisitor
         case FastConstants.GOTO_LABELED_BREAK:
             {
                 FastInstruction fi = (FastInstruction)instruction;
-                if (fi.instruction != null)
+                if (fi.getInstruction() != null)
                 {
-                    if (match(fi, fi.instruction))
-                        fi.instruction = this.newInstruction;
+                    if (match(fi, fi.getInstruction()))
+                        fi.setInstruction(this.newInstruction);
                     else
-                        visit(fi.instruction);
+                        visit(fi.getInstruction());
                 }
             }
             break;
@@ -587,15 +587,15 @@ public class ReplaceDupLoadVisitor
         case FastConstants.SWITCH_STRING:
             {
                 FastSwitch fs = (FastSwitch)instruction;
-                if (match(fs, fs.test))
+                if (match(fs, fs.getTest()))
                 {
-                    fs.test = this.newInstruction;
+                    fs.setTest(this.newInstruction);
                 }
                 else
                 {
-                    visit(fs.test);
+                    visit(fs.getTest());
 
-                    FastSwitch.Pair[] pairs = fs.pairs;
+                    FastSwitch.Pair[] pairs = fs.getPairs();
                     for (int i=pairs.length-1; (i>=0) && (this.parentFound == null); --i)
                         visit(pairs[i].getInstructions());
                 }
@@ -604,56 +604,56 @@ public class ReplaceDupLoadVisitor
         case FastConstants.TRY:
             {
                 FastTry ft = (FastTry)instruction;
-                visit(ft.instructions);
+                visit(ft.getInstructions());
 
                 if (this.parentFound == null)
                 {
-                    if (ft.finallyInstructions != null)
-                        visit(ft.finallyInstructions);
+                    if (ft.getFinallyInstructions() != null)
+                        visit(ft.getFinallyInstructions());
 
-                    List<FastCatch> catchs = ft.catches;
+                    List<FastCatch> catchs = ft.getCatches();
                     for (int i=catchs.size()-1; (i>=0) && (this.parentFound == null); --i)
-                        visit(catchs.get(i).instructions);
+                        visit(catchs.get(i).getInstructions());
                 }
             }
             break;
         case FastConstants.SYNCHRONIZED:
             {
                 FastSynchronized fsd = (FastSynchronized)instruction;
-                if (match(fsd, fsd.monitor))
+                if (match(fsd, fsd.getMonitor()))
                 {
-                    fsd.monitor = this.newInstruction;
+                    fsd.setMonitor(this.newInstruction);
                 }
                 else
                 {
-                    visit(fsd.monitor);
+                    visit(fsd.getMonitor());
 
                     if (this.parentFound == null)
-                        visit(fsd.instructions);
+                        visit(fsd.getInstructions());
                 }
             }
             break;
         case FastConstants.LABEL:
             {
                 FastLabel fl = (FastLabel)instruction;
-                if (fl.instruction != null)
+                if (fl.getInstruction() != null)
                 {
-                    if (match(fl, fl.instruction))
-                        fl.instruction = this.newInstruction;
+                    if (match(fl, fl.getInstruction()))
+                        fl.setInstruction(this.newInstruction);
                     else
-                        visit(fl.instruction);
+                        visit(fl.getInstruction());
                 }
             }
             break;
         case FastConstants.DECLARE:
             {
                 FastDeclaration fd = (FastDeclaration)instruction;
-                if (fd.instruction != null)
+                if (fd.getInstruction() != null)
                 {
-                    if (match(fd, fd.instruction))
-                        fd.instruction = this.newInstruction;
+                    if (match(fd, fd.getInstruction()))
+                        fd.setInstruction(this.newInstruction);
                     else
-                        visit(fd.instruction);
+                        visit(fd.getInstruction());
                 }
             }
             break;
@@ -686,7 +686,7 @@ public class ReplaceDupLoadVisitor
             System.err.println(
                     "Can not replace DupLoad in " +
                     instruction.getClass().getName() +
-                    ", opcode=" + instruction.opcode);
+                    ", opcode=" + instruction.getOpcode());
         }
     }
 
@@ -706,12 +706,12 @@ public class ReplaceDupLoadVisitor
 
     private boolean match(Instruction parent, Instruction i)
     {
-        if (i.opcode != ByteCodeConstants.DUPLOAD)
+        if (i.getOpcode() != ByteCodeConstants.DUPLOAD)
             return false;
 
         DupLoad dupload = (DupLoad)i;
 
-        if (dupload.dupStore == this.dupStore)
+        if (dupload.getDupStore() == this.dupStore)
         {
             this.parentFound = parent;
             return true;

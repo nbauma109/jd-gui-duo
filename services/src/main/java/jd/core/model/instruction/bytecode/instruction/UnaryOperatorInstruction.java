@@ -22,9 +22,9 @@ import jd.core.model.classfile.LocalVariables;
 public class UnaryOperatorInstruction extends Instruction
 {
     private final int priority;
-    public final String signature;
-    public final String operator;
-    public Instruction value;
+    private final String signature;
+    private final String operator;
+    private Instruction value;
 
     public UnaryOperatorInstruction(
             int opcode, int offset, int lineNumber, int priority,
@@ -34,14 +34,14 @@ public class UnaryOperatorInstruction extends Instruction
         this.priority = priority;
         this.signature = signature;
         this.operator = operator;
-        this.value = value;
+        this.setValue(value);
     }
 
     @Override
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        return this.signature;
+        return this.getSignature();
     }
 
     @Override
@@ -49,4 +49,20 @@ public class UnaryOperatorInstruction extends Instruction
     {
         return this.priority;
     }
+
+	public String getOperator() {
+		return operator;
+	}
+
+	public String getSignature() {
+		return signature;
+	}
+
+	public Instruction getValue() {
+		return value;
+	}
+
+	public void setValue(Instruction value) {
+		this.value = value;
+	}
 }

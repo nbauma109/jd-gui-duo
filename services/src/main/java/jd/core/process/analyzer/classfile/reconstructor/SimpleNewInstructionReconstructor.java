@@ -42,18 +42,18 @@ public class SimpleNewInstructionReconstructor
              invokespecialIndex<list.size();
              invokespecialIndex++)
         {
-            if (list.get(invokespecialIndex).opcode != Const.INVOKESPECIAL)
+            if (list.get(invokespecialIndex).getOpcode() != Const.INVOKESPECIAL)
                 continue;
 
             Invokespecial is = (Invokespecial)list.get(invokespecialIndex);
 
-            if (is.objectref.opcode != Const.NEW)
+            if (is.getObjectref().getOpcode() != Const.NEW)
                 continue;
 
-            New nw = (New)is.objectref;
+            New nw = (New)is.getObjectref();
             InvokeNew invokeNew = new InvokeNew(
-                ByteCodeConstants.INVOKENEW, is.offset,
-                nw.lineNumber, is.index, is.args);
+                ByteCodeConstants.INVOKENEW, is.getOffset(),
+                nw.getLineNumber(), is.getIndex(), is.getArgs());
 
             list.set(invokespecialIndex, invokeNew);
 

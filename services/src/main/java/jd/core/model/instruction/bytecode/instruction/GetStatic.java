@@ -36,7 +36,7 @@ public class GetStatic extends IndexInstruction
         if (constants == null)
             return null;
 
-        ConstantFieldref cfr = constants.getConstantFieldref(this.index);
+        ConstantFieldref cfr = constants.getConstantFieldref(this.getIndex());
         if (cfr == null)
             return null;
 

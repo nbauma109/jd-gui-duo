@@ -75,41 +75,41 @@ public class DotClassEclipseReconstructor
         {
             Instruction instruction = list.get(i);
 
-            if (instruction.opcode != ByteCodeConstants.IFXNULL)
+            if (instruction.getOpcode() != ByteCodeConstants.IFXNULL)
                 continue;
 
             IfInstruction ii = (IfInstruction)instruction;
 
-            if (ii.value.opcode != Const.GETSTATIC)
+            if (ii.getValue().getOpcode() != Const.GETSTATIC)
                 continue;
 
             int jumpOffset = ii.getJumpOffset();
 
             instruction = list.get(i+1);
 
-            if (instruction.opcode != FastConstants.TRY)
+            if (instruction.getOpcode() != FastConstants.TRY)
                 continue;
 
             FastTry ft = (FastTry)instruction;
 
-            if ((ft.catches.size() != 1) || (ft.finallyInstructions != null) ||
-                (ft.instructions.size() != 2))
+            if ((ft.getCatches().size() != 1) || (ft.getFinallyInstructions() != null) ||
+                (ft.getInstructions().size() != 2))
                 continue;
 
-            FastCatch fc = ft.catches.get(0);
+            FastCatch fc = ft.getCatches().get(0);
 
-            if ((fc.instructions.size() != 1) ||
-                (fc.otherExceptionTypeIndexes != null))
+            if ((fc.getInstructions().size() != 1) ||
+                (fc.getOtherExceptionTypeIndexes() != null))
                     continue;
 
             instruction = list.get(i+2);
 
-            if ((ft.offset >= jumpOffset) || (jumpOffset > instruction.offset))
+            if ((ft.getOffset() >= jumpOffset) || (jumpOffset > instruction.getOffset()))
                 continue;
 
-            GetStatic gs = (GetStatic)ii.value;
+            GetStatic gs = (GetStatic)ii.getValue();
 
-            ConstantFieldref cfr = constants.getConstantFieldref(gs.index);
+            ConstantFieldref cfr = constants.getConstantFieldref(gs.getIndex());
 
             if (cfr.getClassIndex() != classFile.getThisClassIndex())
                 continue;
@@ -128,27 +128,27 @@ public class DotClassEclipseReconstructor
             if (! name.startsWith(StringConstants.CLASS_DOLLAR))
                 continue;
 
-            instruction = ft.instructions.get(0);
+            instruction = ft.getInstructions().get(0);
 
-            if (instruction.opcode != ByteCodeConstants.DUPSTORE)
+            if (instruction.getOpcode() != ByteCodeConstants.DUPSTORE)
                 continue;
 
             DupStore ds = (DupStore)instruction;
 
-            if (ds.objectref.opcode != Const.INVOKESTATIC)
+            if (ds.getObjectref().getOpcode() != Const.INVOKESTATIC)
                 continue;
 
-            Invokestatic is = (Invokestatic)ds.objectref;
+            Invokestatic is = (Invokestatic)ds.getObjectref();
 
-            if (is.args.size() != 1)
+            if (is.getArgs().size() != 1)
                 continue;
 
-            instruction = is.args.get(0);
+            instruction = is.getArgs().get(0);
 
-            if (instruction.opcode != Const.LDC)
+            if (instruction.getOpcode() != Const.LDC)
                 continue;
 
-            ConstantMethodref cmr = constants.getConstantMethodref(is.index);
+            ConstantMethodref cmr = constants.getConstantMethodref(is.getIndex());
 
             name = constants.getConstantClassName(cmr.getClassIndex());
 
@@ -163,30 +163,30 @@ public class DotClassEclipseReconstructor
                 continue;
 
             Ldc ldc = (Ldc)instruction;
-            Constant cv = constants.getConstantValue(ldc.index);
+            Constant cv = constants.getConstantValue(ldc.getIndex());
 
             if (!(cv instanceof ConstantString))
                 continue;
 
-            instruction = ft.instructions.get(1);
+            instruction = ft.getInstructions().get(1);
 
-            if (instruction.opcode != Const.PUTSTATIC)
+            if (instruction.getOpcode() != Const.PUTSTATIC)
                 continue;
 
             PutStatic ps = (PutStatic)instruction;
 
-            if ((ps.index != gs.index) ||
-                (ps.valueref.opcode != ByteCodeConstants.DUPLOAD) ||
-                (ps.valueref.offset != ds.offset))
+            if ((ps.getIndex() != gs.getIndex()) ||
+                (ps.getValueref().getOpcode() != ByteCodeConstants.DUPLOAD) ||
+                (ps.getValueref().getOffset() != ds.getOffset()))
                 continue;
 
             String exceptionName =
-                constants.getConstantClassName(fc.exceptionTypeIndex);
+                constants.getConstantClassName(fc.getExceptionTypeIndex());
 
             if (! exceptionName.equals(StringConstants.INTERNAL_CLASSNOTFOUNDEXCEPTION_SIGNATURE))
                 continue;
 
-            if (fc.instructions.get(0).opcode != Const.ATHROW)
+            if (fc.getInstructions().get(0).getOpcode() != Const.ATHROW)
                 continue;
 
             // Trouve !
@@ -203,8 +203,8 @@ public class DotClassEclipseReconstructor
             // Ajout d'une nouvelle classe
             index = constants.addConstantClass(index);
             ldc = new Ldc(
-                Const.LDC, ii.offset,
-                ii.lineNumber, index);
+                Const.LDC, ii.getOffset(),
+                ii.getLineNumber(), index);
 
             // Remplacement de l'intruction GetStatic par l'instruction Ldc
             ReplaceDupLoadVisitor visitor = new ReplaceDupLoadVisitor(ds, ldc);
@@ -226,7 +226,7 @@ public class DotClassEclipseReconstructor
 
                 if (field.getNameIndex() == cnatField.getNameIndex())
                 {
-                    field.accessFlags |= Const.ACC_SYNTHETIC;
+                    field.setAccessFlags(field.getAccessFlags() | Const.ACC_SYNTHETIC);
                     break;
                 }
             }

@@ -57,7 +57,7 @@ public class IfGotoToIfReconstructor
         while (index-- > 0)
         {
             Instruction i = list.get(index);
-            switch (i.opcode)
+            switch (i.getOpcode())
             {
             case ByteCodeConstants.IF:
             case ByteCodeConstants.IFCMP:
@@ -66,7 +66,7 @@ public class IfGotoToIfReconstructor
                 BranchInstruction bi = (BranchInstruction)i;
 
                 i = list.get(index+1);
-                if (i.opcode != Const.GOTO) {
+                if (i.getOpcode() != Const.GOTO) {
 					continue;
 				}
 
@@ -75,12 +75,12 @@ public class IfGotoToIfReconstructor
                 i = list.get(index+2);
                 int jumpOffset = bi.getJumpOffset();
 
-                if (jumpOffset <= g.offset || i.offset < jumpOffset) {
+                if (jumpOffset <= g.getOffset() || i.getOffset() < jumpOffset) {
 					continue;
 				}
 
                 // Setup BranchInstruction
-                bi.branch = g.getJumpOffset() - bi.offset;
+                bi.setBranch(g.getJumpOffset() - bi.getOffset());
                 ComparisonInstructionAnalyzer.inverseComparison(bi);
                 // Delete Goto
                 list.remove(index+1);

@@ -25,22 +25,38 @@ import jd.core.model.classfile.LocalVariables;
  */
 public class TernaryOpStore extends Instruction
 {
-    public Instruction objectref;
-    public int         ternaryOp2ndValueOffset;
+    private Instruction objectref;
+    private int         ternaryOp2ndValueOffset;
 
     public TernaryOpStore(
             int opcode, int offset, int lineNumber, Instruction objectref,
             int ternaryOp2ndValueOffset)
     {
         super(opcode, offset, lineNumber);
-        this.objectref = objectref;
-        this.ternaryOp2ndValueOffset = ternaryOp2ndValueOffset;
+        this.setObjectref(objectref);
+        this.setTernaryOp2ndValueOffset(ternaryOp2ndValueOffset);
     }
 
     @Override
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        return this.objectref.getReturnedSignature(constants, localVariables);
+        return this.getObjectref().getReturnedSignature(constants, localVariables);
     }
+
+	public Instruction getObjectref() {
+		return objectref;
+	}
+
+	public void setObjectref(Instruction objectref) {
+		this.objectref = objectref;
+	}
+
+	public int getTernaryOp2ndValueOffset() {
+		return ternaryOp2ndValueOffset;
+	}
+
+	public void setTernaryOp2ndValueOffset(int ternaryOp2ndValueOffset) {
+		this.ternaryOp2ndValueOffset = ternaryOp2ndValueOffset;
+	}
 }

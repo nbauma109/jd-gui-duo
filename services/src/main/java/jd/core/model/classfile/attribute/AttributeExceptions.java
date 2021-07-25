@@ -18,13 +18,16 @@ package jd.core.model.classfile.attribute;
 
 public class AttributeExceptions extends Attribute
 {
-    public final int[] exceptionIndexTable;
+    private final int[] exceptionIndexTable;
 
     public AttributeExceptions(byte tag,
-                               int attributeNameIndex,
                                int[] exceptionIndexTable)
     {
-        super(tag, attributeNameIndex);
+        super(tag);
         this.exceptionIndexTable = exceptionIndexTable;
     }
+
+	public int[] getExceptionIndexTable() {
+		return exceptionIndexTable;
+	}
 }

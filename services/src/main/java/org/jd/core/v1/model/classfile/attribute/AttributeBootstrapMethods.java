@@ -19,4 +19,8 @@ public class AttributeBootstrapMethods implements Attribute {
     public BootstrapMethod[] getBootstrapMethods() {
         return bootstrapMethods;
     }
+
+	public BootstrapMethod getBootstrapMethod(int i) {
+		return bootstrapMethods[i];
+	}
 }

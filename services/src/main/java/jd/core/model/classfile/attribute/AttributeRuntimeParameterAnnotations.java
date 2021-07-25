@@ -18,13 +18,16 @@ package jd.core.model.classfile.attribute;
 
 public class AttributeRuntimeParameterAnnotations  extends Attribute
 {
-    public final ParameterAnnotations[] parameterAnnotations;
+    private final ParameterAnnotations[] parameterAnnotations;
 
     public AttributeRuntimeParameterAnnotations(
-            byte tag, int attributeNameIndex,
-            ParameterAnnotations[] parameterAnnotations)
+            byte tag, ParameterAnnotations[] parameterAnnotations)
     {
-        super(tag, attributeNameIndex);
+        super(tag);
         this.parameterAnnotations = parameterAnnotations;
     }
+
+	public ParameterAnnotations[] getParameterAnnotations() {
+		return parameterAnnotations;
+	}
 }

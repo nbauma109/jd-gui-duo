@@ -44,11 +44,11 @@ public class OuterInvokeMethodVisitor extends OuterGetStaticVisitor
     @Override
     protected Accessor match(Instruction i)
     {
-        if (i.opcode != Const.INVOKESTATIC)
+        if (i.getOpcode() != Const.INVOKESTATIC)
             return null;
 
         Invokestatic is = (Invokestatic)i;
-        ConstantMethodref cmr = constants.getConstantMethodref(is.index);
+        ConstantMethodref cmr = constants.getConstantMethodref(is.getIndex());
         ConstantNameAndType cnat =
             constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
         String descriptor =
@@ -69,7 +69,7 @@ public class OuterInvokeMethodVisitor extends OuterGetStaticVisitor
         Accessor accessor = classFile.getAccessor(name, descriptor);
 
         if ((accessor == null) ||
-            (accessor.tag != AccessorConstants.ACCESSOR_INVOKEMETHOD))
+            (accessor.getTag() != AccessorConstants.ACCESSOR_INVOKEMETHOD))
             return null;
 
         return accessor;
@@ -81,47 +81,47 @@ public class OuterInvokeMethodVisitor extends OuterGetStaticVisitor
         InvokeMethodAccessor ima = (InvokeMethodAccessor)a;
         Invokestatic is = (Invokestatic)i;
 
-        int nameIndex = this.constants.addConstantUtf8(ima.methodName);
+        int nameIndex = this.constants.addConstantUtf8(ima.getMethodName());
         int descriptorIndex =
-            this.constants.addConstantUtf8(ima.methodDescriptor);
+            this.constants.addConstantUtf8(ima.getMethodDescriptor());
         int cnatIndex =
             this.constants.addConstantNameAndType(nameIndex, descriptorIndex);
 
-        int classNameIndex = this.constants.addConstantUtf8(ima.className);
+        int classNameIndex = this.constants.addConstantUtf8(ima.getClassName());
         int classIndex = this.constants.addConstantClass(classNameIndex);
 
         int cmrIndex = constants.addConstantMethodref(
             classIndex, cnatIndex,
-            ima.listOfParameterSignatures, ima.returnedSignature);
+            ima.getListOfParameterSignatures(), ima.getReturnedSignature());
 
-        switch (ima.methodOpcode)
+        switch (ima.getMethodOpcode())
         {
         case Const.INVOKESPECIAL:
             {
-                Instruction objectref = is.args.remove(0);
+                Instruction objectref = is.getArgs().remove(0);
                 return new Invokespecial(
-                    Const.INVOKESPECIAL, i.offset, i.lineNumber,
-                    cmrIndex, objectref, is.args);
+                    Const.INVOKESPECIAL, i.getOffset(), i.getLineNumber(),
+                    cmrIndex, objectref, is.getArgs());
             }
         case Const.INVOKEVIRTUAL:
             {
-                Instruction objectref = is.args.remove(0);
+                Instruction objectref = is.getArgs().remove(0);
                 return new Invokevirtual(
-                    Const.INVOKEVIRTUAL, i.offset, i.lineNumber,
-                    cmrIndex, objectref, is.args);
+                    Const.INVOKEVIRTUAL, i.getOffset(), i.getLineNumber(),
+                    cmrIndex, objectref, is.getArgs());
             }
         case Const.INVOKEINTERFACE:
             {
-                Instruction objectref = is.args.remove(0);
+                Instruction objectref = is.getArgs().remove(0);
                 return new Invokeinterface(
-                    Const.INVOKEINTERFACE, i.offset, i.lineNumber,
-                    cmrIndex, objectref, is.args);
+                    Const.INVOKEINTERFACE, i.getOffset(), i.getLineNumber(),
+                    cmrIndex, objectref, is.getArgs());
             }
         case Const.INVOKESTATIC:
             {
                 return new Invokestatic(
-                    Const.INVOKESTATIC, i.offset, i.lineNumber,
-                    cmrIndex, is.args);
+                    Const.INVOKESTATIC, i.getOffset(), i.getLineNumber(),
+                    cmrIndex, is.getArgs());
             }
         default:
             return i;

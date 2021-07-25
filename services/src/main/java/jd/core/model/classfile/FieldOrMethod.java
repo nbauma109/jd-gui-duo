@@ -32,11 +32,6 @@ public class FieldOrMethod extends Base
         this.descriptorIndex = descriptorIndex;
     }
 
-    public Attribute[] getAttributes()
-    {
-        return this.attributes;
-    }
-
 	public int getNameIndex() {
 		return nameIndex;
 	}
@@ -48,5 +43,5 @@ public class FieldOrMethod extends Base
 	public int getDescriptorIndex() {
 		return descriptorIndex;
 	}
-    
+
 }

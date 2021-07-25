@@ -26,8 +26,8 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 /** List & while(true). */
 public class FastDeclaration extends Instruction
 {
-    public final LocalVariable lv;
-    public Instruction instruction;
+    private final LocalVariable lv;
+    private Instruction instruction;
 
     public FastDeclaration(
         int opcode, int offset, int lineNumber,
@@ -35,7 +35,7 @@ public class FastDeclaration extends Instruction
     {
         super(opcode, offset, lineNumber);
         this.lv = lv;
-        this.instruction = instruction;
+        this.setInstruction(instruction);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class FastDeclaration extends Instruction
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(lv.index, lv.nameIndex, lv.signatureIndex);
+		return Objects.hash(getLv().getIndex(), getLv().getNameIndex(), getLv().getSignatureIndex());
 	}
 
 	@Override
@@ -59,8 +59,20 @@ public class FastDeclaration extends Instruction
 			return false;
 		}
 		FastDeclaration other = (FastDeclaration) obj;
-		return lv.index == other.lv.index 
-            && lv.nameIndex == other.lv.nameIndex
-            && lv.signatureIndex == other.lv.signatureIndex;
+		return getLv().getIndex() == other.getLv().getIndex() 
+            && getLv().getNameIndex() == other.getLv().getNameIndex()
+            && getLv().getSignatureIndex() == other.getLv().getSignatureIndex();
+	}
+
+	public LocalVariable getLv() {
+		return lv;
+	}
+
+	public Instruction getInstruction() {
+		return instruction;
+	}
+
+	public void setInstruction(Instruction instruction) {
+		this.instruction = instruction;
 	}
 }

@@ -72,7 +72,7 @@ public class TableSwitchFactory implements InstructionFactory
 
         list.add(new TableSwitch(
             opcode, offset, lineNumber, key, defaultOffset,
-            offsets, low, high));
+            offsets, low));
 
         return (i - offset - 1);
     }

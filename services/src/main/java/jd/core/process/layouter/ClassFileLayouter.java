@@ -171,15 +171,15 @@ public class ClassFileLayouter {
         else
         {
             TypeBodyBlockEndLayoutBlock bbelb = new TypeBodyBlockEndLayoutBlock();
-            bbslb.other = bbelb;
-            bbelb.other = bbslb;
+            bbslb.setOther(bbelb);
+            bbelb.setOther(bbslb);
             layoutBlockList.add(bbelb);
         }
 
         MarkerLayoutBlock tmelb = new MarkerLayoutBlock(
             LayoutBlockConstants.TYPE_MARKER_END, classFile);
-        tmslb.other = tmelb;
-        tmelb.other = tmslb;
+        tmslb.setOther(tmelb);
+        tmelb.setOther(tmslb);
         layoutBlockList.add(tmelb);
 
         return maxLineNumber;
@@ -211,8 +211,8 @@ public class ClassFileLayouter {
         {
             layoutBlockList.add(new TypeNameLayoutBlock(classFile));
 
-            if ((classFile.accessFlags & Const.ACC_ANNOTATION) == 0) {
-                if ((classFile.accessFlags & Const.ACC_ENUM) != 0)
+            if ((classFile.getAccessFlags() & Const.ACC_ANNOTATION) == 0) {
+                if ((classFile.getAccessFlags() & Const.ACC_ENUM) != 0)
                 {
                     // Enum
                      // Interfaces
@@ -220,7 +220,7 @@ public class ClassFileLayouter {
                         createBlocksForInterfacesImplements(
                             classFile, layoutBlockList);
                 }
-                else if ((classFile.accessFlags & Const.ACC_INTERFACE) != 0)
+                else if ((classFile.getAccessFlags() & Const.ACC_INTERFACE) != 0)
                 {
                     // Interface
                      // Super interface
@@ -256,7 +256,7 @@ public class ClassFileLayouter {
         {
             // Signature contenant des notations generiques
             ConstantPool constants = classFile.getConstantPool();
-            String signature = constants.getConstantUtf8(as.signatureIndex);
+            String signature = constants.getConstantUtf8(as.getSignatureIndex());
             displayExtendsOrImplementsFlag =
                 SignatureLayouter.createLayoutBlocksForClassSignature(
                     classFile, signature, layoutBlockList);
@@ -303,8 +303,8 @@ public class ClassFileLayouter {
         {
             InnerTypeBodyBlockEndLayoutBlock ibbelb =
                 new InnerTypeBodyBlockEndLayoutBlock();
-            ibbslb.other = ibbelb;
-            ibbelb.other = ibbslb;
+            ibbslb.setOther(ibbelb);
+            ibbelb.setOther(ibbslb);
             layoutBlockList.add(ibbelb);
         }
 
@@ -364,7 +364,7 @@ public class ClassFileLayouter {
                 for (int i=0; i<valuesLength; i++)
                 {
                     getStatic = (GetStatic)values.get(i);
-                    cfr = constants.getConstantFieldref(getStatic.index);
+                    cfr = constants.getConstantFieldref(getStatic.getIndex());
                     cnat = constants.getConstantNameAndType(
                         cfr.getNameAndTypeIndex());
 
@@ -461,7 +461,7 @@ public class ClassFileLayouter {
         {
             field = fields[i];
 
-            if ((field.accessFlags & (Const.ACC_SYNTHETIC|Const.ACC_ENUM)) != 0) {
+            if ((field.getAccessFlags() & (Const.ACC_SYNTHETIC|Const.ACC_ENUM)) != 0) {
                 continue;
             }
 
@@ -495,7 +495,7 @@ public class ClassFileLayouter {
                 Instruction value = valueAndMethod.getValue();
                 Method method = valueAndMethod.getMethod();
 
-                firstLineNumber = value.lineNumber;
+                firstLineNumber = value.getLineNumber();
                 lastLineNumber = MaxLineNumberVisitor.visit(value);
                 preferedLineNumber = lastLineNumber - firstLineNumber;
 
@@ -511,8 +511,8 @@ public class ClassFileLayouter {
 
             fmelb = new MarkerLayoutBlock(
                 LayoutBlockConstants.FIELD_MARKER_END, classFile);
-            fmslb.other = fmelb;
-            fmelb.other = fmslb;
+            fmslb.setOther(fmelb);
+            fmelb.setOther(fmslb);
             subLayoutBlockList.add(fmelb);
 
             sortedFieldBlockList.add(new SubListLayoutBlock(
@@ -571,7 +571,7 @@ public class ClassFileLayouter {
         {
             method = methods[i];
 
-            if ((method.accessFlags &
+            if ((method.getAccessFlags() &
                     (Const.ACC_SYNTHETIC|Const.ACC_BRIDGE)) != 0) {
                 continue;
             }
@@ -582,15 +582,15 @@ public class ClassFileLayouter {
             // constructeurs des Enums ! Cette information est passée à
             // "SignatureWriter.writeMethodSignature(...)".
             signatureIndex = as == null ?
-                    method.getDescriptorIndex() : as.signatureIndex;
+                    method.getDescriptorIndex() : as.getSignatureIndex();
             signature = constants.getConstantUtf8(signatureIndex);
 
-            if ((classFile.accessFlags & Const.ACC_ENUM) != 0 &&
+            if ((classFile.getAccessFlags() & Const.ACC_ENUM) != 0 &&
                 ClassFileUtil.isAMethodOfEnum(classFile, method, signature)) {
                 continue;
             }
 
-            if (method.getNameIndex() == constants.instanceConstructorIndex)
+            if (method.getNameIndex() == constants.getInstanceConstructorIndex())
             {
                 if (classFile.getInternalAnonymousClassName() != null) {
                     // Ne pas afficher les constructeurs des classes anonymes.
@@ -606,7 +606,7 @@ public class ClassFileLayouter {
                     if (exceptionIndexes == null ||
                         exceptionIndexes.length == 0)
                     {
-                        if ((classFile.accessFlags & Const.ACC_ENUM) != 0)
+                        if ((classFile.getAccessFlags() & Const.ACC_ENUM) != 0)
                         {
                             if (SignatureUtil.getParameterSignatureCount(signature) == 2)
                             {
@@ -625,7 +625,7 @@ public class ClassFileLayouter {
                 }
             }
 
-            if (method.getNameIndex() == constants.classConstructorIndex && (method.getFastNodes() == null ||
+            if (method.getNameIndex() == constants.getClassConstructorIndex() && (method.getFastNodes() == null ||
                 method.getFastNodes().isEmpty())) {
                 continue;
             }
@@ -659,7 +659,7 @@ public class ClassFileLayouter {
             nullCodeFlag = method.getCode() == null;
             displayThrowsFlag = false;
 
-            if (method.getNameIndex() == constants.classConstructorIndex)
+            if (method.getNameIndex() == constants.getClassConstructorIndex())
             {
                 subLayoutBlockList.add(new MethodStaticLayoutBlock(classFile));
             } else if (method.getExceptionIndexes() == null)
@@ -697,8 +697,8 @@ public class ClassFileLayouter {
                     MethodBodyBlockEndLayoutBlock mbbelb =
                         new MethodBodyBlockEndLayoutBlock();
                     subLayoutBlockList.add(mbbelb);
-                    mbbslb.other = mbbelb;
-                    mbbelb.other = mbbslb;
+                    mbbslb.setOther(mbbelb);
+                    mbbelb.setOther(mbbslb);
                 }
                 // DEBUG //
                 else
@@ -758,16 +758,16 @@ public class ClassFileLayouter {
                         mbbslb.transformToSingleLineBlock();
                         MethodBodySingleLineBlockEndLayoutBlock mbssbelb =
                             new MethodBodySingleLineBlockEndLayoutBlock();
-                        mbbslb.other   = mbssbelb;
-                        mbssbelb.other = mbbslb;
+                        mbbslb.setOther(mbssbelb);
+                        mbssbelb.setOther(mbbslb);
                         subLayoutBlockList.add(mbssbelb);
                     }
                     else
                     {
                         MethodBodyBlockEndLayoutBlock mbbelb =
                             new MethodBodyBlockEndLayoutBlock();
-                        mbbslb.other = mbbelb;
-                        mbbelb.other = mbbslb;
+                        mbbslb.setOther(mbbelb);
+                        mbbelb.setOther(mbbslb);
                         subLayoutBlockList.add(mbbelb);
                     }
                 } // if (method.containsError()) else
@@ -775,8 +775,8 @@ public class ClassFileLayouter {
 
             mmelb = new MarkerLayoutBlock(
                 LayoutBlockConstants.METHOD_MARKER_END, classFile);
-            mmslb.other = mmelb;
-            mmelb.other = mmslb;
+            mmslb.setOther(mmelb);
+            mmelb.setOther(mmslb);
             subLayoutBlockList.add(mmelb);
 
             sortedMethodBlockList.add(new SubListLayoutBlock(
@@ -809,7 +809,7 @@ public class ClassFileLayouter {
         {
             innerClassFile = innerClassFiles.get(i);
 
-            if ((innerClassFile.accessFlags & Const.ACC_SYNTHETIC) != 0 ||
+            if ((innerClassFile.getAccessFlags() & Const.ACC_SYNTHETIC) != 0 ||
                 innerClassFile.getInternalAnonymousClassName() != null) {
                 continue;
             }
@@ -847,7 +847,7 @@ public class ClassFileLayouter {
         int firstLineNumber;
         for (int index=firstIndex; index<afterIndex; index++)
         {
-            firstLineNumber = layoutBlockList.get(index).firstLineNumber;
+            firstLineNumber = layoutBlockList.get(index).getFirstLineNumber();
             if (firstLineNumber != Instruction.UNKNOWN_LINE_NUMBER) {
                 return firstLineNumber;
             }
@@ -862,7 +862,7 @@ public class ClassFileLayouter {
         int lastLineNumber;
         while (afterIndex-- > firstIndex)
         {
-            lastLineNumber = layoutBlockList.get(afterIndex).lastLineNumber;
+            lastLineNumber = layoutBlockList.get(afterIndex).getLastLineNumber();
             if (lastLineNumber != Instruction.UNKNOWN_LINE_NUMBER) {
                 return lastLineNumber;
             }
@@ -885,7 +885,7 @@ public class ClassFileLayouter {
         for (int i=0; i<length; i++)
         {
             layoutBlock = blockList.get(i);
-            newLineNumber = layoutBlock.lastLineNumber;
+            newLineNumber = layoutBlock.getLastLineNumber();
 
             if (newLineNumber != Instruction.UNKNOWN_LINE_NUMBER)
             {
@@ -919,7 +919,7 @@ public class ClassFileLayouter {
         } else if (order == 3) {
             for (int i=0; i<length; i++)
             {
-                blockList.get(i).index = i;
+                blockList.get(i).setIndex(i);
             }
             // Tri par ordre croissant, les blocs sans numero de ligne
             // sont places a la fin.
@@ -1105,7 +1105,7 @@ public class ClassFileLayouter {
         List<SubListLayoutBlock> source,
         int minLineNumber, int maxLineNumber)
     {
-        byte lastTag = destination.get(destination.size()-1).tag;
+        byte lastTag = destination.get(destination.size()-1).getTag();
         int index = source.size();
 
         SubListLayoutBlock sllb;
@@ -1114,7 +1114,7 @@ public class ClassFileLayouter {
         while (index > 0)
         {
             sllb = source.get(index-1);
-            lineNumber = sllb.lastLineNumber;
+            lineNumber = sllb.getLastLineNumber();
 
             if (lineNumber != Instruction.UNKNOWN_LINE_NUMBER &&
                 lineNumber >= minLineNumber) {
@@ -1144,10 +1144,10 @@ public class ClassFileLayouter {
             }
 
             // Move item
-            destination.addAll(sllb.subList);
+            destination.addAll(sllb.getSubList());
 
             // Store last line number
-            lastLineNumber = sllb.lastLineNumber;
+            lastLineNumber = sllb.getLastLineNumber();
             if (lastLineNumber != Instruction.UNKNOWN_LINE_NUMBER && (maxLineNumber == Instruction.UNKNOWN_LINE_NUMBER ||
                 maxLineNumber < lastLineNumber))
             {
@@ -1169,7 +1169,7 @@ public class ClassFileLayouter {
         List<SubListLayoutBlock> source,
         int minLineNumber, int maxLineNumber)
     {
-        byte lastTag = destination.get(destination.size()-1).tag;
+        byte lastTag = destination.get(destination.size()-1).getTag();
         int index = source.size();
 
         SubListLayoutBlock sllb;
@@ -1178,7 +1178,7 @@ public class ClassFileLayouter {
         while (index > 0)
         {
             sllb = source.get(index-1);
-            lineNumber = sllb.lastLineNumber;
+            lineNumber = sllb.getLastLineNumber();
 
             if (lineNumber != Instruction.UNKNOWN_LINE_NUMBER &&
                 lineNumber >= minLineNumber) {
@@ -1210,10 +1210,10 @@ public class ClassFileLayouter {
             index--;
             // Move item
             source.remove(index);
-            destination.addAll(sllb.subList);
+            destination.addAll(sllb.getSubList());
 
             // Store last line number
-            lastLineNumber = sllb.lastLineNumber;
+            lastLineNumber = sllb.getLastLineNumber();
             if (lastLineNumber != Instruction.UNKNOWN_LINE_NUMBER && (maxLineNumber == Instruction.UNKNOWN_LINE_NUMBER ||
                 maxLineNumber < lastLineNumber))
             {
@@ -1232,7 +1232,7 @@ public class ClassFileLayouter {
         List<SubListLayoutBlock> source,
         int minLineNumber, int maxLineNumber)
     {
-        byte lastTag = destination.get(destination.size()-1).tag;
+        byte lastTag = destination.get(destination.size()-1).getTag();
         int index = source.size();
 
         SubListLayoutBlock sllb;
@@ -1242,7 +1242,7 @@ public class ClassFileLayouter {
         while (index > 0)
         {
             sllb = source.get(index-1);
-            lineNumber = sllb.lastLineNumber;
+            lineNumber = sllb.getLastLineNumber();
 
             if (lineNumber != Instruction.UNKNOWN_LINE_NUMBER &&
                 lineNumber > minLineNumber) {
@@ -1258,10 +1258,10 @@ public class ClassFileLayouter {
             }
 
             // Move item
-            destination.addAll(sllb.subList);
+            destination.addAll(sllb.getSubList());
 
             // Store last line number
-            lastLineNumber = sllb.lastLineNumber;
+            lastLineNumber = sllb.getLastLineNumber();
             if (lastLineNumber != Instruction.UNKNOWN_LINE_NUMBER && (maxLineNumber == Instruction.UNKNOWN_LINE_NUMBER ||
                 maxLineNumber < lastLineNumber))
             {
@@ -1287,7 +1287,7 @@ public class ClassFileLayouter {
         List<SubListLayoutBlock> source,
         int maxLineNumber)
     {
-        byte lastTag = destination.get(destination.size()-1).tag;
+        byte lastTag = destination.get(destination.size()-1).getTag();
         int index = source.size();
 
         SubListLayoutBlock sllb;
@@ -1304,10 +1304,10 @@ public class ClassFileLayouter {
 
             // Move item
             sllb = source.remove(index);
-            destination.addAll(sllb.subList);
+            destination.addAll(sllb.getSubList());
 
             // Store last line number
-            lastLineNumber = sllb.lastLineNumber;
+            lastLineNumber = sllb.getLastLineNumber();
             if (lastLineNumber != Instruction.UNKNOWN_LINE_NUMBER && (maxLineNumber == Instruction.UNKNOWN_LINE_NUMBER ||
                 maxLineNumber < lastLineNumber))
             {
@@ -1326,7 +1326,7 @@ public class ClassFileLayouter {
         List<SubListLayoutBlock> source,
         int maxLineNumber)
     {
-        byte lastTag = destination.get(destination.size()-1).tag;
+        byte lastTag = destination.get(destination.size()-1).getTag();
         int index = source.size();
 
         SubListLayoutBlock sllb;
@@ -1357,10 +1357,10 @@ public class ClassFileLayouter {
 
             // Move item
             sllb = source.remove(index);
-            destination.addAll(sllb.subList);
+            destination.addAll(sllb.getSubList());
 
             // Store last line number
-            lastLineNumber = sllb.lastLineNumber;
+            lastLineNumber = sllb.getLastLineNumber();
             if (lastLineNumber != Instruction.UNKNOWN_LINE_NUMBER && (maxLineNumber == Instruction.UNKNOWN_LINE_NUMBER ||
                 maxLineNumber < lastLineNumber))
             {
@@ -1382,7 +1382,7 @@ public class ClassFileLayouter {
         int lineNumber;
         while (index-- > 0)
         {
-            lineNumber = list.get(index).lastLineNumber;
+            lineNumber = list.get(index).getLastLineNumber();
             if (lineNumber != Instruction.UNKNOWN_LINE_NUMBER) {
                 return lineNumber;
             }
@@ -1465,24 +1465,24 @@ public class ClassFileLayouter {
         {
             lb = layoutBlockList.get(blockIndex);
 
-            if (lb.tag == LayoutBlockConstants.BYTE_CODE)
+            if (lb.getTag() == LayoutBlockConstants.BYTE_CODE)
             {
                 containsError = true;
             }
 
-            if (lb.firstLineNumber != Instruction.UNKNOWN_LINE_NUMBER)
+            if (lb.getFirstLineNumber() != Instruction.UNKNOWN_LINE_NUMBER)
             {
-                if (firstLineNumber > lb.firstLineNumber) {
+                if (firstLineNumber > lb.getFirstLineNumber()) {
                     containsError = true;
                 }
                 layoutSectionList.add(new LayoutSection(
                     layoutSectionListSize,
                     firstBlockIndex, blockIndex-1,
-                    firstLineNumber, lb.firstLineNumber,
+                    firstLineNumber, lb.getFirstLineNumber(),
                     containsError));
                 layoutSectionListSize++;
                 firstBlockIndex = blockIndex+1;
-                firstLineNumber = lb.lastLineNumber;
+                firstLineNumber = lb.getLastLineNumber();
                 containsError = false;
             }
         }
@@ -1511,15 +1511,15 @@ public class ClassFileLayouter {
         for (int sectionIndex=0; sectionIndex<sectionLength; sectionIndex++)
         {
             section = layoutSectionList.get(sectionIndex);
-            lastBlockIndex = section.lastBlockIndex;
+            lastBlockIndex = section.getLastBlockIndex();
 
-            for (blockIndex = section.firstBlockIndex;
+            for (blockIndex = section.getFirstBlockIndex();
                  blockIndex <= lastBlockIndex;
                  blockIndex++)
             {
                 lb = layoutBlockList.get(blockIndex);
-                lb.index = blockIndex;
-                lb.section = section;
+                lb.setIndex(blockIndex);
+                lb.setSection(section);
             }
         }
     }
@@ -1536,17 +1536,17 @@ public class ClassFileLayouter {
         {
             section = layoutSectionList.get(sectionIndex);
 
-            if (section.relayout)
+            if (section.isRelayout())
             {
-                int lastBlockIndex = section.lastBlockIndex;
+                int lastBlockIndex = section.getLastBlockIndex();
 
                 LayoutBlock lb;
-                for (int blockIndex = section.firstBlockIndex;
+                for (int blockIndex = section.getFirstBlockIndex();
                          blockIndex <= lastBlockIndex;
                          blockIndex++)
                 {
                     lb = layoutBlockList.get(blockIndex);
-                    lb.lineCount = lb.preferedLineCount;
+                    lb.setLineCount(lb.getPreferedLineCount());
                 }
             }
         }
@@ -1576,25 +1576,25 @@ public class ClassFileLayouter {
                 {
                     section = layoutSectionList.get(sectionIndex);
 
-                    if (section.relayout && !section.containsError)
+                    if (section.isRelayout() && !section.containsError())
                     {
-                        section.relayout = false;
+                        section.setRelayout(false);
 
-                        int originalLineCount = section.originalLineCount;
+                        int originalLineCount = section.getOriginalLineCount();
                         int currentLineCount = getLineCount(
-                            layoutBlockList, section.firstBlockIndex, section.lastBlockIndex);
+                            layoutBlockList, section.getFirstBlockIndex(), section.getLastBlockIndex());
 
                         if (originalLineCount > currentLineCount)
                         {
                             expandBlocksWithHeuristics(
-                                layoutBlockList, section.firstBlockIndex, section.lastBlockIndex,
+                                layoutBlockList, section.getFirstBlockIndex(), section.getLastBlockIndex(),
                                 originalLineCount-currentLineCount);
                             redo = true;
                         }
                         else if (currentLineCount > originalLineCount)
                         {
                             compactBlocksWithHeuristics(
-                                layoutBlockList, section.firstBlockIndex, section.lastBlockIndex,
+                                layoutBlockList, section.getFirstBlockIndex(), section.getLastBlockIndex(),
                                 currentLineCount-originalLineCount);
                             redo = true;
                         }
@@ -1602,7 +1602,7 @@ public class ClassFileLayouter {
                 }
 
                 // Pas de mise en page de la derniere section
-                layoutSectionList.get(sectionLength).relayout = false;
+                layoutSectionList.get(sectionLength).setRelayout(false);
             }
             while (redo && layoutCount-- > 0);
 
@@ -1614,31 +1614,31 @@ public class ClassFileLayouter {
                 {
                     section = layoutSectionList.get(sectionIndex);
 
-                    if (section.relayout && !section.containsError)
+                    if (section.isRelayout() && !section.containsError())
                     {
-                        section.relayout = false;
+                        section.setRelayout(false);
 
-                        int originalLineCount = section.originalLineCount;
+                        int originalLineCount = section.getOriginalLineCount();
                         int currentLineCount = getLineCount(
-                            layoutBlockList, section.firstBlockIndex, section.lastBlockIndex);
+                            layoutBlockList, section.getFirstBlockIndex(), section.getLastBlockIndex());
 
                         if (originalLineCount > currentLineCount)
                         {
                             expandBlocks(
-                                layoutBlockList, section.firstBlockIndex, section.lastBlockIndex,
+                                layoutBlockList, section.getFirstBlockIndex(), section.getLastBlockIndex(),
                                 originalLineCount-currentLineCount);
                         }
                         else if (currentLineCount > originalLineCount)
                         {
                             compactBlocks(
-                                layoutBlockList, section.firstBlockIndex, section.lastBlockIndex,
+                                layoutBlockList, section.getFirstBlockIndex(), section.getLastBlockIndex(),
                                 currentLineCount-originalLineCount);
                         }
                     }
                 }
 
                 // Pas de mise en page de la derniere section
-                layoutSectionList.get(sectionLength).relayout = false;
+                layoutSectionList.get(sectionLength).setRelayout(false);
             }
         }
     }
@@ -1651,7 +1651,7 @@ public class ClassFileLayouter {
         int lineCount;
         for (int index=firstIndex; index<=lastIndex; index++)
         {
-            lineCount = layoutBlockList.get(index).lineCount;
+            lineCount = layoutBlockList.get(index).getLineCount();
             if (lineCount != LayoutBlockConstants.UNLIMITED_LINE_COUNT) {
                 sum += lineCount;
             }
@@ -1676,9 +1676,9 @@ public class ClassFileLayouter {
             {
                 lb = layoutBlockList.get(i);
 
-                if ((lb.tag == LayoutBlockConstants.SEPARATOR || lb.tag == LayoutBlockConstants.SEPARATOR_OF_STATEMENTS) && lb.lineCount > 2)
+                if ((lb.getTag() == LayoutBlockConstants.SEPARATOR || lb.getTag() == LayoutBlockConstants.SEPARATOR_OF_STATEMENTS) && lb.getLineCount() > 2)
                 {
-                    lb.lineCount--;
+                    lb.setLineCount(lb.getLineCount() - 1);
                     delta--;
                 }
             }
@@ -1694,10 +1694,10 @@ public class ClassFileLayouter {
             {
                 LayoutBlock lb = layoutBlockList.get(i);
 
-                if ((lb.tag == LayoutBlockConstants.IMPLEMENTS_INTERFACES
-                        || lb.tag == LayoutBlockConstants.GENERIC_IMPLEMENTS_INTERFACES
-                        || lb.tag == LayoutBlockConstants.THROWS) && lb.lineCount > 0)				{
-                    lb.lineCount--;
+                if ((lb.getTag() == LayoutBlockConstants.IMPLEMENTS_INTERFACES
+                        || lb.getTag() == LayoutBlockConstants.GENERIC_IMPLEMENTS_INTERFACES
+                        || lb.getTag() == LayoutBlockConstants.THROWS) && lb.getLineCount() > 0)				{
+                    lb.setLineCount(lb.getLineCount() - 1);
                     delta--;
                 }
             }
@@ -1708,12 +1708,12 @@ public class ClassFileLayouter {
             {
                 lb = layoutBlockList.get(i);
 
-                if ((lb.tag == LayoutBlockConstants.EXTENDS_SUPER_TYPE
-                        || lb.tag == LayoutBlockConstants.EXTENDS_SUPER_INTERFACES
-                        || lb.tag == LayoutBlockConstants.GENERIC_EXTENDS_SUPER_TYPE
-                        || lb.tag == LayoutBlockConstants.GENERIC_EXTENDS_SUPER_INTERFACES)
-                        && lb.lineCount > 0)				{
-                    lb.lineCount--;
+                if ((lb.getTag() == LayoutBlockConstants.EXTENDS_SUPER_TYPE
+                        || lb.getTag() == LayoutBlockConstants.EXTENDS_SUPER_INTERFACES
+                        || lb.getTag() == LayoutBlockConstants.GENERIC_EXTENDS_SUPER_TYPE
+                        || lb.getTag() == LayoutBlockConstants.GENERIC_EXTENDS_SUPER_INTERFACES)
+                        && lb.getLineCount() > 0)				{
+                    lb.setLineCount(lb.getLineCount() - 1);
                     delta--;
                 }
             }
@@ -1725,17 +1725,17 @@ public class ClassFileLayouter {
         {
             LayoutBlock lb = layoutBlockList.get(i);
 
-            if (lb.tag == LayoutBlockConstants.IMPORTS && lb.lineCount > 0)
+            if (lb.getTag() == LayoutBlockConstants.IMPORTS && lb.getLineCount() > 0)
             {
-                if (lb.lineCount >= delta)
+                if (lb.getLineCount() >= delta)
                 {
-                    lb.lineCount -= delta;
+                    lb.setLineCount(lb.getLineCount() - delta);
                     delta = 0;
                 }
                 else
                 {
-                    delta -= lb.lineCount;
-                    lb.lineCount = 0;
+                    delta -= lb.getLineCount();
+                    lb.setLineCount(0);
                 }
             }
         }
@@ -1750,15 +1750,15 @@ public class ClassFileLayouter {
             {
                 lb = layoutBlockList.get(i);
 
-                if ((lb.tag == LayoutBlockConstants.STATEMENTS_BLOCK_START
-                        || lb.tag == LayoutBlockConstants.SINGLE_STATEMENT_BLOCK_START
-                        || lb.tag == LayoutBlockConstants.SWITCH_BLOCK_START
-                        || lb.tag == LayoutBlockConstants.METHOD_BODY_BLOCK_START
-                        || lb.tag == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START
-                        || lb.tag == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START
-                        || lb.tag == LayoutBlockConstants.TYPE_BODY_BLOCK_START) && lb.lineCount > 1
-                        && lb.lineCount > lb.minimalLineCount)				{
-                    lb.lineCount--;
+                if ((lb.getTag() == LayoutBlockConstants.STATEMENTS_BLOCK_START
+                        || lb.getTag() == LayoutBlockConstants.SINGLE_STATEMENT_BLOCK_START
+                        || lb.getTag() == LayoutBlockConstants.SWITCH_BLOCK_START
+                        || lb.getTag() == LayoutBlockConstants.METHOD_BODY_BLOCK_START
+                        || lb.getTag() == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START
+                        || lb.getTag() == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START
+                        || lb.getTag() == LayoutBlockConstants.TYPE_BODY_BLOCK_START) && lb.getLineCount() > 1
+                        && lb.getLineCount() > lb.getMinimalLineCount())				{
+                    lb.setLineCount(lb.getLineCount() - 1);
                     delta--;
                 }
             }
@@ -1775,9 +1775,9 @@ public class ClassFileLayouter {
             {
                 lb = layoutBlockList.get(i);
 
-                if (lb.tag == LayoutBlockConstants.SEPARATOR_OF_STATEMENTS && lb.lineCount > 1)
+                if (lb.getTag() == LayoutBlockConstants.SEPARATOR_OF_STATEMENTS && lb.getLineCount() > 1)
                 {
-                    lb.lineCount--;
+                    lb.setLineCount(lb.getLineCount() - 1);
                     delta--;
                 }
             }
@@ -1794,16 +1794,16 @@ public class ClassFileLayouter {
             {
                 lb = layoutBlockList.get(i);
 
-                if ((lb.tag == LayoutBlockConstants.STATEMENTS_BLOCK_END
-                        || lb.tag == LayoutBlockConstants.SINGLE_STATEMENT_BLOCK_END
-                        || lb.tag == LayoutBlockConstants.SWITCH_BLOCK_END
-                        || lb.tag == LayoutBlockConstants.METHOD_BODY_BLOCK_END
-                        || lb.tag == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_END
-                        || lb.tag == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_END
-                        || lb.tag == LayoutBlockConstants.TYPE_BODY_BLOCK_END) && lb.lineCount > 1
-                        && lb.lineCount > lb.minimalLineCount)				{
+                if ((lb.getTag() == LayoutBlockConstants.STATEMENTS_BLOCK_END
+                        || lb.getTag() == LayoutBlockConstants.SINGLE_STATEMENT_BLOCK_END
+                        || lb.getTag() == LayoutBlockConstants.SWITCH_BLOCK_END
+                        || lb.getTag() == LayoutBlockConstants.METHOD_BODY_BLOCK_END
+                        || lb.getTag() == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_END
+                        || lb.getTag() == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_END
+                        || lb.getTag() == LayoutBlockConstants.TYPE_BODY_BLOCK_END) && lb.getLineCount() > 1
+                        && lb.getLineCount() > lb.getMinimalLineCount())				{
                     // Compact end block
-                    lb.lineCount--;
+                    lb.setLineCount(lb.getLineCount() - 1);
                     delta--;
                 }
             }
@@ -1820,11 +1820,11 @@ public class ClassFileLayouter {
             {
                 lb = layoutBlockList.get(i);
 
-                if ((lb.tag == LayoutBlockConstants.FRAGMENT_CASE
-                        || lb.tag == LayoutBlockConstants.FRAGMENT_CASE_ENUM
-                        || lb.tag == LayoutBlockConstants.FRAGMENT_CASE_STRING)
-                        && lb.lineCount > 0)				{
-                    lb.lineCount--;
+                if ((lb.getTag() == LayoutBlockConstants.FRAGMENT_CASE
+                        || lb.getTag() == LayoutBlockConstants.FRAGMENT_CASE_ENUM
+                        || lb.getTag() == LayoutBlockConstants.FRAGMENT_CASE_STRING)
+                        && lb.getLineCount() > 0)				{
+                    lb.setLineCount(lb.getLineCount() - 1);
                     delta--;
                 }
             }
@@ -1841,10 +1841,10 @@ public class ClassFileLayouter {
             {
                 lb = layoutBlockList.get(i);
 
-                if (lb.tag == LayoutBlockConstants.SINGLE_STATEMENT_BLOCK_END && lb.lineCount > lb.minimalLineCount)
+                if (lb.getTag() == LayoutBlockConstants.SINGLE_STATEMENT_BLOCK_END && lb.getLineCount() > lb.getMinimalLineCount())
                 {
                     // Compact end block
-                    lb.lineCount--;
+                    lb.setLineCount(lb.getLineCount() - 1);
                     delta--;
                 }
             }
@@ -1861,9 +1861,9 @@ public class ClassFileLayouter {
             {
                 lb = layoutBlockList.get(i);
 
-                if ((lb.tag == LayoutBlockConstants.CASE_BLOCK_START || lb.tag == LayoutBlockConstants.CASE_BLOCK_END) && lb.lineCount > 0)
+                if ((lb.getTag() == LayoutBlockConstants.CASE_BLOCK_START || lb.getTag() == LayoutBlockConstants.CASE_BLOCK_END) && lb.getLineCount() > 0)
                 {
-                    lb.lineCount--;
+                    lb.setLineCount(lb.getLineCount() - 1);
                     delta--;
                 }
             }
@@ -1880,34 +1880,34 @@ public class ClassFileLayouter {
             {
                 lb = layoutBlockList.get(i);
 
-                if ((lb.tag == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START || lb.tag == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_END) && lb.lineCount > lb.minimalLineCount)
+                if ((lb.getTag() == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START || lb.getTag() == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_END) && lb.getLineCount() > lb.getMinimalLineCount())
                 {
                     BlockLayoutBlock blb = (BlockLayoutBlock)lb;
 
                     // Compact end block
-                    lb.lineCount--;
+                    lb.setLineCount(lb.getLineCount() - 1);
                     delta--;
 
-                    if (lb.lineCount <= 1)
+                    if (lb.getLineCount() <= 1)
                     {
                         // Compact start block
-                        if (blb.section == blb.other.section)
+                        if (blb.getSection() == blb.getOther().getSection())
                         {
-                            if (blb.other.lineCount > delta)
+                            if (blb.getOther().getLineCount() > delta)
                             {
-                                blb.other.lineCount -= delta;
+                                blb.getOther().setLineCount(blb.getOther().getLineCount() - delta);
                                 delta = 0;
                             }
                             else
                             {
-                                delta -= blb.other.lineCount;
-                                blb.other.lineCount = 0;
+                                delta -= blb.getOther().getLineCount();
+                                blb.getOther().setLineCount(0);
                             }
                         }
                         else
                         {
-                            blb.other.section.relayout = true;
-                            blb.other.lineCount = 0;
+                            blb.getOther().getSection().setRelayout(true);
+                            blb.getOther().setLineCount(0);
                         }
                     }
                 }
@@ -1924,45 +1924,45 @@ public class ClassFileLayouter {
             {
                 LayoutBlock lb = layoutBlockList.get(i);
 
-                if (lb.tag == LayoutBlockConstants.STATEMENTS_BLOCK_START
-                        || lb.tag == LayoutBlockConstants.SWITCH_BLOCK_START
-                        || lb.tag == LayoutBlockConstants.METHOD_BODY_BLOCK_START
-                        || lb.tag == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START
-                        || lb.tag == LayoutBlockConstants.TYPE_BODY_BLOCK_START) {
-                    if (lb.lineCount > lb.minimalLineCount)
+                if (lb.getTag() == LayoutBlockConstants.STATEMENTS_BLOCK_START
+                        || lb.getTag() == LayoutBlockConstants.SWITCH_BLOCK_START
+                        || lb.getTag() == LayoutBlockConstants.METHOD_BODY_BLOCK_START
+                        || lb.getTag() == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START
+                        || lb.getTag() == LayoutBlockConstants.TYPE_BODY_BLOCK_START) {
+                    if (lb.getLineCount() > lb.getMinimalLineCount())
                     {
                         // Compact start block
-                        lb.lineCount--;
+                        lb.setLineCount(lb.getLineCount() - 1);
                         delta--;
                     }
-                } else if (lb.tag == LayoutBlockConstants.SINGLE_STATEMENT_BLOCK_START && lb.lineCount > lb.minimalLineCount)
+                } else if (lb.getTag() == LayoutBlockConstants.SINGLE_STATEMENT_BLOCK_START && lb.getLineCount() > lb.getMinimalLineCount())
                 {
                     // Compact start block
-                    lb.lineCount--;
+                    lb.setLineCount(lb.getLineCount() - 1);
                     delta--;
 
-                    if (lb.lineCount == 0)
+                    if (lb.getLineCount() == 0)
                     {
                         BlockLayoutBlock blb = (BlockLayoutBlock)lb;
 
                         // Compact end block
-                        if (blb.section == blb.other.section)
+                        if (blb.getSection() == blb.getOther().getSection())
                         {
-                            if (blb.other.lineCount > delta)
+                            if (blb.getOther().getLineCount() > delta)
                             {
-                                blb.other.lineCount -= delta;
+                                blb.getOther().setLineCount(blb.getOther().getLineCount() - delta);
                                 delta = 0;
                             }
                             else
                             {
-                                delta -= blb.other.lineCount;
-                                blb.other.lineCount = 0;
+                                delta -= blb.getOther().getLineCount();
+                                blb.getOther().setLineCount(0);
                             }
                         }
                         else
                         {
-                            blb.other.section.relayout = true;
-                            blb.other.lineCount = 0;
+                            blb.getOther().getSection().setRelayout(true);
+                            blb.getOther().setLineCount(0);
                         }
                     }
                 }
@@ -1974,16 +1974,16 @@ public class ClassFileLayouter {
             {
                 lb = layoutBlockList.get(i);
 
-                if ((lb.tag == LayoutBlockConstants.STATEMENTS_BLOCK_END
-                        || lb.tag == LayoutBlockConstants.SWITCH_BLOCK_END
-                        || lb.tag == LayoutBlockConstants.METHOD_BODY_BLOCK_END
-                        || lb.tag == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_END
-                        || lb.tag == LayoutBlockConstants.TYPE_BODY_BLOCK_END)
-                        && lb.lineCount > lb.minimalLineCount)				{
+                if ((lb.getTag() == LayoutBlockConstants.STATEMENTS_BLOCK_END
+                        || lb.getTag() == LayoutBlockConstants.SWITCH_BLOCK_END
+                        || lb.getTag() == LayoutBlockConstants.METHOD_BODY_BLOCK_END
+                        || lb.getTag() == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_END
+                        || lb.getTag() == LayoutBlockConstants.TYPE_BODY_BLOCK_END)
+                        && lb.getLineCount() > lb.getMinimalLineCount())				{
 //						BlockLayoutBlock blb = (BlockLayoutBlock)lb;
 
                     // Compact end block
-                    lb.lineCount--;
+                    lb.setLineCount(lb.getLineCount() - 1);
                     delta--;
 
 //						if (lb.lineCount <= 1)
@@ -2023,9 +2023,9 @@ public class ClassFileLayouter {
             {
                 lb = layoutBlockList.get(i);
 
-                if ((lb.tag == LayoutBlockConstants.SEPARATOR || lb.tag == LayoutBlockConstants.SEPARATOR_OF_STATEMENTS) && lb.lineCount > 0)
+                if ((lb.getTag() == LayoutBlockConstants.SEPARATOR || lb.getTag() == LayoutBlockConstants.SEPARATOR_OF_STATEMENTS) && lb.getLineCount() > 0)
                 {
-                    lb.lineCount--;
+                    lb.setLineCount(lb.getLineCount() - 1);
                     delta--;
                 }
             }
@@ -2042,9 +2042,9 @@ public class ClassFileLayouter {
             {
                 lb = layoutBlockList.get(i);
 
-                if (lb.tag == LayoutBlockConstants.COMMENT_ERROR && lb.lineCount > 0)
+                if (lb.getTag() == LayoutBlockConstants.COMMENT_ERROR && lb.getLineCount() > 0)
                 {
-                    lb.lineCount--;
+                    lb.setLineCount(lb.getLineCount() - 1);
                     delta--;
                 }
             }
@@ -2084,12 +2084,12 @@ public class ClassFileLayouter {
             {
                 LayoutBlock lb = layoutBlockList.get(i);
 
-                if ((lb.tag == LayoutBlockConstants.IMPLEMENTS_INTERFACES
-                        || lb.tag == LayoutBlockConstants.EXTENDS_SUPER_INTERFACES
-                        || lb.tag == LayoutBlockConstants.GENERIC_IMPLEMENTS_INTERFACES
-                        || lb.tag == LayoutBlockConstants.GENERIC_EXTENDS_SUPER_INTERFACES)
-                        && lb.lineCount < lb.maximalLineCount)				{
-                    lb.lineCount++;
+                if ((lb.getTag() == LayoutBlockConstants.IMPLEMENTS_INTERFACES
+                        || lb.getTag() == LayoutBlockConstants.EXTENDS_SUPER_INTERFACES
+                        || lb.getTag() == LayoutBlockConstants.GENERIC_IMPLEMENTS_INTERFACES
+                        || lb.getTag() == LayoutBlockConstants.GENERIC_EXTENDS_SUPER_INTERFACES)
+                        && lb.getLineCount() < lb.getMaximalLineCount())				{
+                    lb.setLineCount(lb.getLineCount() + 1);
                     delta--;
                 }
             }
@@ -2099,9 +2099,9 @@ public class ClassFileLayouter {
             {
                 LayoutBlock lb = layoutBlockList.get(i);
 
-                if ((lb.tag == LayoutBlockConstants.EXTENDS_SUPER_TYPE || lb.tag == LayoutBlockConstants.GENERIC_EXTENDS_SUPER_TYPE) && lb.lineCount < lb.maximalLineCount)
+                if ((lb.getTag() == LayoutBlockConstants.EXTENDS_SUPER_TYPE || lb.getTag() == LayoutBlockConstants.GENERIC_EXTENDS_SUPER_TYPE) && lb.getLineCount() < lb.getMaximalLineCount())
                 {
-                    lb.lineCount++;
+                    lb.setLineCount(lb.getLineCount() + 1);
                     delta--;
                 }
             }
@@ -2112,8 +2112,8 @@ public class ClassFileLayouter {
             {
                 lb = layoutBlockList.get(i);
 
-                if (lb.tag == LayoutBlockConstants.SEPARATOR_AT_BEGINING || lb.tag == LayoutBlockConstants.SEPARATOR_AFTER_IMPORTS) {
-                    lb.lineCount += delta;
+                if (lb.getTag() == LayoutBlockConstants.SEPARATOR_AT_BEGINING || lb.getTag() == LayoutBlockConstants.SEPARATOR_AFTER_IMPORTS) {
+                    lb.setLineCount(lb.getLineCount() + delta);
                     delta = 0;
                 }
             }
@@ -2129,9 +2129,9 @@ public class ClassFileLayouter {
             {
                 lb = layoutBlockList.get(i);
 
-                if (lb.tag == LayoutBlockConstants.FOR_BLOCK_START && lb.lineCount < lb.maximalLineCount)
+                if (lb.getTag() == LayoutBlockConstants.FOR_BLOCK_START && lb.getLineCount() < lb.getMaximalLineCount())
                 {
-                    lb.lineCount++;
+                    lb.setLineCount(lb.getLineCount() + 1);
                     delta--;
                 }
             }
@@ -2147,9 +2147,9 @@ public class ClassFileLayouter {
             {
                 lb = layoutBlockList.get(i);
 
-                if (lb.tag == LayoutBlockConstants.CASE_BLOCK_END && lb.lineCount == 0)
+                if (lb.getTag() == LayoutBlockConstants.CASE_BLOCK_END && lb.getLineCount() == 0)
                 {
-                    lb.lineCount++;
+                    lb.setLineCount(lb.getLineCount() + 1);
                     delta--;
                 }
             }
@@ -2165,33 +2165,33 @@ public class ClassFileLayouter {
             {
                 LayoutBlock lb = layoutBlockList.get(i);
 
-                if ((lb.tag == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_END
-                        || lb.tag == LayoutBlockConstants.TYPE_BODY_BLOCK_END
-                        || lb.tag == LayoutBlockConstants.METHOD_BODY_BLOCK_END
-                        || lb.tag == LayoutBlockConstants.STATEMENTS_BLOCK_END
-                        || lb.tag == LayoutBlockConstants.SINGLE_STATEMENT_BLOCK_END
-                        || lb.tag == LayoutBlockConstants.SWITCH_BLOCK_END) && lb.lineCount == 0)				{
+                if ((lb.getTag() == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_END
+                        || lb.getTag() == LayoutBlockConstants.TYPE_BODY_BLOCK_END
+                        || lb.getTag() == LayoutBlockConstants.METHOD_BODY_BLOCK_END
+                        || lb.getTag() == LayoutBlockConstants.STATEMENTS_BLOCK_END
+                        || lb.getTag() == LayoutBlockConstants.SINGLE_STATEMENT_BLOCK_END
+                        || lb.getTag() == LayoutBlockConstants.SWITCH_BLOCK_END) && lb.getLineCount() == 0)				{
                     BlockLayoutBlock blb = (BlockLayoutBlock)lb;
 
                     // Expand end block
-                    lb.lineCount++;
+                    lb.setLineCount(lb.getLineCount() + 1);
                     delta--;
 
                     // Expand start block
-                    if (blb.other.lineCount == 0)
+                    if (blb.getOther().getLineCount() == 0)
                     {
-                        if (blb.section == blb.other.section)
+                        if (blb.getSection() == blb.getOther().getSection())
                         {
                             if (delta > 0)
                             {
-                                blb.other.lineCount++;
+                                blb.getOther().setLineCount(blb.getOther().getLineCount() + 1);
                                 delta--;
                             }
                         }
                         else
                         {
-                            blb.other.section.relayout = true;
-                            blb.other.lineCount = 1;
+                            blb.getOther().getSection().setRelayout(true);
+                            blb.getOther().setLineCount(1);
                         }
                     }
                 }
@@ -2203,37 +2203,37 @@ public class ClassFileLayouter {
             {
                 lb = layoutBlockList.get(i);
 
-                if ((lb.tag == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START
-                        || lb.tag == LayoutBlockConstants.TYPE_BODY_BLOCK_START
-                        || lb.tag == LayoutBlockConstants.METHOD_BODY_BLOCK_START
-                        || lb.tag == LayoutBlockConstants.STATEMENTS_BLOCK_START
-                        || lb.tag == LayoutBlockConstants.SWITCH_BLOCK_START)
-                        && lb.lineCount == 0)				{
+                if ((lb.getTag() == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START
+                        || lb.getTag() == LayoutBlockConstants.TYPE_BODY_BLOCK_START
+                        || lb.getTag() == LayoutBlockConstants.METHOD_BODY_BLOCK_START
+                        || lb.getTag() == LayoutBlockConstants.STATEMENTS_BLOCK_START
+                        || lb.getTag() == LayoutBlockConstants.SWITCH_BLOCK_START)
+                        && lb.getLineCount() == 0)				{
                     BlockLayoutBlock blb = (BlockLayoutBlock)lb;
 
                     // Expand start block
-                    lb.lineCount++;
+                    lb.setLineCount(lb.getLineCount() + 1);
                     delta--;
                     // Expand end block
-                    if (blb.section == blb.other.section)
+                    if (blb.getSection() == blb.getOther().getSection())
                     {
-                        int d = 2 - blb.other.lineCount;
+                        int d = 2 - blb.getOther().getLineCount();
 
                         if (d > delta)
                         {
-                            blb.other.lineCount += delta;
+                            blb.getOther().setLineCount(blb.getOther().getLineCount() + delta);
                             delta = 0;
                         }
                         else
                         {
                             delta -= d;
-                            blb.other.lineCount = 2;
+                            blb.getOther().setLineCount(2);
                         }
                     }
                     else
                     {
-                        blb.other.section.relayout = true;
-                        blb.other.lineCount = 2;
+                        blb.getOther().getSection().setRelayout(true);
+                        blb.getOther().setLineCount(2);
                     }
                 }
             }
@@ -2250,8 +2250,8 @@ public class ClassFileLayouter {
             {
                 lb = layoutBlockList.get(i);
 
-                if (lb.tag == LayoutBlockConstants.SEPARATOR || lb.tag == LayoutBlockConstants.SEPARATOR_OF_STATEMENTS) {
-                    lb.lineCount++;
+                if (lb.getTag() == LayoutBlockConstants.SEPARATOR || lb.getTag() == LayoutBlockConstants.SEPARATOR_OF_STATEMENTS) {
+                    lb.setLineCount(lb.getLineCount() + 1);
                     delta--;
                 }
             }
@@ -2267,9 +2267,9 @@ public class ClassFileLayouter {
             {
                 lb = layoutBlockList.get(i);
 
-                if (lb.tag == LayoutBlockConstants.CASE_BLOCK_END && lb.lineCount < lb.maximalLineCount)
+                if (lb.getTag() == LayoutBlockConstants.CASE_BLOCK_END && lb.getLineCount() < lb.getMaximalLineCount())
                 {
-                    lb.lineCount++;
+                    lb.setLineCount(lb.getLineCount() + 1);
                     delta--;
                 }
             }
@@ -2286,18 +2286,18 @@ public class ClassFileLayouter {
             {
                 lb = layoutBlockList.get(i);
 
-                if ((lb.tag == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_END
-                        || lb.tag == LayoutBlockConstants.TYPE_BODY_BLOCK_END
-                        || lb.tag == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_END
-                        || lb.tag == LayoutBlockConstants.METHOD_BODY_BLOCK_END
-                        || lb.tag == LayoutBlockConstants.STATEMENTS_BLOCK_END
-                        || lb.tag == LayoutBlockConstants.SINGLE_STATEMENT_BLOCK_END
-                        || lb.tag == LayoutBlockConstants.SWITCH_BLOCK_END)
-                        && lb.lineCount < lb.maximalLineCount)				{
+                if ((lb.getTag() == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_END
+                        || lb.getTag() == LayoutBlockConstants.TYPE_BODY_BLOCK_END
+                        || lb.getTag() == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_END
+                        || lb.getTag() == LayoutBlockConstants.METHOD_BODY_BLOCK_END
+                        || lb.getTag() == LayoutBlockConstants.STATEMENTS_BLOCK_END
+                        || lb.getTag() == LayoutBlockConstants.SINGLE_STATEMENT_BLOCK_END
+                        || lb.getTag() == LayoutBlockConstants.SWITCH_BLOCK_END)
+                        && lb.getLineCount() < lb.getMaximalLineCount())				{
    //					BlockLayoutBlock blb = (BlockLayoutBlock)lb;
 
                     // Expand end block
-                    lb.lineCount++;
+                    lb.setLineCount(lb.getLineCount() + 1);
                     delta--;
 //						if (delta < 2)
 //						{
@@ -2335,35 +2335,35 @@ public class ClassFileLayouter {
             {
                 lb = layoutBlockList.get(i);
 
-                if ((lb.tag == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START
-                        || lb.tag == LayoutBlockConstants.TYPE_BODY_BLOCK_START
-                        || lb.tag == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START
-                        || lb.tag == LayoutBlockConstants.METHOD_BODY_BLOCK_START
-                        || lb.tag == LayoutBlockConstants.STATEMENTS_BLOCK_START
-                        || lb.tag == LayoutBlockConstants.SINGLE_STATEMENT_BLOCK_START
-                        || lb.tag == LayoutBlockConstants.SWITCH_BLOCK_START)
-                        && lb.lineCount < lb.maximalLineCount)				{
+                if ((lb.getTag() == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START
+                        || lb.getTag() == LayoutBlockConstants.TYPE_BODY_BLOCK_START
+                        || lb.getTag() == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START
+                        || lb.getTag() == LayoutBlockConstants.METHOD_BODY_BLOCK_START
+                        || lb.getTag() == LayoutBlockConstants.STATEMENTS_BLOCK_START
+                        || lb.getTag() == LayoutBlockConstants.SINGLE_STATEMENT_BLOCK_START
+                        || lb.getTag() == LayoutBlockConstants.SWITCH_BLOCK_START)
+                        && lb.getLineCount() < lb.getMaximalLineCount())				{
                     BlockLayoutBlock blb = (BlockLayoutBlock)lb;
 
                     // Expand start block
-                    lb.lineCount++;
+                    lb.setLineCount(lb.getLineCount() + 1);
                     delta--;
 
-                    if (lb.lineCount > 1 && blb.other.lineCount == 0)
+                    if (lb.getLineCount() > 1 && blb.getOther().getLineCount() == 0)
                     {
                         // Expand end block
-                        if (blb.section == blb.other.section) // yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
+                        if (blb.getSection() == blb.getOther().getSection()) // yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
                         {
                             if (delta > 0)
                             {
-                                blb.other.lineCount = 1;
+                                blb.getOther().setLineCount(1);
                                 delta--;
                             }
                         }
                         else
                         {
-                            blb.other.section.relayout = true;
-                            blb.other.lineCount = 1;
+                            blb.getOther().getSection().setRelayout(true);
+                            blb.getOther().setLineCount(1);
                         }
                     }
                 }
@@ -2403,9 +2403,9 @@ public class ClassFileLayouter {
             {
                 lb = layoutBlockList.get(i);
 
-                if (lb.lineCount > lb.minimalLineCount)
+                if (lb.getLineCount() > lb.getMinimalLineCount())
                 {
-                    lb.lineCount--;
+                    lb.setLineCount(lb.getLineCount() - 1);
                     delta--;
                 }
             }
@@ -2428,9 +2428,9 @@ public class ClassFileLayouter {
             {
                 lb = layoutBlockList.get(i);
 
-                if (lb.lineCount < lb.maximalLineCount)
+                if (lb.getLineCount() < lb.getMaximalLineCount())
                 {
-                    lb.lineCount++;
+                    lb.setLineCount(lb.getLineCount() + 1);
                     delta--;
                 }
             }
@@ -2457,30 +2457,30 @@ public class ClassFileLayouter {
             for (int sectionIndex=0; sectionIndex<sectionLength; sectionIndex++)
             {
                 section = layoutSectionList.get(sectionIndex);
-                lastBlockIndex = section.lastBlockIndex;
+                lastBlockIndex = section.getLastBlockIndex();
                 score = 0;
                 sumScore = 0;
 
-                for (int blockIndex = section.firstBlockIndex;
+                for (int blockIndex = section.getFirstBlockIndex();
                      blockIndex <= lastBlockIndex;
                      blockIndex++)
                 {
                     lb = layoutBlockList.get(blockIndex);
 
-                    if (lb.tag == LayoutBlockConstants.SEPARATOR) {
-                        if (lb.lineCount < lb.preferedLineCount)
+                    if (lb.getTag() == LayoutBlockConstants.SEPARATOR) {
+                        if (lb.getLineCount() < lb.getPreferedLineCount())
                         {
-                            sumScore += lb.preferedLineCount-lb.lineCount;
+                            sumScore += lb.getPreferedLineCount()-lb.getLineCount();
 
-                            if (lb.lineCount > 0)
+                            if (lb.getLineCount() > 0)
                             {
                                 score += sumScore*sumScore;
                                 sumScore = 0;
                             }
                         }
-                        else if (lb.lineCount > lb.preferedLineCount)
+                        else if (lb.getLineCount() > lb.getPreferedLineCount())
                         {
-                            int delta = lb.lineCount - lb.preferedLineCount;
+                            int delta = lb.getLineCount() - lb.getPreferedLineCount();
                             score -= delta*delta;
                         }
                     }
@@ -2489,7 +2489,7 @@ public class ClassFileLayouter {
                 score += sumScore*sumScore;
 
                 // DEBUG // System.err.println("score = " + score);
-                section.score = score;
+                section.setScore(score);
             }
         }
 
@@ -2523,7 +2523,7 @@ public class ClassFileLayouter {
             // Section source
             lsSource = sortedLayoutSectionList.get(sectionSourceIndex);
 
-            if (lsSource.score <= 0) {
+            if (lsSource.getScore() <= 0) {
                 break;
             }
 
@@ -2559,7 +2559,7 @@ public class ClassFileLayouter {
             // Section source
             lsSource = sortedLayoutSectionList.get(sectionSourceIndex);
 
-            if (lsSource.score <= 0) {
+            if (lsSource.getScore() <= 0) {
                 break;
             }
 
@@ -2585,17 +2585,17 @@ public class ClassFileLayouter {
         LayoutSection lsSource)
     {
         // Slice down. Detect type of last block
-        int firstBlockIndex = lsSource.firstBlockIndex;
+        int firstBlockIndex = lsSource.getFirstBlockIndex();
         int blockIndex;
 
         LayoutBlock lb;
-        for (blockIndex = lsSource.lastBlockIndex;
+        for (blockIndex = lsSource.getLastBlockIndex();
              blockIndex >= firstBlockIndex;
              blockIndex--)
         {
             lb = layoutBlockList.get(blockIndex);
 
-            switch (lb.tag)
+            switch (lb.getTag())
             {
             case LayoutBlockConstants.TYPE_MARKER_START:
                 // Found
@@ -2674,7 +2674,7 @@ public class ClassFileLayouter {
         LayoutSection lsSource, int markerStartTag, int markerEndTag)
     {
         // Rechercher le dernier block de type 'tag'
-        int firstBlockIndex = lsSource.firstBlockIndex;
+        int firstBlockIndex = lsSource.getFirstBlockIndex();
 
         LayoutBlock lb;
         while (firstBlockIndex < blockIndex)
@@ -2682,12 +2682,12 @@ public class ClassFileLayouter {
             blockIndex--;
             lb = layoutBlockList.get(blockIndex);
 
-            if (lb.tag == markerEndTag)
+            if (lb.getTag() == markerEndTag)
             {
                 // Tag de marqueur de fin trouvé.
                 MarkerLayoutBlock mlb = (MarkerLayoutBlock)lb;
 
-                if (mlb.section != mlb.other.section || mlb.other.index <= firstBlockIndex)
+                if (mlb.getSection() != mlb.getOther().getSection() || mlb.getOther().getIndex() <= firstBlockIndex)
                 {
                     // Le marqueur de début est avant la limite.
                     return false;
@@ -2702,34 +2702,34 @@ public class ClassFileLayouter {
                 //  Trouver le premier block de type 'tag' sans numero de ligne
                 int counter = 1;
 
-                blockIndex = mlb.other.index;
+                blockIndex = mlb.getOther().getIndex();
 
                 while (firstBlockIndex < blockIndex)
                 {
                     blockIndex--;
                     lb = layoutBlockList.get(blockIndex);
 
-                    if (lb.tag == LayoutBlockConstants.TYPE_BODY_BLOCK_START /* || (lb.tag == LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK) */)
+                    if (lb.getTag() == LayoutBlockConstants.TYPE_BODY_BLOCK_START /* || (lb.tag == LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK) */)
                     {
                         break;
                     }
-                    if (lb.tag == markerEndTag)
+                    if (lb.getTag() == markerEndTag)
                     {
                         // Tag de marqueur de fin trouvé.
                         mlb = (MarkerLayoutBlock)lb;
 
-                        if (mlb.section != mlb.other.section || mlb.other.index <= firstBlockIndex)
+                        if (mlb.getSection() != mlb.getOther().getSection() || mlb.getOther().getIndex() <= firstBlockIndex)
                         {
                             // Le marqueur de début est avant la limite.
                             break;
                         }
 
                         counter++;
-                        blockIndex = mlb.other.index;
+                        blockIndex = mlb.getOther().getIndex();
                     }
-                    else if (lb.tag == LayoutBlockConstants.FIELD_MARKER_END ||
-                             lb.tag == LayoutBlockConstants.METHOD_MARKER_END ||
-                             lb.tag == LayoutBlockConstants.TYPE_MARKER_END)
+                    else if (lb.getTag() == LayoutBlockConstants.FIELD_MARKER_END ||
+                             lb.getTag() == LayoutBlockConstants.METHOD_MARKER_END ||
+                             lb.getTag() == LayoutBlockConstants.TYPE_MARKER_END)
                     {
                         break;
                     }
@@ -2744,21 +2744,21 @@ public class ClassFileLayouter {
                 int blockLength = layoutBlockList.size();
                 blockIndex = lastEndTagBlockIndex;
 
-                int lowerScore = lsSource.score;
+                int lowerScore = lsSource.getScore();
                 int lowerScoreBlockIndex = blockIndex;
 
                 while (++blockIndex < blockLength)
                 {
                     lb = layoutBlockList.get(blockIndex);
 
-                    if (lb.tag == LayoutBlockConstants.TYPE_BODY_BLOCK_END ||
+                    if (lb.getTag() == LayoutBlockConstants.TYPE_BODY_BLOCK_END ||
 //						(lb.tag == LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK) ||
-                        lb.tag == markerStartTag)
+                        lb.getTag() == markerStartTag)
                     {
                         // Fin de corps ou début d'un bloc
-                        if (lowerScore > lb.section.score)
+                        if (lowerScore > lb.getSection().getScore())
                         {
-                            lowerScore = lb.section.score;
+                            lowerScore = lb.getSection().getScore();
                             lowerScoreBlockIndex = blockIndex;
                         }
 
@@ -2768,23 +2768,23 @@ public class ClassFileLayouter {
                         // => On s'arrete.
                         break;
                     }
-                    if (lb.tag == LayoutBlockConstants.FIELD_MARKER_START ||
-                             lb.tag == LayoutBlockConstants.METHOD_MARKER_START ||
-                             lb.tag == LayoutBlockConstants.TYPE_MARKER_START)
+                    if (lb.getTag() == LayoutBlockConstants.FIELD_MARKER_START ||
+                             lb.getTag() == LayoutBlockConstants.METHOD_MARKER_START ||
+                             lb.getTag() == LayoutBlockConstants.TYPE_MARKER_START)
                     {
                         // Debut d'un bloc d'un type different
-                        if (lb.section != null &&
-                            lowerScore > lb.section.score)
+                        if (lb.getSection() != null &&
+                            lowerScore > lb.getSection().getScore())
                         {
-                            lowerScore = lb.section.score;
+                            lowerScore = lb.getSection().getScore();
                             lowerScoreBlockIndex = blockIndex;
                         }
 
-                        blockIndex = ((MarkerLayoutBlock)lb).other.index;
+                        blockIndex = ((MarkerLayoutBlock)lb).getOther().getIndex();
                     }
                 }
 
-                if (lowerScore != lsSource.score)
+                if (lowerScore != lsSource.getScore())
                 {
                     // Trouvé.
 
@@ -2800,14 +2800,14 @@ public class ClassFileLayouter {
                     {
                         lb = layoutBlockList.get(blockIndex);
 
-                        if (lb.tag == LayoutBlockConstants.TYPE_BODY_BLOCK_START /* || (lb.tag == LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK) */)
+                        if (lb.getTag() == LayoutBlockConstants.TYPE_BODY_BLOCK_START /* || (lb.tag == LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK) */)
                         {
                             break;
                         }
-                        if (lb.tag == markerEndTag)
+                        if (lb.getTag() == markerEndTag)
                         {
                             firstStartTagBlockIndex = blockIndex =
-                                ((MarkerLayoutBlock)lb).other.index;
+                                ((MarkerLayoutBlock)lb).getOther().getIndex();
 
                             counter--;
                             if (counter == 0) {
@@ -2828,7 +2828,7 @@ public class ClassFileLayouter {
 
                     LayoutBlock insertionLayoutBlock =
                         layoutBlockList.get(lowerScoreBlockIndex);
-                    LayoutSection lsTarget = insertionLayoutBlock.section;
+                    LayoutSection lsTarget = insertionLayoutBlock.getSection();
 
                     // Remove blocks
                     int sourceDeltaIndex =
@@ -2843,7 +2843,7 @@ public class ClassFileLayouter {
                         lb = layoutBlockList.remove(blockIndex);
 
                         // Update section attribute
-                        lb.section = lsTarget;
+                        lb.setSection(lsTarget);
 
                         layoutBlockListToMove.add(lb);
                     }
@@ -2851,7 +2851,7 @@ public class ClassFileLayouter {
                     Collections.reverse(layoutBlockListToMove);
 
                     // Remove separator after blocks if exists
-                    if (layoutBlockList.get(blockIndex+1).tag ==
+                    if (layoutBlockList.get(blockIndex+1).getTag() ==
                         LayoutBlockConstants.SEPARATOR)
                     {
                         layoutBlockList.remove(blockIndex+1);
@@ -2859,10 +2859,10 @@ public class ClassFileLayouter {
                     }
 
                     // Modify separator brefore blocks if exists
-                    if (layoutBlockList.get(blockIndex).tag ==
+                    if (layoutBlockList.get(blockIndex).getTag() ==
                         LayoutBlockConstants.SEPARATOR)
                     {
-                        layoutBlockList.get(blockIndex).preferedLineCount = 2;
+                        layoutBlockList.get(blockIndex).setPreferedLineCount(2);
                     }
 
                     // Blocs pas encore inserés.
@@ -2870,14 +2870,14 @@ public class ClassFileLayouter {
 
                     int targetDeltaIndex = 0;
 
-                    if (insertionLayoutBlock.tag == LayoutBlockConstants.TYPE_BODY_BLOCK_END /*||
+                    if (insertionLayoutBlock.getTag() == LayoutBlockConstants.TYPE_BODY_BLOCK_END /*||
                         (insertionLayoutBlock.tag == LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK)*/)
                     {
                         // Insert new separator before blocks
                         int preferedLineCount = 2;
 
                         if (markerEndTag == LayoutBlockConstants.FIELD_MARKER_END &&
-                            layoutBlockList.get(lowerScoreBlockIndex-1).tag ==
+                            layoutBlockList.get(lowerScoreBlockIndex-1).getTag() ==
                                 LayoutBlockConstants.FIELD_MARKER_END)
                         {
                             preferedLineCount = 1;
@@ -2900,13 +2900,13 @@ public class ClassFileLayouter {
                         int preferedLineCount = 2;
 
                         if (markerEndTag == LayoutBlockConstants.FIELD_MARKER_END &&
-                            layoutBlockList.get(lowerScoreBlockIndex-2).tag ==
+                            layoutBlockList.get(lowerScoreBlockIndex-2).getTag() ==
                                 LayoutBlockConstants.FIELD_MARKER_END)
                         {
                             preferedLineCount = 1;
                         }
 
-                        beforeLayoutBlock.preferedLineCount = preferedLineCount;
+                        beforeLayoutBlock.setPreferedLineCount(preferedLineCount);
                     }
 
                     // Insert blocks
@@ -2919,7 +2919,7 @@ public class ClassFileLayouter {
                     targetDeltaIndex += layoutBlockListToMoveSize;
 
                     // Add separator after blocks
-                    if (insertionLayoutBlock.tag != LayoutBlockConstants.TYPE_BODY_BLOCK_END /*&&
+                    if (insertionLayoutBlock.getTag() != LayoutBlockConstants.TYPE_BODY_BLOCK_END /*&&
                         (insertionLayoutBlock.tag != LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK)*/)
                     {
                         int preferedLineCount = 2;
@@ -2941,34 +2941,34 @@ public class ClassFileLayouter {
                     // -- 4 ------------------------------------------------- //
 
                     // Update indexes of sections
-                    lsSource.lastBlockIndex -= sourceDeltaIndex;
+                    lsSource.setLastBlockIndex(lsSource.getLastBlockIndex() - sourceDeltaIndex);
 
-                    for (int sectionIndex=lsSource.index+1;
-                             sectionIndex<=lsTarget.index-1;
+                    for (int sectionIndex=lsSource.getIndex()+1;
+                             sectionIndex<=lsTarget.getIndex()-1;
                              sectionIndex++)
                     {
                         LayoutSection ls = layoutSectionList.get(sectionIndex);
-                        ls.firstBlockIndex -= sourceDeltaIndex;
-                        ls.lastBlockIndex  -= sourceDeltaIndex;
+                        ls.setFirstBlockIndex(ls.getFirstBlockIndex() - sourceDeltaIndex);
+                        ls.setLastBlockIndex(ls.getLastBlockIndex() - sourceDeltaIndex);
                     }
 
-                    lsTarget.firstBlockIndex -= sourceDeltaIndex;
+                    lsTarget.setFirstBlockIndex(lsTarget.getFirstBlockIndex() - sourceDeltaIndex);
 
                     int delta = sourceDeltaIndex - targetDeltaIndex;
 
                     if (delta != 0)
                     {
-                        lsTarget.lastBlockIndex -= delta;
+                        lsTarget.setLastBlockIndex(lsTarget.getLastBlockIndex() - delta);
 
                         LayoutSection ls;
                         // Update indexes of last sections
                         for (int sectionIndex=layoutSectionList.size()-1;
-                                 sectionIndex>lsTarget.index;
+                                 sectionIndex>lsTarget.getIndex();
                                  sectionIndex--)
                         {
                             ls = layoutSectionList.get(sectionIndex);
-                            ls.firstBlockIndex -= delta;
-                            ls.lastBlockIndex  -= delta;
+                            ls.setFirstBlockIndex(ls.getFirstBlockIndex() - delta);
+                            ls.setLastBlockIndex(ls.getLastBlockIndex() - delta);
                         }
                     }
 
@@ -2979,7 +2979,7 @@ public class ClassFileLayouter {
                          blockIndex<blockLength;
                          blockIndex++)
                     {
-                        layoutBlockList.get(blockIndex).index = blockIndex;
+                        layoutBlockList.get(blockIndex).setIndex(blockIndex);
                     }
 
                     // Update relayout flag of sections
@@ -2991,13 +2991,13 @@ public class ClassFileLayouter {
 
                 break;
             }
-            if (lb.tag == LayoutBlockConstants.FIELD_MARKER_END ||
-                     lb.tag == LayoutBlockConstants.METHOD_MARKER_END ||
-                     lb.tag == LayoutBlockConstants.TYPE_MARKER_END)
+            if (lb.getTag() == LayoutBlockConstants.FIELD_MARKER_END ||
+                     lb.getTag() == LayoutBlockConstants.METHOD_MARKER_END ||
+                     lb.getTag() == LayoutBlockConstants.TYPE_MARKER_END)
             {
-                blockIndex = ((MarkerLayoutBlock)lb).other.index;
+                blockIndex = ((MarkerLayoutBlock)lb).getOther().getIndex();
             }
-            else if (lb.tag == LayoutBlockConstants.TYPE_BODY_BLOCK_START /* || (lb.tag == LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK) */)
+            else if (lb.getTag() == LayoutBlockConstants.TYPE_BODY_BLOCK_START /* || (lb.tag == LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK) */)
             {
                 break;
             }
@@ -3012,17 +3012,17 @@ public class ClassFileLayouter {
         LayoutSection lsSource)
     {
         // Slice up. Detect type of last block
-        int lastBlockIndex = lsSource.lastBlockIndex;
+        int lastBlockIndex = lsSource.getLastBlockIndex();
         int blockIndex;
 
         LayoutBlock lb;
-        for (blockIndex = lsSource.firstBlockIndex;
+        for (blockIndex = lsSource.getFirstBlockIndex();
              blockIndex <= lastBlockIndex;
              blockIndex++)
         {
             lb = layoutBlockList.get(blockIndex);
 
-            switch (lb.tag)
+            switch (lb.getTag())
             {
             case LayoutBlockConstants.TYPE_MARKER_END:
                 // Found
@@ -3087,7 +3087,7 @@ public class ClassFileLayouter {
         LayoutSection lsSource, int markerStartTag, int markerEndTag)
     {
         // Rechercher le premier block de type 'tag'
-        int lastBlockIndex = lsSource.lastBlockIndex;
+        int lastBlockIndex = lsSource.getLastBlockIndex();
 
         LayoutBlock lb;
         while (blockIndex < lastBlockIndex)
@@ -3095,12 +3095,12 @@ public class ClassFileLayouter {
             blockIndex++;
             lb = layoutBlockList.get(blockIndex);
 
-            if (lb.tag == markerStartTag)
+            if (lb.getTag() == markerStartTag)
             {
                 // Tag de marqueur de début trouvé.
                 MarkerLayoutBlock mlb = (MarkerLayoutBlock)lb;
 
-                if (mlb.section != mlb.other.section || mlb.other.index >= lastBlockIndex)
+                if (mlb.getSection() != mlb.getOther().getSection() || mlb.getOther().getIndex() >= lastBlockIndex)
                 {
                     // Le marqueur de fin est après la limite.
                     return false;
@@ -3115,34 +3115,34 @@ public class ClassFileLayouter {
                 //  Trouver le dernier block de type 'tag' sans numero de ligne
                 int counter = 1;
 
-                blockIndex = mlb.other.index;
+                blockIndex = mlb.getOther().getIndex();
 
                 while (blockIndex < lastBlockIndex)
                 {
                     blockIndex++;
                     lb = layoutBlockList.get(blockIndex);
 
-                    if (lb.tag == LayoutBlockConstants.TYPE_BODY_BLOCK_END /* || (lb.tag == LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK) */)
+                    if (lb.getTag() == LayoutBlockConstants.TYPE_BODY_BLOCK_END /* || (lb.tag == LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK) */)
                     {
                         break;
                     }
-                    if (lb.tag == markerStartTag)
+                    if (lb.getTag() == markerStartTag)
                     {
                         // Tag de marqueur de fin trouvé.
                         mlb = (MarkerLayoutBlock)lb;
 
-                        if (mlb.section != mlb.other.section || mlb.other.index >= lastBlockIndex)
+                        if (mlb.getSection() != mlb.getOther().getSection() || mlb.getOther().getIndex() >= lastBlockIndex)
                         {
                             // Le marqueur de début est avant la limite.
                             break;
                         }
 
                         counter++;
-                        blockIndex = mlb.other.index;
+                        blockIndex = mlb.getOther().getIndex();
                     }
-                    else if (lb.tag == LayoutBlockConstants.FIELD_MARKER_START ||
-                             lb.tag == LayoutBlockConstants.METHOD_MARKER_START ||
-                             lb.tag == LayoutBlockConstants.TYPE_MARKER_START)
+                    else if (lb.getTag() == LayoutBlockConstants.FIELD_MARKER_START ||
+                             lb.getTag() == LayoutBlockConstants.METHOD_MARKER_START ||
+                             lb.getTag() == LayoutBlockConstants.TYPE_MARKER_START)
                     {
                         break;
                     }
@@ -3156,21 +3156,21 @@ public class ClassFileLayouter {
                 //  de ligne defini
                 blockIndex = firstStartTagBlockIndex;
 
-                int lowerScore = lsSource.score;
+                int lowerScore = lsSource.getScore();
                 int lowerScoreBlockIndex = blockIndex;
 
                 while (blockIndex-- > 0)
                 {
                     lb = layoutBlockList.get(blockIndex);
 
-                    if (lb.tag == LayoutBlockConstants.TYPE_BODY_BLOCK_START ||
+                    if (lb.getTag() == LayoutBlockConstants.TYPE_BODY_BLOCK_START ||
 //						(lb.tag == LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK) ||
-                        lb.tag == markerEndTag)
+                        lb.getTag() == markerEndTag)
                     {
                         // début de corps ou fin d'un bloc
-                        if (lowerScore > lb.section.score)
+                        if (lowerScore > lb.getSection().getScore())
                         {
-                            lowerScore = lb.section.score;
+                            lowerScore = lb.getSection().getScore();
                             lowerScoreBlockIndex = blockIndex;
                         }
 
@@ -3180,23 +3180,23 @@ public class ClassFileLayouter {
                         // => On s'arrete.
                         break;
                     }
-                    if (lb.tag == LayoutBlockConstants.FIELD_MARKER_END ||
-                             lb.tag == LayoutBlockConstants.METHOD_MARKER_END ||
-                             lb.tag == LayoutBlockConstants.TYPE_MARKER_END)
+                    if (lb.getTag() == LayoutBlockConstants.FIELD_MARKER_END ||
+                             lb.getTag() == LayoutBlockConstants.METHOD_MARKER_END ||
+                             lb.getTag() == LayoutBlockConstants.TYPE_MARKER_END)
                     {
                         // Fin d'un bloc d'un type different
-                        if (lb.section != null &&
-                            lowerScore > lb.section.score)
+                        if (lb.getSection() != null &&
+                            lowerScore > lb.getSection().getScore())
                         {
-                            lowerScore = lb.section.score;
+                            lowerScore = lb.getSection().getScore();
                             lowerScoreBlockIndex = blockIndex;
                         }
 
-                        blockIndex = ((MarkerLayoutBlock)lb).other.index;
+                        blockIndex = ((MarkerLayoutBlock)lb).getOther().getIndex();
                     }
                 }
 
-                if (lowerScore != lsSource.score)
+                if (lowerScore != lsSource.getScore())
                 {
                     // Trouvé.
 
@@ -3212,14 +3212,14 @@ public class ClassFileLayouter {
                     {
                         lb = layoutBlockList.get(blockIndex);
 
-                        if (lb.tag == LayoutBlockConstants.TYPE_BODY_BLOCK_END /* || (lb.tag == LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK) */)
+                        if (lb.getTag() == LayoutBlockConstants.TYPE_BODY_BLOCK_END /* || (lb.tag == LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK) */)
                         {
                             break;
                         }
-                        if (lb.tag == markerStartTag)
+                        if (lb.getTag() == markerStartTag)
                         {
                             lastEndTagBlockIndex = blockIndex =
-                                ((MarkerLayoutBlock)lb).other.index;
+                                ((MarkerLayoutBlock)lb).getOther().getIndex();
 
                             counter--;
                             if (counter == 0) {
@@ -3240,7 +3240,7 @@ public class ClassFileLayouter {
 
                     LayoutBlock insertionLayoutBlock =
                         layoutBlockList.get(lowerScoreBlockIndex);
-                    LayoutSection lsTarget = insertionLayoutBlock.section;
+                    LayoutSection lsTarget = insertionLayoutBlock.getSection();
 
                     // Remove blocks
                     int sourceDeltaIndex =
@@ -3255,7 +3255,7 @@ public class ClassFileLayouter {
                         lb = layoutBlockList.remove(blockIndex);
 
                         // Update section attribute
-                        lb.section = lsTarget;
+                        lb.setSection(lsTarget);
 
                         layoutBlockListToMove.add(lb);
                     }
@@ -3263,7 +3263,7 @@ public class ClassFileLayouter {
                     Collections.reverse(layoutBlockListToMove);
 
                     // Remove separator after blocks if exists
-                    if (layoutBlockList.get(blockIndex+1).tag ==
+                    if (layoutBlockList.get(blockIndex+1).getTag() ==
                         LayoutBlockConstants.SEPARATOR)
                     {
                         layoutBlockList.remove(blockIndex+1);
@@ -3271,10 +3271,10 @@ public class ClassFileLayouter {
                     }
 
                     // Modify separator brefore blocks if exists
-                    if (layoutBlockList.get(blockIndex).tag ==
+                    if (layoutBlockList.get(blockIndex).getTag() ==
                         LayoutBlockConstants.SEPARATOR)
                     {
-                        layoutBlockList.get(blockIndex).preferedLineCount = 2;
+                        layoutBlockList.get(blockIndex).setPreferedLineCount(2);
                     }
 
                     // Blocs pas encore inserés.
@@ -3282,7 +3282,7 @@ public class ClassFileLayouter {
 
                     int targetDeltaIndex = 0;
 
-                    if (insertionLayoutBlock.tag != LayoutBlockConstants.TYPE_BODY_BLOCK_START /*&&
+                    if (insertionLayoutBlock.getTag() != LayoutBlockConstants.TYPE_BODY_BLOCK_START /*&&
                         (insertionLayoutBlock.tag != LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK)*/)
                     {
                         // Insert new separator before blocks
@@ -3312,14 +3312,14 @@ public class ClassFileLayouter {
                     targetDeltaIndex += layoutBlockListToMoveSize;
 
                     // Update separator after blocks
-                    if (insertionLayoutBlock.tag == LayoutBlockConstants.TYPE_BODY_BLOCK_START /*||
+                    if (insertionLayoutBlock.getTag() == LayoutBlockConstants.TYPE_BODY_BLOCK_START /*||
                         (insertionLayoutBlock.tag == LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK)*/)
                     {
                         // Insert new separator after blocks
                         int preferedLineCount = 2;
 
                         if (markerEndTag == LayoutBlockConstants.FIELD_MARKER_END &&
-                            layoutBlockList.get(lowerScoreBlockIndex+targetDeltaIndex).tag ==
+                            layoutBlockList.get(lowerScoreBlockIndex+targetDeltaIndex).getTag() ==
                                 LayoutBlockConstants.FIELD_MARKER_END)
                         {
                             preferedLineCount = 1;
@@ -3342,46 +3342,46 @@ public class ClassFileLayouter {
                         int preferedLineCount = 2;
 
                         if (markerStartTag == LayoutBlockConstants.FIELD_MARKER_START &&
-                            layoutBlockList.get(lowerScoreBlockIndex+targetDeltaIndex+1).tag ==
+                            layoutBlockList.get(lowerScoreBlockIndex+targetDeltaIndex+1).getTag() ==
                                 LayoutBlockConstants.FIELD_MARKER_START)
                         {
                             preferedLineCount = 1;
                         }
 
-                        afterLayoutBlock.preferedLineCount = preferedLineCount;
+                        afterLayoutBlock.setPreferedLineCount(preferedLineCount);
                     }
 
                     // -- 4 ------------------------------------------------- //
 
                     // Update indexes of sections
-                    lsTarget.lastBlockIndex += targetDeltaIndex;
+                    lsTarget.setLastBlockIndex(lsTarget.getLastBlockIndex() + targetDeltaIndex);
 
-                    for (int sectionIndex=lsTarget.index+1;
-                             sectionIndex<=lsSource.index-1;
+                    for (int sectionIndex=lsTarget.getIndex()+1;
+                             sectionIndex<=lsSource.getIndex()-1;
                              sectionIndex++)
                     {
                         LayoutSection ls = layoutSectionList.get(sectionIndex);
-                        ls.firstBlockIndex += targetDeltaIndex;
-                        ls.lastBlockIndex  += targetDeltaIndex;
+                        ls.setFirstBlockIndex(ls.getFirstBlockIndex() + targetDeltaIndex);
+                        ls.setLastBlockIndex(ls.getLastBlockIndex() + targetDeltaIndex);
                     }
 
-                    lsSource.firstBlockIndex += targetDeltaIndex;
+                    lsSource.setFirstBlockIndex(lsSource.getFirstBlockIndex() + targetDeltaIndex);
 
                     int delta = sourceDeltaIndex - targetDeltaIndex;
 
                     if (delta != 0)
                     {
-                        lsSource.lastBlockIndex -= delta;
+                        lsSource.setLastBlockIndex(lsSource.getLastBlockIndex() - delta);
 
                         LayoutSection ls;
                         // Update indexes of last sections
                         for (int sectionIndex=layoutSectionList.size()-1;
-                                 sectionIndex>lsSource.index;
+                                 sectionIndex>lsSource.getIndex();
                                  sectionIndex--)
                         {
                             ls = layoutSectionList.get(sectionIndex);
-                            ls.firstBlockIndex -= delta;
-                            ls.lastBlockIndex  -= delta;
+                            ls.setFirstBlockIndex(ls.getFirstBlockIndex() - delta);
+                            ls.setLastBlockIndex(ls.getLastBlockIndex() - delta);
                         }
                     }
 
@@ -3392,7 +3392,7 @@ public class ClassFileLayouter {
                          blockIndex<blockLength;
                          blockIndex++)
                     {
-                        layoutBlockList.get(blockIndex).index = blockIndex;
+                        layoutBlockList.get(blockIndex).setIndex(blockIndex);
                     }
 
                     // Update relayout flag of sections
@@ -3404,13 +3404,13 @@ public class ClassFileLayouter {
 
                 break;
             }
-            if (lb.tag == LayoutBlockConstants.FIELD_MARKER_START ||
-                     lb.tag == LayoutBlockConstants.METHOD_MARKER_START ||
-                     lb.tag == LayoutBlockConstants.TYPE_MARKER_START)
+            if (lb.getTag() == LayoutBlockConstants.FIELD_MARKER_START ||
+                     lb.getTag() == LayoutBlockConstants.METHOD_MARKER_START ||
+                     lb.getTag() == LayoutBlockConstants.TYPE_MARKER_START)
             {
-                blockIndex = ((MarkerLayoutBlock)lb).other.index;
+                blockIndex = ((MarkerLayoutBlock)lb).getOther().getIndex();
             }
-            else if (lb.tag == LayoutBlockConstants.TYPE_BODY_BLOCK_END /* || (lb.tag == LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK) */)
+            else if (lb.getTag() == LayoutBlockConstants.TYPE_BODY_BLOCK_END /* || (lb.tag == LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK) */)
             {
                 break;
             }
@@ -3422,34 +3422,34 @@ public class ClassFileLayouter {
     private static void updateRelayoutFlag(
         List<LayoutBlock> layoutBlockList, LayoutSection section)
     {
-        section.relayout = true;
+        section.setRelayout(true);
 
-        int lastBlockIndex = section.lastBlockIndex;
+        int lastBlockIndex = section.getLastBlockIndex();
 
         LayoutBlock block;
-        for (int blockIndex=section.firstBlockIndex;
+        for (int blockIndex=section.getFirstBlockIndex();
                  blockIndex<lastBlockIndex;
                  blockIndex++)
         {
             block = layoutBlockList.get(blockIndex);
 
-            if (block.tag == LayoutBlockConstants.TYPE_BODY_BLOCK_START
-                    || block.tag == LayoutBlockConstants.TYPE_BODY_BLOCK_END
-                    || block.tag == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START
-                    || block.tag == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_END
-                    || block.tag == LayoutBlockConstants.METHOD_BODY_BLOCK_START
-                    || block.tag == LayoutBlockConstants.METHOD_BODY_BLOCK_END
-                    || block.tag == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START
-                    || block.tag == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_END
-                    || block.tag == LayoutBlockConstants.SINGLE_STATEMENT_BLOCK_START
-                    || block.tag == LayoutBlockConstants.SINGLE_STATEMENT_BLOCK_END
-                    || block.tag == LayoutBlockConstants.STATEMENTS_BLOCK_START
-                    || block.tag == LayoutBlockConstants.STATEMENTS_BLOCK_END
-                    || block.tag == LayoutBlockConstants.SWITCH_BLOCK_START
-                    || block.tag == LayoutBlockConstants.SWITCH_BLOCK_END) {
+            if (block.getTag() == LayoutBlockConstants.TYPE_BODY_BLOCK_START
+                    || block.getTag() == LayoutBlockConstants.TYPE_BODY_BLOCK_END
+                    || block.getTag() == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START
+                    || block.getTag() == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_END
+                    || block.getTag() == LayoutBlockConstants.METHOD_BODY_BLOCK_START
+                    || block.getTag() == LayoutBlockConstants.METHOD_BODY_BLOCK_END
+                    || block.getTag() == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START
+                    || block.getTag() == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_END
+                    || block.getTag() == LayoutBlockConstants.SINGLE_STATEMENT_BLOCK_START
+                    || block.getTag() == LayoutBlockConstants.SINGLE_STATEMENT_BLOCK_END
+                    || block.getTag() == LayoutBlockConstants.STATEMENTS_BLOCK_START
+                    || block.getTag() == LayoutBlockConstants.STATEMENTS_BLOCK_END
+                    || block.getTag() == LayoutBlockConstants.SWITCH_BLOCK_START
+                    || block.getTag() == LayoutBlockConstants.SWITCH_BLOCK_END) {
                 BlockLayoutBlock blb = (BlockLayoutBlock) block;
-                LayoutSection otherSection = blb.other.section;
-                if (!otherSection.relayout) {
+                LayoutSection otherSection = blb.getOther().getSection();
+                if (!otherSection.isRelayout()) {
                     updateRelayoutFlag(layoutBlockList, otherSection);
                 }
             }

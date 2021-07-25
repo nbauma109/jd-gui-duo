@@ -32,6 +32,6 @@ public class IStore extends StoreInstruction
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        return this.valueref.getReturnedSignature(constants, localVariables);
+        return this.getValueref().getReturnedSignature(constants, localVariables);
     }
 }

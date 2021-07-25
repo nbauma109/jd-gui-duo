@@ -25,13 +25,21 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
  */
 public class FastTestList extends FastList
 {
-    public Instruction test;
+    private Instruction test;
 
     public FastTestList(
         int opcode, int offset, int lineNumber, int branch, Instruction test,
         List<Instruction> instructions)
     {
         super(opcode, offset, lineNumber, branch, instructions);
-        this.test = test;
+        this.setTest(test);
     }
+
+	public Instruction getTest() {
+		return test;
+	}
+
+	public void setTest(Instruction test) {
+		this.test = test;
+	}
 }

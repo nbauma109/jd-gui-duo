@@ -24,7 +24,7 @@ import jd.core.model.classfile.LocalVariables;
  */
 public class IConst extends ConstInstruction
 {
-    public String signature;
+    private String signature;
 
     public IConst(int opcode, int offset, int lineNumber, int value)
     {
@@ -42,22 +42,22 @@ public class IConst extends ConstInstruction
         if (value < 0)
         {
             if (value >= Byte.MIN_VALUE) {
-				this.signature = "B";
+				this.setSignature("B");
 			} else if (value >= Short.MIN_VALUE) {
-				this.signature = "S";
+				this.setSignature("S");
 			} else {
-				this.signature = "I";
+				this.setSignature("I");
 			}
         } else if (value <= 1) {
-			this.signature = "X";
+			this.setSignature("X");
 		} else if (value <= Byte.MAX_VALUE) {
-			this.signature = "Y";
+			this.setSignature("Y");
 		} else if (value <= Short.MAX_VALUE) {
-			this.signature = "S";
+			this.setSignature("S");
 		} else if (value <= Character.MAX_VALUE) {
-			this.signature = "C";
+			this.setSignature("C");
 		} else {
-			this.signature = "I";
+			this.setSignature("I");
 		}
     }
 
@@ -70,11 +70,15 @@ public class IConst extends ConstInstruction
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        return this.signature;
+        return this.getSignature();
     }
 
     public void setReturnedSignature(String signature)
     {
-        this.signature = signature;
+        this.setSignature(signature);
     }
+
+	public void setSignature(String signature) {
+		this.signature = signature;
+	}
 }

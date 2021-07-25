@@ -19,4 +19,8 @@ public class AttributeLineNumberTable implements Attribute {
     public LineNumber[] getLineNumberTable() {
         return lineNumberTable;
     }
+
+    public LineNumber getLineNumberTable(int i) {
+    	return lineNumberTable[i];
+    }
 }

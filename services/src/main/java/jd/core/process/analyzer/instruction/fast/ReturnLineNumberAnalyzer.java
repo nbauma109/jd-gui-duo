@@ -46,7 +46,7 @@ public class ReturnLineNumberAnalyzer
 
         if (length > 1)
         {
-            int afterListLineNumber = list.get(length-1).lineNumber;
+            int afterListLineNumber = list.get(length-1).getLineNumber();
 
             if (afterListLineNumber != Instruction.UNKNOWN_LINE_NUMBER)
             {
@@ -65,7 +65,7 @@ public class ReturnLineNumberAnalyzer
         {
             Instruction instruction = list.get(index);
 
-            switch (instruction.opcode)
+            switch (instruction.getOpcode())
             {
             case FastConstants.WHILE:
             case FastConstants.DO_WHILE:
@@ -76,7 +76,7 @@ public class ReturnLineNumberAnalyzer
             case FastConstants.SYNCHRONIZED:
                 {
                     List<Instruction> instructions =
-                            ((FastList)instruction).instructions;
+                            ((FastList)instruction).getInstructions();
                     if (instructions != null)
                         recursiveCheck(instructions, afterListLineNumber);
                 }
@@ -84,15 +84,15 @@ public class ReturnLineNumberAnalyzer
             case FastConstants.IF_ELSE:
                 {
                     FastTest2Lists ft2l = (FastTest2Lists)instruction;
-                    recursiveCheck(ft2l.instructions, afterListLineNumber);
-                    recursiveCheck(ft2l.instructions2, afterListLineNumber);
+                    recursiveCheck(ft2l.getInstructions(), afterListLineNumber);
+                    recursiveCheck(ft2l.getInstructions2(), afterListLineNumber);
                 }
                 break;
             case FastConstants.SWITCH:
             case FastConstants.SWITCH_ENUM:
             case FastConstants.SWITCH_STRING:
                 {
-                    FastSwitch.Pair[] pairs = ((FastSwitch)instruction).pairs;
+                    FastSwitch.Pair[] pairs = ((FastSwitch)instruction).getPairs();
                     if (pairs != null)
                         for (int i=pairs.length-1; i>=0; --i)
                         {
@@ -103,7 +103,7 @@ public class ReturnLineNumberAnalyzer
                                 if (!instructions.isEmpty())
                                 {
                                     afterListLineNumber =
-                                        instructions.get(0).lineNumber;
+                                        instructions.get(0).getLineNumber();
                                 }
                             }
                         }
@@ -113,45 +113,45 @@ public class ReturnLineNumberAnalyzer
                 {
                     FastTry ft = (FastTry)instruction;
 
-                    if (ft.finallyInstructions != null)
+                    if (ft.getFinallyInstructions() != null)
                     {
-                        recursiveCheck(ft.finallyInstructions, afterListLineNumber);
-                        if (!ft.finallyInstructions.isEmpty())
+                        recursiveCheck(ft.getFinallyInstructions(), afterListLineNumber);
+                        if (!ft.getFinallyInstructions().isEmpty())
                         {
                             afterListLineNumber =
-                                ft.finallyInstructions.get(0).lineNumber;
+                                ft.getFinallyInstructions().get(0).getLineNumber();
                         }
                     }
 
-                    if (ft.catches != null)
+                    if (ft.getCatches() != null)
                     {
-                        for (int i=ft.catches.size()-1; i>=0; --i)
+                        for (int i=ft.getCatches().size()-1; i>=0; --i)
                         {
                             List<Instruction> catchInstructions =
-                                ft.catches.get(i).instructions;
+                                ft.getCatches().get(i).getInstructions();
                             recursiveCheck(
                                 catchInstructions, afterListLineNumber);
                             if (!catchInstructions.isEmpty())
                             {
                                 afterListLineNumber =
-                                    catchInstructions.get(0).lineNumber;
+                                    catchInstructions.get(0).getLineNumber();
                             }
                         }
                     }
 
-                    recursiveCheck(ft.instructions, afterListLineNumber);
+                    recursiveCheck(ft.getInstructions(), afterListLineNumber);
                 }
                 break;
             case Const.RETURN:
                 {
                     Return r = (Return)instruction;
-                    if (r.lineNumber > afterListLineNumber)
-                        r.lineNumber = Instruction.UNKNOWN_LINE_NUMBER;
+                    if (r.getLineNumber() > afterListLineNumber)
+                        r.setLineNumber(Instruction.UNKNOWN_LINE_NUMBER);
                 }
                 break;
             }
 
-            afterListLineNumber = instruction.lineNumber;
+            afterListLineNumber = instruction.getLineNumber();
         }
     }
 }

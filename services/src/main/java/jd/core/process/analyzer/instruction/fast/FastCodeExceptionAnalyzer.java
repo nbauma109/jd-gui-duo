@@ -98,19 +98,19 @@ public class FastCodeExceptionAnalyzer
 			fce1 = fastCodeExceptions.get(i);
 			fce2 = fastCodeExceptions.get(i-1);
 
-			if (fce1.tryFromOffset == fce2.tryFromOffset &&
-					fce1.tryToOffset == fce2.tryToOffset &&
-					fce1.synchronizedFlag == fce2.synchronizedFlag &&
-					(fce1.afterOffset == UtilConstants.INVALID_OFFSET || fce1.afterOffset > fce2.maxOffset) &&
-					(fce2.afterOffset == UtilConstants.INVALID_OFFSET || fce2.afterOffset > fce1.maxOffset))
+			if (fce1.getTryFromOffset() == fce2.getTryFromOffset() &&
+					fce1.getTryToOffset() == fce2.getTryToOffset() &&
+					fce1.hasSynchronizedFlag() == fce2.hasSynchronizedFlag() &&
+					(fce1.getAfterOffset() == UtilConstants.INVALID_OFFSET || fce1.getAfterOffset() > fce2.maxOffset) &&
+					(fce2.getAfterOffset() == UtilConstants.INVALID_OFFSET || fce2.getAfterOffset() > fce1.maxOffset))
 			{
 				// Append catches
-				fce2.catches.addAll(fce1.catches);
-				Collections.sort(fce2.catches);
+				fce2.getCatches().addAll(fce1.getCatches());
+				Collections.sort(fce2.getCatches());
 				// Append finally
 				if (fce2.nbrFinally == 0)
 				{
-					fce2.finallyFromOffset = fce1.finallyFromOffset;
+					fce2.setFinallyFromOffset(fce1.getFinallyFromOffset());
 					fce2.nbrFinally        = fce1.nbrFinally;
 				}
 				// Update 'maxOffset'
@@ -118,10 +118,10 @@ public class FastCodeExceptionAnalyzer
 					fce2.maxOffset = fce1.maxOffset;
 				}
 				// Update 'afterOffset'
-				if (fce2.afterOffset == UtilConstants.INVALID_OFFSET ||
-						fce1.afterOffset != UtilConstants.INVALID_OFFSET &&
-						fce1.afterOffset < fce2.afterOffset) {
-					fce2.afterOffset = fce1.afterOffset;
+				if (fce2.getAfterOffset() == UtilConstants.INVALID_OFFSET ||
+						fce1.getAfterOffset() != UtilConstants.INVALID_OFFSET &&
+						fce1.getAfterOffset() < fce2.getAfterOffset()) {
+					fce2.setAfterOffset(fce1.getAfterOffset());
 				}
 				// Remove last FastCodeException
 				fastCodeExceptions.remove(i);
@@ -139,7 +139,7 @@ public class FastCodeExceptionAnalyzer
 			// Determine type
 			defineType(list, fce);
 
-			if (fce.type == FastConstants.TYPE_UNDEFINED) {
+			if (fce.getType() == FastConstants.TYPE_UNDEFINED) {
 				System.err.println("Undefined type catch");
 			}
 
@@ -148,15 +148,15 @@ public class FastCodeExceptionAnalyzer
 					method, list, switchCaseOffsets, fastCodeExceptions, fce, i);
 
 			length = list.size();
-			if (fce.afterOffset == UtilConstants.INVALID_OFFSET && length > 0)
+			if (fce.getAfterOffset() == UtilConstants.INVALID_OFFSET && length > 0)
 			{
 				Instruction lastInstruction = list.get(length-1);
-				fce.afterOffset = lastInstruction.offset;
+				fce.setAfterOffset(lastInstruction.getOffset());
 
-				if (lastInstruction.opcode != Const.RETURN &&
-						lastInstruction.opcode != ByteCodeConstants.XRETURN) {
+				if (lastInstruction.getOpcode() != Const.RETURN &&
+						lastInstruction.getOpcode() != ByteCodeConstants.XRETURN) {
 					// Set afterOffset to a virtual instruction after list.
-					fce.afterOffset++;
+					fce.setAfterOffset(fce.getAfterOffset() + 1);
 				}
 			}
 		}
@@ -258,7 +258,7 @@ public class FastCodeExceptionAnalyzer
 			return false;
 		}
 
-		if (list.get(index).opcode == Const.MONITOREXIT)
+		if (list.get(index).getOpcode() == Const.MONITOREXIT)
 		{
 			// Cas particulier Jikes 1.2.2
 			return true;
@@ -286,13 +286,13 @@ public class FastCodeExceptionAnalyzer
 		 */
 		Instruction instruction = list.get(index-1);
 
-		if (instruction.opcode != Const.MONITORENTER) {
+		if (instruction.getOpcode() != Const.MONITORENTER) {
 			return false;
 		}
 
 		int varMonitorIndex;
 		MonitorEnter monitorEnter = (MonitorEnter)instruction;
-		switch (monitorEnter.objectref.opcode)
+		switch (monitorEnter.getObjectref().getOpcode())
 		{
 		case Const.ALOAD:
 		{
@@ -300,22 +300,22 @@ public class FastCodeExceptionAnalyzer
 				return false;
 			}
 			instruction = list.get(index-2);
-			if (instruction.opcode != Const.ASTORE) {
+			if (instruction.getOpcode() != Const.ASTORE) {
 				return false;
 			}
 			AStore astore = (AStore)instruction;
-			varMonitorIndex = astore.index;
+			varMonitorIndex = astore.getIndex();
 		}
 		break;
 		case ByteCodeConstants.ASSIGNMENT:
 		{
 			AssignmentInstruction ai =
-					(AssignmentInstruction)monitorEnter.objectref;
-			if (ai.value1.opcode != Const.ALOAD) {
+					(AssignmentInstruction)monitorEnter.getObjectref();
+			if (ai.getValue1().getOpcode() != Const.ALOAD) {
 				return false;
 			}
-			ALoad aload = (ALoad)ai.value1;
-			varMonitorIndex = aload.index;
+			ALoad aload = (ALoad)ai.getValue1();
+			varMonitorIndex = aload.getIndex();
 		}
 		break;
 		default:
@@ -331,16 +331,16 @@ public class FastCodeExceptionAnalyzer
 			instruction = list.get(index);
 			index++;
 
-			if (instruction.opcode == Const.MONITOREXIT) {
+			if (instruction.getOpcode() == Const.MONITOREXIT) {
 				checkMonitorExit = true;
 				MonitorExit monitorExit = (MonitorExit)instruction;
 
-				if (monitorExit.objectref.opcode == Const.ALOAD &&
-						((ALoad)monitorExit.objectref).index == varMonitorIndex) {
+				if (monitorExit.getObjectref().getOpcode() == Const.ALOAD &&
+						((ALoad)monitorExit.getObjectref()).getIndex() == varMonitorIndex) {
 					return true;
 				}
-			} else if (instruction.opcode == Const.RETURN || instruction.opcode == ByteCodeConstants.XRETURN
-					|| instruction.opcode == Const.ATHROW) {
+			} else if (instruction.getOpcode() == Const.RETURN || instruction.getOpcode() == ByteCodeConstants.XRETURN
+					|| instruction.getOpcode() == Const.ATHROW) {
 				return false;
 			}
 		}
@@ -364,16 +364,16 @@ public class FastCodeExceptionAnalyzer
 			{
 				FastCodeExcepcion fce = fastCodeExceptions.get(i);
 
-				if (fce.finallyFromOffset == UtilConstants.INVALID_OFFSET &&
-						fastAggregatedCodeException.getStartPC() == fce.tryFromOffset &&
-						fastAggregatedCodeException.getEndPC() == fce.tryToOffset &&
+				if (fce.getFinallyFromOffset() == UtilConstants.INVALID_OFFSET &&
+						fastAggregatedCodeException.getStartPC() == fce.getTryFromOffset() &&
+						fastAggregatedCodeException.getEndPC() == fce.getTryToOffset() &&
 						fastAggregatedCodeException.getHandlerPC() > fce.maxOffset &&
-						!fastAggregatedCodeException.synchronizedFlag && (fce.afterOffset == UtilConstants.INVALID_OFFSET ||
-						fastAggregatedCodeException.getEndPC() < fce.afterOffset &&
-						fastAggregatedCodeException.getHandlerPC() < fce.afterOffset))
+						!fastAggregatedCodeException.synchronizedFlag && (fce.getAfterOffset() == UtilConstants.INVALID_OFFSET ||
+						fastAggregatedCodeException.getEndPC() < fce.getAfterOffset() &&
+						fastAggregatedCodeException.getHandlerPC() < fce.getAfterOffset()))
 				{
 					fce.maxOffset = fastAggregatedCodeException.getHandlerPC();
-					fce.finallyFromOffset = fastAggregatedCodeException.getHandlerPC();
+					fce.setFinallyFromOffset(fastAggregatedCodeException.getHandlerPC());
 					fce.nbrFinally += fastAggregatedCodeException.nbrFinally;
 					return true;
 				}
@@ -385,16 +385,16 @@ public class FastCodeExceptionAnalyzer
 			{
 				fce = fastCodeExceptions.get(i);
 
-				if (fce.finallyFromOffset == UtilConstants.INVALID_OFFSET &&
-						fastAggregatedCodeException.getStartPC() == fce.tryFromOffset &&
-						fastAggregatedCodeException.getEndPC() >= fce.tryToOffset &&
+				if (fce.getFinallyFromOffset() == UtilConstants.INVALID_OFFSET &&
+						fastAggregatedCodeException.getStartPC() == fce.getTryFromOffset() &&
+						fastAggregatedCodeException.getEndPC() >= fce.getTryToOffset() &&
 						fastAggregatedCodeException.getHandlerPC() > fce.maxOffset &&
-						!fastAggregatedCodeException.synchronizedFlag && (fce.afterOffset == UtilConstants.INVALID_OFFSET ||
-						fastAggregatedCodeException.getEndPC() < fce.afterOffset &&
-						fastAggregatedCodeException.getHandlerPC() < fce.afterOffset))
+						!fastAggregatedCodeException.synchronizedFlag && (fce.getAfterOffset() == UtilConstants.INVALID_OFFSET ||
+						fastAggregatedCodeException.getEndPC() < fce.getAfterOffset() &&
+						fastAggregatedCodeException.getHandlerPC() < fce.getAfterOffset()))
 				{
 					fce.maxOffset = fastAggregatedCodeException.getHandlerPC();
-					fce.finallyFromOffset = fastAggregatedCodeException.getHandlerPC();
+					fce.setFinallyFromOffset(fastAggregatedCodeException.getHandlerPC());
 					fce.nbrFinally += fastAggregatedCodeException.nbrFinally;
 					return true;
 				}
@@ -425,19 +425,19 @@ public class FastCodeExceptionAnalyzer
 
 		if (fastCodeException.getCatchType() == 0)
 		{
-			fce.finallyFromOffset = fastCodeException.getHandlerPC();
+			fce.setFinallyFromOffset(fastCodeException.getHandlerPC());
 			fce.nbrFinally += fastCodeException.nbrFinally;
 		}
 		else
 		{
-			fce.catches.add(new FastCodeExceptionCatch(
+			fce.getCatches().add(new FastCodeExceptionCatch(
 					fastCodeException.getCatchType(),
 					fastCodeException.otherCatchTypes,
 					fastCodeException.getHandlerPC()));
 		}
 
 		// Approximation a affinée par la méthode 'ComputeAfterOffset'
-		fce.afterOffset = searchAfterOffset(list, fastCodeException.getHandlerPC());
+		fce.setAfterOffset(searchAfterOffset(list, fastCodeException.getHandlerPC()));
 
 		return fce;
 	}
@@ -455,25 +455,25 @@ public class FastCodeExceptionAnalyzer
 		index--;
 		// Search previous 'goto' instruction
 		Instruction i = list.get(index);
-		switch (i.opcode)
+		switch (i.getOpcode())
 		{
 		case Const.GOTO:
-			int branch = ((Goto)i).branch;
+			int branch = ((Goto)i).getBranch();
 			if (branch < 0) {
 				return UtilConstants.INVALID_OFFSET;
 			}
-			int jumpOffset = i.offset + branch;
+			int jumpOffset = i.getOffset() + branch;
 			index = InstructionUtil.getIndexForOffset(list, jumpOffset);
 			if (index <= 0) {
 				return UtilConstants.INVALID_OFFSET;
 			}
 			i = list.get(index);
-			if (i.opcode != Const.JSR) {
+			if (i.getOpcode() != Const.JSR) {
 				return jumpOffset;
 			}
-			branch = ((Jsr)i).branch;
+			branch = ((Jsr)i).getBranch();
 			if (branch > 0) {
-				return i.offset + branch;
+				return i.getOffset() + branch;
 			}
 			return jumpOffset+1;
 
@@ -492,10 +492,10 @@ public class FastCodeExceptionAnalyzer
 			//  45: ret 4
 			while (--index >= 3)
 			{
-				if (list.get(index).opcode == Const.ATHROW &&
-						list.get(index-1).opcode == Const.JSR &&
-						list.get(index-2).opcode == Const.ASTORE &&
-						list.get(index-3).opcode == Const.GOTO)
+				if (list.get(index).getOpcode() == Const.ATHROW &&
+						list.get(index-1).getOpcode() == Const.JSR &&
+						list.get(index-2).getOpcode() == Const.ASTORE &&
+						list.get(index-3).getOpcode() == Const.GOTO)
 				{
 					Goto g = (Goto)list.get(index-3);
 					return g.getJumpOffset();
@@ -518,14 +518,14 @@ public class FastCodeExceptionAnalyzer
 		{
 			instruction = list.get(i);
 
-			if (instruction.opcode == Const.TABLESWITCH || instruction.opcode == Const.LOOKUPSWITCH) {
+			if (instruction.getOpcode() == Const.TABLESWITCH || instruction.getOpcode() == Const.LOOKUPSWITCH) {
 				Switch s = (Switch)instruction;
-				int j = s.offsets.length;
+				int j = s.getOffsets().length;
 				int[] offsets = new int[j+1];
 
-				offsets[j] = s.offset + s.defaultOffset;
+				offsets[j] = s.getOffset() + s.getDefaultOffset();
 				while (j-- > 0) {
-					offsets[j] = s.offset + s.offsets[j];
+					offsets[j] = s.getOffset() + s.getOffset(j);
 				}
 
 				Arrays.sort(offsets);
@@ -544,44 +544,42 @@ public class FastCodeExceptionAnalyzer
 		{
 		case 0:
 			// No
-			fastCodeException.type = FastConstants.TYPE_CATCH;
+			fastCodeException.setType(FastConstants.TYPE_CATCH);
 			break;
 		case 1:
 			// 1.1.8, 1.3.1, 1.4.2 or eclipse 677
 			// Yes, contains catch ?
-			if (fastCodeException.catches == null	||
-			fastCodeException.catches.isEmpty())
+			if (fastCodeException.getCatches() == null	||
+			fastCodeException.getCatches().isEmpty())
 			{
 				// No
 				int index = InstructionUtil.getIndexForOffset(
-						list, fastCodeException.finallyFromOffset);
+						list, fastCodeException.getFinallyFromOffset());
 				if (index < 0) {
 					return;
 				}
 
 				// Search 'goto' instruction
 				Instruction instruction = list.get(index-1);
-				switch (instruction.opcode)
+				switch (instruction.getOpcode())
 				{
 				case Const.GOTO:
 					if (tryBlockContainsJsr(list, fastCodeException))
 					{
-						fastCodeException.type = FastConstants.TYPE_118_FINALLY;
+						fastCodeException.setType(FastConstants.TYPE_118_FINALLY);
 					} else // Search previous 'goto' instruction
-						if (list.get(index-2).opcode == Const.MONITOREXIT) {
-							fastCodeException.type = FastConstants.TYPE_118_SYNCHRONIZED;
+						if (list.get(index-2).getOpcode() == Const.MONITOREXIT) {
+							fastCodeException.setType(FastConstants.TYPE_118_SYNCHRONIZED);
 						} else {
 							// TYPE_ECLIPSE_677_FINALLY or TYPE_118_FINALLY_2 ?
 							int jumpOffset = ((Goto)instruction).getJumpOffset();
 							instruction =
 									InstructionUtil.getInstructionAt(list, jumpOffset);
 
-							if (instruction.opcode == Const.JSR) {
-								fastCodeException.type =
-										FastConstants.TYPE_118_FINALLY_2;
+							if (instruction.getOpcode() == Const.JSR) {
+								fastCodeException.setType(FastConstants.TYPE_118_FINALLY_2);
 							} else {
-								fastCodeException.type =
-										FastConstants.TYPE_ECLIPSE_677_FINALLY;
+								fastCodeException.setType(FastConstants.TYPE_ECLIPSE_677_FINALLY);
 							}
 						}
 					break;
@@ -589,25 +587,25 @@ public class FastCodeExceptionAnalyzer
 				case ByteCodeConstants.XRETURN:
 					if (tryBlockContainsJsr(list, fastCodeException))
 					{
-						fastCodeException.type = FastConstants.TYPE_118_FINALLY;
+						fastCodeException.setType(FastConstants.TYPE_118_FINALLY);
 					} else // Search previous 'return' instruction
-						if (list.get(index-2).opcode == Const.MONITOREXIT) {
-							fastCodeException.type = FastConstants.TYPE_118_SYNCHRONIZED;
+						if (list.get(index-2).getOpcode() == Const.MONITOREXIT) {
+							fastCodeException.setType(FastConstants.TYPE_118_SYNCHRONIZED);
 						} else {
 							// TYPE_ECLIPSE_677_FINALLY or TYPE_142 ?
 							Instruction firstFinallyInstruction = list.get(index+1);
-							int exceptionIndex = ((AStore)list.get(index)).index;
+							int exceptionIndex = ((AStore)list.get(index)).getIndex();
 							int length = list.size();
 
 							// Search throw instruction
 							while (++index < length)
 							{
 								instruction = list.get(index);
-								if (instruction.opcode == Const.ATHROW)
+								if (instruction.getOpcode() == Const.ATHROW)
 								{
 									AThrow athrow = (AThrow)instruction;
-									if (athrow.value.opcode == Const.ALOAD &&
-											((ALoad)athrow.value).index == exceptionIndex) {
+									if (athrow.getValue().getOpcode() == Const.ALOAD &&
+											((ALoad)athrow.getValue()).getIndex() == exceptionIndex) {
 										break;
 									}
 								}
@@ -615,39 +613,34 @@ public class FastCodeExceptionAnalyzer
 
 							if (++index >= length)
 							{
-								fastCodeException.type = FastConstants.TYPE_142;
+								fastCodeException.setType(FastConstants.TYPE_142);
 							}
 							else
 							{
 								instruction = list.get(index);
 
-								fastCodeException.type =
-										instruction.opcode != firstFinallyInstruction.opcode ||
-										firstFinallyInstruction.lineNumber == Instruction.UNKNOWN_LINE_NUMBER ||
-										firstFinallyInstruction.lineNumber != instruction.lineNumber ?
-												FastConstants.TYPE_142 :
-													FastConstants.TYPE_ECLIPSE_677_FINALLY;
+								fastCodeException.setType(instruction.getOpcode() != firstFinallyInstruction.getOpcode() ||
+								firstFinallyInstruction.getLineNumber() == Instruction.UNKNOWN_LINE_NUMBER ||
+								firstFinallyInstruction.getLineNumber() != instruction.getLineNumber() ?
+										FastConstants.TYPE_142 :
+											FastConstants.TYPE_ECLIPSE_677_FINALLY);
 							}
 						}
 					break;
 				case Const.ATHROW:
 					// Search 'jsr' instruction after 'astore' instruction
-					if (list.get(index+1).opcode == Const.JSR) {
-						fastCodeException.type =
-								FastConstants.TYPE_118_FINALLY_THROW;
-					} else if (list.get(index).opcode ==
+					if (list.get(index+1).getOpcode() == Const.JSR) {
+						fastCodeException.setType(FastConstants.TYPE_118_FINALLY_THROW);
+					} else if (list.get(index).getOpcode() ==
 							Const.MONITOREXIT) {
-						fastCodeException.type =
-								FastConstants.TYPE_118_FINALLY;
+						fastCodeException.setType(FastConstants.TYPE_118_FINALLY);
 					} else {
-						fastCodeException.type =
-								FastConstants.TYPE_142_FINALLY_THROW;
+						fastCodeException.setType(FastConstants.TYPE_142_FINALLY_THROW);
 					}
 					break;
 				case Const.RET:
 					// Double synchronized blocks compiled with the JDK 1.1.8
-					fastCodeException.type =
-					FastConstants.TYPE_118_SYNCHRONIZED_DOUBLE;
+					fastCodeException.setType(FastConstants.TYPE_118_SYNCHRONIZED_DOUBLE);
 					break;
 				}
 			}
@@ -655,7 +648,7 @@ public class FastCodeExceptionAnalyzer
 			{
 				// Yes, contains catch(s) & finally
 				int index = InstructionUtil.getIndexForOffset(
-						list, fastCodeException.catches.get(0).fromOffset);
+						list, fastCodeException.getCatches().get(0).fromOffset);
 				if (index < 0) {
 					return;
 				}
@@ -663,16 +656,16 @@ public class FastCodeExceptionAnalyzer
 				index--;
 				// Search 'goto' instruction in try block
 				Instruction instruction = list.get(index);
-				if (instruction.opcode == Const.GOTO)
+				if (instruction.getOpcode() == Const.GOTO)
 				{
 					Goto g = (Goto)instruction;
 
 					index--;
 					// Search previous 'goto' instruction
 					instruction = list.get(index);
-					if (instruction.opcode == Const.JSR)
+					if (instruction.getOpcode() == Const.JSR)
 					{
-						fastCodeException.type = FastConstants.TYPE_131_CATCH_FINALLY;
+						fastCodeException.setType(FastConstants.TYPE_131_CATCH_FINALLY);
 					}
 					else
 					{
@@ -681,38 +674,33 @@ public class FastCodeExceptionAnalyzer
 								list, g.getJumpOffset());
 						instruction = list.get(index);
 
-						if (instruction.opcode == Const.JSR)
+						if (instruction.getOpcode() == Const.JSR)
 						{
-							fastCodeException.type =
-									FastConstants.TYPE_118_CATCH_FINALLY;
+							fastCodeException.setType(FastConstants.TYPE_118_CATCH_FINALLY);
 						}
 						else
 						{
 							instruction = list.get(index - 1);
 
-							if (instruction.opcode == Const.ATHROW) {
-								fastCodeException.type =
-										FastConstants.TYPE_ECLIPSE_677_CATCH_FINALLY;
+							if (instruction.getOpcode() == Const.ATHROW) {
+								fastCodeException.setType(FastConstants.TYPE_ECLIPSE_677_CATCH_FINALLY);
 							} else {
-								fastCodeException.type =
-										FastConstants.TYPE_118_CATCH_FINALLY_2;
+								fastCodeException.setType(FastConstants.TYPE_118_CATCH_FINALLY_2);
 							}
 						}
 					}
-				} else if (instruction.opcode == Const.RET)
+				} else if (instruction.getOpcode() == Const.RET)
 				{
-					fastCodeException.type =
-							FastConstants.TYPE_118_CATCH_FINALLY;
+					fastCodeException.setType(FastConstants.TYPE_118_CATCH_FINALLY);
 				}
 				else
 				{
 					index--;
 					// Search previous instruction
 					instruction = list.get(index);
-					if (instruction.opcode == Const.JSR)
+					if (instruction.getOpcode() == Const.JSR)
 					{
-						fastCodeException.type =
-								FastConstants.TYPE_131_CATCH_FINALLY;
+						fastCodeException.setType(FastConstants.TYPE_131_CATCH_FINALLY);
 					}
 				}
 			}
@@ -720,24 +708,24 @@ public class FastCodeExceptionAnalyzer
 		default:
 			// 1.3.1, 1.4.2, 1.5.0, jikes 1.2.2 or eclipse 677
 			// Yes, contains catch ?
-			if (fastCodeException.catches == null	||
-			fastCodeException.catches.isEmpty())
+			if (fastCodeException.getCatches() == null	||
+			fastCodeException.getCatches().isEmpty())
 			{
 				// No, 1.4.2 or jikes 1.2.2 ?
 				int index = InstructionUtil.getIndexForOffset(
-						list, fastCodeException.tryToOffset);
+						list, fastCodeException.getTryToOffset());
 				if (index < 0) {
 					return;
 				}
 
 				Instruction instruction = list.get(index);
-				switch (instruction.opcode)
+				switch (instruction.getOpcode())
 				{
 				case Const.JSR:
-					fastCodeException.type = FastConstants.TYPE_131_CATCH_FINALLY;
+					fastCodeException.setType(FastConstants.TYPE_131_CATCH_FINALLY);
 					break;
 				case Const.ATHROW:
-					fastCodeException.type = FastConstants.TYPE_JIKES_122;
+					fastCodeException.setType(FastConstants.TYPE_JIKES_122);
 					break;
 				case Const.GOTO:
 					Goto g = (Goto)instruction;
@@ -749,35 +737,35 @@ public class FastCodeExceptionAnalyzer
 						return;
 					}
 
-					if (instruction.opcode == Const.JSR &&
-							((Jsr)instruction).branch < 0)
+					if (instruction.getOpcode() == Const.JSR &&
+							((Jsr)instruction).getBranch() < 0)
 					{
-						fastCodeException.type = FastConstants.TYPE_JIKES_122;
-					} else if (index > 0 && list.get(index-1).opcode == Const.JSR) {
-						fastCodeException.type = FastConstants.TYPE_131_CATCH_FINALLY;
+						fastCodeException.setType(FastConstants.TYPE_JIKES_122);
+					} else if (index > 0 && list.get(index-1).getOpcode() == Const.JSR) {
+						fastCodeException.setType(FastConstants.TYPE_131_CATCH_FINALLY);
 					} else {
-						fastCodeException.type = FastConstants.TYPE_142;
+						fastCodeException.setType(FastConstants.TYPE_142);
 					}
 					break;
 				case Const.POP:
 					defineTypeJikes122Or142(
-							list, fastCodeException, ((Pop)instruction).objectref, index);
+							list, fastCodeException, ((Pop)instruction).getObjectref(), index);
 					break;
 				case Const.ASTORE:
 					defineTypeJikes122Or142(
-							list, fastCodeException, ((AStore)instruction).valueref, index);
+							list, fastCodeException, ((AStore)instruction).getValueref(), index);
 					break;
 				case Const.RETURN:
 				case ByteCodeConstants.XRETURN:
 					// 1.3.1, 1.4.2 or jikes 1.2.2 ?
-					if (index > 0 && list.get(index-1).opcode == Const.JSR) {
-						fastCodeException.type = FastConstants.TYPE_131_CATCH_FINALLY;
+					if (index > 0 && list.get(index-1).getOpcode() == Const.JSR) {
+						fastCodeException.setType(FastConstants.TYPE_131_CATCH_FINALLY);
 					} else {
-						fastCodeException.type = FastConstants.TYPE_142;
+						fastCodeException.setType(FastConstants.TYPE_142);
 					}
 					break;
 				default:
-					fastCodeException.type = FastConstants.TYPE_142;
+					fastCodeException.setType(FastConstants.TYPE_142);
 				}
 			}
 			else
@@ -788,24 +776,24 @@ public class FastCodeExceptionAnalyzer
 				boolean uniqueJumpAddressFlag = true;
 				int uniqueJumpAddress = -1;
 
-				if (fastCodeException.catches != null)
+				if (fastCodeException.getCatches() != null)
 				{
 					FastCodeExceptionCatch fcec;
 					int index;
-					for (int i=fastCodeException.catches.size()-1; i>=0; --i)
+					for (int i=fastCodeException.getCatches().size()-1; i>=0; --i)
 					{
-						fcec = fastCodeException.catches.get(i);
+						fcec = fastCodeException.getCatches().get(i);
 						index = InstructionUtil.getIndexForOffset(
 								list, fcec.fromOffset);
 						if (index != -1)
 						{
 							Instruction instruction = list.get(index-1);
-							if (instruction.opcode == Const.GOTO)
+							if (instruction.getOpcode() == Const.GOTO)
 							{
-								int branch  = ((Goto)instruction).branch;
+								int branch  = ((Goto)instruction).getBranch();
 								if (branch > 0)
 								{
-									int jumpAddress = instruction.offset + branch;
+									int jumpAddress = instruction.getOffset() + branch;
 									if (uniqueJumpAddress == -1)
 									{
 										uniqueJumpAddress = jumpAddress;
@@ -822,7 +810,7 @@ public class FastCodeExceptionAnalyzer
 				}
 
 				int index = InstructionUtil.getIndexForOffset(
-						list, fastCodeException.finallyFromOffset);
+						list, fastCodeException.getFinallyFromOffset());
 				if (index < 0) {
 					return;
 				}
@@ -831,12 +819,12 @@ public class FastCodeExceptionAnalyzer
 				Instruction instruction = list.get(index);
 
 				if (uniqueJumpAddressFlag &&
-						instruction.opcode == Const.GOTO)
+						instruction.getOpcode() == Const.GOTO)
 				{
-					int branch  = ((Goto)instruction).branch;
+					int branch  = ((Goto)instruction).getBranch();
 					if (branch > 0)
 					{
-						int jumpAddress = instruction.offset + branch;
+						int jumpAddress = instruction.getOffset() + branch;
 						if (uniqueJumpAddress == -1) {
 							uniqueJumpAddress = jumpAddress;
 						} else if (uniqueJumpAddress != jumpAddress) {
@@ -847,25 +835,25 @@ public class FastCodeExceptionAnalyzer
 
 				if (!uniqueJumpAddressFlag)
 				{
-					fastCodeException.type = FastConstants.TYPE_ECLIPSE_677_CATCH_FINALLY;
+					fastCodeException.setType(FastConstants.TYPE_ECLIPSE_677_CATCH_FINALLY);
 					return;
 				}
 
 				index = InstructionUtil.getIndexForOffset(
-						list, fastCodeException.tryToOffset);
+						list, fastCodeException.getTryToOffset());
 				if (index < 0) {
 					return;
 				}
 
 				instruction = list.get(index);
 
-				switch (instruction.opcode)
+				switch (instruction.getOpcode())
 				{
 				case Const.JSR:
-					fastCodeException.type = FastConstants.TYPE_131_CATCH_FINALLY;
+					fastCodeException.setType(FastConstants.TYPE_131_CATCH_FINALLY);
 					break;
 				case Const.ATHROW:
-					fastCodeException.type = FastConstants.TYPE_JIKES_122;
+					fastCodeException.setType(FastConstants.TYPE_JIKES_122);
 					break;
 				case Const.GOTO:
 					Goto g = (Goto)instruction;
@@ -877,23 +865,23 @@ public class FastCodeExceptionAnalyzer
 						return;
 					}
 
-					if (instruction.opcode == Const.JSR &&
-							((Jsr)instruction).branch < 0)
+					if (instruction.getOpcode() == Const.JSR &&
+							((Jsr)instruction).getBranch() < 0)
 					{
-						fastCodeException.type = FastConstants.TYPE_JIKES_122;
-					} else if (index > 0 && list.get(index-1).opcode == Const.JSR) {
-						fastCodeException.type = FastConstants.TYPE_131_CATCH_FINALLY;
+						fastCodeException.setType(FastConstants.TYPE_JIKES_122);
+					} else if (index > 0 && list.get(index-1).getOpcode() == Const.JSR) {
+						fastCodeException.setType(FastConstants.TYPE_131_CATCH_FINALLY);
 					} else {
-						fastCodeException.type = FastConstants.TYPE_142;
+						fastCodeException.setType(FastConstants.TYPE_142);
 					}
 					break;
 				case Const.POP:
 					defineTypeJikes122Or142(
-							list, fastCodeException, ((Pop)instruction).objectref, index);
+							list, fastCodeException, ((Pop)instruction).getObjectref(), index);
 					break;
 				case Const.ASTORE:
 					defineTypeJikes122Or142(
-							list, fastCodeException, ((AStore)instruction).valueref, index);
+							list, fastCodeException, ((AStore)instruction).getValueref(), index);
 					break;
 				case Const.RETURN:
 				case ByteCodeConstants.XRETURN:
@@ -901,39 +889,39 @@ public class FastCodeExceptionAnalyzer
 					instruction = InstructionUtil.getInstructionAt(
 							list, uniqueJumpAddress);
 					if (instruction != null &&
-							instruction.opcode == Const.JSR &&
-							((Jsr)instruction).branch < 0) {
-						fastCodeException.type = FastConstants.TYPE_JIKES_122;
-					} else if (index > 0 && list.get(index-1).opcode == Const.JSR) {
-						fastCodeException.type = FastConstants.TYPE_131_CATCH_FINALLY;
+							instruction.getOpcode() == Const.JSR &&
+							((Jsr)instruction).getBranch() < 0) {
+						fastCodeException.setType(FastConstants.TYPE_JIKES_122);
+					} else if (index > 0 && list.get(index-1).getOpcode() == Const.JSR) {
+						fastCodeException.setType(FastConstants.TYPE_131_CATCH_FINALLY);
 					} else {
-						fastCodeException.type = FastConstants.TYPE_142;
+						fastCodeException.setType(FastConstants.TYPE_142);
 					}
 					break;
 				default:
 					// TYPE_ECLIPSE_677_FINALLY or TYPE_142 ?
 					index = InstructionUtil.getIndexForOffset(
-							list, fastCodeException.finallyFromOffset);
+							list, fastCodeException.getFinallyFromOffset());
 					Instruction firstFinallyInstruction = list.get(index+1);
 
-					if (firstFinallyInstruction.opcode != Const.ASTORE)
+					if (firstFinallyInstruction.getOpcode() != Const.ASTORE)
 					{
-						fastCodeException.type = FastConstants.TYPE_142;
+						fastCodeException.setType(FastConstants.TYPE_142);
 					}
 					else
 					{
-						int exceptionIndex = ((AStore)list.get(index)).index;
+						int exceptionIndex = ((AStore)list.get(index)).getIndex();
 						int length = list.size();
 
 						// Search throw instruction
 						while (++index < length)
 						{
 							instruction = list.get(index);
-							if (instruction.opcode == Const.ATHROW)
+							if (instruction.getOpcode() == Const.ATHROW)
 							{
 								AThrow athrow = (AThrow)instruction;
-								if (athrow.value.opcode == Const.ALOAD &&
-										((ALoad)athrow.value).index == exceptionIndex) {
+								if (athrow.getValue().getOpcode() == Const.ALOAD &&
+										((ALoad)athrow.getValue()).getIndex() == exceptionIndex) {
 									break;
 								}
 							}
@@ -941,18 +929,17 @@ public class FastCodeExceptionAnalyzer
 
 						if (++index >= length)
 						{
-							fastCodeException.type = FastConstants.TYPE_142;
+							fastCodeException.setType(FastConstants.TYPE_142);
 						}
 						else
 						{
 							instruction = list.get(index);
 
-							fastCodeException.type =
-									instruction.opcode != firstFinallyInstruction.opcode ||
-									firstFinallyInstruction.lineNumber == Instruction.UNKNOWN_LINE_NUMBER ||
-									firstFinallyInstruction.lineNumber != instruction.lineNumber ?
-											FastConstants.TYPE_142 :
-												FastConstants.TYPE_ECLIPSE_677_CATCH_FINALLY;
+							fastCodeException.setType(instruction.getOpcode() != firstFinallyInstruction.getOpcode() ||
+							firstFinallyInstruction.getLineNumber() == Instruction.UNKNOWN_LINE_NUMBER ||
+							firstFinallyInstruction.getLineNumber() != instruction.getLineNumber() ?
+									FastConstants.TYPE_142 :
+										FastConstants.TYPE_ECLIPSE_677_CATCH_FINALLY);
 						}
 					}
 				}
@@ -964,24 +951,24 @@ public class FastCodeExceptionAnalyzer
 			List<Instruction> list, FastCodeExcepcion fastCodeException)
 	{
 		int index = InstructionUtil.getIndexForOffset(
-				list, fastCodeException.tryToOffset);
+				list, fastCodeException.getTryToOffset());
 
 		if (index != -1)
 		{
-			int tryFromOffset = fastCodeException.tryFromOffset;
+			int tryFromOffset = fastCodeException.getTryFromOffset();
 
 			Instruction instruction;
 			for (;;)
 			{
 				instruction = list.get(index);
 
-				if (instruction.offset <= tryFromOffset)
+				if (instruction.getOffset() <= tryFromOffset)
 				{
 					break;
 				}
 
-				if (instruction.opcode == Const.JSR && ((Jsr)instruction).getJumpOffset() >
-				fastCodeException.finallyFromOffset)
+				if (instruction.getOpcode() == Const.JSR && ((Jsr)instruction).getJumpOffset() >
+				fastCodeException.getFinallyFromOffset())
 				{
 					return true;
 				}
@@ -1002,27 +989,27 @@ public class FastCodeExceptionAnalyzer
 			List<Instruction> list, FastCodeExcepcion fastCodeException,
 			Instruction instruction, int index)
 	{
-		if (instruction.opcode == ByteCodeConstants.EXCEPTIONLOAD)
+		if (instruction.getOpcode() == ByteCodeConstants.EXCEPTIONLOAD)
 		{
 			index--;
 			instruction = list.get(index);
 
-			if (instruction.opcode == Const.GOTO)
+			if (instruction.getOpcode() == Const.GOTO)
 			{
 				int jumpAddress = ((Goto)instruction).getJumpOffset();
 
 				instruction = InstructionUtil.getInstructionAt(list, jumpAddress);
 
 				if (instruction != null &&
-						instruction.opcode == Const.JSR)
+						instruction.getOpcode() == Const.JSR)
 				{
-					fastCodeException.type = FastConstants.TYPE_JIKES_122;
+					fastCodeException.setType(FastConstants.TYPE_JIKES_122);
 					return;
 				}
 			}
 		}
 
-		fastCodeException.type = FastConstants.TYPE_142;
+		fastCodeException.setType(FastConstants.TYPE_142);
 	}
 
 	private static void computeAfterOffset(
@@ -1031,14 +1018,14 @@ public class FastCodeExceptionAnalyzer
 			List<FastCodeExcepcion> fastCodeExceptions,
 			FastCodeExcepcion fastCodeException, int fastCodeExceptionIndex)
 	{
-		switch (fastCodeException.type)
+		switch (fastCodeException.getType())
 		{
 		case FastConstants.TYPE_118_CATCH_FINALLY:
 		{
 			// Strategie : Trouver l'instruction suivant 'ret' de la sous
 			// routine 'finally'.
 			int index = InstructionUtil.getIndexForOffset(
-					list, fastCodeException.afterOffset);
+					list, fastCodeException.getAfterOffset());
 			if (index < 0 || index >= list.size()) {
 				return;
 			}
@@ -1054,12 +1041,12 @@ public class FastCodeExceptionAnalyzer
 			{
 				i = list.get(index);
 
-				if (i.opcode == Const.JSR) {
+				if (i.getOpcode() == Const.JSR) {
 					offsetSet.add(((Jsr)i).getJumpOffset());
-				} else if (i.opcode == Const.RET) {
+				} else if (i.getOpcode() == Const.RET) {
 					if (offsetSet.size() == retCounter)
 					{
-						fastCodeException.afterOffset = i.offset + 1;
+						fastCodeException.setAfterOffset(i.getOffset() + 1);
 						return;
 					}
 					retCounter++;
@@ -1070,29 +1057,29 @@ public class FastCodeExceptionAnalyzer
 		case FastConstants.TYPE_118_CATCH_FINALLY_2:
 		{
 			Instruction instruction = InstructionUtil.getInstructionAt(
-					list, fastCodeException.afterOffset);
+					list, fastCodeException.getAfterOffset());
 			if (instruction == null) {
 				return;
 			}
 
-			fastCodeException.afterOffset = instruction.offset + 1;
+			fastCodeException.setAfterOffset(instruction.getOffset() + 1);
 		}
 		break;
 		case FastConstants.TYPE_118_FINALLY_2:
 		{
 			int index = InstructionUtil.getIndexForOffset(
-					list, fastCodeException.afterOffset);
+					list, fastCodeException.getAfterOffset());
 			if (index < 0 || index >= list.size()) {
 				return;
 			}
 
 			index++;
 			Instruction i = list.get(index);
-			if (i.opcode != Const.GOTO) {
+			if (i.getOpcode() != Const.GOTO) {
 				return;
 			}
 
-			fastCodeException.afterOffset = ((Goto)i).getJumpOffset();
+			fastCodeException.setAfterOffset(((Goto)i).getJumpOffset());
 		}
 		break;
 		case FastConstants.TYPE_JIKES_122:
@@ -1111,7 +1098,7 @@ public class FastCodeExceptionAnalyzer
 		case FastConstants.TYPE_ECLIPSE_677_FINALLY:
 		{
 			int index = InstructionUtil.getIndexForOffset(
-					list, fastCodeException.finallyFromOffset);
+					list, fastCodeException.getFinallyFromOffset());
 			if (index < 0) {
 				return;
 			}
@@ -1119,19 +1106,18 @@ public class FastCodeExceptionAnalyzer
 			int length = list.size();
 			Instruction instruction = list.get(index);
 
-			if (instruction.opcode == Const.POP) {
+			if (instruction.getOpcode() == Const.POP) {
 				// Search the first throw instruction
 				while (++index < length)
 				{
 					instruction = list.get(index);
-					if (instruction.opcode == Const.ATHROW)
+					if (instruction.getOpcode() == Const.ATHROW)
 					{
-						fastCodeException.afterOffset =
-								instruction.offset + 1;
+						fastCodeException.setAfterOffset(instruction.getOffset() + 1);
 						break;
 					}
 				}
-			} else if (instruction.opcode == Const.ASTORE) {
+			} else if (instruction.getOpcode() == Const.ASTORE) {
 				// L'un des deux cas les plus complexes :
 				// - le bloc 'finally' est dupliqué deux fois.
 				// - aucun 'goto' ne saute après le dernier bloc finally.
@@ -1141,17 +1127,17 @@ public class FastCodeExceptionAnalyzer
 				// - Ajouter ce nombre à l'index de l'instruction vers laquelle
 				//   saute le 'goto' precedent le 1er bloc 'finally'.
 				int finallyStartIndex = index+1;
-				int exceptionIndex = ((AStore)instruction).index;
+				int exceptionIndex = ((AStore)instruction).getIndex();
 
 				// Search throw instruction
 				while (++index < length)
 				{
 					instruction = list.get(index);
-					if (instruction.opcode == Const.ATHROW)
+					if (instruction.getOpcode() == Const.ATHROW)
 					{
 						AThrow athrow = (AThrow)instruction;
-						if (athrow.value.opcode == Const.ALOAD &&
-								((ALoad)athrow.value).index == exceptionIndex) {
+						if (athrow.getValue().getOpcode() == Const.ALOAD &&
+								((ALoad)athrow.getValue()).getIndex() == exceptionIndex) {
 							break;
 						}
 					}
@@ -1160,7 +1146,7 @@ public class FastCodeExceptionAnalyzer
 				index += index - finallyStartIndex + 1;
 
 				if (index < length) {
-					fastCodeException.afterOffset = list.get(index).offset;
+					fastCodeException.setAfterOffset(list.get(index).getOffset());
 				}
 			}
 		}
@@ -1176,26 +1162,26 @@ public class FastCodeExceptionAnalyzer
 			// - Ajouter ce nombre à l'index de l'instruction vers laquelle
 			//   saute le 'goto' precedent le 1er bloc 'finally'.
 			int index = InstructionUtil.getIndexForOffset(
-					list, fastCodeException.finallyFromOffset);
+					list, fastCodeException.getFinallyFromOffset());
 			if (index < 0) {
 				return;
 			}
 
 			Instruction instruction = list.get(index);
 
-			if (instruction.opcode != Const.ASTORE) {
+			if (instruction.getOpcode() != Const.ASTORE) {
 				return;
 			}
 
 			int finallyStartIndex = index+1;
-			int exceptionIndex = ((AStore)instruction).index;
+			int exceptionIndex = ((AStore)instruction).getIndex();
 			int length = list.size();
 
 			// Search throw instruction
 			while (++index < length)
 			{
 				instruction = list.get(index);
-				if (instruction.opcode == Const.ATHROW)
+				if (instruction.getOpcode() == Const.ATHROW)
 				{
 					AThrow athrow = (AThrow)instruction;
 					if (findAloadForAThrow(exceptionIndex, athrow))
@@ -1209,29 +1195,29 @@ public class FastCodeExceptionAnalyzer
 			index += delta + 1;
 
 			if (index < list.size()) {
-				int afterOffset = list.get(index).offset;
+				int afterOffset = list.get(index).getOffset();
 
 				// Verification de la presence d'un bloc 'finally' pour les blocs
 				// 'catch'.
 				if (index < length &&
-						list.get(index).opcode == Const.GOTO)
+						list.get(index).getOpcode() == Const.GOTO)
 				{
 					Goto g = (Goto)list.get(index);
 					int jumpOffset = g.getJumpOffset();
 					int indexTmp = index + delta + 1;
 
 					if (indexTmp < length &&
-							list.get(indexTmp-1).offset < jumpOffset &&
-							jumpOffset <= list.get(indexTmp).offset)
+							list.get(indexTmp-1).getOffset() < jumpOffset &&
+							jumpOffset <= list.get(indexTmp).getOffset())
 					{
 						// Reduction de 'afterOffset' a l'aide des 'Branch Instructions'
 						afterOffset = reduceAfterOffsetWithBranchInstructions(
 								list, fastCodeException,
-								fastCodeException.finallyFromOffset,
-								list.get(indexTmp).offset);
+								fastCodeException.getFinallyFromOffset(),
+								list.get(indexTmp).getOffset());
 
 						// Reduction de 'afterOffset' a l'aide des numeros de ligne
-						if (! fastCodeException.synchronizedFlag)
+						if (! fastCodeException.hasSynchronizedFlag())
 						{
 							afterOffset = reduceAfterOffsetWithLineNumbers(
 									list, fastCodeException, afterOffset);
@@ -1240,12 +1226,12 @@ public class FastCodeExceptionAnalyzer
 						// Reduction de 'afterOffset' a l'aide des instructions de
 						// gestion des exceptions englobantes
 						afterOffset = reduceAfterOffsetWithExceptions(
-								fastCodeExceptions, fastCodeException.tryFromOffset,
-								fastCodeException.finallyFromOffset, afterOffset);
+								fastCodeExceptions, fastCodeException.getTryFromOffset(),
+								fastCodeException.getFinallyFromOffset(), afterOffset);
 					}
 				}
 
-				fastCodeException.afterOffset = afterOffset;
+				fastCodeException.setAfterOffset(afterOffset);
 			}
 		}
 		break;
@@ -1256,7 +1242,7 @@ public class FastCodeExceptionAnalyzer
 			// trouve après l'instruction 'ret' de la sous procedure du
 			// bloc 'finally'.
 			int index = InstructionUtil.getIndexForOffset(
-					list, fastCodeException.finallyFromOffset);
+					list, fastCodeException.getFinallyFromOffset());
 			if (index <= 0) {
 				return;
 			}
@@ -1264,7 +1250,7 @@ public class FastCodeExceptionAnalyzer
 			int length = list.size();
 
 			// Gestion des instructions JSR imbriquees
-			int offsetOfJsrsLength = list.get(length-1).offset + 1;
+			int offsetOfJsrsLength = list.get(length-1).getOffset() + 1;
 			boolean[] offsetOfJsrs = new boolean[offsetOfJsrsLength];
 			int level = 0;
 
@@ -1273,22 +1259,22 @@ public class FastCodeExceptionAnalyzer
 			{
 				i = list.get(index);
 
-				if (offsetOfJsrs[i.offset]) {
+				if (offsetOfJsrs[i.getOffset()]) {
 					level++;
 				}
 
-				if (i.opcode == Const.JSR)
+				if (i.getOpcode() == Const.JSR)
 				{
 					int jumpOffset = ((Jsr)i).getJumpOffset();
 					if (jumpOffset < offsetOfJsrsLength) {
 						offsetOfJsrs[jumpOffset] = true;
 					}
 				}
-				else if (i.opcode == Const.RET)
+				else if (i.getOpcode() == Const.RET)
 				{
 					if (level <= 1)
 					{
-						fastCodeException.afterOffset = i.offset+1;
+						fastCodeException.setAfterOffset(i.getOffset()+1);
 						break;
 					}
 					level--;
@@ -1300,7 +1286,7 @@ public class FastCodeExceptionAnalyzer
 		case FastConstants.TYPE_131_CATCH_FINALLY:
 		{
 			int index = InstructionUtil.getIndexForOffset(
-					list, fastCodeException.finallyFromOffset);
+					list, fastCodeException.getFinallyFromOffset());
 			if (index <= 0) {
 				return;
 			}
@@ -1312,11 +1298,11 @@ public class FastCodeExceptionAnalyzer
 			while (++index < length)
 			{
 				i = list.get(index);
-				if (i.opcode == Const.RET)
+				if (i.getOpcode() == Const.RET)
 				{
-					fastCodeException.afterOffset = ++index < length ?
-							list.get(index).offset :
-								i.offset+1;
+					fastCodeException.setAfterOffset(++index < length ?
+							list.get(index).getOffset() :
+								i.getOffset()+1);
 					break;
 				}
 			}
@@ -1334,9 +1320,9 @@ public class FastCodeExceptionAnalyzer
 			// du bytecode doit prendre en compte les sauts positifs.
 
 			// Calcul de l'offset après la structure try-catch
-			int afterOffset = fastCodeException.afterOffset;
+			int afterOffset = fastCodeException.getAfterOffset();
 			if (afterOffset == -1) {
-				afterOffset = list.get(length-1).offset + 1;
+				afterOffset = list.get(length-1).getOffset() + 1;
 			}
 
 			// Reduction de 'afterOffset' a l'aide des 'Branch Instructions'
@@ -1345,7 +1331,7 @@ public class FastCodeExceptionAnalyzer
 					afterOffset);
 
 			// Reduction de 'afterOffset' a l'aide des numeros de ligne
-			if (! fastCodeException.synchronizedFlag)
+			if (! fastCodeException.hasSynchronizedFlag())
 			{
 				afterOffset = reduceAfterOffsetWithLineNumbers(
 						list, fastCodeException, afterOffset);
@@ -1353,15 +1339,16 @@ public class FastCodeExceptionAnalyzer
 
 			// Reduction de 'afterOffset' a l'aide des instructions 'switch'
 			afterOffset = reduceAfterOffsetWithSwitchInstructions(
-					switchCaseOffsets, fastCodeException.tryFromOffset,
+					switchCaseOffsets, fastCodeException.getTryFromOffset(),
 					fastCodeException.maxOffset, afterOffset);
 
 			// Reduction de 'afterOffset' a l'aide des instructions de gestion
 			// des exceptions englobantes
-			fastCodeException.afterOffset = afterOffset =
+			afterOffset =
 					reduceAfterOffsetWithExceptions(
-							fastCodeExceptions, fastCodeException.tryFromOffset,
+							fastCodeExceptions, fastCodeException.getTryFromOffset(),
 							fastCodeException.maxOffset, afterOffset);
+			fastCodeException.setAfterOffset(afterOffset);
 
 			// Recherche de la 1ere exception débutant après 'maxOffset'
 			int tryFromOffset = Integer.MAX_VALUE;
@@ -1369,7 +1356,7 @@ public class FastCodeExceptionAnalyzer
 			while (tryIndex < fastCodeExceptions.size())
 			{
 				int tryFromOffsetTmp =
-						fastCodeExceptions.get(tryIndex).tryFromOffset;
+						fastCodeExceptions.get(tryIndex).getTryFromOffset();
 				if (tryFromOffsetTmp > fastCodeException.maxOffset)
 				{
 					tryFromOffset = tryFromOffsetTmp;
@@ -1387,16 +1374,16 @@ public class FastCodeExceptionAnalyzer
 			{
 				instruction = list.get(index);
 
-				if (instruction.offset >= afterOffset) {
+				if (instruction.getOffset() >= afterOffset) {
 					break;
 				}
 
-				if (instruction.offset > tryFromOffset)
+				if (instruction.getOffset() > tryFromOffset)
 				{
 					// Saut des blocs try-catch-finally
 					FastCodeExcepcion fce =
 							fastCodeExceptions.get(tryIndex);
-					int afterOffsetTmp = fce.afterOffset;
+					int afterOffsetTmp = fce.getAfterOffset();
 
 					int tryFromOffsetTmp;
 					FastCodeExcepcion fceTmp;
@@ -1410,26 +1397,26 @@ public class FastCodeExceptionAnalyzer
 							tryFromOffset = Integer.MAX_VALUE;
 							break;
 						}
-						tryFromOffsetTmp = fastCodeExceptions.get(tryIndex).tryFromOffset;
-						if (fce.tryFromOffset != tryFromOffsetTmp)
+						tryFromOffsetTmp = fastCodeExceptions.get(tryIndex).getTryFromOffset();
+						if (fce.getTryFromOffset() != tryFromOffsetTmp)
 						{
 							tryFromOffset = tryFromOffsetTmp;
 							break;
 						}
 						fceTmp = fastCodeExceptions.get(tryIndex);
-						if (afterOffsetTmp < fceTmp.afterOffset) {
-							afterOffsetTmp = fceTmp.afterOffset;
+						if (afterOffsetTmp < fceTmp.getAfterOffset()) {
+							afterOffsetTmp = fceTmp.getAfterOffset();
 						}
 					}
 
 					while (index < length &&
-							list.get(index).offset < afterOffsetTmp) {
+							list.get(index).getOffset() < afterOffsetTmp) {
 						index++;
 					}
 				}
 				else
 				{
-					switch (instruction.opcode)
+					switch (instruction.getOpcode())
 					{
 					case Const.ATHROW:
 					case Const.RETURN:
@@ -1445,21 +1432,21 @@ public class FastCodeExceptionAnalyzer
 								instruction) || checkTernaryOperator(list, index))
 						{
 							// => Instruction incluse au bloc
-							fastCodeException.afterOffset = instruction.offset+1;
+							fastCodeException.setAfterOffset(instruction.getOffset()+1);
 						} else if (index+1 >= length)
 						{
 							// Derniere instruction de la liste
-							if (instruction.opcode == Const.ATHROW)
+							if (instruction.getOpcode() == Const.ATHROW)
 							{
 								// Dernier 'throw'
 								// => Instruction incluse au bloc
-								fastCodeException.afterOffset = instruction.offset+1;
+								fastCodeException.setAfterOffset(instruction.getOffset()+1);
 							}
 							else
 							{
 								// Dernier 'return'
 								// => Instruction placee après le bloc
-								fastCodeException.afterOffset = instruction.offset;
+								fastCodeException.setAfterOffset(instruction.getOffset());
 							}
 						}
 						else
@@ -1469,19 +1456,19 @@ public class FastCodeExceptionAnalyzer
 							// cette instruction ?
 							int tryFromIndex =
 									InstructionUtil.getIndexForOffset(
-											list, fastCodeException.tryFromOffset);
+											list, fastCodeException.getTryFromOffset());
 							int beforeInstructionOffset = index==0 ?
-									0 : list.get(index-1).offset;
+									0 : list.get(index-1).getOffset();
 
 							if (InstructionUtil.checkNoJumpToInterval(
 									list, tryFromIndex, maxIndex,
-									beforeInstructionOffset, instruction.offset))
+									beforeInstructionOffset, instruction.getOffset()))
 							{
 								// Aucune instruction du bloc
 								// 'try-catch-finally' ne saute vers
 								// cette instruction.
 								// => Instruction incluse au bloc
-								fastCodeException.afterOffset = instruction.offset+1;
+								fastCodeException.setAfterOffset(instruction.getOffset()+1);
 							}
 							else
 							{
@@ -1489,7 +1476,7 @@ public class FastCodeExceptionAnalyzer
 								// 'try-catch-finally' saute vers
 								// cette instruction.
 								// => Instruction placee après le bloc
-								fastCodeException.afterOffset = instruction.offset;
+								fastCodeException.setAfterOffset(instruction.getOffset());
 							}
 						}
 						return;
@@ -1499,7 +1486,7 @@ public class FastCodeExceptionAnalyzer
 					case ByteCodeConstants.IFXNULL:
 						int jumpOffsetTmp;
 
-						if (instruction.opcode == Const.GOTO)
+						if (instruction.getOpcode() == Const.GOTO)
 						{
 							jumpOffsetTmp =
 									((BranchInstruction)instruction).getJumpOffset();
@@ -1517,30 +1504,30 @@ public class FastCodeExceptionAnalyzer
 							jumpOffsetTmp = lastBi.getJumpOffset();
 						}
 
-						if (jumpOffsetTmp > instruction.offset)
+						if (jumpOffsetTmp > instruction.getOffset())
 						{
 							// Saut positif
 							if (jumpOffsetTmp >= afterOffset) {
-								if (instruction.opcode == Const.GOTO ||
+								if (instruction.getOpcode() == Const.GOTO ||
 										jumpOffsetTmp != afterOffset)
 								{
 									// Une instruction du bloc 'try-catch-finally'
 									// saute-t-elle vers cett instuction ?
 									int tryFromIndex =
 											InstructionUtil.getIndexForOffset(
-													list, fastCodeException.tryFromOffset);
+													list, fastCodeException.getTryFromOffset());
 									int beforeInstructionOffset = index==0 ?
-											0 : list.get(index-1).offset;
+											0 : list.get(index-1).getOffset();
 
 									if (InstructionUtil.checkNoJumpToInterval(
 											list, tryFromIndex, maxIndex,
-											beforeInstructionOffset, instruction.offset))
+											beforeInstructionOffset, instruction.getOffset()))
 									{
 										// Aucune instruction du bloc
 										// 'try-catch-finally' ne saute vers
 										// cette instuction
 										// => Instruction incluse au bloc
-										fastCodeException.afterOffset = instruction.offset+1;
+										fastCodeException.setAfterOffset(instruction.getOffset()+1);
 									}
 									else
 									{
@@ -1548,7 +1535,7 @@ public class FastCodeExceptionAnalyzer
 										// 'try-catch-finally' saute vers
 										// cette instuction
 										// => Instruction placée après le bloc
-										fastCodeException.afterOffset = instruction.offset;
+										fastCodeException.setAfterOffset(instruction.getOffset());
 									}
 								}
 								//else
@@ -1561,45 +1548,42 @@ public class FastCodeExceptionAnalyzer
 							}
 							while (++index < length)
 							{
-								if (list.get(index).offset >= jumpOffsetTmp)
+								if (list.get(index).getOffset() >= jumpOffsetTmp)
 								{
 									--index;
 									break;
 								}
 							}
 						}
-						else if (jumpOffsetTmp <= fastCodeException.tryFromOffset)
+						else if (jumpOffsetTmp <= fastCodeException.getTryFromOffset())
 						{
 							// Saut négatif
 							if (index > 0 &&
-									instruction.lineNumber != Instruction.UNKNOWN_LINE_NUMBER)
+									instruction.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER)
 							{
 								Instruction beforeInstruction = list.get(index-1);
-								if (instruction.lineNumber ==
-										beforeInstruction.lineNumber)
+								if (instruction.getLineNumber() ==
+										beforeInstruction.getLineNumber())
 								{
 									// For instruction ?
-									if (beforeInstruction.opcode ==
+									if (beforeInstruction.getOpcode() ==
 											Const.ASTORE &&
-											((AStore)beforeInstruction).valueref.opcode ==
-											ByteCodeConstants.EXCEPTIONLOAD || beforeInstruction.opcode ==
+											((AStore)beforeInstruction).getValueref().getOpcode() ==
+											ByteCodeConstants.EXCEPTIONLOAD || beforeInstruction.getOpcode() ==
 											Const.POP &&
-											((Pop)beforeInstruction).objectref.opcode ==
+											((Pop)beforeInstruction).getObjectref().getOpcode() ==
 											ByteCodeConstants.EXCEPTIONLOAD)
 									{
 										// Non
-										fastCodeException.afterOffset =
-												instruction.offset;
+										fastCodeException.setAfterOffset(instruction.getOffset());
 									} else {
 										// Oui
-										fastCodeException.afterOffset =
-												beforeInstruction.offset;
+										fastCodeException.setAfterOffset(beforeInstruction.getOffset());
 									}
 									return;
 								}
 							}
-							fastCodeException.afterOffset =
-									instruction.offset;
+							fastCodeException.setAfterOffset(instruction.getOffset());
 							return;
 						}
 						break;
@@ -1608,11 +1592,11 @@ public class FastCodeExceptionAnalyzer
 						Switch s = (Switch)instruction;
 
 						// Search max offset
-						int maxOffset = s.defaultOffset;
-						int i = s.offsets.length;
+						int maxOffset = s.getDefaultOffset();
+						int i = s.getOffsets().length;
 						while (i-- > 0)
 						{
-							int offset = s.offsets[i];
+							int offset = s.getOffset(i);
 							if (maxOffset < offset) {
 								maxOffset = offset;
 							}
@@ -1622,7 +1606,7 @@ public class FastCodeExceptionAnalyzer
 						{
 							while (++index < length)
 							{
-								if (list.get(index).offset >= maxOffset)
+								if (list.get(index).getOffset() >= maxOffset)
 								{
 									--index;
 									break;
@@ -1646,13 +1630,13 @@ public class FastCodeExceptionAnalyzer
 		//  index-1) Goto
 		//    index) (X)Return
 		if (index > 2 &&
-				list.get(index-1).opcode == Const.GOTO &&
-				list.get(index-2).opcode == ByteCodeConstants.TERNARYOPSTORE)
+				list.get(index-1).getOpcode() == Const.GOTO &&
+				list.get(index-2).getOpcode() == ByteCodeConstants.TERNARYOPSTORE)
 		{
 			Goto g = (Goto)list.get(index-1);
 			int jumpOffset = g.getJumpOffset();
-			int returnOffset = list.get(index).offset;
-			if (g.offset < jumpOffset && jumpOffset < returnOffset)
+			int returnOffset = list.get(index).getOffset();
+			if (g.getOffset() < jumpOffset && jumpOffset < returnOffset)
 			{
 				return true;
 			}
@@ -1669,7 +1653,7 @@ public class FastCodeExceptionAnalyzer
 
 		// Check previous instructions
 		int index = InstructionUtil.getIndexForOffset(
-				list, fastCodeException.tryFromOffset);
+				list, fastCodeException.getTryFromOffset());
 
 		if (index != -1)
 		{
@@ -1677,8 +1661,8 @@ public class FastCodeExceptionAnalyzer
 			{
 				instruction = list.get(index);
 
-				if (instruction.opcode == ByteCodeConstants.IF || instruction.opcode == ByteCodeConstants.IFCMP
-						|| instruction.opcode == ByteCodeConstants.IFXNULL || instruction.opcode == Const.GOTO) {
+				if (instruction.getOpcode() == ByteCodeConstants.IF || instruction.getOpcode() == ByteCodeConstants.IFCMP
+						|| instruction.getOpcode() == ByteCodeConstants.IFXNULL || instruction.getOpcode() == Const.GOTO) {
 					int jumpOffset = ((BranchInstruction)instruction).getJumpOffset();
 					if (firstOffset < jumpOffset && jumpOffset < afterOffset) {
 						afterOffset = jumpOffset;
@@ -1694,15 +1678,15 @@ public class FastCodeExceptionAnalyzer
 			index--;
 			instruction = list.get(index);
 
-			if (instruction.opcode == ByteCodeConstants.IF || instruction.opcode == ByteCodeConstants.IFCMP
-					|| instruction.opcode == ByteCodeConstants.IFXNULL || instruction.opcode == Const.GOTO) {
+			if (instruction.getOpcode() == ByteCodeConstants.IF || instruction.getOpcode() == ByteCodeConstants.IFCMP
+					|| instruction.getOpcode() == ByteCodeConstants.IFXNULL || instruction.getOpcode() == Const.GOTO) {
 				int jumpOffset = ((BranchInstruction)instruction).getJumpOffset();
 				if (firstOffset < jumpOffset && jumpOffset < afterOffset) {
 					afterOffset = jumpOffset;
 				}
 			}
 		}
-		while (instruction.offset > afterOffset);
+		while (instruction.getOffset() > afterOffset);
 
 		return afterOffset;
 	}
@@ -1712,7 +1696,7 @@ public class FastCodeExceptionAnalyzer
 			int afterOffset)
 	{
 		int fromIndex = InstructionUtil.getIndexForOffset(
-				list, fastCodeException.tryFromOffset);
+				list, fastCodeException.getTryFromOffset());
 		int index = fromIndex;
 
 		if (index != -1)
@@ -1727,13 +1711,13 @@ public class FastCodeExceptionAnalyzer
 				instruction = list.get(index);
 				index++;
 
-				if (instruction.lineNumber != Instruction.UNKNOWN_LINE_NUMBER)
+				if (instruction.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER)
 				{
-					firstLineNumber = instruction.lineNumber;
+					firstLineNumber = instruction.getLineNumber();
 					break;
 				}
 			}
-			while (instruction.offset < afterOffset && index < length);
+			while (instruction.getOffset() < afterOffset && index < length);
 
 			if (firstLineNumber != Instruction.UNKNOWN_LINE_NUMBER)
 			{
@@ -1747,8 +1731,8 @@ public class FastCodeExceptionAnalyzer
 					{
 						instruction = list.get(index);
 
-						if (instruction.offset <= maxOffset || instruction.lineNumber != Instruction.UNKNOWN_LINE_NUMBER &&
-								instruction.lineNumber >= firstLineNumber)
+						if (instruction.getOffset() <= maxOffset || instruction.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER &&
+								instruction.getLineNumber() >= firstLineNumber)
 						{
 							break;
 						}
@@ -1760,7 +1744,7 @@ public class FastCodeExceptionAnalyzer
 						// Est-ce une instruction de saut ? Si oui, est-ce que
 						// la placer hors du bloc 'catch' genererait deux points
 						// de sortie du bloc ?
-						if (instruction.opcode == Const.GOTO)
+						if (instruction.getOpcode() == Const.GOTO)
 						{
 							int jumpOffset = ((Goto)instruction).getJumpOffset();
 
@@ -1776,12 +1760,12 @@ public class FastCodeExceptionAnalyzer
 						// Est-ce une instruction 'return' ? Si oui, est-ce que
 						// la placer hors du bloc 'catch' genererait deux points
 						// de sortie du bloc ?
-						if (instruction.opcode == Const.RETURN)
+						if (instruction.getOpcode() == Const.RETURN)
 						{
 							int maxIndex = InstructionUtil.getIndexForOffset(
 									list, maxOffset);
 
-							if (list.get(maxIndex-1).opcode == instruction.opcode)
+							if (list.get(maxIndex-1).getOpcode() == instruction.getOpcode())
 							{
 								break;
 							}
@@ -1809,7 +1793,7 @@ public class FastCodeExceptionAnalyzer
                         }
                         / */
 
-						afterOffset = instruction.offset;
+						afterOffset = instruction.getOffset();
 					}
 				}
 			}
@@ -1864,15 +1848,15 @@ public class FastCodeExceptionAnalyzer
 		{
 			fastCodeException = fastCodeExceptions.get(i);
 
-			toOffset = fastCodeException.finallyFromOffset;
+			toOffset = fastCodeException.getFinallyFromOffset();
 
-			if (fastCodeException.catches != null)
+			if (fastCodeException.getCatches() != null)
 			{
-				int j = fastCodeException.catches.size();
+				int j = fastCodeException.getCatches().size();
 				FastCodeExceptionCatch fcec;
 				while (j-- > 0)
 				{
-					fcec = fastCodeException.catches.get(j);
+					fcec = fastCodeException.getCatches().get(j);
 
 					if (toOffset != -1 &&
 							fcec.fromOffset <= fromOffset &&
@@ -1884,7 +1868,7 @@ public class FastCodeExceptionAnalyzer
 				}
 			}
 
-			if (fastCodeException.tryFromOffset <= fromOffset &&
+			if (fastCodeException.getTryFromOffset() <= fromOffset &&
 					maxOffset < toOffset && (afterOffset == -1 || afterOffset > toOffset)) {
 				afterOffset = toOffset;
 			}
@@ -1897,7 +1881,7 @@ public class FastCodeExceptionAnalyzer
 			LocalVariables localVariables, FastCodeExcepcion fce,
 			FastTry fastTry, int returnOffset)
 	{
-		switch (fce.type)
+		switch (fce.getType())
 		{
 		case FastConstants.TYPE_CATCH:
 			formatCatch(localVariables, fce, fastTry);
@@ -1940,7 +1924,7 @@ public class FastCodeExceptionAnalyzer
 	private static void formatCatch(
 			LocalVariables localVariables, FastCodeExcepcion fce, FastTry fastTry)
 	{
-		List<Instruction> tryInstructions = fastTry.instructions;
+		List<Instruction> tryInstructions = fastTry.getInstructions();
 		int jumpOffset = -1;
 
 		// Remove last 'goto' instruction in try block
@@ -1949,15 +1933,15 @@ public class FastCodeExceptionAnalyzer
 			int lastIndex = tryInstructions.size() - 1;
 			Instruction instruction = tryInstructions.get(lastIndex);
 
-			if (instruction.opcode == Const.GOTO)
+			if (instruction.getOpcode() == Const.GOTO)
 			{
 				int tmpJumpOffset = ((Goto)instruction).getJumpOffset();
 
-				if (tmpJumpOffset < fce.tryFromOffset ||
-						instruction.offset < tmpJumpOffset)
+				if (tmpJumpOffset < fce.getTryFromOffset() ||
+						instruction.getOffset() < tmpJumpOffset)
 				{
 					jumpOffset = tmpJumpOffset;
-					fce.tryToOffset = instruction.offset;
+					fce.setTryToOffset(instruction.getOffset());
 					tryInstructions.remove(lastIndex);
 				}
 			}
@@ -1967,11 +1951,11 @@ public class FastCodeExceptionAnalyzer
 		formatFastTryRemoveJsrInstructionAndCompactStoreReturn(
 				tryInstructions, localVariables, Instruction.UNKNOWN_LINE_NUMBER);
 
-		int i = fastTry.catches.size();
+		int i = fastTry.getCatches().size();
 		List<Instruction> catchInstructions;
 		while (i-- > 0)
 		{
-			catchInstructions = fastTry.catches.get(i).instructions;
+			catchInstructions = fastTry.getCatches().get(i).getInstructions();
 
 			// Remove first catch instruction in each catch block
 			if (formatCatchRemoveFirstCatchInstruction(catchInstructions.get(0))) {
@@ -1984,22 +1968,22 @@ public class FastCodeExceptionAnalyzer
 				int lastIndex = catchInstructions.size() - 1;
 				Instruction instruction = catchInstructions.get(lastIndex);
 
-				if (instruction.opcode == Const.GOTO)
+				if (instruction.getOpcode() == Const.GOTO)
 				{
 					int tmpJumpOffset = ((Goto)instruction).getJumpOffset();
 
-					if (tmpJumpOffset < fce.tryFromOffset ||
-							instruction.offset < tmpJumpOffset)
+					if (tmpJumpOffset < fce.getTryFromOffset() ||
+							instruction.getOffset() < tmpJumpOffset)
 					{
 						if (jumpOffset == -1)
 						{
 							jumpOffset = tmpJumpOffset;
-							fce.catches.get(i).toOffset = instruction.offset;
+							fce.getCatches().get(i).toOffset = instruction.getOffset();
 							catchInstructions.remove(lastIndex);
 						}
 						else if (jumpOffset == tmpJumpOffset)
 						{
-							fce.catches.get(i).toOffset = instruction.offset;
+							fce.getCatches().get(i).toOffset = instruction.getOffset();
 							catchInstructions.remove(lastIndex);
 						}
 					}
@@ -2016,16 +2000,16 @@ public class FastCodeExceptionAnalyzer
 	private static boolean formatCatchRemoveFirstCatchInstruction(
 			Instruction instruction)
 	{
-		switch (instruction.opcode)
+		switch (instruction.getOpcode())
 		{
 		case Const.POP:
 			return
-					((Pop)instruction).objectref.opcode ==
+					((Pop)instruction).getObjectref().getOpcode() ==
 					ByteCodeConstants.EXCEPTIONLOAD;
 
 		case Const.ASTORE:
 			return
-					((AStore)instruction).valueref.opcode ==
+					((AStore)instruction).getValueref().getOpcode() ==
 					ByteCodeConstants.EXCEPTIONLOAD;
 
 		default:
@@ -2036,25 +2020,25 @@ public class FastCodeExceptionAnalyzer
 	private static void format118Finally(
 			LocalVariables localVariables, FastCodeExcepcion fce, FastTry fastTry)
 	{
-		List<Instruction> tryInstructions = fastTry.instructions;
+		List<Instruction> tryInstructions = fastTry.getInstructions();
 		int length = tryInstructions.size();
 
 		// Remove last 'goto' instruction in try block
-		if (tryInstructions.get(--length).opcode == Const.GOTO)
+		if (tryInstructions.get(--length).getOpcode() == Const.GOTO)
 		{
 			Goto g = (Goto)tryInstructions.remove(length);
-			fce.tryToOffset = g.offset;
+			fce.setTryToOffset(g.getOffset());
 		}
 		length--;
 		// Remove last 'jsr' instruction in try block
-		if (tryInstructions.get(length).opcode != Const.JSR) {
+		if (tryInstructions.get(length).getOpcode() != Const.JSR) {
 			throw new UnexpectedInstructionException();
 		}
 		tryInstructions.remove(length);
 
 		// Remove JSR instruction in try block before 'return' instruction
 		int finallyInstructionsLineNumber =
-				fastTry.finallyInstructions.get(0).lineNumber;
+				fastTry.getFinallyInstructions().get(0).getLineNumber();
 		formatFastTryRemoveJsrInstructionAndCompactStoreReturn(
 				tryInstructions, localVariables, finallyInstructionsLineNumber);
 
@@ -2064,19 +2048,19 @@ public class FastCodeExceptionAnalyzer
 	private static void format118Finally2(
 			FastCodeExcepcion fce, FastTry fastTry)
 	{
-		List<Instruction> tryInstructions = fastTry.instructions;
+		List<Instruction> tryInstructions = fastTry.getInstructions();
 		int tryInstructionsLength = tryInstructions.size();
 
 		// Remove last 'goto' instruction in try block
-		if (tryInstructions.get(tryInstructionsLength-1).opcode ==
+		if (tryInstructions.get(tryInstructionsLength-1).getOpcode() ==
 				Const.GOTO)
 		{
 			tryInstructionsLength--;
 			Goto g = (Goto)tryInstructions.remove(tryInstructionsLength);
-			fce.tryToOffset = g.offset;
+			fce.setTryToOffset(g.getOffset());
 		}
 
-		List<Instruction> finallyInstructions = fastTry.finallyInstructions;
+		List<Instruction> finallyInstructions = fastTry.getFinallyInstructions();
 		int finallyInstructionsLength = finallyInstructions.size();
 
 		// Update all offset of instructions 'goto' and 'ifxxx' if
@@ -2084,15 +2068,15 @@ public class FastCodeExceptionAnalyzer
 		// (jump offset) < (finallyInstructions.gt(5).offset)
 		if (finallyInstructionsLength > 5)
 		{
-			int firstFinallyOffset = finallyInstructions.get(0).offset;
-			int lastFinallyOffset = finallyInstructions.get(5).offset;
+			int firstFinallyOffset = finallyInstructions.get(0).getOffset();
+			int lastFinallyOffset = finallyInstructions.get(5).getOffset();
 
 			Instruction instruction;
 			int jumpOffset;
 			while (tryInstructionsLength-- > 0)
 			{
 				instruction = tryInstructions.get(tryInstructionsLength);
-				switch (instruction.opcode)
+				switch (instruction.getOpcode())
 				{
 				case ByteCodeConstants.IFCMP:
 				{
@@ -2100,8 +2084,7 @@ public class FastCodeExceptionAnalyzer
 
 					if (firstFinallyOffset < jumpOffset &&
 							jumpOffset <= lastFinallyOffset) {
-						((IfCmp)instruction).branch =
-								firstFinallyOffset - instruction.offset;
+						((IfCmp)instruction).setBranch(firstFinallyOffset - instruction.getOffset());
 					}
 				}
 				break;
@@ -2113,8 +2096,7 @@ public class FastCodeExceptionAnalyzer
 
 					if (firstFinallyOffset < jumpOffset &&
 							jumpOffset <= lastFinallyOffset) {
-						((IfInstruction)instruction).branch =
-								firstFinallyOffset - instruction.offset;
+						((IfInstruction)instruction).setBranch(firstFinallyOffset - instruction.getOffset());
 					}
 				}
 				break;
@@ -2125,8 +2107,7 @@ public class FastCodeExceptionAnalyzer
 
 					if (firstFinallyOffset < jumpOffset &&
 							jumpOffset <= lastFinallyOffset) {
-						((ComplexConditionalBranchInstruction)instruction).branch =
-								firstFinallyOffset - instruction.offset;
+						((ComplexConditionalBranchInstruction)instruction).setBranch(firstFinallyOffset - instruction.getOffset());
 					}
 				}
 				break;
@@ -2136,8 +2117,7 @@ public class FastCodeExceptionAnalyzer
 
 					if (firstFinallyOffset < jumpOffset &&
 							jumpOffset <= lastFinallyOffset) {
-						((Goto)instruction).branch =
-								firstFinallyOffset - instruction.offset;
+						((Goto)instruction).setBranch(firstFinallyOffset - instruction.getOffset());
 					}
 				}
 				break;
@@ -2163,13 +2143,13 @@ public class FastCodeExceptionAnalyzer
 
 	private static void format118FinallyThrow(FastTry fastTry)
 	{
-		List<Instruction> finallyInstructions = fastTry.finallyInstructions;
+		List<Instruction> finallyInstructions = fastTry.getFinallyInstructions();
 		int length = finallyInstructions.size();
 
 		length--;
 		// Remove last 'ret' instruction in finally block
 		Instruction i = finallyInstructions.get(length);
-		if (i.opcode != Const.RET) {
+		if (i.getOpcode() != Const.RET) {
 			throw new UnexpectedInstructionException();
 		}
 		finallyInstructions.remove(length);
@@ -2186,26 +2166,26 @@ public class FastCodeExceptionAnalyzer
 	private static void format118CatchFinally(
 			FastCodeExcepcion fce, FastTry fastTry)
 	{
-		List<Instruction> tryInstructions = fastTry.instructions;
+		List<Instruction> tryInstructions = fastTry.getInstructions();
 		int tryInstructionsLength = tryInstructions.size();
 
 		// Remove last 'goto' instruction in try block
-		if (tryInstructions.get(--tryInstructionsLength).opcode ==
+		if (tryInstructions.get(--tryInstructionsLength).getOpcode() ==
 				Const.GOTO)
 		{
 			Goto g = (Goto)tryInstructions.remove(tryInstructionsLength);
-			fce.tryToOffset = g.offset;
+			fce.setTryToOffset(g.getOffset());
 		}
 
 		// Format catch blocks
-		int i = fastTry.catches.size()-1;
+		int i = fastTry.getCatches().size()-1;
 		if (i >= 0)
 		{
 			List<Instruction>  catchInstructions =
-					fastTry.catches.get(i).instructions;
+					fastTry.getCatches().get(i).getInstructions();
 			int catchInstructionsLength = catchInstructions.size();
 
-			switch (catchInstructions.get(--catchInstructionsLength).opcode)
+			switch (catchInstructions.get(--catchInstructionsLength).getOpcode())
 			{
 			case Const.GOTO:
 				// Remove 'goto' instruction in catch block
@@ -2221,7 +2201,7 @@ public class FastCodeExceptionAnalyzer
 				catchInstructions.remove(catchInstructionsLength);
 
 				if (catchInstructionsLength > 0 &&
-						catchInstructions.get(catchInstructionsLength-1).opcode == Const.ATHROW)
+						catchInstructions.get(catchInstructionsLength-1).getOpcode() == Const.ATHROW)
 				{
 					// Remove 'return' instruction after a 'throw' instruction
 					catchInstructions.remove(catchInstructionsLength);
@@ -2235,16 +2215,16 @@ public class FastCodeExceptionAnalyzer
 
 			while (i-- > 0)
 			{
-				catchInstructions = fastTry.catches.get(i).instructions;
+				catchInstructions = fastTry.getCatches().get(i).getInstructions();
 				catchInstructionsLength = catchInstructions.size();
 
-				switch (catchInstructions.get(--catchInstructionsLength).opcode)
+				switch (catchInstructions.get(--catchInstructionsLength).getOpcode())
 				{
 				case Const.GOTO:
 					// Remove 'goto' instruction in catch block
 					Instruction in =
 					catchInstructions.remove(catchInstructionsLength);
-					fce.catches.get(i).toOffset = in.offset;
+					fce.getCatches().get(i).toOffset = in.getOffset();
 					break;
 				case Const.RETURN:
 				case ByteCodeConstants.XRETURN:
@@ -2259,7 +2239,7 @@ public class FastCodeExceptionAnalyzer
 			}
 		}
 
-		List<Instruction>  finallyInstructions = fastTry.finallyInstructions;
+		List<Instruction>  finallyInstructions = fastTry.getFinallyInstructions();
 		int finallyInstructionsLength = finallyInstructions.size();
 
 		finallyInstructionsLength--;
@@ -2278,35 +2258,35 @@ public class FastCodeExceptionAnalyzer
 	private static void format118CatchFinally2(
 			FastCodeExcepcion fce, FastTry fastTry)
 	{
-		List<Instruction> tryInstructions = fastTry.instructions;
+		List<Instruction> tryInstructions = fastTry.getInstructions();
 		int tryInstructionsLength = tryInstructions.size();
 
 		// Remove last 'goto' instruction in try block
-		if (tryInstructions.get(--tryInstructionsLength).opcode ==
+		if (tryInstructions.get(--tryInstructionsLength).getOpcode() ==
 				Const.GOTO)
 		{
 			Goto g = (Goto)tryInstructions.remove(tryInstructionsLength);
-			fce.tryToOffset = g.offset;
+			fce.setTryToOffset(g.getOffset());
 		}
 
 		// Format catch blocks
-		int i = fastTry.catches.size();
+		int i = fastTry.getCatches().size();
 		List<Instruction> catchInstructions;
 		int catchInstructionsLength;
 		Instruction in;
 		while (i-- > 0)
 		{
-			catchInstructions = fastTry.catches.get(i).instructions;
+			catchInstructions = fastTry.getCatches().get(i).getInstructions();
 			catchInstructionsLength = catchInstructions.size();
 			// Remove 'goto' instruction in catch block
 			in = catchInstructions.remove(catchInstructionsLength - 1);
-			fce.catches.get(i).toOffset = in.offset;
+			fce.getCatches().get(i).toOffset = in.getOffset();
 			// Remove first catch instruction in each catch block
 			catchInstructions.remove(0);
 		}
 
 		// Remove 'Pop ExceptionLoad' instruction in finally block
-		List<Instruction>  finallyInstructions = fastTry.finallyInstructions;
+		List<Instruction>  finallyInstructions = fastTry.getFinallyInstructions();
 		finallyInstructions.remove(0);
 	}
 
@@ -2316,23 +2296,23 @@ public class FastCodeExceptionAnalyzer
 	private static void format131CatchFinally(
 			LocalVariables localVariables, FastCodeExcepcion fce, FastTry fastTry)
 	{
-		List<Instruction> tryInstructions = fastTry.instructions;
+		List<Instruction> tryInstructions = fastTry.getInstructions();
 		int length = tryInstructions.size();
 
 		// Remove last 'goto' instruction in try block
-		if (tryInstructions.get(--length).opcode == Const.GOTO)
+		if (tryInstructions.get(--length).getOpcode() == Const.GOTO)
 		{
 			Goto g = (Goto)tryInstructions.remove(length);
-			fce.tryToOffset = g.offset;
+			fce.setTryToOffset(g.getOffset());
 		}
 		// Remove JSR instruction in try block before 'return' instruction
 		int finallyInstructionsLineNumber =
-				fastTry.finallyInstructions.get(0).lineNumber;
+				fastTry.getFinallyInstructions().get(0).getLineNumber();
 		int jumpOffset = formatFastTryRemoveJsrInstructionAndCompactStoreReturn(
 				tryInstructions, localVariables, finallyInstructionsLineNumber);
 		// Remove last 'jsr' instruction in try block
 		length = tryInstructions.size();
-		if (tryInstructions.get(--length).opcode == Const.JSR)
+		if (tryInstructions.get(--length).getOpcode() == Const.JSR)
 		{
 			Jsr jsr = (Jsr)tryInstructions.remove(length);
 			jumpOffset = jsr.getJumpOffset();
@@ -2341,22 +2321,22 @@ public class FastCodeExceptionAnalyzer
 			throw new UnexpectedInstructionException();
 		}
 
-		List<Instruction> finallyInstructions = fastTry.finallyInstructions;
+		List<Instruction> finallyInstructions = fastTry.getFinallyInstructions();
 
-		if (jumpOffset < finallyInstructions.get(0).offset)
+		if (jumpOffset < finallyInstructions.get(0).getOffset())
 		{
 			// La sous procedure [finally] se trouve dans l'un des blocs 'catch'.
 
 			// Recherche et extraction de la sous procedure
-			int i = fastTry.catches.size();
+			int i = fastTry.getCatches().size();
 			int index;
 			while (i-- > 0)
 			{
 				List<Instruction> catchInstructions =
-						fastTry.catches.get(i).instructions;
+						fastTry.getCatches().get(i).getInstructions();
 
 				if (catchInstructions.isEmpty() ||
-						catchInstructions.get(0).offset > jumpOffset) {
+						catchInstructions.get(0).getOffset() > jumpOffset) {
 					continue;
 				}
 
@@ -2364,10 +2344,10 @@ public class FastCodeExceptionAnalyzer
 				index = InstructionUtil.getIndexForOffset(catchInstructions, jumpOffset);
 				finallyInstructions.clear();
 
-				while (catchInstructions.get(index).opcode != Const.RET) {
+				while (catchInstructions.get(index).getOpcode() != Const.RET) {
 					finallyInstructions.add(catchInstructions.remove(index));
 				}
-				if (catchInstructions.get(index).opcode == Const.RET) {
+				if (catchInstructions.get(index).getOpcode() == Const.RET) {
 					finallyInstructions.add(catchInstructions.remove(index));
 				}
 
@@ -2375,21 +2355,21 @@ public class FastCodeExceptionAnalyzer
 			}
 
 			// Format catch blocks
-			i = fastTry.catches.size();
+			i = fastTry.getCatches().size();
 			List<Instruction> catchInstructions;
 			while (i-- > 0)
 			{
-				catchInstructions = fastTry.catches.get(i).instructions;
+				catchInstructions = fastTry.getCatches().get(i).getInstructions();
 				length = catchInstructions.size();
 
 				// Remove last 'goto' instruction
-				if (catchInstructions.get(--length).opcode == Const.GOTO)
+				if (catchInstructions.get(--length).getOpcode() == Const.GOTO)
 				{
 					Goto g = (Goto)catchInstructions.remove(length);
-					fce.catches.get(i).toOffset = g.offset;
+					fce.getCatches().get(i).toOffset = g.getOffset();
 				}
 				// Remove last 'jsr' instruction
-				if (catchInstructions.get(--length).opcode == Const.JSR) {
+				if (catchInstructions.get(--length).getOpcode() == Const.JSR) {
 					catchInstructions.remove(length);
 				}
 				// Remove JSR instruction in try block before 'return' instruction
@@ -2412,21 +2392,21 @@ public class FastCodeExceptionAnalyzer
 			// La sous procedure [finally] se trouve dans le bloc 'finally'.
 
 			// Format catch blocks
-			int i = fastTry.catches.size();
+			int i = fastTry.getCatches().size();
 			List<Instruction> catchInstructions;
 			while (i-- > 0)
 			{
-				catchInstructions = fastTry.catches.get(i).instructions;
+				catchInstructions = fastTry.getCatches().get(i).getInstructions();
 				length = catchInstructions.size();
 
 				// Remove last 'goto' instruction
-				if (catchInstructions.get(--length).opcode == Const.GOTO)
+				if (catchInstructions.get(--length).getOpcode() == Const.GOTO)
 				{
 					Goto g = (Goto)catchInstructions.remove(length);
-					fce.catches.get(i).toOffset = g.offset;
+					fce.getCatches().get(i).toOffset = g.getOffset();
 				}
 				// Remove last 'jsr' instruction
-				if (catchInstructions.get(--length).opcode == Const.JSR) {
+				if (catchInstructions.get(--length).getOpcode() == Const.JSR) {
 					catchInstructions.remove(length);
 				}
 				// Remove JSR instruction in try block before 'return' instruction
@@ -2457,17 +2437,17 @@ public class FastCodeExceptionAnalyzer
 	private static void format142(
 			LocalVariables localVariables, FastCodeExcepcion fce, FastTry fastTry)
 	{
-		List<Instruction> finallyInstructions = fastTry.finallyInstructions;
+		List<Instruction> finallyInstructions = fastTry.getFinallyInstructions();
 		int finallyInstructionsSize = finallyInstructions.size();
 
 		// Remove last 'athrow' instruction in finally block
-		if (finallyInstructions.get(finallyInstructionsSize-1).opcode ==
+		if (finallyInstructions.get(finallyInstructionsSize-1).getOpcode() ==
 				Const.ATHROW)
 		{
 			finallyInstructions.remove(finallyInstructionsSize-1);
 		}
 		// Remove 'astore' or 'monitorexit' instruction in finally block
-		int finallyFirstOpcode = finallyInstructions.get(0).opcode;
+		int finallyFirstOpcode = finallyInstructions.get(0).getOpcode();
 		if (finallyFirstOpcode == Const.ASTORE || finallyFirstOpcode == Const.POP) {
 			finallyInstructions.remove(0);
 		}
@@ -2478,18 +2458,18 @@ public class FastCodeExceptionAnalyzer
 			FastCompareInstructionVisitor visitor =
 					new FastCompareInstructionVisitor();
 
-			List<Instruction> tryInstructions = fastTry.instructions;
+			List<Instruction> tryInstructions = fastTry.getInstructions();
 			int length = tryInstructions.size();
 
-			int tryLastOpCode = tryInstructions.get(length-1).opcode;
+			int tryLastOpCode = tryInstructions.get(length-1).getOpcode();
 			if (tryLastOpCode == Const.GOTO) {
 				length--;
 				// Remove last 'goto' instruction in try block
 				Goto g = (Goto)tryInstructions.get(length);
-				if (g.branch > 0)
+				if (g.getBranch() > 0)
 				{
 					tryInstructions.remove(length);
-					fce.tryToOffset = g.offset;
+					fce.setTryToOffset(g.getOffset());
 				}
 			}
 
@@ -2497,27 +2477,27 @@ public class FastCodeExceptionAnalyzer
 			format142RemoveFinallyInstructionsBeforeReturnAndCompactStoreReturn(
 					localVariables, visitor, tryInstructions, finallyInstructions);
 
-			if (fastTry.catches != null)
+			if (fastTry.getCatches() != null)
 			{
 				// Format catch blocks
-				int i = fastTry.catches.size();
+				int i = fastTry.getCatches().size();
 				List<Instruction> catchInstructions;
 				int catchLastOpCode;
 				while (i-- > 0)
 				{
-					catchInstructions = fastTry.catches.get(i).instructions;
+					catchInstructions = fastTry.getCatches().get(i).getInstructions();
 
 					length = catchInstructions.size();
 
-					catchLastOpCode = catchInstructions.get(length-1).opcode;
+					catchLastOpCode = catchInstructions.get(length-1).getOpcode();
 					if (catchLastOpCode == Const.GOTO) {
 						length--;
 						// Remove last 'goto' instruction in try block
 						Goto g = (Goto)catchInstructions.get(length);
-						if (g.branch > 0)
+						if (g.getBranch() > 0)
 						{
 							catchInstructions.remove(length);
-							fce.catches.get(i).toOffset = g.offset;
+							fce.getCatches().get(i).toOffset = g.getOffset();
 						}
 					}
 
@@ -2531,14 +2511,14 @@ public class FastCodeExceptionAnalyzer
 				}
 			}
 		}
-		if (fastTry.catches != null && !fastTry.catches.isEmpty())
+		if (fastTry.getCatches() != null && !fastTry.getCatches().isEmpty())
 		{
 			// Format catch blocks
-			int i = fastTry.catches.size();
+			int i = fastTry.getCatches().size();
 			List<Instruction> catchInstructions;
 			while (i-- > 0)
 			{
-				catchInstructions = fastTry.catches.get(i).instructions;
+				catchInstructions = fastTry.getCatches().get(i).getInstructions();
 
 				// Remove first catch instruction in each catch block
 				if (!catchInstructions.isEmpty() && formatCatchRemoveFirstCatchInstruction(catchInstructions.get(0))) {
@@ -2556,7 +2536,7 @@ public class FastCodeExceptionAnalyzer
 	{
 		int index = instructions.size();
 		int finallyInstructionsSize = finallyInstructions.size();
-		int finallyInstructionsLineNumber = finallyInstructions.get(0).lineNumber;
+		int finallyInstructionsLineNumber = finallyInstructions.get(0).getLineNumber();
 
 		boolean match = index >= finallyInstructionsSize && visitor.visit(
 				instructions, finallyInstructions,
@@ -2575,7 +2555,7 @@ public class FastCodeExceptionAnalyzer
 		{
 			instruction = instructions.get(index);
 
-			switch (instruction.opcode)
+			switch (instruction.getOpcode())
 			{
 			case Const.RETURN:
 			case Const.ATHROW:
@@ -2590,16 +2570,16 @@ public class FastCodeExceptionAnalyzer
 					// Remove finally instructions
 					for (int j=0; j<finallyInstructionsSize && index>0; index--,++j) {
 						instr = instructions.get(index-1);
-						if (instr.lineNumber >= finallyInstructionsLineNumber) {
+						if (instr.getLineNumber() >= finallyInstructionsLineNumber) {
 							instructions.remove(index-1);
 						}
 					}
 				}
 
-				if (instruction.lineNumber != Instruction.UNKNOWN_LINE_NUMBER &&
-						instruction.lineNumber >= finallyInstructionsLineNumber)
+				if (instruction.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER &&
+						instruction.getLineNumber() >= finallyInstructionsLineNumber)
 				{
-					instruction.lineNumber = Instruction.UNKNOWN_LINE_NUMBER;
+					instruction.setLineNumber(Instruction.UNKNOWN_LINE_NUMBER);
 				}
 			}
 			break;
@@ -2620,26 +2600,26 @@ public class FastCodeExceptionAnalyzer
 				// Compact AStore + Return
 				ReturnInstruction ri = (ReturnInstruction)instruction;
 
-				if (ri.lineNumber != Instruction.UNKNOWN_LINE_NUMBER)
+				if (ri.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER)
 				{
-					switch (ri.valueref.opcode)
+					switch (ri.getValueref().getOpcode())
 					{
 					case Const.ALOAD:
-						if (instructions.get(index-1).opcode == Const.ASTORE) {
+						if (instructions.get(index-1).getOpcode() == Const.ASTORE) {
 							index = compactStoreReturn(
 									instructions, localVariables, ri,
 									index, finallyInstructionsLineNumber);
 						}
 						break;
 					case ByteCodeConstants.LOAD:
-						if (instructions.get(index-1).opcode == ByteCodeConstants.STORE) {
+						if (instructions.get(index-1).getOpcode() == ByteCodeConstants.STORE) {
 							index = compactStoreReturn(
 									instructions, localVariables, ri,
 									index, finallyInstructionsLineNumber);
 						}
 						break;
 					case Const.ILOAD:
-						if (instructions.get(index-1).opcode == Const.ISTORE) {
+						if (instructions.get(index-1).getOpcode() == Const.ISTORE) {
 							index = compactStoreReturn(
 									instructions, localVariables, ri,
 									index, finallyInstructionsLineNumber);
@@ -2656,24 +2636,24 @@ public class FastCodeExceptionAnalyzer
 
 				format142RemoveFinallyInstructionsBeforeReturnAndCompactStoreReturn(
 						localVariables, visitor,
-						ft.instructions, finallyInstructions);
+						ft.getInstructions(), finallyInstructions);
 
-				if (ft.catches != null)
+				if (ft.getCatches() != null)
 				{
-					int i = ft.catches.size();
+					int i = ft.getCatches().size();
 					while (i-- > 0)
 					{
 						format142RemoveFinallyInstructionsBeforeReturnAndCompactStoreReturn(
 								localVariables, visitor,
-								ft.catches.get(i).instructions, finallyInstructions);
+								ft.getCatches().get(i).getInstructions(), finallyInstructions);
 					}
 				}
 
-				if (ft.finallyInstructions != null)
+				if (ft.getFinallyInstructions() != null)
 				{
 					format142RemoveFinallyInstructionsBeforeReturnAndCompactStoreReturn(
 							localVariables, visitor,
-							ft.finallyInstructions, finallyInstructions);
+							ft.getFinallyInstructions(), finallyInstructions);
 				}
 			}
 			break;
@@ -2684,7 +2664,7 @@ public class FastCodeExceptionAnalyzer
 
 				format142RemoveFinallyInstructionsBeforeReturnAndCompactStoreReturn(
 						localVariables, visitor,
-						fs.instructions, finallyInstructions);
+						fs.getInstructions(), finallyInstructions);
 			}
 			break;
 			}
@@ -2695,29 +2675,29 @@ public class FastCodeExceptionAnalyzer
 			List<Instruction> instructions, LocalVariables localVariables,
 			ReturnInstruction ri, int index, int finallyInstructionsLineNumber)
 	{
-		IndexInstruction load = (IndexInstruction)ri.valueref;
+		IndexInstruction load = (IndexInstruction)ri.getValueref();
 		StoreInstruction store = (StoreInstruction)instructions.get(index-1);
 
-		if (load.index == store.index &&
-				(load.lineNumber <= store.lineNumber ||
-				load.lineNumber >= finallyInstructionsLineNumber))
+		if (load.getIndex() == store.getIndex() &&
+				(load.getLineNumber() <= store.getLineNumber() ||
+				load.getLineNumber() >= finallyInstructionsLineNumber))
 		{
 			// TODO A ameliorer !!
 			// Remove local variable
 			LocalVariable lv = localVariables.
 					getLocalVariableWithIndexAndOffset(
-							store.index, store.offset);
+							store.getIndex(), store.getOffset());
 
-			if (lv != null && lv.startPc == store.offset &&
-					lv.startPc + lv.length <= ri.offset) {
+			if (lv != null && lv.getStartPc() == store.getOffset() &&
+					lv.getStartPc() + lv.getLength() <= ri.getOffset()) {
 				localVariables.
 				removeLocalVariableWithIndexAndOffset(
-						store.index, store.offset);
+						store.getIndex(), store.getOffset());
 			}
 			// Replace returned instruction
-			ri.valueref = store.valueref;
-			if (ri.lineNumber > store.lineNumber) {
-				ri.lineNumber = store.lineNumber;
+			ri.setValueref(store.getValueref());
+			if (ri.getLineNumber() > store.getLineNumber()) {
+				ri.setLineNumber(store.getLineNumber());
 			}
 			index--;
 			// Remove 'store' instruction
@@ -2730,49 +2710,49 @@ public class FastCodeExceptionAnalyzer
 	private static void format142FinallyThrow(FastTry fastTry)
 	{
 		// Remove last 'athrow' instruction in finally block
-		fastTry.finallyInstructions.remove(fastTry.finallyInstructions.size()-1);
+		fastTry.getFinallyInstructions().remove(fastTry.getFinallyInstructions().size()-1);
 		// Remove 'astore' instruction in finally block
-		fastTry.finallyInstructions.remove(0);
+		fastTry.getFinallyInstructions().remove(0);
 	}
 
 	private static void formatJikes122(
 			LocalVariables localVariables, FastCodeExcepcion fce,
 			FastTry fastTry, int returnOffset)
 	{
-		List<Instruction> tryInstructions = fastTry.instructions;
+		List<Instruction> tryInstructions = fastTry.getInstructions();
 		int lastIndex = tryInstructions.size()-1;
 		Instruction lastTryInstruction = tryInstructions.get(lastIndex);
-		int lastTryInstructionOffset = lastTryInstruction.offset;
+		int lastTryInstructionOffset = lastTryInstruction.getOffset();
 
 		// Remove last 'goto' instruction in try block
-		if (tryInstructions.get(lastIndex).opcode == Const.GOTO)
+		if (tryInstructions.get(lastIndex).getOpcode() == Const.GOTO)
 		{
 			Goto g = (Goto)tryInstructions.remove(lastIndex);
-			fce.tryToOffset = g.offset;
+			fce.setTryToOffset(g.getOffset());
 		}
 		// Remove Jsr instruction before return instructions
 		int finallyInstructionsLineNumber;
-		if (fastTry.finallyInstructions.isEmpty()) {
+		if (fastTry.getFinallyInstructions().isEmpty()) {
 			finallyInstructionsLineNumber = -1;
 		} else {
-			finallyInstructionsLineNumber = fastTry.finallyInstructions.get(0).lineNumber;
+			finallyInstructionsLineNumber = fastTry.getFinallyInstructions().get(0).getLineNumber();
 		}
 		formatFastTryRemoveJsrInstructionAndCompactStoreReturn(
 				tryInstructions, localVariables, finallyInstructionsLineNumber);
 
 		// Format catch blocks
-		int i = fastTry.catches.size();
+		int i = fastTry.getCatches().size();
 		List<Instruction> catchInstructions;
 		while (i-- > 0)
 		{
-			catchInstructions = fastTry.catches.get(i).instructions;
+			catchInstructions = fastTry.getCatches().get(i).getInstructions();
 			lastIndex = catchInstructions.size()-1;
 
 			// Remove last 'goto' instruction in try block
-			if (catchInstructions.get(lastIndex).opcode == Const.GOTO)
+			if (catchInstructions.get(lastIndex).getOpcode() == Const.GOTO)
 			{
 				Goto g = (Goto)catchInstructions.remove(lastIndex);
-				fce.catches.get(i).toOffset = g.offset;
+				fce.getCatches().get(i).toOffset = g.getOffset();
 			}
 			// Remove Jsr instruction before return instructions
 			if (finallyInstructionsLineNumber != -1) {
@@ -2787,7 +2767,7 @@ public class FastCodeExceptionAnalyzer
 			catchInstructions.remove(0);
 		}
 
-		List<Instruction> finallyInstructions = fastTry.finallyInstructions;
+		List<Instruction> finallyInstructions = fastTry.getFinallyInstructions();
 		int length = finallyInstructions.size();
 
 		// Remove last 'jsr' instruction in finally block
@@ -2805,15 +2785,15 @@ public class FastCodeExceptionAnalyzer
 			finallyInstructions.remove(0);
 		}
 		// Remove 'jsr' instruction in finally block
-		if (!finallyInstructions.isEmpty() && finallyInstructions.get(0).opcode == Const.JSR) {
+		if (!finallyInstructions.isEmpty() && finallyInstructions.get(0).getOpcode() == Const.JSR) {
 			finallyInstructions.remove(0);
 		}
 		// Remove 'athrow' instruction in finally block
-		if (!finallyInstructions.isEmpty() && finallyInstructions.get(0).opcode == Const.ATHROW) {
+		if (!finallyInstructions.isEmpty() && finallyInstructions.get(0).getOpcode() == Const.ATHROW) {
 			finallyInstructions.remove(0);
 		}
 		// Remove 'astore' instruction in finally block
-		if (!finallyInstructions.isEmpty() && finallyInstructions.get(0).opcode == Const.ASTORE) {
+		if (!finallyInstructions.isEmpty() && finallyInstructions.get(0).getOpcode() == Const.ASTORE) {
 			finallyInstructions.remove(0);
 		}
 	}
@@ -2827,7 +2807,7 @@ public class FastCodeExceptionAnalyzer
 
 		while (index-- > 1)
 		{
-			if (instructions.get(index).opcode == Const.JSR)
+			if (instructions.get(index).getOpcode() == Const.JSR)
 			{
 				// Remove Jsr instruction
 				Jsr jsr = (Jsr)instructions.remove(index);
@@ -2842,31 +2822,31 @@ public class FastCodeExceptionAnalyzer
 		{
 			instruction = instructions.get(index);
 
-			if (instruction.opcode == ByteCodeConstants.XRETURN)
+			if (instruction.getOpcode() == ByteCodeConstants.XRETURN)
 			{
 				// Compact AStore + Return
 				ReturnInstruction ri = (ReturnInstruction)instruction;
 
-				if (ri.lineNumber != Instruction.UNKNOWN_LINE_NUMBER)
+				if (ri.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER)
 				{
-					switch (ri.valueref.opcode)
+					switch (ri.getValueref().getOpcode())
 					{
 					case Const.ALOAD:
-						if (instructions.get(index-1).opcode == Const.ASTORE) {
+						if (instructions.get(index-1).getOpcode() == Const.ASTORE) {
 							index = compactStoreReturn(
 									instructions, localVariables, ri,
 									index, finallyInstructionsLineNumber);
 						}
 						break;
 					case ByteCodeConstants.LOAD:
-						if (instructions.get(index-1).opcode == ByteCodeConstants.STORE) {
+						if (instructions.get(index-1).getOpcode() == ByteCodeConstants.STORE) {
 							index = compactStoreReturn(
 									instructions, localVariables, ri,
 									index, finallyInstructionsLineNumber);
 						}
 						break;
 					case Const.ILOAD:
-						if (instructions.get(index-1).opcode == Const.ISTORE) {
+						if (instructions.get(index-1).getOpcode() == Const.ISTORE) {
 							index = compactStoreReturn(
 									instructions, localVariables, ri,
 									index, finallyInstructionsLineNumber);
@@ -2891,14 +2871,14 @@ public class FastCodeExceptionAnalyzer
 		{
 			instruction = instructions.get(i);
 
-			if (instruction.opcode == Const.GOTO) {
+			if (instruction.getOpcode() == Const.GOTO) {
 				Goto g = (Goto)instruction;
 				int jumpOffset = g.getJumpOffset();
 
 				if (jumpOffset < lastTryInstructionOffset)
 				{
 					// Change jump offset
-					g.branch = returnOffset - g.offset;
+					g.setBranch(returnOffset - g.getOffset());
 				}
 			}
 		}
@@ -2908,25 +2888,25 @@ public class FastCodeExceptionAnalyzer
 			FastCodeExcepcion fce, FastTry fastTry)
 	{
 		// Remove instructions in finally block
-		List<Instruction> finallyInstructions = fastTry.finallyInstructions;
+		List<Instruction> finallyInstructions = fastTry.getFinallyInstructions();
 
 		Instruction instruction = finallyInstructions.get(0);
 
-		if (instruction.opcode == Const.POP) {
+		if (instruction.getOpcode() == Const.POP) {
 			// Remove 'pop' instruction in finally block
 			finallyInstructions.remove(0);
 
-			List<Instruction> tryInstructions = fastTry.instructions;
+			List<Instruction> tryInstructions = fastTry.getInstructions();
 			int lastIndex = tryInstructions.size()-1;
 
 			// Remove last 'goto' instruction in try block
-			if (tryInstructions.get(lastIndex).opcode == Const.GOTO)
+			if (tryInstructions.get(lastIndex).getOpcode() == Const.GOTO)
 			{
 				Goto g = (Goto)tryInstructions.remove(lastIndex);
-				fce.tryToOffset = g.offset;
+				fce.setTryToOffset(g.getOffset());
 			}
-		} else if (instruction.opcode == Const.ASTORE) {
-			int exceptionIndex = ((AStore)instruction).index;
+		} else if (instruction.getOpcode() == Const.ASTORE) {
+			int exceptionIndex = ((AStore)instruction).getIndex();
 			int index = finallyInstructions.size();
 			int athrowOffset = -1;
 			int afterAthrowOffset = -1;
@@ -2935,18 +2915,18 @@ public class FastCodeExceptionAnalyzer
 			while (index-- > 0)
 			{
 				instruction = finallyInstructions.get(index);
-				if (instruction.opcode == Const.ATHROW)
+				if (instruction.getOpcode() == Const.ATHROW)
 				{
 					AThrow athrow = (AThrow)instruction;
 					if (findAloadForAThrow(exceptionIndex, athrow))
 					{
 						// Remove last 'athrow' instruction in finally block
-						athrowOffset = instruction.offset;
+						athrowOffset = instruction.getOffset();
 						finallyInstructions.remove(index);
 						break;
 					}
 				}
-				afterAthrowOffset = instruction.offset;
+				afterAthrowOffset = instruction.getOffset();
 				finallyInstructions.remove(index);
 			}
 
@@ -2954,14 +2934,14 @@ public class FastCodeExceptionAnalyzer
 				// Remove 'astore' instruction in finally block
 				Instruction astore = finallyInstructions.remove(0);
 
-				List<Instruction> tryInstructions = fastTry.instructions;
+				List<Instruction> tryInstructions = fastTry.getInstructions();
 				int lastIndex = tryInstructions.size()-1;
 
 				// Remove last 'goto' instruction in try block
-				if (tryInstructions.get(lastIndex).opcode == Const.GOTO)
+				if (tryInstructions.get(lastIndex).getOpcode() == Const.GOTO)
 				{
 					Goto g = (Goto)tryInstructions.remove(lastIndex);
-					fce.tryToOffset = g.offset;
+					fce.setTryToOffset(g.getOffset());
 				}
 
 				removeOutOfBoundsInstructions(fastTry, astore);
@@ -2972,7 +2952,7 @@ public class FastCodeExceptionAnalyzer
 
 				// Format 'ifxxx' instruction jumping to finally block
 				formatEclipse677FinallyFormatIfInstruction(
-						tryInstructions, athrowOffset, afterAthrowOffset, astore.offset);
+						tryInstructions, athrowOffset, afterAthrowOffset, astore.getOffset());
 			}
 		}
 	}
@@ -2980,18 +2960,18 @@ public class FastCodeExceptionAnalyzer
 	private static void removeOutOfBoundsInstructions(FastTry fastTry, Instruction astore) {
 		Instruction tryInstr;
 		// Remove try instructions that are out of bounds and should be found in finally instructions
-		for (Iterator<Instruction> tryIter = fastTry.instructions.iterator(); tryIter.hasNext();) {
+		for (Iterator<Instruction> tryIter = fastTry.getInstructions().iterator(); tryIter.hasNext();) {
 			tryInstr = tryIter.next();
-			if (tryInstr.lineNumber >= astore.lineNumber) {
+			if (tryInstr.getLineNumber() >= astore.getLineNumber()) {
 				tryIter.remove();
 			}
 		}
 		Instruction catchInstr;
 		// Remove catch instructions that are out of bounds and should be found in finally instructions
-		for (FastCatch fastCatch : fastTry.catches) {
-			for (Iterator<Instruction> catchIter = fastCatch.instructions.iterator(); catchIter.hasNext();) {
+		for (FastCatch fastCatch : fastTry.getCatches()) {
+			for (Iterator<Instruction> catchIter = fastCatch.getInstructions().iterator(); catchIter.hasNext();) {
 				catchInstr = catchIter.next();
-				if (catchInstr.lineNumber >= astore.lineNumber) {
+				if (catchInstr.getLineNumber() >= astore.getLineNumber()) {
 					catchIter.remove();
 				}
 			}
@@ -3009,15 +2989,15 @@ public class FastCodeExceptionAnalyzer
 		{
 			instruction = instructions.get(i);
 
-			if (instruction.opcode == ByteCodeConstants.IF || instruction.opcode == ByteCodeConstants.IFXNULL
-					|| instruction.opcode == ByteCodeConstants.COMPLEXIF) {
+			if (instruction.getOpcode() == ByteCodeConstants.IF || instruction.getOpcode() == ByteCodeConstants.IFXNULL
+					|| instruction.getOpcode() == ByteCodeConstants.COMPLEXIF) {
 				IfInstruction ifi = (IfInstruction)instruction;
 				int jumpOffset = ifi.getJumpOffset();
 
 				if (athrowOffset < jumpOffset && jumpOffset <= afterAthrowOffset)
 				{
 					// Change jump offset
-					ifi.branch = afterTryOffset - ifi.offset;
+					ifi.setBranch(afterTryOffset - ifi.getOffset());
 				}
 			}
 		}
@@ -3031,7 +3011,7 @@ public class FastCodeExceptionAnalyzer
 		int iOpCode;
 		while (i-- > 0)
 		{
-			iOpCode = instructions.get(i).opcode;
+			iOpCode = instructions.get(i).getOpcode();
 			if (iOpCode == Const.RETURN || iOpCode == ByteCodeConstants.XRETURN) {
 				// Remove finally instructions
 				for (int j=0; j<finallyInstructionsSize && i>0; i--,j++) {
@@ -3045,9 +3025,9 @@ public class FastCodeExceptionAnalyzer
 			FastCodeExcepcion fce, FastTry fastTry, int returnOffset)
 	{
 		// Remove instructions in finally block
-		List<Instruction> finallyInstructions = fastTry.finallyInstructions;
+		List<Instruction> finallyInstructions = fastTry.getFinallyInstructions();
 
-		int exceptionIndex = ((AStore)finallyInstructions.get(0)).index;
+		int exceptionIndex = ((AStore)finallyInstructions.get(0)).getIndex();
 		int index = finallyInstructions.size();
 		int athrowOffset = -1;
 		int afterAthrowOffset = -1;
@@ -3057,17 +3037,17 @@ public class FastCodeExceptionAnalyzer
 		while (index-- > 0)
 		{
 			instruction = finallyInstructions.get(index);
-			if (instruction.opcode == Const.ATHROW)
+			if (instruction.getOpcode() == Const.ATHROW)
 			{
 				AThrow athrow = (AThrow)instruction;
 				if (findAloadForAThrow(exceptionIndex, athrow))
 				{
 					// Remove last 'athrow' instruction in finally block
-					athrowOffset = finallyInstructions.remove(index).offset;
+					athrowOffset = finallyInstructions.remove(index).getOffset();
 					break;
 				}
 			}
-			afterAthrowOffset = instruction.offset;
+			afterAthrowOffset = instruction.getOffset();
 			finallyInstructions.remove(index);
 		}
 
@@ -3075,16 +3055,16 @@ public class FastCodeExceptionAnalyzer
 			// Remove 'astore' instruction in finally block
 			Instruction astore = finallyInstructions.remove(0);
 
-			List<Instruction> tryInstructions = fastTry.instructions;
+			List<Instruction> tryInstructions = fastTry.getInstructions();
 			int lastIndex = tryInstructions.size()-1;
 			Instruction lastTryInstruction = tryInstructions.get(lastIndex);
-			int lastTryInstructionOffset = lastTryInstruction.offset;
+			int lastTryInstructionOffset = lastTryInstruction.getOffset();
 
 			// Remove last 'goto' instruction in try block
-			if (lastTryInstruction.opcode == Const.GOTO)
+			if (lastTryInstruction.getOpcode() == Const.GOTO)
 			{
 				Goto g = (Goto)tryInstructions.remove(lastIndex);
-				fce.tryToOffset = g.offset;
+				fce.setTryToOffset(g.getOffset());
 			}
 
 			removeOutOfBoundsInstructions(fastTry, astore);
@@ -3100,29 +3080,29 @@ public class FastCodeExceptionAnalyzer
 					afterAthrowOffset, lastTryInstructionOffset+1);
 
 			// Format catch blocks
-			int i = fastTry.catches.size();
+			int i = fastTry.getCatches().size();
 			FastCatch fastCatch;
 			List<Instruction> catchInstructions;
 			Instruction lastInstruction;
 			int lastInstructionOffset;
 			while (i-- > 0)
 			{
-				fastCatch = fastTry.catches.get(i);
-				catchInstructions = fastCatch.instructions;
+				fastCatch = fastTry.getCatches().get(i);
+				catchInstructions = fastCatch.getInstructions();
 				index = catchInstructions.size();
 
 				lastInstruction = catchInstructions.get(index-1);
-				lastInstructionOffset = lastInstruction.offset;
+				lastInstructionOffset = lastInstruction.getOffset();
 
-				if (lastInstruction.opcode == Const.GOTO)
+				if (lastInstruction.getOpcode() == Const.GOTO)
 				{
 					index--;
 					// Remove last 'goto' instruction
 					Goto g = (Goto)catchInstructions.remove(index);
-					fce.catches.get(i).toOffset = g.offset;
+					fce.getCatches().get(i).toOffset = g.getOffset();
 					int jumpOffset = g.getJumpOffset();
 
-					if (jumpOffset > fastTry.offset)
+					if (jumpOffset > fastTry.getOffset())
 					{
 						// Remove finally block instructions
 						for (int j=finallyInstructionsSize; j>0; --j) {
@@ -3152,38 +3132,38 @@ public class FastCodeExceptionAnalyzer
 	}
 
 	private static boolean findAloadForAThrow(int exceptionIndex, AThrow athrow) {
-		return athrow.value.opcode == Const.ALOAD &&
-				((ALoad)athrow.value).index == exceptionIndex
-				|| athrow.value.opcode == Const.CHECKCAST &&
-				((CheckCast)athrow.value).objectref.opcode == Const.ALOAD &&
-				((ALoad)((CheckCast)athrow.value).objectref).index == exceptionIndex;
+		return athrow.getValue().getOpcode() == Const.ALOAD &&
+				((ALoad)athrow.getValue()).getIndex() == exceptionIndex
+				|| athrow.getValue().getOpcode() == Const.CHECKCAST &&
+				((CheckCast)athrow.getValue()).getObjectref().getOpcode() == Const.ALOAD &&
+				((ALoad)((CheckCast)athrow.getValue()).getObjectref()).getIndex() == exceptionIndex;
 	}
 
 	public static class FastCodeExcepcion
 	implements Comparable<FastCodeExcepcion>
 	{
-		public final int tryFromOffset;
-		public int tryToOffset;
-		public final List<FastCodeExceptionCatch> catches;
-		public int finallyFromOffset;
-		public int nbrFinally;
-		public int maxOffset;
-		public int afterOffset;
-		public int type;
-		public final boolean synchronizedFlag;
+		private final int tryFromOffset;
+		private int tryToOffset;
+		private final List<FastCodeExceptionCatch> catches;
+		private int finallyFromOffset;
+		private int nbrFinally;
+		private int maxOffset;
+		private int afterOffset;
+		private int type;
+		private final boolean synchronizedFlag;
 
 		FastCodeExcepcion(
 				int tryFromOffset, int tryToOffset,
 				int maxOffset, boolean synchronizedFlag)
 		{
 			this.tryFromOffset = tryFromOffset;
-			this.tryToOffset = tryToOffset;
+			this.setTryToOffset(tryToOffset);
 			this.catches = new ArrayList<>();
-			this.finallyFromOffset = UtilConstants.INVALID_OFFSET;
+			this.setFinallyFromOffset(UtilConstants.INVALID_OFFSET);
 			this.nbrFinally = 0;
 			this.maxOffset = maxOffset;
-			this.afterOffset = UtilConstants.INVALID_OFFSET;
-			this.type = FastConstants.TYPE_UNDEFINED;
+			this.setAfterOffset(UtilConstants.INVALID_OFFSET);
+			this.setType(FastConstants.TYPE_UNDEFINED);
 			this.synchronizedFlag = synchronizedFlag;
 		}
 
@@ -3191,15 +3171,75 @@ public class FastCodeExceptionAnalyzer
 		public int compareTo(FastCodeExcepcion other)
 		{
 			// Sort by 1)tryFromOffset 2)maxOffset 3)tryToOffset
-			if (this.tryFromOffset != other.tryFromOffset) {
-				return this.tryFromOffset - other.tryFromOffset;
+			if (this.getTryFromOffset() != other.getTryFromOffset()) {
+				return this.getTryFromOffset() - other.getTryFromOffset();
 			}
 
 			if (this.maxOffset != other.maxOffset) {
 				return other.maxOffset - this.maxOffset;
 			}
 
-			return other.tryToOffset - this.tryToOffset;
+			return other.getTryToOffset() - this.getTryToOffset();
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(tryFromOffset, tryToOffset, maxOffset);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null || getClass() != obj.getClass()) {
+				return false;
+			}
+			return obj instanceof FastCodeExcepcion fce && compareTo(fce) == 0;
+		}
+
+		public int getTryFromOffset() {
+			return tryFromOffset;
+		}
+
+		public List<FastCodeExceptionCatch> getCatches() {
+			return catches;
+		}
+
+		public boolean hasSynchronizedFlag() {
+			return synchronizedFlag;
+		}
+
+		public int getFinallyFromOffset() {
+			return finallyFromOffset;
+		}
+
+		public void setFinallyFromOffset(int finallyFromOffset) {
+			this.finallyFromOffset = finallyFromOffset;
+		}
+
+		public int getAfterOffset() {
+			return afterOffset;
+		}
+
+		public void setAfterOffset(int afterOffset) {
+			this.afterOffset = afterOffset;
+		}
+
+		public int getType() {
+			return type;
+		}
+
+		public void setType(int type) {
+			this.type = type;
+		}
+
+		public int getTryToOffset() {
+			return tryToOffset;
+		}
+
+		public void setTryToOffset(int tryToOffset) {
+			this.tryToOffset = tryToOffset;
 		}
 	}
 
@@ -3224,6 +3264,22 @@ public class FastCodeExceptionAnalyzer
 		public int compareTo(FastCodeExceptionCatch other)
 		{
 			return this.fromOffset - other.fromOffset;
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(fromOffset);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null || getClass() != obj.getClass()) {
+				return false;
+			}
+			return obj instanceof FastCodeExceptionCatch fcec && compareTo(fcec) == 0;
 		}
 	}
 
@@ -3263,26 +3319,26 @@ public class FastCodeExceptionAnalyzer
 			int lastIndex, int maxOffset)
 	{
 		// Parcours
-		int beforeMaxOffset = fce.tryFromOffset;
+		int beforeMaxOffset = fce.getTryFromOffset();
 		int index = InstructionUtil.getIndexForOffset(
-				instructions, fce.tryFromOffset);
+				instructions, fce.getTryFromOffset());
 
 		Instruction instruction;
 		while (index <= lastIndex)
 		{
 			instruction = instructions.get(index);
 
-			if (instruction.offset > maxOffset) {
+			if (instruction.getOffset() > maxOffset) {
 				return index-1;
 			}
 
-			switch (instruction.opcode)
+			switch (instruction.getOpcode())
 			{
 			case Const.ATHROW:
 			case Const.RETURN:
 			case ByteCodeConstants.XRETURN:
 			{
-				if (instruction.offset >= beforeMaxOffset) {
+				if (instruction.getOffset() >= beforeMaxOffset) {
 					return index;
 				}	// Inclus au bloc 'try'
 			}
@@ -3291,7 +3347,7 @@ public class FastCodeExceptionAnalyzer
 			{
 				int jumpOffset = ((BranchInstruction)instruction).getJumpOffset();
 
-				if (jumpOffset > instruction.offset)
+				if (jumpOffset > instruction.getOffset())
 				{
 					// Saut positif
 					if (jumpOffset < maxOffset)
@@ -3301,11 +3357,11 @@ public class FastCodeExceptionAnalyzer
 							beforeMaxOffset = jumpOffset;
 						}
 					} else // Saut au-delà des limites
-						if (instruction.offset >= beforeMaxOffset) {
+						if (instruction.getOffset() >= beforeMaxOffset) {
 							return index;
 						}	// Inclus au bloc 'try'
 				} else // Saut au-delà des limites
-					if (jumpOffset < fce.tryFromOffset && instruction.offset >= beforeMaxOffset) {
+					if (jumpOffset < fce.getTryFromOffset() && instruction.getOffset() >= beforeMaxOffset) {
 						return index;
 					}	// Inclus au bloc 'try'
 			}
@@ -3323,7 +3379,7 @@ public class FastCodeExceptionAnalyzer
 				int jumpOffset = lastBi.getJumpOffset();
 
 				// Saut positif dans les limites
-				if (jumpOffset > instruction.offset && jumpOffset < maxOffset && beforeMaxOffset < jumpOffset) {
+				if (jumpOffset > instruction.getOffset() && jumpOffset < maxOffset && beforeMaxOffset < jumpOffset) {
 					beforeMaxOffset = jumpOffset;
 				}
 				// else
@@ -3342,20 +3398,20 @@ public class FastCodeExceptionAnalyzer
 				Switch s = (Switch)instruction;
 
 				// Search max offset
-				int maxSitchOffset = s.defaultOffset;
-				int i = s.offsets.length;
+				int maxSitchOffset = s.getDefaultOffset();
+				int i = s.getOffsets().length;
 				int offset;
 				while (i-- > 0)
 				{
-					offset = s.offsets[i];
+					offset = s.getOffset(i);
 					if (maxSitchOffset < offset) {
 						maxSitchOffset = offset;
 					}
 				}
-				maxSitchOffset += s.offset;
+				maxSitchOffset += s.getOffset();
 
 				// Saut positif dans les limites
-				if (maxSitchOffset > instruction.offset && maxSitchOffset < maxOffset && beforeMaxOffset < maxSitchOffset) {
+				if (maxSitchOffset > instruction.getOffset() && maxSitchOffset < maxOffset && beforeMaxOffset < maxSitchOffset) {
 					beforeMaxOffset = maxSitchOffset;
 				}
 				// else

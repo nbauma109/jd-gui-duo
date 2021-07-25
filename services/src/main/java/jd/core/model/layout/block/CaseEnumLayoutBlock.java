@@ -22,7 +22,7 @@ import jd.core.model.instruction.fast.instruction.FastSwitch;
 
 public class CaseEnumLayoutBlock extends CaseLayoutBlock
 {
-    public final int switchMapKeyIndex;
+    private final int switchMapKeyIndex;
 
     public CaseEnumLayoutBlock(
         ClassFile classFile, Method method,
@@ -36,4 +36,8 @@ public class CaseEnumLayoutBlock extends CaseLayoutBlock
 
         this.switchMapKeyIndex = switchMapKeyIndex;
     }
+
+	public int getSwitchMapKeyIndex() {
+		return switchMapKeyIndex;
+	}
 }

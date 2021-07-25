@@ -24,21 +24,16 @@ import java.util.Map.Entry;
 
 public class AttributeCode extends Attribute
 {
-    //private int maxStack;
-    //private int maxLocals;
-    public final byte[] code;
-    public final List<Entry<Integer, CodeException>> exceptionTable;
-    public final Attribute[] attributes;
+    private final byte[] code;
+    private final List<Entry<Integer, CodeException>> exceptionTable;
+    private final Attribute[] attributes;
 
     public AttributeCode(byte tag,
-                         int attributeNameIndex,
                          byte[] code,
                          List<Entry<Integer, CodeException>> exceptionTable,
                          Attribute[] attributes)
     {
-        super(tag, attributeNameIndex);
-        //this.maxStack = maxStack;
-        //this.maxLocals = maxLocals;
+        super(tag);
         this.code = code;
         this.exceptionTable = exceptionTable;
         this.attributes = attributes;
@@ -48,7 +43,7 @@ public class AttributeCode extends Attribute
     {
         if (this.attributes != null)
             for (int i=this.attributes.length-1; i>=0; --i)
-                if (this.attributes[i].tag == Const.ATTR_LINE_NUMBER_TABLE)
+                if (this.attributes[i].getTag() == Const.ATTR_LINE_NUMBER_TABLE)
                     return (AttributeNumberTable)this.attributes[i];
 
         return null;
@@ -58,7 +53,7 @@ public class AttributeCode extends Attribute
     {
         if (this.attributes != null)
             for (int i=this.attributes.length-1; i>=0; --i)
-                if (this.attributes[i].tag == Const.ATTR_LOCAL_VARIABLE_TABLE)
+                if (this.attributes[i].getTag() == Const.ATTR_LOCAL_VARIABLE_TABLE)
                     return (AttributeLocalVariableTable)this.attributes[i];
 
         return null;
@@ -68,9 +63,17 @@ public class AttributeCode extends Attribute
     {
         if (this.attributes != null)
             for (int i=this.attributes.length-1; i>=0; --i)
-                if (this.attributes[i].tag == Const.ATTR_LOCAL_VARIABLE_TYPE_TABLE)
+                if (this.attributes[i].getTag() == Const.ATTR_LOCAL_VARIABLE_TYPE_TABLE)
                     return (AttributeLocalVariableTable)this.attributes[i];
 
         return null;
     }
+
+	public byte[] getCode() {
+		return code;
+	}
+
+	public List<Entry<Integer, CodeException>> getExceptionTable() {
+		return exceptionTable;
+	}
 }

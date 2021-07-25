@@ -52,44 +52,44 @@ public class AssignmentOperatorReconstructor
         {
             Instruction i = list.get(index);
 
-            switch (i.opcode)
+            switch (i.getOpcode())
             {
             case Const.PUTSTATIC:
-                if (((PutStatic)i).valueref.opcode ==
+                if (((PutStatic)i).getValueref().getOpcode() ==
                 		ByteCodeConstants.BINARYOP) {
 					reconstructPutStaticOperator(list, index, i);
 				}
                 break;
             case Const.PUTFIELD:
-                if (((PutField)i).valueref.opcode ==
+                if (((PutField)i).getValueref().getOpcode() ==
                 		ByteCodeConstants.BINARYOP) {
 					index = reconstructPutFieldOperator(list, index, i);
 				}
                 break;
             case Const.ISTORE:
-                if (((StoreInstruction)i).valueref.opcode ==
+                if (((StoreInstruction)i).getValueref().getOpcode() ==
                 		ByteCodeConstants.BINARYOP)
                 {
                     BinaryOperatorInstruction boi = (BinaryOperatorInstruction)
-                        ((StoreInstruction)i).valueref;
-                    if (boi.value1.opcode == Const.ILOAD) {
+                        ((StoreInstruction)i).getValueref();
+                    if (boi.getValue1().getOpcode() == Const.ILOAD) {
 						reconstructStoreOperator(list, index, i, boi);
 					}
                 }
                 break;
             case ByteCodeConstants.STORE:
-                if (((StoreInstruction)i).valueref.opcode ==
+                if (((StoreInstruction)i).getValueref().getOpcode() ==
                 		ByteCodeConstants.BINARYOP)
                 {
                     BinaryOperatorInstruction boi = (BinaryOperatorInstruction)
-                        ((StoreInstruction)i).valueref;
-                    if (boi.value1.opcode == ByteCodeConstants.LOAD) {
+                        ((StoreInstruction)i).getValueref();
+                    if (boi.getValue1().getOpcode() == ByteCodeConstants.LOAD) {
 						reconstructStoreOperator(list, index, i, boi);
 					}
                 }
                 break;
             case ByteCodeConstants.ARRAYSTORE:
-                if (((ArrayStoreInstruction)i).valueref.opcode ==
+                if (((ArrayStoreInstruction)i).getValueref().getOpcode() ==
                 		ByteCodeConstants.BINARYOP) {
 					index = reconstructArrayOperator(list, index, i);
 				}
@@ -106,25 +106,25 @@ public class AssignmentOperatorReconstructor
     {
         PutStatic putStatic = (PutStatic)i;
         BinaryOperatorInstruction boi =
-            (BinaryOperatorInstruction)putStatic.valueref;
+            (BinaryOperatorInstruction)putStatic.getValueref();
 
-        if (boi.value1.opcode != Const.GETSTATIC) {
+        if (boi.getValue1().getOpcode() != Const.GETSTATIC) {
 			return;
 		}
 
-        GetStatic getStatic = (GetStatic)boi.value1;
+        GetStatic getStatic = (GetStatic)boi.getValue1();
 
-        if (putStatic.lineNumber != getStatic.lineNumber ||
-            putStatic.index != getStatic.index) {
+        if (putStatic.getLineNumber() != getStatic.getLineNumber() ||
+            putStatic.getIndex() != getStatic.getIndex()) {
 			return;
 		}
 
-        String newOperator = boi.operator + "=";
+        String newOperator = boi.getOperator() + "=";
 
         list.set(index, new AssignmentInstruction(
-            ByteCodeConstants.ASSIGNMENT, putStatic.offset,
-            getStatic.lineNumber, boi.getPriority(), newOperator,
-            getStatic, boi.value2));
+            ByteCodeConstants.ASSIGNMENT, putStatic.getOffset(),
+            getStatic.getLineNumber(), boi.getPriority(), newOperator,
+            getStatic, boi.getValue2()));
 
     }
 
@@ -136,35 +136,35 @@ public class AssignmentOperatorReconstructor
     {
         PutField putField = (PutField)i;
         BinaryOperatorInstruction boi =
-            (BinaryOperatorInstruction)putField.valueref;
+            (BinaryOperatorInstruction)putField.getValueref();
 
-        if (boi.value1.opcode != Const.GETFIELD) {
+        if (boi.getValue1().getOpcode() != Const.GETFIELD) {
 			return index;
 		}
 
-        GetField getField = (GetField)boi.value1;
+        GetField getField = (GetField)boi.getValue1();
         CompareInstructionVisitor visitor = new CompareInstructionVisitor();
 
-        if (putField.lineNumber != getField.lineNumber ||
-            putField.index != getField.index ||
-            !visitor.visit(putField.objectref, getField.objectref)) {
+        if (putField.getLineNumber() != getField.getLineNumber() ||
+            putField.getIndex() != getField.getIndex() ||
+            !visitor.visit(putField.getObjectref(), getField.getObjectref())) {
 			return index;
 		}
 
-        if (putField.objectref.opcode == ByteCodeConstants.DUPLOAD)
+        if (putField.getObjectref().getOpcode() == ByteCodeConstants.DUPLOAD)
         {
             // Remove DupStore & DupLoad
-            DupLoad dupLoad = (DupLoad)getField.objectref;
+            DupLoad dupLoad = (DupLoad)getField.getObjectref();
             index = deleteDupStoreInstruction(list, index, dupLoad);
-            getField.objectref = dupLoad.dupStore.objectref;
+            getField.setObjectref(dupLoad.getDupStore().getObjectref());
         }
 
-        String newOperator = boi.operator + "=";
+        String newOperator = boi.getOperator() + "=";
 
         list.set(index, new AssignmentInstruction(
-            ByteCodeConstants.ASSIGNMENT, putField.offset,
-            getField.lineNumber, boi.getPriority(), newOperator,
-            getField, boi.value2));
+            ByteCodeConstants.ASSIGNMENT, putField.getOffset(),
+            getField.getLineNumber(), boi.getPriority(), newOperator,
+            getField, boi.getValue2()));
 
         return index;
     }
@@ -177,18 +177,18 @@ public class AssignmentOperatorReconstructor
         Instruction i, BinaryOperatorInstruction boi)
     {
         StoreInstruction si = (StoreInstruction)i;
-        LoadInstruction li = (LoadInstruction)boi.value1;
+        LoadInstruction li = (LoadInstruction)boi.getValue1();
 
-        if (si.lineNumber != li.lineNumber || si.index != li.index) {
+        if (si.getLineNumber() != li.getLineNumber() || si.getIndex() != li.getIndex()) {
 			return;
 		}
 
-        String newOperator = boi.operator + "=";
+        String newOperator = boi.getOperator() + "=";
 
         list.set(index, new AssignmentInstruction(
-            ByteCodeConstants.ASSIGNMENT, si.offset,
-            li.lineNumber, boi.getPriority(), newOperator,
-            li, boi.value2));
+            ByteCodeConstants.ASSIGNMENT, si.getOffset(),
+            li.getLineNumber(), boi.getPriority(), newOperator,
+            li, boi.getValue2()));
 
     }
 
@@ -200,43 +200,43 @@ public class AssignmentOperatorReconstructor
         List<Instruction> list, int index, Instruction i)
     {
         ArrayStoreInstruction asi = (ArrayStoreInstruction)i;
-        BinaryOperatorInstruction boi = (BinaryOperatorInstruction)asi.valueref;
+        BinaryOperatorInstruction boi = (BinaryOperatorInstruction)asi.getValueref();
 
-        if (boi.value1.opcode != ByteCodeConstants.ARRAYLOAD) {
+        if (boi.getValue1().getOpcode() != ByteCodeConstants.ARRAYLOAD) {
 			return index;
 		}
 
-        ArrayLoadInstruction ali = (ArrayLoadInstruction)boi.value1;
+        ArrayLoadInstruction ali = (ArrayLoadInstruction)boi.getValue1();
         CompareInstructionVisitor visitor = new CompareInstructionVisitor();
 
-        if (asi.lineNumber != ali.lineNumber ||
-            !visitor.visit(asi.arrayref, ali.arrayref) ||
-            !visitor.visit(asi.indexref, ali.indexref)) {
+        if (asi.getLineNumber() != ali.getLineNumber() ||
+            !visitor.visit(asi.getArrayref(), ali.getArrayref()) ||
+            !visitor.visit(asi.getIndexref(), ali.getIndexref())) {
 			return index;
 		}
 
-        if (asi.arrayref.opcode == ByteCodeConstants.DUPLOAD)
+        if (asi.getArrayref().getOpcode() == ByteCodeConstants.DUPLOAD)
         {
             // Remove DupStore & DupLoad
-            DupLoad dupLoad = (DupLoad)ali.arrayref;
+            DupLoad dupLoad = (DupLoad)ali.getArrayref();
             index = deleteDupStoreInstruction(list, index, dupLoad);
-            ali.arrayref = dupLoad.dupStore.objectref;
+            ali.setArrayref(dupLoad.getDupStore().getObjectref());
         }
 
-        if (asi.indexref.opcode == ByteCodeConstants.DUPLOAD)
+        if (asi.getIndexref().getOpcode() == ByteCodeConstants.DUPLOAD)
         {
             // Remove DupStore & DupLoad
-            DupLoad dupLoad = (DupLoad)ali.indexref;
+            DupLoad dupLoad = (DupLoad)ali.getIndexref();
             index = deleteDupStoreInstruction(list, index, dupLoad);
-            ali.indexref = dupLoad.dupStore.objectref;
+            ali.setIndexref(dupLoad.getDupStore().getObjectref());
         }
 
-        String newOperator = boi.operator + "=";
+        String newOperator = boi.getOperator() + "=";
 
         list.set(index, new AssignmentInstruction(
-            ByteCodeConstants.ASSIGNMENT, asi.offset,
-            ali.lineNumber, boi.getPriority(), newOperator,
-            ali, boi.value2));
+            ByteCodeConstants.ASSIGNMENT, asi.getOffset(),
+            ali.getLineNumber(), boi.getPriority(), newOperator,
+            ali, boi.getValue2()));
 
         return index;
     }
@@ -250,7 +250,7 @@ public class AssignmentOperatorReconstructor
         {
             Instruction i = list.get(indexTmp);
 
-            if (dupLoad.dupStore == i)
+            if (dupLoad.getDupStore() == i)
             {
                 list.remove(indexTmp);
                 return --index;

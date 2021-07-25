@@ -54,7 +54,7 @@ public class DupLocalVariableAnalyzer
         {
             Instruction instruction = list.get(index);
 
-            switch (instruction.opcode)
+            switch (instruction.getOpcode())
             {
             case FastConstants.WHILE:
             case FastConstants.DO_WHILE:
@@ -65,7 +65,7 @@ public class DupLocalVariableAnalyzer
             case FastConstants.SYNCHRONIZED:
                 {
                     List<Instruction> instructions =
-                        ((FastList)instruction).instructions;
+                        ((FastList)instruction).getInstructions();
                     if (instructions != null) {
 						recursiveDeclare(
                             constants, localVariables, codeLength, instructions);
@@ -77,9 +77,9 @@ public class DupLocalVariableAnalyzer
                 {
                     FastTest2Lists ft2l = (FastTest2Lists)instruction;
                     recursiveDeclare(
-                        constants, localVariables, codeLength, ft2l.instructions);
+                        constants, localVariables, codeLength, ft2l.getInstructions());
                     recursiveDeclare(
-                        constants, localVariables, codeLength, ft2l.instructions2);
+                        constants, localVariables, codeLength, ft2l.getInstructions2());
                 }
                 break;
 
@@ -87,7 +87,7 @@ public class DupLocalVariableAnalyzer
             case FastConstants.SWITCH_ENUM:
             case FastConstants.SWITCH_STRING:
                 {
-                    FastSwitch.Pair[] pairs = ((FastSwitch)instruction).pairs;
+                    FastSwitch.Pair[] pairs = ((FastSwitch)instruction).getPairs();
                     if (pairs != null) {
 						for (int i=pairs.length-1; i>=0; --i)
                         {
@@ -105,20 +105,20 @@ public class DupLocalVariableAnalyzer
                 {
                     FastTry ft = (FastTry)instruction;
                     recursiveDeclare(
-                        constants, localVariables, codeLength, ft.instructions);
+                        constants, localVariables, codeLength, ft.getInstructions());
 
-                    if (ft.catches != null) {
-						for (int i=ft.catches.size()-1; i>=0; --i) {
+                    if (ft.getCatches() != null) {
+						for (int i=ft.getCatches().size()-1; i>=0; --i) {
 							recursiveDeclare(
                                 constants, localVariables,
-                                codeLength, ft.catches.get(i).instructions);
+                                codeLength, ft.getCatches().get(i).getInstructions());
 						}
 					}
 
-                    if (ft.finallyInstructions != null) {
+                    if (ft.getFinallyInstructions() != null) {
 						recursiveDeclare(
                             constants, localVariables,
-                            codeLength, ft.finallyInstructions);
+                            codeLength, ft.getFinallyInstructions());
 					}
                 }
             }
@@ -129,30 +129,30 @@ public class DupLocalVariableAnalyzer
         {
             Instruction instruction = list.get(i);
 
-            if (instruction.opcode != ByteCodeConstants.DUPSTORE) {
+            if (instruction.getOpcode() != ByteCodeConstants.DUPSTORE) {
 				continue;
 			}
 
             DupStore dupStore = (DupStore)instruction;
 
             String signature =
-                dupStore.objectref.getReturnedSignature(constants, localVariables);
+                dupStore.getObjectref().getReturnedSignature(constants, localVariables);
 
             int signatureIndex = constants.addConstantUtf8(signature);
             int nameIndex = constants.addConstantUtf8(
                 StringConstants.TMP_LOCAL_VARIABLE_NAME +
-                dupStore.offset + "_" +
-                ((DupStore)instruction).objectref.offset);
+                dupStore.getOffset() + "_" +
+                ((DupStore)instruction).getObjectref().getOffset());
             int varIndex = localVariables.size();
 
             LocalVariable lv = new LocalVariable(
-                dupStore.offset, codeLength,
+                dupStore.getOffset(), codeLength,
                 nameIndex, signatureIndex, varIndex);
-            lv.declarationFlag = true;
+            lv.setDeclarationFlag(true);
             localVariables.add(lv);
 
             list.set(i, new FastDeclaration(
-                FastConstants.DECLARE, dupStore.offset,
+                FastConstants.DECLARE, dupStore.getOffset(),
                 Instruction.UNKNOWN_LINE_NUMBER, lv, dupStore));
         }
     }

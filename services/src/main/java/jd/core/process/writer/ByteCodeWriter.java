@@ -384,16 +384,16 @@ public class ByteCodeWriter
 					printer.endOfLine();
 					printer.startOfLine(Instruction.UNKNOWN_LINE_NUMBER);
 					printer.print(START_OF_COMMENT);
-					printer.print(lv.startPc);
+					printer.print(lv.getStartPc());
 					printer.print("\t");
-					printer.print(lv.length);
+					printer.print(lv.getLength());
 					printer.print("\t");
-					printer.print(lv.index);
+					printer.print(lv.getIndex());
 					printer.print("\t");
 
-					if (lv.nameIndex > 0)
+					if (lv.getNameIndex() > 0)
 					{
-						printer.print(constants.getConstantUtf8(lv.nameIndex));
+						printer.print(constants.getConstantUtf8(lv.getNameIndex()));
 					}
 					else
 					{
@@ -402,11 +402,11 @@ public class ByteCodeWriter
 
 					printer.print("\t");
 
-					if (lv.signatureIndex > 0)
+					if (lv.getSignatureIndex() > 0)
 					{
 						SignatureWriter.writeSignature(
 								loader, printer, referenceMap,
-								classFile, constants.getConstantUtf8(lv.signatureIndex));
+								classFile, constants.getConstantUtf8(lv.getSignatureIndex()));
 					}
 					else
 					{

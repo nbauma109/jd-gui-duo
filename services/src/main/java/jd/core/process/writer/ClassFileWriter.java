@@ -145,7 +145,7 @@ public class ClassFileWriter
         {
             lb = this.layoutBlockList.get(this.index++);
 
-            switch (lb.tag)
+            switch (lb.getTag())
             {
             case LayoutBlockConstants.PACKAGE:
                 writePackage((PackageLayoutBlock)lb);
@@ -382,47 +382,47 @@ public class ClassFileWriter
             lb = this.layoutBlockList.get(i);
             i++;
 
-            if (lb.tag == LayoutBlockConstants.INSTRUCTION
-                    || lb.tag == LayoutBlockConstants.INSTRUCTIONS) {
-                return lb.firstLineNumber;
+            if (lb.getTag() == LayoutBlockConstants.INSTRUCTION
+                    || lb.getTag() == LayoutBlockConstants.INSTRUCTIONS) {
+                return lb.getFirstLineNumber();
             }
-            if ((lb.tag == LayoutBlockConstants.SEPARATOR
-                    || lb.tag == LayoutBlockConstants.SEPARATOR_AT_BEGINING
-                    || lb.tag == LayoutBlockConstants.SEPARATOR_AFTER_IMPORTS
-                    || lb.tag == LayoutBlockConstants.SEPARATOR_OF_STATEMENTS
-                    || lb.tag == LayoutBlockConstants.IMPORTS
-                    || lb.tag == LayoutBlockConstants.COMMENT_DEPRECATED
-                    || lb.tag == LayoutBlockConstants.ANNOTATIONS
-                    || lb.tag == LayoutBlockConstants.EXTENDS_SUPER_TYPE
-                    || lb.tag == LayoutBlockConstants.EXTENDS_SUPER_INTERFACES
-                    || lb.tag == LayoutBlockConstants.IMPLEMENTS_INTERFACES
-                    || lb.tag == LayoutBlockConstants.GENERIC_EXTENDS_SUPER_TYPE
-                    || lb.tag == LayoutBlockConstants.GENERIC_EXTENDS_SUPER_INTERFACES
-                    || lb.tag == LayoutBlockConstants.GENERIC_IMPLEMENTS_INTERFACES
-                    || lb.tag == LayoutBlockConstants.TYPE_BODY_BLOCK_START
-                    || lb.tag == LayoutBlockConstants.TYPE_BODY_BLOCK_END
-                    || lb.tag == LayoutBlockConstants.TYPE_BODY_BLOCK_START_END
-                    || lb.tag == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START
-                    || lb.tag == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_END
-                    || lb.tag == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START_END
-                    || lb.tag == LayoutBlockConstants.METHOD_BODY_BLOCK_START
-                    || lb.tag == LayoutBlockConstants.METHOD_BODY_BLOCK_END
-                    || lb.tag == LayoutBlockConstants.METHOD_BODY_BLOCK_START_END
-                    || lb.tag == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START
-                    || lb.tag == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_END
-                    || lb.tag == LayoutBlockConstants.STATEMENTS_BLOCK_START
-                    || lb.tag == LayoutBlockConstants.STATEMENTS_BLOCK_END
-                    || lb.tag == LayoutBlockConstants.STATEMENTS_BLOCK_START_END
-                    || lb.tag == LayoutBlockConstants.SINGLE_STATEMENT_BLOCK_START
-                    || lb.tag == LayoutBlockConstants.SINGLE_STATEMENT_BLOCK_END
-                    || lb.tag == LayoutBlockConstants.SINGLE_STATEMENTS_BLOCK_START_END
-                    || lb.tag == LayoutBlockConstants.SWITCH_BLOCK_START
-                    || lb.tag == LayoutBlockConstants.SWITCH_BLOCK_END
-                    || lb.tag == LayoutBlockConstants.CASE_BLOCK_START
-                    || lb.tag == LayoutBlockConstants.CASE_BLOCK_END
-                    || lb.tag == LayoutBlockConstants.FRAGMENT_CASE
-                    || lb.tag == LayoutBlockConstants.FRAGMENT_CASE_ENUM
-                    || lb.tag == LayoutBlockConstants.FRAGMENT_CASE_STRING) && lb.lineCount > 0) {
+            if ((lb.getTag() == LayoutBlockConstants.SEPARATOR
+                    || lb.getTag() == LayoutBlockConstants.SEPARATOR_AT_BEGINING
+                    || lb.getTag() == LayoutBlockConstants.SEPARATOR_AFTER_IMPORTS
+                    || lb.getTag() == LayoutBlockConstants.SEPARATOR_OF_STATEMENTS
+                    || lb.getTag() == LayoutBlockConstants.IMPORTS
+                    || lb.getTag() == LayoutBlockConstants.COMMENT_DEPRECATED
+                    || lb.getTag() == LayoutBlockConstants.ANNOTATIONS
+                    || lb.getTag() == LayoutBlockConstants.EXTENDS_SUPER_TYPE
+                    || lb.getTag() == LayoutBlockConstants.EXTENDS_SUPER_INTERFACES
+                    || lb.getTag() == LayoutBlockConstants.IMPLEMENTS_INTERFACES
+                    || lb.getTag() == LayoutBlockConstants.GENERIC_EXTENDS_SUPER_TYPE
+                    || lb.getTag() == LayoutBlockConstants.GENERIC_EXTENDS_SUPER_INTERFACES
+                    || lb.getTag() == LayoutBlockConstants.GENERIC_IMPLEMENTS_INTERFACES
+                    || lb.getTag() == LayoutBlockConstants.TYPE_BODY_BLOCK_START
+                    || lb.getTag() == LayoutBlockConstants.TYPE_BODY_BLOCK_END
+                    || lb.getTag() == LayoutBlockConstants.TYPE_BODY_BLOCK_START_END
+                    || lb.getTag() == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START
+                    || lb.getTag() == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_END
+                    || lb.getTag() == LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START_END
+                    || lb.getTag() == LayoutBlockConstants.METHOD_BODY_BLOCK_START
+                    || lb.getTag() == LayoutBlockConstants.METHOD_BODY_BLOCK_END
+                    || lb.getTag() == LayoutBlockConstants.METHOD_BODY_BLOCK_START_END
+                    || lb.getTag() == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START
+                    || lb.getTag() == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_END
+                    || lb.getTag() == LayoutBlockConstants.STATEMENTS_BLOCK_START
+                    || lb.getTag() == LayoutBlockConstants.STATEMENTS_BLOCK_END
+                    || lb.getTag() == LayoutBlockConstants.STATEMENTS_BLOCK_START_END
+                    || lb.getTag() == LayoutBlockConstants.SINGLE_STATEMENT_BLOCK_START
+                    || lb.getTag() == LayoutBlockConstants.SINGLE_STATEMENT_BLOCK_END
+                    || lb.getTag() == LayoutBlockConstants.SINGLE_STATEMENTS_BLOCK_START_END
+                    || lb.getTag() == LayoutBlockConstants.SWITCH_BLOCK_START
+                    || lb.getTag() == LayoutBlockConstants.SWITCH_BLOCK_END
+                    || lb.getTag() == LayoutBlockConstants.CASE_BLOCK_START
+                    || lb.getTag() == LayoutBlockConstants.CASE_BLOCK_END
+                    || lb.getTag() == LayoutBlockConstants.FRAGMENT_CASE
+                    || lb.getTag() == LayoutBlockConstants.FRAGMENT_CASE_ENUM
+                    || lb.getTag() == LayoutBlockConstants.FRAGMENT_CASE_STRING) && lb.getLineCount() > 0) {
                 return Printer.UNKNOWN_LINE_NUMBER;
             }
         }
@@ -434,7 +434,7 @@ public class ClassFileWriter
     {
         this.printer.printKeyword("package");
         this.printer.print(' ');
-        String internalPackageName = plb.classFile.getInternalPackageName();
+        String internalPackageName = plb.getClassFile().getInternalPackageName();
         this.printer.print(
             internalPackageName.replace(
                 StringConstants.INTERNAL_PACKAGE_SEPARATOR,
@@ -444,7 +444,7 @@ public class ClassFileWriter
 
     private void writeSeparatorAtBegining(LayoutBlock slb)
     {
-        int lineCount = slb.lineCount;
+        int lineCount = slb.getLineCount();
 
         this.printer.debugStartOfSeparatorLayoutBlock();
         //DEBUG this.printer.print('^');
@@ -463,12 +463,12 @@ public class ClassFileWriter
         }
 
         this.printer.debugEndOfSeparatorLayoutBlock(
-            slb.minimalLineCount, slb.lineCount, slb.maximalLineCount);
+            slb.getMinimalLineCount(), slb.getLineCount(), slb.getMaximalLineCount());
     }
 
     private void writeSeparator(LayoutBlock slb)
     {
-        int lineCount = slb.lineCount;
+        int lineCount = slb.getLineCount();
 
         this.printer.debugStartOfSeparatorLayoutBlock();
         //DEBUG this.printer.print('^');
@@ -498,7 +498,7 @@ public class ClassFileWriter
         }
 
         this.printer.debugEndOfSeparatorLayoutBlock(
-            slb.minimalLineCount, slb.lineCount, slb.maximalLineCount);
+            slb.getMinimalLineCount(), slb.getLineCount(), slb.getMaximalLineCount());
     }
 
     private void writeImports(ImportsLayoutBlock ilb)
@@ -508,7 +508,7 @@ public class ClassFileWriter
 
         if (length > 0)
         {
-            ClassFile classFile = ilb.classFile;
+            ClassFile classFile = ilb.getClassFile();
             String internalPackageName = classFile.getInternalPackageName();
 
             Iterator<Reference> iterator = collection.iterator();
@@ -538,7 +538,7 @@ public class ClassFileWriter
             // Reduction
             if (!references.isEmpty())
             {
-                int delta = ilb.preferedLineCount - ilb.lineCount;
+                int delta = ilb.getPreferedLineCount() - ilb.getLineCount();
 
                 if (delta > 0)
                 {
@@ -601,7 +601,7 @@ public class ClassFileWriter
 
     private void writeTypeMarkerStart(MarkerLayoutBlock mlb)
     {
-        String internalPath = mlb.classFile.getThisClassName() + StringConstants.CLASS_FILE_SUFFIX;
+        String internalPath = mlb.getClassFile().getThisClassName() + StringConstants.CLASS_FILE_SUFFIX;
         this.printer.startOfTypeDeclaration(internalPath);
         this.printer.debugMarker("&lt;T&lt;");
     }
@@ -613,7 +613,7 @@ public class ClassFileWriter
 
     private void writeFieldMarkerStart(MarkerLayoutBlock mlb)
     {
-        String internalPath = mlb.classFile.getThisClassName() + StringConstants.CLASS_FILE_SUFFIX;
+        String internalPath = mlb.getClassFile().getThisClassName() + StringConstants.CLASS_FILE_SUFFIX;
         this.printer.startOfTypeDeclaration(internalPath);
         this.printer.debugMarker("&lt;F&lt;");
     }
@@ -625,7 +625,7 @@ public class ClassFileWriter
 
     private void writeMethodMarkerStart(MarkerLayoutBlock mlb)
     {
-        String internalPath = mlb.classFile.getThisClassName() + StringConstants.CLASS_FILE_SUFFIX;
+        String internalPath = mlb.getClassFile().getThisClassName() + StringConstants.CLASS_FILE_SUFFIX;
         this.printer.startOfTypeDeclaration(internalPath);
         this.printer.debugMarker("&lt;M&lt;");
     }
@@ -639,7 +639,7 @@ public class ClassFileWriter
     {
         this.printer.debugStartOfCommentDeprecatedLayoutBlock();
 
-        switch (lb.lineCount)
+        switch (lb.getLineCount())
         {
         case 0:
             this.printer.startOfJavadoc();
@@ -700,11 +700,11 @@ public class ClassFileWriter
     {
         this.printer.debugStartOfCommentDeprecatedLayoutBlock();
 
-        if (lb.lineCount == 0) {
+        if (lb.getLineCount() == 0) {
             this.printer.startOfError();
             this.printer.print("/* Error */ ");
             this.printer.endOfError();
-        } else if (lb.lineCount == 1) {
+        } else if (lb.getLineCount() == 1) {
             this.printer.startOfError();
             this.printer.print("/* Error */");
             this.printer.endOfError();
@@ -717,16 +717,16 @@ public class ClassFileWriter
 
     private void writeAnnotations(AnnotationsLayoutBlock alb)
     {
-        List<Annotation> annotations = alb.annotations;
+        List<Annotation> annotations = alb.getAnnotations();
         int length = annotations.size();
 
         if (length > 0)
         {
             this.printer.debugStartOfLayoutBlock();
 
-            ClassFile classFile = alb.classFile;
+            ClassFile classFile = alb.getClassFile();
 
-            if (alb.lineCount == 0)
+            if (alb.getLineCount() == 0)
             {
                 for (int i=0; i<length; i++)
                 {
@@ -737,14 +737,14 @@ public class ClassFileWriter
             }
             else
             {
-                int annotationsByLine = length / alb.lineCount;
+                int annotationsByLine = length / alb.getLineCount();
 
-                if (annotationsByLine * alb.lineCount < length) {
+                if (annotationsByLine * alb.getLineCount() < length) {
                     annotationsByLine++;
                 }
 
                 int j = annotationsByLine;
-                int k = alb.lineCount;
+                int k = alb.getLineCount();
 
                 for (int i=0; i<length; i++)
                 {
@@ -781,14 +781,14 @@ public class ClassFileWriter
     {
         this.printer.debugStartOfLayoutBlock();
 
-        ClassFile classFile = tdlb.classFile;
+        ClassFile classFile = tdlb.getClassFile();
 
         writeAccessAndType(classFile);
 
         this.printer.printTypeDeclaration(
             classFile.getThisClassName(), classFile.getClassName());
 
-        if (tdlb.lineCount > 0)
+        if (tdlb.getLineCount() > 0)
         {
             endOfLine();
             this.printer.startOfLine(searchFirstLineNumber());
@@ -801,27 +801,27 @@ public class ClassFileWriter
     {
         // Affichage de la classe, de l'interface, de l'enum ou de l'annotation
          // Check annotation
-        if ((classFile.accessFlags & Const.ACC_ANNOTATION) != 0)
+        if ((classFile.getAccessFlags() & Const.ACC_ANNOTATION) != 0)
         {
             // Retrait du flags 'abstract'
-            classFile.accessFlags &= ~Const.ACC_ABSTRACT;
+            classFile.setAccessFlags(classFile.getAccessFlags() & ~Const.ACC_ABSTRACT);
         }
 
         // Access : public private static volatile ...
-        if ((classFile.accessFlags & Const.ACC_ENUM) == 0)
+        if ((classFile.getAccessFlags() & Const.ACC_ENUM) == 0)
         {
             if (classFile.isAInnerClass()) {
-                writeAccessNestedClass(classFile.accessFlags);
+                writeAccessNestedClass(classFile.getAccessFlags());
             } else {
-                writeAccessClass(classFile.accessFlags);
+                writeAccessClass(classFile.getAccessFlags());
             }
         } else if (classFile.isAInnerClass()) {
-            writeAccessNestedEnum(classFile.accessFlags);
+            writeAccessNestedEnum(classFile.getAccessFlags());
         } else {
-            writeAccessEnum(classFile.accessFlags);
+            writeAccessEnum(classFile.getAccessFlags());
         }
 
-        writeType(classFile.accessFlags);
+        writeType(classFile.getAccessFlags());
         this.printer.print(' ');
     }
 
@@ -913,7 +913,7 @@ public class ClassFileWriter
         this.printer.debugStartOfLayoutBlock();
         //DEBUG this.printer.print('^');
 
-        if (stelb.lineCount > 0)
+        if (stelb.getLineCount() > 0)
         {
             endOfLine();
             this.printer.indent();
@@ -925,7 +925,7 @@ public class ClassFileWriter
             this.printer.print(' ');
         }
 
-        ClassFile classFile = stelb.classFile;
+        ClassFile classFile = stelb.getClassFile();
 
         this.printer.printKeyword(EXTENDS);
         this.printer.print(' ');
@@ -941,13 +941,13 @@ public class ClassFileWriter
     private void writeExtendsSuperInterfaces(
         ExtendsSuperInterfacesLayoutBlock sielb)
     {
-        writeInterfaces(sielb, sielb.classFile, true);
+        writeInterfaces(sielb, sielb.getClassFile(), true);
     }
 
     private void writeImplementsInterfaces(
         ImplementsInterfacesLayoutBlock iilb)
     {
-        writeInterfaces(iilb, iilb.classFile, false);
+        writeInterfaces(iilb, iilb.getClassFile(), false);
     }
 
     private void writeInterfaces(
@@ -956,7 +956,7 @@ public class ClassFileWriter
         this.printer.debugStartOfLayoutBlock();
         //DEBUG this.printer.print('^');
 
-        if (lb.lineCount > 0)
+        if (lb.getLineCount() > 0)
         {
             endOfLine();
             this.printer.indent();
@@ -1003,11 +1003,11 @@ public class ClassFileWriter
 
     private void writeGenericType(GenericTypeNameLayoutBlock gtdlb)
     {
-        writeAccessAndType(gtdlb.classFile);
+        writeAccessAndType(gtdlb.getClassFile());
 
         SignatureWriter.writeTypeDeclaration(
             this.loader, this.printer, this.referenceMap,
-            gtdlb.classFile, gtdlb.signature);
+            gtdlb.getClassFile(), gtdlb.getSignature());
     }
 
     private void writeGenericExtendsSuperType(
@@ -1016,7 +1016,7 @@ public class ClassFileWriter
         this.printer.debugStartOfLayoutBlock();
         //DEBUG this.printer.print('^');
 
-        if (gstelb.lineCount > 0)
+        if (gstelb.getLineCount() > 0)
         {
             endOfLine();
             this.printer.indent();
@@ -1031,10 +1031,10 @@ public class ClassFileWriter
         this.printer.printKeyword(EXTENDS);
         this.printer.print(' ');
 
-        char[] caSignature = gstelb.caSignature;
+        char[] caSignature = gstelb.getCaSignature();
         SignatureWriter.writeSignature(
-            this.loader, this.printer, this.referenceMap, gstelb.classFile,
-            caSignature, caSignature.length, gstelb.signatureIndex);
+            this.loader, this.printer, this.referenceMap, gstelb.getClassFile(),
+            caSignature, caSignature.length, gstelb.getSignatureIndex());
 
         this.printer.debugEndOfLayoutBlock();
     }
@@ -1043,16 +1043,16 @@ public class ClassFileWriter
         GenericExtendsSuperInterfacesLayoutBlock gsielb)
     {
         writeGenericInterfaces(
-            gsielb, gsielb.classFile, gsielb.caSignature,
-            gsielb.signatureIndex, true);
+            gsielb, gsielb.getClassFile(), gsielb.getCaSignature(),
+            gsielb.getSignatureIndex(), true);
     }
 
     private void writeGenericImplementsInterfaces(
         GenericImplementsInterfacesLayoutBlock giilb)
     {
         writeGenericInterfaces(
-            giilb, giilb.classFile, giilb.caSignature,
-            giilb.signatureIndex, false);
+            giilb, giilb.getClassFile(), giilb.getCaSignature(),
+            giilb.getSignatureIndex(), false);
     }
 
     private void writeGenericInterfaces(
@@ -1062,7 +1062,7 @@ public class ClassFileWriter
         this.printer.debugStartOfLayoutBlock();
         //DEBUG this.printer.print('^');
 
-        if (lb.lineCount > 0)
+        if (lb.getLineCount() > 0)
         {
             endOfLine();
             this.printer.indent();
@@ -1105,7 +1105,7 @@ public class ClassFileWriter
     {
         this.printer.debugStartOfStatementsBlockLayoutBlock();
 
-        switch (lb.lineCount)
+        switch (lb.getLineCount())
         {
         case 0:
             /* A { B */
@@ -1127,7 +1127,7 @@ public class ClassFileWriter
             this.printer.print('{');
             endOfLine();
 
-            this.printer.extraLine(lb.lineCount-2);
+            this.printer.extraLine(lb.getLineCount()-2);
 
             this.printer.indent();
             this.printer.startOfLine(searchFirstLineNumber());
@@ -1135,14 +1135,14 @@ public class ClassFileWriter
         }
 
         this.printer.debugEndOfStatementsBlockLayoutBlock(
-            lb.minimalLineCount, lb.lineCount, lb.maximalLineCount);
+            lb.getMinimalLineCount(), lb.getLineCount(), lb.getMaximalLineCount());
     }
 
     private void writeSwitchBlockStart(LayoutBlock lb)
     {
         this.printer.debugStartOfStatementsBlockLayoutBlock();
 
-        switch (lb.lineCount)
+        switch (lb.getLineCount())
         {
         case 0:
             /* A { B */
@@ -1162,21 +1162,21 @@ public class ClassFileWriter
             this.printer.print('{');
             endOfLine();
 
-            this.printer.extraLine(lb.lineCount-2);
+            this.printer.extraLine(lb.getLineCount()-2);
 
             this.printer.startOfLine(searchFirstLineNumber());
             break;
         }
 
         this.printer.debugEndOfStatementsBlockLayoutBlock(
-            lb.minimalLineCount, lb.lineCount, lb.maximalLineCount);
+            lb.getMinimalLineCount(), lb.getLineCount(), lb.getMaximalLineCount());
     }
 
     private void writeStatementsBlockEnd(LayoutBlock lb)
     {
         this.printer.debugStartOfStatementsBlockLayoutBlock();
 
-        switch (lb.lineCount)
+        switch (lb.getLineCount())
         {
         case 0:
             /* A } B */
@@ -1199,7 +1199,7 @@ public class ClassFileWriter
             endOfLine();
             this.printer.desindent();
 
-            this.printer.extraLine(lb.lineCount-2);
+            this.printer.extraLine(lb.getLineCount()-2);
 
             this.printer.startOfLine(Printer.UNKNOWN_LINE_NUMBER);
             this.printer.print('}');
@@ -1210,14 +1210,14 @@ public class ClassFileWriter
         }
 
         this.printer.debugEndOfStatementsBlockLayoutBlock(
-            lb.minimalLineCount, lb.lineCount, lb.maximalLineCount);
+            lb.getMinimalLineCount(), lb.getLineCount(), lb.getMaximalLineCount());
     }
 
     private void writeStatementsInnerBodyBlockEnd(LayoutBlock lb)
     {
         this.printer.debugStartOfStatementsBlockLayoutBlock();
 
-        switch (lb.lineCount)
+        switch (lb.getLineCount())
         {
         case 0:
             /* A }B */
@@ -1238,7 +1238,7 @@ public class ClassFileWriter
             endOfLine();
             this.printer.desindent();
 
-            this.printer.extraLine(lb.lineCount-1);
+            this.printer.extraLine(lb.getLineCount()-1);
 
             this.printer.startOfLine(searchFirstLineNumber());
             this.printer.print('}');
@@ -1246,7 +1246,7 @@ public class ClassFileWriter
         }
 
         this.printer.debugEndOfStatementsBlockLayoutBlock(
-            lb.minimalLineCount, lb.lineCount, lb.maximalLineCount);
+            lb.getMinimalLineCount(), lb.getLineCount(), lb.getMaximalLineCount());
 
         this.addSpace = false;
     }
@@ -1255,7 +1255,7 @@ public class ClassFileWriter
     {
         this.printer.debugStartOfStatementsBlockLayoutBlock();
 
-        switch (lb.lineCount)
+        switch (lb.getLineCount())
         {
         case 0:
             /* A } B */
@@ -1275,7 +1275,7 @@ public class ClassFileWriter
             endOfLine();
             this.printer.desindent();
 
-            this.printer.extraLine(lb.lineCount-1);
+            this.printer.extraLine(lb.getLineCount()-1);
 
             this.printer.startOfLine(searchFirstLineNumber());
             this.printer.print('}');
@@ -1284,7 +1284,7 @@ public class ClassFileWriter
         }
 
         this.printer.debugEndOfStatementsBlockLayoutBlock(
-            lb.minimalLineCount, lb.lineCount, lb.maximalLineCount);
+            lb.getMinimalLineCount(), lb.getLineCount(), lb.getMaximalLineCount());
     }
 
     private void writeCaseBlockStart(LayoutBlock lb)
@@ -1292,7 +1292,7 @@ public class ClassFileWriter
         this.printer.indent();
         this.printer.debugStartOfCaseBlockLayoutBlock();
         //writeSeparator(lb);
-        int lineCount = lb.lineCount;
+        int lineCount = lb.getLineCount();
 
         //DEBUG this.printer.print('^');
 
@@ -1326,7 +1326,7 @@ public class ClassFileWriter
         this.printer.desindent();
         this.printer.debugStartOfCaseBlockLayoutBlock();
         //writeSeparator(lb);
-        int lineCount = lb.lineCount;
+        int lineCount = lb.getLineCount();
 
         //DEBUG this.printer.print('^');
 
@@ -1360,7 +1360,7 @@ public class ClassFileWriter
         this.printer.indent();
         this.printer.indent();
         this.printer.debugStartOfSeparatorLayoutBlock();
-        int lineCount = lb.lineCount;
+        int lineCount = lb.getLineCount();
 
         //DEBUG this.printer.print('^');
 
@@ -1383,7 +1383,7 @@ public class ClassFileWriter
                 searchFirstLineNumber());
         }
         this.printer.debugEndOfSeparatorLayoutBlock(
-            lb.minimalLineCount, lb.lineCount, lb.maximalLineCount);
+            lb.getMinimalLineCount(), lb.getLineCount(), lb.getMaximalLineCount());
     }
 
     private void writeForBlockEnd()
@@ -1396,7 +1396,7 @@ public class ClassFileWriter
     {
         this.printer.debugStartOfStatementsBlockLayoutBlock();
 
-        switch (lb.lineCount)
+        switch (lb.getLineCount())
         {
         case 0:
             /* A {} B */
@@ -1417,25 +1417,25 @@ public class ClassFileWriter
             this.printer.print("{}");
             endOfLine();
 
-            this.printer.extraLine(lb.lineCount-1);
+            this.printer.extraLine(lb.getLineCount()-1);
 
             this.printer.startOfLine(searchFirstLineNumber());
             break;
         }
 
         this.printer.debugEndOfStatementsBlockLayoutBlock(
-            lb.minimalLineCount, lb.lineCount, lb.maximalLineCount);
+            lb.getMinimalLineCount(), lb.getLineCount(), lb.getMaximalLineCount());
     }
 
     private void writeSingleStatementsBlockStart(LayoutBlock lb)
     {
         this.printer.debugStartOfStatementsBlockLayoutBlock();
 
-        switch (lb.lineCount)
+        switch (lb.getLineCount())
         {
         case 0:
             /* A B */
-            if (((BlockLayoutBlock)lb).other.lineCount > 0)
+            if (((BlockLayoutBlock)lb).getOther().getLineCount() > 0)
             {
                 this.printer.print(" {");
             }
@@ -1447,7 +1447,7 @@ public class ClassFileWriter
             /* A { B */
             //DEBUG this.printer.print('^');
 
-            if (((BlockLayoutBlock)lb).other.lineCount > 0)
+            if (((BlockLayoutBlock)lb).getOther().getLineCount() > 0)
             {
                 this.printer.print(" {");
             }
@@ -1464,7 +1464,7 @@ public class ClassFileWriter
             this.printer.print('{');
             endOfLine();
 
-            this.printer.extraLine(lb.lineCount-2);
+            this.printer.extraLine(lb.getLineCount()-2);
 
             this.printer.indent();
             this.printer.startOfLine(searchFirstLineNumber());
@@ -1472,18 +1472,18 @@ public class ClassFileWriter
         }
 
         this.printer.debugEndOfStatementsBlockLayoutBlock(
-            lb.minimalLineCount, lb.lineCount, lb.maximalLineCount);
+            lb.getMinimalLineCount(), lb.getLineCount(), lb.getMaximalLineCount());
     }
 
     private void writeSingleStatementsBlockEnd(LayoutBlock lb)
     {
         this.printer.debugStartOfStatementsBlockLayoutBlock();
 
-        switch (lb.lineCount)
+        switch (lb.getLineCount())
         {
         case 0:
             /* A B */
-            if (((BlockLayoutBlock)lb).other.lineCount > 1)
+            if (((BlockLayoutBlock)lb).getOther().getLineCount() > 1)
             {
                 this.printer.print(" }");
             }
@@ -1506,7 +1506,7 @@ public class ClassFileWriter
             endOfLine();
             this.printer.desindent();
 
-            this.printer.extraLine(lb.lineCount-2);
+            this.printer.extraLine(lb.getLineCount()-2);
 
             this.printer.startOfLine(Printer.UNKNOWN_LINE_NUMBER);
             this.printer.print('}');
@@ -1517,14 +1517,14 @@ public class ClassFileWriter
         }
 
         this.printer.debugEndOfStatementsBlockLayoutBlock(
-            lb.minimalLineCount, lb.lineCount, lb.maximalLineCount);
+            lb.getMinimalLineCount(), lb.getLineCount(), lb.getMaximalLineCount());
     }
 
     private void writeSingleStatementsBlockStartEnd(LayoutBlock lb)
     {
         this.printer.debugStartOfStatementsBlockLayoutBlock();
 
-        if (lb.lineCount == 0) {
+        if (lb.getLineCount() == 0) {
             /* A B */
             this.printer.print(" ;");
         } else {
@@ -1532,28 +1532,28 @@ public class ClassFileWriter
             this.printer.print(" ;");
             endOfLine();
 
-            this.printer.extraLine(lb.lineCount-1);
+            this.printer.extraLine(lb.getLineCount()-1);
 
             this.printer.indent();
             this.printer.startOfLine(searchFirstLineNumber());
         }
 
         this.printer.debugEndOfStatementsBlockLayoutBlock(
-            lb.minimalLineCount, lb.lineCount, lb.maximalLineCount);
+            lb.getMinimalLineCount(), lb.getLineCount(), lb.getMaximalLineCount());
     }
 
     private void writeField(FieldNameLayoutBlock flb)
     {
-        ClassFile classFile = flb.classFile;
-        Field field = flb.field;
+        ClassFile classFile = flb.getClassFile();
+        Field field = flb.getField();
 
-        writeAccessField(field.accessFlags);
+        writeAccessField(field.getAccessFlags());
 
         ConstantPool constants = classFile.getConstantPool();
 
         AttributeSignature as = field.getAttributeSignature();
         int signatureIndex = as == null ?
-                field.getDescriptorIndex() : as.signatureIndex;
+                field.getDescriptorIndex() : as.getSignatureIndex();
 
         String signature = constants.getConstantUtf8(signatureIndex);
 
@@ -1570,7 +1570,7 @@ public class ClassFileWriter
         String internalClassName = classFile.getThisClassName();
         String descriptor = constants.getConstantUtf8(field.getDescriptorIndex());
 
-        if ((field.accessFlags & Const.ACC_STATIC) != 0) {
+        if ((field.getAccessFlags() & Const.ACC_STATIC) != 0) {
             this.printer.printStaticFieldDeclaration(
                 internalClassName, fieldName, descriptor);
         } else {
@@ -1617,33 +1617,33 @@ public class ClassFileWriter
     private void writeMethodStatic(MethodStaticLayoutBlock mslb)
     {
         this.printer.printStaticConstructorDeclaration(
-            mslb.classFile.getThisClassName(), STATIC);
+            mslb.getClassFile().getThisClassName(), STATIC);
     }
 
     private void writeMethod(MethodNameLayoutBlock mlb)
     {
-        Method method = mlb.method;
+        Method method = mlb.getMethod();
 
-        if ((mlb.classFile.accessFlags & Const.ACC_ANNOTATION) == 0)
+        if ((mlb.getClassFile().getAccessFlags() & Const.ACC_ANNOTATION) == 0)
         {
-            writeAccessMethod(method.accessFlags);
+            writeAccessMethod(method.getAccessFlags());
 
             SignatureWriter.writeMethodDeclaration(
                 keywords, this.loader, this.printer, this.referenceMap,
-                mlb.classFile, method, mlb.signature, mlb.descriptorFlag);
+                mlb.getClassFile(), method, mlb.getSignature(), mlb.hasDescriptorFlag());
 
-            if (mlb.nullCodeFlag) {
+            if (mlb.hasNullCodeFlag()) {
                 this.printer.print(';');
             }
         }
         else
         {
             writeAccessMethod(
-                method.accessFlags & ~(Const.ACC_PUBLIC|Const.ACC_ABSTRACT));
+                method.getAccessFlags() & ~(Const.ACC_PUBLIC|Const.ACC_ABSTRACT));
 
             SignatureWriter.writeMethodDeclaration(
                 keywords, this.loader, this.printer, this.referenceMap,
-                mlb.classFile, method, mlb.signature, mlb.descriptorFlag);
+                mlb.getClassFile(), method, mlb.getSignature(), mlb.hasDescriptorFlag());
 
             ElementValue defaultAnnotationValue =
                     method.getDefaultAnnotationValue();
@@ -1655,7 +1655,7 @@ public class ClassFileWriter
                 this.printer.print(' ');
                 ElementValueWriter.writeElementValue(
                     this.loader, this.printer, this.referenceMap,
-                    mlb.classFile, defaultAnnotationValue);
+                    mlb.getClassFile(), defaultAnnotationValue);
             }
 
             this.printer.print(';');
@@ -1682,7 +1682,7 @@ public class ClassFileWriter
         this.printer.debugStartOfLayoutBlock();
         //DEBUG this.printer.print('^');
 
-        if (tlb.lineCount > 0)
+        if (tlb.getLineCount() > 0)
         {
             endOfLine();
             this.printer.indent();
@@ -1697,9 +1697,9 @@ public class ClassFileWriter
         this.printer.printKeyword("throws");
         this.printer.print(' ');
 
-        ClassFile classFile = tlb.classFile;
+        ClassFile classFile = tlb.getClassFile();
         ConstantPool constants = classFile.getConstantPool();
-        int[] exceptionIndexes = tlb.method.getExceptionIndexes();
+        int[] exceptionIndexes = tlb.getMethod().getExceptionIndexes();
         int exceptionIndexesLength = exceptionIndexes.length;
 
         if (exceptionIndexesLength > 0)
@@ -1721,7 +1721,7 @@ public class ClassFileWriter
             }
         }
 
-        if (tlb.nullCodeFlag) {
+        if (tlb.hasNullCodeFlag()) {
             this.printer.print(';');
         }
 
@@ -1738,10 +1738,10 @@ public class ClassFileWriter
             this.addSpace = false;
         }
 
-        this.instructionPrinter.init(ilb.firstLineNumber);
-        this.visitor.init(ilb.classFile, ilb.method, ilb.firstOffset, ilb.lastOffset);
+        this.instructionPrinter.init(ilb.getFirstLineNumber());
+        this.visitor.init(ilb.getClassFile(), ilb.getMethod(), ilb.getFirstOffset(), ilb.getLastOffset());
         this.instructionPrinter.startOfInstruction();
-        this.visitor.visit(ilb.instruction);
+        this.visitor.visit(ilb.getInstruction());
         this.instructionPrinter.endOfInstruction();
         this.instructionPrinter.release();
 
@@ -1758,27 +1758,27 @@ public class ClassFileWriter
             this.addSpace = false;
         }
 
-        this.instructionPrinter.init(ilb.firstLineNumber);
+        this.instructionPrinter.init(ilb.getFirstLineNumber());
         this.visitor.init(
-            ilb.classFile, ilb.method, ilb.firstOffset, ilb.lastOffset);
+            ilb.getClassFile(), ilb.getMethod(), ilb.getFirstOffset(), ilb.getLastOffset());
 
-        int idx = ilb.firstIndex;
-        int lastIndex = ilb.lastIndex;
-        List<Instruction> instructions = ilb.instructions;
+        int idx = ilb.getFirstIndex();
+        int lastIndex = ilb.getLastIndex();
+        List<Instruction> instructions = ilb.getInstructions();
 
         Instruction instruction;
         while (idx <= lastIndex)
         {
             instruction = instructions.get(idx);
 
-            if (idx > ilb.firstIndex || ilb.firstOffset == 0)
+            if (idx > ilb.getFirstIndex() || ilb.getFirstOffset() == 0)
             {
                 this.instructionPrinter.startOfInstruction();
             }
 
             this.visitor.visit(instruction);
 
-            if (idx < lastIndex || ilb.lastOffset == instruction.offset)
+            if (idx < lastIndex || ilb.getLastOffset() == instruction.getOffset())
             {
                 // Ne pas afficher de ';' si une instruction n'a pas ete
                 // entierement ecrite.
@@ -1807,7 +1807,7 @@ public class ClassFileWriter
 
         ByteCodeWriter.write(
             this.loader, this.printer, this.referenceMap,
-            bclb.classFile, bclb.method);
+            bclb.getClassFile(), bclb.getMethod());
     }
 
     private void writeDeclaration(DeclareLayoutBlock dlb)
@@ -1820,10 +1820,10 @@ public class ClassFileWriter
             this.addSpace = false;
         }
 
-        this.instructionPrinter.init(dlb.firstLineNumber);
-        this.visitor.init(dlb.classFile, dlb.method, 0, dlb.instruction.offset);
+        this.instructionPrinter.init(dlb.getFirstLineNumber());
+        this.visitor.init(dlb.getClassFile(), dlb.getMethod(), 0, dlb.getInstruction().getOffset());
         this.instructionPrinter.startOfInstruction();
-        this.visitor.visit(dlb.instruction);
+        this.visitor.visit(dlb.getInstruction());
         this.instructionPrinter.endOfInstruction();
         this.printer.print(';');
         this.instructionPrinter.release();
@@ -1878,7 +1878,7 @@ public class ClassFileWriter
         this.printer.printKeyword(BREAK);
         this.printer.print(' ');
         this.printer.print(FastConstants.LABEL_PREFIX);
-        this.printer.print(olb.offset);
+        this.printer.print(olb.getOffset());
         this.printer.print(';');
     }
 
@@ -1932,21 +1932,21 @@ public class ClassFileWriter
             this.addSpace = false;
         }
 
-        String signature = clb.fs.test.getReturnedSignature(
-            clb.classFile.getConstantPool(), clb.method.getLocalVariables());
+        String signature = clb.getFs().getTest().getReturnedSignature(
+            clb.getClassFile().getConstantPool(), clb.getMethod().getLocalVariables());
         char type = signature == null ? 'X' : signature.charAt(0);
 
-        FastSwitch.Pair[] pairs = clb.fs.pairs;
-        int lineCount = clb.lineCount + 1;
-        int lastIndex = clb.lastIndex;
-        int caseCount = lastIndex - clb.firstIndex + 1;
+        FastSwitch.Pair[] pairs = clb.getFs().getPairs();
+        int lineCount = clb.getLineCount() + 1;
+        int lastIndex = clb.getLastIndex();
+        int caseCount = lastIndex - clb.getFirstIndex() + 1;
 
         int caseByLine = caseCount / lineCount;
         int middleLineCount = caseCount - caseByLine*lineCount;
-        int middleIndex = clb.firstIndex + middleLineCount*(caseByLine + 1);
+        int middleIndex = clb.getFirstIndex() + middleLineCount*(caseByLine + 1);
         int j = caseByLine + 1;
 
-        for (int i=clb.firstIndex; i<middleIndex; i++)
+        for (int i=clb.getFirstIndex(); i<middleIndex; i++)
         {
             FastSwitch.Pair pair = pairs[i];
 
@@ -1966,7 +1966,7 @@ public class ClassFileWriter
                         StringUtil.escapeCharAndAppendApostrophe(
                             (char)pair.getKey());
                     this.printer.printString(
-                        escapedString, clb.classFile.getThisClassName());
+                        escapedString, clb.getClassFile().getThisClassName());
                 }
                 else
                 {
@@ -2014,7 +2014,7 @@ public class ClassFileWriter
                         StringUtil.escapeCharAndAppendApostrophe(
                             (char)pair.getKey());
                     this.printer.printString(
-                        escapedString, clb.classFile.getThisClassName());
+                        escapedString, clb.getClassFile().getThisClassName());
                 }
                 else
                 {
@@ -2048,30 +2048,30 @@ public class ClassFileWriter
             this.addSpace = false;
         }
 
-        ClassFile classFile = celb.classFile;
+        ClassFile classFile = celb.getClassFile();
         ConstantPool constants = classFile.getConstantPool();
         List<Integer> switchMap =
-            classFile.getSwitchMaps().get(celb.switchMapKeyIndex);
+            classFile.getSwitchMaps().get(celb.getSwitchMapKeyIndex());
 
-        ArrayLoadInstruction ali = (ArrayLoadInstruction)celb.fs.test;
-        Invokevirtual iv = (Invokevirtual)ali.indexref;
-        ConstantMethodref cmr = constants.getConstantMethodref(iv.index);
+        ArrayLoadInstruction ali = (ArrayLoadInstruction)celb.getFs().getTest();
+        Invokevirtual iv = (Invokevirtual)ali.getIndexref();
+        ConstantMethodref cmr = constants.getConstantMethodref(iv.getIndex());
         String internalEnumName =
             constants.getConstantClassName(cmr.getClassIndex());
 
         String enumDescriptor = SignatureUtil.createTypeName(internalEnumName);
 
-        FastSwitch.Pair[] pairs = celb.fs.pairs;
-        int lineCount = celb.lineCount + 1;
-        int lastIndex = celb.lastIndex;
-        int caseCount = lastIndex - celb.firstIndex + 1;
+        FastSwitch.Pair[] pairs = celb.getFs().getPairs();
+        int lineCount = celb.getLineCount() + 1;
+        int lastIndex = celb.getLastIndex();
+        int caseCount = lastIndex - celb.getFirstIndex() + 1;
 
         int caseByLine = caseCount / lineCount;
         int middleLineCount = caseCount - caseByLine*lineCount;
-        int middleIndex = celb.firstIndex + middleLineCount*(caseByLine + 1);
+        int middleIndex = celb.getFirstIndex() + middleLineCount*(caseByLine + 1);
         int j = caseByLine + 1;
 
-        for (int i=celb.firstIndex; i<middleIndex; i++)
+        for (int i=celb.getFirstIndex(); i<middleIndex; i++)
         {
             FastSwitch.Pair pair = pairs[i];
 
@@ -2179,20 +2179,20 @@ public class ClassFileWriter
             this.addSpace = false;
         }
 
-        ClassFile classFile = clb.classFile;
+        ClassFile classFile = clb.getClassFile();
         ConstantPool constants = classFile.getConstantPool();
 
-        FastSwitch.Pair[] pairs = clb.fs.pairs;
-        int lineCount = clb.lineCount + 1;
-        int lastIndex = clb.lastIndex;
-        int caseCount = lastIndex - clb.firstIndex + 1;
+        FastSwitch.Pair[] pairs = clb.getFs().getPairs();
+        int lineCount = clb.getLineCount() + 1;
+        int lastIndex = clb.getLastIndex();
+        int caseCount = lastIndex - clb.getFirstIndex() + 1;
 
         int caseByLine = caseCount / lineCount;
         int middleLineCount = caseCount - caseByLine*lineCount;
-        int middleIndex = clb.firstIndex + middleLineCount*(caseByLine + 1);
+        int middleIndex = clb.getFirstIndex() + middleLineCount*(caseByLine + 1);
         int j = caseByLine + 1;
 
-        for (int i=clb.firstIndex; i<middleIndex; i++)
+        for (int i=clb.getFirstIndex(); i<middleIndex; i++)
         {
             FastSwitch.Pair pair = pairs[i];
 
@@ -2285,16 +2285,16 @@ public class ClassFileWriter
         this.printer.printKeyword("catch");
         this.printer.print(" (");
 
-        ClassFile classFile = fslb.classFile;
+        ClassFile classFile = fslb.getClassFile();
         ConstantPool constants = classFile.getConstantPool();
-        Method method = fslb.method;
-        FastCatch fc = fslb.fc;
+        Method method = fslb.getMethod();
+        FastCatch fc = fslb.getFc();
 
-        writeCatchType(classFile, constants, fc.exceptionTypeIndex);
+        writeCatchType(classFile, constants, fc.getExceptionTypeIndex());
 
-        if (fc.otherExceptionTypeIndexes != null)
+        if (fc.getOtherExceptionTypeIndexes() != null)
         {
-            int[] otherExceptionTypeIndexes = fc.otherExceptionTypeIndexes;
+            int[] otherExceptionTypeIndexes = fc.getOtherExceptionTypeIndexes();
             int otherExceptionTypeIndexesLength =
                     otherExceptionTypeIndexes.length;
 
@@ -2313,7 +2313,7 @@ public class ClassFileWriter
 
         LocalVariable lv = method.getLocalVariables()
             .searchLocalVariableWithIndexAndOffset(
-                fc.localVarIndex, fc.exceptionOffset);
+                fc.getLocalVarIndex(), fc.getExceptionOffset());
 
         if (lv == null)
         {
@@ -2323,7 +2323,7 @@ public class ClassFileWriter
         }
         else
         {
-            this.printer.print(constants.getConstantUtf8(lv.nameIndex));
+            this.printer.print(constants.getConstantUtf8(lv.getNameIndex()));
         }
 
         this.printer.print(')');
@@ -2361,7 +2361,7 @@ public class ClassFileWriter
         }
 
         this.printer.print(FastConstants.LABEL_PREFIX);
-        this.printer.print(olb.offset);
+        this.printer.print(olb.getOffset());
         this.printer.print(':');
     }
 

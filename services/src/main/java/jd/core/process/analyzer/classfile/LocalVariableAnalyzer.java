@@ -80,7 +80,7 @@ public class LocalVariableAnalyzer
 			method.setLocalVariables(localVariables);
 
 			// Add this
-			if ((method.accessFlags & Const.ACC_STATIC) == 0)
+			if ((method.getAccessFlags() & Const.ACC_STATIC) == 0)
 			{
 				int nameIndex = constants.addConstantUtf8(
 						StringConstants.THIS_LOCAL_VARIABLE_NAME);
@@ -91,9 +91,9 @@ public class LocalVariableAnalyzer
 				localVariables.add(lv);
 			}
 
-			if (method.getNameIndex() == constants.instanceConstructorIndex &&
+			if (method.getNameIndex() == constants.getInstanceConstructorIndex() &&
 					classFile.isAInnerClass() &&
-					(classFile.accessFlags & Const.ACC_STATIC) == 0)
+					(classFile.getAccessFlags() & Const.ACC_STATIC) == 0)
 			{
 				// Add outer this
 				int nameIndex = constants.addConstantUtf8(
@@ -129,10 +129,10 @@ public class LocalVariableAnalyzer
 			// Traitement des entrées correspondant aux parametres
 			AttributeSignature as = method.getAttributeSignature();
 			String methodSignature = constants.getConstantUtf8(
-					as==null ? method.getDescriptorIndex() : as.signatureIndex);
+					as==null ? method.getDescriptorIndex() : as.getSignatureIndex());
 
 			int indexOfFirstLocalVariable =
-					((method.accessFlags & Const.ACC_STATIC) == 0 ? 1 : 0) +
+					((method.getAccessFlags() & Const.ACC_STATIC) == 0 ? 1 : 0) +
 					SignatureUtil.getParameterSignatureCount(methodSignature);
 
 			if (indexOfFirstLocalVariable > localVariables.size())
@@ -209,7 +209,7 @@ public class LocalVariableAnalyzer
 		// constructeurs des Enums !
 		AttributeSignature as = method.getAttributeSignature();
 		String methodSignature = constants.getConstantUtf8(
-				as == null ? method.getDescriptorIndex() : as.signatureIndex);
+				as == null ? method.getDescriptorIndex() : as.getSignatureIndex());
 		List<String> parameterTypes =
 				SignatureUtil.getParameterSignatures(methodSignature);
 
@@ -226,21 +226,21 @@ public class LocalVariableAnalyzer
 			// - variableIndex = 1 + 1 + 1
 			// Le premier parametre des méthodes non statiques est 'this'
 			boolean staticMethodFlag =
-					(method.accessFlags & Const.ACC_STATIC) != 0;
+					(method.getAccessFlags() & Const.ACC_STATIC) != 0;
 			int variableIndex = staticMethodFlag ? 0 : 1;
 
 			int firstVisibleParameterCounter = 0;
 
-			if (method.getNameIndex() == constants.instanceConstructorIndex)
+			if (method.getNameIndex() == constants.getInstanceConstructorIndex())
 			{
-				if ((classFile.accessFlags & Const.ACC_ENUM) != 0)
+				if ((classFile.getAccessFlags() & Const.ACC_ENUM) != 0)
 				{
 					if (as == null) {
 						firstVisibleParameterCounter = 2;
 					} else {
 						variableIndex = 3;
 					}
-				} else if (classFile.isAInnerClass() && (classFile.accessFlags & Const.ACC_STATIC) == 0) {
+				} else if (classFile.isAInnerClass() && (classFile.getAccessFlags() & Const.ACC_STATIC) == 0) {
 					firstVisibleParameterCounter = 1;
 				}
 			}
@@ -259,7 +259,7 @@ public class LocalVariableAnalyzer
 
 			final int varargsParameterIndex;
 
-			if ((method.accessFlags & Const.ACC_VARARGS) == 0)
+			if ((method.getAccessFlags() & Const.ACC_VARARGS) == 0)
 			{
 				varargsParameterIndex = Integer.MAX_VALUE;
 			}
@@ -316,46 +316,46 @@ public class LocalVariableAnalyzer
 		{
 			instruction = listForAnalyze.get(i);
 
-			if (instruction.opcode != Const.MONITORENTER) {
+			if (instruction.getOpcode() != Const.MONITORENTER) {
 				continue;
 			}
 
 			mEnter = (MonitorEnter)instruction;
 			monitorLocalVariableLength = 1;
 
-			if (mEnter.objectref.opcode == ByteCodeConstants.DUPLOAD)
+			if (mEnter.getObjectref().getOpcode() == ByteCodeConstants.DUPLOAD)
 			{
 				/* DupStore( ? ) AStore( DupLoad ) MonitorEnter( DupLoad ) */
 				instruction = listForAnalyze.get(i-1);
-				if (instruction.opcode != Const.ASTORE) {
+				if (instruction.getOpcode() != Const.ASTORE) {
 					continue;
 				}
 				AStore astore = (AStore)instruction;
-				if (astore.valueref.opcode != ByteCodeConstants.DUPLOAD) {
+				if (astore.getValueref().getOpcode() != ByteCodeConstants.DUPLOAD) {
 					continue;
 				}
-				DupLoad dupload1 = (DupLoad)mEnter.objectref;
-				DupLoad dupload2 = (DupLoad)astore.valueref;
-				if (dupload1.dupStore != dupload2.dupStore) {
+				DupLoad dupload1 = (DupLoad)mEnter.getObjectref();
+				DupLoad dupload2 = (DupLoad)astore.getValueref();
+				if (dupload1.getDupStore() != dupload2.getDupStore()) {
 					continue;
 				}
-				monitorLocalVariableIndex = astore.index;
-				monitorLocalVariableOffset = astore.offset;
+				monitorLocalVariableIndex = astore.getIndex();
+				monitorLocalVariableOffset = astore.getOffset();
 			}
-			else if (mEnter.objectref.opcode == Const.ALOAD)
+			else if (mEnter.getObjectref().getOpcode() == Const.ALOAD)
 			{
 				/* AStore( ? ) MonitorEnter( ALoad ) */
-				ALoad aload = (ALoad)mEnter.objectref;
+				ALoad aload = (ALoad)mEnter.getObjectref();
 				instruction = listForAnalyze.get(i-1);
-				if (instruction.opcode != Const.ASTORE) {
+				if (instruction.getOpcode() != Const.ASTORE) {
 					continue;
 				}
 				AStore astore = (AStore)instruction;
-				if (astore.index != aload.index) {
+				if (astore.getIndex() != aload.getIndex()) {
 					continue;
 				}
-				monitorLocalVariableIndex = astore.index;
-				monitorLocalVariableOffset = astore.offset;
+				monitorLocalVariableIndex = astore.getIndex();
+				monitorLocalVariableOffset = astore.getOffset();
 			}
 			else
 			{
@@ -369,14 +369,14 @@ public class LocalVariableAnalyzer
 			while (++j < length)
 			{
 				instruction = listForAnalyze.get(j);
-				if (instruction.opcode != Const.MONITOREXIT || ((MonitorExit)instruction).objectref.opcode != Const.ALOAD) {
+				if (instruction.getOpcode() != Const.MONITOREXIT || ((MonitorExit)instruction).getObjectref().getOpcode() != Const.ALOAD) {
 					continue;
 				}
-				ALoad al = (ALoad)((MonitorExit)instruction).objectref;
-				if (al.index == monitorLocalVariableIndex)
+				ALoad al = (ALoad)((MonitorExit)instruction).getObjectref();
+				if (al.getIndex() == monitorLocalVariableIndex)
 				{
 					monitorLocalVariableLength =
-							al.offset - monitorLocalVariableOffset;
+							al.getOffset() - monitorLocalVariableOffset;
 					monitorExitCount++;
 				}
 			}
@@ -389,15 +389,15 @@ public class LocalVariableAnalyzer
 				while (j-- > 0)
 				{
 					instruction = listForAnalyze.get(j);
-					if (instruction.opcode != Const.MONITOREXIT || ((MonitorExit)instruction).objectref.opcode != Const.ALOAD) {
+					if (instruction.getOpcode() != Const.MONITOREXIT || ((MonitorExit)instruction).getObjectref().getOpcode() != Const.ALOAD) {
 						continue;
 					}
-					al = (ALoad)((MonitorExit)instruction).objectref;
-					if (al.index == monitorLocalVariableIndex)
+					al = (ALoad)((MonitorExit)instruction).getObjectref();
+					if (al.getIndex() == monitorLocalVariableIndex)
 					{
 						monitorLocalVariableLength +=
-								monitorLocalVariableOffset - al.offset;
-						monitorLocalVariableOffset = al.offset;
+								monitorLocalVariableOffset - al.getOffset();
+						monitorLocalVariableOffset = al.getOffset();
 
 						monitorExitCount++;
 						break;
@@ -415,7 +415,7 @@ public class LocalVariableAnalyzer
 
 			// Creation d'une variable locale
 			if (lv == null ||
-					lv.startPc+lv.length < monitorLocalVariableOffset+monitorLocalVariableLength)
+					lv.getStartPc()+lv.getLength() < monitorLocalVariableOffset+monitorLocalVariableLength)
 			{
 				int signatureIndex =
 						constants.addConstantUtf8(StringConstants.INTERNAL_OBJECT_SIGNATURE);
@@ -442,7 +442,7 @@ public class LocalVariableAnalyzer
 
 		// Remise à 1 de la longueur des portées
 		for (int i=localVariables.getIndexOfFirstLocalVariable(); i<length; i++) {
-			localVariables.getLocalVariableAt(i).length = 1;
+			localVariables.getLocalVariableAt(i).setLength(1);
 		}
 
 		// Update range
@@ -452,14 +452,14 @@ public class LocalVariableAnalyzer
 		for (int i=0; i<length; i++)
 		{
 			instruction = listForAnalyze.get(i);
-			switch (instruction.opcode)
+			switch (instruction.getOpcode())
 			{
 			case ByteCodeConstants.PREINC:
 			case ByteCodeConstants.POSTINC:
 			{
-				instruction = ((IncInstruction)instruction).value;
-				if (instruction.opcode == Const.ILOAD ||
-						instruction.opcode == ByteCodeConstants.LOAD) {
+				instruction = ((IncInstruction)instruction).getValue();
+				if (instruction.getOpcode() == Const.ILOAD ||
+						instruction.getOpcode() == ByteCodeConstants.LOAD) {
 					checkLocalVariableRangesForIndexInstruction(
 							code, localVariables, (IndexInstruction)instruction);
 				}
@@ -469,16 +469,16 @@ public class LocalVariableAnalyzer
 			{
 				AStore astore = (AStore)instruction;
 				// ExceptionLoad ?
-				if (astore.valueref.opcode == ByteCodeConstants.EXCEPTIONLOAD)
+				if (astore.getValueref().getOpcode() == ByteCodeConstants.EXCEPTIONLOAD)
 				{
 					ExceptionLoad el =
-							(ExceptionLoad)astore.valueref;
+							(ExceptionLoad)astore.getValueref();
 
-					if (el.exceptionNameIndex != 0)
+					if (el.getExceptionNameIndex() != 0)
 					{
 						LocalVariable lv =
 								localVariables.getLocalVariableWithIndexAndOffset(
-										astore.index, astore.offset);
+										astore.getIndex(), astore.getOffset());
 
 						if (lv == null)
 						{
@@ -486,56 +486,56 @@ public class LocalVariableAnalyzer
 							// l'offset suivant car les compilateurs place 'startPc'
 							// une instruction plus après.
 							int nextOffset =
-									ByteCodeUtil.nextInstructionOffset(code, astore.offset);
+									ByteCodeUtil.nextInstructionOffset(code, astore.getOffset());
 							lv = localVariables.getLocalVariableWithIndexAndOffset(
-									astore.index, nextOffset);
+									astore.getIndex(), nextOffset);
 							if (lv == null)
 							{
 								// Create a new local variable for exception
 								lv = new LocalVariable(
-										astore.offset, 1, -1,
-										el.exceptionNameIndex, astore.index, true);
+										astore.getOffset(), 1, -1,
+										el.getExceptionNameIndex(), astore.getIndex(), true);
 								localVariables.add(lv);
 								String signature =
-										constants.getConstantUtf8(el.exceptionNameIndex);
+										constants.getConstantUtf8(el.getExceptionNameIndex());
 								boolean appearsOnce = signatureAppearsOnceInLocalVariables(
 										localVariables, localVariables.size(),
-										el.exceptionNameIndex);
+										el.getExceptionNameIndex());
 								String name =
 										variableNameGenerator.generateLocalVariableNameFromSignature(
 												signature, appearsOnce);
-								lv.nameIndex = constants.addConstantUtf8(name);
+								lv.setNameIndex(constants.addConstantUtf8(name));
 							}
 							else
 							{
 								// Variable trouvée. Mise à jour de 'startPc' de la
 								// portée.
-								lv.updateRange(astore.offset);
+								lv.updateRange(astore.getOffset());
 							}
 						}
 					}
 				}
 				else if (i+1 < length &&
-						astore.valueref.opcode == ByteCodeConstants.DUPLOAD &&
-						listForAnalyze.get(i+1).opcode == Const.MONITORENTER)
+						astore.getValueref().getOpcode() == ByteCodeConstants.DUPLOAD &&
+						listForAnalyze.get(i+1).getOpcode() == Const.MONITORENTER)
 				{
 					// Monitor ?
 					LocalVariable lv =
 							localVariables.getLocalVariableWithIndexAndOffset(
-									astore.index, astore.offset);
+									astore.getIndex(), astore.getOffset());
 					if (lv == null)
 					{
 						MonitorEnter me = (MonitorEnter)listForAnalyze.get(i+1);
-						if (me.objectref.opcode == ByteCodeConstants.DUPLOAD &&
-								((DupLoad)astore.valueref).dupStore ==
-								((DupLoad)me.objectref).dupStore)
+						if (me.getObjectref().getOpcode() == ByteCodeConstants.DUPLOAD &&
+								((DupLoad)astore.getValueref()).getDupStore() ==
+								((DupLoad)me.getObjectref()).getDupStore())
 						{
 							// Create a new local variable for monitor
 							int signatureIndex = constants.addConstantUtf8(
 									StringConstants.INTERNAL_OBJECT_SIGNATURE);
 							localVariables.add(new LocalVariable(
-									astore.offset, 1, signatureIndex,
-									signatureIndex, astore.index));
+									astore.getOffset(), 1, signatureIndex,
+									signatureIndex, astore.getIndex()));
 						}
 						else
 						{
@@ -570,36 +570,36 @@ public class LocalVariableAnalyzer
 			byte[] code, LocalVariables localVariables, IndexInstruction ii)
 	{
 		LocalVariable lv =
-				localVariables.getLocalVariableWithIndexAndOffset(ii.index, ii.offset);
+				localVariables.getLocalVariableWithIndexAndOffset(ii.getIndex(), ii.getOffset());
 
 		if (lv == null)
 		{
 			// Variable non trouvée. Recherche de la variable avec
 			// l'offset suivant car les compilateurs place 'startPc'
 			// une instruction plus après.
-			int nextOffset = ByteCodeUtil.nextInstructionOffset(code, ii.offset);
-			lv = localVariables.getLocalVariableWithIndexAndOffset(ii.index, nextOffset);
+			int nextOffset = ByteCodeUtil.nextInstructionOffset(code, ii.getOffset());
+			lv = localVariables.getLocalVariableWithIndexAndOffset(ii.getIndex(), nextOffset);
 			if (lv != null)
 			{
 				// Variable trouvée. Mise à jour de 'startPc' de la
 				// portée.
-				lv.updateRange(ii.offset);
+				lv.updateRange(ii.getOffset());
 			}
 			else
 			{
 				// Mise à jour de la longueur de la portées de la
 				// variable possedant le meme index et precedement
 				// definie.
-				lv = localVariables.searchLocalVariableWithIndexAndOffset(ii.index, ii.offset);
+				lv = localVariables.searchLocalVariableWithIndexAndOffset(ii.getIndex(), ii.getOffset());
 				if (lv != null) {
-					lv.updateRange(ii.offset);
+					lv.updateRange(ii.getOffset());
 				}
 			}
 		}
 		else
 		{
 			// Mise à jour de la longeur de la portée
-			lv.updateRange(ii.offset);
+			lv.updateRange(ii.getOffset());
 		}
 	}
 
@@ -672,13 +672,13 @@ public class LocalVariableAnalyzer
 		{
 			Instruction instruction = listForAnalyze.get(i);
 
-			if (instruction.opcode == Const.ISTORE || instruction.opcode == ByteCodeConstants.STORE
-					|| instruction.opcode == Const.ASTORE || instruction.opcode == Const.ILOAD
-					|| instruction.opcode == ByteCodeConstants.LOAD || instruction.opcode == Const.ALOAD
-					|| instruction.opcode == Const.IINC) {
+			if (instruction.getOpcode() == Const.ISTORE || instruction.getOpcode() == ByteCodeConstants.STORE
+					|| instruction.getOpcode() == Const.ASTORE || instruction.getOpcode() == Const.ILOAD
+					|| instruction.getOpcode() == ByteCodeConstants.LOAD || instruction.getOpcode() == Const.ALOAD
+					|| instruction.getOpcode() == Const.IINC) {
 				subAnalyzeMethodCode(
 						constants, localVariables, listForAnalyze,
-						((IndexInstruction)instruction).index, i,
+						((IndexInstruction)instruction).getIndex(), i,
 						returnedSignature);
 			}
 		}
@@ -694,12 +694,12 @@ public class LocalVariableAnalyzer
 			for (int i=0; i<length; i++)
 			{
 				instruction = listForAnalyze.get(i);
-				switch (instruction.opcode)
+				switch (instruction.getOpcode())
 				{
 				case Const.ISTORE:
 				{
 					StoreInstruction si = (StoreInstruction)instruction;
-					if (si.valueref.opcode == Const.ILOAD)
+					if (si.getValueref().getOpcode() == Const.ILOAD)
 					{
 						// Contrainte du type de la variable liée à ILoad par
 						// le type de la variable liée à IStore.
@@ -710,10 +710,10 @@ public class LocalVariableAnalyzer
 				case Const.PUTSTATIC:
 				{
 					PutStatic ps = (PutStatic)instruction;
-					if (ps.valueref.opcode == Const.ILOAD || ps.valueref.opcode == Const.ALOAD) {
+					if (ps.getValueref().getOpcode() == Const.ILOAD || ps.getValueref().getOpcode() == Const.ALOAD) {
 						// Contrainte du type de la variable liée à ILoad par
 						// le type de la variable liée à PutStatic.
-						LoadInstruction load = (LoadInstruction)ps.valueref;
+						LoadInstruction load = (LoadInstruction)ps.getValueref();
 						change |= reverseAnalyzePutStaticPutField(
 								constants, localVariables, ps, load);
 					}
@@ -722,10 +722,10 @@ public class LocalVariableAnalyzer
 				case Const.PUTFIELD:
 				{
 					PutField pf = (PutField)instruction;
-					if (pf.valueref.opcode == Const.ILOAD || pf.valueref.opcode == Const.ALOAD) {
+					if (pf.getValueref().getOpcode() == Const.ILOAD || pf.getValueref().getOpcode() == Const.ALOAD) {
 						// Contrainte du type de la variable liée à ILoad
 						// par le type de la variable liée à PutField.
-						LoadInstruction load = (LoadInstruction)pf.valueref;
+						LoadInstruction load = (LoadInstruction)pf.getValueref();
 						change |= reverseAnalyzePutStaticPutField(
 								constants, localVariables, pf, load);
 					}
@@ -746,15 +746,15 @@ public class LocalVariableAnalyzer
 		{
 			LocalVariable lv = localVariables.getLocalVariableAt(i);
 
-			switch (lv.signatureIndex)
+			switch (lv.getSignatureIndex())
 			{
 			case UNDEFINED_TYPE:
-				lv.signatureIndex = constants.addConstantUtf8(
-						StringConstants.INTERNAL_OBJECT_SIGNATURE);
+				lv.setSignatureIndex(constants.addConstantUtf8(
+						StringConstants.INTERNAL_OBJECT_SIGNATURE));
 				break;
 			case NUMBER_TYPE:
-				lv.signatureIndex = constants.addConstantUtf8(
-						SignatureUtil.getSignatureFromTypesBitField(lv.typesBitField));
+				lv.setSignatureIndex(constants.addConstantUtf8(
+						SignatureUtil.getSignatureFromTypesBitField(lv.getTypesBitField())));
 				break;
 			case OBJECT_TYPE:
 				// Plusieurs types sont affectés à la même variable. Le
@@ -762,7 +762,7 @@ public class LocalVariableAnalyzer
 				// classes decompilées. Le type de la variable est valué à
 				// 'Object'. Des instructions 'cast' supplémentaires doivent
 				// être ajoutés. Voir la limitation de JAD sur ce point.
-				lv.signatureIndex = internalObjectSignatureIndex;
+				lv.setSignatureIndex(internalObjectSignatureIndex);
 				break;
 			}
 		}
@@ -772,7 +772,7 @@ public class LocalVariableAnalyzer
 		for (int i=0; i<length; i++)
 		{
 			lv = localVariables.getLocalVariableAt(i);
-			if (lv.signatureIndex == internalObjectSignatureIndex) {
+			if (lv.getSignatureIndex() == internalObjectSignatureIndex) {
 				addCastInstruction(constants, list, localVariables, lv);
 			}
 		}
@@ -789,7 +789,7 @@ public class LocalVariableAnalyzer
 
 		LocalVariable lv =
 				localVariables.getLocalVariableWithIndexAndOffset(
-						firstInstruction.index, firstInstruction.offset);
+						firstInstruction.getIndex(), firstInstruction.getOffset());
 
 		if (lv != null)
 		{
@@ -797,11 +797,11 @@ public class LocalVariableAnalyzer
 
 			// Verification que l'attribut 'exception' est correctement
 			// positionné.
-			if (firstInstruction.opcode == Const.ASTORE)
+			if (firstInstruction.getOpcode() == Const.ASTORE)
 			{
 				AStore astore = (AStore)firstInstruction;
-				if (astore.valueref.opcode == ByteCodeConstants.EXCEPTIONLOAD) {
-					lv.exceptionOrReturnAddress = true;
+				if (astore.getValueref().getOpcode() == ByteCodeConstants.EXCEPTIONLOAD) {
+					lv.setExceptionOrReturnAddress(true);
 				}
 			}
 
@@ -816,45 +816,45 @@ public class LocalVariableAnalyzer
 		for (int i=startIndex; i<length; i++)
 		{
 			instruction = listForAnalyze.get(i);
-			switch (instruction.opcode)
+			switch (instruction.getOpcode())
 			{
 			case Const.ISTORE:
-				if (((IndexInstruction)instruction).index == varIndex) {
+				if (((IndexInstruction)instruction).getIndex() == varIndex) {
 					analyzeIStore(constants, localVariables, instruction);
 				}
 				break;
 			case ByteCodeConstants.STORE:
-				if (((IndexInstruction)instruction).index == varIndex) {
+				if (((IndexInstruction)instruction).getIndex() == varIndex) {
 					analyzeStore(constants, localVariables, instruction);
 				}
 				break;
 			case Const.ASTORE:
-				if (((IndexInstruction)instruction).index == varIndex) {
+				if (((IndexInstruction)instruction).getIndex() == varIndex) {
 					analyzeAStore(constants, localVariables, instruction);
 				}
 				break;
 			case ByteCodeConstants.PREINC:
 			case ByteCodeConstants.POSTINC:
-				instruction = ((IncInstruction)instruction).value;
-				if (instruction.opcode != Const.ILOAD &&
-						instruction.opcode != ByteCodeConstants.LOAD) {
+				instruction = ((IncInstruction)instruction).getValue();
+				if (instruction.getOpcode() != Const.ILOAD &&
+						instruction.getOpcode() != ByteCodeConstants.LOAD) {
 					break;
 				}
 				// intended fall through
 			case Const.ILOAD:
 			case Const.IINC:
-				if (((IndexInstruction)instruction).index == varIndex) {
+				if (((IndexInstruction)instruction).getIndex() == varIndex) {
 					analyzeILoad(localVariables, instruction);
 				}
 				break;
 			case ByteCodeConstants.LOAD:
 			case ByteCodeConstants.EXCEPTIONLOAD:
-				if (((IndexInstruction)instruction).index == varIndex) {
+				if (((IndexInstruction)instruction).getIndex() == varIndex) {
 					analyzeLoad(localVariables, instruction);
 				}
 				break;
 			case Const.ALOAD:
-				if (((IndexInstruction)instruction).index == varIndex) {
+				if (((IndexInstruction)instruction).getIndex() == varIndex) {
 					analyzeALoad(localVariables, instruction);
 				}
 				break;
@@ -870,13 +870,13 @@ public class LocalVariableAnalyzer
 				(BinaryOperatorInstruction)instruction;
 				analyzeBinaryOperator(
 						constants, localVariables, instruction,
-						boi.value1, boi.value2, varIndex);
+						boi.getValue1(), boi.getValue2(), varIndex);
 				break;
 			case ByteCodeConstants.IFCMP:
 				IfCmp ic = (IfCmp)instruction;
 				analyzeBinaryOperator(
 						constants, localVariables, instruction,
-						ic.value1, ic.value2, varIndex);
+						ic.getValue1(), ic.getValue2(), varIndex);
 				break;
 			case ByteCodeConstants.XRETURN:
 				analyzeReturnInstruction(
@@ -892,8 +892,8 @@ public class LocalVariableAnalyzer
 			Instruction instruction)
 	{
 		StoreInstruction store = (StoreInstruction)instruction;
-		int index = store.index;
-		int offset = store.offset;
+		int index = store.getIndex();
+		int offset = store.getOffset();
 
 		LocalVariable lv =
 				localVariables.searchLocalVariableWithIndexAndOffset(index, offset);
@@ -906,16 +906,16 @@ public class LocalVariableAnalyzer
 
 			if (signature == null)
 			{
-				if (store.valueref.opcode == Const.ILOAD)
+				if (store.getValueref().getOpcode() == Const.ILOAD)
 				{
-					ILoad iload = (ILoad)store.valueref;
+					ILoad iload = (ILoad)store.getValueref();
 					lv = localVariables.getLocalVariableWithIndexAndOffset(
-							iload.index, iload.offset);
+							iload.getIndex(), iload.getOffset());
 					typesBitField = lv == null ?
 							ByteCodeConstants.TBF_INT_INT|ByteCodeConstants.TBF_INT_SHORT|
 							ByteCodeConstants.TBF_INT_BYTE|ByteCodeConstants.TBF_INT_CHAR|
 							ByteCodeConstants.TBF_INT_BOOLEAN:
-								lv.typesBitField;
+								lv.getTypesBitField();
 				}
 				else
 				{
@@ -941,13 +941,13 @@ public class LocalVariableAnalyzer
 			// Une variable est trouvée. Le type est il compatible ?
 			int typesBitField =
 					SignatureUtil.createTypesBitField(signature);
-			switch (lv.signatureIndex)
+			switch (lv.getSignatureIndex())
 			{
 			case NUMBER_TYPE:
-				if ((typesBitField & lv.typesBitField) != 0)
+				if ((typesBitField & lv.getTypesBitField()) != 0)
 				{
 					// Reduction de champ de bits
-					lv.typesBitField &= typesBitField;
+					lv.setTypesBitField(lv.getTypesBitField() & typesBitField);
 					lv.updateRange(offset);
 				}
 				else
@@ -965,7 +965,7 @@ public class LocalVariableAnalyzer
 				break;
 			default:
 				String signatureLV =
-				constants.getConstantUtf8(lv.signatureIndex);
+				constants.getConstantUtf8(lv.getSignatureIndex());
 				int typesBitFieldLV =
 						SignatureUtil.createTypesBitField(signatureLV);
 
@@ -987,8 +987,8 @@ public class LocalVariableAnalyzer
 			LocalVariables localVariables, Instruction instruction)
 	{
 		IndexInstruction load = (IndexInstruction)instruction;
-		int index = load.index;
-		int offset = load.offset;
+		int index = load.getIndex();
+		int offset = load.getOffset();
 
 		LocalVariable lv =
 				localVariables.searchLocalVariableWithIndexAndOffset(index, offset);
@@ -1013,8 +1013,8 @@ public class LocalVariableAnalyzer
 			LocalVariables localVariables, Instruction instruction)
 	{
 		IndexInstruction load = (IndexInstruction)instruction;
-		int index = load.index;
-		int offset = load.offset;
+		int index = load.getIndex();
+		int offset = load.getOffset();
 
 		LocalVariable lv =
 				localVariables.searchLocalVariableWithIndexAndOffset(index, offset);
@@ -1034,8 +1034,8 @@ public class LocalVariableAnalyzer
 			LocalVariables localVariables, Instruction instruction)
 	{
 		IndexInstruction load = (IndexInstruction)instruction;
-		int index = load.index;
-		int offset = load.offset;
+		int index = load.getIndex();
+		int offset = load.getOffset();
 
 		LocalVariable lv =
 				localVariables.searchLocalVariableWithIndexAndOffset(index, offset);
@@ -1057,7 +1057,7 @@ public class LocalVariableAnalyzer
 	{
 		final InvokeInstruction invokeInstruction =
 				(InvokeInstruction)instruction;
-		final List<Instruction> args = invokeInstruction.args;
+		final List<Instruction> args = invokeInstruction.getArgs();
 		final List<String> argSignatures =
 				invokeInstruction.getListOfParameterSignatures(constants);
 		final int nbrOfArgs = args.size();
@@ -1075,30 +1075,28 @@ public class LocalVariableAnalyzer
 			Instruction instruction, int varIndex, String signature)
 	{
 		LoadInstruction li;
-		if (instruction.opcode == Const.ILOAD) {
+		if (instruction.getOpcode() == Const.ILOAD) {
 			li = (LoadInstruction)instruction;
-			if (li.index == varIndex)
+			if (li.getIndex() == varIndex)
 			{
 				LocalVariable lv =
-						localVariables.searchLocalVariableWithIndexAndOffset(li.index, li.offset);
+						localVariables.searchLocalVariableWithIndexAndOffset(li.getIndex(), li.getOffset());
 				if (lv != null) {
-					lv.typesBitField &=
-							SignatureUtil.createArgOrReturnBitFields(signature);
+					lv.setTypesBitField(lv.getTypesBitField() & SignatureUtil.createArgOrReturnBitFields(signature));
 				}
 			}
-		} else if (instruction.opcode == Const.ALOAD) {
+		} else if (instruction.getOpcode() == Const.ALOAD) {
 			li = (LoadInstruction)instruction;
-			if (li.index == varIndex)
+			if (li.getIndex() == varIndex)
 			{
 				LocalVariable lv =
 						localVariables.searchLocalVariableWithIndexAndOffset(
-								li.index, li.offset);
+								li.getIndex(), li.getOffset());
 				if (lv != null)
 				{
-					if (lv.signatureIndex == UNDEFINED_TYPE) {
-						lv.signatureIndex =
-								constants.addConstantUtf8(signature);
-					} else if (lv.signatureIndex == NUMBER_TYPE) {
+					if (lv.getSignatureIndex() == UNDEFINED_TYPE) {
+						lv.setSignatureIndex(constants.addConstantUtf8(signature));
+					} else if (lv.getSignatureIndex() == NUMBER_TYPE) {
 						new Throwable("type inattendu").printStackTrace();
 						// NE PAS GENERER DE CONFLIT DE TYPE LORSQUE LE TYPE
 						// D'UNE VARIABLE EST DIFFERENT DU TYPE D'UN PARAMETRE.
@@ -1130,41 +1128,41 @@ public class LocalVariableAnalyzer
 			int varIndex)
 	{
 		if (
-				(i1.opcode != Const.ILOAD || ((ILoad)i1).index != varIndex) &&
-				(i2.opcode != Const.ILOAD || ((ILoad)i2).index != varIndex)
+				(i1.getOpcode() != Const.ILOAD || ((ILoad)i1).getIndex() != varIndex) &&
+				(i2.getOpcode() != Const.ILOAD || ((ILoad)i2).getIndex() != varIndex)
 				) {
 			return;
 		}
 
-		LocalVariable lv1 = i1.opcode == Const.ILOAD ?
+		LocalVariable lv1 = i1.getOpcode() == Const.ILOAD ?
 				localVariables.searchLocalVariableWithIndexAndOffset(
-						((ILoad)i1).index, i1.offset) : null;
+						((ILoad)i1).getIndex(), i1.getOffset()) : null;
 
-		LocalVariable lv2 = i2.opcode == Const.ILOAD ?
+		LocalVariable lv2 = i2.getOpcode() == Const.ILOAD ?
 				localVariables.searchLocalVariableWithIndexAndOffset(
-						((ILoad)i2).index, i2.offset) : null;
+						((ILoad)i2).getIndex(), i2.getOffset()) : null;
 
 		if (lv1 != null)
 		{
-			lv1.updateRange(instruction.offset);
+			lv1.updateRange(instruction.getOffset());
 			if (lv2 != null) {
-				lv2.updateRange(instruction.offset);
+				lv2.updateRange(instruction.getOffset());
 			}
 
-			if (lv1.signatureIndex == NUMBER_TYPE)
+			if (lv1.getSignatureIndex() == NUMBER_TYPE)
 			{
 				// Reduction des types de lv1
 				if (lv2 != null)
 				{
-					if (lv2.signatureIndex == NUMBER_TYPE)
+					if (lv2.getSignatureIndex() == NUMBER_TYPE)
 					{
 						// Reduction des types de lv1 & lv2
-						lv1.typesBitField &= lv2.typesBitField;
-						lv2.typesBitField &= lv1.typesBitField;
+						lv1.setTypesBitField(lv1.getTypesBitField() & lv2.getTypesBitField());
+						lv2.setTypesBitField(lv2.getTypesBitField() & lv1.getTypesBitField());
 					}
 					else
 					{
-						lv1.signatureIndex = lv2.signatureIndex;
+						lv1.setSignatureIndex(lv2.getSignatureIndex());
 					}
 				}
 				else
@@ -1176,22 +1174,22 @@ public class LocalVariableAnalyzer
 					{
 						int type = SignatureUtil.createTypesBitField(signature);
 						if (type != 0) {
-							lv1.typesBitField &= type;
+							lv1.setTypesBitField(lv1.getTypesBitField() & type);
 						}
 					}
 				}
 			}
-			else if (lv2 != null && lv2.signatureIndex == NUMBER_TYPE)
+			else if (lv2 != null && lv2.getSignatureIndex() == NUMBER_TYPE)
 			{
 				// Reduction des types de lv2
-				lv2.signatureIndex = lv1.signatureIndex;
+				lv2.setSignatureIndex(lv1.getSignatureIndex());
 			}
 		}
 		else if (lv2 != null)
 		{
-			lv2.updateRange(instruction.offset);
+			lv2.updateRange(instruction.getOffset());
 
-			if (lv2.signatureIndex == NUMBER_TYPE)
+			if (lv2.getSignatureIndex() == NUMBER_TYPE)
 			{
 				// Reduction des types de lv2
 				String signature =
@@ -1201,7 +1199,7 @@ public class LocalVariableAnalyzer
 				{
 					int type = SignatureUtil.createTypesBitField(signature);
 					if (type != 0) {
-						lv2.typesBitField &= type;
+						lv2.setTypesBitField(lv2.getTypesBitField() & type);
 					}
 				}
 			}
@@ -1214,7 +1212,7 @@ public class LocalVariableAnalyzer
 	{
 		ReturnInstruction ri = (ReturnInstruction)instruction;
 		analyzeArgOrReturnedInstruction(
-				constants, localVariables, ri.valueref,
+				constants, localVariables, ri.getValueref(),
 				varIndex, returnedSignature);
 	}
 
@@ -1223,8 +1221,8 @@ public class LocalVariableAnalyzer
 			Instruction instruction)
 	{
 		StoreInstruction store = (StoreInstruction)instruction;
-		int index = store.index;
-		int offset = store.offset;
+		int index = store.getIndex();
+		int offset = store.getOffset();
 
 		LocalVariable lv =
 				localVariables.searchLocalVariableWithIndexAndOffset(index, offset);
@@ -1233,7 +1231,7 @@ public class LocalVariableAnalyzer
 		int signatureIndex =
 				signature != null ? constants.addConstantUtf8(signature) : -1;
 
-		if (lv == null || lv.signatureIndex != signatureIndex)
+		if (lv == null || lv.getSignatureIndex() != signatureIndex)
 		{
 			// variable non trouvée ou type incompatible => création de variable
 			localVariables.add(new LocalVariable(
@@ -1248,8 +1246,8 @@ public class LocalVariableAnalyzer
 			Instruction instruction)
 	{
 		StoreInstruction store = (StoreInstruction)instruction;
-		int index = store.index;
-		int offset = store.offset;
+		int index = store.getIndex();
+		int offset = store.getOffset();
 
 		LocalVariable lv =
 				localVariables.searchLocalVariableWithIndexAndOffset(index, offset);
@@ -1258,11 +1256,11 @@ public class LocalVariableAnalyzer
 		int signatureInstructionIndex = signatureInstruction != null ?
 				constants.addConstantUtf8(signatureInstruction) : UNDEFINED_TYPE;
 		boolean isExceptionOrReturnAddress =
-				store.valueref.opcode == ByteCodeConstants.EXCEPTIONLOAD ||
-				store.valueref.opcode == ByteCodeConstants.RETURNADDRESSLOAD;
+				store.getValueref().getOpcode() == ByteCodeConstants.EXCEPTIONLOAD ||
+				store.getValueref().getOpcode() == ByteCodeConstants.RETURNADDRESSLOAD;
 
-		if (lv == null || lv.exceptionOrReturnAddress ||
-				isExceptionOrReturnAddress && lv.startPc + lv.length < offset)
+		if (lv == null || lv.isExceptionOrReturnAddress() ||
+				isExceptionOrReturnAddress && lv.getStartPc() + lv.getLength() < offset)
 		{
 			localVariables.add(new LocalVariable(
 					offset, 1, -1, signatureInstructionIndex, index,
@@ -1271,21 +1269,21 @@ public class LocalVariableAnalyzer
 		else if (!isExceptionOrReturnAddress)
 		{
 			// Une variable est trouvée. Le type est il compatible ?
-			if (lv.signatureIndex == UNDEFINED_TYPE)
+			if (lv.getSignatureIndex() == UNDEFINED_TYPE)
 			{
 				// Cas particulier Jikes 1.2.2 bloc finally :
 				//  Une instruction ALoad apparait avant AStore
-				lv.signatureIndex = signatureInstructionIndex;
+				lv.setSignatureIndex(signatureInstructionIndex);
 				lv.updateRange(offset);
 			}
-			else if (lv.signatureIndex == NUMBER_TYPE)
+			else if (lv.getSignatureIndex() == NUMBER_TYPE)
 			{
 				// Creation de variables
 				localVariables.add(new LocalVariable(
 						offset, 1, -1, signatureInstructionIndex, index));
 			}
-			else if (lv.signatureIndex == signatureInstructionIndex ||
-					lv.signatureIndex == OBJECT_TYPE)
+			else if (lv.getSignatureIndex() == signatureInstructionIndex ||
+					lv.getSignatureIndex() == OBJECT_TYPE)
 			{
 				lv.updateRange(offset);
 			}
@@ -1298,7 +1296,7 @@ public class LocalVariableAnalyzer
 				//    modification du type de la variable en 'Object' puis
 				//    ajout d'instruction cast.
 				String signatureLV =
-						constants.getConstantUtf8(lv.signatureIndex);
+						constants.getConstantUtf8(lv.getSignatureIndex());
 
 				if (SignatureUtil.isPrimitiveSignature(signatureLV))
 				{
@@ -1309,7 +1307,7 @@ public class LocalVariableAnalyzer
 					if (signatureInstructionIndex != UNDEFINED_TYPE)
 					{
 						// Modification du type de variable
-						lv.signatureIndex = OBJECT_TYPE;
+						lv.setSignatureIndex(OBJECT_TYPE);
 					}
 					lv.updateRange(offset);
 				}
@@ -1333,7 +1331,7 @@ public class LocalVariableAnalyzer
 		{
 			final Instruction instruction = listForAnalyze.get(i);
 
-			switch (instruction.opcode)
+			switch (instruction.getOpcode())
 			{
 			case ByteCodeConstants.ARRAYSTORE:
 				setConstantTypesArrayStore(
@@ -1345,14 +1343,14 @@ public class LocalVariableAnalyzer
 				BinaryOperatorInstruction boi =
 						(BinaryOperatorInstruction)instruction;
 				setConstantTypesBinaryOperator(
-						constants, localVariables, boi.value1, boi.value2);
+						constants, localVariables, boi.getValue1(), boi.getValue2());
 			}
 			break;
 			case ByteCodeConstants.IFCMP:
 			{
 				IfCmp ic = (IfCmp)instruction;
 				setConstantTypesBinaryOperator(
-						constants, localVariables, ic.value1, ic.value2);
+						constants, localVariables, ic.getValue1(), ic.getValue2());
 			}
 			break;
 			case Const.INVOKEINTERFACE:
@@ -1369,14 +1367,14 @@ public class LocalVariableAnalyzer
 			{
 				PutField putField = (PutField)instruction;
 				setConstantTypesPutFieldAndPutStatic(
-						constants, putField.valueref, putField.index);
+						constants, putField.getValueref(), putField.getIndex());
 			}
 			break;
 			case Const.PUTSTATIC:
 			{
 				PutStatic putStatic = (PutStatic)instruction;
 				setConstantTypesPutFieldAndPutStatic(
-						constants, putStatic.valueref, putStatic.index);
+						constants, putStatic.getValueref(), putStatic.getIndex());
 			}
 			break;
 			case ByteCodeConstants.XRETURN:
@@ -1394,7 +1392,7 @@ public class LocalVariableAnalyzer
 		{
 			instruction = listForAnalyze.get(i);
 
-			if (instruction.opcode == ByteCodeConstants.TERNARYOPSTORE)
+			if (instruction.getOpcode() == ByteCodeConstants.TERNARYOPSTORE)
 			{
 				TernaryOpStore tos = (TernaryOpStore)instruction;
 				setConstantTypesTernaryOpStore(
@@ -1409,7 +1407,7 @@ public class LocalVariableAnalyzer
 	{
 		final InvokeInstruction invokeInstruction =
 				(InvokeInstruction)instruction;
-		final List<Instruction> args = invokeInstruction.args;
+		final List<Instruction> args = invokeInstruction.getArgs();
 		final List<String> types =
 				invokeInstruction.getListOfParameterSignatures(constants);
 		final int nbrOfArgs = args.size();
@@ -1419,8 +1417,8 @@ public class LocalVariableAnalyzer
 		{
 			arg = args.get(j);
 
-			if (arg.opcode == Const.BIPUSH || arg.opcode == ByteCodeConstants.ICONST
-					|| arg.opcode == Const.SIPUSH) {
+			if (arg.getOpcode() == Const.BIPUSH || arg.getOpcode() == ByteCodeConstants.ICONST
+					|| arg.getOpcode() == Const.SIPUSH) {
 				((IConst)arg).setReturnedSignature(types.get(j));
 			}
 		}
@@ -1429,8 +1427,8 @@ public class LocalVariableAnalyzer
 	private static void setConstantTypesPutFieldAndPutStatic(
 			ConstantPool constants, Instruction valueref, int index)
 	{
-		if (valueref.opcode == Const.BIPUSH || valueref.opcode == ByteCodeConstants.ICONST
-				|| valueref.opcode == Const.SIPUSH) {
+		if (valueref.getOpcode() == Const.BIPUSH || valueref.getOpcode() == ByteCodeConstants.ICONST
+				|| valueref.getOpcode() == Const.SIPUSH) {
 			ConstantFieldref cfr = constants.getConstantFieldref(index);
 			ConstantNameAndType cnat =
 					constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
@@ -1443,11 +1441,11 @@ public class LocalVariableAnalyzer
 			ConstantPool constants, LocalVariables localVariables,
 			List<Instruction> list, TernaryOpStore tos)
 	{
-		if (tos.objectref.opcode == Const.BIPUSH || tos.objectref.opcode == ByteCodeConstants.ICONST
-				|| tos.objectref.opcode == Const.SIPUSH) {
+		if (tos.getObjectref().getOpcode() == Const.BIPUSH || tos.getObjectref().getOpcode() == ByteCodeConstants.ICONST
+				|| tos.getObjectref().getOpcode() == Const.SIPUSH) {
 			// Recherche de la seconde valeur de l'instruction ternaire
 			int index = InstructionUtil.getIndexForOffset(
-					list, tos.ternaryOp2ndValueOffset);
+					list, tos.getTernaryOp2ndValueOffset());
 
 			if (index != -1)
 			{
@@ -1457,13 +1455,13 @@ public class LocalVariableAnalyzer
 				while (index < length)
 				{
 					result = SearchInstructionByOffsetVisitor.visit(
-							list.get(index), tos.ternaryOp2ndValueOffset);
+							list.get(index), tos.getTernaryOp2ndValueOffset());
 
 					if (result != null)
 					{
 						String signature =
 								result.getReturnedSignature(constants, localVariables);
-						((IConst)tos.objectref).setReturnedSignature(signature);
+						((IConst)tos.getObjectref()).setReturnedSignature(signature);
 						break;
 					}
 
@@ -1478,38 +1476,38 @@ public class LocalVariableAnalyzer
 			LocalVariables localVariables,
 			ArrayStoreInstruction asi)
 	{
-		if (asi.valueref.opcode == Const.BIPUSH || asi.valueref.opcode == ByteCodeConstants.ICONST
-				|| asi.valueref.opcode == Const.SIPUSH) {
-			switch (asi.arrayref.opcode)
+		if (asi.getValueref().getOpcode() == Const.BIPUSH || asi.getValueref().getOpcode() == ByteCodeConstants.ICONST
+				|| asi.getValueref().getOpcode() == Const.SIPUSH) {
+			switch (asi.getArrayref().getOpcode())
 			{
 			case Const.ALOAD:
 			{
-				ALoad aload = (ALoad)asi.arrayref;
+				ALoad aload = (ALoad)asi.getArrayref();
 				LocalVariable lv = localVariables.getLocalVariableWithIndexAndOffset(
-						aload.index, aload.offset);
+						aload.getIndex(), aload.getOffset());
 
 				if (lv == null)
 				{
-					new Throwable("lv is null. index=" + aload.index).printStackTrace();
+					new Throwable("lv is null. index=" + aload.getIndex()).printStackTrace();
 					return;
 				}
 
 				String signature =
-						constants.getConstantUtf8(lv.signatureIndex);
-				((IConst)asi.valueref).setReturnedSignature(
+						constants.getConstantUtf8(lv.getSignatureIndex());
+				((IConst)asi.getValueref()).setReturnedSignature(
 						SignatureUtil.cutArrayDimensionPrefix(signature));
 			}
 			break;
 			case Const.GETFIELD:
 			case Const.GETSTATIC:
 			{
-				IndexInstruction ii = (IndexInstruction)asi.arrayref;
-				ConstantFieldref cfr = constants.getConstantFieldref(ii.index);
+				IndexInstruction ii = (IndexInstruction)asi.getArrayref();
+				ConstantFieldref cfr = constants.getConstantFieldref(ii.getIndex());
 				ConstantNameAndType cnat =
 						constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
 				String signature =
 						constants.getConstantUtf8(cnat.getSignatureIndex());
-				((IConst)asi.valueref).setReturnedSignature(
+				((IConst)asi.getValueref()).setReturnedSignature(
 						SignatureUtil.cutArrayDimensionPrefix(signature));
 			}
 			break;
@@ -1524,13 +1522,13 @@ public class LocalVariableAnalyzer
 	{
 		StoreInstruction store = (StoreInstruction)instruction;
 
-		if (store.valueref.opcode == Const.BIPUSH || store.valueref.opcode == ByteCodeConstants.ICONST
-				|| store.valueref.opcode == Const.SIPUSH) {
+		if (store.getValueref().getOpcode() == Const.BIPUSH || store.getValueref().getOpcode() == ByteCodeConstants.ICONST
+				|| store.getValueref().getOpcode() == Const.SIPUSH) {
 			final LocalVariable lv =
 					localVariables.getLocalVariableWithIndexAndOffset(
-							store.index, store.offset);
-			String signature = constants.getConstantUtf8(lv.signatureIndex);
-			((IConst)store.valueref).setReturnedSignature(signature);
+							store.getIndex(), store.getOffset());
+			String signature = constants.getConstantUtf8(lv.getSignatureIndex());
+			((IConst)store.getValueref()).setReturnedSignature(signature);
 		}
 	}
 
@@ -1539,18 +1537,18 @@ public class LocalVariableAnalyzer
 			LocalVariables localVariables,
 			Instruction i1, Instruction i2)
 	{
-		if (i1.opcode == Const.BIPUSH || i1.opcode == ByteCodeConstants.ICONST
-				|| i1.opcode == Const.SIPUSH) {
-			if (i2.opcode != Const.BIPUSH && i2.opcode != ByteCodeConstants.ICONST
-					&& i2.opcode != Const.SIPUSH) {
+		if (i1.getOpcode() == Const.BIPUSH || i1.getOpcode() == ByteCodeConstants.ICONST
+				|| i1.getOpcode() == Const.SIPUSH) {
+			if (i2.getOpcode() != Const.BIPUSH && i2.getOpcode() != ByteCodeConstants.ICONST
+					&& i2.getOpcode() != Const.SIPUSH) {
 				String signature = i2.getReturnedSignature(
 						constants, localVariables);
 				if (signature != null) {
 					((IConst)i1).setReturnedSignature(signature);
 				}
 			}
-		} else if (i2.opcode == Const.BIPUSH || i2.opcode == ByteCodeConstants.ICONST
-				|| i2.opcode == Const.SIPUSH) {
+		} else if (i2.getOpcode() == Const.BIPUSH || i2.getOpcode() == ByteCodeConstants.ICONST
+				|| i2.getOpcode() == Const.SIPUSH) {
 			String signature = i1.getReturnedSignature(
 					constants, localVariables);
 			if (signature != null) {
@@ -1564,7 +1562,7 @@ public class LocalVariableAnalyzer
 	{
 		ReturnInstruction ri = (ReturnInstruction)instruction;
 
-		int opcode = ri.valueref.opcode;
+		int opcode = ri.getValueref().getOpcode();
 
 		if (opcode != Const.SIPUSH &&
 				opcode != Const.BIPUSH &&
@@ -1572,7 +1570,7 @@ public class LocalVariableAnalyzer
 			return;
 		}
 
-		((IConst)ri.valueref).signature = returnedSignature;
+		((IConst)ri.getValueref()).setSignature(returnedSignature);
 	}
 
 	private static String getReturnedSignature(
@@ -1580,7 +1578,7 @@ public class LocalVariableAnalyzer
 	{
 		AttributeSignature as = method.getAttributeSignature();
 		int signatureIndex = as == null ?
-				method.getDescriptorIndex() : as.signatureIndex;
+				method.getDescriptorIndex() : as.getSignatureIndex();
 		String signature =
 				classFile.getConstantPool().getConstantUtf8(signatureIndex);
 
@@ -1603,15 +1601,15 @@ public class LocalVariableAnalyzer
 		{
 			Instruction i = listForAnalyze.get(index);
 
-			if (i.opcode == Const.ASTORE)
+			if (i.getOpcode() == Const.ASTORE)
 			{
 				AStore as = (AStore)i;
 
-				if (as.valueref.opcode == ByteCodeConstants.EXCEPTIONLOAD)
+				if (as.getValueref().getOpcode() == ByteCodeConstants.EXCEPTIONLOAD)
 				{
-					ExceptionLoad el = (ExceptionLoad)as.valueref;
-					if (el.index == UtilConstants.INVALID_INDEX) {
-						el.index = as.index;
+					ExceptionLoad el = (ExceptionLoad)as.getValueref();
+					if (el.getIndex() == UtilConstants.INVALID_INDEX) {
+						el.setIndex(as.getIndex());
 					}
 				}
 			}
@@ -1630,19 +1628,19 @@ public class LocalVariableAnalyzer
 		{
 			i = listForAnalyze.get(index);
 
-			if (i.opcode == ByteCodeConstants.EXCEPTIONLOAD)
+			if (i.getOpcode() == ByteCodeConstants.EXCEPTIONLOAD)
 			{
 				ExceptionLoad el = (ExceptionLoad)i;
 
-				if (el.index == UtilConstants.INVALID_INDEX &&
-						el.exceptionNameIndex > 0)
+				if (el.getIndex() == UtilConstants.INVALID_INDEX &&
+						el.getExceptionNameIndex() > 0)
 				{
 					int varIndex = localVariables.size();
 					LocalVariable localVariable = new LocalVariable(
-							el.offset, 1, UtilConstants.INVALID_INDEX,
-							el.exceptionNameIndex, varIndex, true);
+							el.getOffset(), 1, UtilConstants.INVALID_INDEX,
+							el.getExceptionNameIndex(), varIndex, true);
 					localVariables.add(localVariable);
-					el.index = varIndex;
+					el.setIndex(varIndex);
 				}
 			}
 		}
@@ -1659,15 +1657,15 @@ public class LocalVariableAnalyzer
 		{
 			final LocalVariable lv = localVariables.getLocalVariableAt(i);
 
-			if (lv != null && lv.nameIndex <= 0)
+			if (lv != null && lv.getNameIndex() <= 0)
 			{
-				String signature = constants.getConstantUtf8(lv.signatureIndex);
+				String signature = constants.getConstantUtf8(lv.getSignatureIndex());
 				boolean appearsOnce = signatureAppearsOnceInLocalVariables(
-						localVariables, length, lv.signatureIndex);
+						localVariables, length, lv.getSignatureIndex());
 				String name =
 						variableNameGenerator.generateLocalVariableNameFromSignature(
 								signature, appearsOnce);
-				lv.nameIndex = constants.addConstantUtf8(name);
+				lv.setNameIndex(constants.addConstantUtf8(name));
 			}
 		}
 	}
@@ -1697,7 +1695,7 @@ public class LocalVariableAnalyzer
 				i<length && counter<2; i++)
 		{
 			final LocalVariable lv = localVariables.getLocalVariableAt(i);
-			if (lv != null && lv.signatureIndex == signatureIndex) {
+			if (lv != null && lv.getSignatureIndex() == signatureIndex) {
 				counter++;
 			}
 		}
@@ -1708,33 +1706,33 @@ public class LocalVariableAnalyzer
 	private static boolean reverseAnalyzeIStore(
 			LocalVariables localVariables, StoreInstruction si)
 	{
-		LoadInstruction load = (LoadInstruction)si.valueref;
+		LoadInstruction load = (LoadInstruction)si.getValueref();
 		LocalVariable lvLoad =
 				localVariables.getLocalVariableWithIndexAndOffset(
-						load.index, load.offset);
+						load.getIndex(), load.getOffset());
 
-		if (lvLoad == null || lvLoad.signatureIndex != NUMBER_TYPE) {
+		if (lvLoad == null || lvLoad.getSignatureIndex() != NUMBER_TYPE) {
 			return false;
 		}
 
 		LocalVariable lvStore =
 				localVariables.getLocalVariableWithIndexAndOffset(
-						si.index, si.offset);
+						si.getIndex(), si.getOffset());
 
 		if (lvStore == null) {
 			return false;
 		}
 
-		if (lvStore.signatureIndex == NUMBER_TYPE)
+		if (lvStore.getSignatureIndex() == NUMBER_TYPE)
 		{
-			int old = lvLoad.typesBitField;
-			lvLoad.typesBitField &= lvStore.typesBitField;
-			return old != lvLoad.typesBitField;
+			int old = lvLoad.getTypesBitField();
+			lvLoad.setTypesBitField(lvLoad.getTypesBitField() & lvStore.getTypesBitField());
+			return old != lvLoad.getTypesBitField();
 		}
-		if (lvStore.signatureIndex >= 0 &&
-				lvStore.signatureIndex != lvLoad.signatureIndex)
+		if (lvStore.getSignatureIndex() >= 0 &&
+				lvStore.getSignatureIndex() != lvLoad.getSignatureIndex())
 		{
-			lvLoad.signatureIndex = lvStore.signatureIndex;
+			lvLoad.setSignatureIndex(lvStore.getSignatureIndex());
 			return true;
 		}
 
@@ -1747,25 +1745,25 @@ public class LocalVariableAnalyzer
 	{
 		LocalVariable lvLoad =
 				localVariables.getLocalVariableWithIndexAndOffset(
-						load.index, load.offset);
+						load.getIndex(), load.getOffset());
 
 		if (lvLoad != null)
 		{
-			ConstantFieldref cfr = constants.getConstantFieldref(ii.index);
+			ConstantFieldref cfr = constants.getConstantFieldref(ii.getIndex());
 			ConstantNameAndType cnat =
 					constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
 
-			if (lvLoad.signatureIndex == NUMBER_TYPE)
+			if (lvLoad.getSignatureIndex() == NUMBER_TYPE)
 			{
 				String descriptor = constants.getConstantUtf8(cnat.getSignatureIndex());
 				int typesBitField = SignatureUtil.createArgOrReturnBitFields(descriptor);
-				int old = lvLoad.typesBitField;
-				lvLoad.typesBitField &= typesBitField;
-				return old != lvLoad.typesBitField;
+				int old = lvLoad.getTypesBitField();
+				lvLoad.setTypesBitField(lvLoad.getTypesBitField() & typesBitField);
+				return old != lvLoad.getTypesBitField();
 			}
-			if (lvLoad.signatureIndex == UNDEFINED_TYPE)
+			if (lvLoad.getSignatureIndex() == UNDEFINED_TYPE)
 			{
-				lvLoad.signatureIndex = cnat.getSignatureIndex();
+				lvLoad.setSignatureIndex(cnat.getSignatureIndex());
 				return true;
 			}
 		}

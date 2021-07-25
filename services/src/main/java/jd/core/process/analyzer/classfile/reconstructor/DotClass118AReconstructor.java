@@ -70,61 +70,61 @@ public class DotClass118AReconstructor
         {
             Instruction instruction = list.get(i);
 
-            if (instruction.opcode != ByteCodeConstants.IFXNULL)
+            if (instruction.getOpcode() != ByteCodeConstants.IFXNULL)
                 continue;
 
             IfInstruction ii = (IfInstruction)instruction;
 
-            if (ii.value.opcode != Const.GETSTATIC)
+            if (ii.getValue().getOpcode() != Const.GETSTATIC)
                 continue;
 
-            GetStatic gs = (GetStatic)ii.value;
+            GetStatic gs = (GetStatic)ii.getValue();
 
             int jumpOffset = ii.getJumpOffset();
 
             instruction = list.get(i+1);
 
-            if (instruction.opcode != ByteCodeConstants.TERNARYOPSTORE)
+            if (instruction.getOpcode() != ByteCodeConstants.TERNARYOPSTORE)
                 continue;
 
             TernaryOpStore tos = (TernaryOpStore)instruction;
 
-            if ((tos.objectref.opcode != Const.GETSTATIC) ||
-                (gs.index != ((GetStatic)tos.objectref).index))
+            if ((tos.getObjectref().getOpcode() != Const.GETSTATIC) ||
+                (gs.getIndex() != ((GetStatic)tos.getObjectref()).getIndex()))
                 continue;
 
             instruction = list.get(i+2);
 
-            if (instruction.opcode != Const.GOTO)
+            if (instruction.getOpcode() != Const.GOTO)
                 continue;
 
             Goto g = (Goto)instruction;
 
             instruction = list.get(i+3);
 
-            if (instruction.opcode != ByteCodeConstants.DUPSTORE)
+            if (instruction.getOpcode() != ByteCodeConstants.DUPSTORE)
                 continue;
 
-            if ((g.offset >= jumpOffset) || (jumpOffset > instruction.offset))
+            if ((g.getOffset() >= jumpOffset) || (jumpOffset > instruction.getOffset()))
                 continue;
 
             DupStore ds = (DupStore)instruction;
 
-            if (ds.objectref.opcode != Const.INVOKESTATIC)
+            if (ds.getObjectref().getOpcode() != Const.INVOKESTATIC)
                 continue;
 
-            Invokestatic is = (Invokestatic)ds.objectref;
+            Invokestatic is = (Invokestatic)ds.getObjectref();
 
-            if (is.args.size() != 1)
+            if (is.getArgs().size() != 1)
                 continue;
 
-            instruction = is.args.get(0);
+            instruction = is.getArgs().get(0);
 
-            if (instruction.opcode != Const.LDC)
+            if (instruction.getOpcode() != Const.LDC)
                 continue;
 
             ConstantMethodref cmr =
-                constants.getConstantMethodref(is.index);
+                constants.getConstantMethodref(is.getIndex());
             ConstantNameAndType cnatMethod =
                 constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
             String nameMethod = constants.getConstantUtf8(cnatMethod.getNameIndex());
@@ -133,23 +133,23 @@ public class DotClass118AReconstructor
                 continue;
 
             Ldc ldc = (Ldc)instruction;
-            Constant cv = constants.getConstantValue(ldc.index);
+            Constant cv = constants.getConstantValue(ldc.getIndex());
 
             if (!(cv instanceof ConstantString))
                 continue;
 
             instruction = list.get(i+4);
 
-            if (instruction.opcode != Const.PUTSTATIC)
+            if (instruction.getOpcode() != Const.PUTSTATIC)
                 continue;
 
             PutStatic ps = (PutStatic)instruction;
 
-            if ((ps.valueref.opcode != ByteCodeConstants.DUPLOAD) ||
-                (ds.offset != ps.valueref.offset))
+            if ((ps.getValueref().getOpcode() != ByteCodeConstants.DUPLOAD) ||
+                (ds.getOffset() != ps.getValueref().getOffset()))
                 continue;
 
-            ConstantFieldref cfr = constants.getConstantFieldref(gs.index);
+            ConstantFieldref cfr = constants.getConstantFieldref(gs.getIndex());
             ConstantNameAndType cnatField = constants.getConstantNameAndType(
                 cfr.getNameAndTypeIndex());
             String signatureField =
@@ -177,8 +177,8 @@ public class DotClass118AReconstructor
                 // Ajout d'une nouvelle classe
                 index = constants.addConstantClass(index);
                 ldc = new Ldc(
-                    Const.LDC, ii.offset,
-                    ii.lineNumber, index);
+                    Const.LDC, ii.getOffset(),
+                    ii.getLineNumber(), index);
 
                 // Remplacement de l'intruction GetStatic par l'instruction Ldc
                 ReplaceDupLoadVisitor visitor = new ReplaceDupLoadVisitor(ds, ldc);
@@ -200,8 +200,8 @@ public class DotClass118AReconstructor
                         SignatureUtil.cutArrayDimensionPrefix(signature);
 
                 IConst iconst0 = new IConst(
-                    ByteCodeConstants.ICONST, ii.offset,
-                    ii.lineNumber, 0);
+                    ByteCodeConstants.ICONST, ii.getOffset(),
+                    ii.getLineNumber(), 0);
                 Instruction newArray;
 
                 if (SignatureUtil.isObjectSignature(signatureWithoutDimension))
@@ -222,8 +222,8 @@ public class DotClass118AReconstructor
                     index = constants.addConstantClass(index);
 
                     newArray = new ANewArray(
-                            Const.ANEWARRAY, ii.offset,
-                            ii.lineNumber, index, iconst0);
+                            Const.ANEWARRAY, ii.getOffset(),
+                            ii.getLineNumber(), index, iconst0);
                 }
                 else
                 {
@@ -231,7 +231,7 @@ public class DotClass118AReconstructor
                     //  9: newarray byte
                     //  11: invokevirtual 62	java/lang/Object:getClass	()Ljava/lang/Class;
                     newArray = new NewArray(
-                        Const.NEWARRAY, ii.offset, ii.lineNumber,
+                        Const.NEWARRAY, ii.getOffset(), ii.getLineNumber(),
                         SignatureUtil.getTypeFromSignature(signatureWithoutDimension),
                         iconst0);
                 }
@@ -243,11 +243,11 @@ public class DotClass118AReconstructor
                 int nameAndTypeIndex = constants.addConstantNameAndType(
                     methodNameIndex, methodDescriptorIndex);
                 int cmrIndex = constants.addConstantMethodref(
-                    constants.objectClassIndex, nameAndTypeIndex);
+                    constants.getObjectClassIndex(), nameAndTypeIndex);
 
                 Invokevirtual iv = new Invokevirtual(
-                    Const.INVOKEVIRTUAL, ii.offset,
-                    ii.lineNumber, cmrIndex, newArray,
+                    Const.INVOKEVIRTUAL, ii.getOffset(),
+                    ii.getLineNumber(), cmrIndex, newArray,
                     new ArrayList<>(0));
 
                 // Remplacement de l'intruction
@@ -286,7 +286,7 @@ public class DotClass118AReconstructor
 
                 if (field.getNameIndex() == cnatField.getNameIndex())
                 {
-                    field.accessFlags |= Const.ACC_SYNTHETIC;
+                    field.setAccessFlags(field.getAccessFlags() | Const.ACC_SYNTHETIC);
                     break;
                 }
             }
@@ -301,7 +301,7 @@ public class DotClass118AReconstructor
 
                 if (method.getNameIndex() == cnatMethod.getNameIndex())
                 {
-                    method.accessFlags |= Const.ACC_SYNTHETIC;
+                    method.setAccessFlags(method.getAccessFlags() | Const.ACC_SYNTHETIC);
                     break;
                 }
             }

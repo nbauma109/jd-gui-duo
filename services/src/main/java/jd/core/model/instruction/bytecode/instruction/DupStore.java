@@ -22,15 +22,15 @@ import jd.core.model.instruction.bytecode.ByteCodeConstants;
 
 public class DupStore extends Instruction
 {
-    public Instruction objectref;
-    public final DupLoad dupLoad1;
-    public final DupLoad dupLoad2;
+    private Instruction objectref;
+    private final DupLoad dupLoad1;
+    private final DupLoad dupLoad2;
 
     public DupStore(
         int opcode, int offset, int lineNumber, Instruction objectref)
     {
         super(opcode, offset, lineNumber);
-        this.objectref = objectref;
+        this.setObjectref(objectref);
         this.dupLoad1 = new DupLoad(
                 ByteCodeConstants.DUPLOAD, offset, lineNumber, this);
         this.dupLoad2 = new DupLoad(
@@ -41,7 +41,7 @@ public class DupStore extends Instruction
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        return this.objectref.getReturnedSignature(constants, localVariables);
+        return this.getObjectref().getReturnedSignature(constants, localVariables);
     }
 
     public DupLoad getDupLoad1()
@@ -53,4 +53,13 @@ public class DupStore extends Instruction
     {
         return dupLoad2;
     }
+
+	public Instruction getObjectref() {
+		return objectref;
+	}
+
+	public void setObjectref(Instruction objectref) {
+		this.objectref = objectref;
+	}
+
 }

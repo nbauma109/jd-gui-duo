@@ -98,14 +98,14 @@ public class InitDexEnumFieldsReconstructor
             while (indexInstruction-- > 0)
             {
                 Instruction instruction = list.get(indexInstruction);
-                if (instruction.opcode != Const.PUTSTATIC)
+                if (instruction.getOpcode() != Const.PUTSTATIC)
                     break;
 
                 PutStatic putStatic = (PutStatic)instruction;
-                if (putStatic.valueref.opcode != Const.ALOAD)
+                if (putStatic.getValueref().getOpcode() != Const.ALOAD)
                     break;
 
-                ConstantFieldref cfr = constants.getConstantFieldref(putStatic.index);
+                ConstantFieldref cfr = constants.getConstantFieldref(putStatic.getIndex());
                 if (cfr.getClassIndex() != classFile.getThisClassIndex())
                     break;
 
@@ -122,14 +122,14 @@ public class InitDexEnumFieldsReconstructor
                 {
                     Field field = fields[indexField];
 
-                    if (((field.accessFlags & (Const.ACC_STATIC|Const.ACC_SYNTHETIC|Const.ACC_FINAL|Const.ACC_PRIVATE)) ==
+                    if (((field.getAccessFlags() & (Const.ACC_STATIC|Const.ACC_SYNTHETIC|Const.ACC_FINAL|Const.ACC_PRIVATE)) ==
                             (Const.ACC_STATIC|Const.ACC_SYNTHETIC|Const.ACC_FINAL|Const.ACC_PRIVATE)) &&
                         (cnat.getSignatureIndex() == field.getDescriptorIndex()) &&
                         (cnat.getNameIndex() == field.getNameIndex()))
                     {
                         // "ENUM$VALUES = ..." found.
-                        ALoad aload = (ALoad)putStatic.valueref;
-                        int localEnumArrayIndex = aload.index;
+                        ALoad aload = (ALoad)putStatic.getValueref();
+                        int localEnumArrayIndex = aload.getIndex();
                         int index = indexInstruction;
 
                         // Middle instructions of pattern : AAStore(...)
@@ -138,24 +138,24 @@ public class InitDexEnumFieldsReconstructor
                         while (index-- > 0)
                         {
                             instruction = list.get(index);
-                            if (instruction.opcode != Const.AASTORE)
+                            if (instruction.getOpcode() != Const.AASTORE)
                                 break;
                             AAStore aastore = (AAStore)instruction;
-                            if ((aastore.arrayref.opcode != Const.ALOAD) ||
-                                (aastore.valueref.opcode != Const.GETSTATIC) ||
-                                (((ALoad)aastore.arrayref).index != localEnumArrayIndex))
+                            if ((aastore.getArrayref().getOpcode() != Const.ALOAD) ||
+                                (aastore.getValueref().getOpcode() != Const.GETSTATIC) ||
+                                (((ALoad)aastore.getArrayref()).getIndex() != localEnumArrayIndex))
                                 break;
-                            values.add(aastore.valueref);
+                            values.add(aastore.getValueref());
                         }
 
                         // FastDeclaration(AStore(...))
-                        if (instruction.opcode != FastConstants.DECLARE)
+                        if (instruction.getOpcode() != FastConstants.DECLARE)
                             break;
                         FastDeclaration declaration = (FastDeclaration)instruction;
-                        if (declaration.instruction.opcode != Const.ASTORE)
+                        if (declaration.getInstruction().getOpcode() != Const.ASTORE)
                             break;
-                        AStore astore = (AStore)declaration.instruction;
-                        if (astore.index != localEnumArrayIndex)
+                        AStore astore = (AStore)declaration.getInstruction();
+                        if (astore.getIndex() != localEnumArrayIndex)
                             break;
 
                         int valuesLength = values.size();
@@ -168,17 +168,17 @@ public class InitDexEnumFieldsReconstructor
                             InitArrayInstruction iai =
                                 new InitArrayInstruction(
                                     ByteCodeConstants.INITARRAY,
-                                    putStatic.offset,
-                                    declaration.lineNumber,
+                                    putStatic.getOffset(),
+                                    declaration.getLineNumber(),
                                     new ANewArray(
                                         Const.ANEWARRAY,
-                                        putStatic.offset,
-                                        declaration.lineNumber,
+                                        putStatic.getOffset(),
+                                        declaration.getLineNumber(),
                                         classFile.getThisClassIndex(),
                                         new IConst(
                                             ByteCodeConstants.ICONST,
-                                            putStatic.offset,
-                                            declaration.lineNumber,
+                                            putStatic.getOffset(),
+                                            declaration.getLineNumber(),
                                             valuesLength)),
                                     values);
                             field.setValueAndMethod(iai, method);

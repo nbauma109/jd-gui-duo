@@ -16,14 +16,16 @@
  ******************************************************************************/
 package jd.core.model.classfile.attribute;
 
-public class Attribute
+public abstract class Attribute
 {
-    public final byte tag;
-    public final int attributeNameIndex;
+    private final byte tag;
 
-    public Attribute(byte tag, int attributeNameIndex)
+    protected Attribute(byte tag)
     {
         this.tag = tag;
-        this.attributeNameIndex = attributeNameIndex;
     }
+
+	public byte getTag() {
+		return tag;
+	}
 }

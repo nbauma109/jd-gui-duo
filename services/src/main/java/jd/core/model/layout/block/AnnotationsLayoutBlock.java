@@ -24,8 +24,8 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class AnnotationsLayoutBlock extends LayoutBlock
 {
-    public final ClassFile classFile;
-    public final List<Annotation> annotations;
+    private final ClassFile classFile;
+    private final List<Annotation> annotations;
 
     public AnnotationsLayoutBlock(
         ClassFile classFile, List<Annotation> annotations)
@@ -43,4 +43,12 @@ public class AnnotationsLayoutBlock extends LayoutBlock
         this.classFile = classFile;
         this.annotations = annotations;
     }
+
+	public List<Annotation> getAnnotations() {
+		return annotations;
+	}
+
+	public ClassFile getClassFile() {
+		return classFile;
+	}
 }

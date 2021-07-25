@@ -68,7 +68,7 @@ public class JavaSourceLayouter
 						LayoutBlockConstants.SEPARATOR_OF_STATEMENTS, 1));
 			}
 
-			switch (instruction.opcode)
+			switch (instruction.getOpcode())
 			{
 			case FastConstants.WHILE:
 				createBlockForFastTestList(
@@ -160,7 +160,7 @@ public class JavaSourceLayouter
 								(FastLabel)instruction);
 						break;
 					case FastConstants.DECLARE:
-						if (((FastDeclaration)instruction).instruction == null)
+						if (((FastDeclaration)instruction).getInstruction() == null)
 						{
 							layoutBlockList.add(new DeclareLayoutBlock(
 									classFile, method, instruction));
@@ -170,7 +170,7 @@ public class JavaSourceLayouter
 					default:
 						if (length == 1)
 						{
-							int min = instruction.lineNumber;
+							int min = instruction.getLineNumber();
 							if (min != Instruction.UNKNOWN_LINE_NUMBER)
 							{
 								int max = MaxLineNumberVisitor.visit(instruction);
@@ -196,14 +196,14 @@ public class JavaSourceLayouter
 		layoutBlockList.add(new FragmentLayoutBlock(tag));
 
 		createBlockForInstruction(
-				preferences, layoutBlockList, classFile, method, ftl.test);
+				preferences, layoutBlockList, classFile, method, ftl.getTest());
 
 		layoutBlockList.add(new FragmentLayoutBlock(
 				LayoutBlockConstants.FRAGMENT_RIGHT_ROUND_BRACKET));
 
 		createBlockForSubList(
 				preferences, layoutBlockList, classFile, method,
-				ftl.instructions, showSingleInstructionBlock, 1);
+				ftl.getInstructions(), showSingleInstructionBlock, 1);
 	}
 
 	private void createBlocksForIfElse(
@@ -215,14 +215,14 @@ public class JavaSourceLayouter
 				LayoutBlockConstants.FRAGMENT_IF));
 
 		createBlockForInstruction(
-				preferences, layoutBlockList, classFile, method, ft2l.test);
+				preferences, layoutBlockList, classFile, method, ft2l.getTest());
 
 		layoutBlockList.add(new FragmentLayoutBlock(
 				LayoutBlockConstants.FRAGMENT_RIGHT_ROUND_BRACKET));
 
-		List<Instruction> instructions = ft2l.instructions;
+		List<Instruction> instructions = ft2l.getInstructions();
 
-		if (instructions.size() == 1 && (instructions.get(0).opcode == FastConstants.IF_SIMPLE || instructions.get(0).opcode == FastConstants.IF_ELSE)) {
+		if (instructions.size() == 1 && (instructions.get(0).getOpcode() == FastConstants.IF_SIMPLE || instructions.get(0).getOpcode() == FastConstants.IF_ELSE)) {
 			createBlockForSubList(
 					preferences, layoutBlockList, classFile,
 					method, instructions, false, 2);
@@ -232,14 +232,14 @@ public class JavaSourceLayouter
 					instructions, showSingleInstructionBlock, 2);
 		}
 
-		List<Instruction> instructions2 = ft2l.instructions2;
+		List<Instruction> instructions2 = ft2l.getInstructions2();
 
 		if (instructions2.size() == 1)
 		{
 			Instruction instruction = instructions2.get(0);
 
 			// Write 'else if'
-			if (instruction.opcode == FastConstants.IF_SIMPLE) {
+			if (instruction.getOpcode() == FastConstants.IF_SIMPLE) {
 				layoutBlockList.add(new FragmentLayoutBlock(
 						LayoutBlockConstants.FRAGMENT_ELSE_SPACE));
 
@@ -249,7 +249,7 @@ public class JavaSourceLayouter
 						showSingleInstructionBlock);
 				return;
 			}
-			if (instruction.opcode == FastConstants.IF_ELSE) {
+			if (instruction.getOpcode() == FastConstants.IF_ELSE) {
 				layoutBlockList.add(new FragmentLayoutBlock(
 						LayoutBlockConstants.FRAGMENT_ELSE_SPACE));
 
@@ -275,12 +275,12 @@ public class JavaSourceLayouter
 		int instructions2Size;
 		for (;;)
 		{
-			instructions = ifElse.instructions;
+			instructions = ifElse.getInstructions();
 			if (instructions != null && instructions.size() >= 2) {
 				return false;
 			}
 
-			instructions2Size = ifElse.instructions2.size();
+			instructions2Size = ifElse.getInstructions2().size();
 
 			if (instructions2Size == 0) {
 				return true;
@@ -292,14 +292,14 @@ public class JavaSourceLayouter
 
 			if (instructions2Size == 1)
 			{
-				Instruction instruction = ifElse.instructions2.get(0);
+				Instruction instruction = ifElse.getInstructions2().get(0);
 
-				if (instruction.opcode == FastConstants.IF_SIMPLE)
+				if (instruction.getOpcode() == FastConstants.IF_SIMPLE)
 				{
-					instructions = ((FastTestList)instruction).instructions;
+					instructions = ((FastTestList)instruction).getInstructions();
 					return instructions == null || instructions.size() < 2;
 				}
-				if (instruction.opcode != FastConstants.IF_ELSE) {
+				if (instruction.getOpcode() != FastConstants.IF_ELSE) {
 					return true;
 				}
 				ifElse = (FastTest2Lists)instruction;
@@ -316,13 +316,13 @@ public class JavaSourceLayouter
 
 		createBlockForSubList(
 				preferences, layoutBlockList, classFile,
-				method, ftl.instructions, false, 1);
+				method, ftl.getInstructions(), false, 1);
 
 		layoutBlockList.add(new FragmentLayoutBlock(
 				LayoutBlockConstants.FRAGMENT_WHILE));
 
 		createBlockForInstruction(
-				preferences, layoutBlockList, classFile, method, ftl.test);
+				preferences, layoutBlockList, classFile, method, ftl.getTest());
 
 		layoutBlockList.add(new FragmentLayoutBlock(
 				LayoutBlockConstants.FRAGMENT_RIGHT_ROUND_BRACKET_SEMICOLON));
@@ -338,7 +338,7 @@ public class JavaSourceLayouter
 
 		createBlockForSubList(
 				preferences, layoutBlockList, classFile,
-				method, fl.instructions, false, 1);
+				method, fl.getInstructions(), false, 1);
 	}
 
 	private void createBlocksForForLoop(
@@ -348,23 +348,23 @@ public class JavaSourceLayouter
 		layoutBlockList.add(new FragmentLayoutBlock(
 				LayoutBlockConstants.FRAGMENT_FOR));
 
-		if (ff.init != null)
+		if (ff.getInit() != null)
 		{
 			BlockLayoutBlock sblb = new BlockLayoutBlock(
 					LayoutBlockConstants.FOR_BLOCK_START, 0);
 			layoutBlockList.add(sblb);
 
 			createBlockForInstruction(
-					preferences, layoutBlockList, classFile, method, ff.init);
+					preferences, layoutBlockList, classFile, method, ff.getInit());
 
 			BlockLayoutBlock eblb = new BlockLayoutBlock(
 					LayoutBlockConstants.FOR_BLOCK_END, 0);
-			sblb.other = eblb;
-			eblb.other = sblb;
+			sblb.setOther(eblb);
+			eblb.setOther(sblb);
 			layoutBlockList.add(eblb);
 		}
 
-		if (ff.test == null)
+		if (ff.getTest() == null)
 		{
 			layoutBlockList.add(new FragmentLayoutBlock(
 					LayoutBlockConstants.FRAGMENT_SEMICOLON));
@@ -380,16 +380,16 @@ public class JavaSourceLayouter
 			layoutBlockList.add(sblb);
 
 			createBlockForInstruction(
-					preferences, layoutBlockList, classFile, method, ff.test);
+					preferences, layoutBlockList, classFile, method, ff.getTest());
 
 			BlockLayoutBlock eblb = new BlockLayoutBlock(
 					LayoutBlockConstants.FOR_BLOCK_END, 0);
-			sblb.other = eblb;
-			eblb.other = sblb;
+			sblb.setOther(eblb);
+			eblb.setOther(sblb);
 			layoutBlockList.add(eblb);
 		}
 
-		if (ff.inc == null)
+		if (ff.getInc() == null)
 		{
 			layoutBlockList.add(new FragmentLayoutBlock(
 					LayoutBlockConstants.FRAGMENT_SEMICOLON));
@@ -405,12 +405,12 @@ public class JavaSourceLayouter
 			layoutBlockList.add(sblb);
 
 			createBlockForInstruction(
-					preferences, layoutBlockList, classFile, method, ff.inc);
+					preferences, layoutBlockList, classFile, method, ff.getInc());
 
 			BlockLayoutBlock eblb = new BlockLayoutBlock(
 					LayoutBlockConstants.FOR_BLOCK_END, 0);
-			sblb.other = eblb;
-			eblb.other = sblb;
+			sblb.setOther(eblb);
+			eblb.setOther(sblb);
 			layoutBlockList.add(eblb);
 		}
 
@@ -419,7 +419,7 @@ public class JavaSourceLayouter
 
 		createBlockForSubList(
 				preferences, layoutBlockList, classFile,
-				method, ff.instructions, true, 1);
+				method, ff.getInstructions(), true, 1);
 	}
 
 	private void createBlockForFastForEach(
@@ -430,20 +430,20 @@ public class JavaSourceLayouter
 				LayoutBlockConstants.FRAGMENT_FOR));
 
 		createBlockForInstruction(
-				preferences, layoutBlockList, classFile, method, ffe.variable);
+				preferences, layoutBlockList, classFile, method, ffe.getVariable());
 
 		layoutBlockList.add(new FragmentLayoutBlock(
 				LayoutBlockConstants.FRAGMENT_SPACE_COLON_SPACE));
 
 		createBlockForInstruction(
-				preferences, layoutBlockList, classFile, method, ffe.values);
+				preferences, layoutBlockList, classFile, method, ffe.getValues());
 
 		layoutBlockList.add(new FragmentLayoutBlock(
 				LayoutBlockConstants.FRAGMENT_RIGHT_ROUND_BRACKET));
 
 		createBlockForSubList(
 				preferences, layoutBlockList, classFile,
-				method, ffe.instructions, true, 1);
+				method, ffe.getInstructions(), true, 1);
 	}
 
 	private void createBlocksForIfContinueOrBreak(
@@ -454,7 +454,7 @@ public class JavaSourceLayouter
 				LayoutBlockConstants.FRAGMENT_IF));
 
 		createBlockForInstruction(
-				preferences, layoutBlockList, classFile, method, fi.instruction);
+				preferences, layoutBlockList, classFile, method, fi.getInstruction());
 
 		layoutBlockList.add(new FragmentLayoutBlock(
 				LayoutBlockConstants.FRAGMENT_RIGHT_ROUND_BRACKET));
@@ -463,7 +463,7 @@ public class JavaSourceLayouter
 				new SingleStatementBlockStartLayoutBlock();
 		layoutBlockList.add(ssbslb);
 
-		if (fi.opcode == FastConstants.IF_CONTINUE)
+		if (fi.getOpcode() == FastConstants.IF_CONTINUE)
 		{
 			layoutBlockList.add(new FragmentLayoutBlock(
 					LayoutBlockConstants.FRAGMENT_CONTINUE));
@@ -476,8 +476,8 @@ public class JavaSourceLayouter
 
 		SingleStatementBlockEndLayoutBlock ssbelb =
 				new SingleStatementBlockEndLayoutBlock(1);
-		ssbslb.other = ssbelb;
-		ssbelb.other = ssbslb;
+		ssbslb.setOther(ssbelb);
+		ssbelb.setOther(ssbslb);
 		layoutBlockList.add(ssbelb);
 	}
 
@@ -489,7 +489,7 @@ public class JavaSourceLayouter
 				LayoutBlockConstants.FRAGMENT_IF));
 
 		createBlockForInstruction(
-				preferences, layoutBlockList, classFile, method, fi.instruction);
+				preferences, layoutBlockList, classFile, method, fi.getInstruction());
 
 		layoutBlockList.add(new FragmentLayoutBlock(
 				LayoutBlockConstants.FRAGMENT_RIGHT_ROUND_BRACKET));
@@ -498,7 +498,7 @@ public class JavaSourceLayouter
 				new SingleStatementBlockStartLayoutBlock();
 		layoutBlockList.add(ssbslb);
 
-		BranchInstruction bi = (BranchInstruction)fi.instruction;
+		BranchInstruction bi = (BranchInstruction)fi.getInstruction();
 
 		layoutBlockList.add(new OffsetLayoutBlock(
 				LayoutBlockConstants.FRAGMENT_LABELED_BREAK,
@@ -509,15 +509,15 @@ public class JavaSourceLayouter
 
 		SingleStatementBlockEndLayoutBlock ssbelb =
 				new SingleStatementBlockEndLayoutBlock(1);
-		ssbslb.other = ssbelb;
-		ssbelb.other = ssbslb;
+		ssbslb.setOther(ssbelb);
+		ssbelb.setOther(ssbslb);
 		layoutBlockList.add(ssbelb);
 	}
 
 	private static void createBlocksForGotoLabeledBreak(
 			List<LayoutBlock> layoutBlockList, FastInstruction fi)
 	{
-		BranchInstruction bi = (BranchInstruction)fi.instruction;
+		BranchInstruction bi = (BranchInstruction)fi.getInstruction();
 
 		layoutBlockList.add(new OffsetLayoutBlock(
 				LayoutBlockConstants.FRAGMENT_LABELED_BREAK,
@@ -536,7 +536,7 @@ public class JavaSourceLayouter
 				LayoutBlockConstants.FRAGMENT_SWITCH));
 
 		createBlockForInstruction(
-				preferences, layoutBlockList, classFile, method, fs.test);
+				preferences, layoutBlockList, classFile, method, fs.getTest());
 
 		layoutBlockList.add(new FragmentLayoutBlock(
 				LayoutBlockConstants.FRAGMENT_RIGHT_ROUND_BRACKET));
@@ -544,7 +544,7 @@ public class JavaSourceLayouter
 		BlockLayoutBlock sbslb = new SwitchBlockStartLayoutBlock();
 		layoutBlockList.add(sbslb);
 
-		Pair[] pairs = fs.pairs;
+		Pair[] pairs = fs.getPairs();
 		int length = pairs.length;
 		int firstIndex = 0;
 
@@ -560,7 +560,7 @@ public class JavaSourceLayouter
 			// Do'nt write default case on last position with empty
 			// instructions list.
 			if (pair.isDefault() && last && (instructions == null || instructions.isEmpty() || instructions.size() == 1 &&
-					instructions.get(0).opcode == FastConstants.GOTO_BREAK)) {
+					instructions.get(0).getOpcode() == FastConstants.GOTO_BREAK)) {
 				break;
 			}
 
@@ -578,8 +578,8 @@ public class JavaSourceLayouter
 		}
 
 		BlockLayoutBlock sbelb = new SwitchBlockEndLayoutBlock();
-		sbslb.other = sbelb;
-		sbelb.other = sbslb;
+		sbslb.setOther(sbelb);
+		sbelb.setOther(sbslb);
 		layoutBlockList.add(sbelb);
 	}
 
@@ -591,33 +591,33 @@ public class JavaSourceLayouter
 		layoutBlockList.add(new FragmentLayoutBlock(
 				LayoutBlockConstants.FRAGMENT_SWITCH));
 
-		Instruction test = fs.test;
+		Instruction test = fs.getTest();
 
 		ConstantPool constants = classFile.getConstantPool();
 		int switchMapKeyIndex = -1;
 
-		if (test.opcode == ByteCodeConstants.ARRAYLOAD)
+		if (test.getOpcode() == ByteCodeConstants.ARRAYLOAD)
 		{
 			ArrayLoadInstruction ali = (ArrayLoadInstruction)test;
 			ConstantNameAndType cnat;
 
-			if (ali.arrayref.opcode == Const.INVOKESTATIC)
+			if (ali.getArrayref().getOpcode() == Const.INVOKESTATIC)
 			{
 				// Dans le cas des instructions Switch+Enum d'Eclipse, la clé de la map
 				// est l'indexe du nom de la méthode
 				// "static int[] $SWITCH_TABLE$basic$data$TestEnum$enum1()".
-				Invokestatic is = (Invokestatic)ali.arrayref;
-				ConstantMethodref cmr = constants.getConstantMethodref(is.index);
+				Invokestatic is = (Invokestatic)ali.getArrayref();
+				ConstantMethodref cmr = constants.getConstantMethodref(is.getIndex());
 				cnat = constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 			}
-			else if (ali.arrayref.opcode == Const.GETSTATIC)
+			else if (ali.getArrayref().getOpcode() == Const.GETSTATIC)
 			{
 				// Dans le cas des instructions Switch+Enum des autres compilateurs,
 				// la clé de la map est l'indexe du nom de la classe interne
 				// "static class 1" contenant le tableau de correspondance
 				// "$SwitchMap$basic$data$TestEnum$enum1".
-				GetStatic gs = (GetStatic)ali.arrayref;
-				ConstantFieldref cfr = constants.getConstantFieldref(gs.index);
+				GetStatic gs = (GetStatic)ali.getArrayref();
+				ConstantFieldref cfr = constants.getConstantFieldref(gs.getIndex());
 				cnat = constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
 			}
 			else
@@ -627,10 +627,10 @@ public class JavaSourceLayouter
 
 			switchMapKeyIndex = cnat.getNameIndex();
 
-			Invokevirtual iv = (Invokevirtual)ali.indexref;
+			Invokevirtual iv = (Invokevirtual)ali.getIndexref();
 
 			createBlockForInstruction(
-					preferences, layoutBlockList, classFile, method, iv.objectref);
+					preferences, layoutBlockList, classFile, method, iv.getObjectref());
 		}
 
 		if (switchMapKeyIndex == -1) {
@@ -643,7 +643,7 @@ public class JavaSourceLayouter
 		BlockLayoutBlock sbslb = new SwitchBlockStartLayoutBlock();
 		layoutBlockList.add(sbslb);
 
-		Pair[] pairs = fs.pairs;
+		Pair[] pairs = fs.getPairs();
 		int length = pairs.length;
 		int firstIndex = 0;
 
@@ -659,7 +659,7 @@ public class JavaSourceLayouter
 			// Do'nt write default case on last position with empty
 			// instructions list.
 			if (pair.isDefault() && last && (instructions == null || instructions.isEmpty() || instructions.size() == 1 &&
-					instructions.get(0).opcode == FastConstants.GOTO_BREAK)) {
+					instructions.get(0).getOpcode() == FastConstants.GOTO_BREAK)) {
 				break;
 			}
 
@@ -677,8 +677,8 @@ public class JavaSourceLayouter
 		}
 
 		BlockLayoutBlock sbelb = new SwitchBlockEndLayoutBlock();
-		sbslb.other = sbelb;
-		sbelb.other = sbslb;
+		sbslb.setOther(sbelb);
+		sbelb.setOther(sbslb);
 		layoutBlockList.add(sbelb);
 	}
 
@@ -691,11 +691,11 @@ public class JavaSourceLayouter
 
 		createBlockForSubList(
 				preferences, layoutBlockList, classFile,
-				method, ft.instructions, false, 2);
+				method, ft.getInstructions(), false, 2);
 
-		if (ft.catches != null)
+		if (ft.getCatches() != null)
 		{
-			int length = ft.catches.size();
+			int length = ft.getCatches().size();
 
 			if (length > 0)
 			{
@@ -704,39 +704,39 @@ public class JavaSourceLayouter
 				// First catch blocks
 				for (int i=0; i<length; ++i)
 				{
-					FastCatch fc = ft.catches.get(i);
+					FastCatch fc = ft.getCatches().get(i);
 
 					layoutBlockList.add(
 							new FastCatchLayoutBlock(classFile, method, fc));
 
 					createBlockForSubList(
 							preferences, layoutBlockList, classFile,
-							method, fc.instructions, false, 2);
+							method, fc.getInstructions(), false, 2);
 				}
 
 				// Last catch block
-				FastCatch fc = ft.catches.get(length);
+				FastCatch fc = ft.getCatches().get(length);
 
 				layoutBlockList.add(
 						new FastCatchLayoutBlock(classFile, method, fc));
 
 				int blockEndPreferedLineCount =
-						ft.finallyInstructions == null ? 1 : 2;
+						ft.getFinallyInstructions() == null ? 1 : 2;
 
 				createBlockForSubList(
 						preferences, layoutBlockList, classFile, method,
-						fc.instructions, false, blockEndPreferedLineCount);
+						fc.getInstructions(), false, blockEndPreferedLineCount);
 			}
 		}
 
-		if (ft.finallyInstructions != null)
+		if (ft.getFinallyInstructions() != null)
 		{
 			layoutBlockList.add(new FragmentLayoutBlock(
 					LayoutBlockConstants.FRAGMENT_FINALLY));
 
 			createBlockForSubList(
 					preferences, layoutBlockList, classFile,
-					method, ft.finallyInstructions, false, 1);
+					method, ft.getFinallyInstructions(), false, 1);
 		}
 	}
 
@@ -748,14 +748,14 @@ public class JavaSourceLayouter
 				LayoutBlockConstants.FRAGMENT_SYNCHRONIZED));
 
 		createBlockForInstruction(
-				preferences, layoutBlockList, classFile, method, fs.monitor);
+				preferences, layoutBlockList, classFile, method, fs.getMonitor());
 
 		layoutBlockList.add(new FragmentLayoutBlock(
 				LayoutBlockConstants.FRAGMENT_RIGHT_ROUND_BRACKET));
 
 		createBlockForSubList(
 				preferences, layoutBlockList, classFile,
-				method, fs.instructions, false, 1);
+				method, fs.getInstructions(), false, 1);
 	}
 
 	private void createBlocksForLabel(
@@ -768,16 +768,16 @@ public class JavaSourceLayouter
 				Instruction.UNKNOWN_LINE_NUMBER,
 				Instruction.UNKNOWN_LINE_NUMBER,
 				0, 0, 0,
-				fl.offset));
+				fl.getOffset()));
 
-		Instruction instruction = fl.instruction;
+		Instruction instruction = fl.getInstruction();
 
 		if (instruction != null)
 		{
 			layoutBlockList.add(new SeparatorLayoutBlock(
 					LayoutBlockConstants.SEPARATOR_OF_STATEMENTS, 1));
 
-			switch (instruction.opcode)
+			switch (instruction.getOpcode())
 			{
 			case FastConstants.WHILE:
 				createBlockForFastTestList(
@@ -869,7 +869,7 @@ public class JavaSourceLayouter
 								(FastLabel)instruction);
 						break;
 					case FastConstants.DECLARE:
-						if (((FastDeclaration)instruction).instruction == null)
+						if (((FastDeclaration)instruction).getInstruction() == null)
 						{
 							layoutBlockList.add(new DeclareLayoutBlock(
 									classFile, method, instruction));
@@ -933,8 +933,8 @@ public class JavaSourceLayouter
 					showSingleInstructionBlock ?
 							new SingleStatementBlockEndLayoutBlock(0+1 /* TENTATIVE blockEndPreferedLineCount */) :
 								new StatementsBlockEndLayoutBlock(blockEndPreferedLineCount);
-			sbslb.other = sbelb;
-			sbelb.other = sbslb;
+			sbslb.setOther(sbelb);
+			sbelb.setOther(sbslb);
 			layoutBlockList.add(sbelb);
 		}
 	}
@@ -980,15 +980,15 @@ public class JavaSourceLayouter
 		{
 			instruction = list.get(index);
 
-			if (instruction.opcode == FastConstants.WHILE || instruction.opcode == FastConstants.DO_WHILE
-					|| instruction.opcode == FastConstants.INFINITE_LOOP || instruction.opcode == FastConstants.FOR
-					|| instruction.opcode == FastConstants.FOREACH || instruction.opcode == FastConstants.IF_SIMPLE
-					|| instruction.opcode == FastConstants.IF_ELSE || instruction.opcode == FastConstants.IF_CONTINUE
-					|| instruction.opcode == FastConstants.IF_BREAK || instruction.opcode == FastConstants.IF_LABELED_BREAK
-					|| instruction.opcode == FastConstants.GOTO_LABELED_BREAK || instruction.opcode == FastConstants.SWITCH
-					|| instruction.opcode == FastConstants.SWITCH_ENUM || instruction.opcode == FastConstants.SWITCH_STRING
-					|| instruction.opcode == FastConstants.TRY || instruction.opcode == FastConstants.SYNCHRONIZED
-					|| instruction.opcode == FastConstants.LABEL || instruction.opcode == FastConstants.DECLARE && ((FastDeclaration)instruction).instruction == null) {
+			if (instruction.getOpcode() == FastConstants.WHILE || instruction.getOpcode() == FastConstants.DO_WHILE
+					|| instruction.getOpcode() == FastConstants.INFINITE_LOOP || instruction.getOpcode() == FastConstants.FOR
+					|| instruction.getOpcode() == FastConstants.FOREACH || instruction.getOpcode() == FastConstants.IF_SIMPLE
+					|| instruction.getOpcode() == FastConstants.IF_ELSE || instruction.getOpcode() == FastConstants.IF_CONTINUE
+					|| instruction.getOpcode() == FastConstants.IF_BREAK || instruction.getOpcode() == FastConstants.IF_LABELED_BREAK
+					|| instruction.getOpcode() == FastConstants.GOTO_LABELED_BREAK || instruction.getOpcode() == FastConstants.SWITCH
+					|| instruction.getOpcode() == FastConstants.SWITCH_ENUM || instruction.getOpcode() == FastConstants.SWITCH_STRING
+					|| instruction.getOpcode() == FastConstants.TRY || instruction.getOpcode() == FastConstants.SYNCHRONIZED
+					|| instruction.getOpcode() == FastConstants.LABEL || instruction.getOpcode() == FastConstants.DECLARE && ((FastDeclaration)instruction).getInstruction() == null) {
 				return index-1;
 			}
 		}

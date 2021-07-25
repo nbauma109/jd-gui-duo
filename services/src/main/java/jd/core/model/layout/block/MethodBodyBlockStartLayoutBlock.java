@@ -32,12 +32,12 @@ public class MethodBodyBlockStartLayoutBlock extends BlockLayoutBlock
 
     public void transformToStartEndBlock(int preferedLineCount)
     {
-        this.tag = LayoutBlockConstants.METHOD_BODY_BLOCK_START_END;
-        this.preferedLineCount = this.lineCount = preferedLineCount;
+        this.setTag(LayoutBlockConstants.METHOD_BODY_BLOCK_START_END);
+        this.setPreferedLineCount(this.setLineCount(preferedLineCount));
     }
 
     public void transformToSingleLineBlock()
     {
-        this.tag = LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START;
+        this.setTag(LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START);
     }
 }

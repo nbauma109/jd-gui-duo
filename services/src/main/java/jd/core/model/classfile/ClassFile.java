@@ -32,20 +32,20 @@ import jd.core.util.SignatureUtil;
 
 public class ClassFile extends Base
 {
-    private int minorVersion;
-    private int majorVersion;
-    private int thisClass;
-    private int superClass;
+    private final int minorVersion;
+    private final int majorVersion;
+    private final int thisClass;
+    private final int superClass;
 
-    private int[] interfaces;
-    private Field[] fields;
-    private Method[] methods;
+    private final int[] interfaces;
+    private final Field[] fields;
+    private final Method[] methods;
 
-    private ConstantPool constants;
-    private String thisClassName;
-    private String superClassName;
-    private String internalClassName;
-    private String internalPackageName;
+    private final ConstantPool constants;
+    private final String thisClassName;
+    private final String superClassName;
+    private final String internalClassName;
+    private final String internalPackageName;
 
     private ClassFile outerClass;
     private Field outerThisField;
@@ -54,7 +54,7 @@ public class ClassFile extends Base
     private Method staticMethod;
     private List<Instruction> enumValues;
     private String internalAnonymousClassName;
-    private Map<String, Map<String, Accessor>> accessors;
+    private final Map<String, Map<String, Accessor>> accessors;
 
     /**
      * Attention :
@@ -66,7 +66,7 @@ public class ClassFile extends Base
      *   contenant le tableau de correspondance
      *   "$SwitchMap$basic$data$TestEnum$enum1".
      */
-    private Map<Integer, List<Integer>> switchMaps;
+    private final Map<Integer, List<Integer>> switchMaps;
 
     public ClassFile(int minorVersion, int majorVersion,
                      ConstantPool constants, int accessFlags, int thisClass,
@@ -89,14 +89,14 @@ public class ClassFile extends Base
         this.thisClassName =
             this.constants.getConstantClassName(this.thisClass);
         // internalSuperClassName
-        this.superClassName = (this.superClass == 0) ? null :
+        this.superClassName = this.superClass == 0 ? null :
             this.constants.getConstantClassName(this.superClass);
         this.internalClassName = SignatureUtil.createTypeName(this.thisClassName);
         // internalPackageName
         int index = this.thisClassName.lastIndexOf(
                 StringConstants.INTERNAL_PACKAGE_SEPARATOR);
         this.internalPackageName =
-            (index == -1) ? "" : this.thisClassName.substring(0, index);
+            index == -1 ? "" : this.thisClassName.substring(0, index);
 
         // staticMethod
         if (this.methods != null)
@@ -106,8 +106,8 @@ public class ClassFile extends Base
             {
                 method = this.methods[i];
 
-                if ((method.accessFlags & Const.ACC_STATIC) != 0 &&
-                    method.getNameIndex() == this.constants.classConstructorIndex)
+                if ((method.getAccessFlags() & Const.ACC_STATIC) != 0 &&
+                    method.getNameIndex() == this.constants.getClassConstructorIndex())
                 {
                     this.staticMethod = method;
                     break;
@@ -164,7 +164,7 @@ public class ClassFile extends Base
 
             int index = this.thisClassName.lastIndexOf(
                     StringConstants.INTERNAL_PACKAGE_SEPARATOR);
-            return (index == -1) ?
+            return index == -1 ?
                 this.thisClassName :
                 this.thisClassName.substring(index + 1);
         }
@@ -193,11 +193,6 @@ public class ClassFile extends Base
         return this.internalPackageName;
     }
 
-    public void setAccessFlags(int accessFlags)
-    {
-        this.accessFlags = accessFlags;
-    }
-
     public Field[] getFields()
     {
         return this.fields;
@@ -208,18 +203,18 @@ public class ClassFile extends Base
         return this.methods;
     }
 
-    public Attribute[] getAttributes()
+    public Method getMethod(int i)
     {
-        return this.attributes;
+    	return this.methods[i];
     }
 
     public AttributeInnerClasses getAttributeInnerClasses()
     {
-        if (this.attributes != null)
+        if (this.getAttributes() != null)
         {
-            for (int i=0; i<this.attributes.length; i++) {
-                if (this.attributes[i].tag == Const.ATTR_INNER_CLASSES) {
-                    return (AttributeInnerClasses)this.attributes[i];
+            for (Attribute attribute : this.getAttributes()) {
+                if (attribute.getTag() == Const.ATTR_INNER_CLASSES) {
+                    return (AttributeInnerClasses)attribute;
                 }
             }
         }
@@ -252,7 +247,7 @@ public class ClassFile extends Base
         {
             ConstantClass cc = this.constants.getConstantClass(this.superClass);
 
-            if (cc.getNameIndex() != this.constants.objectClassNameIndex)
+            if (cc.getNameIndex() != this.constants.getObjectClassNameIndex())
             {
                 // Super class
                 this.internalAnonymousClassName = this.superClassName;
@@ -426,7 +421,7 @@ public class ClassFile extends Base
     public Accessor getAccessor(String name, String descriptor)
     {
         Map<String, Accessor> map = this.accessors.get(name);
-        return (map == null) ? null : map.get(descriptor);
+        return map == null ? null : map.get(descriptor);
     }
 
     public Map<Integer, List<Integer>> getSwitchMaps()

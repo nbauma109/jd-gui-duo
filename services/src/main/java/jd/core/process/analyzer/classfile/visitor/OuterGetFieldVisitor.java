@@ -46,11 +46,11 @@ public class OuterGetFieldVisitor extends OuterGetStaticVisitor
     @Override
     protected Accessor match(Instruction i)
     {
-        if (i.opcode != Const.INVOKESTATIC)
+        if (i.getOpcode() != Const.INVOKESTATIC)
             return null;
 
         Invokestatic is = (Invokestatic)i;
-        ConstantMethodref cmr = constants.getConstantMethodref(is.index);
+        ConstantMethodref cmr = constants.getConstantMethodref(is.getIndex());
         ConstantNameAndType cnat =
             constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
         String descriptor =
@@ -71,7 +71,7 @@ public class OuterGetFieldVisitor extends OuterGetStaticVisitor
         Accessor accessor = classFile.getAccessor(name, descriptor);
 
         if ((accessor == null) ||
-            (accessor.tag != AccessorConstants.ACCESSOR_GETFIELD))
+            (accessor.getTag() != AccessorConstants.ACCESSOR_GETFIELD))
             return null;
 
         return accessor;
@@ -83,22 +83,22 @@ public class OuterGetFieldVisitor extends OuterGetStaticVisitor
         GetFieldAccessor gfa = (GetFieldAccessor)a;
         Invokestatic is = (Invokestatic)i;
 
-        int nameIndex = this.constants.addConstantUtf8(gfa.fieldName);
+        int nameIndex = this.constants.addConstantUtf8(gfa.getFieldName());
         int descriptorIndex =
-            this.constants.addConstantUtf8(gfa.fieldDescriptor);
+            this.constants.addConstantUtf8(gfa.getFieldDescriptor());
         int cnatIndex =
             this.constants.addConstantNameAndType(nameIndex, descriptorIndex);
 
-        int classNameIndex = this.constants.addConstantUtf8(gfa.className);
+        int classNameIndex = this.constants.addConstantUtf8(gfa.getClassName());
         int classIndex = this.constants.addConstantClass(classNameIndex);
 
         int cfrIndex =
              this.constants.addConstantFieldref(classIndex, cnatIndex);
 
-        Instruction objectref = is.args.remove(0);
+        Instruction objectref = is.getArgs().remove(0);
 
         return new GetField(
-            Const.GETFIELD, i.offset, i.lineNumber,
+            Const.GETFIELD, i.getOffset(), i.getLineNumber(),
             cfrIndex, objectref);
     }
 }

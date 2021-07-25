@@ -51,9 +51,9 @@ public class AnnotationLayouter
 		{
 			attribute = attributes[i];
 
-			if (attribute.tag == Const.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS || attribute.tag == Const.ATTR_RUNTIME_VISIBLE_ANNOTATIONS) {
+			if (attribute.getTag() == Const.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS || attribute.getTag() == Const.ATTR_RUNTIME_VISIBLE_ANNOTATIONS) {
 				Annotation[] array =
-						((AttributeRuntimeAnnotations)attribute).annotations;
+						((AttributeRuntimeAnnotations)attribute).getAnnotations();
 
 				if (array != null)
 				{

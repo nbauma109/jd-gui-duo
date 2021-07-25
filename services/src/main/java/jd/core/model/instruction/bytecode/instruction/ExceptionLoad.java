@@ -22,7 +22,7 @@ import jd.core.util.UtilConstants;
 
 public class ExceptionLoad extends IndexInstruction
 {
-    public final int exceptionNameIndex;
+    private final int exceptionNameIndex;
 
     public ExceptionLoad(
         int opcode, int offset, int lineNumber, int signatureIndex)
@@ -35,9 +35,13 @@ public class ExceptionLoad extends IndexInstruction
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        if ((constants == null) || (this.exceptionNameIndex == 0))
+        if ((constants == null) || (this.getExceptionNameIndex() == 0))
             return null;
 
-        return constants.getConstantUtf8(this.exceptionNameIndex);
+        return constants.getConstantUtf8(this.getExceptionNameIndex());
     }
+
+	public int getExceptionNameIndex() {
+		return exceptionNameIndex;
+	}
 }
