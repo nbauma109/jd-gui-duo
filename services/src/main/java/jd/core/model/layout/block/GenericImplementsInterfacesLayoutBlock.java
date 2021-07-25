@@ -22,8 +22,8 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 public class GenericImplementsInterfacesLayoutBlock
     extends ImplementsInterfacesLayoutBlock
 {
-    public char[] caSignature;
-    public int signatureIndex;
+    public final char[] caSignature;
+    public final int signatureIndex;
 
     public GenericImplementsInterfacesLayoutBlock(
         ClassFile classFile, char[] caSignature, int signatureIndex)

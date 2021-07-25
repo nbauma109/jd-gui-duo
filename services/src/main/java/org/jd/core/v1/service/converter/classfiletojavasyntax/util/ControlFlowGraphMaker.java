@@ -76,8 +76,8 @@ public class ControlFlowGraphMaker {
                     }
                     // identify access to static member from instance by checking if the ALOAD is discarded by a POP
                     // followed by another load instruction
-                    if (offset+2 < length 
-                    	&& (code[offset+1] & 255) == POP 
+                    if (offset+2 < length
+                    	&& (code[offset+1] & 255) == POP
                     	&& ByteCodeUtil.isLoad(code, offset+2)) {
                         offset++; // skip pop
                     }
@@ -86,14 +86,14 @@ public class ControlFlowGraphMaker {
                     // identify constants prefixed with 'this' qualifier
                     // by matching the pattern 1)aload_0 -> 2)pop -> 3)ldc/getstatic
                     // that we can refactor to a single ldc, ignoring the aload_0 and pop
-                    if (offset+2 < length 
-                    	&& (code[offset+1] & 255) == POP 
+                    if (offset+2 < length
+                    	&& (code[offset+1] & 255) == POP
                     	&& ByteCodeUtil.isStaticAccess(code, offset+2)) {
                         offset++; // skip pop
                     }
                     // another pattern 1)aload_0 -> 2)getfield -> 3)pop -> 4)ldc/getstatic
-                    if (offset+5 < length 
-                    	&& (code[offset+1] & 255) == GETFIELD 
+                    if (offset+5 < length
+                    	&& (code[offset+1] & 255) == GETFIELD
                     	&& (code[offset+4] & 255) == POP
                         && ByteCodeUtil.isStaticAccess(code, offset+5)) {
                     	offset+=4; // skip getfield and pop

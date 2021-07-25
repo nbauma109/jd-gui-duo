@@ -22,7 +22,7 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class InstructionLayoutBlock extends LayoutBlock
 {
-    public ClassFile classFile;
+    public final ClassFile classFile;
     public Method method;
     public Instruction instruction;
     public int firstOffset;

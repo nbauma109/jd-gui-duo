@@ -38,17 +38,20 @@ public class GetField extends IndexInstruction
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        if (constants == null)
-            return null;
+        if (constants == null) {
+			return null;
+		}
 
         ConstantFieldref cfr = constants.getConstantFieldref(this.index);
-        if (cfr == null)
-            return null;
+        if (cfr == null) {
+			return null;
+		}
 
         ConstantNameAndType cnat =
             constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
-        if (cnat == null)
-            return null;
+        if (cnat == null) {
+			return null;
+		}
 
         return constants.getConstantUtf8(cnat.getSignatureIndex());
     }

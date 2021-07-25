@@ -1178,12 +1178,12 @@ public class ByteCodeParser {
 
         typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(fr.getType(), valueRef);
 
-        if (valueRef.getLineNumber() == lineNumber 
-         && valueRef.isBinaryOperatorExpression() 
+        if (valueRef.getLineNumber() == lineNumber
+         && valueRef.isBinaryOperatorExpression()
          && valueRef.getLeftExpression().isFieldReferenceExpression()) {
             FieldReferenceExpression boefr = (FieldReferenceExpression)valueRef.getLeftExpression();
 
-            if (boefr.getName().equals(fr.getName()) 
+            if (boefr.getName().equals(fr.getName())
              && boefr.getExpression().getType().equals(fr.getExpression().getType())
              && boefr.getExpression().getIndex().getIntegerValue() == fr.getExpression().getIndex().getIntegerValue()) {
                 BinaryOperatorExpression boe = (BinaryOperatorExpression)valueRef;
@@ -1568,9 +1568,7 @@ public class ByteCodeParser {
     private void parseIF(DefaultStack<Expression> stack, int lineNumber, BasicBlock basicBlock, String operator1, String operator2, int priority) {
         Expression expression = stack.pop();
 
-        if (expression instanceof ClassFileCmpExpression) {
-            ClassFileCmpExpression cmp = (ClassFileCmpExpression)expression;
-
+        if (expression instanceof ClassFileCmpExpression cmp) {
             typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(cmp.getLeftExpression().getType(), cmp.getLeftExpression());
             typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(cmp.getRightExpression().getType(), cmp.getRightExpression());
 

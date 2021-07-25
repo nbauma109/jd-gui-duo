@@ -41,26 +41,24 @@ public class IConst extends ConstInstruction
 
         if (value < 0)
         {
-            if (value >= Byte.MIN_VALUE)
-                this.signature = "B";
-            else if (value >= Short.MIN_VALUE)
-                this.signature = "S";
-            else
-                this.signature = "I";
-        }
-        else
-        {
-            if (value <= 1)
-                this.signature = "X";
-            else if (value <= Byte.MAX_VALUE)
-                this.signature = "Y";
-            else if (value <= Short.MAX_VALUE)
-                this.signature = "S";
-            else if (value <= Character.MAX_VALUE)
-                this.signature = "C";
-            else
-                this.signature = "I";
-        }
+            if (value >= Byte.MIN_VALUE) {
+				this.signature = "B";
+			} else if (value >= Short.MIN_VALUE) {
+				this.signature = "S";
+			} else {
+				this.signature = "I";
+			}
+        } else if (value <= 1) {
+			this.signature = "X";
+		} else if (value <= Byte.MAX_VALUE) {
+			this.signature = "Y";
+		} else if (value <= Short.MAX_VALUE) {
+			this.signature = "S";
+		} else if (value <= Character.MAX_VALUE) {
+			this.signature = "C";
+		} else {
+			this.signature = "I";
+		}
     }
 
     public String getSignature()

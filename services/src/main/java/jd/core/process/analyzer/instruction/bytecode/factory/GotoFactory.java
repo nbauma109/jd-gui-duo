@@ -40,11 +40,12 @@ public class GotoFactory extends InstructionFactory
     {
         final int opcode = code[offset] & 255;
         final int value  =
-            (short)(((code[offset+1] & 255) << 8) | (code[offset+2] & 255));
+            (short)((code[offset+1] & 255) << 8 | code[offset+2] & 255);
 
-        if (!stack.isEmpty() && !list.isEmpty())
-            generateTernaryOpStore(
+        if (!stack.isEmpty() && !list.isEmpty()) {
+			generateTernaryOpStore(
                 list, listForAnalyze, stack, code, offset, value);
+		}
 
         list.add(new Goto(opcode, offset, lineNumber, value));
 
@@ -92,7 +93,6 @@ public class GotoFactory extends InstructionFactory
         while (offset < jumpOffset)
         {
             int opcode = code[offset] & 255;
-
             // on retient l'offset de la derniere opération placant une
             // information sur la pile.
             switch (opcode)

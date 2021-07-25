@@ -48,8 +48,9 @@ public class AssignmentInstructionReconstructor
     {
         for (int dupStoreIndex=0; dupStoreIndex<list.size(); dupStoreIndex++)
         {
-            if (list.get(dupStoreIndex).opcode != ByteCodeConstants.DUPSTORE)
-                continue;
+            if (list.get(dupStoreIndex).opcode != ByteCodeConstants.DUPSTORE) {
+				continue;
+			}
 
             // DupStore trouvé
             DupStore dupStore = (DupStore)list.get(dupStoreIndex);
@@ -65,13 +66,14 @@ public class AssignmentInstructionReconstructor
                 Instruction i = list.get(dupStoreIndex+1);
 
                 // Recherche de ?AStore ( DupLoad, index, value )
-                if ((i.opcode == Const.AASTORE) ||
-                    (i.opcode == ByteCodeConstants.ARRAYSTORE))
+                if (i.opcode == Const.AASTORE ||
+                    i.opcode == ByteCodeConstants.ARRAYSTORE)
                 {
                     i = ((ArrayStoreInstruction)i).arrayref;
-                    if ((i.opcode == ByteCodeConstants.DUPLOAD) &&
-                        (((DupLoad)i).dupStore == dupStore))
-                        continue;
+                    if (i.opcode == ByteCodeConstants.DUPLOAD &&
+                        ((DupLoad)i).dupStore == dupStore) {
+						continue;
+					}
                 }
             }
 
@@ -95,8 +97,8 @@ public class AssignmentInstructionReconstructor
                     {
                         Instruction i =
                             ((ValuerefAttribute)xstorePutfieldPutstatic).getValueref();
-                        if ((i.opcode == ByteCodeConstants.DUPLOAD) &&
-                            (((DupLoad)i).dupStore == dupStore))
+                        if (i.opcode == ByteCodeConstants.DUPLOAD &&
+                            ((DupLoad)i).dupStore == dupStore)
                         {
                             // 1er DupLoad trouvé
                             dupload1 = i;
@@ -110,8 +112,9 @@ public class AssignmentInstructionReconstructor
                                 .printStackTrace();
                 }
 
-                if (dupload1 == null)
-                    continue;
+                if (dupload1 == null) {
+					continue;
+				}
 
                 // Recherche du 2eme DupLoad
                 Instruction dupload2 = null;
@@ -121,12 +124,14 @@ public class AssignmentInstructionReconstructor
                 {
                     dupload2 = SearchDupLoadInstructionVisitor.visit(
                         list.get(dupload2Index), dupStore);
-                    if (dupload2 != null)
-                        break;
+                    if (dupload2 != null) {
+						break;
+					}
                 }
 
-                if (dupload2 == null)
-                    continue;
+                if (dupload2 == null) {
+					continue;
+				}
 
                 if (dupload1.lineNumber == dupload2.lineNumber)
                 {
@@ -270,47 +275,52 @@ public class AssignmentInstructionReconstructor
                 switch (xstorePutfieldPutstatic.opcode)
                 {
                 case Const.ASTORE:
-                    if ((value1.opcode == Const.ALOAD) &&
-                        (((StoreInstruction)xstorePutfieldPutstatic).index ==
-                            ((LoadInstruction)value1).index))
-                        return createBinaryOperatorAssignmentInstruction(
+                    if (value1.opcode == Const.ALOAD &&
+                        ((StoreInstruction)xstorePutfieldPutstatic).index ==
+                            ((LoadInstruction)value1).index) {
+						return createBinaryOperatorAssignmentInstruction(
                             xstorePutfieldPutstatic, dupStore);
+					}
                     break;
                 case Const.ISTORE:
-                    if ((value1.opcode == Const.ILOAD) &&
-                        (((StoreInstruction)xstorePutfieldPutstatic).index ==
-                            ((LoadInstruction)value1).index))
-                        return createBinaryOperatorAssignmentInstruction(
+                    if (value1.opcode == Const.ILOAD &&
+                        ((StoreInstruction)xstorePutfieldPutstatic).index ==
+                            ((LoadInstruction)value1).index) {
+						return createBinaryOperatorAssignmentInstruction(
                             xstorePutfieldPutstatic, dupStore);
+					}
                     break;
                 case ByteCodeConstants.STORE:
-                    if ((value1.opcode == ByteCodeConstants.LOAD) &&
-                        (((StoreInstruction)xstorePutfieldPutstatic).index ==
-                            ((LoadInstruction)value1).index))
-                        return createBinaryOperatorAssignmentInstruction(
+                    if (value1.opcode == ByteCodeConstants.LOAD &&
+                        ((StoreInstruction)xstorePutfieldPutstatic).index ==
+                            ((LoadInstruction)value1).index) {
+						return createBinaryOperatorAssignmentInstruction(
                             xstorePutfieldPutstatic, dupStore);
+					}
                     break;
                 case Const.PUTFIELD:
-                    if ((value1.opcode == Const.GETFIELD) &&
-                        (((PutField)xstorePutfieldPutstatic).index ==
-                            ((GetField)value1).index))
+                    if (value1.opcode == Const.GETFIELD &&
+                        ((PutField)xstorePutfieldPutstatic).index ==
+                            ((GetField)value1).index)
                     {
                         CompareInstructionVisitor visitor =
                             new CompareInstructionVisitor();
 
                         if (visitor.visit(
                                 ((PutField)xstorePutfieldPutstatic).objectref,
-                                ((GetField)value1).objectref))
-                            return createBinaryOperatorAssignmentInstruction(
+                                ((GetField)value1).objectref)) {
+							return createBinaryOperatorAssignmentInstruction(
                                 xstorePutfieldPutstatic, dupStore);
+						}
                     }
                     break;
                 case Const.PUTSTATIC:
-                    if ((value1.opcode == Const.GETFIELD) &&
-                        (((PutStatic)xstorePutfieldPutstatic).index ==
-                            ((GetStatic)value1).index))
-                        return createBinaryOperatorAssignmentInstruction(
+                    if (value1.opcode == Const.GETFIELD &&
+                        ((PutStatic)xstorePutfieldPutstatic).index ==
+                            ((GetStatic)value1).index) {
+						return createBinaryOperatorAssignmentInstruction(
                             xstorePutfieldPutstatic, dupStore);
+					}
                     break;
                 case Const.AASTORE:
                     if (value1.opcode == Const.AALOAD)
@@ -325,9 +335,10 @@ public class AssignmentInstructionReconstructor
                         if (visitor.visit(
                                 aas.arrayref, aal.arrayref) &&
                             visitor.visit(
-                                aas.indexref, aal.indexref))
-                            return createBinaryOperatorAssignmentInstruction(
+                                aas.indexref, aal.indexref)) {
+							return createBinaryOperatorAssignmentInstruction(
                                     xstorePutfieldPutstatic, dupStore);
+						}
                     }
                     break;
                 case ByteCodeConstants.ARRAYSTORE:
@@ -343,9 +354,10 @@ public class AssignmentInstructionReconstructor
                         if (visitor.visit(
                                 aas.arrayref, aal.arrayref) &&
                             visitor.visit(
-                                aas.indexref, aal.indexref))
-                            return createBinaryOperatorAssignmentInstruction(
+                                aas.indexref, aal.indexref)) {
+							return createBinaryOperatorAssignmentInstruction(
                                     xstorePutfieldPutstatic, dupStore);
+						}
                     }
                     break;
                 case Const.DSTORE:

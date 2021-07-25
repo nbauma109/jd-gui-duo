@@ -38,9 +38,11 @@ public class Base
     {
         if (this.attributes != null)
         {
-            for (int i=this.attributes.length-1; i>=0; --i)
-                if (this.attributes[i].tag == Const.ATTR_SIGNATURE)
-                    return (AttributeSignature)this.attributes[i];
+            for (int i=this.attributes.length-1; i>=0; --i) {
+				if (this.attributes[i].tag == Const.ATTR_SIGNATURE) {
+					return (AttributeSignature)this.attributes[i];
+				}
+			}
         }
 
         return null;
@@ -50,9 +52,11 @@ public class Base
     {
         if (this.attributes != null)
         {
-            for (int i=this.attributes.length-1; i>=0; --i)
-                if (this.attributes[i].tag == Const.ATTR_DEPRECATED)
-                    return true;
+            for (int i=this.attributes.length-1; i>=0; --i) {
+				if (this.attributes[i].tag == Const.ATTR_DEPRECATED) {
+					return true;
+				}
+			}
         }
 
         return false;
@@ -71,8 +75,9 @@ public class Base
                     {
                         Annotation[]annotations =
                             ((AttributeRuntimeAnnotations)attributes[i]).annotations;
-                        if (containsAnnotationDeprecated(classFile, annotations))
-                            return true;
+                        if (containsAnnotationDeprecated(classFile, annotations)) {
+							return true;
+						}
                     }
                     break;
                 }
@@ -90,9 +95,11 @@ public class Base
             int idsIndex =
                 classFile.getConstantPool().internalDeprecatedSignatureIndex;
 
-            for (int i=annotations.length-1; i>=0; --i)
-                if (idsIndex == annotations[i].typeIndex)
-                    return true;
+            for (int i=annotations.length-1; i>=0; --i) {
+				if (idsIndex == annotations[i].typeIndex) {
+					return true;
+				}
+			}
         }
 
         return false;

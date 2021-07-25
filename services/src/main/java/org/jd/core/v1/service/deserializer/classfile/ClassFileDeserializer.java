@@ -61,44 +61,44 @@ public class ClassFileDeserializer {
 
 	        // Load main type
 	        ClassFile classFile = loadClassFile(reader);
-	
+
 	        // Load inner types
 	        AttributeInnerClasses aic = classFile.getAttribute("InnerClasses");
-	
+
 	        if (aic != null) {
 	            DefaultList<ClassFile> innerClassFiles = new DefaultList<>();
 	            String innerTypePrefix = internalTypeName + '$';
-	
+
 	            String innerTypeName;
 	            for (InnerClass ic : aic.getInnerClasses()) {
 	                innerTypeName = ic.getInnerTypeName();
-	
+
 	                if (!internalTypeName.equals(innerTypeName) && (internalTypeName.equals(ic.getOuterTypeName()) || innerTypeName.startsWith(innerTypePrefix))) {
 	                    ClassFile innerClassFile = innerLoadClassFile(loader, innerTypeName);
 	                    int flags = ic.getInnerAccessFlags();
 	                    int length;
-	
+
 	                    if (innerTypeName.startsWith(innerTypePrefix)) {
 	                        length = internalTypeName.length() + 1;
 	                    } else {
 	                        length = innerTypeName.indexOf('$') + 1;
 	                    }
-	
+
 	                    if (Character.isDigit(innerTypeName.charAt(length))) {
 	                        flags |= ACC_SYNTHETIC;
 	                    }
-	
+
 	                    if (innerClassFile == null) {
 	                        // Inner class not found. Create an empty one.
 	                        innerClassFile = new ClassFile(classFile.getMajorVersion(), classFile.getMinorVersion(), 0, innerTypeName, StringConstants.JAVA_LANG_OBJECT, null, null, null, null);
 	                    }
-	
+
 	                    innerClassFile.setOuterClassFile(classFile);
 	                    innerClassFile.setAccessFlags(flags);
 	                    innerClassFiles.add(innerClassFile);
 	                }
 	            }
-	
+
 	            if (!innerClassFiles.isEmpty()) {
 	                classFile.setInnerClassFiles(innerClassFiles);
 	            }
@@ -124,7 +124,7 @@ public class ClassFileDeserializer {
         int superClassIndex = reader.readUnsignedShort();
 
         String internalTypeName = constants.getConstantTypeName(thisClassIndex);
-        String superTypeName = (superClassIndex == 0) ? null : constants.getConstantTypeName(superClassIndex);
+        String superTypeName = superClassIndex == 0 ? null : constants.getConstantTypeName(superClassIndex);
         String[] interfaceTypeNames = loadInterfaces(reader, constants);
         Field[] fields = loadFields(reader, constants);
         Method[] methods = loadMethods(reader, constants);
@@ -145,7 +145,6 @@ public class ClassFileDeserializer {
         int tag;
         for (int i=1; i<count; i++) {
             tag = reader.readByte();
-
             switch (tag) {
                 case CONSTANT_Utf8:
                     constants[i] = new ConstantUtf8(reader.readUTF());
@@ -552,8 +551,8 @@ public class ClassFileDeserializer {
             innerAccessFlags = reader.readUnsignedShort();
 
             innerTypeName = constants.getConstantTypeName(innerTypeIndex);
-            outerTypeName = (outerTypeIndex == 0) ? null : constants.getConstantTypeName(outerTypeIndex);
-            innerName = (innerNameIndex == 0) ? null : constants.getConstantUtf8(innerNameIndex);
+            outerTypeName = outerTypeIndex == 0 ? null : constants.getConstantTypeName(outerTypeIndex);
+            innerName = innerNameIndex == 0 ? null : constants.getConstantUtf8(innerNameIndex);
 
             innerClasses[i] = new InnerClass(innerTypeName, outerTypeName, innerName, innerAccessFlags);
         }
@@ -673,7 +672,7 @@ public class ClassFileDeserializer {
             moduleVersionIndex = reader.readUnsignedShort();
 
             moduleInfoName = constants.getConstantTypeName(moduleInfoIndex);
-            moduleVersion = (moduleVersionIndex==0) ? null : constants.getConstantUtf8(moduleVersionIndex);
+            moduleVersion = moduleVersionIndex==0 ? null : constants.getConstantUtf8(moduleVersionIndex);
 
             moduleInfos[i] = new ModuleInfo(moduleInfoName, moduleFlag, moduleVersion);
         }

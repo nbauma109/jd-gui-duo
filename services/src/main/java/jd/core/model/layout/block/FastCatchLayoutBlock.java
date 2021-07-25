@@ -23,9 +23,9 @@ import jd.core.model.instruction.fast.instruction.FastTry.FastCatch;
 
 public class FastCatchLayoutBlock extends LayoutBlock
 {
-    public ClassFile classFile;
-    public Method method;
-    public FastCatch fc;
+    public final ClassFile classFile;
+    public final Method method;
+    public final FastCatch fc;
 
     public FastCatchLayoutBlock(
         ClassFile classFile, Method method, FastCatch fc)

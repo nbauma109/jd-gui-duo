@@ -108,7 +108,7 @@ import static org.apache.bcel.Const.*;
 public class ByteCodeWriter {
 
     public static final String DECOMPILATION_FAILED_AT_LINE = "Decompilation failed at line #";
-    
+
 	public static final String ILLEGAL_OPCODE = "<illegal opcode>";
 
     private ByteCodeWriter() {
@@ -166,59 +166,59 @@ public class ByteCodeWriter {
                     sb.append(" #").append((byte) (code[++offset] & 255));
                     break;
                 case SIPUSH:
-                    sb.append(" #").append((short)(((code[++offset] & 255) << 8) | (code[++offset] & 255)));
+                    sb.append(" #").append((short)((code[++offset] & 255) << 8 | code[++offset] & 255));
                     break;
                 case LDC:
                     writeLDC(sb, constants, constants.getConstant(code[++offset] & 255));
                     break;
                 case LDC_W, LDC2_W:
-                    writeLDC(sb, constants, constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255)));
+                    writeLDC(sb, constants, constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255));
                     break;
                 case ILOAD, LLOAD, FLOAD, DLOAD, ALOAD,
                      ISTORE, LSTORE, FSTORE, DSTORE, ASTORE,
                      RET:
-                    sb.append(" #").append((code[++offset] & 255));
+                    sb.append(" #").append(code[++offset] & 255);
                     break;
                 case IINC:
-                    sb.append(" #").append((code[++offset] & 255)).append(", ").append((byte)(code[++offset] & 255));
+                    sb.append(" #").append(code[++offset] & 255).append(", ").append((byte)(code[++offset] & 255));
                     break;
                 case IFEQ, IFNE, IFLT, IFGE, IFGT, IFLE,
                      IF_ICMPEQ, IF_ICMPNE, IF_ICMPLT, IF_ICMPGE, IF_ICMPGT, IF_ICMPLE, IF_ACMPEQ, IF_ACMPNE,
                      GOTO, JSR:
-                    sb.append(" -> ").append(offset + (short)(((code[++offset] & 255) << 8) | (code[++offset] & 255)));
+                    sb.append(" -> ").append(offset + (short)((code[++offset] & 255) << 8 | code[++offset] & 255));
                     break;
                 case TABLESWITCH:
                     // Skip padding
-                    int i = (offset + 4) & 0xFFFC;
+                    int i = offset + 4 & 0xFFFC;
 
-                    sb.append(" default").append(" -> ").append(offset + (((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255)));
+                    sb.append(" default").append(" -> ").append(offset + ((code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255));
 
-                    int low = ((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255);
-                    int high = ((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255);
+                    int low = (code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255;
+                    int high = (code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255;
 
                     for (int value = low; value <= high; value++) {
-                        sb.append(", ").append(value).append(" -> ").append(offset + (((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255)));
+                        sb.append(", ").append(value).append(" -> ").append(offset + ((code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255));
                     }
 
-                    offset = (i - 1);
+                    offset = i - 1;
                     break;
                 case LOOKUPSWITCH:
                     // Skip padding
-                    i = (offset + 4) & 0xFFFC;
+                    i = offset + 4 & 0xFFFC;
 
-                    sb.append(" default").append(" -> ").append(offset + (((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255)));
+                    sb.append(" default").append(" -> ").append(offset + ((code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255));
 
-                    int npairs = ((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255);
+                    int npairs = (code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255;
 
                     for (int k = 0; k < npairs; k++) {
-                        sb.append(", ").append(((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255));
-                        sb.append(" -> ").append(offset + (((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255)));
+                        sb.append(", ").append((code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255);
+                        sb.append(" -> ").append(offset + ((code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255));
                     }
 
-                    offset = (i - 1);
+                    offset = i - 1;
                     break;
                 case GETSTATIC, PUTSTATIC:
-                    ConstantMemberRef constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                    ConstantMemberRef constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
                     ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
                     String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
@@ -227,7 +227,7 @@ public class ByteCodeWriter {
                     sb.append(" ").append(typeName).append('.').append(name).append(" : ").append(descriptor);
                     break;
                 case GETFIELD, PUTFIELD, INVOKEVIRTUAL, INVOKESPECIAL, INVOKESTATIC:
-                    constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                    constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
                     name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
                     descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
@@ -235,7 +235,7 @@ public class ByteCodeWriter {
                     sb.append(" ").append(name).append(" : ").append(descriptor);
                     break;
                 case INVOKEINTERFACE, INVOKEDYNAMIC:
-                    constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                    constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
                     name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
                     descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
@@ -245,11 +245,11 @@ public class ByteCodeWriter {
                     offset += 2; // Skip 2 bytes
                     break;
                 case NEW, ANEWARRAY, CHECKCAST, INSTANCEOF:
-                    typeName = constants.getConstantTypeName(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                    typeName = constants.getConstantTypeName((code[++offset] & 255) << 8 | code[++offset] & 255);
                     sb.append(" ").append(typeName);
                     break;
                 case NEWARRAY:
-                    switch ((code[++offset] & 255)) {
+                    switch (code[++offset] & 255) {
                         case T_BOOLEAN: sb.append(" boolean"); break;
                         case T_CHAR:    sb.append(" char"); break;
                         case T_FLOAT:   sb.append(" float"); break;
@@ -262,10 +262,10 @@ public class ByteCodeWriter {
                     break;
                 case WIDE:
                     opcode = code[++offset] & 255;
-                    i = ((code[++offset] & 255) << 8) | (code[++offset] & 255);
+                    i = (code[++offset] & 255) << 8 | code[++offset] & 255;
 
                     if (opcode == IINC) {
-                        sb.append(" iinc #").append(i).append(' ').append((short)(((code[++offset] & 255) << 8) | (code[++offset] & 255)));
+                        sb.append(" iinc #").append(i).append(' ').append((short)((code[++offset] & 255) << 8 | code[++offset] & 255));
                     } else {
                         switch (opcode) {
                             case ILOAD : sb.append(" iload #").append(i); break;
@@ -283,14 +283,14 @@ public class ByteCodeWriter {
                     }
                     break;
                 case MULTIANEWARRAY:
-                    typeName = constants.getConstantTypeName(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                    typeName = constants.getConstantTypeName((code[++offset] & 255) << 8 | code[++offset] & 255);
                     sb.append(typeName).append(' ').append(code[++offset] & 255);
                     break;
                 case IFNULL, IFNONNULL:
-                    sb.append(" -> ").append(offset + (short)(((code[++offset] & 255) << 8) | (code[++offset] & 255)));
+                    sb.append(" -> ").append(offset + (short)((code[++offset] & 255) << 8 | code[++offset] & 255));
                     break;
                 case GOTO_W, JSR_W:
-                    sb.append(" -> ").append(offset + (((code[++offset] & 255) << 24) | ((code[++offset] & 255) << 16) | ((code[++offset] & 255) << 8) | (code[++offset] & 255)));
+                    sb.append(" -> ").append(offset + ((code[++offset] & 255) << 24 | (code[++offset] & 255) << 16 | (code[++offset] & 255) << 8 | code[++offset] & 255));
                     break;
             }
 
@@ -351,23 +351,23 @@ public class ByteCodeWriter {
             }
         }
     }
-    
+
     public static List<Statement> getLineNumberTableAsStatements(Method method) {
-    	
+
     	List<Statement> comments = new ArrayList<>();
- 
+
         AttributeCode attributeCode = method.getAttribute("Code");
 
         if (attributeCode == null) {
             return null;
         }
-    	
+
     	TreeMap<Integer, List<Integer>> lineNumberToOffsets = new TreeMap<>();
-    	
+
     	AttributeLineNumberTable lineNumberTable = attributeCode.getAttribute("LineNumberTable");
-    	
+
     	if (lineNumberTable != null) {
-    		
+
     		for (LineNumber lineNumber : lineNumberTable.getLineNumberTable()) {
     			lineNumberToOffsets.computeIfAbsent(lineNumber.getLineNumber(), k -> new ArrayList<>()).add(lineNumber.getStartPC());
     		}

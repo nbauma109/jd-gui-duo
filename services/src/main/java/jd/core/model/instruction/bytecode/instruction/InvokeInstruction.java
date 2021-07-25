@@ -25,7 +25,7 @@ import jd.core.model.classfile.LocalVariables;
 
 public abstract class InvokeInstruction extends IndexInstruction
 {
-    public List<Instruction> args;
+    public final List<Instruction> args;
 
     protected InvokeInstruction(
         int opcode, int offset, int lineNumber,
@@ -39,8 +39,9 @@ public abstract class InvokeInstruction extends IndexInstruction
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        if (constants == null)
-            return null;
+        if (constants == null) {
+			return null;
+		}
 
         ConstantMethodref cmr = constants.getConstantMethodref(this.index);
 
@@ -49,8 +50,9 @@ public abstract class InvokeInstruction extends IndexInstruction
 
     public List<String> getListOfParameterSignatures(ConstantPool constants)
     {
-        if (constants == null)
-            return null;
+        if (constants == null) {
+			return null;
+		}
 
         ConstantMethodref cmr = constants.getConstantMethodref(this.index);
 

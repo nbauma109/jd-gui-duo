@@ -70,7 +70,7 @@ public class LocalVariableAnalyzer
 
         // Reconstruction de la Liste des variables locales
         byte[] code = method.getCode();
-        int codeLength = (code == null) ? 0 : code.length;
+        int codeLength = code == null ? 0 : code.length;
         LocalVariables localVariables = method.getLocalVariables();
 
         if (localVariables == null)
@@ -129,10 +129,10 @@ public class LocalVariableAnalyzer
             // Traitement des entrées correspondant aux parametres
             AttributeSignature as = method.getAttributeSignature();
             String methodSignature = constants.getConstantUtf8(
-                    (as==null) ? method.getDescriptorIndex() : as.signatureIndex);
+                    as==null ? method.getDescriptorIndex() : as.signatureIndex);
 
             int indexOfFirstLocalVariable =
-                (((method.accessFlags & Const.ACC_STATIC) == 0) ? 1 : 0) +
+                ((method.accessFlags & Const.ACC_STATIC) == 0 ? 1 : 0) +
                 SignatureUtil.getParameterSignatureCount(methodSignature);
 
             if (indexOfFirstLocalVariable > localVariables.size())
@@ -293,7 +293,7 @@ public class LocalVariableAnalyzer
 
                 final char firstChar = signature.charAt(0);
                 variableIndex +=
-                    (firstChar == 'D' || firstChar == 'J') ? 2 : 1;
+                    firstChar == 'D' || firstChar == 'J' ? 2 : 1;
             }
         }
     }
@@ -452,7 +452,6 @@ public class LocalVariableAnalyzer
         for (int i=0; i<length; i++)
         {
             instruction = listForAnalyze.get(i);
-
             switch (instruction.opcode)
             {
             case ByteCodeConstants.PREINC:
@@ -817,7 +816,6 @@ public class LocalVariableAnalyzer
         for (int i=startIndex; i<length; i++)
         {
             instruction = listForAnalyze.get(i);
-
             switch (instruction.opcode)
             {
             case Const.ISTORE:
@@ -913,7 +911,7 @@ public class LocalVariableAnalyzer
                     ILoad iload = (ILoad)store.valueref;
                     lv = localVariables.getLocalVariableWithIndexAndOffset(
                         iload.index, iload.offset);
-                    typesBitField = (lv == null) ?
+                    typesBitField = lv == null ?
                         ByteCodeConstants.TBF_INT_INT|ByteCodeConstants.TBF_INT_SHORT|
                         ByteCodeConstants.TBF_INT_BYTE|ByteCodeConstants.TBF_INT_CHAR|
                         ByteCodeConstants.TBF_INT_BOOLEAN:
@@ -943,7 +941,6 @@ public class LocalVariableAnalyzer
             // Une variable est trouvée. Le type est il compatible ?
             int typesBitField =
                     SignatureUtil.createTypesBitField(signature);
-
             switch (lv.signatureIndex)
             {
             case NUMBER_TYPE:
@@ -1142,11 +1139,11 @@ public class LocalVariableAnalyzer
             return;
         }
 
-        LocalVariable lv1 = (i1.opcode == Const.ILOAD) ?
+        LocalVariable lv1 = i1.opcode == Const.ILOAD ?
             localVariables.searchLocalVariableWithIndexAndOffset(
                 ((ILoad)i1).index, i1.offset) : null;
 
-        LocalVariable lv2 = (i2.opcode == Const.ILOAD) ?
+        LocalVariable lv2 = i2.opcode == Const.ILOAD ?
             localVariables.searchLocalVariableWithIndexAndOffset(
                 ((ILoad)i2).index, i2.offset) : null;
 
@@ -1237,7 +1234,7 @@ public class LocalVariableAnalyzer
         String signature =
             instruction.getReturnedSignature(constants, localVariables);
         int signatureIndex =
-            (signature != null) ? constants.addConstantUtf8(signature) : -1;
+            signature != null ? constants.addConstantUtf8(signature) : -1;
 
         if (lv == null || lv.signatureIndex != signatureIndex)
         {
@@ -1261,14 +1258,14 @@ public class LocalVariableAnalyzer
             localVariables.searchLocalVariableWithIndexAndOffset(index, offset);
         String signatureInstruction =
             instruction.getReturnedSignature(constants, localVariables);
-        int signatureInstructionIndex = (signatureInstruction != null) ?
+        int signatureInstructionIndex = signatureInstruction != null ?
             constants.addConstantUtf8(signatureInstruction) : UNDEFINED_TYPE;
         boolean isExceptionOrReturnAddress =
             store.valueref.opcode == ByteCodeConstants.EXCEPTIONLOAD ||
             store.valueref.opcode == ByteCodeConstants.RETURNADDRESSLOAD;
 
         if (lv == null || lv.exceptionOrReturnAddress ||
-            (isExceptionOrReturnAddress && lv.startPc + lv.length < offset))
+            isExceptionOrReturnAddress && lv.startPc + lv.length < offset)
         {
             localVariables.add(new LocalVariable(
                 offset, 1, -1, signatureInstructionIndex, index,
@@ -1585,7 +1582,7 @@ public class LocalVariableAnalyzer
             ClassFile classFile, Method method)
     {
         AttributeSignature as = method.getAttributeSignature();
-        int signatureIndex = (as == null) ?
+        int signatureIndex = as == null ?
             method.getDescriptorIndex() : as.signatureIndex;
         String signature =
             classFile.getConstantPool().getConstantUtf8(signatureIndex);

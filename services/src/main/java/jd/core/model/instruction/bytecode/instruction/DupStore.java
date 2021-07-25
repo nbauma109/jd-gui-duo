@@ -23,8 +23,8 @@ import jd.core.model.instruction.bytecode.ByteCodeConstants;
 public class DupStore extends Instruction
 {
     public Instruction objectref;
-    public DupLoad dupLoad1;
-    public DupLoad dupLoad2;
+    public final DupLoad dupLoad1;
+    public final DupLoad dupLoad2;
 
     public DupStore(
         int opcode, int offset, int lineNumber, Instruction objectref)

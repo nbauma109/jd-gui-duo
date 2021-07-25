@@ -70,7 +70,6 @@ public class Method extends FieldOrMethod
             for (int i=this.attributes.length-1; i>=0; --i)
             {
                 Attribute attribute =  this.attributes[i];
-
                 switch (attribute.tag)
                 {
                 case Const.ATTR_EXCEPTIONS:
@@ -78,7 +77,7 @@ public class Method extends FieldOrMethod
                         ((AttributeExceptions)attribute).exceptionIndexTable;
                     break;
                 case Const.ATTR_CODE:
-                    ac = ((AttributeCode)attributes[i]);
+                    ac = (AttributeCode)attributes[i];
                     break;
                 case Const.ATTR_RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS:
                     this.visibleParameterAnnotations =
@@ -98,21 +97,21 @@ public class Method extends FieldOrMethod
             if (ac != null)
             {
                 this.code = ByteCodeUtil.cleanUpByteCode(ac.code);
-                
+
                 // localVariables
                 AttributeLocalVariableTable alvt = ac.getAttributeLocalVariableTable();
-                if ((alvt != null) && (alvt.localVariableTable != null))
+                if (alvt != null && alvt.localVariableTable != null)
                 {
                     AttributeLocalVariableTable alvtt = ac.getAttributeLocalVariableTypeTable();
                     LocalVariable[] localVariableTypeTable =
-                        (alvtt == null) ? null : alvtt.localVariableTable;
+                        alvtt == null ? null : alvtt.localVariableTable;
                     this.localVariables = new LocalVariables(
                         alvt.localVariableTable, localVariableTypeTable);
                 }
 
                 // lineNumbers
                 AttributeNumberTable ant = ac.getAttributeLineNumberTable();
-                this.lineNumbers = (ant == null) ? null : ant.lineNumberTable;
+                this.lineNumbers = ant == null ? null : ant.lineNumberTable;
 
                 // codeExceptions
                 this.codeExceptions = ac.exceptionTable;

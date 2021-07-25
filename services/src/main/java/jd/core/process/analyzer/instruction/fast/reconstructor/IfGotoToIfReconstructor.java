@@ -48,15 +48,15 @@ public class IfGotoToIfReconstructor
     public static void reconstruct(List<Instruction> list)
     {
         int length = list.size();
-        if (length < 3)
-            return;
+        if (length < 3) {
+			return;
+		}
 
         int index = length-2;
 
         while (index-- > 0)
         {
             Instruction i = list.get(index);
-
             switch (i.opcode)
             {
             case ByteCodeConstants.IF:
@@ -66,16 +66,18 @@ public class IfGotoToIfReconstructor
                 BranchInstruction bi = (BranchInstruction)i;
 
                 i = list.get(index+1);
-                if (i.opcode != Const.GOTO)
-                    continue;
+                if (i.opcode != Const.GOTO) {
+					continue;
+				}
 
                 Goto g = (Goto)i;
 
                 i = list.get(index+2);
                 int jumpOffset = bi.getJumpOffset();
 
-                if ((jumpOffset <= g.offset) || (i.offset < jumpOffset))
-                    continue;
+                if (jumpOffset <= g.offset || i.offset < jumpOffset) {
+					continue;
+				}
 
                 // Setup BranchInstruction
                 bi.branch = g.getJumpOffset() - bi.offset;

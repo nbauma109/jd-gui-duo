@@ -22,7 +22,7 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class FieldNameLayoutBlock extends LayoutBlock
 {
-    public ClassFile classFile;
+    public final ClassFile classFile;
     public Field field;
 
     public FieldNameLayoutBlock(ClassFile classFile, Field field)

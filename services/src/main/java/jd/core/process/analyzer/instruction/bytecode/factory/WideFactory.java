@@ -36,12 +36,12 @@ public class WideFactory extends InstructionFactory
             int lineNumber, boolean[] jumps)
     {
         final int opcode = code[offset+1] & 255;
-        final int index = ((code[offset+2] & 255) << 8) | (code[offset+3] & 255);
+        final int index = (code[offset+2] & 255) << 8 | code[offset+3] & 255;
 
         if (opcode == Const.IINC)
         {
             final int count =
-                (short)(((code[offset+4] & 255) << 8) | (code[offset+5] & 255));
+                (short)((code[offset+4] & 255) << 8 | code[offset+5] & 255);
             Instruction instruction = new IInc(
                 opcode, offset, lineNumber, index, count);
 
@@ -57,7 +57,6 @@ public class WideFactory extends InstructionFactory
         else
         {
             Instruction instruction = null;
-
             switch (opcode)
             {
             case Const.ILOAD:

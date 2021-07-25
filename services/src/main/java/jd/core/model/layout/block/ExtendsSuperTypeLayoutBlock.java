@@ -21,7 +21,7 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class ExtendsSuperTypeLayoutBlock extends LayoutBlock
 {
-    public ClassFile classFile;
+    public final ClassFile classFile;
 
     public ExtendsSuperTypeLayoutBlock(ClassFile classFile)
     {

@@ -20,7 +20,7 @@ public class IndexToIndexMap
 {
     private static final int INITIAL_CAPACITY = 128;
 
-    private MapEntry[] entries;
+    private final MapEntry[] entries;
 
     public IndexToIndexMap()
     {
@@ -52,8 +52,9 @@ public class IndexToIndexMap
 
          while (entry != null)
          {
-             if (entry.key == key)
-                 return entry.value;
+             if (entry.key == key) {
+				return entry.value;
+			}
             entry = entry.next;
          }
 
@@ -62,14 +63,14 @@ public class IndexToIndexMap
 
     private static int hashCodeToIndex(int hashCode, int size)
     {
-        return hashCode & (size - 1);
+        return hashCode & size - 1;
     }
 
     private static class MapEntry
     {
-        public int key;
-        public int value;
-        public MapEntry next;
+        private final int key;
+        private int value;
+        private final MapEntry next;
 
         public MapEntry(int key, int value, MapEntry next)
         {

@@ -22,8 +22,8 @@ import jd.core.model.classfile.LocalVariables;
 public class Switch extends Instruction
 {
     public Instruction key;
-    public int         defaultOffset;
-    public int[]       offsets;
+    public final int   defaultOffset;
+    public final int[] offsets;
 
     public Switch(
             int opcode, int offset, int lineNumber,

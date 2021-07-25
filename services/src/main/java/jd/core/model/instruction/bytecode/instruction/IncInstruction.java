@@ -36,16 +36,17 @@ public class IncInstruction extends Instruction
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        return (this.value == null) ? null :
+        return this.value == null ? null :
             this.value.getReturnedSignature(constants, localVariables);
     }
 
     @Override
     public int getPriority()
     {
-        if ((this.count == 1) || (this.count == -1))
-            // Operator '++' or '--'
+        if (this.count == 1 || this.count == -1) {
+			// Operator '++' or '--'
             return 2;
+		}
         // Operator '+=' or '-='
         return 14;
     }

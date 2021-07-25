@@ -287,31 +287,18 @@ public class ConvertClassFileProcessor {
 
     protected ExpressionVariableInitializer convertFieldInitializer(Field field, Type typeField) {
         AttributeConstantValue acv = field.getAttribute("ConstantValue");
-
         if (acv == null) {
             return null;
         }
         Constant constantValue = acv.getConstantValue();
-        Expression expression;
-        switch (constantValue.getClass().getSimpleName()) {
-            case "ConstantInteger":
-                expression = new IntegerConstantExpression(typeField, ((ConstantInteger)constantValue).getBytes());
-                break;
-            case "ConstantFloat":
-                expression = new FloatConstantExpression(((ConstantFloat)constantValue).getBytes());
-                break;
-            case "ConstantLong":
-                expression = new LongConstantExpression(((ConstantLong)constantValue).getBytes());
-                break;
-            case "ConstantDouble":
-                expression = new DoubleConstantExpression(((ConstantDouble)constantValue).getBytes());
-                break;
-            case "ConstantUtf8":
-                expression = new StringConstantExpression(((ConstantUtf8)constantValue).getBytes());
-                break;
-            default:
-                throw new ConvertClassFileException("Invalid attributes");
-        }
+        Expression expression = switch (constantValue.getClass().getSimpleName()) {
+			case "ConstantInteger" -> new IntegerConstantExpression(typeField, ((ConstantInteger)constantValue).getBytes());
+			case "ConstantFloat" -> new FloatConstantExpression(((ConstantFloat)constantValue).getBytes());
+			case "ConstantLong" -> new LongConstantExpression(((ConstantLong)constantValue).getBytes());
+			case "ConstantDouble" -> new DoubleConstantExpression(((ConstantDouble)constantValue).getBytes());
+			case "ConstantUtf8" -> new StringConstantExpression(((ConstantUtf8)constantValue).getBytes());
+			default -> throw new ConvertClassFileException("Invalid attributes");
+		};
         return new ExpressionVariableInitializer(expression);
     }
 
@@ -346,7 +333,7 @@ public class ConvertClassFileProcessor {
         DefaultList<ModuleDeclaration.PackageInfo> list = new DefaultList<>(packageInfos.length);
         DefaultList<String> moduleInfoNames;
         for (PackageInfo packageInfo : packageInfos) {
-            moduleInfoNames = (packageInfo.getModuleInfoNames() == null) ?
+            moduleInfoNames = packageInfo.getModuleInfoNames() == null ?
                     null : new DefaultList<>(packageInfo.getModuleInfoNames());
             list.add(new ModuleDeclaration.PackageInfo(packageInfo.getInternalName(), packageInfo.getFlags(), moduleInfoNames));
         }
@@ -360,7 +347,7 @@ public class ConvertClassFileProcessor {
         DefaultList<ModuleDeclaration.ServiceInfo> list = new DefaultList<>(serviceInfos.length);
         DefaultList<String> implementationTypeNames;
         for (ServiceInfo serviceInfo : serviceInfos) {
-            implementationTypeNames = (serviceInfo.getImplementationTypeNames() == null) ?
+            implementationTypeNames = serviceInfo.getImplementationTypeNames() == null ?
                     null : new DefaultList<>(serviceInfo.getImplementationTypeNames());
             list.add(new ModuleDeclaration.ServiceInfo(serviceInfo.getInterfaceTypeName(), implementationTypeNames));
         }

@@ -22,7 +22,7 @@ import jd.core.util.SignatureUtil;
 
 public class NewArray extends Instruction
 {
-    public int type;
+    public final int type;
     public Instruction dimension;
 
     public NewArray(
@@ -39,6 +39,6 @@ public class NewArray extends Instruction
     {
         String signature = SignatureUtil.getSignatureFromType(this.type);
 
-        return (signature == null) ? null : "[" + signature;
+        return signature == null ? null : "[" + signature;
     }
 }

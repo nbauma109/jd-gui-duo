@@ -40,20 +40,21 @@ public class CheckCast extends IndexInstruction
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        if (constants == null)
-            return null;
+        if (constants == null) {
+			return null;
+		}
 
         Constant c = constants.get(this.index);
 
-        if (c instanceof ConstantUtf8)
+        if (c instanceof ConstantUtf8 cutf8)
         {
-            ConstantUtf8 cutf8 = (ConstantUtf8)c;
             return cutf8.getBytes();
         }
         ConstantClass cc = (ConstantClass)c;
         String signature = constants.getConstantUtf8(cc.getNameIndex());
-        if (signature.charAt(0) != '[')
-            signature = SignatureUtil.createTypeName(signature);
+        if (signature.charAt(0) != '[') {
+			signature = SignatureUtil.createTypeName(signature);
+		}
         return signature;
     }
 

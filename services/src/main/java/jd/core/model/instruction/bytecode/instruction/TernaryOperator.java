@@ -46,8 +46,9 @@ public class TernaryOperator extends Instruction
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        if (this.value1 != null)
-            return this.value1.getReturnedSignature(constants, localVariables);
+        if (this.value1 != null) {
+			return this.value1.getReturnedSignature(constants, localVariables);
+		}
         return this.value2.getReturnedSignature(constants, localVariables);
     }
 

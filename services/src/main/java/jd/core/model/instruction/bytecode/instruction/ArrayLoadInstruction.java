@@ -21,7 +21,7 @@ import jd.core.model.classfile.LocalVariables;
 
 public class ArrayLoadInstruction extends ArrayInstruction
 {
-    public String signature;
+    public final String signature;
     public Instruction indexref;
 
     public ArrayLoadInstruction(

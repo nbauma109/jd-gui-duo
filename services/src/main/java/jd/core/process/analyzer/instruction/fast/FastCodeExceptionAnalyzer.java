@@ -119,8 +119,8 @@ public class FastCodeExceptionAnalyzer
                 }
                 // Update 'afterOffset'
                 if (fce2.afterOffset == UtilConstants.INVALID_OFFSET ||
-                    (fce1.afterOffset != UtilConstants.INVALID_OFFSET &&
-                     fce1.afterOffset < fce2.afterOffset)) {
+                    fce1.afterOffset != UtilConstants.INVALID_OFFSET &&
+                     fce1.afterOffset < fce2.afterOffset) {
                     fce2.afterOffset = fce1.afterOffset;
                 }
                 // Remove last FastCodeException
@@ -189,8 +189,7 @@ public class FastCodeExceptionAnalyzer
             if (array[codeException.getHandlerPC()] == null)
             {
                 FastAggregatedCodeExcepcion face =
-                    new FastAggregatedCodeExcepcion(
-                        i, codeException.getStartPC(), codeException.getEndPC(),
+                    new FastAggregatedCodeExcepcion(codeException.getStartPC(), codeException.getEndPC(),
                         codeException.getHandlerPC(), codeException.getCatchType());
                 fastAggregatedCodeExceptions.add(face);
                 array[codeException.getHandlerPC()] = face;
@@ -293,7 +292,6 @@ public class FastCodeExceptionAnalyzer
 
         int varMonitorIndex;
         MonitorEnter monitorEnter = (MonitorEnter)instruction;
-
         switch (monitorEnter.objectref.opcode)
         {
         case Const.ALOAD:
@@ -371,8 +369,8 @@ public class FastCodeExceptionAnalyzer
                     fastAggregatedCodeException.getEndPC() == fce.tryToOffset &&
                     fastAggregatedCodeException.getHandlerPC() > fce.maxOffset &&
                     !fastAggregatedCodeException.synchronizedFlag && (fce.afterOffset == UtilConstants.INVALID_OFFSET ||
-                    (fastAggregatedCodeException.getEndPC() < fce.afterOffset &&
-                     fastAggregatedCodeException.getHandlerPC() < fce.afterOffset)))
+                    fastAggregatedCodeException.getEndPC() < fce.afterOffset &&
+                     fastAggregatedCodeException.getHandlerPC() < fce.afterOffset))
                 {
                     fce.maxOffset = fastAggregatedCodeException.getHandlerPC();
                     fce.finallyFromOffset = fastAggregatedCodeException.getHandlerPC();
@@ -392,8 +390,8 @@ public class FastCodeExceptionAnalyzer
                     fastAggregatedCodeException.getEndPC() >= fce.tryToOffset &&
                     fastAggregatedCodeException.getHandlerPC() > fce.maxOffset &&
                     !fastAggregatedCodeException.synchronizedFlag && (fce.afterOffset == UtilConstants.INVALID_OFFSET ||
-                    (fastAggregatedCodeException.getEndPC() < fce.afterOffset &&
-                     fastAggregatedCodeException.getHandlerPC() < fce.afterOffset)))
+                    fastAggregatedCodeException.getEndPC() < fce.afterOffset &&
+                     fastAggregatedCodeException.getHandlerPC() < fce.afterOffset))
                 {
                     fce.maxOffset = fastAggregatedCodeException.getHandlerPC();
                     fce.finallyFromOffset = fastAggregatedCodeException.getHandlerPC();
@@ -457,7 +455,6 @@ public class FastCodeExceptionAnalyzer
         index--;
         // Search previous 'goto' instruction
         Instruction i = list.get(index);
-
         switch (i.opcode)
         {
         case Const.GOTO:
@@ -625,9 +622,9 @@ public class FastCodeExceptionAnalyzer
                             instruction = list.get(index);
 
                             fastCodeException.type =
-                                (instruction.opcode != firstFinallyInstruction.opcode ||
+                                instruction.opcode != firstFinallyInstruction.opcode ||
                                  firstFinallyInstruction.lineNumber == Instruction.UNKNOWN_LINE_NUMBER ||
-                                 firstFinallyInstruction.lineNumber != instruction.lineNumber) ?
+                                 firstFinallyInstruction.lineNumber != instruction.lineNumber ?
                                          FastConstants.TYPE_142 :
                                          FastConstants.TYPE_ECLIPSE_677_FINALLY;
                         }
@@ -734,7 +731,6 @@ public class FastCodeExceptionAnalyzer
                 }
 
                 Instruction instruction = list.get(index);
-
                 switch (instruction.opcode)
                 {
                 case Const.JSR:
@@ -952,9 +948,9 @@ public class FastCodeExceptionAnalyzer
                             instruction = list.get(index);
 
                             fastCodeException.type =
-                                (instruction.opcode != firstFinallyInstruction.opcode ||
+                                instruction.opcode != firstFinallyInstruction.opcode ||
                                  firstFinallyInstruction.lineNumber == Instruction.UNKNOWN_LINE_NUMBER ||
-                                 firstFinallyInstruction.lineNumber != instruction.lineNumber) ?
+                                 firstFinallyInstruction.lineNumber != instruction.lineNumber ?
                                          FastConstants.TYPE_142 :
                                          FastConstants.TYPE_ECLIPSE_677_CATCH_FINALLY;
                         }
@@ -1318,7 +1314,7 @@ public class FastCodeExceptionAnalyzer
                     i = list.get(index);
                     if (i.opcode == Const.RET)
                     {
-                        fastCodeException.afterOffset = (++index < length) ?
+                        fastCodeException.afterOffset = ++index < length ?
                             list.get(index).offset :
                             i.offset+1;
                         break;
@@ -1474,7 +1470,7 @@ public class FastCodeExceptionAnalyzer
                                 int tryFromIndex =
                                     InstructionUtil.getIndexForOffset(
                                         list, fastCodeException.tryFromOffset);
-                                int beforeInstructionOffset = (index==0) ?
+                                int beforeInstructionOffset = index==0 ?
                                     0 : list.get(index-1).offset;
 
                                 if (InstructionUtil.checkNoJumpToInterval(
@@ -1533,7 +1529,7 @@ public class FastCodeExceptionAnalyzer
                                         int tryFromIndex =
                                             InstructionUtil.getIndexForOffset(
                                                 list, fastCodeException.tryFromOffset);
-                                        int beforeInstructionOffset = (index==0) ?
+                                        int beforeInstructionOffset = index==0 ?
                                                 0 : list.get(index-1).offset;
 
                                         if (InstructionUtil.checkNoJumpToInterval(
@@ -1583,13 +1579,13 @@ public class FastCodeExceptionAnalyzer
                                             beforeInstruction.lineNumber)
                                     {
                                         // For instruction ?
-                                        if ((beforeInstruction.opcode ==
+                                        if (beforeInstruction.opcode ==
                                                 Const.ASTORE &&
                                             ((AStore)beforeInstruction).valueref.opcode ==
-                                                ByteCodeConstants.EXCEPTIONLOAD) || (beforeInstruction.opcode ==
+                                                ByteCodeConstants.EXCEPTIONLOAD || beforeInstruction.opcode ==
                                                 Const.POP &&
                                             ((Pop)beforeInstruction).objectref.opcode ==
-                                                ByteCodeConstants.EXCEPTIONLOAD))
+                                                ByteCodeConstants.EXCEPTIONLOAD)
                                         {
                                             // Non
                                             fastCodeException.afterOffset =
@@ -1751,8 +1747,8 @@ public class FastCodeExceptionAnalyzer
                     {
                         instruction = list.get(index);
 
-                        if (instruction.offset <= maxOffset || (instruction.lineNumber != Instruction.UNKNOWN_LINE_NUMBER &&
-                            instruction.lineNumber >= firstLineNumber))
+                        if (instruction.offset <= maxOffset || instruction.lineNumber != Instruction.UNKNOWN_LINE_NUMBER &&
+                            instruction.lineNumber >= firstLineNumber)
                         {
                             break;
                         }
@@ -2513,7 +2509,7 @@ public class FastCodeExceptionAnalyzer
                 while (i-- > 0)
                 {
                     catchInstructions = fastTry.catches.get(i).instructions;
-                    
+
                     length = catchInstructions.size();
 
                     switch (catchInstructions.get(length-1).opcode)
@@ -2548,7 +2544,7 @@ public class FastCodeExceptionAnalyzer
             while (i-- > 0)
             {
                 catchInstructions = fastTry.catches.get(i).instructions;
-                
+
 		        // Remove first catch instruction in each catch block
 		        if (!catchInstructions.isEmpty() && formatCatchRemoveFirstCatchInstruction(catchInstructions.get(0))) {
 		            catchInstructions.remove(0);
@@ -3162,25 +3158,25 @@ public class FastCodeExceptionAnalyzer
     }
 
 	private static boolean findAloadForAThrow(int exceptionIndex, AThrow athrow) {
-		return (athrow.value.opcode == Const.ALOAD &&
-		        ((ALoad)athrow.value).index == exceptionIndex) 
-            || (athrow.value.opcode == Const.CHECKCAST &&
+		return athrow.value.opcode == Const.ALOAD &&
+		        ((ALoad)athrow.value).index == exceptionIndex
+            || athrow.value.opcode == Const.CHECKCAST &&
 		        ((CheckCast)athrow.value).objectref.opcode == Const.ALOAD &&
-		        ((ALoad)((CheckCast)athrow.value).objectref).index == exceptionIndex);
+		        ((ALoad)((CheckCast)athrow.value).objectref).index == exceptionIndex;
 	}
 
     public static class FastCodeExcepcion
         implements Comparable<FastCodeExcepcion>
     {
-        public int tryFromOffset;
+        public final int tryFromOffset;
         public int tryToOffset;
-        public List<FastCodeExceptionCatch> catches;
+        public final List<FastCodeExceptionCatch> catches;
         public int finallyFromOffset;
         public int nbrFinally;
         public int maxOffset;
         public int afterOffset;
         public int type;
-        public boolean synchronizedFlag;
+        public final boolean synchronizedFlag;
 
         FastCodeExcepcion(
             int tryFromOffset, int tryToOffset,
@@ -3216,10 +3212,10 @@ public class FastCodeExceptionAnalyzer
     public static class FastCodeExceptionCatch
         implements Comparable<FastCodeExceptionCatch>
     {
-        public int type;
-        public int otherTypes[];
-        public int fromOffset;
-        public int toOffset;
+        final int type;
+        final int otherTypes[];
+        final int fromOffset;
+        int toOffset;
 
         public FastCodeExceptionCatch(
             int type, int otherCatchTypes[], int fromOffset)
@@ -3239,33 +3235,30 @@ public class FastCodeExceptionAnalyzer
 
     public static class FastAggregatedCodeExcepcion
     {
-        public int           otherCatchTypes[];
-        public int           nbrFinally;
-        public boolean       synchronizedFlag;
-        public int           index;
-        public CodeException codeException;
+        private int                 otherCatchTypes[];
+        private int                 nbrFinally;
+        private boolean             synchronizedFlag;
+        private final CodeException codeException;
 
-        public FastAggregatedCodeExcepcion(
-            int index, int startPc, int endPc, int handlerPc, int catchType)
+        public FastAggregatedCodeExcepcion(int startPc, int endPc, int handlerPc, int catchType)
         {
-        	this.index = index;
             this.codeException = new CodeException(startPc, endPc, handlerPc, catchType);
             this.otherCatchTypes = null;
-            this.nbrFinally = (catchType == 0) ? 1 : 0;
+            this.nbrFinally = catchType == 0 ? 1 : 0;
         }
-        
+
         public int getCatchType() {
         	return codeException.getCatchType();
         }
-        
+
         public int getStartPC() {
         	return codeException.getStartPC();
         }
-        
+
         public int getEndPC() {
         	return codeException.getEndPC();
         }
-        
+
         public int getHandlerPC() {
         	return codeException.getHandlerPC();
         }

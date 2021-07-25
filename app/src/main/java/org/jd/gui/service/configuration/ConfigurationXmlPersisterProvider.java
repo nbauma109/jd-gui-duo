@@ -111,13 +111,13 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
                         case XMLStreamConstants.START_ELEMENT:
                             names.push(name);
                             name = String.join("/", name, reader.getLocalName());
-						if ("/configuration/gui/mainWindow/location".equals(name)) {
-							x = Integer.parseInt(reader.getAttributeValue(null, "x"));
-							y = Integer.parseInt(reader.getAttributeValue(null, "y"));
-						} else if ("/configuration/gui/mainWindow/size".equals(name)) {
-							w = Integer.parseInt(reader.getAttributeValue(null, "w"));
-							h = Integer.parseInt(reader.getAttributeValue(null, "h"));
-						}
+							if ("/configuration/gui/mainWindow/location".equals(name)) {
+								x = Integer.parseInt(reader.getAttributeValue(null, "x"));
+								y = Integer.parseInt(reader.getAttributeValue(null, "y"));
+							} else if ("/configuration/gui/mainWindow/size".equals(name)) {
+								w = Integer.parseInt(reader.getAttributeValue(null, "w"));
+								h = Integer.parseInt(reader.getAttributeValue(null, "h"));
+							}
                             break;
                         case XMLStreamConstants.END_ELEMENT:
                             name = names.pop();

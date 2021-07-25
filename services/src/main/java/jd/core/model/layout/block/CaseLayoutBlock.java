@@ -23,7 +23,7 @@ import jd.core.model.instruction.fast.instruction.FastSwitch;
 
 public class CaseLayoutBlock extends LayoutBlock
 {
-    public ClassFile classFile;
+    public final ClassFile classFile;
     public Method method;
     public FastSwitch fs;
     public int firstIndex;

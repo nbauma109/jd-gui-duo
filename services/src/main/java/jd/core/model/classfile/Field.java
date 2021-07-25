@@ -53,13 +53,15 @@ public class Field extends FieldOrMethod
 
     public Constant getConstantValue(ConstantPool constants)
     {
-        if (this.attributes != null)
-            for(int i=0; i<this.attributes.length; i++)
-                if (this.attributes[i].tag == Const.ATTR_CONSTANT_VALUE)
+        if (this.attributes != null) {
+			for (Attribute attribute : this.attributes) {
+				if (attribute.tag == Const.ATTR_CONSTANT_VALUE)
                 {
-                    AttributeConstantValue acv = (AttributeConstantValue)this.attributes[i];
+                    AttributeConstantValue acv = (AttributeConstantValue)attribute;
                     return constants.getConstantValue(acv.constantvalueIndex);
                 }
+			}
+		}
 
         return null;
     }
@@ -76,8 +78,8 @@ public class Field extends FieldOrMethod
 
     public static class ValueAndMethod
     {
-        private Instruction value;
-        private Method method;
+        private final Instruction value;
+        private final Method method;
 
         ValueAndMethod(Instruction value, Method method)
         {

@@ -27,7 +27,7 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 public class FastSwitch extends BranchInstruction
 {
     public Instruction test;
-    public Pair[] pairs;
+    public final Pair[] pairs;
 
     public FastSwitch(
         int opcode, int offset, int lineNumber, int branch,
@@ -40,9 +40,9 @@ public class FastSwitch extends BranchInstruction
 
     public static class Pair implements Comparable<Pair>
     {
-        private boolean defaultFlag;
+        private final boolean defaultFlag;
         private int key;
-        private int offset;
+        private final int offset;
         private List<Instruction> instructions;
 
         public Pair(boolean defaultFlag, int key, int offset)

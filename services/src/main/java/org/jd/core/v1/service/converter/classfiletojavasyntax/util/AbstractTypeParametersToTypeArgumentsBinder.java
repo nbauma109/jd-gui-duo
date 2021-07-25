@@ -34,12 +34,12 @@ public abstract class AbstractTypeParametersToTypeArgumentsBinder {
     }
 
     protected static BaseType clone(BaseType parameterTypes) {
-        if ((parameterTypes != null) && parameterTypes.isList()) {
-            switch (parameterTypes.size()) {
-                case 0: parameterTypes = null; break;
-                case 1: parameterTypes = parameterTypes.getFirst(); break;
-                default: parameterTypes = new Types(parameterTypes.getList()); break;
-            }
+        if (parameterTypes != null && parameterTypes.isList()) {
+            parameterTypes = switch (parameterTypes.size()) {
+				case 0 -> null;
+				case 1 -> parameterTypes.getFirst();
+				default -> new Types(parameterTypes.getList());
+			};
         }
 
         return parameterTypes;

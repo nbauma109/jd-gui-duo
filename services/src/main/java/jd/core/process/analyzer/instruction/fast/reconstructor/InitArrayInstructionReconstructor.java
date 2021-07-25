@@ -50,15 +50,17 @@ public class InitArrayInstructionReconstructor
         {
             Instruction i = list.get(index);
 
-            if (i.opcode != ByteCodeConstants.DUPSTORE)
-                continue;
+            if (i.opcode != ByteCodeConstants.DUPSTORE) {
+				continue;
+			}
 
             DupStore dupStore = (DupStore)i;
             int opcode = dupStore.objectref.opcode;
 
-            if ((opcode != Const.NEWARRAY) &&
-                (opcode != Const.ANEWARRAY))
-                continue;
+            if (opcode != Const.NEWARRAY &&
+                opcode != Const.ANEWARRAY) {
+				continue;
+			}
 
             reconstructAInstruction(list, index, dupStore);
         }
@@ -80,15 +82,17 @@ public class InitArrayInstructionReconstructor
             Instruction i = list.get(index);
 
             // Recherche de ?AStore ( DupLoad, index, value )
-            if ((i.opcode != Const.AASTORE) &&
-                (i.opcode != ByteCodeConstants.ARRAYSTORE))
-                break;
+            if (i.opcode != Const.AASTORE &&
+                i.opcode != ByteCodeConstants.ARRAYSTORE) {
+				break;
+			}
 
             ArrayStoreInstruction asi = (ArrayStoreInstruction)i;
 
-            if ((asi.arrayref.opcode != ByteCodeConstants.DUPLOAD) ||
-                (asi.arrayref.offset != lastDupStore.offset))
-                break;
+            if (asi.arrayref.opcode != ByteCodeConstants.DUPLOAD ||
+                asi.arrayref.offset != lastDupStore.offset) {
+				break;
+			}
 
             lastAsi = asi;
 
@@ -107,19 +111,22 @@ public class InitArrayInstructionReconstructor
             arrayIndex++;
 
             // Recherche de DupStoreM( DupLoadN )
-            if (++index >= length)
-                break;
+            if (++index >= length) {
+				break;
+			}
 
             i = list.get(index);
 
-            if (i.opcode != ByteCodeConstants.DUPSTORE)
-                break;
+            if (i.opcode != ByteCodeConstants.DUPSTORE) {
+				break;
+			}
 
             DupStore nextDupStore = (DupStore)i;
 
-            if ((nextDupStore.objectref.opcode != ByteCodeConstants.DUPLOAD) ||
-                (nextDupStore.objectref.offset != lastDupStore.offset))
-                break;
+            if (nextDupStore.objectref.opcode != ByteCodeConstants.DUPLOAD ||
+                nextDupStore.objectref.offset != lastDupStore.offset) {
+				break;
+			}
 
             lastDupStore = nextDupStore;
         }
@@ -135,22 +142,22 @@ public class InitArrayInstructionReconstructor
             Instruction parent = ReconstructorUtil.replaceDupLoad(
                 list, index, lastDupStore, iai);
 
-            if (parent != null)
-                switch (parent.opcode)
+            if (parent != null) {
+				switch (parent.opcode)
                 {
                 case Const.AASTORE:
                     iai.opcode = ByteCodeConstants.INITARRAY;
                 }
-
+			}
             // Retrait des instructions de la liste
-            while (firstDupStoreIndex < index)
-                list.remove(--index);
+            while (firstDupStoreIndex < index) {
+				list.remove(--index);
+			}
 
             // Initialisation des types de constantes entieres
             if (iai.newArray.opcode == Const.NEWARRAY)
             {
                 NewArray na = (NewArray)iai.newArray;
-
                 switch (na.type)
                 {
                 case Const.T_BOOLEAN:
@@ -181,7 +188,6 @@ public class InitArrayInstructionReconstructor
         for (int i=0; i<length; i++)
         {
             Instruction value = values.get(i);
-
             switch (value.opcode)
             {
             case Const.BIPUSH:

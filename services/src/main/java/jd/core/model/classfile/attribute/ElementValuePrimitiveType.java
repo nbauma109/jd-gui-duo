@@ -21,7 +21,7 @@ public class ElementValuePrimitiveType extends ElementValue
     /*
      * type = {'B', 'D', 'F', 'I', 'J', 'S', 'Z', 'C', 's'}
      */
-    public byte type;
+    public final byte type;
     public final int constValueIndex;
 
     public ElementValuePrimitiveType(byte tag, byte type, int constValueIndex)

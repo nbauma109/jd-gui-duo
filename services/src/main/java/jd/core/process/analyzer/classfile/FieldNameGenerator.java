@@ -70,7 +70,6 @@ public class FieldNameGenerator
                 }
                 sbName.append("Of");
             }
-
             switch(caSignature[index])
             {
             case 'B' :
@@ -106,8 +105,9 @@ public class FieldNameGenerator
                 while (index < length)
                 {
                     c = caSignature[index];
-                    if ((c == ';') || (c == '<'))
-                        break;
+                    if (c == ';' || c == '<') {
+						break;
+					}
                     index++;
                 }
 
@@ -134,8 +134,9 @@ public class FieldNameGenerator
                 }
 
                 // pass ';'
-                if (caSignature[index] == ';')
-                    index++;
+                if (caSignature[index] == ';') {
+					index++;
+				}
                 break;
             case 'S' :
                 sbName.append("Short");
@@ -181,8 +182,9 @@ public class FieldNameGenerator
                 // DEBUG
             }
 
-            if ((index >= length) || (caSignature[index] != '.'))
-                break;
+            if (index >= length || caSignature[index] != '.') {
+				break;
+			}
 
             sbName.append("_");
         }

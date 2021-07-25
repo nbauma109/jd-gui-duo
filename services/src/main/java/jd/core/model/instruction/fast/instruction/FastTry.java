@@ -25,8 +25,8 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
  */
 public class FastTry extends FastList
 {
-    public List<FastCatch>   catches;
-    public List<Instruction> finallyInstructions;
+    public final List<FastCatch>   catches;
+    public final List<Instruction> finallyInstructions;
 
     public FastTry(
             int opcode, int offset, int lineNumber, int branch,
@@ -40,19 +40,16 @@ public class FastTry extends FastList
 
     public static class FastCatch
     {
-        public int offset;
-        public int exceptionOffset;
-        public int exceptionTypeIndex;
-        public int otherExceptionTypeIndexes[];
-        public int localVarIndex;
-        public List<Instruction> instructions;
+        public final int exceptionOffset;
+        public final int exceptionTypeIndex;
+        public final int otherExceptionTypeIndexes[];
+        public final int localVarIndex;
+        public final List<Instruction> instructions;
 
-        public FastCatch(
-                int offset, int exceptionOffset, int exceptionTypeIndex,
+        public FastCatch(int exceptionOffset, int exceptionTypeIndex,
                 int otherExceptionTypeIndexes[], int localVarIndex,
                 List<Instruction> instructions)
         {
-            this.offset = offset;
             this.exceptionOffset = exceptionOffset;
             this.exceptionTypeIndex = exceptionTypeIndex;
             this.otherExceptionTypeIndexes = otherExceptionTypeIndexes;

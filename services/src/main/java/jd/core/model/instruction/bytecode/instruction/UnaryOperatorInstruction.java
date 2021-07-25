@@ -21,9 +21,9 @@ import jd.core.model.classfile.LocalVariables;
 
 public class UnaryOperatorInstruction extends Instruction
 {
-    private int priority;
-    public String signature;
-    public String operator;
+    private final int priority;
+    public final String signature;
+    public final String operator;
     public Instruction value;
 
     public UnaryOperatorInstruction(

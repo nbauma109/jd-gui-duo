@@ -76,7 +76,7 @@ public class LocalVariable
     {
         if (offset < this.startPc)
         {
-            this.length += (this.startPc - offset);
+            this.length += this.startPc - offset;
             this.startPc = offset;
         }
 
@@ -106,17 +106,21 @@ public class LocalVariable
     @Override
     public int compareTo(LocalVariable other)
     {
-        if (other == null)
-            return -1;
+        if (other == null) {
+			return -1;
+		}
 
-        if (this.nameIndex != other.nameIndex)
-            return this.nameIndex - other.nameIndex;
+        if (this.nameIndex != other.nameIndex) {
+			return this.nameIndex - other.nameIndex;
+		}
 
-        if (this.length != other.length)
-            return this.length - other.length;
+        if (this.length != other.length) {
+			return this.length - other.length;
+		}
 
-        if (this.startPc != other.startPc)
-            return this.startPc - other.startPc;
+        if (this.startPc != other.startPc) {
+			return this.startPc - other.startPc;
+		}
 
         return this.index - other.index;
     }

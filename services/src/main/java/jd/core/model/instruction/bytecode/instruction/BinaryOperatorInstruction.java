@@ -61,9 +61,9 @@ import jd.core.model.classfile.LocalVariables;
  */
 public class BinaryOperatorInstruction extends Instruction
 {
-    private int priority;
-    public String signature;
-    public String operator;
+    private final int priority;
+    public final String signature;
+    public final String operator;
     public Instruction value1;
     public Instruction value2;
 

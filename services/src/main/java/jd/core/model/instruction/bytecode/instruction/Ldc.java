@@ -33,17 +33,19 @@ public class Ldc extends LdcInstruction
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        if (constants == null)
-            return null;
+        if (constants == null) {
+			return null;
+		}
 
         Constant c = constants.get(this.index);
 
-        if (c == null)
-            return null;
+        if (c == null) {
+			return null;
+		}
 
         switch (c.getClass().getSimpleName())
         {
-       case "ConstantFloat":
+        case "ConstantFloat":
             return "F";
         case "ConstantInteger":
             return "I";

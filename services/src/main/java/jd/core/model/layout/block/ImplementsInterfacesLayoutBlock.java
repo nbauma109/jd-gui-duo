@@ -21,7 +21,7 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class ImplementsInterfacesLayoutBlock extends LayoutBlock
 {
-    public ClassFile classFile;
+    public final ClassFile classFile;
 
     public ImplementsInterfacesLayoutBlock(ClassFile classFile)
     {

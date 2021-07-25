@@ -56,13 +56,15 @@ public class AssignmentOperatorReconstructor
             {
             case Const.PUTSTATIC:
                 if (((PutStatic)i).valueref.opcode ==
-                		ByteCodeConstants.BINARYOP)
-                    reconstructPutStaticOperator(list, index, i);
+                		ByteCodeConstants.BINARYOP) {
+					reconstructPutStaticOperator(list, index, i);
+				}
                 break;
             case Const.PUTFIELD:
                 if (((PutField)i).valueref.opcode ==
-                		ByteCodeConstants.BINARYOP)
-                    index = reconstructPutFieldOperator(list, index, i);
+                		ByteCodeConstants.BINARYOP) {
+					index = reconstructPutFieldOperator(list, index, i);
+				}
                 break;
             case Const.ISTORE:
                 if (((StoreInstruction)i).valueref.opcode ==
@@ -70,8 +72,9 @@ public class AssignmentOperatorReconstructor
                 {
                     BinaryOperatorInstruction boi = (BinaryOperatorInstruction)
                         ((StoreInstruction)i).valueref;
-                    if (boi.value1.opcode == Const.ILOAD)
-                        reconstructStoreOperator(list, index, i, boi);
+                    if (boi.value1.opcode == Const.ILOAD) {
+						reconstructStoreOperator(list, index, i, boi);
+					}
                 }
                 break;
             case ByteCodeConstants.STORE:
@@ -80,14 +83,16 @@ public class AssignmentOperatorReconstructor
                 {
                     BinaryOperatorInstruction boi = (BinaryOperatorInstruction)
                         ((StoreInstruction)i).valueref;
-                    if (boi.value1.opcode == ByteCodeConstants.LOAD)
-                        reconstructStoreOperator(list, index, i, boi);
+                    if (boi.value1.opcode == ByteCodeConstants.LOAD) {
+						reconstructStoreOperator(list, index, i, boi);
+					}
                 }
                 break;
             case ByteCodeConstants.ARRAYSTORE:
                 if (((ArrayStoreInstruction)i).valueref.opcode ==
-                		ByteCodeConstants.BINARYOP)
-                    index = reconstructArrayOperator(list, index, i);
+                		ByteCodeConstants.BINARYOP) {
+					index = reconstructArrayOperator(list, index, i);
+				}
                 break;
             }
         }
@@ -103,14 +108,16 @@ public class AssignmentOperatorReconstructor
         BinaryOperatorInstruction boi =
             (BinaryOperatorInstruction)putStatic.valueref;
 
-        if (boi.value1.opcode != Const.GETSTATIC)
-            return;
+        if (boi.value1.opcode != Const.GETSTATIC) {
+			return;
+		}
 
         GetStatic getStatic = (GetStatic)boi.value1;
 
-        if ((putStatic.lineNumber != getStatic.lineNumber) ||
-            (putStatic.index != getStatic.index))
-            return;
+        if (putStatic.lineNumber != getStatic.lineNumber ||
+            putStatic.index != getStatic.index) {
+			return;
+		}
 
         String newOperator = boi.operator + "=";
 
@@ -131,16 +138,18 @@ public class AssignmentOperatorReconstructor
         BinaryOperatorInstruction boi =
             (BinaryOperatorInstruction)putField.valueref;
 
-        if (boi.value1.opcode != Const.GETFIELD)
-            return index;
+        if (boi.value1.opcode != Const.GETFIELD) {
+			return index;
+		}
 
         GetField getField = (GetField)boi.value1;
         CompareInstructionVisitor visitor = new CompareInstructionVisitor();
 
-        if ((putField.lineNumber != getField.lineNumber) ||
-            (putField.index != getField.index) ||
-            !visitor.visit(putField.objectref, getField.objectref))
-            return index;
+        if (putField.lineNumber != getField.lineNumber ||
+            putField.index != getField.index ||
+            !visitor.visit(putField.objectref, getField.objectref)) {
+			return index;
+		}
 
         if (putField.objectref.opcode == ByteCodeConstants.DUPLOAD)
         {
@@ -170,8 +179,9 @@ public class AssignmentOperatorReconstructor
         StoreInstruction si = (StoreInstruction)i;
         LoadInstruction li = (LoadInstruction)boi.value1;
 
-        if ((si.lineNumber != li.lineNumber) || (si.index != li.index))
-            return;
+        if (si.lineNumber != li.lineNumber || si.index != li.index) {
+			return;
+		}
 
         String newOperator = boi.operator + "=";
 
@@ -192,16 +202,18 @@ public class AssignmentOperatorReconstructor
         ArrayStoreInstruction asi = (ArrayStoreInstruction)i;
         BinaryOperatorInstruction boi = (BinaryOperatorInstruction)asi.valueref;
 
-        if (boi.value1.opcode != ByteCodeConstants.ARRAYLOAD)
-            return index;
+        if (boi.value1.opcode != ByteCodeConstants.ARRAYLOAD) {
+			return index;
+		}
 
         ArrayLoadInstruction ali = (ArrayLoadInstruction)boi.value1;
         CompareInstructionVisitor visitor = new CompareInstructionVisitor();
 
-        if ((asi.lineNumber != ali.lineNumber) ||
+        if (asi.lineNumber != ali.lineNumber ||
             !visitor.visit(asi.arrayref, ali.arrayref) ||
-            !visitor.visit(asi.indexref, ali.indexref))
-            return index;
+            !visitor.visit(asi.indexref, ali.indexref)) {
+			return index;
+		}
 
         if (asi.arrayref.opcode == ByteCodeConstants.DUPLOAD)
         {

@@ -54,7 +54,7 @@ public class ByteCodeConstants
     public static final int COMPLEXIF                 = 284;
     public static final int OUTERTHIS                 = 285;
     public static final int ASSERT                    = 286;
-    
+
 	/**
 	 * Types Bit Fields
 	 */
@@ -63,27 +63,24 @@ public class ByteCodeConstants
 	public static final byte TBF_INT_SHORT   = 4;
 	public static final byte TBF_INT_INT     = 8;
 	public static final byte TBF_INT_BOOLEAN = 16;
-	
+
 	/**
 	 * Binary operator constants
 	 */
 	public static final int CMP_AND          = 0;
 	public static final int CMP_NONE         = 1;
 	public static final int CMP_OR           = 2;
-	
+
 
 	public static final int CMP_MAX_INDEX = 7;
-	
+
 	public static final int CMP_EQ  = 0;
 	public static final int CMP_LT  = 1;
-	public static final int CMP_GT  = 2;	
-	public static final int CMP_UEQ = 3;	
-	public static final int CMP_UNE = 4;	
+	public static final int CMP_GT  = 2;
+	public static final int CMP_UEQ = 3;
+	public static final int CMP_UNE = 4;
 	public static final int CMP_LE  = 5;
 	public static final int CMP_GE  = 6;
 	public static final int CMP_NE  = 7;
-	
-	public static final String[] CMP_NAMES = { 
-		"==", "<", ">", "", "!", "<=", ">=", "!=" };
-	
+
 }

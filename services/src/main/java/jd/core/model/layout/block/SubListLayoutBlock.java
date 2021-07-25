@@ -20,7 +20,7 @@ import java.util.List;
 
 public class SubListLayoutBlock extends LayoutBlock
 {
-    public List<LayoutBlock> subList;
+    public final List<LayoutBlock> subList;
 
     public SubListLayoutBlock(
         byte tag, List<LayoutBlock> subList,

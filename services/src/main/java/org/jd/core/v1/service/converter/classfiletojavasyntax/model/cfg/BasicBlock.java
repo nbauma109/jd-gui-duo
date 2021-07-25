@@ -339,7 +339,8 @@ public class BasicBlock {
                 throw new IllegalStateException("Invalid condition");
         }
     }
-        public void endCondition() {
+
+    public void endCondition() {
         setNext(END);
         setBranch(END);
     }

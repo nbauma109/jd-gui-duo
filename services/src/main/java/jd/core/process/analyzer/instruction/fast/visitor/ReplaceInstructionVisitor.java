@@ -120,7 +120,7 @@ public class ReplaceInstructionVisitor
                 {
                     visit(ai.test);
 
-                    if ((this.oldInstruction == null) && (ai.msg != null))
+                    if (this.oldInstruction == null && ai.msg != null)
                     {
                         if (ai.msg.offset == this.offset)
                         {
@@ -296,8 +296,9 @@ public class ReplaceInstructionVisitor
             {
                 List<Instruction> branchList =
                     ((ComplexConditionalBranchInstruction)instruction).instructions;
-                for (int i=branchList.size()-1; i>=0; --i)
-                    visit(branchList.get(i));
+                for (int i=branchList.size()-1; i>=0; --i) {
+					visit(branchList.get(i));
+				}
             }
             break;
         case Const.INSTANCEOF:
@@ -334,7 +335,7 @@ public class ReplaceInstructionVisitor
         case Const.INVOKESTATIC:
             {
                 List<Instruction> list = ((InvokeInstruction)instruction).args;
-                for (int i=list.size()-1; (i>=0) && (this.oldInstruction == null); --i)
+                for (int i=list.size()-1; i>=0 && this.oldInstruction == null; --i)
                 {
                     Instruction instuction = list.get(i);
                     if (instuction.offset == this.offset)
@@ -352,7 +353,7 @@ public class ReplaceInstructionVisitor
         case ByteCodeConstants.INVOKENEW:
             {
                 List<Instruction> list = ((InvokeNew)instruction).args;
-                for (int i=list.size()-1; (i>=0) && (this.oldInstruction == null); --i)
+                for (int i=list.size()-1; i>=0 && this.oldInstruction == null; --i)
                 {
                     Instruction instuction = list.get(i);
                     if (instuction.offset == this.offset)
@@ -412,7 +413,7 @@ public class ReplaceInstructionVisitor
         case Const.MULTIANEWARRAY:
             {
                 Instruction[] dimensions = ((MultiANewArray)instruction).dimensions;
-                for (int i=dimensions.length-1; (i>=0) && (this.oldInstruction == null); --i)
+                for (int i=dimensions.length-1; i>=0 && this.oldInstruction == null; --i)
                 {
                     if (dimensions[i].offset == this.offset)
                     {
@@ -593,8 +594,9 @@ public class ReplaceInstructionVisitor
                 {
                     visit(iai.newArray);
 
-                    if (iai.values != null)
-                        visit(iai.values);
+                    if (iai.values != null) {
+						visit(iai.values);
+					}
                 }
             }
             break;
@@ -646,11 +648,13 @@ public class ReplaceInstructionVisitor
 
                 if (this.oldInstruction == null)
                 {
-                    if (ft.finallyInstructions != null)
-                        visit(ft.finallyInstructions);
+                    if (ft.finallyInstructions != null) {
+						visit(ft.finallyInstructions);
+					}
 
-                    for (int i=ft.catches.size()-1; (i>=0) && (this.oldInstruction == null); --i)
-                        visit(ft.catches.get(i).instructions);
+                    for (int i=ft.catches.size()-1; i>=0 && this.oldInstruction == null; --i) {
+						visit(ft.catches.get(i).instructions);
+					}
                 }
             }
             break;
@@ -685,8 +689,9 @@ public class ReplaceInstructionVisitor
                 {
                     visit(fsy.monitor);
 
-                    if (this.oldInstruction == null)
-                        visit(fsy.instructions);
+                    if (this.oldInstruction == null) {
+						visit(fsy.instructions);
+					}
                 }
             }
             break;
@@ -703,9 +708,10 @@ public class ReplaceInstructionVisitor
                 {
                     visit(ftl.test);
 
-                    if ((this.oldInstruction == null) &&
-                        (ftl.instructions != null))
-                        visit(ftl.instructions);
+                    if (this.oldInstruction == null &&
+                        ftl.instructions != null) {
+						visit(ftl.instructions);
+					}
                 }
             }
             break;
@@ -745,8 +751,9 @@ public class ReplaceInstructionVisitor
 
     private void visit(List<Instruction> instructions)
     {
-        for (int i=instructions.size()-1; i>=0; --i)
-            visit(instructions.get(i));
+        for (int i=instructions.size()-1; i>=0; --i) {
+			visit(instructions.get(i));
+		}
     }
 
     public Instruction getOldInstruction()

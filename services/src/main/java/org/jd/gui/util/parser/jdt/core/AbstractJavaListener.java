@@ -27,12 +27,10 @@ public abstract class AbstractJavaListener extends ASTVisitor {
     }
 
     protected static String nameToString(Name name) {
-        if (name instanceof SimpleName) {
-            SimpleName simpleName = (SimpleName) name;
+        if (name instanceof SimpleName simpleName) {
             return simpleName.getIdentifier();
         }
-        if (name instanceof QualifiedName) {
-            QualifiedName qualifiedName = (QualifiedName) name;
+        if (name instanceof QualifiedName qualifiedName) {
             Name qualifier = qualifiedName.getQualifier();
             String identifier = qualifiedName.getName().getIdentifier();
             return String.join("/", nameToString(qualifier), identifier);
@@ -49,8 +47,7 @@ public abstract class AbstractJavaListener extends ASTVisitor {
     @Override
     public boolean visit(ImportDeclaration node) {
         Name name = node.getName();
-        if (name instanceof QualifiedName) {
-            QualifiedName qualifiedName = (QualifiedName) name;
+        if (name instanceof QualifiedName qualifiedName) {
             String simpleName = qualifiedName.getName().getIdentifier();
             String internalTypeName = nameToString(name);
             nameToInternalTypeName.put(simpleName, internalTypeName);
@@ -93,16 +90,13 @@ public abstract class AbstractJavaListener extends ASTVisitor {
     }
 
     protected static String typeToString(Type type) {
-        if (type instanceof ArrayType) {
-            ArrayType arrayType = (ArrayType) type;
+        if (type instanceof ArrayType arrayType) {
             return typeToString(arrayType.getElementType());
         }
-        if (type instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) type;
+        if (type instanceof ParameterizedType parameterizedType) {
             return typeToString(parameterizedType.getType());
         }
-        if (type instanceof QualifiedType) {
-            QualifiedType qualifiedType = (QualifiedType) type;
+        if (type instanceof QualifiedType qualifiedType) {
             Type qualifierType = qualifiedType.getQualifier();
             String qualifiedIdentifier = qualifiedType.getName().getIdentifier();
             return String.join("/", typeToString(qualifierType), qualifiedIdentifier);
@@ -110,8 +104,7 @@ public abstract class AbstractJavaListener extends ASTVisitor {
         if (type instanceof SimpleType) {
             return nameToString(((SimpleType) type).getName());
         }
-        if (type instanceof NameQualifiedType) {
-            NameQualifiedType nameQualifiedType = (NameQualifiedType) type;
+        if (type instanceof NameQualifiedType nameQualifiedType) {
             String qualifiedIdentifier = nameQualifiedType.getName().getIdentifier();
             return String.join("/", nameToString(nameQualifiedType.getQualifier()), qualifiedIdentifier);
         }
@@ -119,29 +112,23 @@ public abstract class AbstractJavaListener extends ASTVisitor {
     }
 
     protected String resolveInternalTypeName(Type type) {
-        if (type instanceof ArrayType) {
-            ArrayType arrayType = (ArrayType) type;
+        if (type instanceof ArrayType arrayType) {
             return resolveInternalTypeName(arrayType.getElementType());
         }
-        if (type instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) type;
+        if (type instanceof ParameterizedType parameterizedType) {
             return resolveInternalTypeName(parameterizedType.getType());
         }
-        if (type instanceof QualifiedType) {
-            QualifiedType qualifiedType = (QualifiedType) type;
+        if (type instanceof QualifiedType qualifiedType) {
             Type qualifierType = qualifiedType.getQualifier();
             String qualifiedIdentifier = qualifiedType.getName().getIdentifier();
             return String.join("/", resolveInternalTypeName(qualifierType), qualifiedIdentifier);
         }
-        if (type instanceof NameQualifiedType) {
-            NameQualifiedType nameQualifiedType = (NameQualifiedType) type;
+        if (type instanceof NameQualifiedType nameQualifiedType) {
             return nameToString(nameQualifiedType.getName());
         }
-        if (type instanceof SimpleType) {
-            SimpleType simpleType = (SimpleType) type;
+        if (type instanceof SimpleType simpleType) {
             Name simpleTypeName = simpleType.getName();
-            if (simpleTypeName instanceof SimpleName) {
-                SimpleName simpleName = (SimpleName) simpleTypeName;
+            if (simpleTypeName instanceof SimpleName simpleName) {
                 String name = simpleName.getIdentifier();
                 // Search in cache
                 String qualifiedName = typeNameCache.get(name);
@@ -224,37 +211,18 @@ public abstract class AbstractJavaListener extends ASTVisitor {
             name = "L" + resolveInternalTypeName(type) + ";";
         } else {
             // Search primitive
-            switch (primitive.getPrimitiveTypeCode().toString()) {
-            case "boolean":
-                name = "Z";
-                break;
-            case "byte":
-                name = "B";
-                break;
-            case "char":
-                name = "C";
-                break;
-            case "double":
-                name = "D";
-                break;
-            case "float":
-                name = "F";
-                break;
-            case "int":
-                name = "I";
-                break;
-            case "long":
-                name = "J";
-                break;
-            case "short":
-                name = "S";
-                break;
-            case "void":
-                name = "V";
-                break;
-            default:
-                throw new IllegalStateException("UNEXPECTED PRIMITIVE");
-            }
+			name = switch (primitive.getPrimitiveTypeCode().toString()) {
+				case "boolean" -> "Z";
+				case "byte" -> "B";
+				case "char" -> "C";
+				case "double" -> "D";
+				case "float" -> "F";
+				case "int" -> "I";
+				case "long" -> "J";
+				case "short" -> "S";
+				case "void" -> "V";
+				default -> throw new IllegalStateException("UNEXPECTED PRIMITIVE");
+			};
         }
 
         switch (dimension) {
@@ -281,7 +249,7 @@ public abstract class AbstractJavaListener extends ASTVisitor {
             }
         }
 
-        return (paramDescriptors == null) ? "()" : paramDescriptors.append(')').toString();
+        return paramDescriptors == null ? "()" : paramDescriptors.append(')').toString();
     }
 
     protected int countDimension(Type type) {

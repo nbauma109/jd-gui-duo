@@ -21,7 +21,7 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class MarkerLayoutBlock extends LayoutBlock
 {
-    public ClassFile classFile;
+    public final ClassFile classFile;
     public MarkerLayoutBlock other;
 
     public MarkerLayoutBlock(byte tag, ClassFile classFile)

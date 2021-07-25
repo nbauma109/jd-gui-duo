@@ -50,12 +50,14 @@ public class ClassFileDeserializer
         throws LoaderException
     {
     	ClassFile classFile = loadSingleClass(loader, internalClassPath);
-        if (classFile == null)
-            return null;
+        if (classFile == null) {
+			return null;
+		}
 
         AttributeInnerClasses aics = classFile.getAttributeInnerClasses();
-        if (aics == null)
-            return classFile;
+        if (aics == null) {
+			return classFile;
+		}
 
         String internalClassPathPrefix =
             internalClassPath.substring(
@@ -73,8 +75,9 @@ public class ClassFileDeserializer
             String innerInternalClassPath =
                 constants.getConstantClassName(cs[i].getInnerClassIndex());
 
-            if (! innerInternalClassPath.startsWith(innerInternalClassNamePrefix))
-                continue;
+            if (! innerInternalClassPath.startsWith(innerInternalClassNamePrefix)) {
+				continue;
+			}
             int offsetInternalInnerSeparator = innerInternalClassPath.indexOf(
                 StringConstants.INTERNAL_INNER_SEPARATOR,
                 innerInternalClassNamePrefix.length());
@@ -83,9 +86,10 @@ public class ClassFileDeserializer
                 String tmpInnerInternalClassPath =
                     innerInternalClassPath.substring(0, offsetInternalInnerSeparator) +
                     StringConstants.CLASS_FILE_SUFFIX;
-                if (loader.canLoad(tmpInnerInternalClassPath))
-                    // 'innerInternalClassName' is not a direct inner class.
+                if (loader.canLoad(tmpInnerInternalClassPath)) {
+					// 'innerInternalClassName' is not a direct inner class.
                     continue;
+				}
             }
 
             try
@@ -178,7 +182,6 @@ public class ClassFileDeserializer
 
         for (int i=1; i<count; i++) {
         	byte tag = di.readByte();
-
             switch (tag) {
                 case Const.CONSTANT_Module, Const.CONSTANT_Package, Const.CONSTANT_Class:
                     constants[i] = new ConstantClass(di.readUnsignedShort());
@@ -205,10 +208,12 @@ public class ClassFileDeserializer
                 	constants[i] = new ConstantFloat(di.readFloat());
                 	break;
                 case Const.CONSTANT_Long:
-                	constants[i++] = new ConstantLong(di.readLong());
+                	constants[i] = new ConstantLong(di.readLong());
+                	i++;
                 	break;
                 case Const.CONSTANT_Double:
-                	constants[i++] = new ConstantDouble(di.readDouble());
+                	constants[i] = new ConstantDouble(di.readDouble());
+                	i++;
                 	break;
                 case Const.CONSTANT_NameAndType:
                 	constants[i] = new ConstantNameAndType(di.readUnsignedShort(),
@@ -240,13 +245,15 @@ public class ClassFileDeserializer
         throws IOException
     {
         int count = di.readUnsignedShort();
-        if (count == 0)
-            return null;
+        if (count == 0) {
+			return null;
+		}
 
         int[] interfaces = new int[count];
 
-        for (int i=0; i<count; i++)
-            interfaces[i] = di.readUnsignedShort();
+        for (int i=0; i<count; i++) {
+			interfaces[i] = di.readUnsignedShort();
+		}
 
         return interfaces;
     }
@@ -256,17 +263,19 @@ public class ClassFileDeserializer
         throws IOException
     {
         int count = di.readUnsignedShort();
-        if (count == 0)
-            return null;
+        if (count == 0) {
+			return null;
+		}
 
         Field[] fieldInfos = new Field[count];
 
-        for (int i=0; i<count; i++)
-            fieldInfos[i] = new Field(
+        for (int i=0; i<count; i++) {
+			fieldInfos[i] = new Field(
                         di.readUnsignedShort(),
                         di.readUnsignedShort(),
                         di.readUnsignedShort(),
                         AttributeDeserializer.deserialize(di, constantPool));
+		}
 
         return fieldInfos;
     }
@@ -276,17 +285,19 @@ public class ClassFileDeserializer
         throws IOException
     {
         int count = di.readUnsignedShort();
-        if (count == 0)
-            return null;
+        if (count == 0) {
+			return null;
+		}
 
         Method[] methodInfos = new Method[count];
 
-        for (int i=0; i<count; i++)
-            methodInfos[i] = new Method(
+        for (int i=0; i<count; i++) {
+			methodInfos[i] = new Method(
                         di.readUnsignedShort(),
                         di.readUnsignedShort(),
                         di.readUnsignedShort(),
                         AttributeDeserializer.deserialize(di, constants));
+		}
 
         return methodInfos;
     }
@@ -296,7 +307,8 @@ public class ClassFileDeserializer
     {
         int magic = di.readInt();
 
-        if(magic != CoreConstants.JAVA_MAGIC_NUMBER)
-          throw new ClassFormatException("Invalid Java .class file");
+        if(magic != CoreConstants.JAVA_MAGIC_NUMBER) {
+			throw new ClassFormatException("Invalid Java .class file");
+		}
     }
 }

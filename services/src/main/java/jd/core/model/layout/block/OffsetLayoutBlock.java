@@ -18,7 +18,7 @@ package jd.core.model.layout.block;
 
 public class OffsetLayoutBlock extends LayoutBlock
 {
-    public int offset;
+    public final int offset;
 
     public OffsetLayoutBlock(
         byte tag, int firstLineNumber, int lastLineNumber,

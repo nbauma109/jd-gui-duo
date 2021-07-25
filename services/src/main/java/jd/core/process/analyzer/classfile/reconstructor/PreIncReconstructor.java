@@ -44,37 +44,42 @@ public class PreIncReconstructor
 
         for (int dupStoreIndex=0; dupStoreIndex<length; dupStoreIndex++)
         {
-            if (list.get(dupStoreIndex).opcode != ByteCodeConstants.DUPSTORE)
-                continue;
+            if (list.get(dupStoreIndex).opcode != ByteCodeConstants.DUPSTORE) {
+				continue;
+			}
 
             // DupStore trouvé
             DupStore dupstore = (DupStore)list.get(dupStoreIndex);
 
-            if ((dupstore.objectref.opcode != ByteCodeConstants.BINARYOP))
-                continue;
+            if (dupstore.objectref.opcode != ByteCodeConstants.BINARYOP) {
+				continue;
+			}
 
             BinaryOperatorInstruction boi =
                 (BinaryOperatorInstruction)dupstore.objectref;
 
-            if ((boi.value2.opcode != ByteCodeConstants.ICONST) &&
-                (boi.value2.opcode != ByteCodeConstants.LCONST) &&
-                (boi.value2.opcode != ByteCodeConstants.DCONST) &&
-                (boi.value2.opcode != ByteCodeConstants.FCONST))
-                continue;
+            if (boi.value2.opcode != ByteCodeConstants.ICONST &&
+                boi.value2.opcode != ByteCodeConstants.LCONST &&
+                boi.value2.opcode != ByteCodeConstants.DCONST &&
+                boi.value2.opcode != ByteCodeConstants.FCONST) {
+				continue;
+			}
 
             ConstInstruction ci = (ConstInstruction)boi.value2;
 
-            if (ci.value != 1)
-                continue;
+            if (ci.value != 1) {
+				continue;
+			}
 
             int value;
 
-            if (boi.operator.equals("+"))
-                value = 1;
-            else if (boi.operator.equals("-"))
-                value = -1;
-            else
-                continue;
+            if (boi.operator.equals("+")) {
+				value = 1;
+			} else if (boi.operator.equals("-")) {
+				value = -1;
+			} else {
+				continue;
+			}
 
             int xstorePutfieldPutstaticIndex = dupStoreIndex;
 
@@ -82,48 +87,53 @@ public class PreIncReconstructor
             {
                 Instruction i = list.get(xstorePutfieldPutstaticIndex);
                 Instruction dupload = null;
-
                 switch (i.opcode)
                 {
                 case Const.ASTORE:
-                    if ((boi.value1.opcode == Const.ALOAD) &&
-                        (((StoreInstruction)i).valueref.opcode == ByteCodeConstants.DUPLOAD) &&
-                        (((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index))
-                        // 1er DupLoad trouvé
+                    if (boi.value1.opcode == Const.ALOAD &&
+                        ((StoreInstruction)i).valueref.opcode == ByteCodeConstants.DUPLOAD &&
+                        ((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index) {
+						// 1er DupLoad trouvé
                         dupload = ((StoreInstruction)i).valueref;
-                        break;
+					}
+                    break;
                 case Const.ISTORE:
-                    if ((boi.value1.opcode == Const.ILOAD) &&
-                        (((StoreInstruction)i).valueref.opcode == ByteCodeConstants.DUPLOAD) &&
-                        (((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index))
-                        // 1er DupLoad trouvé
+                    if (boi.value1.opcode == Const.ILOAD &&
+                        ((StoreInstruction)i).valueref.opcode == ByteCodeConstants.DUPLOAD &&
+                        ((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index) {
+						// 1er DupLoad trouvé
                         dupload = ((StoreInstruction)i).valueref;
-                        break;
+					}
+                    break;
                 case ByteCodeConstants.STORE:
-                    if ((boi.value1.opcode == ByteCodeConstants.LOAD) &&
-                        (((StoreInstruction)i).valueref.opcode == ByteCodeConstants.DUPLOAD) &&
-                        (((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index))
-                        // 1er DupLoad trouvé
+                    if (boi.value1.opcode == ByteCodeConstants.LOAD &&
+                        ((StoreInstruction)i).valueref.opcode == ByteCodeConstants.DUPLOAD &&
+                        ((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index) {
+						// 1er DupLoad trouvé
                         dupload = ((StoreInstruction)i).valueref;
+					}
                     break;
                 case Const.PUTFIELD:
-                    if ((boi.value1.opcode == Const.GETFIELD) &&
-                        (((PutField)i).valueref.opcode == ByteCodeConstants.DUPLOAD) &&
-                        (((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index))
-                        // 1er DupLoad trouvé
+                    if (boi.value1.opcode == Const.GETFIELD &&
+                        ((PutField)i).valueref.opcode == ByteCodeConstants.DUPLOAD &&
+                        ((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index) {
+						// 1er DupLoad trouvé
                         dupload = ((PutField)i).valueref;
+					}
                     break;
                 case Const.PUTSTATIC:
-                    if ((boi.value1.opcode == Const.GETSTATIC) &&
-                        (((PutStatic)i).valueref.opcode == ByteCodeConstants.DUPLOAD) &&
-                        (((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index))
-                        // 1er DupLoad trouvé
+                    if (boi.value1.opcode == Const.GETSTATIC &&
+                        ((PutStatic)i).valueref.opcode == ByteCodeConstants.DUPLOAD &&
+                        ((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index) {
+						// 1er DupLoad trouvé
                         dupload = ((PutStatic)i).valueref;
+					}
                     break;
                 }
 
-                if ((dupload == null) || (dupload.offset != dupstore.offset))
-                    continue;
+                if (dupload == null || dupload.offset != dupstore.offset) {
+					continue;
+				}
 
                 Instruction preinc = new IncInstruction(
                     ByteCodeConstants.PREINC, boi.offset,

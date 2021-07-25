@@ -29,11 +29,11 @@ public class LayoutBlock {
 
     public byte tag;
 
-    public int firstLineNumber;
-    public int lastLineNumber;
+    public final int firstLineNumber;
+    public final int lastLineNumber;
 
-    public int minimalLineCount;
-    public int maximalLineCount;
+    public final int minimalLineCount;
+    public final int maximalLineCount;
     public int preferedLineCount;
 
     public int lineCount;

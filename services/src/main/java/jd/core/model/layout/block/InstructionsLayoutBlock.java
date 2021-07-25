@@ -24,7 +24,7 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class InstructionsLayoutBlock extends LayoutBlock
 {
-    public ClassFile classFile;
+    public final ClassFile classFile;
     public Method method;
     public List<Instruction> instructions;
     public int firstIndex;

@@ -20,7 +20,7 @@ public class StringToIndexMap
 {
     private static final int INITIAL_CAPACITY = 128*2;
 
-    private HashEntry[] entries;
+    private final HashEntry[] entries;
 
     public StringToIndexMap()
     {
@@ -35,7 +35,7 @@ public class StringToIndexMap
 
         while (entry != null)
         {
-            if ((entry.hash == hashCode) && key.equals(entry.key))
+            if (entry.hash == hashCode && key.equals(entry.key))
             {
                 entry.value = value;
                 return;
@@ -55,8 +55,9 @@ public class StringToIndexMap
 
          while (entry != null)
          {
-             if ((entry.hash == hashCode) && key.equals(entry.key))
-                 return entry.value;
+             if (entry.hash == hashCode && key.equals(entry.key)) {
+				return entry.value;
+			}
             entry = entry.next;
          }
 
@@ -70,10 +71,10 @@ public class StringToIndexMap
 
     private static class HashEntry
     {
-        public String key;
-        public int hash;
-        public int value;
-        public HashEntry next;
+        private final String key;
+        private final int hash;
+        private int value;
+        private final HashEntry next;
 
         public HashEntry(String key, int hash, int value, HashEntry next)
         {

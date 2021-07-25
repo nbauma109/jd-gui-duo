@@ -24,7 +24,7 @@ public abstract class Instruction
     public static final int UNKNOWN_LINE_NUMBER = 0;
 
     public int opcode;
-    public int offset;
+    public final int offset;
     public int lineNumber;
 
     protected Instruction(int opcode, int offset, int lineNumber)

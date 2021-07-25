@@ -39,12 +39,13 @@ import jd.core.model.reference.ReferenceMap;
 import jd.core.printer.InstructionPrinter;
 import jd.core.process.writer.ConstantValueWriter;
 import jd.core.process.writer.SignatureWriter;
-import jd.core.util.SignatureUtil;
-import jd.core.util.StringUtil;
-import jd.core.util.UtilConstants;
+import jd.core.util.*;
 
 public class SourceWriterVisitor
 {
+	protected static final String[] CMP_NAMES = {
+			"==", "<", ">", "", "!", "<=", ">=", "!=" };
+
     protected Loader loader;
     protected InstructionPrinter printer;
     protected ReferenceMap referenceMap;
@@ -317,9 +318,8 @@ public class SourceWriterVisitor
                     String signature;
                     Constant c = constants.get(checkCast.index);
 
-                    if (c instanceof ConstantUtf8)
+                    if (c instanceof ConstantUtf8 cutf8)
                     {
-                        ConstantUtf8 cutf8 = (ConstantUtf8)c;
                         signature = cutf8.getBytes();
                     }
                     else
@@ -918,7 +918,7 @@ public class SourceWriterVisitor
             else if ("Z".equals(signature))
             {
                 this.printer.printKeyword(
-                    lineNumber, (value == 0) ? "false" : "true");
+                    lineNumber, value == 0 ? "false" : "true");
             }
             else
             {
@@ -1126,7 +1126,7 @@ public class SourceWriterVisitor
             ifInstruction.offset <= this.lastOffset)
         {
             this.printer.print(' ');
-            this.printer.print(ByteCodeConstants.CMP_NAMES[ifInstruction.cmp]);
+            this.printer.print(CMP_NAMES[ifInstruction.cmp]);
             this.printer.print(' ');
             this.printer.printNumeric("0");
         }
@@ -1143,7 +1143,7 @@ public class SourceWriterVisitor
             nextOffset <= this.lastOffset)
         {
             this.printer.print(lineNumber, ' ');
-            this.printer.print(ByteCodeConstants.CMP_NAMES[ifCmpInstruction.cmp]);
+            this.printer.print(CMP_NAMES[ifCmpInstruction.cmp]);
             this.printer.print(' ');
         }
 
@@ -1158,7 +1158,7 @@ public class SourceWriterVisitor
             ifXNull.offset <= this.lastOffset)
         {
             this.printer.print(lineNumber, ' ');
-            this.printer.print(ByteCodeConstants.CMP_NAMES[ifXNull.cmp]);
+            this.printer.print(CMP_NAMES[ifXNull.cmp]);
             this.printer.print(' ');
             this.printer.printKeyword("null");
         }
@@ -1175,7 +1175,7 @@ public class SourceWriterVisitor
         if (length > 1)
         {
             String operator =
-                (ccbi.cmp==ByteCodeConstants.CMP_AND) ? " && " : " || ";
+                ccbi.cmp==ByteCodeConstants.CMP_AND ? " && " : " || ";
             Instruction instruction = branchList.get(0);
             int lineNumber = instruction.lineNumber;
 
@@ -2027,10 +2027,9 @@ public class SourceWriterVisitor
             // instruction LDC pointant un objet de type 'ConstantClass'.
             Constant cst = constants.get(ii.index);
 
-            if (cst instanceof ConstantClass)
+            if (cst instanceof ConstantClass cc)
             {
                 // Exception a la regle
-                ConstantClass cc = (ConstantClass)cst;
                 String signature = SignatureUtil.createTypeName(
                     constants.getConstantUtf8(cc.getNameIndex()));
 

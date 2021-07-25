@@ -256,7 +256,7 @@ public class ClassFileAnalyzer
                     // Key = indexe du nom de na classe interne dans le
                     // pool de constantes de la classe externe
                     outerClassFile.getSwitchMaps().put(
-                        Integer.valueOf(outerFieldNameIndex), enumNameIndexes);
+                        outerFieldNameIndex, enumNameIndexes);
 
                     index -= 3;
                 }
@@ -298,9 +298,8 @@ public class ClassFileAnalyzer
         {
             constant = constants.get(i);
 
-            if (constant instanceof ConstantMethodref)
+            if (constant instanceof ConstantMethodref cmr)
             {
-                ConstantMethodref cmr = (ConstantMethodref)constant;
                 ConstantNameAndType cnat =
                     constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 
@@ -619,7 +618,7 @@ public class ClassFileAnalyzer
             }
 
             classFile.getSwitchMaps().put(
-                Integer.valueOf(method.getNameIndex()), enumNameIndexes);
+                method.getNameIndex(), enumNameIndexes);
         }
         else if (length >= 7 &&
                 list.get(0).opcode == Const.ASTORE &&
@@ -664,7 +663,7 @@ public class ClassFileAnalyzer
             }
 
             classFile.getSwitchMaps().put(
-                Integer.valueOf(method.getNameIndex()), enumNameIndexes);
+                method.getNameIndex(), enumNameIndexes);
         }
     }
 
@@ -767,7 +766,7 @@ public class ClassFileAnalyzer
         // méthodes externes si la classe courante est une classe interne ou
         // si elle contient des classes internes
         OuterReferenceReconstructor outerReferenceReconstructor =
-            (innerClassesMap != null) ?
+            innerClassesMap != null ?
                 new OuterReferenceReconstructor(innerClassesMap, classFile) : null;
 
         for (int i=0; i<length; i++)
@@ -903,7 +902,7 @@ public class ClassFileAnalyzer
         // Is parameters counter greater than 0 ?
         AttributeSignature as = method.getAttributeSignature();
         String methodSignature = constants.getConstantUtf8(
-            (as==null) ? method.getDescriptorIndex() : as.signatureIndex);
+            as==null ? method.getDescriptorIndex() : as.signatureIndex);
 
         if (methodSignature.charAt(1) == ')') {
             return 0;
@@ -1308,8 +1307,8 @@ public class ClassFileAnalyzer
 
             instruction = field.getValueAndMethod().getValue();
 
-            if ((instruction.opcode != ByteCodeConstants.INITARRAY &&
-                 instruction.opcode != ByteCodeConstants.NEWANDINITARRAY) ||
+            if (instruction.opcode != ByteCodeConstants.INITARRAY &&
+                 instruction.opcode != ByteCodeConstants.NEWANDINITARRAY ||
                 !constants.getConstantUtf8(field.getDescriptorIndex()).equals(enumArraySignature)) {
                 continue;
             }

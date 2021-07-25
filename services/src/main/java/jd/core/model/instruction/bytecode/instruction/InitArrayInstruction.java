@@ -24,7 +24,7 @@ import jd.core.model.classfile.LocalVariables;
 public class InitArrayInstruction extends Instruction
 {
     public Instruction newArray;
-    public List<Instruction> values;
+    public final List<Instruction> values;
 
     public InitArrayInstruction(
             int opcode, int offset, int lineNumber,

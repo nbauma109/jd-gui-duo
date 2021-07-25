@@ -42,8 +42,9 @@ public class SignatureAnalyzer
         index = analyzeSignature(referenceMap, caSignature, length, index);
 
         //Interfaces
-        while (index < signature.length())
-            index = analyzeSignature(referenceMap, caSignature, length, index);
+        while (index < signature.length()) {
+			index = analyzeSignature(referenceMap, caSignature, length, index);
+		}
         }
         catch (RuntimeException e) // DEBUG //
         {
@@ -64,15 +65,17 @@ public class SignatureAnalyzer
         // Affichage des generics
         index = analyzeGenerics(referenceMap, caSignature, length, index);
 
-        if (caSignature[index] != '(')
-            throw new SignatureFormatException(signature);
+        if (caSignature[index] != '(') {
+			throw new SignatureFormatException(signature);
+		}
 
         // pass '('
         index++;
 
         // Arguments
-        while (caSignature[index] != ')')
-            index = analyzeSignature(referenceMap, caSignature, length, index);
+        while (caSignature[index] != ')') {
+			index = analyzeSignature(referenceMap, caSignature, length, index);
+		}
 
         // pass ')'
         index++;
@@ -113,13 +116,15 @@ public class SignatureAnalyzer
                 index = CharArrayUtil.indexOf(caSignature, ':', index) + 1;
 
                 // Mystere ...
-                if (caSignature[index] == ':')
-                    index++;
+                if (caSignature[index] == ':') {
+					index++;
+				}
 
                 index = analyzeSignature(referenceMap, caSignature, length, index);
 
-                if (caSignature[index] == '>')
-                    break;
+                if (caSignature[index] == '>') {
+					break;
+				}
             }
 
             index++;
@@ -141,9 +146,9 @@ public class SignatureAnalyzer
             {
                 while (++index < length)
                 {
-                    if ((caSignature[index] == 'L') &&
-                        (index+1 < length) &&
-                        (caSignature[index+1] == '['))
+                    if (caSignature[index] == 'L' &&
+                        index+1 < length &&
+                        caSignature[index+1] == '[')
                     {
                         index++;
                         length--;
@@ -154,11 +159,10 @@ public class SignatureAnalyzer
                     }
                 }
             }
-
             switch(caSignature[index])
             {
             case 'L' : case '.' :
-                boolean classFlag = (caSignature[index] == 'L');
+                boolean classFlag = caSignature[index] == 'L';
                 int beginIndex = ++index;
                 c = '.';
 
@@ -166,31 +170,35 @@ public class SignatureAnalyzer
                 while (index < length)
                 {
                     c = caSignature[index];
-                    if ((c == ';') || (c == '<'))
-                        break;
+                    if (c == ';' || c == '<') {
+						break;
+					}
                     index++;
                 }
 
-                if (classFlag)
-                    referenceMap.add(
+                if (classFlag) {
+					referenceMap.add(
                         CharArrayUtil.substring(caSignature, beginIndex, index));
+				}
 
                 if (c == '<')
                 {
                     // pass '<'
                     index++;
 
-                    while (caSignature[index] != '>')
-                        index = analyzeSignature(
+                    while (caSignature[index] != '>') {
+						index = analyzeSignature(
                             referenceMap, caSignature, length, index);
+					}
 
                     // pass '>'
                     index++;
                 }
 
                 // pass ';'
-                if (caSignature[index] == ';')
-                    index++;
+                if (caSignature[index] == ';') {
+					index++;
+				}
                 break;
             case '-' : case '+' :
                 index = analyzeSignature(
@@ -204,13 +212,15 @@ public class SignatureAnalyzer
                 index++;
             }
 
-            if ((index >= length) || (caSignature[index] != '.'))
-                break;
+            if (index >= length || caSignature[index] != '.') {
+				break;
+			}
 
             debugCounter++;
 
-            if (debugCounter > 3000) // DEBUG //
-                throw new IllegalStateException("Infinite loop");
+            if (debugCounter > 3000) {
+				throw new IllegalStateException("Infinite loop");
+			}
         }
 
         return index;

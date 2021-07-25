@@ -87,14 +87,14 @@ public class SearchInConstantPoolsView<T extends DefaultMutableTreeNode & Contai
             searchInConstantPoolsEnterTextField.addKeyListener(new KeyAdapter() {
                 @Override
                 public void keyTyped(KeyEvent e)  {
-                    if (e.getKeyChar() == '=' 
-                     || e.getKeyChar() == '(' 
-                     || e.getKeyChar() == ')' 
+                    if (e.getKeyChar() == '='
+                     || e.getKeyChar() == '('
+                     || e.getKeyChar() == ')'
                      || e.getKeyChar() == '{'
-                     || e.getKeyChar() == '}' 
-                     || e.getKeyChar() == '[' 
-                     || e.getKeyChar() == ']' 
-                     || (Character.isDigit(e.getKeyChar()) && searchInConstantPoolsEnterTextField.getText().isEmpty())) {
+                     || e.getKeyChar() == '}'
+                     || e.getKeyChar() == '['
+                     || e.getKeyChar() == ']'
+                     || Character.isDigit(e.getKeyChar()) && searchInConstantPoolsEnterTextField.getText().isEmpty()) {
                         e.consume();
                     }
                 }
@@ -442,7 +442,6 @@ public class SearchInConstantPoolsView<T extends DefaultMutableTreeNode & Contai
             } else {
                 model.reload();
             }
-
             // Update matching item counter
             switch (matchingTypeCount) {
                 case 0:

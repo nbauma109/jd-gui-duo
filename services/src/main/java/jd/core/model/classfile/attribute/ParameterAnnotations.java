@@ -18,7 +18,7 @@ package jd.core.model.classfile.attribute;
 
 public class ParameterAnnotations
 {
-    public Annotation[] annotations;
+    public final Annotation[] annotations;
 
     public ParameterAnnotations(Annotation[] annotations)
     {

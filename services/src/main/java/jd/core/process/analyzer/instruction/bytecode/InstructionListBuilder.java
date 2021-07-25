@@ -81,7 +81,7 @@ public class InstructionListBuilder
                 int[] subProcOffsets = offsetSet.toArray();
                 int subProcOffsetsIndex = 0;
                 int subProcOffset =
-                    (subProcOffsets == null) ? -1 : subProcOffsets[0];
+                    subProcOffsets == null ? -1 : subProcOffsets[0];
 
                 // Declaration de variables additionnelles pour le traitement
                 // des blocs 'catch' et 'finally'.
@@ -140,106 +140,103 @@ public class InstructionListBuilder
                     InstructionFactory factory =
                         InstructionFactoryConstants.FACTORIES[opcode];
 
-                    if (factory != null)
-                    {
-                        // Ajout de ExceptionLoad
-                        if (offset == exceptionOffset && codeExceptions != null)
-                        {
-                            // Ajout d'une pseudo instruction de lecture
-                            // d'exception en début de bloc catch
-                            int catchType =
-                                codeExceptions.get(codeExceptionsIndex).getValue().getCatchType();
-                            int signatureIndex;
-
-                            if (catchType == 0)
-                            {
-                                signatureIndex = 0;
-                            }
-                            else
-                            {
-                                String catchClassName = SignatureUtil.createTypeName(
-                                    constants.getConstantClassName(catchType));
-                                signatureIndex = constants.addConstantUtf8(
-                                    catchClassName);
-                            }
-
-                            ExceptionLoad el = new ExceptionLoad(
-                                    ByteCodeConstants.EXCEPTIONLOAD,
-                                    offset, lineNumber, signatureIndex);
-                            stack.push(el);
-                            listForAnalyze.add(el);
-
-                            // Search next exception offset
-                            int nextOffsetException;
-                            for (;;)
-                            {
-                                if (++codeExceptionsIndex >= codeExceptions.size())
-                                {
-                                    nextOffsetException = -1;
-                                    break;
-                                }
-
-                                nextOffsetException =
-                                    codeExceptions.get(codeExceptionsIndex).getValue().getHandlerPC();
-
-                                if (nextOffsetException != exceptionOffset)
-                                    break;
-                            }
-                            exceptionOffset = nextOffsetException;
-                        }
-
-                        // Ajout de ReturnAddressLoad
-                        if (offset == subProcOffset)
-                        {
-                            // Ajout d'une pseudo adresse de retour en début de
-                            // sous procedure. Lors de l'execution, cette
-                            // adresse est normalement placée sur la pile par
-                            // l'instruction JSR.
-                            stack.push(new ReturnAddressLoad(
-                                    ByteCodeConstants.RETURNADDRESSLOAD,
-                                    offset, lineNumber));
-
-                            if (subProcOffsets != null) {
-                                if (++subProcOffsetsIndex >= subProcOffsets.length) {
-                                    subProcOffset = -1;
-                                } else {
-                                    subProcOffset = subProcOffsets[subProcOffsetsIndex];
-                                }
-                            }
-                        }
-
-                        // Traitement des numeros de ligne
-                        if (lineNumbers != null && offset == nextLineOffset)
-                        {
-                            LineNumber ln = lineNumbers[lineNumbersIndex];
-                            lineNumber = ln.getLineNumber();
-                            nextLineOffset = -1;
-
-                            int startPc = ln.getStartPC();
-                            while (++lineNumbersIndex < lineNumbers.length)
-                            {
-                                ln = lineNumbers[lineNumbersIndex];
-                                if (ln.getStartPC() != startPc)
-                                {
-                                    nextLineOffset = ln.getStartPC();
-                                    break;
-                                }
-                                lineNumber = ln.getLineNumber();
-                            }
-                        }
-
-                        // Generation d'instruction
-                        offset += factory.create(
-                            classFile, method, list, listForAnalyze, stack,
-                            code, offset, lineNumber, jumps);
-                    }
-                    else
-                    {
+                    if (factory == null) {
                         String msg = "No factory for " +
                                 Const.getOpcodeName(opcode);
                         System.err.println(msg);
                         throw new UnexpectedOpcodeException(opcode);
                     }
+					// Ajout de ExceptionLoad
+					if (offset == exceptionOffset && codeExceptions != null)
+					{
+					    // Ajout d'une pseudo instruction de lecture
+					    // d'exception en début de bloc catch
+					    int catchType =
+					        codeExceptions.get(codeExceptionsIndex).getValue().getCatchType();
+					    int signatureIndex;
+
+					    if (catchType == 0)
+					    {
+					        signatureIndex = 0;
+					    }
+					    else
+					    {
+					        String catchClassName = SignatureUtil.createTypeName(
+					            constants.getConstantClassName(catchType));
+					        signatureIndex = constants.addConstantUtf8(
+					            catchClassName);
+					    }
+
+					    ExceptionLoad el = new ExceptionLoad(
+					            ByteCodeConstants.EXCEPTIONLOAD,
+					            offset, lineNumber, signatureIndex);
+					    stack.push(el);
+					    listForAnalyze.add(el);
+
+					    // Search next exception offset
+					    int nextOffsetException;
+					    for (;;)
+					    {
+					        if (++codeExceptionsIndex >= codeExceptions.size())
+					        {
+					            nextOffsetException = -1;
+					            break;
+					        }
+
+					        nextOffsetException =
+					            codeExceptions.get(codeExceptionsIndex).getValue().getHandlerPC();
+
+					        if (nextOffsetException != exceptionOffset) {
+								break;
+							}
+					    }
+					    exceptionOffset = nextOffsetException;
+					}
+
+					// Ajout de ReturnAddressLoad
+					if (offset == subProcOffset)
+					{
+					    // Ajout d'une pseudo adresse de retour en début de
+					    // sous procedure. Lors de l'execution, cette
+					    // adresse est normalement placée sur la pile par
+					    // l'instruction JSR.
+					    stack.push(new ReturnAddressLoad(
+					            ByteCodeConstants.RETURNADDRESSLOAD,
+					            offset, lineNumber));
+
+					    if (subProcOffsets != null) {
+					        if (++subProcOffsetsIndex >= subProcOffsets.length) {
+					            subProcOffset = -1;
+					        } else {
+					            subProcOffset = subProcOffsets[subProcOffsetsIndex];
+					        }
+					    }
+					}
+
+					// Traitement des numeros de ligne
+					if (lineNumbers != null && offset == nextLineOffset)
+					{
+					    LineNumber ln = lineNumbers[lineNumbersIndex];
+					    lineNumber = ln.getLineNumber();
+					    nextLineOffset = -1;
+
+					    int startPc = ln.getStartPC();
+					    while (++lineNumbersIndex < lineNumbers.length)
+					    {
+					        ln = lineNumbers[lineNumbersIndex];
+					        if (ln.getStartPC() != startPc)
+					        {
+					            nextLineOffset = ln.getStartPC();
+					            break;
+					        }
+					        lineNumber = ln.getLineNumber();
+					    }
+					}
+
+					// Generation d'instruction
+					offset += factory.create(
+					    classFile, method, list, listForAnalyze, stack,
+					    code, offset, lineNumber, jumps);
                 }
 
                 if (! stack.isEmpty())
@@ -310,14 +307,14 @@ public class InstructionListBuilder
 
                 case Const.GOTO:
                     jumpOffset = offset +
-                                        (short)( ((code[++offset] & 255) << 8) |
-                                                  (code[++offset] & 255) );
+                                        (short)( (code[++offset] & 255) << 8 |
+                                                  code[++offset] & 255 );
                     jumps[jumpOffset] = true;
                     break;
                 case Const.JSR:
                     jumpOffset = offset +
-                                    (short)( ((code[++offset] & 255) << 8) |
-                                              (code[++offset] & 255) );
+                                    (short)( (code[++offset] & 255) << 8 |
+                                              code[++offset] & 255 );
                     offsetSet.add(jumpOffset);
                     break;
                 default:
@@ -331,17 +328,17 @@ public class InstructionListBuilder
                 case Const.GOTO_W:
                     jumpOffset = offset +
                                         ((code[++offset] & 255) << 24) |
-                                        ((code[++offset] & 255) << 16) |
-                                        ((code[++offset] & 255) << 8 ) |
-                                         (code[++offset] & 255);
+                                        (code[++offset] & 255) << 16 |
+                                        (code[++offset] & 255) << 8 |
+                                         code[++offset] & 255;
                     jumps[jumpOffset] = true;
                     break;
                 case Const.JSR_W:
                     jumpOffset = offset +
                                      ((code[++offset] & 255) << 24) |
-                                     ((code[++offset] & 255) << 16) |
-                                     ((code[++offset] & 255) << 8 ) |
-                                      (code[++offset] & 255);
+                                     (code[++offset] & 255) << 16 |
+                                     (code[++offset] & 255) << 8 |
+                                      code[++offset] & 255;
                     offsetSet.add(jumpOffset);
                     break;
                 default:
@@ -349,20 +346,12 @@ public class InstructionListBuilder
                 }
                 break;
             default:
-                switch (opcode)
-                {
-                case Const.TABLESWITCH:
-                    offset = ByteCodeUtil.nextTableSwitchOffset(code, offset);
-                    break;
-                case Const.LOOKUPSWITCH:
-                    offset = ByteCodeUtil.nextLookupSwitchOffset(code, offset);
-                    break;
-                case Const.WIDE:
-                    offset = ByteCodeUtil.nextWideOffset(code, offset);
-                    break;
-                default:
-                    offset += Const.getNoOfOperands(opcode);
-                }
+                offset = switch (opcode) {
+					case Const.TABLESWITCH -> ByteCodeUtil.nextTableSwitchOffset(code, offset);
+					case Const.LOOKUPSWITCH -> ByteCodeUtil.nextLookupSwitchOffset(code, offset);
+					case Const.WIDE -> ByteCodeUtil.nextWideOffset(code, offset);
+					default -> offset + Const.getNoOfOperands(opcode);
+				};
             }
         }
     }
@@ -375,15 +364,18 @@ public class InstructionListBuilder
         {
         	CodeException ce1 = ice1.getValue();
         	CodeException ce2 = ice2.getValue();
-        	
-            if (ce1.getHandlerPC() != ce2.getHandlerPC())
-                return ce1.getHandlerPC() - ce2.getHandlerPC();
 
-            if (ce1.getEndPC() != ce2.getEndPC())
-                return ce1.getEndPC() - ce2.getEndPC();
+            if (ce1.getHandlerPC() != ce2.getHandlerPC()) {
+				return ce1.getHandlerPC() - ce2.getHandlerPC();
+			}
 
-            if (ce1.getStartPC() != ce2.getStartPC())
-                return ce1.getStartPC() - ce2.getStartPC();
+            if (ce1.getEndPC() != ce2.getEndPC()) {
+				return ce1.getEndPC() - ce2.getEndPC();
+			}
+
+            if (ce1.getStartPC() != ce2.getStartPC()) {
+				return ce1.getStartPC() - ce2.getStartPC();
+			}
 
             return ice1.getKey() - ice2.getKey();
         }
