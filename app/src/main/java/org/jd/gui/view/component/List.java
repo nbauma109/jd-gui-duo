@@ -71,9 +71,7 @@ public class List extends JList {
         @Override
         public Component getListCellRendererComponent(JList list, Object value, int index, boolean selected, boolean hasFocus) {
             Object data = ((DefaultMutableTreeNode)value).getUserObject();
-
-            if (data instanceof TreeNodeData) {
-                TreeNodeData tnd = (TreeNodeData)data;
+            if (data instanceof TreeNodeData tnd) {
                 label.setIcon(tnd.getIcon());
                 label.setText(tnd.getLabel());
             } else {

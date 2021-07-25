@@ -36,8 +36,8 @@ import jd.core.util.SignatureUtil;
 
 public class ReferenceVisitor
 {
-    private ConstantPool constants;
-    private ReferenceMap referenceMap;
+    private final ConstantPool constants;
+    private final ReferenceMap referenceMap;
 
     public ReferenceVisitor(ConstantPool constants, ReferenceMap referenceMap)
     {
@@ -47,8 +47,9 @@ public class ReferenceVisitor
 
     public void visit(Instruction instruction)
     {
-        if (instruction == null)
-            return;
+        if (instruction == null) {
+			return;
+		}
 
         String internalName;
 
@@ -145,8 +146,9 @@ public class ReferenceVisitor
             {
                 List<Instruction> branchList =
                     ((ComplexConditionalBranchInstruction)instruction).instructions;
-                for (int i=branchList.size()-1; i>=0; --i)
-                    visit(branchList.get(i));
+                for (int i=branchList.size()-1; i>=0; --i) {
+					visit(branchList.get(i));
+				}
             }
             break;
         case Const.INSTANCEOF:
@@ -196,8 +198,9 @@ public class ReferenceVisitor
                 MultiANewArray multiANewArray = (MultiANewArray)instruction;
                 visitCheckCastAndMultiANewArray(multiANewArray.index);
                 Instruction[] dimensions = multiANewArray.dimensions;
-                for (int i=dimensions.length-1; i>=0; --i)
-                    visit(dimensions[i]);
+                for (int i=dimensions.length-1; i>=0; --i) {
+					visit(dimensions[i]);
+				}
             }
             break;
         case Const.NEWARRAY:
@@ -283,8 +286,9 @@ public class ReferenceVisitor
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
                 visit(iai.newArray);
-                for (int index=iai.values.size()-1; index>=0; --index)
-                    visit(iai.values.get(index));
+                for (int index=iai.values.size()-1; index>=0; --index) {
+					visit(iai.values.get(index));
+				}
             }
             break;
         case FastConstants.FOR:
@@ -357,8 +361,9 @@ public class ReferenceVisitor
                 FastTry ft = (FastTry)instruction;
                 visit(ft.instructions);
                 List<FastCatch> catches = ft.catches;
-                for (int i=catches.size()-1; i>=0; --i)
-                    visit(catches.get(i).instructions);
+                for (int i=catches.size()-1; i>=0; --i) {
+					visit(catches.get(i).instructions);
+				}
                 visit(ft.finallyInstructions);
             }
             break;
@@ -379,10 +384,8 @@ public class ReferenceVisitor
             {
                 IndexInstruction indexInstruction = (IndexInstruction)instruction;
                 Constant cst = constants.get(indexInstruction.index);
-
-                if (cst instanceof ConstantClass)
+                if (cst instanceof ConstantClass cc)
                 {
-                    ConstantClass cc = (ConstantClass)cst;
                     internalName = constants.getConstantUtf8(cc.getNameIndex());
                     addReference(internalName);
                 }
@@ -424,8 +427,9 @@ public class ReferenceVisitor
     {
         if (instructions != null)
         {
-            for (int i=instructions.size()-1; i>=0; --i)
-                visit(instructions.get(i));
+            for (int i=instructions.size()-1; i>=0; --i) {
+				visit(instructions.get(i));
+			}
         }
     }
 
@@ -446,8 +450,9 @@ public class ReferenceVisitor
         {
             signature = SignatureUtil.cutArrayDimensionPrefix(signature);
 
-            if (signature.charAt(0) == 'L')
-                referenceMap.add(SignatureUtil.getInnerName(signature));
+            if (signature.charAt(0) == 'L') {
+				referenceMap.add(SignatureUtil.getInnerName(signature));
+			}
         }
         else
         {

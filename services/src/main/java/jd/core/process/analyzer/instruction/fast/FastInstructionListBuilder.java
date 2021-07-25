@@ -124,19 +124,20 @@ public class FastInstructionListBuilder {
         }
     }
 
-
 	private static void manageRedeclaredVariables(List<Instruction> list) {
 		manageRedeclaredVariables(new HashSet<>(), new HashSet<>(), list);
 	}
 
-	/*
+	/**
 	 * Remove re-declarations of unassigned local variables
 	 * Convert re-declarations of assigned local variables into assignments
-	 * Attempt to manage a simplified scope of local variables
+	 * Attempt to manage a simplified scope of local variables.
 	 */
     private static void manageRedeclaredVariables(Set<FastDeclaration> outsideDeclarations, Set<FastDeclaration> insideDeclarations, List<Instruction> instructions) {
-    	for (int i = 0; i < instructions.size(); i++) {
-			Instruction instruction = instructions.get(i);
+    	Instruction instruction;
+		List<List<Instruction>> blocks;
+		for (int i = 0; i < instructions.size(); i++) {
+			instruction = instructions.get(i);
 			if (instruction instanceof FastDeclaration declaration) {
 				if (insideDeclarations.contains(declaration) || outsideDeclarations.contains(declaration)) {
 					if (declaration.instruction == null) {
@@ -151,7 +152,7 @@ public class FastInstructionListBuilder {
 					insideDeclarations.add(declaration);
 				}
 			}
-			List<List<Instruction>> blocks = getBlocks(instruction);
+			blocks = getBlocks(instruction);
 			if (!blocks.isEmpty()) {
 				/* each block has access to the previously declared local variables :
 				 * - outsideDeclarations contains the previously declared local variables from every parent block
@@ -1048,16 +1049,15 @@ public class FastInstructionListBuilder {
     }
 
     private static void removeSyntheticReturn(List<Instruction> list, int index) {
-        switch (list.get(index).opcode) {
-        case Const.RETURN:
-            list.remove(index);
-            break;
-        case FastConstants.LABEL:
-            FastLabel fl = (FastLabel) list.get(index);
+        int iOpCode = list.get(index).opcode;
+		if (iOpCode == Const.RETURN) {
+			list.remove(index);
+		} else if (iOpCode == FastConstants.LABEL) {
+			FastLabel fl = (FastLabel) list.get(index);
             if (fl.instruction.opcode == Const.RETURN) {
                 fl.instruction = null;
             }
-        }
+		}
     }
 
     private static void addCastInstructionOnReturn(
@@ -1412,10 +1412,11 @@ public class FastInstructionListBuilder {
 	protected static ReturnInstruction findReturnInstructionForStore(List<Instruction> list, int length, int i, StoreInstruction si) {
 		if (i + 1 < length) {
 			Instruction next = list.get(i + 1);
-			if (next instanceof ReturnInstruction returnInstruction && si.valueref instanceof IndexInstruction && returnInstruction.valueref instanceof IndexInstruction returnRef) {
-				if (returnRef.index == si.index) {
-					return returnInstruction;
-				}
+			if (next instanceof ReturnInstruction returnInstruction
+					&& si.valueref instanceof IndexInstruction
+					&& returnInstruction.valueref instanceof IndexInstruction returnRef
+					&& returnRef.index == si.index) {
+				return returnInstruction;
 			}
 		}
 		return null;
@@ -4341,7 +4342,6 @@ public class FastInstructionListBuilder {
 
         list.set(switchIndex, new FastSwitch(switchOpcode, lastSwitchOffset, switchLineNumber, branch, test, pairs));
     }
-
 
 	private static void removeLastInstruction(List<Instruction> instructions) {
 		instructions.remove(instructions.size() - 1);

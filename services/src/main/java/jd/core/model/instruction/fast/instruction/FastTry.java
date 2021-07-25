@@ -42,12 +42,12 @@ public class FastTry extends FastList
     {
         public final int exceptionOffset;
         public final int exceptionTypeIndex;
-        public final int otherExceptionTypeIndexes[];
+        public final int[] otherExceptionTypeIndexes;
         public final int localVarIndex;
         public final List<Instruction> instructions;
 
         public FastCatch(int exceptionOffset, int exceptionTypeIndex,
-                int otherExceptionTypeIndexes[], int localVarIndex,
+                int[] otherExceptionTypeIndexes, int localVarIndex,
                 List<Instruction> instructions)
         {
             this.exceptionOffset = exceptionOffset;

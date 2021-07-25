@@ -2294,7 +2294,7 @@ public class ClassFileWriter
 
         if (fc.otherExceptionTypeIndexes != null)
         {
-            int otherExceptionTypeIndexes[] = fc.otherExceptionTypeIndexes;
+            int[] otherExceptionTypeIndexes = fc.otherExceptionTypeIndexes;
             int otherExceptionTypeIndexesLength =
                     otherExceptionTypeIndexes.length;
 

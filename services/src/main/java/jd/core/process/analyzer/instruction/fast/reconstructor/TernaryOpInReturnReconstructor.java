@@ -134,7 +134,7 @@ public class TernaryOpInReturnReconstructor
                 }
             }
 
-            if (found == true)
+            if (found)
                 continue;
 
             if (iConst2.value == 1)

@@ -26,7 +26,7 @@ import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.MonitorExit;
 
-public class MonitorExitFactory extends InstructionFactory
+public class MonitorExitFactory implements InstructionFactory
 {
     @Override
     public int create(

@@ -22,6 +22,7 @@ import jd.core.model.classfile.LocalVariables;
 public abstract class Instruction
 {
     public static final int UNKNOWN_LINE_NUMBER = 0;
+    public static final int ZERO_PRIORITY = 0;
 
     public int opcode;
     public final int offset;
@@ -39,6 +40,6 @@ public abstract class Instruction
 
     public int getPriority()
     {
-        return 0;
+        return ZERO_PRIORITY;
     }
 }

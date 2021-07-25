@@ -24,7 +24,7 @@ import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.LookupSwitch;
 
-public class LookupSwitchFactory extends InstructionFactory
+public class LookupSwitchFactory implements InstructionFactory
 {
     @Override
     public int create(

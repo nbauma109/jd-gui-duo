@@ -25,7 +25,7 @@ import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 
-public class SwapFactory extends InstructionFactory
+public class SwapFactory implements InstructionFactory
 {
     @Override
     public int create(

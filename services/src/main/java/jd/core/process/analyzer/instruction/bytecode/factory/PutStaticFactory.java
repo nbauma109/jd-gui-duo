@@ -26,7 +26,7 @@ import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.PutStatic;
 
-public class PutStaticFactory extends InstructionFactory
+public class PutStaticFactory implements InstructionFactory
 {
     @Override
     public int create(

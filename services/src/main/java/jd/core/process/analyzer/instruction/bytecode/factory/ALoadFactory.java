@@ -26,7 +26,7 @@ import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.instruction.ALoad;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 
-public class ALoadFactory extends InstructionFactory
+public class ALoadFactory implements InstructionFactory
 {
     @Override
     public int create(

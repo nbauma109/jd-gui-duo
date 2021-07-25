@@ -29,7 +29,7 @@ import jd.core.model.instruction.bytecode.instruction.ILoad;
 import jd.core.model.instruction.bytecode.instruction.IncInstruction;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 
-public class ILoadFactory extends InstructionFactory
+public class ILoadFactory implements InstructionFactory
 {
     @Override
     public int create(

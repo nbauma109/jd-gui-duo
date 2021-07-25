@@ -241,10 +241,8 @@ public class ObjectType implements Type {
             return typeArguments != null && typeArguments.isTypeArgumentAssignableFrom(typeBounds, ot.getTypeArguments());
         }
 
-        if (typeArgument instanceof GenericType) {
-            GenericType gt = (GenericType)typeArgument;
+        if (typeArgument instanceof GenericType gt) {
             BaseType bt = typeBounds.get(gt.getName());
-
             if (bt != null) {
                 for (Type type : bt) {
                     if (dimension == type.getDimension() && (type instanceof ObjectType || type instanceof InnerObjectType)) {

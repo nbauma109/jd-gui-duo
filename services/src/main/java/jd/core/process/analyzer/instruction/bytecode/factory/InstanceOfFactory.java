@@ -26,7 +26,7 @@ import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.instruction.InstanceOf;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 
-public class InstanceOfFactory extends InstructionFactory
+public class InstanceOfFactory implements InstructionFactory
 {
     @Override
     public int create(

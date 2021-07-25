@@ -21,7 +21,7 @@ package jd.core.util;
  */
 public class IntSet
 {
-    private int values[];
+    private int[] values;
     private int capacity;
     private int size;
     private int min;

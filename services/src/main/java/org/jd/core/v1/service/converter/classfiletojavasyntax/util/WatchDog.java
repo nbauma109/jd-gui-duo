@@ -47,9 +47,8 @@ public class WatchDog {
 
         @Override
         public boolean equals(Object o) {
-            if (o instanceof Link) {
-                Link other = (Link)o;
-                return (parentIndex == other.parentIndex) && (childIndex == other.childIndex);
+            if (o instanceof Link other) {
+                return parentIndex == other.parentIndex && childIndex == other.childIndex;
             }
             return false;
         }

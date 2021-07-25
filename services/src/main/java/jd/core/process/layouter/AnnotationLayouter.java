@@ -1,4 +1,4 @@
-/*******************************************************************************
+/**
  * Copyright (C) 2007-2019 Emmanuel Dupuy GPLv3
  *
  * This program is free software: you can redistribute it and/or modify
@@ -13,12 +13,13 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- ******************************************************************************/
+ */
 package jd.core.process.layouter;
 
 import org.apache.bcel.Const;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
@@ -30,45 +31,41 @@ import jd.core.model.layout.block.LayoutBlock;
 
 public class AnnotationLayouter
 {
-    private AnnotationLayouter() {
-        super();
-    }
+	private AnnotationLayouter() {
+	}
 
-    public static void createBlocksForAnnotations(
-        ClassFile classFile, Attribute[] attributes,
-        List<LayoutBlock> layoutBlockList)
-    {
-        if (attributes == null)
-            return;
+	public static void createBlocksForAnnotations(
+			ClassFile classFile, Attribute[] attributes,
+			List<LayoutBlock> layoutBlockList)
+	{
+		if (attributes == null) {
+			return;
+		}
 
-        int attributesLength = attributes.length;
-        List<Annotation> annotations =
-                new ArrayList<>(attributesLength);
+		int attributesLength = attributes.length;
+		List<Annotation> annotations =
+				new ArrayList<>(attributesLength);
 
-        for (int i=0; i<attributesLength; i++)
-        {
-            Attribute attribute = attributes[i];
+		Attribute attribute;
+		for (int i=0; i<attributesLength; i++)
+		{
+			attribute = attributes[i];
 
-            switch(attribute.tag)
-            {
-            case Const.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS:
-            case Const.ATTR_RUNTIME_VISIBLE_ANNOTATIONS:
-                Annotation[] array =
-                    ((AttributeRuntimeAnnotations)attribute).annotations;
+			if (attribute.tag == Const.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS || attribute.tag == Const.ATTR_RUNTIME_VISIBLE_ANNOTATIONS) {
+				Annotation[] array =
+						((AttributeRuntimeAnnotations)attribute).annotations;
 
-                if (array != null)
-                {
-                    for (Annotation annotation : array)
-                        annotations.add(annotation);
-                }
-                break;
-            }
-        }
+				if (array != null)
+				{
+					Collections.addAll(annotations, array);
+				}
+			}
+		}
 
-        if (!annotations.isEmpty())
-        {
-            layoutBlockList.add(new AnnotationsLayoutBlock(
-                classFile, annotations));
-        }
-    }
+		if (!annotations.isEmpty())
+		{
+			layoutBlockList.add(new AnnotationsLayoutBlock(
+					classFile, annotations));
+		}
+	}
 }

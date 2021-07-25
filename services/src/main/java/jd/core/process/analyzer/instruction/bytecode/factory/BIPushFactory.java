@@ -26,7 +26,7 @@ import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.instruction.BIPush;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 
-public class BIPushFactory extends InstructionFactory
+public class BIPushFactory implements InstructionFactory
 {
     @Override
     public int create(

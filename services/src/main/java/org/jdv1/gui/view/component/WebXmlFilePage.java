@@ -70,8 +70,7 @@ public class WebXmlFilePage extends TypeReferencePage implements UriGettable, In
                 api.addURI(new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), "position=" + offset, null));
 
                 // Open link
-                if (hyperlinkData instanceof PathHyperlinkData) {
-                    PathHyperlinkData d = (PathHyperlinkData)hyperlinkData;
+                if (hyperlinkData instanceof PathHyperlinkData d) {
                     String path = d.path;
                     Container.Entry nextEntry = searchEntry(this.entry.getContainer().getRoot(), path);
                     if (nextEntry != null) {
@@ -102,8 +101,9 @@ public class WebXmlFilePage extends TypeReferencePage implements UriGettable, In
     }
 
     public static Container.Entry searchEntry(Container.Entry parent, String path) {
-        if (path.charAt(0) == '/')
-            path = path.substring(1);
+        if (path.charAt(0) == '/') {
+			path = path.substring(1);
+		}
         return recursiveSearchEntry(parent, path);
     }
 
@@ -127,7 +127,7 @@ public class WebXmlFilePage extends TypeReferencePage implements UriGettable, In
             }
         }
 
-        return (entry != null) ? searchEntry(entry, path) : null;
+        return entry != null ? searchEntry(entry, path) : null;
     }
 
     // --- UriGettable --- //
@@ -154,8 +154,7 @@ public class WebXmlFilePage extends TypeReferencePage implements UriGettable, In
             TypeHyperlinkData data = (TypeHyperlinkData)nextEntry.getValue();
             boolean enabled;
 
-            if (data instanceof PathHyperlinkData) {
-                PathHyperlinkData d = (PathHyperlinkData)data;
+            if (data instanceof PathHyperlinkData d) {
                 enabled = searchEntry(this.entry.getContainer().getRoot(), d.path) != null;
             } else {
                 String internalTypeName = data.getInternalTypeName();
@@ -174,7 +173,7 @@ public class WebXmlFilePage extends TypeReferencePage implements UriGettable, In
     }
 
     public static class PathHyperlinkData extends TypeHyperlinkData {
-    	private String path;
+    	private final String path;
 
         PathHyperlinkData(int startPosition, int endPosition, String path) {
             super(startPosition, endPosition, null);

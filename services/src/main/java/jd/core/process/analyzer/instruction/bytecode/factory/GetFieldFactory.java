@@ -26,7 +26,7 @@ import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.instruction.GetField;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 
-public class GetFieldFactory extends InstructionFactory
+public class GetFieldFactory implements InstructionFactory
 {
     @Override
     public int create(

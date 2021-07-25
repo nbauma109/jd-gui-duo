@@ -29,7 +29,7 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.TernaryOpStore;
 import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
 
-public class GotoFactory extends InstructionFactory
+public class GotoFactory implements InstructionFactory
 {
     @Override
     public int create(

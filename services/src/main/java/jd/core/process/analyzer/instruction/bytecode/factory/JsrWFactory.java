@@ -26,7 +26,7 @@ import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.Jsr;
 
-public class JsrWFactory extends InstructionFactory
+public class JsrWFactory implements InstructionFactory
 {
     @Override
     public int create(

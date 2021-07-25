@@ -26,7 +26,7 @@ import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 
-public class WideFactory extends InstructionFactory
+public class WideFactory implements InstructionFactory
 {
     @Override
     public int create(

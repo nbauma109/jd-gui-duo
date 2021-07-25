@@ -27,7 +27,7 @@ import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.LoadInstruction;
 
-public class FLoadFactory extends InstructionFactory
+public class FLoadFactory implements InstructionFactory
 {
     @Override
     public int create(

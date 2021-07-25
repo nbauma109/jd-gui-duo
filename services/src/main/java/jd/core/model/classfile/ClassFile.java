@@ -37,9 +37,9 @@ public class ClassFile extends Base
     private int thisClass;
     private int superClass;
 
-    private int interfaces[];
-    private Field fields[];
-    private Method methods[];
+    private int[] interfaces;
+    private Field[] fields;
+    private Method[] methods;
 
     private ConstantPool constants;
     private String thisClassName;

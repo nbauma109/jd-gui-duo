@@ -23,9 +23,7 @@ import java.util.List;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 import jd.core.model.instruction.bytecode.instruction.attribute.ValuerefAttribute;
-import jd.core.process.analyzer.classfile.visitor.CompareInstructionVisitor;
-import jd.core.process.analyzer.classfile.visitor.ReplaceDupLoadVisitor;
-import jd.core.process.analyzer.classfile.visitor.SearchDupLoadInstructionVisitor;
+import jd.core.process.analyzer.classfile.visitor.*;
 
 /*
  * Recontruction des affectations multiples depuis le motif :

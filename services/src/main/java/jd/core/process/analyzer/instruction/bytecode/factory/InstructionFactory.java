@@ -23,9 +23,9 @@ import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 
-public abstract class InstructionFactory
+public interface InstructionFactory
 {
-    public abstract int create(
+    int create(
             ClassFile classFile,
             Method method,
             List<Instruction> list,

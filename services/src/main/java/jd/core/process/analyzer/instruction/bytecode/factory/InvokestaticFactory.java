@@ -29,7 +29,7 @@ import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.Invokestatic;
 
-public class InvokestaticFactory extends InstructionFactory
+public class InvokestaticFactory implements InstructionFactory
 {
     @Override
     public int create(

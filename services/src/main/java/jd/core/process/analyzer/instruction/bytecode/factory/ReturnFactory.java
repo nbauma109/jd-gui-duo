@@ -26,7 +26,7 @@ import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.Return;
 
-public class ReturnFactory extends InstructionFactory
+public class ReturnFactory implements InstructionFactory
 {
     @Override
     public int create(

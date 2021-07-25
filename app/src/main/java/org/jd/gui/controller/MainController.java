@@ -243,9 +243,7 @@ public class MainController implements API {
     protected void onSaveAllSources() {
         if (! saveAllSourcesController.isActivated()) {
             JComponent currentPanel = mainView.getSelectedMainPanel();
-
-            if (currentPanel instanceof SourcesSavable) {
-                SourcesSavable sourcesSavable = (SourcesSavable)currentPanel;
+            if (currentPanel instanceof SourcesSavable sourcesSavable) {
                 JFileChooser chooser = new JFileChooser();
                 JFrame mainFrame = mainView.getMainFrame();
 
@@ -323,15 +321,13 @@ public class MainController implements API {
     }
 
     protected void onOpenTypeHierarchy() {
-        if (currentPage instanceof FocusedTypeGettable) {
-            FocusedTypeGettable ftg = (FocusedTypeGettable)currentPage;
+        if (currentPage instanceof FocusedTypeGettable ftg) {
             openTypeHierarchyController.show(getCollectionOfFutureIndexes(), ftg.getEntry(), ftg.getFocusedTypeName(), this::openURI);
         }
     }
 
     protected void onGoTo() {
-        if (currentPage instanceof LineNumberNavigable) {
-            LineNumberNavigable lnn = (LineNumberNavigable)currentPage;
+        if (currentPage instanceof LineNumberNavigable lnn) {
             goToController.show(lnn, lnn::goToLineNumber);
         }
     }
@@ -341,8 +337,7 @@ public class MainController implements API {
     }
 
     protected void onFindPrevious() {
-        if (currentPage instanceof ContentSearchable) {
-            ContentSearchable cs = (ContentSearchable)currentPage;
+        if (currentPage instanceof ContentSearchable cs) {
             cs.findPrevious(mainView.getFindText(), mainView.getFindCaseSensitive());
         }
     }
@@ -407,7 +402,7 @@ public class MainController implements API {
     protected void checkPreferencesChange(JComponent page) {
         if (page instanceof PreferencesChangeListener) {
             Map<String, String> preferences = configuration.getPreferences();
-            Integer currentHashcode = Integer.valueOf(preferences.hashCode());
+            Integer currentHashcode = preferences.hashCode();
             Integer lastHashcode = (Integer)page.getClientProperty("preferences-hashCode");
             if (!currentHashcode.equals(lastHashcode)) {
                 ((PreferencesChangeListener)page).preferencesChanged(preferences);
@@ -419,7 +414,7 @@ public class MainController implements API {
     protected void checkIndexesChange(JComponent page) {
         if (page instanceof IndexesChangeListener) {
             Collection<Future<Indexes>> collectionOfFutureIndexes = getCollectionOfFutureIndexes();
-            Integer currentHashcode = Integer.valueOf(collectionOfFutureIndexes.hashCode());
+            Integer currentHashcode = collectionOfFutureIndexes.hashCode();
             Integer lastHashcode = (Integer)page.getClientProperty("collectionOfFutureIndexes-hashCode");
 
             if (!currentHashcode.equals(lastHashcode)) {
@@ -682,7 +677,7 @@ public class MainController implements API {
                 }
                 return hashCode;
             }
-            
+
             @Override
             public boolean equals(Object o) {
             	if (this == o) {

@@ -112,8 +112,7 @@ public class ReferenceListener extends AbstractJavaListener {
         if (currentContext != null) {
             SimpleName fieldNameNode = node.getName();
             Name qualifier = node.getQualifier();
-            if (qualifier instanceof SimpleName) {
-                SimpleName qualifierName = (SimpleName) qualifier;
+            if (qualifier instanceof SimpleName qualifierName) {
                 String qualifierIdentifier = qualifierName.getIdentifier();
                 String qualifierDescriptor = currentContext.getDescriptor(qualifierIdentifier);
                 if (qualifierDescriptor != null && qualifierDescriptor.charAt(0) == 'L') {
@@ -166,7 +165,7 @@ public class ReferenceListener extends AbstractJavaListener {
         // Constructor call -> Add a link to the constructor declaration
         @SuppressWarnings("unchecked")
 		List<Expression> expressionList = node.arguments();
-        String descriptor = (expressionList != null) ? getParametersDescriptor(expressionList).append('V').toString()
+        String descriptor = expressionList != null ? getParametersDescriptor(expressionList).append('V').toString()
                 : "()V";
 
         ReferenceData refData = newReferenceData(internalTypeName, StringConstants.INSTANCE_CONSTRUCTOR, descriptor);
@@ -218,7 +217,7 @@ public class ReferenceListener extends AbstractJavaListener {
     public boolean visit(ConstructorInvocation node) {
         @SuppressWarnings("unchecked")
 		List<Expression> args = node.arguments();
-        String methodDescriptor = (args != null) ? getParametersDescriptor(args).append('?').toString() : "()?";
+        String methodDescriptor = args != null ? getParametersDescriptor(args).append('?').toString() : "()?";
         ReferenceData refData = newReferenceData(currentInternalTypeName, StringConstants.INSTANCE_CONSTRUCTOR, methodDescriptor);
         int position = node.getStartPosition();
         addHyperlink(new HyperlinkReferenceData(position, 4 /* this */, refData));
@@ -229,7 +228,7 @@ public class ReferenceListener extends AbstractJavaListener {
     public boolean visit(SuperConstructorInvocation node) {
         @SuppressWarnings("unchecked")
 		List<Expression> args = node.arguments();
-        String methodDescriptor = (args != null) ? getParametersDescriptor(args).append('?').toString() : "()?";
+        String methodDescriptor = args != null ? getParametersDescriptor(args).append('?').toString() : "()?";
         DeclarationData data = getDeclarations().get(currentInternalTypeName);
 
         if (data instanceof TypeDeclarationData) {
@@ -260,8 +259,7 @@ public class ReferenceListener extends AbstractJavaListener {
             }
         }
         Expression subject = node.getExpression();
-        if (subject instanceof SimpleName) {
-            SimpleName subjectName = (SimpleName) subject;
+        if (subject instanceof SimpleName subjectName) {
             int position = subjectName.getStartPosition();
             String internalTypeName = nameToInternalTypeName.get(subjectName.getIdentifier());
             if (internalTypeName != null) {

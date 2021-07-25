@@ -26,7 +26,7 @@ import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.instruction.AConstNull;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 
-public class AConstNullFactory extends InstructionFactory
+public class AConstNullFactory implements InstructionFactory
 {
     @Override
     public int create(

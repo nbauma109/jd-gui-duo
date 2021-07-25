@@ -26,7 +26,7 @@ import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.instruction.AThrow;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 
-public class AThrowFactory extends InstructionFactory
+public class AThrowFactory implements InstructionFactory
 {
     @Override
     public int create(

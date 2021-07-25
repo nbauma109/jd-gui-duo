@@ -44,22 +44,22 @@ public class AccessorAnalyzer
     {
         // Recherche des accesseurs de champs statiques
         //   static AuthenticatedSubject access$000()
-        if (searchGetStaticAccessor(classFile, method) == true)
+        if (searchGetStaticAccessor(classFile, method))
             return;
 
         // Recherche des accesseurs de champs statiques
         //   static void access$0(int)
-        if (searchPutStaticAccessor(classFile, method) == true)
+        if (searchPutStaticAccessor(classFile, method))
             return;
 
         // Recherche des accesseurs de champs
         //   static int access$1(TestInnerClass)
-        if (searchGetFieldAccessor(classFile, method) == true)
+        if (searchGetFieldAccessor(classFile, method))
             return;
 
         // Recherche des accesseurs de champs
         //   static void access$0(TestInnerClass, int)
-        if (searchPutFieldAccessor(classFile, method) == true)
+        if (searchPutFieldAccessor(classFile, method))
             return;
 
         // Recherche des accesseurs de méthodes

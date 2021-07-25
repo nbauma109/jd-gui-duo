@@ -26,7 +26,7 @@ import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.instruction.CheckCast;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 
-public class CheckCastFactory extends InstructionFactory
+public class CheckCastFactory implements InstructionFactory
 {
     @Override
     public int create(

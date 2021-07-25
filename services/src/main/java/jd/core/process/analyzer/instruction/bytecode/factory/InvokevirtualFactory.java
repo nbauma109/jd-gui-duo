@@ -29,7 +29,7 @@ import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.Invokevirtual;
 
-public class InvokevirtualFactory extends InstructionFactory
+public class InvokevirtualFactory implements InstructionFactory
 {
     @Override
     public int create(

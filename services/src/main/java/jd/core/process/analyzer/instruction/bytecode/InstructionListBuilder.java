@@ -39,345 +39,345 @@ import jd.core.util.SignatureUtil;
 
 public class InstructionListBuilder
 {
-    private InstructionListBuilder() {
-        super();
-    }
+	private InstructionListBuilder() {
+		super();
+	}
 
-    private static CodeExceptionComparator COMPARATOR =
-        new CodeExceptionComparator();
+	private static final CodeExceptionComparator COMPARATOR =
+			new CodeExceptionComparator();
 
-    public static void build(
-            ClassFile classFile, Method method,
-            List<Instruction> list,
-            List<Instruction> listForAnalyze)
-    {
-        byte[] code = method.getCode();
+	public static void build(
+			ClassFile classFile, Method method,
+			List<Instruction> list,
+			List<Instruction> listForAnalyze)
+	{
+		byte[] code = method.getCode();
 
-        if (code != null)
-        {
-            int offset = 0;
+		if (code != null)
+		{
+			int offset = 0;
 
-            try
-            {
-                final int length = code.length;
+			try
+			{
+				final int length = code.length;
 
-                // Declaration du tableau de sauts utile pour reconstruire les
-                // instructions de pre et post incrementation : si une
-                // instruction 'iinc' est une instruction vers laquelle on
-                // saute, elle ne sera pas agregée a l'instruction precedante
-                // ou suivante.
-                boolean[] jumps = new boolean[length];
+				// Declaration du tableau de sauts utile pour reconstruire les
+				// instructions de pre et post incrementation : si une
+				// instruction 'iinc' est une instruction vers laquelle on
+				// saute, elle ne sera pas agregée a l'instruction precedante
+				// ou suivante.
+				boolean[] jumps = new boolean[length];
 
-                // Declaration du tableau des sauts vers les sous procedures
-                // (jsr ... ret). A chaque début de sous procedures, une pseudo
-                // adresse de retour doit être inseree sur la pile.
-                IntSet offsetSet = new IntSet();
+				// Declaration du tableau des sauts vers les sous procedures
+				// (jsr ... ret). A chaque début de sous procedures, une pseudo
+				// adresse de retour doit être inseree sur la pile.
+				IntSet offsetSet = new IntSet();
 
-                // Population des deux tableaux dans la meme passe.
-                populateJumpsArrayAndSubProcOffsets(code, length, jumps, offsetSet);
+				// Population des deux tableaux dans la meme passe.
+				populateJumpsArrayAndSubProcOffsets(code, length, jumps, offsetSet);
 
-                // Initialisation de variables additionnelles pour le traitement
-                // des sous procedures.
-                int[] subProcOffsets = offsetSet.toArray();
-                int subProcOffsetsIndex = 0;
-                int subProcOffset =
-                    subProcOffsets == null ? -1 : subProcOffsets[0];
+				// Initialisation de variables additionnelles pour le traitement
+				// des sous procedures.
+				int[] subProcOffsets = offsetSet.toArray();
+				int subProcOffsetsIndex = 0;
+				int subProcOffset =
+						subProcOffsets == null ? -1 : subProcOffsets[0];
 
-                // Declaration de variables additionnelles pour le traitement
-                // des blocs 'catch' et 'finally'.
-                final Deque<Instruction> stack = new ArrayDeque<>();
-                final List<Entry<Integer, CodeException>> codeExceptions = method.getCodeExceptions();
-                int codeExceptionsIndex = 0;
-                int exceptionOffset;
-                ConstantPool constants = classFile.getConstantPool();
+				// Declaration de variables additionnelles pour le traitement
+				// des blocs 'catch' et 'finally'.
+				final Deque<Instruction> stack = new ArrayDeque<>();
+				final List<Entry<Integer, CodeException>> codeExceptions = method.getCodeExceptions();
+				int codeExceptionsIndex = 0;
+				int exceptionOffset;
+				ConstantPool constants = classFile.getConstantPool();
 
-                if (codeExceptions == null)
-                {
-                    exceptionOffset = -1;
-                }
-                else
-                {
-                    // Sort codeExceptions by handlerPc
-                    Collections.sort(codeExceptions, COMPARATOR);
-                    exceptionOffset = codeExceptions.get(0).getValue().getHandlerPC();
-                }
+				if (codeExceptions == null)
+				{
+					exceptionOffset = -1;
+				}
+				else
+				{
+					// Sort codeExceptions by handlerPc
+					Collections.sort(codeExceptions, COMPARATOR);
+					exceptionOffset = codeExceptions.get(0).getValue().getHandlerPC();
+				}
 
-                // Declaration de variables additionnelles pour le traitement
-                // des numeros de ligne
-                LineNumber[] lineNumbers = method.getLineNumbers();
-                int lineNumbersIndex = 0;
-                int lineNumber;
-                int nextLineOffset;
+				// Declaration de variables additionnelles pour le traitement
+				// des numeros de ligne
+				LineNumber[] lineNumbers = method.getLineNumbers();
+				int lineNumbersIndex = 0;
+				int lineNumber;
+				int nextLineOffset;
 
-                if (lineNumbers == null)
-                {
-                    lineNumber = Instruction.UNKNOWN_LINE_NUMBER;
-                    nextLineOffset = -1;
-                }
-                else
-                {
-                    LineNumber ln = lineNumbers[lineNumbersIndex];
-                    lineNumber = ln.getLineNumber();
-                    nextLineOffset = -1;
+				if (lineNumbers == null)
+				{
+					lineNumber = Instruction.UNKNOWN_LINE_NUMBER;
+					nextLineOffset = -1;
+				}
+				else
+				{
+					LineNumber ln = lineNumbers[lineNumbersIndex];
+					lineNumber = ln.getLineNumber();
+					nextLineOffset = -1;
 
-                    int startPc = ln.getStartPC();
-                    while (++lineNumbersIndex < lineNumbers.length)
-                    {
-                        ln = lineNumbers[lineNumbersIndex];
-                        if (ln.getStartPC() != startPc)
-                        {
-                            nextLineOffset = ln.getStartPC();
-                            break;
-                        }
-                        lineNumber = ln.getLineNumber();
-                    }
-                }
+					int startPc = ln.getStartPC();
+					while (++lineNumbersIndex < lineNumbers.length)
+					{
+						ln = lineNumbers[lineNumbersIndex];
+						if (ln.getStartPC() != startPc)
+						{
+							nextLineOffset = ln.getStartPC();
+							break;
+						}
+						lineNumber = ln.getLineNumber();
+					}
+				}
 
-                // Boucle principale : agregation des instructions
-                for (offset=0; offset<length; ++offset)
-                {
-                    int opcode = code[offset] & 255;
-                    InstructionFactory factory =
-                        InstructionFactoryConstants.FACTORIES[opcode];
+				// Boucle principale : agregation des instructions
+				for (offset=0; offset<length; ++offset)
+				{
+					int opcode = code[offset] & 255;
+					InstructionFactory factory =
+							InstructionFactoryConstants.FACTORIES[opcode];
 
-                    if (factory == null) {
-                        String msg = "No factory for " +
-                                Const.getOpcodeName(opcode);
-                        System.err.println(msg);
-                        throw new UnexpectedOpcodeException(opcode);
-                    }
+					if (factory == null) {
+						String msg = "No factory for " +
+								Const.getOpcodeName(opcode);
+						System.err.println(msg);
+						throw new UnexpectedOpcodeException(opcode);
+					}
 					// Ajout de ExceptionLoad
 					if (offset == exceptionOffset && codeExceptions != null)
 					{
-					    // Ajout d'une pseudo instruction de lecture
-					    // d'exception en début de bloc catch
-					    int catchType =
-					        codeExceptions.get(codeExceptionsIndex).getValue().getCatchType();
-					    int signatureIndex;
+						// Ajout d'une pseudo instruction de lecture
+						// d'exception en début de bloc catch
+						int catchType =
+								codeExceptions.get(codeExceptionsIndex).getValue().getCatchType();
+						int signatureIndex;
 
-					    if (catchType == 0)
-					    {
-					        signatureIndex = 0;
-					    }
-					    else
-					    {
-					        String catchClassName = SignatureUtil.createTypeName(
-					            constants.getConstantClassName(catchType));
-					        signatureIndex = constants.addConstantUtf8(
-					            catchClassName);
-					    }
+						if (catchType == 0)
+						{
+							signatureIndex = 0;
+						}
+						else
+						{
+							String catchClassName = SignatureUtil.createTypeName(
+									constants.getConstantClassName(catchType));
+							signatureIndex = constants.addConstantUtf8(
+									catchClassName);
+						}
 
-					    ExceptionLoad el = new ExceptionLoad(
-					            ByteCodeConstants.EXCEPTIONLOAD,
-					            offset, lineNumber, signatureIndex);
-					    stack.push(el);
-					    listForAnalyze.add(el);
+						ExceptionLoad el = new ExceptionLoad(
+								ByteCodeConstants.EXCEPTIONLOAD,
+								offset, lineNumber, signatureIndex);
+						stack.push(el);
+						listForAnalyze.add(el);
 
-					    // Search next exception offset
-					    int nextOffsetException;
-					    for (;;)
-					    {
-					        if (++codeExceptionsIndex >= codeExceptions.size())
-					        {
-					            nextOffsetException = -1;
-					            break;
-					        }
-
-					        nextOffsetException =
-					            codeExceptions.get(codeExceptionsIndex).getValue().getHandlerPC();
-
-					        if (nextOffsetException != exceptionOffset) {
+						// Search next exception offset
+						int nextOffsetException;
+						for (;;)
+						{
+							if (++codeExceptionsIndex >= codeExceptions.size())
+							{
+								nextOffsetException = -1;
 								break;
 							}
-					    }
-					    exceptionOffset = nextOffsetException;
+
+							nextOffsetException =
+									codeExceptions.get(codeExceptionsIndex).getValue().getHandlerPC();
+
+							if (nextOffsetException != exceptionOffset) {
+								break;
+							}
+						}
+						exceptionOffset = nextOffsetException;
 					}
 
 					// Ajout de ReturnAddressLoad
 					if (offset == subProcOffset)
 					{
-					    // Ajout d'une pseudo adresse de retour en début de
-					    // sous procedure. Lors de l'execution, cette
-					    // adresse est normalement placée sur la pile par
-					    // l'instruction JSR.
-					    stack.push(new ReturnAddressLoad(
-					            ByteCodeConstants.RETURNADDRESSLOAD,
-					            offset, lineNumber));
+						// Ajout d'une pseudo adresse de retour en début de
+						// sous procedure. Lors de l'execution, cette
+						// adresse est normalement placée sur la pile par
+						// l'instruction JSR.
+						stack.push(new ReturnAddressLoad(
+								ByteCodeConstants.RETURNADDRESSLOAD,
+								offset, lineNumber));
 
-					    if (subProcOffsets != null) {
-					        if (++subProcOffsetsIndex >= subProcOffsets.length) {
-					            subProcOffset = -1;
-					        } else {
-					            subProcOffset = subProcOffsets[subProcOffsetsIndex];
-					        }
-					    }
+						if (subProcOffsets != null) {
+							if (++subProcOffsetsIndex >= subProcOffsets.length) {
+								subProcOffset = -1;
+							} else {
+								subProcOffset = subProcOffsets[subProcOffsetsIndex];
+							}
+						}
 					}
 
 					// Traitement des numeros de ligne
 					if (lineNumbers != null && offset == nextLineOffset)
 					{
-					    LineNumber ln = lineNumbers[lineNumbersIndex];
-					    lineNumber = ln.getLineNumber();
-					    nextLineOffset = -1;
+						LineNumber ln = lineNumbers[lineNumbersIndex];
+						lineNumber = ln.getLineNumber();
+						nextLineOffset = -1;
 
-					    int startPc = ln.getStartPC();
-					    while (++lineNumbersIndex < lineNumbers.length)
-					    {
-					        ln = lineNumbers[lineNumbersIndex];
-					        if (ln.getStartPC() != startPc)
-					        {
-					            nextLineOffset = ln.getStartPC();
-					            break;
-					        }
-					        lineNumber = ln.getLineNumber();
-					    }
+						int startPc = ln.getStartPC();
+						while (++lineNumbersIndex < lineNumbers.length)
+						{
+							ln = lineNumbers[lineNumbersIndex];
+							if (ln.getStartPC() != startPc)
+							{
+								nextLineOffset = ln.getStartPC();
+								break;
+							}
+							lineNumber = ln.getLineNumber();
+						}
 					}
 
 					// Generation d'instruction
 					offset += factory.create(
-					    classFile, method, list, listForAnalyze, stack,
-					    code, offset, lineNumber, jumps);
-                }
+							classFile, method, list, listForAnalyze, stack,
+							code, offset, lineNumber, jumps);
+				}
 
-                if (! stack.isEmpty())
-                {
-                    final String className = classFile.getClassName();
-                    final String methodName =
-                        classFile.getConstantPool().getConstantUtf8(method.getNameIndex());
-                    System.err.println(
-                        "'" + className + '.' + methodName +
-                        "' build error: stack not empty. stack=" + stack);
-                }
-            }
-            catch (Exception e)
-            {
-                // Bad byte code ... generated, for example, by Eclipse Java
-                // Compiler or Harmony:
-                // Byte code:
-                //   0: aload_0
-                //   1: invokevirtual 16	TryCatchFinallyClassForTest:before	()V
-                //   4: iconst_1
-                //   5: ireturn
-                //   6: astore_1       <----- Error: EmptyStackException
-                //   7: aload_0
-                //   8: invokevirtual 19	TryCatchFinallyClassForTest:inCatch1	()V
-                //   11: aload_0
-                //   12: invokevirtual 22	TryCatchFinallyClassForTest:after	()V
-                //   15: iconst_2
-                //   16: ireturn
-                throw new InstructionListException(classFile, method, offset, e);
-            }
-        }
-    }
+				if (! stack.isEmpty())
+				{
+					final String className = classFile.getClassName();
+					final String methodName =
+							classFile.getConstantPool().getConstantUtf8(method.getNameIndex());
+					System.err.println(
+							"'" + className + '.' + methodName +
+							"' build error: stack not empty. stack=" + stack);
+				}
+			}
+			catch (Exception e)
+			{
+				// Bad byte code ... generated, for example, by Eclipse Java
+				// Compiler or Harmony:
+				// Byte code:
+				//   0: aload_0
+				//   1: invokevirtual 16	TryCatchFinallyClassForTest:before	()V
+				//   4: iconst_1
+				//   5: ireturn
+				//   6: astore_1       <----- Error: EmptyStackException
+				//   7: aload_0
+				//   8: invokevirtual 19	TryCatchFinallyClassForTest:inCatch1	()V
+				//   11: aload_0
+				//   12: invokevirtual 22	TryCatchFinallyClassForTest:after	()V
+				//   15: iconst_2
+				//   16: ireturn
+				throw new InstructionListException(classFile, method, offset, e);
+			}
+		}
+	}
 
-    private static void populateJumpsArrayAndSubProcOffsets(
-            byte[] code, int length, boolean[] jumps, IntSet offsetSet)
-    {
-        for (int offset=0; offset<length; ++offset)
-        {
-            int jumpOffset;
-            int opcode = code[offset] & 255;
+	private static void populateJumpsArrayAndSubProcOffsets(
+			byte[] code, int length, boolean[] jumps, IntSet offsetSet)
+	{
+		for (int offset=0; offset<length; ++offset)
+		{
+			int jumpOffset;
+			int opcode = code[offset] & 255;
 
-            switch (Const.getNoOfOperands(opcode))
-            {
-            case 0:
-                break;
-            case 2:
-                switch (opcode)
-                {
-                case Const.IFEQ:
-                case Const.IFNE:
-                case Const.IFLT:
-                case Const.IFGE:
-                case Const.IFGT:
-                case Const.IFLE:
+			switch (Const.getNoOfOperands(opcode))
+			{
+			case 0:
+				break;
+			case 2:
+				switch (opcode)
+				{
+				case Const.IFEQ:
+				case Const.IFNE:
+				case Const.IFLT:
+				case Const.IFGE:
+				case Const.IFGT:
+				case Const.IFLE:
 
-                case Const.IF_ICMPEQ:
-                case Const.IF_ICMPNE:
-                case Const.IF_ICMPLT:
-                case Const.IF_ICMPGE:
-                case Const.IF_ICMPGT:
-                case Const.IF_ICMPLE:
+				case Const.IF_ICMPEQ:
+				case Const.IF_ICMPNE:
+				case Const.IF_ICMPLT:
+				case Const.IF_ICMPGE:
+				case Const.IF_ICMPGT:
+				case Const.IF_ICMPLE:
 
-                case Const.IF_ACMPEQ:
-                case Const.IF_ACMPNE:
+				case Const.IF_ACMPEQ:
+				case Const.IF_ACMPNE:
 
-                case Const.IFNONNULL:
-                case Const.IFNULL:
+				case Const.IFNONNULL:
+				case Const.IFNULL:
 
-                case Const.GOTO:
-                    jumpOffset = offset +
-                                        (short)( (code[++offset] & 255) << 8 |
-                                                  code[++offset] & 255 );
-                    jumps[jumpOffset] = true;
-                    break;
-                case Const.JSR:
-                    jumpOffset = offset +
-                                    (short)( (code[++offset] & 255) << 8 |
-                                              code[++offset] & 255 );
-                    offsetSet.add(jumpOffset);
-                    break;
-                default:
-                    offset += 2;
-                }
-                break;
+				case Const.GOTO:
+					jumpOffset = offset +
+					(short)( (code[++offset] & 255) << 8 |
+							code[++offset] & 255 );
+					jumps[jumpOffset] = true;
+					break;
+				case Const.JSR:
+					jumpOffset = offset +
+					(short)( (code[++offset] & 255) << 8 |
+							code[++offset] & 255 );
+					offsetSet.add(jumpOffset);
+					break;
+				default:
+					offset += 2;
+				}
+				break;
 
-            case 4:
-                switch (opcode)
-                {
-                case Const.GOTO_W:
-                    jumpOffset = offset +
-                                        ((code[++offset] & 255) << 24) |
-                                        (code[++offset] & 255) << 16 |
-                                        (code[++offset] & 255) << 8 |
-                                         code[++offset] & 255;
-                    jumps[jumpOffset] = true;
-                    break;
-                case Const.JSR_W:
-                    jumpOffset = offset +
-                                     ((code[++offset] & 255) << 24) |
-                                     (code[++offset] & 255) << 16 |
-                                     (code[++offset] & 255) << 8 |
-                                      code[++offset] & 255;
-                    offsetSet.add(jumpOffset);
-                    break;
-                default:
-                    offset += 4;
-                }
-                break;
-            default:
-                offset = switch (opcode) {
-					case Const.TABLESWITCH -> ByteCodeUtil.nextTableSwitchOffset(code, offset);
-					case Const.LOOKUPSWITCH -> ByteCodeUtil.nextLookupSwitchOffset(code, offset);
-					case Const.WIDE -> ByteCodeUtil.nextWideOffset(code, offset);
-					default -> offset + Const.getNoOfOperands(opcode);
+			case 4:
+				switch (opcode)
+				{
+				case Const.GOTO_W:
+					jumpOffset = offset +
+					((code[++offset] & 255) << 24) |
+					(code[++offset] & 255) << 16 |
+					(code[++offset] & 255) << 8 |
+					code[++offset] & 255;
+					jumps[jumpOffset] = true;
+					break;
+				case Const.JSR_W:
+					jumpOffset = offset +
+					((code[++offset] & 255) << 24) |
+					(code[++offset] & 255) << 16 |
+					(code[++offset] & 255) << 8 |
+					code[++offset] & 255;
+					offsetSet.add(jumpOffset);
+					break;
+				default:
+					offset += 4;
+				}
+				break;
+			default:
+				offset = switch (opcode) {
+				case Const.TABLESWITCH -> ByteCodeUtil.nextTableSwitchOffset(code, offset);
+				case Const.LOOKUPSWITCH -> ByteCodeUtil.nextLookupSwitchOffset(code, offset);
+				case Const.WIDE -> ByteCodeUtil.nextWideOffset(code, offset);
+				default -> offset + Const.getNoOfOperands(opcode);
 				};
-            }
-        }
-    }
+			}
+		}
+	}
 
-    private static class CodeExceptionComparator
-        implements Comparator<Entry<Integer, CodeException>>
-    {
-        @Override
-        public int compare(Entry<Integer, CodeException> ice1, Entry<Integer, CodeException> ice2)
-        {
-        	CodeException ce1 = ice1.getValue();
-        	CodeException ce2 = ice2.getValue();
+	private static class CodeExceptionComparator
+	implements Comparator<Entry<Integer, CodeException>>
+	{
+		@Override
+		public int compare(Entry<Integer, CodeException> ice1, Entry<Integer, CodeException> ice2)
+		{
+			CodeException ce1 = ice1.getValue();
+			CodeException ce2 = ice2.getValue();
 
-            if (ce1.getHandlerPC() != ce2.getHandlerPC()) {
+			if (ce1.getHandlerPC() != ce2.getHandlerPC()) {
 				return ce1.getHandlerPC() - ce2.getHandlerPC();
 			}
 
-            if (ce1.getEndPC() != ce2.getEndPC()) {
+			if (ce1.getEndPC() != ce2.getEndPC()) {
 				return ce1.getEndPC() - ce2.getEndPC();
 			}
 
-            if (ce1.getStartPC() != ce2.getStartPC()) {
+			if (ce1.getStartPC() != ce2.getStartPC()) {
 				return ce1.getStartPC() - ce2.getStartPC();
 			}
 
-            return ice1.getKey() - ice2.getKey();
-        }
-    }
+			return ice1.getKey() - ice2.getKey();
+		}
+	}
 }

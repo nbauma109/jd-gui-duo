@@ -26,7 +26,7 @@ public class InstructionPrinter implements Printer
     private boolean newInstruction;
     private boolean multiLineInstruction;
     private boolean active;
-    private List<Boolean> states;
+    private final List<Boolean> states;
 
     /*
      * L'etat se reduit a  "multiLineInstruction"
@@ -66,11 +66,11 @@ public class InstructionPrinter implements Printer
 
     public void addNewLinesAndPrefix(int lineNumber)
     {
-        if (this.active == false)
+        if (!this.active)
         {
-            // Instruction non commencée, e cours d'affichage. Restoration de
-            // l'état precedant.
-            this.multiLineInstruction = this.states.remove(this.states.size()-1).booleanValue();
+            // Instruction non commencée, en cours d'affichage. Restoration de
+            // l'état précédent.
+            this.multiLineInstruction = this.states.remove(this.states.size()-1);
             /* State state = this.states.remove(this.states.size()-1);
             this.newInstruction = state.newInstruction;
             this.multiLineInstruction = state.multiLineInstruction; */
@@ -91,45 +91,37 @@ public class InstructionPrinter implements Printer
                     this.printer.print(' ');
                 }
             }
-        }
-        else
-        {
-            if (this.previousLineNumber == UNKNOWN_LINE_NUMBER)
-            {
-                this.previousLineNumber = lineNumber;
-            }
-            else
-            {
-                if (this.previousLineNumber < lineNumber)
-                {
-                    int lineCount = lineNumber - this.previousLineNumber;
+        } else if (this.previousLineNumber == UNKNOWN_LINE_NUMBER)
+		{
+		    this.previousLineNumber = lineNumber;
+		} else if (this.previousLineNumber < lineNumber)
+		{
+		    int lineCount = lineNumber - this.previousLineNumber;
 
-                    this.printer.endOfLine();
+		    this.printer.endOfLine();
 
-                    if (lineCount > 1)
-                    {
-                        this.printer.startOfLine(Printer.UNKNOWN_LINE_NUMBER);
-                        this.printer.endOfLine();
+		    if (lineCount > 1)
+		    {
+		        this.printer.startOfLine(Printer.UNKNOWN_LINE_NUMBER);
+		        this.printer.endOfLine();
 
-                        if (lineCount > 2)
-                        {
-                            this.printer.extraLine(lineCount-2);
-                        }
-                    }
+		        if (lineCount > 2)
+		        {
+		            this.printer.extraLine(lineCount-2);
+		        }
+		    }
 
-                    if ((this.newInstruction == false) &&
-                        (this.multiLineInstruction == false))
-                    {
-                        this.printer.indent();
-                        this.multiLineInstruction = true;
-                    }
+		    if (!this.newInstruction &&
+		        !this.multiLineInstruction)
+		    {
+		        this.printer.indent();
+		        this.multiLineInstruction = true;
+		    }
 
-                    this.printer.startOfLine(lineNumber);
+		    this.printer.startOfLine(lineNumber);
 
-                    this.previousLineNumber = lineNumber;
-                }
-            }
-        }
+		    this.previousLineNumber = lineNumber;
+		}
 
         this.newInstruction = false;
     }
@@ -148,10 +140,10 @@ public class InstructionPrinter implements Printer
 
     public void release()
     {
-        if (this.active == true)
+        if (this.active)
         {
             // Instruction non terminée. Sauvegarde de l'état courant.
-            this.states.add(Boolean.valueOf(this.multiLineInstruction));
+            this.states.add(this.multiLineInstruction);
             /* this.states.add(
                 new State(this.newInstruction, this.multiLineInstruction)); */
         }

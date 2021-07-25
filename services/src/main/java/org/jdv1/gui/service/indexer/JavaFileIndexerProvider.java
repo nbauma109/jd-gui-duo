@@ -154,8 +154,7 @@ public class JavaFileIndexerProvider extends AbstractIndexerProvider {
                     superInternalTypeNameSet.add(superQualifiedTypeName);
                 }
             }
-            if (node instanceof TypeDeclaration) {
-                TypeDeclaration typeDeclaration = (TypeDeclaration) node;
+            if (node instanceof TypeDeclaration typeDeclaration) {
                 @SuppressWarnings("unchecked")
 				List<Type> superInterfaces = typeDeclaration.superInterfaceTypes();
                 String superQualifiedInterfaceName;

@@ -112,7 +112,7 @@ public class FastCompareInstructionVisitor extends CompareInstructionVisitor
     }
 
     private static boolean compareExceptionTypeIndexes(
-        int otherExceptionTypeIndexes1[], int otherExceptionTypeIndexes2[])
+        int[] otherExceptionTypeIndexes1, int[] otherExceptionTypeIndexes2)
     {
         if (otherExceptionTypeIndexes1 == null)
         {

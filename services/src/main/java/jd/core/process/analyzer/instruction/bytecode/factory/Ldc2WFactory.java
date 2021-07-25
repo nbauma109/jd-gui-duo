@@ -26,7 +26,7 @@ import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.Ldc2W;
 
-public class Ldc2WFactory extends InstructionFactory
+public class Ldc2WFactory implements InstructionFactory
 {
     @Override
     public int create(

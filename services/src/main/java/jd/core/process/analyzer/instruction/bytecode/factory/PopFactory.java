@@ -26,7 +26,7 @@ import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.Pop;
 
-public class PopFactory extends InstructionFactory
+public class PopFactory implements InstructionFactory
 {
     @Override
     public int create(

@@ -27,7 +27,7 @@ import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.StoreInstruction;
 
-public class DStoreFactory extends InstructionFactory
+public class DStoreFactory implements InstructionFactory
 {
     @Override
     public int create(
