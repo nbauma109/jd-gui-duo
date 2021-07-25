@@ -339,7 +339,8 @@ public class FastCodeExceptionAnalyzer
 						((ALoad)monitorExit.getObjectref()).getIndex() == varMonitorIndex) {
 					return true;
 				}
-			} else if (instruction.getOpcode() == Const.RETURN || instruction.getOpcode() == ByteCodeConstants.XRETURN
+			} else if (instruction.getOpcode() == Const.RETURN
+					|| instruction.getOpcode() == ByteCodeConstants.XRETURN
 					|| instruction.getOpcode() == Const.ATHROW) {
 				return false;
 			}
@@ -583,8 +584,8 @@ public class FastCodeExceptionAnalyzer
 							}
 						}
 					break;
-				case Const.RETURN:
-				case ByteCodeConstants.XRETURN:
+				case Const.RETURN,
+				     ByteCodeConstants.XRETURN:
 					if (tryBlockContainsJsr(list, fastCodeException))
 					{
 						fastCodeException.setType(FastConstants.TYPE_118_FINALLY);
@@ -755,8 +756,8 @@ public class FastCodeExceptionAnalyzer
 					defineTypeJikes122Or142(
 							list, fastCodeException, ((AStore)instruction).getValueref(), index);
 					break;
-				case Const.RETURN:
-				case ByteCodeConstants.XRETURN:
+				case Const.RETURN,
+				     ByteCodeConstants.XRETURN:
 					// 1.3.1, 1.4.2 or jikes 1.2.2 ?
 					if (index > 0 && list.get(index-1).getOpcode() == Const.JSR) {
 						fastCodeException.setType(FastConstants.TYPE_131_CATCH_FINALLY);
@@ -883,8 +884,8 @@ public class FastCodeExceptionAnalyzer
 					defineTypeJikes122Or142(
 							list, fastCodeException, ((AStore)instruction).getValueref(), index);
 					break;
-				case Const.RETURN:
-				case ByteCodeConstants.XRETURN:
+				case Const.RETURN,
+				     ByteCodeConstants.XRETURN:
 					// 1.3.1, 1.4.2 or jikes 1.2.2 ?
 					instruction = InstructionUtil.getInstructionAt(
 							list, uniqueJumpAddress);
@@ -1282,8 +1283,8 @@ public class FastCodeExceptionAnalyzer
 			}
 		}
 		break;
-		case FastConstants.TYPE_118_FINALLY_THROW:
-		case FastConstants.TYPE_131_CATCH_FINALLY:
+		case FastConstants.TYPE_118_FINALLY_THROW,
+		     FastConstants.TYPE_131_CATCH_FINALLY:
 		{
 			int index = InstructionUtil.getIndexForOffset(
 					list, fastCodeException.getFinallyFromOffset());
@@ -1418,9 +1419,9 @@ public class FastCodeExceptionAnalyzer
 				{
 					switch (instruction.getOpcode())
 					{
-					case Const.ATHROW:
-					case Const.RETURN:
-					case ByteCodeConstants.XRETURN:
+					case Const.ATHROW,
+					     Const.RETURN,
+					     ByteCodeConstants.XRETURN:
 						// Verification que toutes les variables
 						// locales utilisees sont definies dans le
 						// bloc du dernier catch ou de finally
@@ -1480,10 +1481,10 @@ public class FastCodeExceptionAnalyzer
 							}
 						}
 						return;
-					case Const.GOTO:
-					case ByteCodeConstants.IFCMP:
-					case ByteCodeConstants.IF:
-					case ByteCodeConstants.IFXNULL:
+					case Const.GOTO,
+					     ByteCodeConstants.IFCMP,
+					     ByteCodeConstants.IF,
+					     ByteCodeConstants.IFXNULL:
 						int jumpOffsetTmp;
 
 						if (instruction.getOpcode() == Const.GOTO)
@@ -1587,8 +1588,8 @@ public class FastCodeExceptionAnalyzer
 							return;
 						}
 						break;
-					case Const.LOOKUPSWITCH:
-					case Const.TABLESWITCH:
+					case Const.LOOKUPSWITCH,
+					     Const.TABLESWITCH:
 						Switch s = (Switch)instruction;
 
 						// Search max offset
@@ -1661,8 +1662,10 @@ public class FastCodeExceptionAnalyzer
 			{
 				instruction = list.get(index);
 
-				if (instruction.getOpcode() == ByteCodeConstants.IF || instruction.getOpcode() == ByteCodeConstants.IFCMP
-						|| instruction.getOpcode() == ByteCodeConstants.IFXNULL || instruction.getOpcode() == Const.GOTO) {
+				if (instruction.getOpcode() == ByteCodeConstants.IF
+                 || instruction.getOpcode() == ByteCodeConstants.IFCMP
+                 || instruction.getOpcode() == ByteCodeConstants.IFXNULL
+                 || instruction.getOpcode() == Const.GOTO) {
 					int jumpOffset = ((BranchInstruction)instruction).getJumpOffset();
 					if (firstOffset < jumpOffset && jumpOffset < afterOffset) {
 						afterOffset = jumpOffset;
@@ -1678,8 +1681,10 @@ public class FastCodeExceptionAnalyzer
 			index--;
 			instruction = list.get(index);
 
-			if (instruction.getOpcode() == ByteCodeConstants.IF || instruction.getOpcode() == ByteCodeConstants.IFCMP
-					|| instruction.getOpcode() == ByteCodeConstants.IFXNULL || instruction.getOpcode() == Const.GOTO) {
+			if (instruction.getOpcode() == ByteCodeConstants.IF
+             || instruction.getOpcode() == ByteCodeConstants.IFCMP
+             || instruction.getOpcode() == ByteCodeConstants.IFXNULL
+             || instruction.getOpcode() == Const.GOTO) {
 				int jumpOffset = ((BranchInstruction)instruction).getJumpOffset();
 				if (firstOffset < jumpOffset && jumpOffset < afterOffset) {
 					afterOffset = jumpOffset;
@@ -2088,8 +2093,8 @@ public class FastCodeExceptionAnalyzer
 					}
 				}
 				break;
-				case ByteCodeConstants.IF:
-				case ByteCodeConstants.IFXNULL:
+				case ByteCodeConstants.IF,
+				     ByteCodeConstants.IFXNULL:
 				{
 					jumpOffset =
 							((IfInstruction)instruction).getJumpOffset();
@@ -2194,8 +2199,8 @@ public class FastCodeExceptionAnalyzer
 				// Remove 'jsr' instruction in catch block
 				catchInstructions.remove(catchInstructionsLength);
 				break;
-			case Const.RETURN:
-			case ByteCodeConstants.XRETURN:
+			case Const.RETURN,
+			     ByteCodeConstants.XRETURN:
 				catchInstructionsLength--;
 				// Remove 'jsr' instruction in catch block
 				catchInstructions.remove(catchInstructionsLength);
@@ -2226,8 +2231,8 @@ public class FastCodeExceptionAnalyzer
 					catchInstructions.remove(catchInstructionsLength);
 					fce.getCatches().get(i).toOffset = in.getOffset();
 					break;
-				case Const.RETURN:
-				case ByteCodeConstants.XRETURN:
+				case Const.RETURN,
+				     ByteCodeConstants.XRETURN:
 					catchInstructionsLength--;
 					// Remove 'jsr' instruction in catch block
 					catchInstructions.remove(catchInstructionsLength);
@@ -2557,8 +2562,8 @@ public class FastCodeExceptionAnalyzer
 
 			switch (instruction.getOpcode())
 			{
-			case Const.RETURN:
-			case Const.ATHROW:
+			case Const.RETURN,
+			     Const.ATHROW:
 			{
 				match = index >= finallyInstructionsSize && visitor.visit(
 						instructions, finallyInstructions,
@@ -2989,8 +2994,9 @@ public class FastCodeExceptionAnalyzer
 		{
 			instruction = instructions.get(i);
 
-			if (instruction.getOpcode() == ByteCodeConstants.IF || instruction.getOpcode() == ByteCodeConstants.IFXNULL
-					|| instruction.getOpcode() == ByteCodeConstants.COMPLEXIF) {
+			if (instruction.getOpcode() == ByteCodeConstants.IF
+             || instruction.getOpcode() == ByteCodeConstants.IFXNULL
+             || instruction.getOpcode() == ByteCodeConstants.COMPLEXIF) {
 				IfInstruction ifi = (IfInstruction)instruction;
 				int jumpOffset = ifi.getJumpOffset();
 
@@ -3334,9 +3340,9 @@ public class FastCodeExceptionAnalyzer
 
 			switch (instruction.getOpcode())
 			{
-			case Const.ATHROW:
-			case Const.RETURN:
-			case ByteCodeConstants.XRETURN:
+			case Const.ATHROW,
+			     Const.RETURN,
+			     ByteCodeConstants.XRETURN:
 			{
 				if (instruction.getOffset() >= beforeMaxOffset) {
 					return index;
@@ -3366,9 +3372,9 @@ public class FastCodeExceptionAnalyzer
 					}	// Inclus au bloc 'try'
 			}
 			break;
-			case ByteCodeConstants.IFCMP:
-			case ByteCodeConstants.IF:
-			case ByteCodeConstants.IFXNULL:
+			case ByteCodeConstants.IFCMP,
+			     ByteCodeConstants.IF,
+			     ByteCodeConstants.IFXNULL:
 			{
 				// L'aggregation des instructions 'if' n'a pas
 				// encore ete executee. Recherche du plus petit
@@ -3392,8 +3398,8 @@ public class FastCodeExceptionAnalyzer
 				//}
 			}
 			break;
-			case Const.LOOKUPSWITCH:
-			case Const.TABLESWITCH:
+			case Const.LOOKUPSWITCH,
+			     Const.TABLESWITCH:
 			{
 				Switch s = (Switch)instruction;
 

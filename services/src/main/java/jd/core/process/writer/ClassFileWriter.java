@@ -153,9 +153,9 @@ public class ClassFileWriter
             case LayoutBlockConstants.SEPARATOR_AT_BEGINING:
                 writeSeparatorAtBegining(lb);
                 break;
-            case LayoutBlockConstants.SEPARATOR:
-            case LayoutBlockConstants.SEPARATOR_OF_STATEMENTS:
-            case LayoutBlockConstants.SEPARATOR_AFTER_IMPORTS:
+            case LayoutBlockConstants.SEPARATOR,
+                 LayoutBlockConstants.SEPARATOR_OF_STATEMENTS,
+                 LayoutBlockConstants.SEPARATOR_AFTER_IMPORTS:
                 writeSeparator(lb);
                 break;
             case LayoutBlockConstants.IMPORTS:
@@ -216,26 +216,26 @@ public class ClassFileWriter
                 writeGenericImplementsInterfaces(
                     (GenericImplementsInterfacesLayoutBlock)lb);
                 break;
-            case LayoutBlockConstants.TYPE_BODY_BLOCK_START:
-            case LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START:
-            case LayoutBlockConstants.METHOD_BODY_BLOCK_START:
-            case LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START:
-            case LayoutBlockConstants.STATEMENTS_BLOCK_START:
+            case LayoutBlockConstants.TYPE_BODY_BLOCK_START,
+                 LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START,
+                 LayoutBlockConstants.METHOD_BODY_BLOCK_START,
+                 LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START,
+                 LayoutBlockConstants.STATEMENTS_BLOCK_START:
                 writeStatementBlockStart(lb);
                 break;
-            case LayoutBlockConstants.TYPE_BODY_BLOCK_END:
-            case LayoutBlockConstants.METHOD_BODY_BLOCK_END:
-            case LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_END:
-            case LayoutBlockConstants.STATEMENTS_BLOCK_END:
+            case LayoutBlockConstants.TYPE_BODY_BLOCK_END,
+                 LayoutBlockConstants.METHOD_BODY_BLOCK_END,
+                 LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_END,
+                 LayoutBlockConstants.STATEMENTS_BLOCK_END:
                 writeStatementsBlockEnd(lb);
                 break;
             case LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_END:
                 writeStatementsInnerBodyBlockEnd(lb);
                 break;
-            case LayoutBlockConstants.TYPE_BODY_BLOCK_START_END:
-            case LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START_END:
-            case LayoutBlockConstants.METHOD_BODY_BLOCK_START_END:
-            case LayoutBlockConstants.STATEMENTS_BLOCK_START_END:
+            case LayoutBlockConstants.TYPE_BODY_BLOCK_START_END,
+                 LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START_END,
+                 LayoutBlockConstants.METHOD_BODY_BLOCK_START_END,
+                 LayoutBlockConstants.STATEMENTS_BLOCK_START_END:
                 writeStatementsBlockStartEnd(lb);
                 break;
             case LayoutBlockConstants.SWITCH_BLOCK_START:

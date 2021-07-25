@@ -135,9 +135,9 @@ public class TernaryOpReconstructor
 		}
         switch (instruction.getOpcode())
         {
-        case Const.BIPUSH:
-        case ByteCodeConstants.ICONST:
-        case Const.SIPUSH:
+        case Const.BIPUSH,
+             ByteCodeConstants.ICONST,
+             Const.SIPUSH:
             return "Z".equals(instruction.getReturnedSignature(null, null));
         default:
             return false;

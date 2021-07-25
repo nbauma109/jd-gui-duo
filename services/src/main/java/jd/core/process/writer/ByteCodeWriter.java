@@ -105,25 +105,25 @@ public class ByteCodeWriter
 						printer.print(code[index]);
 						break;
 
-					case Const.IFEQ:
-					case Const.IFNE:
-					case Const.IFLT:
-					case Const.IFGE:
-					case Const.IFGT:
-					case Const.IFLE:
-					case Const.IF_ICMPEQ:
-					case Const.IF_ICMPNE:
-					case Const.IF_ICMPLT:
-					case Const.IF_ICMPGE:
-					case Const.IF_ICMPGT:
-					case Const.IF_ICMPLE:
-					case Const.IF_ACMPEQ:
-					case Const.IF_ACMPNE:
-					case Const.IFNONNULL:
-					case Const.IFNULL:
+					case Const.IFEQ,
+					     Const.IFNE,
+					     Const.IFLT,
+					     Const.IFGE,
+					     Const.IFGT,
+					     Const.IFLE,
+					     Const.IF_ICMPEQ,
+					     Const.IF_ICMPNE,
+					     Const.IF_ICMPLT,
+					     Const.IF_ICMPGE,
+					     Const.IF_ICMPGT,
+					     Const.IF_ICMPLE,
+					     Const.IF_ACMPEQ,
+					     Const.IF_ACMPNE,
+					     Const.IFNONNULL,
+					     Const.IFNULL,
 
-					case Const.GOTO:
-					case Const.JSR:
+					     Const.GOTO,
+					     Const.JSR:
 						soperande = (short)( (code[++index] & 255) << 8 |
 								code[++index] & 255 );
 						if (soperande >= 0) {
@@ -135,11 +135,11 @@ public class ByteCodeWriter
 								index + soperande - 2);
 						break;
 
-					case Const.PUTSTATIC:
-					case Const.PUTFIELD:
-					case Const.GETSTATIC:
-					case ByteCodeConstants.OUTERTHIS:
-					case Const.GETFIELD:
+					case Const.PUTSTATIC,
+					     Const.PUTFIELD,
+					     Const.GETSTATIC,
+					     ByteCodeConstants.OUTERTHIS,
+					     Const.GETFIELD:
 						ioperande = (code[++index] & 255) << 8 |
 						code[++index] & 255;
 						printer.print(ioperande);
@@ -159,9 +159,9 @@ public class ByteCodeWriter
 						}
 						break;
 
-					case Const.INVOKESTATIC:
-					case Const.INVOKESPECIAL:
-					case Const.INVOKEVIRTUAL:
+					case Const.INVOKESTATIC,
+					     Const.INVOKESPECIAL,
+					     Const.INVOKEVIRTUAL:
 						ioperande = (code[++index] & 255) << 8 |
 						code[++index] & 255;
 						printer.print(ioperande);
@@ -181,9 +181,9 @@ public class ByteCodeWriter
 						}
 						break;
 
-					case Const.NEW:
-					case Const.ANEWARRAY:
-					case Const.CHECKCAST:
+					case Const.NEW,
+					     Const.ANEWARRAY,
+					     Const.CHECKCAST:
 						ioperande = (code[++index] & 255) << 8 |
 						code[++index] & 255;
 						printer.print(ioperande);

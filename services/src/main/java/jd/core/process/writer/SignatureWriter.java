@@ -356,8 +356,7 @@ public class SignatureWriter
                 printer.printKeyword("long");
                 index++;
                 break;
-            case 'L':
-            case '.':
+            case 'L', '.':
                 boolean typeFlag = caSignature[index] == 'L';
                 index++;
                 beginIndex = index;
@@ -466,8 +465,7 @@ public class SignatureWriter
                 printer.print('?');
                 index++;
                 break;
-            case 'X':
-            case 'Y':
+            case 'X', 'Y':
                 printer.printKeyword("int");
                 System.err.println("<UNDEFINED>");
                 index++;

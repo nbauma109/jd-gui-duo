@@ -41,8 +41,8 @@ public class SearchInstructionByOffsetVisitor
         {
         case Const.ARRAYLENGTH:
             return visit(((ArrayLength)instruction).getArrayref(), offset);
-        case Const.AASTORE:
-        case ByteCodeConstants.ARRAYSTORE:
+        case Const.AASTORE,
+             ByteCodeConstants.ARRAYSTORE:
             return visit(((ArrayStoreInstruction)instruction).getArrayref(), offset);
         case ByteCodeConstants.ASSERT:
             {
@@ -58,8 +58,8 @@ public class SearchInstructionByOffsetVisitor
             return visit(((AThrow)instruction).getValue(), offset);
         case ByteCodeConstants.UNARYOP:
             return visit(((UnaryOperatorInstruction)instruction).getValue(), offset);
-        case ByteCodeConstants.BINARYOP:
-        case ByteCodeConstants.ASSIGNMENT:
+        case ByteCodeConstants.BINARYOP,
+             ByteCodeConstants.ASSIGNMENT:
             {
                 BinaryOperatorInstruction boi =
                     (BinaryOperatorInstruction)instruction;
@@ -70,14 +70,14 @@ public class SearchInstructionByOffsetVisitor
             }
         case Const.CHECKCAST:
             return visit(((CheckCast)instruction).getObjectref(), offset);
-        case ByteCodeConstants.STORE:
-        case Const.ASTORE:
-        case Const.ISTORE:
+        case ByteCodeConstants.STORE,
+             Const.ASTORE,
+             Const.ISTORE:
             return visit(((StoreInstruction)instruction).getValueref(), offset);
         case ByteCodeConstants.DUPSTORE:
             return visit(((DupStore)instruction).getObjectref(), offset);
-        case ByteCodeConstants.CONVERT:
-        case ByteCodeConstants.IMPLICITCONVERT:
+        case ByteCodeConstants.CONVERT,
+             ByteCodeConstants.IMPLICITCONVERT:
             return visit(((ConvertInstruction)instruction).getValue(), offset);
         case ByteCodeConstants.IFCMP:
             {
@@ -87,8 +87,8 @@ public class SearchInstructionByOffsetVisitor
                     return instruction;
                 return visit(ifCmp.getValue2(), offset);
             }
-        case ByteCodeConstants.IF:
-        case ByteCodeConstants.IFXNULL:
+        case ByteCodeConstants.IF,
+             ByteCodeConstants.IFXNULL:
             return visit(((IfInstruction)instruction).getValue(), offset);
         case ByteCodeConstants.COMPLEXIF:
             {
@@ -104,9 +104,9 @@ public class SearchInstructionByOffsetVisitor
             break;
         case Const.INSTANCEOF:
             return visit(((InstanceOf)instruction).getObjectref(), offset);
-        case Const.INVOKEINTERFACE:
-        case Const.INVOKESPECIAL:
-        case Const.INVOKEVIRTUAL:
+        case Const.INVOKEINTERFACE,
+             Const.INVOKESPECIAL,
+             Const.INVOKEVIRTUAL:
             {
                 Instruction result = visit(
                     ((InvokeNoStaticInstruction)instruction).getObjectref(), offset);
@@ -114,8 +114,8 @@ public class SearchInstructionByOffsetVisitor
                     return result;
             }
             // intended fall through
-        case Const.INVOKESTATIC:
-        case ByteCodeConstants.INVOKENEW:
+        case Const.INVOKESTATIC,
+             ByteCodeConstants.INVOKENEW:
             {
                 List<Instruction> list = ((InvokeInstruction)instruction).getArgs();
                 for (int i=list.size()-1; i>=0; --i)
@@ -165,13 +165,13 @@ public class SearchInstructionByOffsetVisitor
             return visit(((TableSwitch)instruction).getKey(), offset);
         case ByteCodeConstants.TERNARYOPSTORE:
             return visit(((TernaryOpStore)instruction).getObjectref(), offset);
-        case ByteCodeConstants.PREINC:
-        case ByteCodeConstants.POSTINC:
+        case ByteCodeConstants.PREINC,
+             ByteCodeConstants.POSTINC:
             return visit(((IncInstruction)instruction).getValue(), offset);
         case Const.GETFIELD:
             return visit(((GetField)instruction).getObjectref(), offset);
-        case ByteCodeConstants.INITARRAY:
-        case ByteCodeConstants.NEWANDINITARRAY:
+        case ByteCodeConstants.INITARRAY,
+             ByteCodeConstants.NEWANDINITARRAY:
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
                 instruction = visit(iai.getNewArray(), offset);
@@ -181,31 +181,31 @@ public class SearchInstructionByOffsetVisitor
                     return visit(iai.getValues(), offset);
             }
             break;
-        case Const.ACONST_NULL:
-        case ByteCodeConstants.ARRAYLOAD:
-        case ByteCodeConstants.LOAD:
-        case Const.ALOAD:
-        case Const.ILOAD:
-        case Const.BIPUSH:
-        case ByteCodeConstants.ICONST:
-        case ByteCodeConstants.LCONST:
-        case ByteCodeConstants.FCONST:
-        case ByteCodeConstants.DCONST:
-        case ByteCodeConstants.DUPLOAD:
-        case Const.GETSTATIC:
-        case ByteCodeConstants.OUTERTHIS:
-        case Const.GOTO:
-        case Const.IINC:
-        case Const.JSR:
-        case Const.LDC:
-        case Const.LDC2_W:
-        case Const.NEW:
-        case Const.NOP:
-        case Const.SIPUSH:
-        case Const.RET:
-        case Const.RETURN:
-        case ByteCodeConstants.EXCEPTIONLOAD:
-        case ByteCodeConstants.RETURNADDRESSLOAD:
+        case Const.ACONST_NULL,
+             ByteCodeConstants.ARRAYLOAD,
+             ByteCodeConstants.LOAD,
+             Const.ALOAD,
+             Const.ILOAD,
+             Const.BIPUSH,
+             ByteCodeConstants.ICONST,
+             ByteCodeConstants.LCONST,
+             ByteCodeConstants.FCONST,
+             ByteCodeConstants.DCONST,
+             ByteCodeConstants.DUPLOAD,
+             Const.GETSTATIC,
+             ByteCodeConstants.OUTERTHIS,
+             Const.GOTO,
+             Const.IINC,
+             Const.JSR,
+             Const.LDC,
+             Const.LDC2_W,
+             Const.NEW,
+             Const.NOP,
+             Const.SIPUSH,
+             Const.RET,
+             Const.RETURN,
+             ByteCodeConstants.EXCEPTIONLOAD,
+             ByteCodeConstants.RETURNADDRESSLOAD:
             break;
         default:
             System.err.println(

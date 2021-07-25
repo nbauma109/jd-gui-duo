@@ -67,13 +67,13 @@ public class ReturnLineNumberAnalyzer
 
             switch (instruction.getOpcode())
             {
-            case FastConstants.WHILE:
-            case FastConstants.DO_WHILE:
-            case FastConstants.INFINITE_LOOP:
-            case FastConstants.FOR:
-            case FastConstants.FOREACH:
-            case FastConstants.IF_SIMPLE:
-            case FastConstants.SYNCHRONIZED:
+            case FastConstants.WHILE,
+                 FastConstants.DO_WHILE,
+                 FastConstants.INFINITE_LOOP,
+                 FastConstants.FOR,
+                 FastConstants.FOREACH,
+                 FastConstants.IF_SIMPLE,
+                 FastConstants.SYNCHRONIZED:
                 {
                     List<Instruction> instructions =
                             ((FastList)instruction).getInstructions();
@@ -88,9 +88,9 @@ public class ReturnLineNumberAnalyzer
                     recursiveCheck(ft2l.getInstructions2(), afterListLineNumber);
                 }
                 break;
-            case FastConstants.SWITCH:
-            case FastConstants.SWITCH_ENUM:
-            case FastConstants.SWITCH_STRING:
+            case FastConstants.SWITCH,
+                 FastConstants.SWITCH_ENUM,
+                 FastConstants.SWITCH_STRING:
                 {
                     FastSwitch.Pair[] pairs = ((FastSwitch)instruction).getPairs();
                     if (pairs != null)

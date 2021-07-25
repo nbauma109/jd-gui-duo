@@ -50,19 +50,19 @@ public class ComparisonInstructionAnalyzer
 
             switch (instruction.getOpcode())
             {
-            case ByteCodeConstants.IF:
-            case ByteCodeConstants.IFCMP:
-            case ByteCodeConstants.IFXNULL:
+            case ByteCodeConstants.IF,
+                 ByteCodeConstants.IFCMP,
+                 ByteCodeConstants.IFXNULL:
                 if (index > 0)
                 {
                     Instruction prevI = list.get(index-1);
 
                     switch (prevI.getOpcode())
                     {
-                    case ByteCodeConstants.IF:
-                    case ByteCodeConstants.IFCMP:
-                    case ByteCodeConstants.IFXNULL:
-                    case Const.GOTO:
+                    case ByteCodeConstants.IF,
+                         ByteCodeConstants.IFCMP,
+                         ByteCodeConstants.IFXNULL,
+                         Const.GOTO:
                         {
                             BranchInstruction bi     = (BranchInstruction)instruction;
                             BranchInstruction prevBi = (BranchInstruction)prevI;
@@ -148,10 +148,10 @@ public class ComparisonInstructionAnalyzer
 
             switch (i.getOpcode())
             {
-            case ByteCodeConstants.IF:
-            case ByteCodeConstants.IFCMP:
-            case ByteCodeConstants.IFXNULL:
-            case Const.GOTO:
+            case ByteCodeConstants.IF,
+                 ByteCodeConstants.IFCMP,
+                 ByteCodeConstants.IFXNULL,
+                 Const.GOTO:
                 int jumpOffset = ((BranchInstruction)i).getJumpOffset();
                 if ((newFirstOffset < jumpOffset) && (jumpOffset <= lastOffset))
                     newFirstOffset = jumpOffset;
@@ -166,10 +166,10 @@ public class ComparisonInstructionAnalyzer
 
             switch (i.getOpcode())
             {
-            case ByteCodeConstants.IF:
-            case ByteCodeConstants.IFCMP:
-            case ByteCodeConstants.IFXNULL:
-            case Const.GOTO:
+            case ByteCodeConstants.IF,
+                 ByteCodeConstants.IFCMP,
+                 ByteCodeConstants.IFXNULL,
+                 Const.GOTO:
                 int jumpOffset = ((BranchInstruction)i).getJumpOffset();
                 if ((newFirstOffset < jumpOffset) && (jumpOffset <= lastOffset))
                     newFirstOffset = jumpOffset;
@@ -396,9 +396,9 @@ public class ComparisonInstructionAnalyzer
 
             switch (i.getOpcode())
             {
-            case ByteCodeConstants.IF:
-            case ByteCodeConstants.IFCMP:
-            case ByteCodeConstants.IFXNULL:
+            case ByteCodeConstants.IF,
+                 ByteCodeConstants.IFCMP,
+                 ByteCodeConstants.IFXNULL:
                 BranchInstruction lastTernaryOpTestBi = (BranchInstruction)i;
                 int lastTernaryOpTestBiJumpOffset =
                     lastTernaryOpTestBi.getJumpOffset();
@@ -771,9 +771,9 @@ public class ComparisonInstructionAnalyzer
     {
         switch (instruction.getOpcode())
         {
-        case ByteCodeConstants.IF:
-        case ByteCodeConstants.IFCMP:
-        case ByteCodeConstants.IFXNULL:
+        case ByteCodeConstants.IF,
+             ByteCodeConstants.IFCMP,
+             ByteCodeConstants.IFXNULL:
             ConditionalBranchInstruction cbi =
                 (ConditionalBranchInstruction)instruction;
             cbi.setCmp(ByteCodeConstants.CMP_MAX_INDEX - cbi.getCmp());

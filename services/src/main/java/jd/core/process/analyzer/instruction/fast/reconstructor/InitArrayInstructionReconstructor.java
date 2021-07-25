@@ -193,8 +193,9 @@ public class InitArrayInstructionReconstructor
 		for (int i=0; i<length; i++)
 		{
 			value = values.get(i);
-			if (value.getOpcode() == Const.BIPUSH || value.getOpcode() == ByteCodeConstants.ICONST
-					|| value.getOpcode() == Const.SIPUSH) {
+			if (value.getOpcode() == Const.BIPUSH
+             || value.getOpcode() == ByteCodeConstants.ICONST
+             || value.getOpcode() == Const.SIPUSH) {
 				((IConst)value).setReturnedSignature(signature);
 			}
 		}

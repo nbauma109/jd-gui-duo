@@ -33,8 +33,8 @@ public class MinLineNumberVisitor
         {
         case ByteCodeConstants.ARRAYLOAD:
             return visit(((ArrayLoadInstruction)instruction).getArrayref());
-        case Const.AASTORE:
-        case ByteCodeConstants.ARRAYSTORE:
+        case Const.AASTORE,
+             ByteCodeConstants.ARRAYSTORE:
             return visit(((ArrayStoreInstruction)instruction).getArrayref());
         case ByteCodeConstants.ASSIGNMENT:
             return visit(((AssignmentInstruction)instruction).getValue1());
@@ -46,8 +46,8 @@ public class MinLineNumberVisitor
 
                 switch (ii.getCount())
                 {
-                case -1:
-                case 1:
+                case -1,
+                     1:
                     return instruction.getLineNumber();
                 default:
                     return visit(ii.getValue());
@@ -59,8 +59,8 @@ public class MinLineNumberVisitor
 
                 switch (ii.getCount())
                 {
-                case -1:
-                case 1:
+                case -1,
+                     1:
                     return visit(ii.getValue());
                 default:
                     return instruction.getLineNumber();
@@ -68,9 +68,9 @@ public class MinLineNumberVisitor
             }
         case Const.INSTANCEOF:
             return visit(((InstanceOf)instruction).getObjectref());
-        case Const.INVOKEINTERFACE:
-        case Const.INVOKEVIRTUAL:
-        case Const.INVOKESPECIAL:
+        case Const.INVOKEINTERFACE,
+             Const.INVOKEVIRTUAL,
+             Const.INVOKESPECIAL:
             return visit(((InvokeNoStaticInstruction)instruction).getObjectref());
         case Const.POP:
             return visit(((Pop)instruction).getObjectref());

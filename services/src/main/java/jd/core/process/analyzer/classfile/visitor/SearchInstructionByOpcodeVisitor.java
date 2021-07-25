@@ -49,15 +49,15 @@ public class SearchInstructionByOpcodeVisitor
         {
         case Const.ARRAYLENGTH:
             return visit(((ArrayLength)instruction).getArrayref(), opcode);
-        case Const.AASTORE:
-        case ByteCodeConstants.ARRAYSTORE:
+        case Const.AASTORE,
+             ByteCodeConstants.ARRAYSTORE:
             return visit(((ArrayStoreInstruction)instruction).getArrayref(), opcode);
         case Const.ATHROW:
             return visit(((AThrow)instruction).getValue(), opcode);
         case ByteCodeConstants.UNARYOP:
             return visit(((UnaryOperatorInstruction)instruction).getValue(), opcode);
-        case ByteCodeConstants.BINARYOP:
-        case ByteCodeConstants.ASSIGNMENT:
+        case ByteCodeConstants.BINARYOP,
+             ByteCodeConstants.ASSIGNMENT:
             {
                 BinaryOperatorInstruction boi =
                     (BinaryOperatorInstruction)instruction;
@@ -68,14 +68,14 @@ public class SearchInstructionByOpcodeVisitor
             }
         case Const.CHECKCAST:
             return visit(((CheckCast)instruction).getObjectref(), opcode);
-        case ByteCodeConstants.STORE:
-        case Const.ASTORE:
-        case Const.ISTORE:
+        case ByteCodeConstants.STORE,
+             Const.ASTORE,
+             Const.ISTORE:
             return visit(((StoreInstruction)instruction).getValueref(), opcode);
         case ByteCodeConstants.DUPSTORE:
             return visit(((DupStore)instruction).getObjectref(), opcode);
-        case ByteCodeConstants.CONVERT:
-        case ByteCodeConstants.IMPLICITCONVERT:
+        case ByteCodeConstants.CONVERT,
+             ByteCodeConstants.IMPLICITCONVERT:
             return visit(((ConvertInstruction)instruction).getValue(), opcode);
         case ByteCodeConstants.IFCMP:
             {
@@ -85,8 +85,8 @@ public class SearchInstructionByOpcodeVisitor
                     return tmp;
                 return visit(ifCmp.getValue2(), opcode);
             }
-        case ByteCodeConstants.IF:
-        case ByteCodeConstants.IFXNULL:
+        case ByteCodeConstants.IF,
+             ByteCodeConstants.IFXNULL:
             return visit(((IfInstruction)instruction).getValue(), opcode);
         case ByteCodeConstants.COMPLEXIF:
             {
@@ -102,9 +102,9 @@ public class SearchInstructionByOpcodeVisitor
             break;
         case Const.INSTANCEOF:
             return visit(((InstanceOf)instruction).getObjectref(), opcode);
-        case Const.INVOKEINTERFACE:
-        case Const.INVOKESPECIAL:
-        case Const.INVOKEVIRTUAL:
+        case Const.INVOKEINTERFACE,
+             Const.INVOKESPECIAL,
+             Const.INVOKEVIRTUAL:
             {
                 Instruction result = visit(
                     ((InvokeNoStaticInstruction)instruction).getObjectref(), opcode);
@@ -112,8 +112,8 @@ public class SearchInstructionByOpcodeVisitor
                     return result;
             }
             // intended fall through
-        case Const.INVOKESTATIC:
-        case ByteCodeConstants.INVOKENEW:
+        case Const.INVOKESTATIC,
+             ByteCodeConstants.INVOKENEW:
             {
                 List<Instruction> list = ((InvokeInstruction)instruction).getArgs();
                 for (int i=list.size()-1; i>=0; --i)
@@ -163,13 +163,13 @@ public class SearchInstructionByOpcodeVisitor
             return visit(((TableSwitch)instruction).getKey(), opcode);
         case ByteCodeConstants.TERNARYOPSTORE:
             return visit(((TernaryOpStore)instruction).getObjectref(), opcode);
-        case ByteCodeConstants.PREINC:
-        case ByteCodeConstants.POSTINC:
+        case ByteCodeConstants.PREINC,
+             ByteCodeConstants.POSTINC:
             return visit(((IncInstruction)instruction).getValue(), opcode);
         case Const.GETFIELD:
             return visit(((GetField)instruction).getObjectref(), opcode);
-        case ByteCodeConstants.INITARRAY:
-        case ByteCodeConstants.NEWANDINITARRAY:
+        case ByteCodeConstants.INITARRAY,
+             ByteCodeConstants.NEWANDINITARRAY:
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
                 Instruction tmp = visit(iai.getNewArray(), opcode);
@@ -229,9 +229,9 @@ public class SearchInstructionByOpcodeVisitor
                 }
             }
             // intended fall through
-        case FastConstants.WHILE:
-        case FastConstants.DO_WHILE:
-        case FastConstants.IF_SIMPLE:
+        case FastConstants.WHILE,
+             FastConstants.DO_WHILE,
+             FastConstants.IF_SIMPLE:
             {
                 FastTestList ftl = (FastTestList)instruction;
                 if (ftl.getTest() != null)
@@ -272,12 +272,12 @@ public class SearchInstructionByOpcodeVisitor
                     return tmp;
                 return visit(ft2l.getInstructions2(), opcode);
             }
-        case FastConstants.IF_CONTINUE:
-        case FastConstants.IF_BREAK:
-        case FastConstants.IF_LABELED_BREAK:
-        case FastConstants.GOTO_CONTINUE:
-        case FastConstants.GOTO_BREAK:
-        case FastConstants.GOTO_LABELED_BREAK:
+        case FastConstants.IF_CONTINUE,
+             FastConstants.IF_BREAK,
+             FastConstants.IF_LABELED_BREAK,
+             FastConstants.GOTO_CONTINUE,
+             FastConstants.GOTO_BREAK,
+             FastConstants.GOTO_LABELED_BREAK:
             {
                 FastInstruction fi = (FastInstruction)instruction;
                 if (fi.getInstruction() != null)
@@ -291,9 +291,9 @@ public class SearchInstructionByOpcodeVisitor
                     return visit(fd.getInstruction(), opcode);
             }
             break;
-        case FastConstants.SWITCH:
-        case FastConstants.SWITCH_ENUM:
-        case FastConstants.SWITCH_STRING:
+        case FastConstants.SWITCH,
+             FastConstants.SWITCH_ENUM,
+             FastConstants.SWITCH_STRING:
             {
                 FastSwitch fs = (FastSwitch)instruction;
                 Instruction tmp = visit(fs.getTest(), opcode);
@@ -320,31 +320,31 @@ public class SearchInstructionByOpcodeVisitor
                     return visit(fla.getInstruction(), opcode);
             }
             break;
-        case Const.ACONST_NULL:
-        case ByteCodeConstants.ARRAYLOAD:
-        case ByteCodeConstants.LOAD:
-        case Const.ALOAD:
-        case Const.ILOAD:
-        case Const.BIPUSH:
-        case ByteCodeConstants.ICONST:
-        case ByteCodeConstants.LCONST:
-        case ByteCodeConstants.FCONST:
-        case ByteCodeConstants.DCONST:
-        case ByteCodeConstants.DUPLOAD:
-        case ByteCodeConstants.EXCEPTIONLOAD:
-        case Const.GETSTATIC:
-        case ByteCodeConstants.OUTERTHIS:
-        case Const.GOTO:
-        case Const.IINC:
-        case Const.JSR:
-        case Const.LDC:
-        case Const.LDC2_W:
-        case Const.NEW:
-        case Const.NOP:
-        case Const.RET:
-        case Const.RETURN:
-        case ByteCodeConstants.RETURNADDRESSLOAD:
-        case Const.SIPUSH:
+        case Const.ACONST_NULL,
+             ByteCodeConstants.ARRAYLOAD,
+             ByteCodeConstants.LOAD,
+             Const.ALOAD,
+             Const.ILOAD,
+             Const.BIPUSH,
+             ByteCodeConstants.ICONST,
+             ByteCodeConstants.LCONST,
+             ByteCodeConstants.FCONST,
+             ByteCodeConstants.DCONST,
+             ByteCodeConstants.DUPLOAD,
+             ByteCodeConstants.EXCEPTIONLOAD,
+             Const.GETSTATIC,
+             ByteCodeConstants.OUTERTHIS,
+             Const.GOTO,
+             Const.IINC,
+             Const.JSR,
+             Const.LDC,
+             Const.LDC2_W,
+             Const.NEW,
+             Const.NOP,
+             Const.RET,
+             Const.RETURN,
+             ByteCodeConstants.RETURNADDRESSLOAD,
+             Const.SIPUSH:
             break;
         default:
             System.err.println(

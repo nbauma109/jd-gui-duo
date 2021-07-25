@@ -64,9 +64,9 @@ public class GotoFactory implements InstructionFactory
 
             switch (previousInstruction.getOpcode())
             {
-            case ByteCodeConstants.IF:
-            case ByteCodeConstants.IFCMP:
-            case ByteCodeConstants.IFXNULL:
+            case ByteCodeConstants.IF,
+                 ByteCodeConstants.IFCMP,
+                 ByteCodeConstants.IFXNULL:
                 {
                     // Gestion de l'operateur ternaire
                     final int ternaryOp2ndValueOffset =
@@ -97,155 +97,155 @@ public class GotoFactory implements InstructionFactory
             // information sur la pile.
             switch (opcode)
             {
-            case Const.ACONST_NULL:
-            case Const.ICONST_M1:
-            case Const.ICONST_0:
-            case Const.ICONST_1:
-            case Const.ICONST_2:
-            case Const.ICONST_3:
-            case Const.ICONST_4:
-            case Const.ICONST_5:
-            case Const.LCONST_0:
-            case Const.LCONST_1:
-            case Const.FCONST_0:
-            case Const.FCONST_1:
-            case Const.FCONST_2:
-            case Const.DCONST_0:
-            case Const.DCONST_1:
-            case Const.BIPUSH:
-            case Const.SIPUSH:
-            case Const.LDC:
-            case Const.LDC_W:
-            case Const.LDC2_W:
-            case Const.ILOAD:
-            case Const.LLOAD:
-            case Const.FLOAD:
-            case Const.DLOAD:
-            case Const.ALOAD:
-            case Const.ILOAD_0:
-            case Const.ILOAD_1:
-            case Const.ILOAD_2:
-            case Const.ILOAD_3:
-            case Const.LLOAD_0:
-            case Const.LLOAD_1:
-            case Const.LLOAD_2:
-            case Const.LLOAD_3:
-            case Const.FLOAD_0:
-            case Const.FLOAD_1:
-            case Const.FLOAD_2:
-            case Const.FLOAD_3:
-            case Const.DLOAD_0:
-            case Const.DLOAD_1:
-            case Const.DLOAD_2:
-            case Const.DLOAD_3:
-            case Const.ALOAD_0:
-            case Const.ALOAD_1:
-            case Const.ALOAD_2:
-            case Const.ALOAD_3:
-            case Const.IALOAD:
-            case Const.LALOAD:
-            case Const.FALOAD:
-            case Const.DALOAD:
-            case Const.AALOAD:
-            case Const.BALOAD:
-            case Const.CALOAD:
-            case Const.SALOAD:
-            case Const.DUP:
-            case Const.DUP_X1:
-            case Const.DUP_X2:
-            case Const.DUP2:
-            case Const.DUP2_X1:
-            case Const.DUP2_X2:
-            case Const.SWAP:
-            case Const.IADD:
-            case Const.LADD:
-            case Const.FADD:
-            case Const.DADD:
-            case Const.ISUB:
-            case Const.LSUB:
-            case Const.FSUB:
-            case Const.DSUB:
-            case Const.IMUL:
-            case Const.LMUL:
-            case Const.FMUL:
-            case Const.DMUL:
-            case Const.IDIV:
-            case Const.LDIV:
-            case Const.FDIV:
-            case Const.DDIV:
-            case Const.IREM:
-            case Const.LREM:
-            case Const.FREM:
-            case Const.DREM:
-            case Const.INEG:
-            case Const.LNEG:
-            case Const.FNEG:
-            case Const.DNEG:
-            case Const.ISHL:
-            case Const.LSHL:
-            case Const.ISHR:
-            case Const.LSHR:
-            case Const.IUSHR:
-            case Const.LUSHR:
-            case Const.IAND:
-            case Const.LAND:
-            case Const.IOR:
-            case Const.LOR:
-            case Const.IXOR:
-            case Const.LXOR:
-            case Const.IINC:
-            case Const.I2L:
-            case Const.I2F:
-            case Const.I2D:
-            case Const.L2I:
-            case Const.L2F:
-            case Const.L2D:
-            case Const.F2I:
-            case Const.F2L:
-            case Const.F2D:
-            case Const.D2I:
-            case Const.D2L:
-            case Const.D2F:
-            case Const.I2B:
-            case Const.I2C:
-            case Const.I2S:
-            case Const.LCMP:
-            case Const.FCMPL:
-            case Const.FCMPG:
-            case Const.DCMPL:
-            case Const.DCMPG:
-            case Const.GETSTATIC:
-            case ByteCodeConstants.OUTERTHIS:
-            case Const.GETFIELD:
-            case Const.INVOKEVIRTUAL:
-            case Const.INVOKESPECIAL:
-            case Const.INVOKESTATIC:
-            case Const.INVOKEINTERFACE:
-            case Const.NEW:
-            case Const.NEWARRAY:
-            case Const.ANEWARRAY:
-            case Const.ARRAYLENGTH:
-            case Const.CHECKCAST:
-            case Const.INSTANCEOF:
-            case Const.WIDE:
-            case Const.MULTIANEWARRAY:
+            case Const.ACONST_NULL,
+                 Const.ICONST_M1,
+                 Const.ICONST_0,
+                 Const.ICONST_1,
+                 Const.ICONST_2,
+                 Const.ICONST_3,
+                 Const.ICONST_4,
+                 Const.ICONST_5,
+                 Const.LCONST_0,
+                 Const.LCONST_1,
+                 Const.FCONST_0,
+                 Const.FCONST_1,
+                 Const.FCONST_2,
+                 Const.DCONST_0,
+                 Const.DCONST_1,
+                 Const.BIPUSH,
+                 Const.SIPUSH,
+                 Const.LDC,
+                 Const.LDC_W,
+                 Const.LDC2_W,
+                 Const.ILOAD,
+                 Const.LLOAD,
+                 Const.FLOAD,
+                 Const.DLOAD,
+                 Const.ALOAD,
+                 Const.ILOAD_0,
+                 Const.ILOAD_1,
+                 Const.ILOAD_2,
+                 Const.ILOAD_3,
+                 Const.LLOAD_0,
+                 Const.LLOAD_1,
+                 Const.LLOAD_2,
+                 Const.LLOAD_3,
+                 Const.FLOAD_0,
+                 Const.FLOAD_1,
+                 Const.FLOAD_2,
+                 Const.FLOAD_3,
+                 Const.DLOAD_0,
+                 Const.DLOAD_1,
+                 Const.DLOAD_2,
+                 Const.DLOAD_3,
+                 Const.ALOAD_0,
+                 Const.ALOAD_1,
+                 Const.ALOAD_2,
+                 Const.ALOAD_3,
+                 Const.IALOAD,
+                 Const.LALOAD,
+                 Const.FALOAD,
+                 Const.DALOAD,
+                 Const.AALOAD,
+                 Const.BALOAD,
+                 Const.CALOAD,
+                 Const.SALOAD,
+                 Const.DUP,
+                 Const.DUP_X1,
+                 Const.DUP_X2,
+                 Const.DUP2,
+                 Const.DUP2_X1,
+                 Const.DUP2_X2,
+                 Const.SWAP,
+                 Const.IADD,
+                 Const.LADD,
+                 Const.FADD,
+                 Const.DADD,
+                 Const.ISUB,
+                 Const.LSUB,
+                 Const.FSUB,
+                 Const.DSUB,
+                 Const.IMUL,
+                 Const.LMUL,
+                 Const.FMUL,
+                 Const.DMUL,
+                 Const.IDIV,
+                 Const.LDIV,
+                 Const.FDIV,
+                 Const.DDIV,
+                 Const.IREM,
+                 Const.LREM,
+                 Const.FREM,
+                 Const.DREM,
+                 Const.INEG,
+                 Const.LNEG,
+                 Const.FNEG,
+                 Const.DNEG,
+                 Const.ISHL,
+                 Const.LSHL,
+                 Const.ISHR,
+                 Const.LSHR,
+                 Const.IUSHR,
+                 Const.LUSHR,
+                 Const.IAND,
+                 Const.LAND,
+                 Const.IOR,
+                 Const.LOR,
+                 Const.IXOR,
+                 Const.LXOR,
+                 Const.IINC,
+                 Const.I2L,
+                 Const.I2F,
+                 Const.I2D,
+                 Const.L2I,
+                 Const.L2F,
+                 Const.L2D,
+                 Const.F2I,
+                 Const.F2L,
+                 Const.F2D,
+                 Const.D2I,
+                 Const.D2L,
+                 Const.D2F,
+                 Const.I2B,
+                 Const.I2C,
+                 Const.I2S,
+                 Const.LCMP,
+                 Const.FCMPL,
+                 Const.FCMPG,
+                 Const.DCMPL,
+                 Const.DCMPG,
+                 Const.GETSTATIC,
+                 ByteCodeConstants.OUTERTHIS,
+                 Const.GETFIELD,
+                 Const.INVOKEVIRTUAL,
+                 Const.INVOKESPECIAL,
+                 Const.INVOKESTATIC,
+                 Const.INVOKEINTERFACE,
+                 Const.NEW,
+                 Const.NEWARRAY,
+                 Const.ANEWARRAY,
+                 Const.ARRAYLENGTH,
+                 Const.CHECKCAST,
+                 Const.INSTANCEOF,
+                 Const.WIDE,
+                 Const.MULTIANEWARRAY:
             // Extension for decompiler
-            case ByteCodeConstants.ICONST:
-            case ByteCodeConstants.LCONST:
-            case ByteCodeConstants.FCONST:
-            case ByteCodeConstants.DCONST:
-            case ByteCodeConstants.DUPLOAD:
-            case ByteCodeConstants.ASSIGNMENT:
-            case ByteCodeConstants.UNARYOP:
-            case ByteCodeConstants.BINARYOP:
-            case ByteCodeConstants.LOAD:
-            case ByteCodeConstants.EXCEPTIONLOAD:
-            case ByteCodeConstants.ARRAYLOAD:
-            case ByteCodeConstants.INVOKENEW:
-            case ByteCodeConstants.CONVERT:
-            case ByteCodeConstants.IMPLICITCONVERT:
-            case ByteCodeConstants.PREINC:
-            case ByteCodeConstants.POSTINC:
+            case ByteCodeConstants.ICONST,
+                 ByteCodeConstants.LCONST,
+                 ByteCodeConstants.FCONST,
+                 ByteCodeConstants.DCONST,
+                 ByteCodeConstants.DUPLOAD,
+                 ByteCodeConstants.ASSIGNMENT,
+                 ByteCodeConstants.UNARYOP,
+                 ByteCodeConstants.BINARYOP,
+                 ByteCodeConstants.LOAD,
+                 ByteCodeConstants.EXCEPTIONLOAD,
+                 ByteCodeConstants.ARRAYLOAD,
+                 ByteCodeConstants.INVOKENEW,
+                 ByteCodeConstants.CONVERT,
+                 ByteCodeConstants.IMPLICITCONVERT,
+                 ByteCodeConstants.PREINC,
+                 ByteCodeConstants.POSTINC:
                 result = offset;
             }
 

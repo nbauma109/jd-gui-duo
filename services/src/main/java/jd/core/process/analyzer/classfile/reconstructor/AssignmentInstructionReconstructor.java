@@ -85,13 +85,13 @@ public class AssignmentInstructionReconstructor
 
                 switch (xstorePutfieldPutstatic.getOpcode())
                 {
-                case Const.ASTORE:
-                case Const.ISTORE:
-                case ByteCodeConstants.STORE:
-                case Const.PUTFIELD:
-                case Const.PUTSTATIC:
-                case Const.AASTORE:
-                case ByteCodeConstants.ARRAYSTORE:
+                case Const.ASTORE,
+                     Const.ISTORE,
+                     ByteCodeConstants.STORE,
+                     Const.PUTFIELD,
+                     Const.PUTSTATIC,
+                     Const.AASTORE,
+                     ByteCodeConstants.ARRAYSTORE:
                     {
                         Instruction i =
                             ((ValuerefAttribute)xstorePutfieldPutstatic).getValueref();
@@ -103,9 +103,9 @@ public class AssignmentInstructionReconstructor
                         }
                     }
                     break;
-                case Const.DSTORE:
-                case Const.FSTORE:
-                case Const.LSTORE:
+                case Const.DSTORE,
+                     Const.FSTORE,
+                     Const.LSTORE:
                     new RuntimeException("Instruction inattendue")
                                 .printStackTrace();
                 }
@@ -358,9 +358,9 @@ public class AssignmentInstructionReconstructor
 						}
                     }
                     break;
-                case Const.DSTORE:
-                case Const.FSTORE:
-                case Const.LSTORE:
+                case Const.DSTORE,
+                     Const.FSTORE,
+                     Const.LSTORE:
                     new RuntimeException("Unexpected instruction")
                                 .printStackTrace();
                 }

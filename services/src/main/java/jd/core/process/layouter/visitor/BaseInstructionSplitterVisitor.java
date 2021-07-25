@@ -61,8 +61,8 @@ public abstract class BaseInstructionSplitterVisitor
                 visit(instruction, ali.getIndexref());
             }
             break;
-        case Const.AASTORE:
-        case ByteCodeConstants.ARRAYSTORE:
+        case Const.AASTORE,
+             ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
                 visit(instruction, asi.getArrayref());
@@ -81,8 +81,8 @@ public abstract class BaseInstructionSplitterVisitor
                     visit(instruction, ai.getMsg());
             }
             break;
-        case ByteCodeConstants.ASSIGNMENT:
-        case ByteCodeConstants.BINARYOP:
+        case ByteCodeConstants.ASSIGNMENT,
+             ByteCodeConstants.BINARYOP:
             {
                 BinaryOperatorInstruction boi =
                     (BinaryOperatorInstruction)instruction;
@@ -96,8 +96,8 @@ public abstract class BaseInstructionSplitterVisitor
         case ByteCodeConstants.UNARYOP:
             visit(instruction, ((UnaryOperatorInstruction)instruction).getValue());
             break;
-        case ByteCodeConstants.CONVERT:
-        case ByteCodeConstants.IMPLICITCONVERT:
+        case ByteCodeConstants.CONVERT,
+             ByteCodeConstants.IMPLICITCONVERT:
             visit(instruction, ((ConvertInstruction)instruction).getValue());
             break;
         case Const.CHECKCAST:
@@ -113,8 +113,8 @@ public abstract class BaseInstructionSplitterVisitor
         case Const.GETFIELD:
             visit(instruction, ((GetField)instruction).getObjectref());
             break;
-        case ByteCodeConstants.IF:
-        case ByteCodeConstants.IFXNULL:
+        case ByteCodeConstants.IF,
+             ByteCodeConstants.IFXNULL:
             visit(instruction, ((IfInstruction)instruction).getValue());
             break;
         case ByteCodeConstants.IFCMP:
@@ -133,8 +133,8 @@ public abstract class BaseInstructionSplitterVisitor
                     visit(instruction, branchList.get(i));
             }
             break;
-        case ByteCodeConstants.PREINC:
-        case ByteCodeConstants.POSTINC:
+        case ByteCodeConstants.PREINC,
+             ByteCodeConstants.POSTINC:
             visit(instruction, ((IncInstruction)instruction).getValue());
             break;
         case ByteCodeConstants.INVOKENEW:
@@ -179,9 +179,9 @@ public abstract class BaseInstructionSplitterVisitor
         case Const.INSTANCEOF:
             visit(instruction, ((InstanceOf)instruction).getObjectref());
             break;
-        case Const.INVOKEINTERFACE:
-        case Const.INVOKEVIRTUAL:
-        case Const.INVOKESPECIAL:
+        case Const.INVOKEINTERFACE,
+             Const.INVOKEVIRTUAL,
+             Const.INVOKESPECIAL:
             visit(instruction, ((InvokeNoStaticInstruction)instruction).getObjectref());
             // intended fall through
         case Const.INVOKESTATIC:
@@ -192,8 +192,8 @@ public abstract class BaseInstructionSplitterVisitor
                     visit(instruction, args.get(i));
             }
             break;
-        case Const.LOOKUPSWITCH:
-        case Const.TABLESWITCH:
+        case Const.LOOKUPSWITCH,
+             Const.TABLESWITCH:
             visit(instruction, ((Switch)instruction).getKey());
             break;
         case Const.MULTIANEWARRAY:
@@ -224,9 +224,9 @@ public abstract class BaseInstructionSplitterVisitor
         case ByteCodeConstants.XRETURN:
             visit(instruction, ((ReturnInstruction)instruction).getValueref());
             break;
-        case ByteCodeConstants.STORE:
-        case Const.ASTORE:
-        case Const.ISTORE:
+        case ByteCodeConstants.STORE,
+             Const.ASTORE,
+             Const.ISTORE:
             visit(instruction, ((StoreInstruction)instruction).getValueref());
             break;
         case ByteCodeConstants.TERNARYOPSTORE:
@@ -240,8 +240,8 @@ public abstract class BaseInstructionSplitterVisitor
                 visit(instruction, tp.getValue2());
             }
             break;
-        case ByteCodeConstants.INITARRAY:
-        case ByteCodeConstants.NEWANDINITARRAY:
+        case ByteCodeConstants.INITARRAY,
+             ByteCodeConstants.NEWANDINITARRAY:
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
                 visit(instruction, iai.getNewArray());

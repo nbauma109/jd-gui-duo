@@ -61,8 +61,8 @@ public class AddCheckCastVisitor
                 visit(al.getArrayref());
             }
             break;
-        case Const.AASTORE:
-        case ByteCodeConstants.ARRAYSTORE:
+        case Const.AASTORE,
+             ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
                 visit(asi.getArrayref());
@@ -119,8 +119,8 @@ public class AddCheckCastVisitor
         case Const.CHECKCAST:
             visit(((CheckCast)instruction).getObjectref());
             break;
-        case ByteCodeConstants.STORE:
-        case Const.ISTORE:
+        case ByteCodeConstants.STORE,
+             Const.ISTORE:
             visit(((StoreInstruction)instruction).getValueref());
             break;
         case Const.ASTORE:
@@ -150,8 +150,8 @@ public class AddCheckCastVisitor
         case ByteCodeConstants.DUPSTORE:
             visit(((DupStore)instruction).getObjectref());
             break;
-        case ByteCodeConstants.CONVERT:
-        case ByteCodeConstants.IMPLICITCONVERT:
+        case ByteCodeConstants.CONVERT,
+             ByteCodeConstants.IMPLICITCONVERT:
             visit(((ConvertInstruction)instruction).getValue());
             break;
         case ByteCodeConstants.IFCMP:
@@ -161,8 +161,8 @@ public class AddCheckCastVisitor
                 visit(ifCmp.getValue2());
             }
             break;
-        case ByteCodeConstants.IF:
-        case ByteCodeConstants.IFXNULL:
+        case ByteCodeConstants.IF,
+             ByteCodeConstants.IFXNULL:
             visit(((IfInstruction)instruction).getValue());
             break;
         case ByteCodeConstants.COMPLEXIF:
@@ -178,9 +178,9 @@ public class AddCheckCastVisitor
         case Const.INSTANCEOF:
             visit(((InstanceOf)instruction).getObjectref());
             break;
-        case Const.INVOKEINTERFACE:
-        case Const.INVOKESPECIAL:
-        case Const.INVOKEVIRTUAL:
+        case Const.INVOKEINTERFACE,
+             Const.INVOKESPECIAL,
+             Const.INVOKEVIRTUAL:
             {
                 InvokeNoStaticInstruction insi =
                     (InvokeNoStaticInstruction)instruction;
@@ -358,34 +358,34 @@ public class AddCheckCastVisitor
                 visit(to.getValue2());
             }
             break;
-        case Const.ACONST_NULL:
-        case ByteCodeConstants.ARRAYLOAD:
-        case ByteCodeConstants.LOAD:
-        case Const.ALOAD:
-        case Const.ILOAD:
-        case Const.BIPUSH:
-        case ByteCodeConstants.ICONST:
-        case ByteCodeConstants.LCONST:
-        case ByteCodeConstants.FCONST:
-        case ByteCodeConstants.DCONST:
-        case ByteCodeConstants.DUPLOAD:
-        case Const.GETSTATIC:
-        case ByteCodeConstants.OUTERTHIS:
-        case Const.GOTO:
-        case ByteCodeConstants.INVOKENEW:
-        case Const.JSR:
-        case Const.LDC:
-        case Const.LDC2_W:
-        case Const.NEW:
-        case Const.NOP:
-        case Const.SIPUSH:
-        case Const.RET:
-        case Const.RETURN:
-        case ByteCodeConstants.EXCEPTIONLOAD:
-        case ByteCodeConstants.RETURNADDRESSLOAD:
-        case Const.IINC:
-        case ByteCodeConstants.PREINC:
-        case ByteCodeConstants.POSTINC:
+        case Const.ACONST_NULL,
+             ByteCodeConstants.ARRAYLOAD,
+             ByteCodeConstants.LOAD,
+             Const.ALOAD,
+             Const.ILOAD,
+             Const.BIPUSH,
+             ByteCodeConstants.ICONST,
+             ByteCodeConstants.LCONST,
+             ByteCodeConstants.FCONST,
+             ByteCodeConstants.DCONST,
+             ByteCodeConstants.DUPLOAD,
+             Const.GETSTATIC,
+             ByteCodeConstants.OUTERTHIS,
+             Const.GOTO,
+             ByteCodeConstants.INVOKENEW,
+             Const.JSR,
+             Const.LDC,
+             Const.LDC2_W,
+             Const.NEW,
+             Const.NOP,
+             Const.SIPUSH,
+             Const.RET,
+             Const.RETURN,
+             ByteCodeConstants.EXCEPTIONLOAD,
+             ByteCodeConstants.RETURNADDRESSLOAD,
+             Const.IINC,
+             ByteCodeConstants.PREINC,
+             ByteCodeConstants.POSTINC:
             break;
         default:
             System.err.println(

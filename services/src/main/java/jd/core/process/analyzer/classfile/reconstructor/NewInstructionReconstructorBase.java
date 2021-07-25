@@ -77,9 +77,9 @@ public class NewInstructionReconstructorBase
 
                             switch (arg.getOpcode())
                             {
-                            case ByteCodeConstants.LOAD:
-                            case Const.ALOAD:
-                            case Const.ILOAD:
+                            case ByteCodeConstants.LOAD,
+                                 Const.ALOAD,
+                                 Const.ILOAD:
                                 LocalVariable lv =
                                     localVariables
                                         .getLocalVariableWithIndexAndOffset(

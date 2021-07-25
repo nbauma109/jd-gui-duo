@@ -38,8 +38,8 @@ public class CompareInstructionVisitor
         case Const.ARRAYLENGTH:
             return visit(
                 ((ArrayLength)i1).getArrayref(), ((ArrayLength)i2).getArrayref());
-        case Const.AASTORE:
-        case ByteCodeConstants.ARRAYSTORE:
+        case Const.AASTORE,
+             ByteCodeConstants.ARRAYSTORE:
             {
                 if ((Objects.compare(((ArrayStoreInstruction)i1).getSignature(),
                         ((ArrayStoreInstruction)i2).getSignature(), Comparator.naturalOrder()) != 0) || ! visit(
@@ -112,9 +112,9 @@ public class CompareInstructionVisitor
                 return visit(
                     ((CheckCast)i1).getObjectref(), ((CheckCast)i2).getObjectref());
             }
-        case ByteCodeConstants.STORE:
-        case Const.ASTORE:
-        case Const.ISTORE:
+        case ByteCodeConstants.STORE,
+             Const.ASTORE,
+             Const.ISTORE:
             {
                 String rs1 = ((StoreInstruction)i1).getReturnedSignature(null, null);
                 String rs2 = ((StoreInstruction)i2).getReturnedSignature(null, null);
@@ -129,8 +129,8 @@ public class CompareInstructionVisitor
         case ByteCodeConstants.DUPSTORE:
             return visit(
                 ((DupStore)i1).getObjectref(), ((DupStore)i2).getObjectref());
-        case ByteCodeConstants.CONVERT:
-        case ByteCodeConstants.IMPLICITCONVERT:
+        case ByteCodeConstants.CONVERT,
+             ByteCodeConstants.IMPLICITCONVERT:
             {
                 if (((ConvertInstruction)i1).getSignature().compareTo(
                         ((ConvertInstruction)i2).getSignature()) != 0) {
@@ -156,8 +156,8 @@ public class CompareInstructionVisitor
 
                 return visit(((IfCmp)i1).getValue2(), ((IfCmp)i2).getValue2());
             }
-        case ByteCodeConstants.IF:
-        case ByteCodeConstants.IFXNULL:
+        case ByteCodeConstants.IF,
+             ByteCodeConstants.IFXNULL:
             {
                 if (((IfInstruction)i1).getCmp() != ((IfInstruction)i2).getCmp()) {
 					return false;
@@ -185,9 +185,9 @@ public class CompareInstructionVisitor
                 return visit(
                     ((InstanceOf)i1).getObjectref(), ((InstanceOf)i2).getObjectref());
             }
-        case Const.INVOKEINTERFACE:
-        case Const.INVOKESPECIAL:
-        case Const.INVOKEVIRTUAL:
+        case Const.INVOKEINTERFACE,
+             Const.INVOKESPECIAL,
+             Const.INVOKEVIRTUAL:
             {
                 if (! visit(
                         ((InvokeNoStaticInstruction)i1).getObjectref(),
@@ -322,8 +322,8 @@ public class CompareInstructionVisitor
                     ((ArrayLoadInstruction)i1).getIndexref(),
                     ((ArrayLoadInstruction)i2).getIndexref());
             }
-        case ByteCodeConstants.PREINC:
-        case ByteCodeConstants.POSTINC:
+        case ByteCodeConstants.PREINC,
+             ByteCodeConstants.POSTINC:
             {
                 if (((IncInstruction)i1).getCount() != ((IncInstruction)i2).getCount()) {
 					return false;
@@ -342,8 +342,8 @@ public class CompareInstructionVisitor
                 return visit(
                     ((GetField)i1).getObjectref(), ((GetField)i2).getObjectref());
             }
-        case ByteCodeConstants.INITARRAY:
-        case ByteCodeConstants.NEWANDINITARRAY:
+        case ByteCodeConstants.INITARRAY,
+             ByteCodeConstants.NEWANDINITARRAY:
             {
                 if (! visit(
                         ((InitArrayInstruction)i1).getNewArray(),
@@ -354,16 +354,16 @@ public class CompareInstructionVisitor
                 return visit(((InitArrayInstruction)i1).getValues(),
                         ((InitArrayInstruction)i2).getValues());
             }
-        case Const.ALOAD:
-        case Const.ILOAD:
+        case Const.ALOAD,
+             Const.ILOAD:
             {
                 String rs1 = ((LoadInstruction)i1).getReturnedSignature(null, null);
                 String rs2 = ((LoadInstruction)i2).getReturnedSignature(null, null);
                 return rs1 == null ? rs2 == null : rs1.compareTo(rs2) == 0;
             }
-        case ByteCodeConstants.ICONST:
-        case Const.BIPUSH:
-        case Const.SIPUSH:
+        case ByteCodeConstants.ICONST,
+             Const.BIPUSH,
+             Const.SIPUSH:
             {
                 if (((IConst)i1).getValue() != ((IConst)i2).getValue()) {
 					return false;
@@ -373,34 +373,34 @@ public class CompareInstructionVisitor
                     ((IConst)i1).getSignature().compareTo(
                         ((IConst)i2).getSignature()) == 0;
             }
-        case ByteCodeConstants.DCONST:
-        case ByteCodeConstants.LCONST:
-        case ByteCodeConstants.FCONST:
+        case ByteCodeConstants.DCONST,
+             ByteCodeConstants.LCONST,
+             ByteCodeConstants.FCONST:
             return ((ConstInstruction)i1).getValue() == ((ConstInstruction)i2).getValue();
         case ByteCodeConstants.DUPLOAD:
             return ((DupLoad)i1).getDupStore() == ((DupLoad)i2).getDupStore();
-        case Const.TABLESWITCH:
-        case ByteCodeConstants.XRETURN:
-        case Const.PUTSTATIC:
-        case Const.LOOKUPSWITCH:
-        case Const.MONITORENTER:
-        case Const.MONITOREXIT:
-        case Const.POP:
-        case Const.ACONST_NULL:
-        case ByteCodeConstants.LOAD:
-        case Const.GETSTATIC:
-        case ByteCodeConstants.OUTERTHIS:
-        case Const.GOTO:
-        case Const.IINC:
-        case Const.JSR:
-        case Const.LDC:
-        case Const.LDC2_W:
-        case Const.NEW:
-        case Const.NOP:
-        case Const.RET:
-        case Const.RETURN:
-        case ByteCodeConstants.EXCEPTIONLOAD:
-        case ByteCodeConstants.RETURNADDRESSLOAD:
+        case Const.TABLESWITCH,
+             ByteCodeConstants.XRETURN,
+             Const.PUTSTATIC,
+             Const.LOOKUPSWITCH,
+             Const.MONITORENTER,
+             Const.MONITOREXIT,
+             Const.POP,
+             Const.ACONST_NULL,
+             ByteCodeConstants.LOAD,
+             Const.GETSTATIC,
+             ByteCodeConstants.OUTERTHIS,
+             Const.GOTO,
+             Const.IINC,
+             Const.JSR,
+             Const.LDC,
+             Const.LDC2_W,
+             Const.NEW,
+             Const.NOP,
+             Const.RET,
+             Const.RETURN,
+             ByteCodeConstants.EXCEPTIONLOAD,
+             ByteCodeConstants.RETURNADDRESSLOAD:
             return true;
         default:
             System.err.println(

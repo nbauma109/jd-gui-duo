@@ -40,8 +40,8 @@ public class CheckLocalVariableUsedVisitor
         case Const.ARRAYLENGTH:
             return visit(
                 localVariables, maxOffset, ((ArrayLength)instruction).getArrayref());
-        case Const.AASTORE:
-        case ByteCodeConstants.ARRAYSTORE:
+        case Const.AASTORE,
+             ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
                 return visit(localVariables, maxOffset, asi.getIndexref()) || visit(localVariables, maxOffset, asi.getValueref());
@@ -61,9 +61,9 @@ public class CheckLocalVariableUsedVisitor
         case Const.CHECKCAST:
             return visit(
                 localVariables, maxOffset, ((CheckCast)instruction).getObjectref());
-        case ByteCodeConstants.LOAD:
-        case Const.ALOAD:
-        case Const.ILOAD:
+        case ByteCodeConstants.LOAD,
+             Const.ALOAD,
+             Const.ILOAD:
             {
                 LoadInstruction li = (LoadInstruction)instruction;
                 LocalVariable lv =
@@ -71,9 +71,9 @@ public class CheckLocalVariableUsedVisitor
                         li.getIndex(), li.getOffset());
                 return lv != null && maxOffset <= lv.getStartPc();
             }
-        case ByteCodeConstants.STORE:
-        case Const.ASTORE:
-        case Const.ISTORE:
+        case ByteCodeConstants.STORE,
+             Const.ASTORE,
+             Const.ISTORE:
             {
                 StoreInstruction si = (StoreInstruction)instruction;
                 LocalVariable lv =
@@ -84,8 +84,8 @@ public class CheckLocalVariableUsedVisitor
         case ByteCodeConstants.DUPSTORE:
             return visit(
                 localVariables, maxOffset, ((DupStore)instruction).getObjectref());
-        case ByteCodeConstants.CONVERT:
-        case ByteCodeConstants.IMPLICITCONVERT:
+        case ByteCodeConstants.CONVERT,
+             ByteCodeConstants.IMPLICITCONVERT:
             return visit(
                 localVariables, maxOffset,
                 ((ConvertInstruction)instruction).getValue());
@@ -94,8 +94,8 @@ public class CheckLocalVariableUsedVisitor
                 IfCmp ifCmp = (IfCmp)instruction;
                 return visit(localVariables, maxOffset, ifCmp.getValue1()) || visit(localVariables, maxOffset, ifCmp.getValue2());
             }
-        case ByteCodeConstants.IF:
-        case ByteCodeConstants.IFXNULL:
+        case ByteCodeConstants.IF,
+             ByteCodeConstants.IFXNULL:
             return visit(
                 localVariables, maxOffset, ((IfInstruction)instruction).getValue());
         case ByteCodeConstants.COMPLEXIF:
@@ -113,9 +113,9 @@ public class CheckLocalVariableUsedVisitor
         case Const.INSTANCEOF:
             return visit(
                 localVariables, maxOffset, ((InstanceOf)instruction).getObjectref());
-        case Const.INVOKEINTERFACE:
-        case Const.INVOKESPECIAL:
-        case Const.INVOKEVIRTUAL:
+        case Const.INVOKEINTERFACE,
+             Const.INVOKESPECIAL,
+             Const.INVOKEVIRTUAL:
             if (visit(
                     localVariables, maxOffset,
                     ((InvokeNoStaticInstruction)instruction).getObjectref())) {
@@ -214,8 +214,8 @@ public class CheckLocalVariableUsedVisitor
                 ArrayLoadInstruction ali = (ArrayLoadInstruction)instruction;
                 return visit(localVariables, maxOffset, ali.getArrayref()) || visit(localVariables, maxOffset, ali.getIndexref());
             }
-        case ByteCodeConstants.PREINC:
-        case ByteCodeConstants.POSTINC:
+        case ByteCodeConstants.PREINC,
+             ByteCodeConstants.POSTINC:
             return visit(
                 localVariables, maxOffset,
                 ((IncInstruction)instruction).getValue());
@@ -223,8 +223,8 @@ public class CheckLocalVariableUsedVisitor
             return visit(
                 localVariables, maxOffset,
                 ((GetField)instruction).getObjectref());
-        case ByteCodeConstants.INITARRAY:
-        case ByteCodeConstants.NEWANDINITARRAY:
+        case ByteCodeConstants.INITARRAY,
+             ByteCodeConstants.NEWANDINITARRAY:
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
                 return visit(localVariables, maxOffset, iai.getNewArray()) || (iai.getValues() != null && visit(localVariables, maxOffset, iai.getValues()));
@@ -234,9 +234,9 @@ public class CheckLocalVariableUsedVisitor
                 FastFor ff = (FastFor)instruction;
                 return (ff.getInit() != null && visit(localVariables, maxOffset, ff.getInit())) || (ff.getInc() != null && visit(localVariables, maxOffset, ff.getInc()));
             }
-        case FastConstants.WHILE:
-        case FastConstants.DO_WHILE:
-        case FastConstants.IF_SIMPLE:
+        case FastConstants.WHILE,
+             FastConstants.DO_WHILE,
+             FastConstants.IF_SIMPLE:
             {
                 Instruction test = ((FastTestList)instruction).getTest();
                 return test != null && visit(localVariables, maxOffset, test);
@@ -257,19 +257,19 @@ public class CheckLocalVariableUsedVisitor
                 FastTest2Lists ft2l = (FastTest2Lists)instruction;
                 return visit(localVariables, maxOffset, ft2l.getTest()) || visit(localVariables, maxOffset, ft2l.getInstructions()) || visit(localVariables, maxOffset, ft2l.getInstructions2());
             }
-        case FastConstants.IF_CONTINUE:
-        case FastConstants.IF_BREAK:
-        case FastConstants.IF_LABELED_BREAK:
-        case FastConstants.GOTO_CONTINUE:
-        case FastConstants.GOTO_BREAK:
-        case FastConstants.GOTO_LABELED_BREAK:
+        case FastConstants.IF_CONTINUE,
+             FastConstants.IF_BREAK,
+             FastConstants.IF_LABELED_BREAK,
+             FastConstants.GOTO_CONTINUE,
+             FastConstants.GOTO_BREAK,
+             FastConstants.GOTO_LABELED_BREAK:
             {
                 FastInstruction fi = (FastInstruction)instruction;
                 return fi.getInstruction() != null && visit(localVariables, maxOffset, fi.getInstruction());
             }
-        case FastConstants.SWITCH:
-        case FastConstants.SWITCH_ENUM:
-        case FastConstants.SWITCH_STRING:
+        case FastConstants.SWITCH,
+             FastConstants.SWITCH_ENUM,
+             FastConstants.SWITCH_STRING:
             {
                 FastSwitch fs = (FastSwitch)instruction;
                 if (visit(localVariables, maxOffset, fs.getTest())) {
@@ -315,27 +315,27 @@ public class CheckLocalVariableUsedVisitor
                 FastDeclaration fd = (FastDeclaration)instruction;
                 return fd.getInstruction() != null && visit(localVariables, maxOffset, fd.getInstruction());
             }
-        case Const.GETSTATIC:
-        case ByteCodeConstants.OUTERTHIS:
-        case Const.ACONST_NULL:
-        case Const.BIPUSH:
-        case ByteCodeConstants.ICONST:
-        case ByteCodeConstants.LCONST:
-        case ByteCodeConstants.FCONST:
-        case ByteCodeConstants.DCONST:
-        case Const.GOTO:
-        case Const.IINC:
-        case Const.JSR:
-        case Const.LDC:
-        case Const.LDC2_W:
-        case Const.NEW:
-        case Const.NOP:
-        case Const.SIPUSH:
-        case Const.RET:
-        case Const.RETURN:
-        case ByteCodeConstants.EXCEPTIONLOAD:
-        case ByteCodeConstants.RETURNADDRESSLOAD:
-        case ByteCodeConstants.DUPLOAD:
+        case Const.GETSTATIC,
+             ByteCodeConstants.OUTERTHIS,
+             Const.ACONST_NULL,
+             Const.BIPUSH,
+             ByteCodeConstants.ICONST,
+             ByteCodeConstants.LCONST,
+             ByteCodeConstants.FCONST,
+             ByteCodeConstants.DCONST,
+             Const.GOTO,
+             Const.IINC,
+             Const.JSR,
+             Const.LDC,
+             Const.LDC2_W,
+             Const.NEW,
+             Const.NOP,
+             Const.SIPUSH,
+             Const.RET,
+             Const.RETURN,
+             ByteCodeConstants.EXCEPTIONLOAD,
+             ByteCodeConstants.RETURNADDRESSLOAD,
+             ByteCodeConstants.DUPLOAD:
             return false;
         default:
             System.err.println(

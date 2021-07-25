@@ -285,27 +285,27 @@ public class InstructionListBuilder
 			case 2:
 				switch (opcode)
 				{
-				case Const.IFEQ:
-				case Const.IFNE:
-				case Const.IFLT:
-				case Const.IFGE:
-				case Const.IFGT:
-				case Const.IFLE:
+				case Const.IFEQ,
+				     Const.IFNE,
+				     Const.IFLT,
+				     Const.IFGE,
+				     Const.IFGT,
+				     Const.IFLE,
 
-				case Const.IF_ICMPEQ:
-				case Const.IF_ICMPNE:
-				case Const.IF_ICMPLT:
-				case Const.IF_ICMPGE:
-				case Const.IF_ICMPGT:
-				case Const.IF_ICMPLE:
+				     Const.IF_ICMPEQ,
+				     Const.IF_ICMPNE,
+				     Const.IF_ICMPLT,
+				     Const.IF_ICMPGE,
+				     Const.IF_ICMPGT,
+				     Const.IF_ICMPLE,
 
-				case Const.IF_ACMPEQ:
-				case Const.IF_ACMPNE:
+				     Const.IF_ACMPEQ,
+				     Const.IF_ACMPNE,
 
-				case Const.IFNONNULL:
-				case Const.IFNULL:
+				     Const.IFNONNULL,
+				     Const.IFNULL,
 
-				case Const.GOTO:
+				     Const.GOTO:
 					jumpOffset = offset +
 					(short)( (code[++offset] & 255) << 8 |
 							code[++offset] & 255 );

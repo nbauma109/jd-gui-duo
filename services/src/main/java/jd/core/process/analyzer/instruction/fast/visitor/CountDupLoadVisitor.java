@@ -49,8 +49,8 @@ public class CountDupLoadVisitor
         case Const.ARRAYLENGTH:
             visit(((ArrayLength)instruction).getArrayref());
             break;
-        case Const.AASTORE:
-        case ByteCodeConstants.ARRAYSTORE:
+        case Const.AASTORE,
+             ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
                 visit(asi.getArrayref());
@@ -74,16 +74,16 @@ public class CountDupLoadVisitor
         case Const.CHECKCAST:
             visit(((CheckCast)instruction).getObjectref());
             break;
-        case ByteCodeConstants.STORE:
-        case Const.ASTORE:
-        case Const.ISTORE:
+        case ByteCodeConstants.STORE,
+             Const.ASTORE,
+             Const.ISTORE:
             visit(((StoreInstruction)instruction).getValueref());
             break;
         case ByteCodeConstants.DUPSTORE:
             visit(((DupStore)instruction).getObjectref());
             break;
-        case ByteCodeConstants.CONVERT:
-        case ByteCodeConstants.IMPLICITCONVERT:
+        case ByteCodeConstants.CONVERT,
+             ByteCodeConstants.IMPLICITCONVERT:
             visit(((ConvertInstruction)instruction).getValue());
             break;
         case ByteCodeConstants.IFCMP:
@@ -93,8 +93,8 @@ public class CountDupLoadVisitor
                 visit(ifCmp.getValue2());
             }
             break;
-        case ByteCodeConstants.IF:
-        case ByteCodeConstants.IFXNULL:
+        case ByteCodeConstants.IF,
+             ByteCodeConstants.IFXNULL:
             visit(((IfInstruction)instruction).getValue());
             break;
         case ByteCodeConstants.COMPLEXIF:
@@ -110,9 +110,9 @@ public class CountDupLoadVisitor
         case Const.INSTANCEOF:
             visit(((InstanceOf)instruction).getObjectref());
             break;
-        case Const.INVOKEINTERFACE:
-        case Const.INVOKESPECIAL:
-        case Const.INVOKEVIRTUAL:
+        case Const.INVOKEINTERFACE,
+             Const.INVOKESPECIAL,
+             Const.INVOKEVIRTUAL:
             visit(((InvokeNoStaticInstruction)instruction).getObjectref());
             // intended fall through
         case Const.INVOKESTATIC:
@@ -200,8 +200,8 @@ public class CountDupLoadVisitor
                 visit(ali.getIndexref());
             }
             break;
-        case ByteCodeConstants.PREINC:
-        case ByteCodeConstants.POSTINC:
+        case ByteCodeConstants.PREINC,
+             ByteCodeConstants.POSTINC:
             visit(((IncInstruction)instruction).getValue());
             break;
         case Const.GETFIELD:
@@ -213,8 +213,8 @@ public class CountDupLoadVisitor
                     this.counter++;
             }
             break;
-        case ByteCodeConstants.INITARRAY:
-        case ByteCodeConstants.NEWANDINITARRAY:
+        case ByteCodeConstants.INITARRAY,
+             ByteCodeConstants.NEWANDINITARRAY:
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
                 visit(iai.getNewArray());
@@ -231,9 +231,9 @@ public class CountDupLoadVisitor
                     visit(ff.getInc());
             }
             // intended fall through
-        case FastConstants.WHILE:
-        case FastConstants.DO_WHILE:
-        case FastConstants.IF_SIMPLE:
+        case FastConstants.WHILE,
+             FastConstants.DO_WHILE,
+             FastConstants.IF_SIMPLE:
             {
                 Instruction test = ((FastTestList)instruction).getTest();
                 if (test != null)
@@ -264,21 +264,21 @@ public class CountDupLoadVisitor
                 visit(ft2l.getInstructions2());
             }
             break;
-        case FastConstants.IF_CONTINUE:
-        case FastConstants.IF_BREAK:
-        case FastConstants.IF_LABELED_BREAK:
-        case FastConstants.GOTO_CONTINUE:
-        case FastConstants.GOTO_BREAK:
-        case FastConstants.GOTO_LABELED_BREAK:
+        case FastConstants.IF_CONTINUE,
+             FastConstants.IF_BREAK,
+             FastConstants.IF_LABELED_BREAK,
+             FastConstants.GOTO_CONTINUE,
+             FastConstants.GOTO_BREAK,
+             FastConstants.GOTO_LABELED_BREAK:
             {
                 FastInstruction fi = (FastInstruction)instruction;
                 if (fi.getInstruction() != null)
                     visit(fi.getInstruction());
             }
             break;
-        case FastConstants.SWITCH:
-        case FastConstants.SWITCH_ENUM:
-        case FastConstants.SWITCH_STRING:
+        case FastConstants.SWITCH,
+             FastConstants.SWITCH_ENUM,
+             FastConstants.SWITCH_STRING:
             {
                 FastSwitch fs = (FastSwitch)instruction;
                 visit(fs.getTest());
@@ -323,29 +323,29 @@ public class CountDupLoadVisitor
                     visit(fd.getInstruction());
             }
             break;
-        case Const.GETSTATIC:
-        case ByteCodeConstants.OUTERTHIS:
-        case Const.ACONST_NULL:
-        case ByteCodeConstants.LOAD:
-        case Const.ALOAD:
-        case Const.ILOAD:
-        case Const.BIPUSH:
-        case ByteCodeConstants.ICONST:
-        case ByteCodeConstants.LCONST:
-        case ByteCodeConstants.FCONST:
-        case ByteCodeConstants.DCONST:
-        case Const.GOTO:
-        case Const.IINC:
-        case Const.JSR:
-        case Const.LDC:
-        case Const.LDC2_W:
-        case Const.NEW:
-        case Const.NOP:
-        case Const.SIPUSH:
-        case Const.RET:
-        case Const.RETURN:
-        case ByteCodeConstants.EXCEPTIONLOAD:
-        case ByteCodeConstants.RETURNADDRESSLOAD:
+        case Const.GETSTATIC,
+             ByteCodeConstants.OUTERTHIS,
+             Const.ACONST_NULL,
+             ByteCodeConstants.LOAD,
+             Const.ALOAD,
+             Const.ILOAD,
+             Const.BIPUSH,
+             ByteCodeConstants.ICONST,
+             ByteCodeConstants.LCONST,
+             ByteCodeConstants.FCONST,
+             ByteCodeConstants.DCONST,
+             Const.GOTO,
+             Const.IINC,
+             Const.JSR,
+             Const.LDC,
+             Const.LDC2_W,
+             Const.NEW,
+             Const.NOP,
+             Const.SIPUSH,
+             Const.RET,
+             Const.RETURN,
+             ByteCodeConstants.EXCEPTIONLOAD,
+             ByteCodeConstants.RETURNADDRESSLOAD:
             break;
         default:
             System.err.println(

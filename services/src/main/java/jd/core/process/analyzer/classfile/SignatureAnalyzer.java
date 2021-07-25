@@ -161,7 +161,7 @@ public class SignatureAnalyzer
             }
             switch(caSignature[index])
             {
-            case 'L' : case '.' :
+            case 'L', '.' :
                 boolean classFlag = caSignature[index] == 'L';
                 int beginIndex = ++index;
                 c = '.';
@@ -200,15 +200,14 @@ public class SignatureAnalyzer
 					index++;
 				}
                 break;
-            case '-' : case '+' :
+            case '-', '+' :
                 index = analyzeSignature(
                             referenceMap, caSignature, length, index+1);
                 break;
             case 'T' :
                 index = CharArrayUtil.indexOf(caSignature, ';', index+1) + 1;
                 break;
-            case 'B' : case 'C' : case 'D' : case 'F' : case 'I' :
-            case 'J' : case 'S' : case 'V' : case 'Z' : case '*' :
+            case 'B', 'C', 'D', 'F', 'I', 'J', 'S', 'V', 'Z', '*' :
                 index++;
             }
 

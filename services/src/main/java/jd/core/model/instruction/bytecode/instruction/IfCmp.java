@@ -37,8 +37,8 @@ public class IfCmp extends ConditionalBranchInstruction
     {
         switch (this.getCmp())
         {
-        case ByteCodeConstants.CMP_EQ:
-        case ByteCodeConstants.CMP_NE:
+        case ByteCodeConstants.CMP_EQ,
+             ByteCodeConstants.CMP_NE:
             return 7;
         default:
             return 6;

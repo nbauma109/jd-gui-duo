@@ -105,14 +105,16 @@ public class ReferenceAnalyzer
         if (attributes != null)
         {
             for (int i=attributes.length-1; i>=0; --i) {
-                if (attributes[i].getTag() == Const.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS || attributes[i].getTag() == Const.ATTR_RUNTIME_VISIBLE_ANNOTATIONS) {
+                if (attributes[i].getTag() == Const.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS
+                 || attributes[i].getTag() == Const.ATTR_RUNTIME_VISIBLE_ANNOTATIONS) {
                     Annotation[] annotations =
                         ((AttributeRuntimeAnnotations)attributes[i])
                         .getAnnotations();
                     for (int j=annotations.length-1; j>=0; --j) {
                         countAnnotationReference(referenceMap, constants, annotations[j]);
                     }
-                } else if (attributes[i].getTag() == Const.ATTR_RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS || attributes[i].getTag() == Const.ATTR_RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS) {
+                } else if (attributes[i].getTag() == Const.ATTR_RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS
+                        || attributes[i].getTag() == Const.ATTR_RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS) {
                     ParameterAnnotations[] parameterAnnotations =
                         ((AttributeRuntimeParameterAnnotations)
                                 attributes[i]).getParameterAnnotations();
@@ -239,7 +241,7 @@ public class ReferenceAnalyzer
 
             as = field.getAttributeSignature();
             signature = classFile.getConstantPool().getConstantUtf8(
-                (as==null) ? field.getDescriptorIndex() : as.getSignatureIndex());
+                as==null ? field.getDescriptorIndex() : as.getSignatureIndex());
             SignatureAnalyzer.analyzeSimpleSignature(referenceMap, signature);
 
             if (field.getValueAndMethod() != null) {
@@ -283,7 +285,7 @@ public class ReferenceAnalyzer
             // Signature
             as = method.getAttributeSignature();
             signature = constants.getConstantUtf8(
-                    (as==null) ? method.getDescriptorIndex() : as.getSignatureIndex());
+                    as==null ? method.getDescriptorIndex() : as.getSignatureIndex());
             SignatureAnalyzer.analyzeMethodSignature(referenceMap, signature);
 
             // Exceptions
@@ -385,7 +387,7 @@ public class ReferenceAnalyzer
             int index =
                 internalName.lastIndexOf(StringConstants.INTERNAL_PACKAGE_SEPARATOR);
             String internalClassName =
-                (index != -1) ? internalName.substring(index+1) : internalName;
+                index != -1 ? internalName.substring(index+1) : internalName;
 
             if (multipleInternalClassName.containsKey(internalClassName)) {
                 multipleInternalClassName.put(internalClassName, Boolean.TRUE);
@@ -420,8 +422,8 @@ public class ReferenceAnalyzer
             internalPackageNameClassName = classFile.getInternalPackageName() +
             StringConstants.INTERNAL_PACKAGE_SEPARATOR + internalClassName;
 
-            if ((!classFile.getInternalPackageName().equals(internalPackageName) &&
-                multipleInternalClassName.get(internalClassName)) || referenceMap.contains(internalPackageNameClassName))
+            if (!classFile.getInternalPackageName().equals(internalPackageName) &&
+                multipleInternalClassName.get(internalClassName) || referenceMap.contains(internalPackageNameClassName))
             {
                 // Remove references with same name and different packages
                 // or with a name of same package of current class

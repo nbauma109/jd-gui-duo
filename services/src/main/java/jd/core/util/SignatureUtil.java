@@ -59,12 +59,10 @@ public class SignatureUtil
 
             switch(caSignature[index])
             {
-            case 'B' : case 'C' : case 'D' : case 'F' :
-            case 'I' : case 'J' : case 'S' : case 'V' :
-            case 'Z' : case '*' : case 'X' : case 'Y' :
+            case 'B', 'C', 'D', 'F', 'I', 'J', 'S', 'V', 'Z', '*', 'X', 'Y' :
                 index++;
                 break;
-            case 'L' : case '.' :
+            case 'L', '.' :
                 index++;
                 c = '.';
 
@@ -99,7 +97,7 @@ public class SignatureUtil
             case 'T' :
                 index = CharArrayUtil.indexOf(caSignature, ';', index+1) + 1;
                 break;
-            case '-' : case '+' :
+            case '-', '+' :
                 index = skipSignature(caSignature, length, index+1);
                 break;
             //default:
@@ -162,8 +160,7 @@ public class SignatureUtil
 
         switch (signature.charAt(0))
         {
-        case 'Z': case 'C': case 'F': case 'D':
-        case 'B': case 'S': case 'I': case 'J':
+        case 'Z', 'C', 'F', 'D', 'B', 'S', 'I', 'J':
             return true;
         default:
             return false;
@@ -178,7 +175,7 @@ public class SignatureUtil
 
         switch (signature.charAt(0))
         {
-        case 'C': case 'B': case 'S': case 'I':
+        case 'C', 'B', 'S', 'I':
             return true;
         default:
             return false;
@@ -241,8 +238,7 @@ public class SignatureUtil
         signature = cutArrayDimensionPrefix(signature);
         switch (signature.charAt(0))
         {
-        case 'L':
-        case 'T':
+        case 'L', 'T':
             return signature.substring(1, signature.length()-1);
         default:
             return signature;
@@ -379,8 +375,7 @@ public class SignatureUtil
         {
         case '[':
             return signature;
-        case 'L':
-        case 'T':
+        case 'L', 'T':
             if (signature.charAt(signature.length()-1) == ';') {
 				return signature;
 			}

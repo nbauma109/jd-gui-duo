@@ -111,10 +111,10 @@ public class InstructionUtil
 
                 switch (i.getOpcode())
                 {
-                case ByteCodeConstants.IF:
-                case ByteCodeConstants.IFCMP:
-                case ByteCodeConstants.IFXNULL:
-                case Const.GOTO:
+                case ByteCodeConstants.IF,
+                     ByteCodeConstants.IFCMP,
+                     ByteCodeConstants.IFXNULL,
+                     Const.GOTO:
                     int jumpOffset = ((BranchInstruction)i).getJumpOffset();
                     if ((firstOffset < jumpOffset) && (jumpOffset <= lastOffset))
                         return false;

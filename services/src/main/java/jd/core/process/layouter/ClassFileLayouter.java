@@ -893,7 +893,7 @@ public class ClassFileLayouter {
                 {
                     if (order == 0) // Unknown
                     {
-                        order = (lineNumber < newLineNumber) ? 1 : 2;
+                        order = lineNumber < newLineNumber ? 1 : 2;
                     }
                     else if (order == 1) // Asc
                     {
@@ -1128,14 +1128,14 @@ public class ClassFileLayouter {
                 destination.add(
                     new SeparatorLayoutBlock(LayoutBlockConstants.SEPARATOR, 1));
                 break;
-//			case LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK:
-            case LayoutBlockConstants.TYPE_BODY_BLOCK_START:
-            case LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START:
-            case LayoutBlockConstants.METHOD_BODY_BLOCK_START:
-            case LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START:
-            case LayoutBlockConstants.STATEMENTS_BLOCK_START:
-            case LayoutBlockConstants.SWITCH_BLOCK_START:
-            case LayoutBlockConstants.SEPARATOR:
+//			case LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK,
+            case LayoutBlockConstants.TYPE_BODY_BLOCK_START,
+                 LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START,
+                 LayoutBlockConstants.METHOD_BODY_BLOCK_START,
+                 LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START,
+                 LayoutBlockConstants.STATEMENTS_BLOCK_START,
+                 LayoutBlockConstants.SWITCH_BLOCK_START,
+                 LayoutBlockConstants.SEPARATOR:
                 break;
             default:
                 destination.add(
@@ -1192,14 +1192,14 @@ public class ClassFileLayouter {
                 destination.add(
                     new SeparatorLayoutBlock(LayoutBlockConstants.SEPARATOR, 1));
                 break;
-//			case LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK:
-            case LayoutBlockConstants.TYPE_BODY_BLOCK_START:
-            case LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START:
-            case LayoutBlockConstants.METHOD_BODY_BLOCK_START:
-            case LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START:
-            case LayoutBlockConstants.STATEMENTS_BLOCK_START:
-            case LayoutBlockConstants.SWITCH_BLOCK_START:
-            case LayoutBlockConstants.SEPARATOR:
+//			case LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK,
+            case LayoutBlockConstants.TYPE_BODY_BLOCK_START,
+                 LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START,
+                 LayoutBlockConstants.METHOD_BODY_BLOCK_START,
+                 LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START,
+                 LayoutBlockConstants.STATEMENTS_BLOCK_START,
+                 LayoutBlockConstants.SWITCH_BLOCK_START,
+                 LayoutBlockConstants.SEPARATOR:
                 break;
             default:
                 destination.add(
@@ -1250,9 +1250,13 @@ public class ClassFileLayouter {
             }
 
             // Add separator
-            if (lastTag != LayoutBlockConstants.TYPE_BODY_BLOCK_START && lastTag != LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START && lastTag != LayoutBlockConstants.METHOD_BODY_BLOCK_START
-                    && lastTag != LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START && lastTag != LayoutBlockConstants.STATEMENTS_BLOCK_START && lastTag != LayoutBlockConstants.SWITCH_BLOCK_START
-                    && lastTag != LayoutBlockConstants.SEPARATOR) {
+            if (lastTag != LayoutBlockConstants.TYPE_BODY_BLOCK_START
+             && lastTag != LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START
+             && lastTag != LayoutBlockConstants.METHOD_BODY_BLOCK_START
+             && lastTag != LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START
+             && lastTag != LayoutBlockConstants.STATEMENTS_BLOCK_START
+             && lastTag != LayoutBlockConstants.SWITCH_BLOCK_START
+             && lastTag != LayoutBlockConstants.SEPARATOR) {
                 destination.add(
                     new SeparatorLayoutBlock(LayoutBlockConstants.SEPARATOR, 2));
             }
@@ -1295,9 +1299,13 @@ public class ClassFileLayouter {
         while (index-- > 0)
         {
             // Add separator
-            if (lastTag != LayoutBlockConstants.TYPE_BODY_BLOCK_START && lastTag != LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START && lastTag != LayoutBlockConstants.METHOD_BODY_BLOCK_START
-                    && lastTag != LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START && lastTag != LayoutBlockConstants.STATEMENTS_BLOCK_START && lastTag != LayoutBlockConstants.SWITCH_BLOCK_START
-                    && lastTag != LayoutBlockConstants.SEPARATOR) {
+            if (lastTag != LayoutBlockConstants.TYPE_BODY_BLOCK_START
+             && lastTag != LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START
+             && lastTag != LayoutBlockConstants.METHOD_BODY_BLOCK_START
+             && lastTag != LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START
+             && lastTag != LayoutBlockConstants.STATEMENTS_BLOCK_START
+             && lastTag != LayoutBlockConstants.SWITCH_BLOCK_START
+             && lastTag != LayoutBlockConstants.SEPARATOR) {
                 destination.add(new SeparatorLayoutBlock(
                     LayoutBlockConstants.SEPARATOR, 2));
             }
@@ -1340,14 +1348,14 @@ public class ClassFileLayouter {
                 destination.add(
                     new SeparatorLayoutBlock(LayoutBlockConstants.SEPARATOR, 1));
                 break;
-//			case LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK:
-            case LayoutBlockConstants.TYPE_BODY_BLOCK_START:
-            case LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START:
-            case LayoutBlockConstants.METHOD_BODY_BLOCK_START:
-            case LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START:
-            case LayoutBlockConstants.STATEMENTS_BLOCK_START:
-            case LayoutBlockConstants.SWITCH_BLOCK_START:
-            case LayoutBlockConstants.SEPARATOR:
+//			case LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK,
+            case LayoutBlockConstants.TYPE_BODY_BLOCK_START,
+                 LayoutBlockConstants.INNER_TYPE_BODY_BLOCK_START,
+                 LayoutBlockConstants.METHOD_BODY_BLOCK_START,
+                 LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START,
+                 LayoutBlockConstants.STATEMENTS_BLOCK_START,
+                 LayoutBlockConstants.SWITCH_BLOCK_START,
+                 LayoutBlockConstants.SEPARATOR:
                 break;
             default:
                 destination.add(new SeparatorLayoutBlock(
@@ -1880,7 +1888,8 @@ public class ClassFileLayouter {
             {
                 lb = layoutBlockList.get(i);
 
-                if ((lb.getTag() == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START || lb.getTag() == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_END) && lb.getLineCount() > lb.getMinimalLineCount())
+                if ((lb.getTag() == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_START
+                  || lb.getTag() == LayoutBlockConstants.METHOD_BODY_SINGLE_LINE_BLOCK_END) && lb.getLineCount() > lb.getMinimalLineCount())
                 {
                     BlockLayoutBlock blb = (BlockLayoutBlock)lb;
 
@@ -2769,8 +2778,8 @@ public class ClassFileLayouter {
                         break;
                     }
                     if (lb.getTag() == LayoutBlockConstants.FIELD_MARKER_START ||
-                             lb.getTag() == LayoutBlockConstants.METHOD_MARKER_START ||
-                             lb.getTag() == LayoutBlockConstants.TYPE_MARKER_START)
+                        lb.getTag() == LayoutBlockConstants.METHOD_MARKER_START ||
+                        lb.getTag() == LayoutBlockConstants.TYPE_MARKER_START)
                     {
                         // Debut d'un bloc d'un type different
                         if (lb.getSection() != null &&
@@ -2992,8 +3001,8 @@ public class ClassFileLayouter {
                 break;
             }
             if (lb.getTag() == LayoutBlockConstants.FIELD_MARKER_END ||
-                     lb.getTag() == LayoutBlockConstants.METHOD_MARKER_END ||
-                     lb.getTag() == LayoutBlockConstants.TYPE_MARKER_END)
+                lb.getTag() == LayoutBlockConstants.METHOD_MARKER_END ||
+                lb.getTag() == LayoutBlockConstants.TYPE_MARKER_END)
             {
                 blockIndex = ((MarkerLayoutBlock)lb).getOther().getIndex();
             }
@@ -3181,8 +3190,8 @@ public class ClassFileLayouter {
                         break;
                     }
                     if (lb.getTag() == LayoutBlockConstants.FIELD_MARKER_END ||
-                             lb.getTag() == LayoutBlockConstants.METHOD_MARKER_END ||
-                             lb.getTag() == LayoutBlockConstants.TYPE_MARKER_END)
+                        lb.getTag() == LayoutBlockConstants.METHOD_MARKER_END ||
+                        lb.getTag() == LayoutBlockConstants.TYPE_MARKER_END)
                     {
                         // Fin d'un bloc d'un type different
                         if (lb.getSection() != null &&
@@ -3405,8 +3414,8 @@ public class ClassFileLayouter {
                 break;
             }
             if (lb.getTag() == LayoutBlockConstants.FIELD_MARKER_START ||
-                     lb.getTag() == LayoutBlockConstants.METHOD_MARKER_START ||
-                     lb.getTag() == LayoutBlockConstants.TYPE_MARKER_START)
+                lb.getTag() == LayoutBlockConstants.METHOD_MARKER_START ||
+                lb.getTag() == LayoutBlockConstants.TYPE_MARKER_START)
             {
                 blockIndex = ((MarkerLayoutBlock)lb).getOther().getIndex();
             }

@@ -347,9 +347,9 @@ public class AccessorAnalyzer
 
         switch (instruction.getOpcode())
         {
-        case Const.INVOKEVIRTUAL:
-        case Const.INVOKESPECIAL:
-        case Const.INVOKEINTERFACE:
+        case Const.INVOKEVIRTUAL,
+             Const.INVOKESPECIAL,
+             Const.INVOKEINTERFACE:
             InvokeNoStaticInstruction insi =
                 (InvokeNoStaticInstruction)instruction;
 

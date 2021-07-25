@@ -96,8 +96,7 @@ public class FieldNameGenerator
                 sbName.append("Long");
                 index++;
                 break;
-            case 'L' :
-            case '.' :
+            case 'L', '.' :
                 beginIndex = ++index;
                 c = '.';
 
@@ -168,8 +167,7 @@ public class FieldNameGenerator
                 sbName.append('X');
                 index++;
                 break;
-            case 'X' :
-            case 'Y' :
+            case 'X', 'Y' :
                 sbName.append('X');
                 System.err.println("<UNDEFINED>");
                 index++;

@@ -30,7 +30,7 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class IfXNullFactory implements InstructionFactory
 {
-	private int cmp;
+	private final int cmp;
 
 	public IfXNullFactory(int cmp)
 	{
@@ -46,7 +46,7 @@ public class IfXNullFactory implements InstructionFactory
 	{
 		final int opcode = code[offset] & 255;
 		final int branch =
-            (short)(((code[offset+1] & 255) << 8) | (code[offset+2] & 255));
+            (short)((code[offset+1] & 255) << 8 | code[offset+2] & 255);
 
 		list.add(new IfInstruction(
 				ByteCodeConstants.IFXNULL, offset, lineNumber,

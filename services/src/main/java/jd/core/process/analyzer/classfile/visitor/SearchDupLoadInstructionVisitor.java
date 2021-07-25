@@ -46,8 +46,8 @@ public class SearchDupLoadInstructionVisitor
                     return dupLoad;
                 return visit(ali.getIndexref(), dupStore);
             }
-        case Const.AASTORE:
-        case ByteCodeConstants.ARRAYSTORE:
+        case Const.AASTORE,
+             ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
                 DupLoad dupLoad = visit(asi.getArrayref(), dupStore);
@@ -72,8 +72,8 @@ public class SearchDupLoadInstructionVisitor
             return visit(((AThrow)instruction).getValue(), dupStore);
         case ByteCodeConstants.UNARYOP:
             return visit(((UnaryOperatorInstruction)instruction).getValue(), dupStore);
-        case ByteCodeConstants.BINARYOP:
-        case ByteCodeConstants.ASSIGNMENT:
+        case ByteCodeConstants.BINARYOP,
+             ByteCodeConstants.ASSIGNMENT:
             {
                 BinaryOperatorInstruction boi =
                     (BinaryOperatorInstruction)instruction;
@@ -84,9 +84,9 @@ public class SearchDupLoadInstructionVisitor
             }
         case Const.CHECKCAST:
             return visit(((CheckCast)instruction).getObjectref(), dupStore);
-        case ByteCodeConstants.STORE:
-        case Const.ASTORE:
-        case Const.ISTORE:
+        case ByteCodeConstants.STORE,
+             Const.ASTORE,
+             Const.ISTORE:
             return visit(((StoreInstruction)instruction).getValueref(), dupStore);
         case ByteCodeConstants.DUPLOAD:
             if (((DupLoad)instruction).getDupStore() == dupStore)
@@ -94,8 +94,8 @@ public class SearchDupLoadInstructionVisitor
             break;
         case ByteCodeConstants.DUPSTORE:
             return visit(((DupStore)instruction).getObjectref(), dupStore);
-        case ByteCodeConstants.CONVERT:
-        case ByteCodeConstants.IMPLICITCONVERT:
+        case ByteCodeConstants.CONVERT,
+             ByteCodeConstants.IMPLICITCONVERT:
             return visit(((ConvertInstruction)instruction).getValue(), dupStore);
         case ByteCodeConstants.IFCMP:
             {
@@ -105,8 +105,8 @@ public class SearchDupLoadInstructionVisitor
                     return dupLoad;
                 return visit(ifCmp.getValue2(), dupStore);
             }
-        case ByteCodeConstants.IF:
-        case ByteCodeConstants.IFXNULL:
+        case ByteCodeConstants.IF,
+             ByteCodeConstants.IFXNULL:
             return visit(((IfInstruction)instruction).getValue(), dupStore);
         case ByteCodeConstants.COMPLEXIF:
             {
@@ -122,9 +122,9 @@ public class SearchDupLoadInstructionVisitor
             break;
         case Const.INSTANCEOF:
             return visit(((InstanceOf)instruction).getObjectref(), dupStore);
-        case Const.INVOKEINTERFACE:
-        case Const.INVOKESPECIAL:
-        case Const.INVOKEVIRTUAL:
+        case Const.INVOKEINTERFACE,
+             Const.INVOKESPECIAL,
+             Const.INVOKEVIRTUAL:
             {
                 DupLoad dupLoad = visit(
                     ((InvokeNoStaticInstruction)instruction).getObjectref(), dupStore);
@@ -132,8 +132,8 @@ public class SearchDupLoadInstructionVisitor
                     return dupLoad;
             }
             // intended fall through
-        case Const.INVOKESTATIC:
-        case ByteCodeConstants.INVOKENEW:
+        case Const.INVOKESTATIC,
+             ByteCodeConstants.INVOKENEW:
             {
                 List<Instruction> list = ((InvokeInstruction)instruction).getArgs();
                 for (int i=list.size()-1; i>=0; --i)
@@ -183,13 +183,13 @@ public class SearchDupLoadInstructionVisitor
             return visit(((TableSwitch)instruction).getKey(), dupStore);
         case ByteCodeConstants.TERNARYOPSTORE:
             return visit(((TernaryOpStore)instruction).getObjectref(), dupStore);
-        case ByteCodeConstants.PREINC:
-        case ByteCodeConstants.POSTINC:
+        case ByteCodeConstants.PREINC,
+             ByteCodeConstants.POSTINC:
             return visit(((IncInstruction)instruction).getValue(), dupStore);
         case Const.GETFIELD:
             return visit(((GetField)instruction).getObjectref(), dupStore);
-        case ByteCodeConstants.INITARRAY:
-        case ByteCodeConstants.NEWANDINITARRAY:
+        case ByteCodeConstants.INITARRAY,
+             ByteCodeConstants.NEWANDINITARRAY:
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
                 DupLoad dupLoad = visit(iai.getNewArray(), dupStore);
@@ -199,29 +199,29 @@ public class SearchDupLoadInstructionVisitor
                     return visit(iai.getValues(), dupStore);
             }
             break;
-        case Const.ACONST_NULL:
-        case ByteCodeConstants.LOAD:
-        case Const.ALOAD:
-        case Const.ILOAD:
-        case Const.BIPUSH:
-        case ByteCodeConstants.ICONST:
-        case ByteCodeConstants.LCONST:
-        case ByteCodeConstants.FCONST:
-        case ByteCodeConstants.DCONST:
-        case Const.GETSTATIC:
-        case ByteCodeConstants.OUTERTHIS:
-        case Const.GOTO:
-        case Const.IINC:
-        case Const.JSR:
-        case Const.LDC:
-        case Const.LDC2_W:
-        case Const.NEW:
-        case Const.NOP:
-        case Const.SIPUSH:
-        case Const.RET:
-        case Const.RETURN:
-        case ByteCodeConstants.EXCEPTIONLOAD:
-        case ByteCodeConstants.RETURNADDRESSLOAD:
+        case Const.ACONST_NULL,
+             ByteCodeConstants.LOAD,
+             Const.ALOAD,
+             Const.ILOAD,
+             Const.BIPUSH,
+             ByteCodeConstants.ICONST,
+             ByteCodeConstants.LCONST,
+             ByteCodeConstants.FCONST,
+             ByteCodeConstants.DCONST,
+             Const.GETSTATIC,
+             ByteCodeConstants.OUTERTHIS,
+             Const.GOTO,
+             Const.IINC,
+             Const.JSR,
+             Const.LDC,
+             Const.LDC2_W,
+             Const.NEW,
+             Const.NOP,
+             Const.SIPUSH,
+             Const.RET,
+             Const.RETURN,
+             ByteCodeConstants.EXCEPTIONLOAD,
+             ByteCodeConstants.RETURNADDRESSLOAD:
             break;
         default:
             System.err.println(

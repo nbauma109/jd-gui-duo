@@ -50,8 +50,8 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
         case Const.ARRAYLENGTH:
             visit(((ArrayLength)instruction).getArrayref());
             break;
-        case Const.AASTORE:
-        case ByteCodeConstants.ARRAYSTORE:
+        case Const.AASTORE,
+             ByteCodeConstants.ARRAYSTORE:
             visit(((ArrayStoreInstruction)instruction).getArrayref());
             break;
         case ByteCodeConstants.ASSERT:
@@ -68,8 +68,8 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
         case ByteCodeConstants.UNARYOP:
             visit(((UnaryOperatorInstruction)instruction).getValue());
             break;
-        case ByteCodeConstants.BINARYOP:
-        case ByteCodeConstants.ASSIGNMENT:
+        case ByteCodeConstants.BINARYOP,
+             ByteCodeConstants.ASSIGNMENT:
             {
                 BinaryOperatorInstruction boi =
                     (BinaryOperatorInstruction)instruction;
@@ -80,16 +80,16 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
         case Const.CHECKCAST:
             visit(((CheckCast)instruction).getObjectref());
             break;
-        case ByteCodeConstants.STORE:
-        case Const.ASTORE:
-        case Const.ISTORE:
+        case ByteCodeConstants.STORE,
+             Const.ASTORE,
+             Const.ISTORE:
             visit(((StoreInstruction)instruction).getValueref());
             break;
         case ByteCodeConstants.DUPSTORE:
             visit(((DupStore)instruction).getObjectref());
             break;
-        case ByteCodeConstants.CONVERT:
-        case ByteCodeConstants.IMPLICITCONVERT:
+        case ByteCodeConstants.CONVERT,
+             ByteCodeConstants.IMPLICITCONVERT:
             visit(((ConvertInstruction)instruction).getValue());
             break;
         case ByteCodeConstants.IFCMP:
@@ -99,8 +99,8 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
                 visit(ifCmp.getValue2());
             }
             break;
-        case ByteCodeConstants.IF:
-        case ByteCodeConstants.IFXNULL:
+        case ByteCodeConstants.IF,
+             ByteCodeConstants.IFXNULL:
             visit(((IfInstruction)instruction).getValue());
             break;
         case ByteCodeConstants.COMPLEXIF:
@@ -153,12 +153,12 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
                 }
             }
             // intended fall through
-        case Const.INVOKEINTERFACE:
-        case Const.INVOKESPECIAL:
+        case Const.INVOKEINTERFACE,
+             Const.INVOKESPECIAL:
             visit(((InvokeNoStaticInstruction)instruction).getObjectref());
             // intended fall through
-        case Const.INVOKESTATIC:
-        case ByteCodeConstants.INVOKENEW:
+        case Const.INVOKESTATIC,
+             ByteCodeConstants.INVOKENEW:
             {
                 List<Instruction> list = ((InvokeInstruction)instruction).getArgs();
                 for (int i=list.size()-1; i>=0; --i)
@@ -209,15 +209,15 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
         case ByteCodeConstants.TERNARYOPSTORE:
             visit(((TernaryOpStore)instruction).getObjectref());
             break;
-        case ByteCodeConstants.PREINC:
-        case ByteCodeConstants.POSTINC:
+        case ByteCodeConstants.PREINC,
+             ByteCodeConstants.POSTINC:
             visit(((IncInstruction)instruction).getValue());
             break;
         case Const.GETFIELD:
             visit(((GetField)instruction).getObjectref());
             break;
-        case ByteCodeConstants.INITARRAY:
-        case ByteCodeConstants.NEWANDINITARRAY:
+        case ByteCodeConstants.INITARRAY,
+             ByteCodeConstants.NEWANDINITARRAY:
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
                 visit(iai.getNewArray());
@@ -225,31 +225,31 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
                     visit(iai.getValues());
             }
             break;
-        case Const.ACONST_NULL:
-        case ByteCodeConstants.ARRAYLOAD:
-        case ByteCodeConstants.LOAD:
-        case Const.ALOAD:
-        case Const.ILOAD:
-        case Const.BIPUSH:
-        case ByteCodeConstants.ICONST:
-        case ByteCodeConstants.LCONST:
-        case ByteCodeConstants.FCONST:
-        case ByteCodeConstants.DCONST:
-        case ByteCodeConstants.DUPLOAD:
-        case Const.GETSTATIC:
-        case ByteCodeConstants.OUTERTHIS:
-        case Const.GOTO:
-        case Const.IINC:
-        case Const.JSR:
-        case Const.LDC:
-        case Const.LDC2_W:
-        case Const.NEW:
-        case Const.NOP:
-        case Const.SIPUSH:
-        case Const.RET:
-        case Const.RETURN:
-        case ByteCodeConstants.EXCEPTIONLOAD:
-        case ByteCodeConstants.RETURNADDRESSLOAD:
+        case Const.ACONST_NULL,
+             ByteCodeConstants.ARRAYLOAD,
+             ByteCodeConstants.LOAD,
+             Const.ALOAD,
+             Const.ILOAD,
+             Const.BIPUSH,
+             ByteCodeConstants.ICONST,
+             ByteCodeConstants.LCONST,
+             ByteCodeConstants.FCONST,
+             ByteCodeConstants.DCONST,
+             ByteCodeConstants.DUPLOAD,
+             Const.GETSTATIC,
+             ByteCodeConstants.OUTERTHIS,
+             Const.GOTO,
+             Const.IINC,
+             Const.JSR,
+             Const.LDC,
+             Const.LDC2_W,
+             Const.NEW,
+             Const.NOP,
+             Const.SIPUSH,
+             Const.RET,
+             Const.RETURN,
+             ByteCodeConstants.EXCEPTIONLOAD,
+             ByteCodeConstants.RETURNADDRESSLOAD:
             break;
         default:
             System.err.println(

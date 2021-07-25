@@ -61,8 +61,8 @@ public class ReferenceVisitor
                 visit(al.getArrayref());
             }
             break;
-        case Const.AASTORE:
-        case ByteCodeConstants.ARRAYSTORE:
+        case Const.AASTORE,
+             ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
                 visit(asi.getValueref());
@@ -87,8 +87,8 @@ public class ReferenceVisitor
                 visit(uoi.getValue());
             }
             break;
-        case ByteCodeConstants.BINARYOP:
-        case ByteCodeConstants.ASSIGNMENT:
+        case ByteCodeConstants.BINARYOP,
+             ByteCodeConstants.ASSIGNMENT:
             {
                 BinaryOperatorInstruction boi = (BinaryOperatorInstruction)instruction;
                 visit(boi.getValue1());
@@ -102,8 +102,8 @@ public class ReferenceVisitor
                 visit(checkCast.getObjectref());
             }
             break;
-        case ByteCodeConstants.STORE:
-        case Const.ISTORE:
+        case ByteCodeConstants.STORE,
+             Const.ISTORE:
             {
                 StoreInstruction storeInstruction = (StoreInstruction)instruction;
                 visit(storeInstruction.getValueref());
@@ -121,8 +121,8 @@ public class ReferenceVisitor
                 visit(dupStore.getObjectref());
             }
             break;
-        case ByteCodeConstants.CONVERT:
-        case ByteCodeConstants.IMPLICITCONVERT:
+        case ByteCodeConstants.CONVERT,
+             ByteCodeConstants.IMPLICITCONVERT:
             {
                 ConvertInstruction ci = (ConvertInstruction)instruction;
                 visit(ci.getValue());
@@ -135,8 +135,8 @@ public class ReferenceVisitor
                 visit(ifCmp.getValue2());
             }
             break;
-        case ByteCodeConstants.IF:
-        case ByteCodeConstants.IFXNULL:
+        case ByteCodeConstants.IF,
+             ByteCodeConstants.IFXNULL:
             {
                 IfInstruction iff = (IfInstruction)instruction;
                 visit(iff.getValue());
@@ -158,15 +158,15 @@ public class ReferenceVisitor
                 visit(instanceOf.getObjectref());
             }
             break;
-        case Const.INVOKEINTERFACE:
-        case Const.INVOKESPECIAL:
-        case Const.INVOKEVIRTUAL:
+        case Const.INVOKEINTERFACE,
+             Const.INVOKESPECIAL,
+             Const.INVOKEVIRTUAL:
             InvokeNoStaticInstruction insi =
                 (InvokeNoStaticInstruction)instruction;
                 visit(insi.getObjectref());
                 // intended fall through
-        case Const.INVOKESTATIC:
-        case ByteCodeConstants.INVOKENEW:
+        case Const.INVOKESTATIC,
+             ByteCodeConstants.INVOKENEW:
             {
                 InvokeInstruction ii = (InvokeInstruction)instruction;
                 ConstantMethodref cmr = constants.getConstantMethodref(ii.getIndex());
@@ -272,8 +272,8 @@ public class ReferenceVisitor
             GetField getField = (GetField)instruction;
             visit(getField.getObjectref());
             // intended fall through
-        case Const.GETSTATIC:
-        case ByteCodeConstants.OUTERTHIS:
+        case Const.GETSTATIC,
+             ByteCodeConstants.OUTERTHIS:
             {
                 IndexInstruction indexInstruction = (IndexInstruction)instruction;
                 ConstantFieldref cfr = constants.getConstantFieldref(indexInstruction.getIndex());
@@ -281,8 +281,8 @@ public class ReferenceVisitor
                 addReference(internalName);
             }
             break;
-        case ByteCodeConstants.INITARRAY:
-        case ByteCodeConstants.NEWANDINITARRAY:
+        case ByteCodeConstants.INITARRAY,
+             ByteCodeConstants.NEWANDINITARRAY:
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
                 visit(iai.getNewArray());
@@ -296,9 +296,9 @@ public class ReferenceVisitor
             visit(ff.getInit());
             visit(ff.getInc());
             // intended fall through
-        case FastConstants.WHILE:
-        case FastConstants.DO_WHILE:
-        case FastConstants.IF_SIMPLE:
+        case FastConstants.WHILE,
+             FastConstants.DO_WHILE,
+             FastConstants.IF_SIMPLE:
             FastTestList ftl = (FastTestList)instruction;
             visit(ftl.getTest());
             // intended fall through
@@ -325,20 +325,20 @@ public class ReferenceVisitor
                 visit(ft2l.getInstructions2());
             }
             break;
-        case FastConstants.IF_CONTINUE:
-        case FastConstants.IF_BREAK:
-        case FastConstants.IF_LABELED_BREAK:
-        case FastConstants.GOTO_CONTINUE:
-        case FastConstants.GOTO_BREAK:
-        case FastConstants.GOTO_LABELED_BREAK:
+        case FastConstants.IF_CONTINUE,
+             FastConstants.IF_BREAK,
+             FastConstants.IF_LABELED_BREAK,
+             FastConstants.GOTO_CONTINUE,
+             FastConstants.GOTO_BREAK,
+             FastConstants.GOTO_LABELED_BREAK:
             {
                 FastInstruction fi = (FastInstruction)instruction;
                 visit(fi.getInstruction());
             }
             break;
-        case FastConstants.SWITCH:
-        case FastConstants.SWITCH_ENUM:
-        case FastConstants.SWITCH_STRING:
+        case FastConstants.SWITCH,
+             FastConstants.SWITCH_ENUM,
+             FastConstants.SWITCH_STRING:
             {
                 FastSwitch fs = (FastSwitch)instruction;
                 visit(fs.getTest());
@@ -391,29 +391,29 @@ public class ReferenceVisitor
                 }
             }
             break;
-        case Const.ACONST_NULL:
-        case ByteCodeConstants.ARRAYLOAD:
-        case ByteCodeConstants.LOAD:
-        case Const.ALOAD:
-        case Const.ILOAD:
-        case Const.BIPUSH:
-        case ByteCodeConstants.ICONST:
-        case ByteCodeConstants.LCONST:
-        case ByteCodeConstants.FCONST:
-        case ByteCodeConstants.DCONST:
-        case ByteCodeConstants.DUPLOAD:
-        case Const.GOTO:
-        case Const.IINC:
-        case ByteCodeConstants.PREINC:
-        case ByteCodeConstants.POSTINC:
-        case Const.JSR:
-        case Const.LDC2_W:
-        case Const.NOP:
-        case Const.SIPUSH:
-        case Const.RET:
-        case Const.RETURN:
-        case ByteCodeConstants.EXCEPTIONLOAD:
-        case ByteCodeConstants.RETURNADDRESSLOAD:
+        case Const.ACONST_NULL,
+             ByteCodeConstants.ARRAYLOAD,
+             ByteCodeConstants.LOAD,
+             Const.ALOAD,
+             Const.ILOAD,
+             Const.BIPUSH,
+             ByteCodeConstants.ICONST,
+             ByteCodeConstants.LCONST,
+             ByteCodeConstants.FCONST,
+             ByteCodeConstants.DCONST,
+             ByteCodeConstants.DUPLOAD,
+             Const.GOTO,
+             Const.IINC,
+             ByteCodeConstants.PREINC,
+             ByteCodeConstants.POSTINC,
+             Const.JSR,
+             Const.LDC2_W,
+             Const.NOP,
+             Const.SIPUSH,
+             Const.RET,
+             Const.RETURN,
+             ByteCodeConstants.EXCEPTIONLOAD,
+             ByteCodeConstants.RETURNADDRESSLOAD:
             break;
         default:
             System.err.println(

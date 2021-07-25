@@ -40,8 +40,8 @@ public class MaxLineNumberVisitor
         case ByteCodeConstants.ARRAYLOAD:
             maxLineNumber = visit(((ArrayLoadInstruction)instruction).getIndexref());
             break;
-        case Const.AASTORE:
-        case ByteCodeConstants.ARRAYSTORE:
+        case Const.AASTORE,
+             ByteCodeConstants.ARRAYSTORE:
             maxLineNumber = visit(((ArrayStoreInstruction)instruction).getValueref());
             break;
         case ByteCodeConstants.ASSERT:
@@ -56,23 +56,23 @@ public class MaxLineNumberVisitor
         case ByteCodeConstants.UNARYOP:
             maxLineNumber = visit(((UnaryOperatorInstruction)instruction).getValue());
             break;
-        case ByteCodeConstants.BINARYOP:
-        case ByteCodeConstants.ASSIGNMENT:
+        case ByteCodeConstants.BINARYOP,
+             ByteCodeConstants.ASSIGNMENT:
             maxLineNumber = visit(((BinaryOperatorInstruction)instruction).getValue2());
             break;
         case Const.CHECKCAST:
             maxLineNumber = visit(((CheckCast)instruction).getObjectref());
             break;
-        case ByteCodeConstants.STORE:
-        case Const.ASTORE:
-        case Const.ISTORE:
+        case ByteCodeConstants.STORE,
+             Const.ASTORE,
+             Const.ISTORE:
             maxLineNumber = visit(((StoreInstruction)instruction).getValueref());
             break;
         case ByteCodeConstants.DUPSTORE:
             maxLineNumber = visit(((DupStore)instruction).getObjectref());
             break;
-        case ByteCodeConstants.CONVERT:
-        case ByteCodeConstants.IMPLICITCONVERT:
+        case ByteCodeConstants.CONVERT,
+             ByteCodeConstants.IMPLICITCONVERT:
             maxLineNumber = visit(((ConvertInstruction)instruction).getValue());
             break;
         case FastConstants.DECLARE:
@@ -85,8 +85,8 @@ public class MaxLineNumberVisitor
         case ByteCodeConstants.IFCMP:
             maxLineNumber = visit(((IfCmp)instruction).getValue2());
             break;
-        case ByteCodeConstants.IF:
-        case ByteCodeConstants.IFXNULL:
+        case ByteCodeConstants.IF,
+             ByteCodeConstants.IFXNULL:
             maxLineNumber = visit(((IfInstruction)instruction).getValue());
             break;
         case ByteCodeConstants.COMPLEXIF:
@@ -99,10 +99,10 @@ public class MaxLineNumberVisitor
         case Const.INSTANCEOF:
             maxLineNumber = visit(((InstanceOf)instruction).getObjectref());
             break;
-        case Const.INVOKEINTERFACE:
-        case Const.INVOKESPECIAL:
-        case Const.INVOKEVIRTUAL:
-        case Const.INVOKESTATIC:
+        case Const.INVOKEINTERFACE,
+             Const.INVOKESPECIAL,
+             Const.INVOKEVIRTUAL,
+             Const.INVOKESTATIC:
             {
                 List<Instruction> list = ((InvokeInstruction)instruction).getArgs();
                 int length = list.size();
@@ -126,8 +126,8 @@ public class MaxLineNumberVisitor
                 }
             }
             break;
-        case ByteCodeConstants.INVOKENEW:
-        case FastConstants.ENUMVALUE:
+        case ByteCodeConstants.INVOKENEW,
+             FastConstants.ENUMVALUE:
             {
                 List<Instruction> list = ((InvokeNew)instruction).getArgs();
                 int length = list.size();
@@ -192,13 +192,13 @@ public class MaxLineNumberVisitor
         case ByteCodeConstants.TERNARYOPSTORE:
             maxLineNumber = visit(((TernaryOpStore)instruction).getObjectref());
             break;
-        case ByteCodeConstants.PREINC:
-        case ByteCodeConstants.POSTINC:
+        case ByteCodeConstants.PREINC,
+             ByteCodeConstants.POSTINC:
             IncInstruction ii = (IncInstruction)instruction;
             maxLineNumber = visit(ii.getValue());
             break;
-        case ByteCodeConstants.INITARRAY:
-        case ByteCodeConstants.NEWANDINITARRAY:
+        case ByteCodeConstants.INITARRAY,
+             ByteCodeConstants.NEWANDINITARRAY:
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
                 int length = iai.getValues().size();

@@ -59,10 +59,10 @@ public class IfGotoToIfReconstructor
             Instruction i = list.get(index);
             switch (i.getOpcode())
             {
-            case ByteCodeConstants.IF:
-            case ByteCodeConstants.IFCMP:
-            case ByteCodeConstants.IFXNULL:
-            case ByteCodeConstants.COMPLEXIF:
+            case ByteCodeConstants.IF,
+                 ByteCodeConstants.IFCMP,
+                 ByteCodeConstants.IFXNULL,
+                 ByteCodeConstants.COMPLEXIF:
                 BranchInstruction bi = (BranchInstruction)i;
 
                 i = list.get(index+1);

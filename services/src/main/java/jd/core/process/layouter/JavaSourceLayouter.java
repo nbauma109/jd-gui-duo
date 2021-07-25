@@ -108,8 +108,8 @@ public class JavaSourceLayouter
 						preferences, layoutBlockList, classFile, method,
 						ft2l, showSingleInstructionBlock(ft2l));
 				break;
-			case FastConstants.IF_CONTINUE:
-			case FastConstants.IF_BREAK:
+			case FastConstants.IF_CONTINUE,
+			     FastConstants.IF_BREAK:
 				createBlocksForIfContinueOrBreak(
 						preferences, layoutBlockList, classFile,
 						method, (FastInstruction)instruction);
@@ -817,8 +817,8 @@ public class JavaSourceLayouter
 						preferences, layoutBlockList, classFile, method,
 						ft2l, showSingleInstructionBlock(ft2l));
 				break;
-			case FastConstants.IF_CONTINUE:
-			case FastConstants.IF_BREAK:
+			case FastConstants.IF_CONTINUE,
+			     FastConstants.IF_BREAK:
 				createBlocksForIfContinueOrBreak(
 						preferences, layoutBlockList, classFile, method,
 						(FastInstruction)instruction);
@@ -980,15 +980,25 @@ public class JavaSourceLayouter
 		{
 			instruction = list.get(index);
 
-			if (instruction.getOpcode() == FastConstants.WHILE || instruction.getOpcode() == FastConstants.DO_WHILE
-					|| instruction.getOpcode() == FastConstants.INFINITE_LOOP || instruction.getOpcode() == FastConstants.FOR
-					|| instruction.getOpcode() == FastConstants.FOREACH || instruction.getOpcode() == FastConstants.IF_SIMPLE
-					|| instruction.getOpcode() == FastConstants.IF_ELSE || instruction.getOpcode() == FastConstants.IF_CONTINUE
-					|| instruction.getOpcode() == FastConstants.IF_BREAK || instruction.getOpcode() == FastConstants.IF_LABELED_BREAK
-					|| instruction.getOpcode() == FastConstants.GOTO_LABELED_BREAK || instruction.getOpcode() == FastConstants.SWITCH
-					|| instruction.getOpcode() == FastConstants.SWITCH_ENUM || instruction.getOpcode() == FastConstants.SWITCH_STRING
-					|| instruction.getOpcode() == FastConstants.TRY || instruction.getOpcode() == FastConstants.SYNCHRONIZED
-					|| instruction.getOpcode() == FastConstants.LABEL || instruction.getOpcode() == FastConstants.DECLARE && ((FastDeclaration)instruction).getInstruction() == null) {
+			if (instruction.getOpcode() == FastConstants.WHILE
+             || instruction.getOpcode() == FastConstants.DO_WHILE
+             || instruction.getOpcode() == FastConstants.INFINITE_LOOP
+             || instruction.getOpcode() == FastConstants.FOR
+             || instruction.getOpcode() == FastConstants.FOREACH
+             || instruction.getOpcode() == FastConstants.IF_SIMPLE
+             || instruction.getOpcode() == FastConstants.IF_ELSE
+             || instruction.getOpcode() == FastConstants.IF_CONTINUE
+             || instruction.getOpcode() == FastConstants.IF_BREAK
+             || instruction.getOpcode() == FastConstants.IF_LABELED_BREAK
+             || instruction.getOpcode() == FastConstants.GOTO_LABELED_BREAK
+             || instruction.getOpcode() == FastConstants.SWITCH
+             || instruction.getOpcode() == FastConstants.SWITCH_ENUM
+             || instruction.getOpcode() == FastConstants.SWITCH_STRING
+             || instruction.getOpcode() == FastConstants.TRY
+             || instruction.getOpcode() == FastConstants.SYNCHRONIZED
+             || instruction.getOpcode() == FastConstants.LABEL
+             || instruction.getOpcode() == FastConstants.DECLARE
+             && ((FastDeclaration)instruction).getInstruction() == null) {
 				return index-1;
 			}
 		}

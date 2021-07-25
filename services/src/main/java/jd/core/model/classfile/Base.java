@@ -68,7 +68,8 @@ public class Base
 		{
 			for (int i=this.attributes.length-1; i>=0; --i)
 			{
-				if (this.attributes[i].getTag() == Const.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS || this.attributes[i].getTag() == Const.ATTR_RUNTIME_VISIBLE_ANNOTATIONS) {
+				if (this.attributes[i].getTag() == Const.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS
+                 || this.attributes[i].getTag() == Const.ATTR_RUNTIME_VISIBLE_ANNOTATIONS) {
 					Annotation[]annotations =
 							((AttributeRuntimeAnnotations)attributes[i]).getAnnotations();
 					if (containsAnnotationDeprecated(classFile, annotations)) {

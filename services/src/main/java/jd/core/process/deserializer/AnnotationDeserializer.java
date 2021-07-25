@@ -68,9 +68,7 @@ public class AnnotationDeserializer
 
         switch (type)
         {
-        case 'B': case 'D': case 'F':
-        case 'I': case 'J': case 'S':
-        case 'Z': case 'C': case 's':
+        case 'B', 'D', 'F', 'I', 'J', 'S', 'Z', 'C', 's':
             return new ElementValuePrimitiveType(
                     ElementValueContants.EV_PRIMITIVE_TYPE, type,
                     di.readUnsignedShort());

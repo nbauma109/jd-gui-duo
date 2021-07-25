@@ -40,9 +40,9 @@ public class IBinaryOperatorInstruction extends BinaryOperatorInstruction
         String signature;
         switch (this.getValue1().getOpcode())
         {
-        case ByteCodeConstants.ICONST:
-        case Const.BIPUSH:
-        case Const.SIPUSH:
+        case ByteCodeConstants.ICONST,
+             Const.BIPUSH,
+             Const.SIPUSH:
             signature = this.getValue2().getReturnedSignature(constants, localVariables);
             if (signature == null) {
 				signature = this.getValue1().getReturnedSignature(constants, localVariables);

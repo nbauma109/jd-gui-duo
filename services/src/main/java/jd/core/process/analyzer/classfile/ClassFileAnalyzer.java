@@ -1143,8 +1143,9 @@ public class ClassFileAnalyzer
 				{
 					PutField pf = (PutField)instruction;
 
-					if (pf.getValueref().getOpcode() == ByteCodeConstants.LOAD || pf.getValueref().getOpcode() == Const.ALOAD
-							|| pf.getValueref().getOpcode() == Const.ILOAD) {
+					if (pf.getValueref().getOpcode() == ByteCodeConstants.LOAD
+                     || pf.getValueref().getOpcode() == Const.ALOAD
+                     || pf.getValueref().getOpcode() == Const.ILOAD) {
 						IndexInstruction ii = (IndexInstruction)pf.getValueref();
 						// Rappel sur l'ordre des parametres passes aux constructeurs:
 						//  <init>(outer this, p1, p2, ..., outer local var1, ...)
@@ -1222,7 +1223,7 @@ public class ClassFileAnalyzer
 			instruction = list.get(index);
 
 			if (instruction.getOpcode() == Const.POP &&
-					(((Pop)instruction).getObjectref().getOpcode() == Const.GETFIELD
+					  (((Pop)instruction).getObjectref().getOpcode() == Const.GETFIELD
 					|| ((Pop)instruction).getObjectref().getOpcode() == Const.GETSTATIC
 					|| ((Pop)instruction).getObjectref().getOpcode() == ByteCodeConstants.OUTERTHIS
 					|| ((Pop)instruction).getObjectref().getOpcode() == Const.ALOAD
@@ -1247,12 +1248,12 @@ public class ClassFileAnalyzer
 				IfInstruction ii = (IfInstruction)instruction;
 
 				if ((ii.getCmp() == ByteCodeConstants.CMP_EQ
-						|| ii.getCmp() == ByteCodeConstants.CMP_NE
-						|| ii.getCmp() == ByteCodeConstants.CMP_LT
-						|| ii.getCmp() == ByteCodeConstants.CMP_GE
-						|| ii.getCmp() == ByteCodeConstants.CMP_GT
-						|| ii.getCmp() == ByteCodeConstants.CMP_LE)
-						&& ii.getValue().getOpcode() == ByteCodeConstants.BINARYOP)
+                  || ii.getCmp() == ByteCodeConstants.CMP_NE
+                  || ii.getCmp() == ByteCodeConstants.CMP_LT
+                  || ii.getCmp() == ByteCodeConstants.CMP_GE
+                  || ii.getCmp() == ByteCodeConstants.CMP_GT
+                  || ii.getCmp() == ByteCodeConstants.CMP_LE)
+                  && ii.getValue().getOpcode() == ByteCodeConstants.BINARYOP)
 				{
 					BinaryOperatorInstruction boi =
 							(BinaryOperatorInstruction)ii.getValue();

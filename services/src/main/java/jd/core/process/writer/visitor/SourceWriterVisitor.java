@@ -127,8 +127,8 @@ public class SourceWriterVisitor
                 lineNumber = writeArray(ali, ali.getArrayref(), ali.getIndexref());
             }
             break;
-        case Const.AASTORE:
-        case ByteCodeConstants.ARRAYSTORE:
+        case Const.AASTORE,
+             ByteCodeConstants.ARRAYSTORE:
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
                 lineNumber = writeArray(asi, asi.getArrayref(), asi.getIndexref());
@@ -260,9 +260,9 @@ public class SourceWriterVisitor
             lineNumber = writeBinaryOperatorInstruction(
                 (BinaryOperatorInstruction)instruction);
             break;
-        case Const.BIPUSH:
-        case Const.SIPUSH:
-        case ByteCodeConstants.ICONST:
+        case Const.BIPUSH,
+             Const.SIPUSH,
+             ByteCodeConstants.ICONST:
             lineNumber = writeBIPushSIPushIConst((IConst)instruction);
             break;
         case ByteCodeConstants.LCONST:
@@ -472,8 +472,8 @@ public class SourceWriterVisitor
                 }
             }
             break;
-        case Const.INVOKEINTERFACE:
-        case Const.INVOKEVIRTUAL:
+        case Const.INVOKEINTERFACE,
+             Const.INVOKEVIRTUAL:
             lineNumber = writeInvokeNoStaticInstruction(
                 (InvokeNoStaticInstruction)instruction);
             break;
@@ -495,13 +495,13 @@ public class SourceWriterVisitor
                 }
             }
             break;
-        case Const.LDC:
-        case Const.LDC2_W:
+        case Const.LDC,
+             Const.LDC2_W:
             lineNumber = writeLcdInstruction((IndexInstruction)instruction);
             break;
-        case ByteCodeConstants.LOAD:
-        case Const.ALOAD:
-        case Const.ILOAD:
+        case ByteCodeConstants.LOAD,
+             Const.ALOAD,
+             Const.ILOAD:
             lineNumber = writeLoadInstruction((LoadInstruction)instruction);
             break;
         case Const.LOOKUPSWITCH:
@@ -715,9 +715,9 @@ public class SourceWriterVisitor
                 lineNumber = visit(ri.getValueref());
             }
             break;
-        case ByteCodeConstants.STORE:
-        case Const.ASTORE:
-        case Const.ISTORE:
+        case ByteCodeConstants.STORE,
+             Const.ASTORE,
+             Const.ISTORE:
             lineNumber = writeStoreInstruction((StoreInstruction)instruction);
             break;
         case ByteCodeConstants.EXCEPTIONLOAD:
@@ -973,7 +973,7 @@ public class SourceWriterVisitor
         {
             switch (boi.getOperator().charAt(0))
             {
-            case '&': case '|': case '^':
+            case '&', '|', '^':
                 {
                     // Binary operators
                     lineNumber =
@@ -1052,9 +1052,9 @@ public class SourceWriterVisitor
         {
             switch (value.getOpcode())
             {
-            case Const.BIPUSH:
-            case ByteCodeConstants.ICONST:
-            case Const.SIPUSH:
+            case Const.BIPUSH,
+                 ByteCodeConstants.ICONST,
+                 Const.SIPUSH:
                 {
                     IConst iconst = (IConst)value;
                     if ("Z".equals(iconst.getSignature()))
@@ -1073,8 +1073,8 @@ public class SourceWriterVisitor
                     }
                 }
                 break;
-            case Const.LDC:
-            case Const.LDC2_W:
+            case Const.LDC,
+                 Const.LDC2_W:
                 this.printer.addNewLinesAndPrefix(lineNumber);
                 Constant cst = constants.get( ((IndexInstruction)value).getIndex() );
                 ConstantValueWriter.writeHexa(
@@ -1097,8 +1097,9 @@ public class SourceWriterVisitor
 
         if (signature != null && signature.charAt(0) == 'Z')
         {
-            if (ifInstruction.getCmp() == ByteCodeConstants.CMP_EQ || ifInstruction.getCmp() == ByteCodeConstants.CMP_LE
-                    || ifInstruction.getCmp() == ByteCodeConstants.CMP_GE) {
+            if (ifInstruction.getCmp() == ByteCodeConstants.CMP_EQ
+             || ifInstruction.getCmp() == ByteCodeConstants.CMP_LE
+             || ifInstruction.getCmp() == ByteCodeConstants.CMP_GE) {
                 int nextOffset = this.previousOffset + 1;
 
                 if (this.firstOffset <= this.previousOffset &&
@@ -2283,7 +2284,7 @@ public class SourceWriterVisitor
         {
             switch (ai.getOperator().charAt(0))
             {
-            case '&': case '|': case '^':
+            case '&', '|', '^':
                 // Binary operators
                 return writeBinaryOperatorParameterInHexaOrBoolean(ai, ai.getValue2());
             }
