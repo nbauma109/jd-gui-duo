@@ -21,12 +21,13 @@ import org.apache.bcel.Const;
 import java.util.Deque;
 import java.util.List;
 
+import static jd.core.model.instruction.bytecode.ByteCodeConstants.*;
+import static org.apache.bcel.Const.*;
+
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
-import jd.core.model.instruction.bytecode.instruction.Goto;
-import jd.core.model.instruction.bytecode.instruction.Instruction;
-import jd.core.model.instruction.bytecode.instruction.TernaryOpStore;
+import jd.core.model.instruction.bytecode.instruction.*;
 import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
 
 public class GotoFactory implements InstructionFactory
@@ -62,24 +63,19 @@ public class GotoFactory implements InstructionFactory
         {
             Instruction previousInstruction = list.get(i);
 
-            switch (previousInstruction.getOpcode())
+            if (ByteCodeUtil.isIfInstruction(previousInstruction.getOpcode(), false))
             {
-            case ByteCodeConstants.IF,
-                 ByteCodeConstants.IFCMP,
-                 ByteCodeConstants.IFXNULL:
-                {
-                    // Gestion de l'operateur ternaire
-                    final int ternaryOp2ndValueOffset =
-                        search2ndValueOffset(code, offset, offset+value);
+                // Gestion de l'operateur ternaire
+                final int ternaryOp2ndValueOffset =
+                    search2ndValueOffset(code, offset, offset+value);
 
-                    final Instruction value0 = stack.pop();
-                    TernaryOpStore tos = new TernaryOpStore(
-                        ByteCodeConstants.TERNARYOPSTORE, offset-1,
-                        value0.getLineNumber(), value0, ternaryOp2ndValueOffset);
+                final Instruction value0 = stack.pop();
+                TernaryOpStore tos = new TernaryOpStore(
+                    ByteCodeConstants.TERNARYOPSTORE, offset-1,
+                    value0.getLineNumber(), value0, ternaryOp2ndValueOffset);
 
-                    list.add(tos);
-                    listForAnalyze.add(tos);
-                }
+                list.add(tos);
+                listForAnalyze.add(tos);
                 return;
             }
         }
@@ -95,157 +91,22 @@ public class GotoFactory implements InstructionFactory
             int opcode = code[offset] & 255;
             // on retient l'offset de la derniere opération placant une
             // information sur la pile.
-            switch (opcode)
+            if (opcode >= ACONST_NULL   && opcode <= SALOAD          // 1..53
+             || opcode >= DUP           && opcode <= DCMPG           // 89..152
+             || opcode == GETSTATIC                                  // 178
+             || opcode == GETFIELD                                   // 180
+             || opcode >= INVOKEVIRTUAL && opcode <= INVOKEINTERFACE // 182..185
+             || opcode >= NEW           && opcode <= ARRAYLENGTH     // 187..190
+             || opcode >= CHECKCAST     && opcode <= INSTANCEOF      // 192..193
+             || opcode >= WIDE          && opcode <= MULTIANEWARRAY  // 196..197
+             || opcode >= ICONST        && opcode <= DCONST          // 256..259
+             || opcode == DUPLOAD                                    // 263
+             || opcode >= ASSIGNMENT    && opcode <= LOAD            // 265..268
+             || opcode >= EXCEPTIONLOAD && opcode <= ARRAYLOAD       // 270..271
+             || opcode >= INVOKENEW     && opcode <= POSTINC         // 274..278
+             || opcode == OUTERTHIS                                  // 285
+            )
             {
-            case Const.ACONST_NULL,
-                 Const.ICONST_M1,
-                 Const.ICONST_0,
-                 Const.ICONST_1,
-                 Const.ICONST_2,
-                 Const.ICONST_3,
-                 Const.ICONST_4,
-                 Const.ICONST_5,
-                 Const.LCONST_0,
-                 Const.LCONST_1,
-                 Const.FCONST_0,
-                 Const.FCONST_1,
-                 Const.FCONST_2,
-                 Const.DCONST_0,
-                 Const.DCONST_1,
-                 Const.BIPUSH,
-                 Const.SIPUSH,
-                 Const.LDC,
-                 Const.LDC_W,
-                 Const.LDC2_W,
-                 Const.ILOAD,
-                 Const.LLOAD,
-                 Const.FLOAD,
-                 Const.DLOAD,
-                 Const.ALOAD,
-                 Const.ILOAD_0,
-                 Const.ILOAD_1,
-                 Const.ILOAD_2,
-                 Const.ILOAD_3,
-                 Const.LLOAD_0,
-                 Const.LLOAD_1,
-                 Const.LLOAD_2,
-                 Const.LLOAD_3,
-                 Const.FLOAD_0,
-                 Const.FLOAD_1,
-                 Const.FLOAD_2,
-                 Const.FLOAD_3,
-                 Const.DLOAD_0,
-                 Const.DLOAD_1,
-                 Const.DLOAD_2,
-                 Const.DLOAD_3,
-                 Const.ALOAD_0,
-                 Const.ALOAD_1,
-                 Const.ALOAD_2,
-                 Const.ALOAD_3,
-                 Const.IALOAD,
-                 Const.LALOAD,
-                 Const.FALOAD,
-                 Const.DALOAD,
-                 Const.AALOAD,
-                 Const.BALOAD,
-                 Const.CALOAD,
-                 Const.SALOAD,
-                 Const.DUP,
-                 Const.DUP_X1,
-                 Const.DUP_X2,
-                 Const.DUP2,
-                 Const.DUP2_X1,
-                 Const.DUP2_X2,
-                 Const.SWAP,
-                 Const.IADD,
-                 Const.LADD,
-                 Const.FADD,
-                 Const.DADD,
-                 Const.ISUB,
-                 Const.LSUB,
-                 Const.FSUB,
-                 Const.DSUB,
-                 Const.IMUL,
-                 Const.LMUL,
-                 Const.FMUL,
-                 Const.DMUL,
-                 Const.IDIV,
-                 Const.LDIV,
-                 Const.FDIV,
-                 Const.DDIV,
-                 Const.IREM,
-                 Const.LREM,
-                 Const.FREM,
-                 Const.DREM,
-                 Const.INEG,
-                 Const.LNEG,
-                 Const.FNEG,
-                 Const.DNEG,
-                 Const.ISHL,
-                 Const.LSHL,
-                 Const.ISHR,
-                 Const.LSHR,
-                 Const.IUSHR,
-                 Const.LUSHR,
-                 Const.IAND,
-                 Const.LAND,
-                 Const.IOR,
-                 Const.LOR,
-                 Const.IXOR,
-                 Const.LXOR,
-                 Const.IINC,
-                 Const.I2L,
-                 Const.I2F,
-                 Const.I2D,
-                 Const.L2I,
-                 Const.L2F,
-                 Const.L2D,
-                 Const.F2I,
-                 Const.F2L,
-                 Const.F2D,
-                 Const.D2I,
-                 Const.D2L,
-                 Const.D2F,
-                 Const.I2B,
-                 Const.I2C,
-                 Const.I2S,
-                 Const.LCMP,
-                 Const.FCMPL,
-                 Const.FCMPG,
-                 Const.DCMPL,
-                 Const.DCMPG,
-                 Const.GETSTATIC,
-                 ByteCodeConstants.OUTERTHIS,
-                 Const.GETFIELD,
-                 Const.INVOKEVIRTUAL,
-                 Const.INVOKESPECIAL,
-                 Const.INVOKESTATIC,
-                 Const.INVOKEINTERFACE,
-                 Const.NEW,
-                 Const.NEWARRAY,
-                 Const.ANEWARRAY,
-                 Const.ARRAYLENGTH,
-                 Const.CHECKCAST,
-                 Const.INSTANCEOF,
-                 Const.WIDE,
-                 Const.MULTIANEWARRAY:
-            // Extension for decompiler
-            case ByteCodeConstants.ICONST,
-                 ByteCodeConstants.LCONST,
-                 ByteCodeConstants.FCONST,
-                 ByteCodeConstants.DCONST,
-                 ByteCodeConstants.DUPLOAD,
-                 ByteCodeConstants.ASSIGNMENT,
-                 ByteCodeConstants.UNARYOP,
-                 ByteCodeConstants.BINARYOP,
-                 ByteCodeConstants.LOAD,
-                 ByteCodeConstants.EXCEPTIONLOAD,
-                 ByteCodeConstants.ARRAYLOAD,
-                 ByteCodeConstants.INVOKENEW,
-                 ByteCodeConstants.CONVERT,
-                 ByteCodeConstants.IMPLICITCONVERT,
-                 ByteCodeConstants.PREINC,
-                 ByteCodeConstants.POSTINC:
                 result = offset;
             }
 

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/**
  * Copyright (C) 2007-2019 Emmanuel Dupuy GPLv3
  *
  * This program is free software: you can redistribute it and/or modify
@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- ******************************************************************************/
+ */
 package jd.core.process.analyzer.classfile.reconstructor;
 
 import org.apache.bcel.Const;
@@ -30,12 +30,11 @@ import jd.core.util.UtilConstants;
 public class NewInstructionReconstructorBase
 {
     protected NewInstructionReconstructorBase() {
-        super();
     }
 
-    /*
+    /**
      * Methode permettant l'affichage des variables locales d'une méthode d'une
-     * outer class dans une inner class
+     * outer class dans une inner class.
      */
     public static void initAnonymousClassConstructorParameterName(
         ClassFile classFile, Method method, InvokeNew invokeNew)
@@ -59,10 +58,12 @@ public class NewInstructionReconstructorBase
                 ConstantPool innerConstants = innerClassFile.getConstantPool();
                 LocalVariables localVariables = method.getLocalVariables();
 
-                while (i-- > 0)
+                Field innerField;
+				int index;
+				while (i-- > 0)
                 {
-                    Field innerField = innerFields[i];
-                    int index = innerField.getAnonymousClassConstructorParameterIndex();
+                    innerField = innerFields[i];
+                    index = innerField.getAnonymousClassConstructorParameterIndex();
 
                     if (index != UtilConstants.INVALID_INDEX)
                     {
@@ -72,15 +73,15 @@ public class NewInstructionReconstructorBase
                         {
                             Instruction arg = invokeNew.getArgs().get(index);
 
-                            if (arg.getOpcode() == Const.CHECKCAST)
-                                arg = ((CheckCast)arg).getObjectref();
+                            if (arg.getOpcode() == Const.CHECKCAST) {
+								arg = ((CheckCast)arg).getObjectref();
+							}
 
-                            switch (arg.getOpcode())
-                            {
-                            case ByteCodeConstants.LOAD,
-                                 Const.ALOAD,
-                                 Const.ILOAD:
-                                LocalVariable lv =
+                            int argOpCode = arg.getOpcode();
+							if (argOpCode == ByteCodeConstants.LOAD 
+                             || argOpCode == Const.ALOAD
+                             || argOpCode == Const.ILOAD) {
+								LocalVariable lv =
                                     localVariables
                                         .getLocalVariableWithIndexAndOffset(
                                             ((IndexInstruction)arg).getIndex(),
@@ -98,7 +99,7 @@ public class NewInstructionReconstructorBase
                                     // l'instruction "new"
                                     lv.setFinalFlag(true);
                                 }
-                            }
+							}
                         }
                     }
                 }

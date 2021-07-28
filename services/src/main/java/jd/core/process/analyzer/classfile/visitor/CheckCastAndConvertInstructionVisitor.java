@@ -23,6 +23,7 @@ import java.util.List;
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
+import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
 import jd.core.util.SignatureUtil;
 
 /*
@@ -50,8 +51,9 @@ public class CheckCastAndConvertInstructionVisitor
             {
                 AssertInstruction ai = (AssertInstruction)instruction;
                 visit(constants, ai.getTest());
-                if (ai.getMsg() != null)
-                    visit(constants, ai.getMsg());
+                if (ai.getMsg() != null) {
+					visit(constants, ai.getMsg());
+				}
             }
             break;
         case Const.ATHROW:
@@ -136,56 +138,52 @@ public class CheckCastAndConvertInstructionVisitor
                     int i = parameterSignatures.size();
                     int j = args.size();
 
-                    while ((i-- > 0) && (j-- > 0))
+                    while (i-- > 0 && j-- > 0)
                     {
                         Instruction arg = args.get(j);
 
-                        switch (arg.getOpcode())
+                        if (ByteCodeUtil.isLoadIntValue(arg.getOpcode()))
                         {
-                        case Const.SIPUSH,
-                             Const.BIPUSH,
-                             ByteCodeConstants.ICONST:
+                            String argSignature = ((IConst)arg).getSignature();
+                            String parameterSignature = parameterSignatures.get(i);
+
+                            if (!parameterSignature.equals(argSignature))
                             {
-                                String argSignature = ((IConst)arg).getSignature();
-                                String parameterSignature = parameterSignatures.get(i);
+                                // Types differents
+                                int argBitFields =
+                                        SignatureUtil.createArgOrReturnBitFields(argSignature);
+                                int paramBitFields =
+                                        SignatureUtil.createTypesBitField(parameterSignature);
 
-                                if (!parameterSignature.equals(argSignature))
+                                if ((argBitFields|paramBitFields) == 0)
                                 {
-                                    // Types differents
-                                    int argBitFields =
-                                            SignatureUtil.createArgOrReturnBitFields(argSignature);
-                                    int paramBitFields =
-                                            SignatureUtil.createTypesBitField(parameterSignature);
-
-                                    if ((argBitFields|paramBitFields) == 0)
-                                    {
-                                        // Ajout d'une instruction cast si les types
-                                        // sont differents
-                                        args.set(j, new ConvertInstruction(
-                                            ByteCodeConstants.CONVERT,
-                                            arg.getOffset()-1, arg.getLineNumber(),
-                                            arg, parameterSignature));
-                                    }
-                                }
-                                else
-                                {
-                                    switch (parameterSignature.charAt(0))
-                                    {
-                                    case 'B', 'S':
-                                        // Ajout d'une instruction cast pour les
-                                        // parametres numeriques de type byte ou short
-                                        args.set(j, new ConvertInstruction(
-                                            ByteCodeConstants.CONVERT,
-                                            arg.getOffset()-1, arg.getLineNumber(),
-                                            arg, parameterSignature));
-                                        break;
-                                    default:
-                                        visit(constants, arg);
-                                    }
+                                    // Ajout d'une instruction cast si les types
+                                    // sont differents
+                                    args.set(j, new ConvertInstruction(
+                                        ByteCodeConstants.CONVERT,
+                                        arg.getOffset()-1, arg.getLineNumber(),
+                                        arg, parameterSignature));
                                 }
                             }
-                            break;
-                        default:
+                            else
+                            {
+                                if (SignatureUtil.isByteOrShortSignature(parameterSignature))
+                                {
+                                    // Ajout d'une instruction cast pour les
+                                    // parametres numeriques de type byte ou short
+                                    args.set(j, new ConvertInstruction(
+                                        ByteCodeConstants.CONVERT,
+                                        arg.getOffset()-1, arg.getLineNumber(),
+                                        arg, parameterSignature));
+                                } 
+                                else
+                                {
+                                    visit(constants, arg);
+                                }
+                            }
+                        }
+                        else
+                        {
                             visit(constants, arg);
                         }
                     }
@@ -250,8 +248,9 @@ public class CheckCastAndConvertInstructionVisitor
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
                 visit(constants, iai.getNewArray());
-                if (iai.getValues() != null)
-                    visit(constants, iai.getValues());
+                if (iai.getValues() != null) {
+					visit(constants, iai.getValues());
+				}
             }
             break;
         case Const.ACONST_NULL,

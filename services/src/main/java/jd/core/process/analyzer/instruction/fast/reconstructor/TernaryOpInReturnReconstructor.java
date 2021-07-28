@@ -23,6 +23,7 @@ import java.util.List;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 import jd.core.process.analyzer.instruction.bytecode.ComparisonInstructionAnalyzer;
+import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
 
 /*
  * Recontruction de l'instruction 'return (b1 == 1);' depuis la sequence :
@@ -89,10 +90,7 @@ public class TernaryOpInReturnReconstructor
 
             opcode = instruction.getOpcode();
 
-            if ((opcode != ByteCodeConstants.IF) &&
-                (opcode != ByteCodeConstants.IFCMP) &&
-                (opcode != ByteCodeConstants.IFXNULL) &&
-                (opcode != ByteCodeConstants.COMPLEXIF))
+            if (!ByteCodeUtil.isIfInstruction(opcode, true))
                 continue;
 
             BranchInstruction bi = (BranchInstruction)instruction;
@@ -119,10 +117,7 @@ public class TernaryOpInReturnReconstructor
                         break;
                     }
                 }
-                else if ((opcode == ByteCodeConstants.IF) ||
-                         (opcode == ByteCodeConstants.IFCMP) ||
-                         (opcode == ByteCodeConstants.IFXNULL) ||
-                         (opcode == ByteCodeConstants.COMPLEXIF))
+                else if (ByteCodeUtil.isIfInstruction(opcode, true))
                 {
                     int jumpOffset =
                         ((BranchInstruction)instruction).getJumpOffset();

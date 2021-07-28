@@ -44,27 +44,23 @@ public class MinLineNumberVisitor
             {
                 IncInstruction ii = (IncInstruction)instruction;
 
-                switch (ii.getCount())
+                if (ii.isSingleStep())
                 {
-                case -1,
-                     1:
+        			// Operator '++' or '--'
                     return instruction.getLineNumber();
-                default:
-                    return visit(ii.getValue());
                 }
+                return visit(ii.getValue());
             }
         case ByteCodeConstants.POSTINC:
             {
                 IncInstruction ii = (IncInstruction)instruction;
 
-                switch (ii.getCount())
+                if (ii.isSingleStep())
                 {
-                case -1,
-                     1:
+                	// Operator '++' or '--'
                     return visit(ii.getValue());
-                default:
-                    return instruction.getLineNumber();
                 }
+                return instruction.getLineNumber();
             }
         case Const.INSTANCEOF:
             return visit(((InstanceOf)instruction).getObjectref());

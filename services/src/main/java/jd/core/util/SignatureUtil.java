@@ -18,13 +18,21 @@ package jd.core.util;
 
 import org.apache.bcel.Const;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 
 public class SignatureUtil
 {
+	/*
+	 * Keep letters in order for binary search
+	 */
+    private static final char[] PRIMITIVE_SIGNATURES    = {'B', 'C', 'D', 'F', 'I', 'J', 'S', 'Z'};
+	private static final char[] INTEGER_SIGNATURES      = {'B', 'C', 'I', 'S'};
+	private static final char[] BYTE_SHORT_SIGNATURES   = {'B', 'S'};
+	private static final char[] OBJECT_TYPE_SIGNATURES  = {'L', 'T'};
+	private static final char[] OBJECT_SIGNATURE        = {'L'};
+
     private SignatureUtil() {
         super();
     }
@@ -154,41 +162,43 @@ public class SignatureUtil
 
     public static boolean isPrimitiveSignature(String signature)
     {
-        if (signature == null || signature.length() != 1) {
-			return false;
-		}
-
-        switch (signature.charAt(0))
-        {
-        case 'Z', 'C', 'F', 'D', 'B', 'S', 'I', 'J':
-            return true;
-        default:
-            return false;
-        }
+    	return isPrimitiveSignature(signature, PRIMITIVE_SIGNATURES);
     }
 
     public static boolean isIntegerSignature(String signature)
     {
-        if (signature == null || signature.length() != 1) {
-			return false;
-		}
+        return isPrimitiveSignature(signature, INTEGER_SIGNATURES);
+    }
 
-        switch (signature.charAt(0))
-        {
-        case 'C', 'B', 'S', 'I':
-            return true;
-        default:
-            return false;
-        }
+    public static boolean isByteOrShortSignature(String signature)
+    {
+    	return isPrimitiveSignature(signature, BYTE_SHORT_SIGNATURES);
+    }
+    
+    private static boolean isPrimitiveSignature(String signature, char[] letters)
+    {
+    	if (signature == null || signature.length() != 1) {
+    		return false;
+    	}
+    	return Arrays.binarySearch(letters, signature.charAt(0)) >= 0;
+    }
+
+    public static boolean isObjectTypeSignature(String signature)
+    {
+    	return isObjectSignature(signature, OBJECT_TYPE_SIGNATURES);
     }
 
     public static boolean isObjectSignature(String signature)
     {
+    	return isObjectSignature(signature, OBJECT_SIGNATURE);
+    }
+    
+    private static boolean isObjectSignature(String signature, char[] letters)
+    {
         if (signature == null || signature.length() <= 2) {
 			return false;
 		}
-
-        return signature.charAt(0) == 'L';
+        return Arrays.binarySearch(letters, signature.charAt(0)) >= 0;
     }
 
     public static String getInternalName(String signature)
@@ -236,13 +246,11 @@ public class SignatureUtil
     public static String getInnerName(String signature)
     {
         signature = cutArrayDimensionPrefix(signature);
-        switch (signature.charAt(0))
+        if (isObjectTypeSignature(signature))
         {
-        case 'L', 'T':
             return signature.substring(1, signature.length()-1);
-        default:
-            return signature;
         }
+        return signature;
     }
 
     public static List<String> getParameterSignatures(

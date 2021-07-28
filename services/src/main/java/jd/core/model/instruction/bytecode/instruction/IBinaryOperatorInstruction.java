@@ -16,11 +16,9 @@
  ******************************************************************************/
 package jd.core.model.instruction.bytecode.instruction;
 
-import org.apache.bcel.Const;
-
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.LocalVariables;
-import jd.core.model.instruction.bytecode.ByteCodeConstants;
+import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
 
 public class IBinaryOperatorInstruction extends BinaryOperatorInstruction
 {
@@ -38,22 +36,18 @@ public class IBinaryOperatorInstruction extends BinaryOperatorInstruction
             ConstantPool constants, LocalVariables localVariables)
     {
         String signature;
-        switch (this.getValue1().getOpcode())
+        if (ByteCodeUtil.isLoadIntValue(this.getValue1().getOpcode()))
         {
-        case ByteCodeConstants.ICONST,
-             Const.BIPUSH,
-             Const.SIPUSH:
             signature = this.getValue2().getReturnedSignature(constants, localVariables);
             if (signature == null) {
 				signature = this.getValue1().getReturnedSignature(constants, localVariables);
 			}
-            return signature;
-        default:
-            signature = this.getValue1().getReturnedSignature(constants, localVariables);
-            if (signature == null) {
+        } else {
+	        signature = this.getValue1().getReturnedSignature(constants, localVariables);
+	        if (signature == null) {
 				signature = this.getValue2().getReturnedSignature(constants, localVariables);
 			}
-            return signature;
         }
+        return signature;
     }
 }

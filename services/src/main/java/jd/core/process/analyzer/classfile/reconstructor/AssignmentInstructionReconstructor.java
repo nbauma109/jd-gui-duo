@@ -83,30 +83,20 @@ public class AssignmentInstructionReconstructor
                     list.get(xstorePutfieldPutstaticIndex);
                 Instruction dupload1 = null;
 
-                switch (xstorePutfieldPutstatic.getOpcode())
+                if (xstorePutfieldPutstatic instanceof ValuerefAttribute valRefAttr)
                 {
-                case Const.ASTORE,
-                     Const.ISTORE,
-                     ByteCodeConstants.STORE,
-                     Const.PUTFIELD,
-                     Const.PUTSTATIC,
-                     Const.AASTORE,
-                     ByteCodeConstants.ARRAYSTORE:
+                    Instruction i = valRefAttr.getValueref();
+                    if (i.getOpcode() == ByteCodeConstants.DUPLOAD &&
+                        ((DupLoad)i).getDupStore() == dupStore)
                     {
-                        Instruction i =
-                            ((ValuerefAttribute)xstorePutfieldPutstatic).getValueref();
-                        if (i.getOpcode() == ByteCodeConstants.DUPLOAD &&
-                            ((DupLoad)i).getDupStore() == dupStore)
-                        {
-                            // 1er DupLoad trouvé
-                            dupload1 = i;
-                        }
+                        // 1er DupLoad trouvé
+                        dupload1 = i;
                     }
-                    break;
-                case Const.DSTORE,
-                     Const.FSTORE,
-                     Const.LSTORE:
-                    new RuntimeException("Instruction inattendue")
+                } else if (xstorePutfieldPutstatic.getOpcode() == Const.DSTORE
+                        || xstorePutfieldPutstatic.getOpcode() == Const.FSTORE
+                        || xstorePutfieldPutstatic.getOpcode() == Const.LSTORE)
+                {
+                	new RuntimeException("Unexpected instruction")
                                 .printStackTrace();
                 }
 

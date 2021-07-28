@@ -22,8 +22,7 @@ import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
 import org.jd.core.v1.util.StringConstants;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ConstantPool;
@@ -43,8 +42,9 @@ import jd.core.util.*;
 
 public class SourceWriterVisitor
 {
-	protected static final String[] CMP_NAMES = {
+	private static final String[] CMP_NAMES = {
 			"==", "<", ">", "", "!", "<=", ">=", "!=" };
+    private static final char[] BIN_OPS = {'&', '^', '|'};
 
     protected Loader loader;
     protected InstructionPrinter printer;
@@ -969,30 +969,25 @@ public class SourceWriterVisitor
     {
         int lineNumber;
 
-        if (boi.getOperator().length() == 1)
+        String op = boi.getOperator();
+		if (op.length() == 1 && Arrays.binarySearch(BIN_OPS, op.charAt(0)) >= 0)
         {
-            switch (boi.getOperator().charAt(0))
+            // Binary operators
+            lineNumber =
+                writeBinaryOperatorParameterInHexaOrBoolean(boi, boi.getValue1());
+
+            int nextOffset = this.previousOffset + 1;
+
+            if (this.firstOffset <= this.previousOffset &&
+                nextOffset <= this.lastOffset)
             {
-            case '&', '|', '^':
-                {
-                    // Binary operators
-                    lineNumber =
-                        writeBinaryOperatorParameterInHexaOrBoolean(boi, boi.getValue1());
-
-                    int nextOffset = this.previousOffset + 1;
-
-                    if (this.firstOffset <= this.previousOffset &&
-                        nextOffset <= this.lastOffset)
-                    {
-                        this.printer.print(lineNumber, ' ');
-                        this.printer.print(lineNumber, boi.getOperator());
-                        this.printer.print(lineNumber, ' ');
-                    }
-
-                    return
-                        writeBinaryOperatorParameterInHexaOrBoolean(boi, boi.getValue2());
-                }
+                this.printer.print(lineNumber, ' ');
+                this.printer.print(lineNumber, op);
+                this.printer.print(lineNumber, ' ');
             }
+
+            return
+                writeBinaryOperatorParameterInHexaOrBoolean(boi, boi.getValue2());
         }
 
         // Other operators
@@ -1004,7 +999,7 @@ public class SourceWriterVisitor
             nextOffset <= this.lastOffset)
         {
             this.printer.print(lineNumber, ' ');
-            this.printer.print(lineNumber, boi.getOperator());
+            this.printer.print(lineNumber, op);
             this.printer.print(lineNumber, ' ');
         }
 
@@ -2271,23 +2266,20 @@ public class SourceWriterVisitor
         this.previousOffset = previousOffsetBackup;
         int nextOffset = this.previousOffset + 1;
 
-        if (this.firstOffset <= this.previousOffset &&
+        String op = ai.getOperator();
+		if (this.firstOffset <= this.previousOffset &&
             nextOffset <= this.lastOffset)
         {
             this.printer.print(lineNumber, ' ');
-            this.printer.print(lineNumber, ai.getOperator());
+            this.printer.print(lineNumber, op);
             this.printer.print(lineNumber, ' ');
         }
 
         /* +=, -=, *=, /=, %=, <<=, >>=, >>>=, &=, |=, ^= */
-        if (!ai.getOperator().isEmpty())
+        if (!op.isEmpty() && Arrays.binarySearch(BIN_OPS, op.charAt(0)) >= 0)
         {
-            switch (ai.getOperator().charAt(0))
-            {
-            case '&', '|', '^':
-                // Binary operators
-                return writeBinaryOperatorParameterInHexaOrBoolean(ai, ai.getValue2());
-            }
+            // Binary operators
+            return writeBinaryOperatorParameterInHexaOrBoolean(ai, ai.getValue2());
         }
 
         return visit(ai, ai.getValue2());

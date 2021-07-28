@@ -16,7 +16,7 @@
  ******************************************************************************/
 package jd.core.model.instruction.bytecode.instruction;
 
-import jd.core.model.instruction.bytecode.ByteCodeConstants;
+import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
 
 public class IfCmp extends ConditionalBranchInstruction
 {
@@ -35,14 +35,7 @@ public class IfCmp extends ConditionalBranchInstruction
     @Override
     public int getPriority()
     {
-        switch (this.getCmp())
-        {
-        case ByteCodeConstants.CMP_EQ,
-             ByteCodeConstants.CMP_NE:
-            return 7;
-        default:
-            return 6;
-        }
+        return ByteCodeUtil.getCmpPriority(this.getCmp());
     }
 
 	public Instruction getValue1() {

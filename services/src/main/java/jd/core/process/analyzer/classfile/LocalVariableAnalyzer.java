@@ -1263,7 +1263,7 @@ public class LocalVariableAnalyzer
 				store.getValueref().getOpcode() == ByteCodeConstants.RETURNADDRESSLOAD;
 
 		if (lv == null || lv.isExceptionOrReturnAddress() ||
-				isExceptionOrReturnAddress && lv.getStartPc() + lv.getLength() < offset)
+				(isExceptionOrReturnAddress && lv.getStartPc() + lv.getLength() < offset))
 		{
 			localVariables.add(new LocalVariable(
 					offset, 1, -1, signatureInstructionIndex, index,
@@ -1479,12 +1479,9 @@ public class LocalVariableAnalyzer
 			LocalVariables localVariables,
 			ArrayStoreInstruction asi)
 	{
-		if (asi.getValueref().getOpcode() == Const.BIPUSH
-         || asi.getValueref().getOpcode() == ByteCodeConstants.ICONST
-         || asi.getValueref().getOpcode() == Const.SIPUSH) {
-			switch (asi.getArrayref().getOpcode())
-			{
-			case Const.ALOAD:
+		if (ByteCodeUtil.isLoadIntValue(asi.getValueref().getOpcode())) {
+			int asiArrayRefOpCode = asi.getArrayref().getOpcode();
+			if (asiArrayRefOpCode == Const.ALOAD)
 			{
 				ALoad aload = (ALoad)asi.getArrayref();
 				LocalVariable lv = localVariables.getLocalVariableWithIndexAndOffset(
@@ -1501,9 +1498,8 @@ public class LocalVariableAnalyzer
 				((IConst)asi.getValueref()).setReturnedSignature(
 						SignatureUtil.cutArrayDimensionPrefix(signature));
 			}
-			break;
-			case Const.GETFIELD,
-			     Const.GETSTATIC:
+			else if (asiArrayRefOpCode == Const.GETFIELD 
+                  || asiArrayRefOpCode == Const.GETSTATIC)
 			{
 				IndexInstruction ii = (IndexInstruction)asi.getArrayref();
 				ConstantFieldref cfr = constants.getConstantFieldref(ii.getIndex());
@@ -1513,8 +1509,6 @@ public class LocalVariableAnalyzer
 						constants.getConstantUtf8(cnat.getSignatureIndex());
 				((IConst)asi.getValueref()).setReturnedSignature(
 						SignatureUtil.cutArrayDimensionPrefix(signature));
-			}
-			break;
 			}
 		}
 	}

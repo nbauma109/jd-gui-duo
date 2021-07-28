@@ -26,6 +26,11 @@ import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_CHAR;
 
 public class ExpressionVisitor extends TypeVisitor {
 	
+	/*
+	 * Binary operators in order for binary search
+	 */
+	private static final String[] BIN_OPS = {"&", "&=", "^", "^=", "|", "|="};
+	
     public static final KeywordToken CLASS = new KeywordToken("class");
     public static final KeywordToken FALSE = new KeywordToken("false");
     public static final KeywordToken INSTANCEOF = new KeywordToken("instanceof");
@@ -64,21 +69,18 @@ public class ExpressionVisitor extends TypeVisitor {
 
     @Override
     public void visit(BinaryOperatorExpression expression) {
-        switch (expression.getOperator()) {
-            case "&", "|", "^", "&=", "|=", "^=":
-				visitHexa(expression, expression.getLeftExpression());
-				tokens.add(TextToken.SPACE);
-				tokens.add(newTextToken(expression.getOperator()));
-				tokens.add(TextToken.SPACE);
-				visitHexa(expression, expression.getRightExpression());
-                break;
-            default:
-				visit(expression, expression.getLeftExpression());
-				tokens.add(TextToken.SPACE);
-				tokens.add(newTextToken(expression.getOperator()));
-				tokens.add(TextToken.SPACE);
-				visit(expression, expression.getRightExpression());
-                break;
+        if (Arrays.binarySearch(BIN_OPS, expression.getOperator()) >= 0) {
+            visitHexa(expression, expression.getLeftExpression());
+            tokens.add(TextToken.SPACE);
+            tokens.add(newTextToken(expression.getOperator()));
+            tokens.add(TextToken.SPACE);
+            visitHexa(expression, expression.getRightExpression());
+        } else {
+            visit(expression, expression.getLeftExpression());
+            tokens.add(TextToken.SPACE);
+            tokens.add(newTextToken(expression.getOperator()));
+            tokens.add(TextToken.SPACE);
+            visit(expression, expression.getRightExpression());
 		}
     }
 

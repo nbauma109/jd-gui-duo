@@ -16,13 +16,12 @@
  ******************************************************************************/
 package jd.core.process.analyzer.instruction.fast.reconstructor;
 
-import org.apache.bcel.Const;
-
 import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 import jd.core.process.analyzer.instruction.bytecode.ComparisonInstructionAnalyzer;
+import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
 import jd.core.process.analyzer.instruction.fast.visitor.ReplaceInstructionVisitor;
 
 /*
@@ -60,10 +59,7 @@ public class TernaryOpReconstructor
                     Instruction instruction = list.get(indexTest);
                     int opcode = instruction.getOpcode();
 
-                    if (opcode == ByteCodeConstants.IF ||
-                        opcode == ByteCodeConstants.IFCMP ||
-                        opcode == ByteCodeConstants.IFXNULL ||
-                        opcode == ByteCodeConstants.COMPLEXIF)
+                    if (ByteCodeUtil.isIfInstruction(opcode, true))
                     {
                         int jumpOffset =
                             ((BranchInstruction)instruction).getJumpOffset();
@@ -130,17 +126,8 @@ public class TernaryOpReconstructor
 
     private static boolean isBooleanConstant(Instruction instruction)
     {
-        if (instruction == null) {
-			return false;
-		}
-        switch (instruction.getOpcode())
-        {
-        case Const.BIPUSH,
-             ByteCodeConstants.ICONST,
-             Const.SIPUSH:
-            return "Z".equals(instruction.getReturnedSignature(null, null));
-        default:
-            return false;
-        }
+        return instruction != null
+            && ByteCodeUtil.isLoadIntValue(instruction.getOpcode())
+            && "Z".equals(instruction.getReturnedSignature(null, null));
     }
 }

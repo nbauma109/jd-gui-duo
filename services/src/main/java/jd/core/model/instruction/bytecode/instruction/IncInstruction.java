@@ -43,13 +43,17 @@ public class IncInstruction extends Instruction
     @Override
     public int getPriority()
     {
-        if (this.getCount() == 1 || this.getCount() == -1) {
+        if (isSingleStep()) {
 			// Operator '++' or '--'
             return 2;
 		}
         // Operator '+=' or '-='
         return 14;
     }
+
+	public boolean isSingleStep() {
+		return this.getCount() == 1 || this.getCount() == -1;
+	}
 
 	public int getCount() {
 		return count;

@@ -423,7 +423,8 @@ public class ReferenceAnalyzer
             StringConstants.INTERNAL_PACKAGE_SEPARATOR + internalClassName;
 
             if (!classFile.getInternalPackageName().equals(internalPackageName) &&
-                multipleInternalClassName.get(internalClassName) || referenceMap.contains(internalPackageNameClassName))
+                Boolean.TRUE.equals(multipleInternalClassName.get(internalClassName)) ||
+                referenceMap.contains(internalPackageNameClassName))
             {
                 // Remove references with same name and different packages
                 // or with a name of same package of current class

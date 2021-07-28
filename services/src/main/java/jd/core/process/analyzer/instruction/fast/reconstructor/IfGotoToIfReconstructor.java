@@ -25,6 +25,7 @@ import jd.core.model.instruction.bytecode.instruction.BranchInstruction;
 import jd.core.model.instruction.bytecode.instruction.Goto;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.process.analyzer.instruction.bytecode.ComparisonInstructionAnalyzer;
+import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
 
 /**
  * Transformation de l'ensemble 'if-break' en simple 'if':
@@ -57,12 +58,8 @@ public class IfGotoToIfReconstructor
         while (index-- > 0)
         {
             Instruction i = list.get(index);
-            switch (i.getOpcode())
+            if (ByteCodeUtil.isIfInstruction(i.getOpcode(), true))
             {
-            case ByteCodeConstants.IF,
-                 ByteCodeConstants.IFCMP,
-                 ByteCodeConstants.IFXNULL,
-                 ByteCodeConstants.COMPLEXIF:
                 BranchInstruction bi = (BranchInstruction)i;
 
                 i = list.get(index+1);
