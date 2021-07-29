@@ -20,7 +20,6 @@ import org.apache.bcel.Const;
 
 import java.util.List;
 
-import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.BranchInstruction;
 import jd.core.model.instruction.bytecode.instruction.Goto;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
