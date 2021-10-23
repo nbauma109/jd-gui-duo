@@ -1181,8 +1181,8 @@ public class FastInstructionListBuilder {
         // Create labeled 'break'
         // Cet appel permettait de reduire le nombre d'imbrication des 'if' en
         // Augmentant le nombre de 'break' et 'continue'.
-        // CreateContinue(
-        // list, beforeLoopEntryOffset, loopEntryOffset, returnOffset);
+         createContinue(
+         list, beforeLoopEntryOffset, loopEntryOffset, returnOffset);
 
         // Create if and if-else
         createIfElse(classFile, method, list, localVariables, offsetLabelSet, beforeLoopEntryOffset, loopEntryOffset,
@@ -1431,72 +1431,55 @@ public class FastInstructionListBuilder {
         }
     }
 
-    /**
-     * Private static void CreateContinue(
-     * List<Instruction> list, int beforeLoopEntryOffset,
-     * int loopEntryOffset, int returnOffset)
-     * {
-     * int length = list.size();
-     * for (int index=0; index<length; index++)
-     * {
-     * Instruction instruction = list.get(index);
-     * switch (instruction.opcode)
-     * {
-     * case ByteCodeConstants.IF:
-     * case ByteCodeConstants.IFCMP:
-     * case ByteCodeConstants.IFXNULL:
-     * case ByteCodeConstants.COMPLEXIF:
-     * {
-     * BranchInstruction bi = (BranchInstruction)instruction;
-     * int jumpOffset = bi.getJumpOffset();
-     * /* if (jumpOffset == returnOffset)
-     * {
-     * if (index+1 < length)
-     * {
-     * Instruction nextInstruction = list.get(index+1);
-     * // Si il n'y a pas assez de place pour une sequence
-     * // 'if' + 'return', un simple 'if' sera cree.
-     * if ((bi.lineNumber != Instruction.UNKNOWN_LINE_NUMBER) &&
-     * (bi.lineNumber+1 == nextInstruction.lineNumber))
-     * continue;
-     * }
-     * List<Instruction> instructions =
-     * new ArrayList<Instruction>(1);
-     * instructions.add(new Return(
-     * Const.RETURN, bi.offset,
-     * Instruction.UNKNOWN_LINE_NUMBER));
-     * list.set(index, new FastTestList(
-     * FastConstants.IF_, bi.offset, bi.lineNumber,
-     * jumpOffset-bi.offset, bi, instructions));
-     * }
-     * else * / if ((beforeLoopEntryOffset < jumpOffset) &&
-     * (jumpOffset <= loopEntryOffset))
-     * {
-     * if (index+1 < length)
-     * {
-     * Instruction nextInstruction = list.get(index+1);
-     * // Si il n'y a pas assez de place pour une sequence
-     * // 'if' + 'continue', un simple 'if' sera cree.
-     * if ((bi.lineNumber != Instruction.UNKNOWN_LINE_NUMBER) &&
-     * (index+1 < length) &&
-     * (bi.lineNumber+1 == nextInstruction.lineNumber))
-     * continue;
-     * // Si l'instruction de test est suivie d'une seule instruction
-     * // 'return', la sequence 'if' + 'continue' n'est pas construite.
-     * if ((nextInstruction.opcode == Const.RETURN) ||
-     * (nextInstruction.opcode == ByteCodeConstants.XRETURN))
-     * continue;
-     * }
-     * list.set(index, new FastInstruction(
-     * FastConstants.IF_CONTINUE, bi.offset,
-     * bi.lineNumber, bi));
-     * }
-     * }
-     * break;
-     * }
-     * }
-     * }
-     */
+    
+	private static void createContinue(List<Instruction> list, int beforeLoopEntryOffset, int loopEntryOffset,
+			int returnOffset) {
+		int length = list.size();
+		for (int index = 0; index < length; index++) {
+			Instruction instruction = list.get(index);
+			switch (instruction.getOpcode()) {
+			case ByteCodeConstants.IF:
+			case ByteCodeConstants.IFCMP:
+			case ByteCodeConstants.IFXNULL:
+			case ByteCodeConstants.COMPLEXIF: {
+				BranchInstruction bi = (BranchInstruction) instruction;
+				int jumpOffset = bi.getJumpOffset();
+				if (jumpOffset == returnOffset) {
+					if (index + 1 < length) {
+						Instruction nextInstruction = list.get(index + 1);
+						// Si il n'y a pas assez de place pour une sequence
+						// 'if' + 'return', un simple 'if' sera cree.
+						if ((bi.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER)
+								&& (bi.getLineNumber() + 1 == nextInstruction.getLineNumber()))
+							continue;
+					}
+					List<Instruction> instructions = new ArrayList<>(1);
+					instructions
+							.add(new Return(Const.RETURN, bi.getOffset(), Instruction.UNKNOWN_LINE_NUMBER));
+					list.set(index, new FastTestList(FastConstants.IF_SIMPLE, bi.getOffset(),
+							bi.getLineNumber(), jumpOffset - bi.getOffset(), bi, instructions));
+				} else if ((beforeLoopEntryOffset < jumpOffset) && (jumpOffset <= loopEntryOffset)) {
+					if (index + 1 < length) {
+						Instruction nextInstruction = list.get(index + 1);
+						// Si il n'y a pas assez de place pour une sequence
+						// 'if' + 'continue', un simple 'if' sera cree.
+						if ((bi.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER) && (index + 1 < length)
+								&& (bi.getLineNumber() + 1 == nextInstruction.getLineNumber()))
+							continue;
+						// Si l'instruction de test est suivie d'une seule instruction
+						// 'return', la sequence 'if' + 'continue' n'est pas construite.
+						if ((nextInstruction.getOpcode() == Const.RETURN)
+								|| (nextInstruction.getOpcode() == ByteCodeConstants.XRETURN))
+							continue;
+					}
+					list.set(index, new FastInstruction(FastConstants.IF_CONTINUE, bi.getOffset(),
+							bi.getLineNumber(), bi));
+				}
+			}
+				break;
+			}
+		}
+	}    
 
     private static void createBreakAndContinue(Method method, List<Instruction> list, IntSet offsetLabelSet,
             int beforeLoopEntryOffset, int loopEntryOffset, int afterBodyLoopOffset, int afterListOffset,
