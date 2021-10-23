@@ -1,25 +1,10 @@
 buildscript {
     repositories {
         mavenCentral()
-		maven {
-			url 'https://jitpack.io'
-		}
-		maven {
-			url 'https://maven-eu.nuxeo.org/nexus/content/repositories/public'
-		}
-    }
-    dependencies {
-		classpath 'com.github.TheBoegl:gradle-launch4j:2.5.0'
     }
 }
 
 apply plugin: 'java'
-apply plugin: 'edu.sc.seis.launch4j'
-
-createExe {
-  mainClassName = 'org.jd.gui.App'
-  icon = "${projectDir}/src/launch4j/resources/images/jd-gui.ico"
-}
 
 // Common configuration //
 rootProject.version='1.6.6'
