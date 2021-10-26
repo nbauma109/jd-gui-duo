@@ -4,9 +4,12 @@ buildscript {
         maven {
 	    url 'https://jitpack.io'
         }
+        maven {
+            url 'https://maven-eu.nuxeo.org/nexus/content/repositories/public'
+        }
     }
     dependencies {
-	classpath 'com.github.TheBoegl:gradle-launch4j:2.5.0'
+	classpath 'com.github.TheBoegl:gradle-launch4j:2.5.1'
     }
 }
 
