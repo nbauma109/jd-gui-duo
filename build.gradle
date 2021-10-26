@@ -5,6 +5,7 @@ buildscript {
 }
 
 apply plugin: 'java'
+apply plugin: 'maven'
 
 // Common configuration //
 rootProject.version='1.6.6'
@@ -15,6 +16,7 @@ targetCompatibility = '16'
 allprojects {
     apply plugin: 'eclipse'
     apply plugin: 'idea'
+    apply plugin: 'maven'
 
     tasks.withType(JavaCompile) {
         sourceCompatibility = '16'
@@ -26,9 +28,6 @@ allprojects {
 
     repositories {
         mavenCentral()
-        maven {
-        	url 'https://jitpack.io'
-        }
     }
 
     configurations {
