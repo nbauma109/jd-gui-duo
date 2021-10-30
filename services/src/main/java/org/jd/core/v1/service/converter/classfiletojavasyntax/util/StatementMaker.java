@@ -71,8 +71,7 @@ public class StatementMaker {
         this.updateIntegerConstantTypeVisitor = new UpdateIntegerConstantTypeVisitor(comd.getReturnedType());
     }
 
-    public Statements make(ControlFlowGraph cfg) {
-        Statements statements = new Statements();
+    public Statements make(ControlFlowGraph cfg, Statements statements) {
         Statements jumps = new Statements();
         WatchDog watchdog = new WatchDog();
 
@@ -163,13 +162,13 @@ public class StatementMaker {
                 statements.add(ReturnStatement.RETURN);
                 break;
             case TYPE_RETURN_VALUE, TYPE_GOTO_IN_TERNARY_OPERATOR, TYPE_RET:
-            parseByteCode(basicBlock, statements);
+                parseByteCode(basicBlock, statements);
                 break;
             case TYPE_SWITCH:
                 parseSwitch(watchdog, basicBlock, statements, jumps);
                 break;
             case TYPE_SWITCH_BREAK, TYPE_LOOP_END:
-            statements.add(BreakStatement.BREAK);
+                statements.add(BreakStatement.BREAK);
                 break;
             case TYPE_TRY:
                 parseTry(watchdog, basicBlock, statements, jumps, false, false);

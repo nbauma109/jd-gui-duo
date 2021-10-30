@@ -1311,6 +1311,9 @@ public class ByteCodeParser {
                 if ((methodDeclaration.getFlags() & (FLAG_SYNTHETIC|FLAG_PRIVATE)) == (FLAG_SYNTHETIC|FLAG_PRIVATE) && methodDeclaration.getMethod().getName().equals(name1) && methodDeclaration.getMethod().getDescriptor().equals(descriptor1)) {
                     // Create lambda expression
                     ClassFileMethodDeclaration cfmd = (ClassFileMethodDeclaration)methodDeclaration;
+                    if (cfmd.getStatements() == null) {
+                    	cfmd.setStatements(new Statements());
+                    }
                     stack.push(new LambdaIdentifiersExpression(
                             lineNumber, indyMethodTypes.getReturnedType(), indyMethodTypes.getReturnedType(),
                             prepareLambdaParameterNames(cfmd.getFormalParameters(), parameterCount),

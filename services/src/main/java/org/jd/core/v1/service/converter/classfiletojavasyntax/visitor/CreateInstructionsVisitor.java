@@ -117,7 +117,11 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
          	for (ControlFlowGraphReducer controlFlowGraphReducer : preferredReducers) {
          		try {
                     if (controlFlowGraphReducer.reduce()) {
-                        comd.setStatements(statementMaker.make(controlFlowGraphReducer.getControlFlowGraph()));
+                    	if (comd.getStatements() instanceof Statements stmts){
+                    		comd.setStatements(statementMaker.make(controlFlowGraphReducer.getControlFlowGraph(), stmts));
+                    	} else {
+                    		comd.setStatements(statementMaker.make(controlFlowGraphReducer.getControlFlowGraph(), new Statements()));
+                    	}
                     	reduced = true;
                         break;
                     }
