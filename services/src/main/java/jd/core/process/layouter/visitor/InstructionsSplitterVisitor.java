@@ -22,9 +22,7 @@ import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.InvokeNew;
-import jd.core.model.layout.block.InstructionsLayoutBlock;
-import jd.core.model.layout.block.LayoutBlock;
-import jd.core.model.layout.block.LayoutBlockConstants;
+import jd.core.model.layout.block.*;
 import jd.core.preferences.Preferences;
 import jd.core.process.layouter.ClassFileLayouter;
 
@@ -63,7 +61,7 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
         int lastOffset = this.list.get(this.index2).getOffset();
 
         // S'il reste un fragment d'instruction a traiter...
-        if ((this.index1 != this.index2) || (this.offset1 != lastOffset))
+        if ((this.index1 != this.index2) || (this.offset1 != lastOffset) || lastOffset == 0)
         {
             // Add last part of instruction
             int lastLineNumber = Instruction.UNKNOWN_LINE_NUMBER;
@@ -77,8 +75,13 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
                     break;
                 }
             }
-
-            addInstructionsLayoutBlock(lastLineNumber, lastOffset);
+            if (lastOffset == 0) {
+            	addInstructionsLayoutBlock(lastLineNumber, 1);
+            	layoutBlockList.add(new FragmentLayoutBlock(
+                        LayoutBlockConstants.FRAGMENT_SEMICOLON));
+            } else {
+            	addInstructionsLayoutBlock(lastLineNumber, lastOffset);
+            }
         }
     }
 
