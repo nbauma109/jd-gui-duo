@@ -10,32 +10,6 @@ public class StringUtilities {
         super();
     }
 
-    public static String replaceAll(final String text, final String regex, final String replacement, final int fromIdx,
-            final int toIdx) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(text.substring(0, fromIdx));
-        sb.append(text.substring(fromIdx, toIdx).replaceAll(regex, replacement));
-        sb.append(text.substring(toIdx));
-        return sb.toString();
-    }
-
-    public static String replace(final String text, final String searchString, final String replacement,
-            final int fromIdx, final int toIdx) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(text.substring(0, fromIdx));
-        sb.append(text.substring(fromIdx, toIdx).replace(searchString, replacement));
-        sb.append(text.substring(toIdx));
-        return sb.toString();
-    }
-
-    public static String patch(final String text, final String patch, final int fromIdx, final int toIdx) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(text.substring(0, fromIdx));
-        sb.append(patch);
-        sb.append(text.substring(toIdx));
-        return sb.toString();
-    }
-
     public static String applyModifications(final String text, final Map<Range, String> replacementMap) {
         List<Integer> indexes = collectIndexes(replacementMap.keySet(), text.length());
         StringBuilder sb = new StringBuilder();
