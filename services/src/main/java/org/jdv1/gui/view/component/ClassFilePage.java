@@ -103,7 +103,7 @@ public class ClassFilePage extends TypePage {
             }
         }
 
-        maximumLineNumber = getMaximumLineNumber();
+        maximumLineNumber = getMaximumSourceLineNumber();
     }
 
     protected void decompileV0(Map<String, String> preferences, ContainerLoader loader) {
