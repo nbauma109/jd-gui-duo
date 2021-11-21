@@ -6,8 +6,6 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
-import org.apache.commons.io.FileUtils;
-import org.jd.core.v1.cfg.ControlFlowGraphPlantUMLWriter;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
@@ -17,8 +15,6 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlo
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.cfg.CmpDepthCFGReducer;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.cfg.MinDepthCFGReducer;
 
-import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.apache.bcel.Const.*;
@@ -521,7 +517,7 @@ public abstract class ControlFlowGraphReducer {
         branch.replace(nextNextNextNext, basicBlock);
     }
 
-    private void updateConditionTernaryOperator2(BasicBlock basicBlock) {
+    private static void updateConditionTernaryOperator2(BasicBlock basicBlock) {
         BasicBlock next = basicBlock.getNext();
         BasicBlock branch = basicBlock.getBranch();
 
