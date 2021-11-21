@@ -11,7 +11,7 @@ import java.util.Set;
 
 public class Loop {
     protected BasicBlock start;
-    protected Set<BasicBlock> members;
+    protected final Set<BasicBlock> members;
     protected BasicBlock end;
 
     public Loop(BasicBlock start, Set<BasicBlock> members, BasicBlock end) {
@@ -40,6 +40,14 @@ public class Loop {
         this.end = end;
     }
 
+    public void updateEnclosingLoop() {
+    	members.forEach(this::updateEnclosingLoop);
+    }
+    
+    private void updateEnclosingLoop(BasicBlock member) {
+    	member.setEnclosingLoop(this);
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) {

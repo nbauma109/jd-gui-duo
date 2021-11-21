@@ -127,7 +127,7 @@ public class ClassFileDeserializer {
         String superTypeName = superClassIndex == 0 ? null : constants.getConstantTypeName(superClassIndex);
         String[] interfaceTypeNames = loadInterfaces(reader, constants);
         Field[] fields = loadFields(reader, constants);
-        Method[] methods = loadMethods(reader, constants);
+        Method[] methods = loadMethods(reader, constants, internalTypeName);
         Map<String, Attribute> attributes = loadAttributes(reader, constants);
 
         return new ClassFile(majorVersion, minorVersion, accessFlags, internalTypeName, superTypeName, interfaceTypeNames, fields, methods, attributes);
@@ -235,7 +235,7 @@ public class ClassFileDeserializer {
         return fields;
     }
 
-    protected Method[] loadMethods(DataInput reader, ConstantPool constants) throws IOException {
+    protected Method[] loadMethods(DataInput reader, ConstantPool constants, String className) throws IOException {
         int count = reader.readUnsignedShort();
         if (count == 0) {
             return null;
@@ -258,7 +258,7 @@ public class ClassFileDeserializer {
             name = constants.getConstantUtf8(nameIndex);
             descriptor = constants.getConstantUtf8(descriptorIndex);
 
-            methods[i] = new Method(accessFlags, name, descriptor, attributes, constants);
+            methods[i] = new Method(accessFlags, name, descriptor, attributes, constants, className);
         }
 
         return methods;

@@ -322,7 +322,7 @@ public class ControlFlowGraphLoopReducer {
             }
         }
 
-        return new Loop(start, members, end);
+		return new Loop(start, members, end);
     }
 
     private static BasicBlock searchEndBasicBlock(BitSet memberIndexes, int maxOffset, Set<BasicBlock> members) {
@@ -689,7 +689,7 @@ public class ControlFlowGraphLoopReducer {
         predecessors.add(bb);
         target.getPredecessors().remove(bb);
 
-        return bb.getControlFlowGraph().newBasicBlock(TYPE_JUMP, bb.getFromOffset(), target.getFromOffset(), predecessors);
+		return bb.getControlFlowGraph().newBasicBlock(TYPE_JUMP, bb.getFromOffset(), target.getFromOffset(), predecessors);
     }
 
     public static void reduce(ControlFlowGraph cfg) {
@@ -723,6 +723,8 @@ public class ControlFlowGraphLoopReducer {
                 }
             }
         }
+        
+        loops.forEach(Loop::updateEnclosingLoop);
     }
 
     /** Smaller loop first. */

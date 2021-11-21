@@ -67,23 +67,24 @@ public class BasicBlock {
     public static final BasicBlock END = new ImmutableBasicBlock(TYPE_END);
     public static final BasicBlock RETURN = new ImmutableBasicBlock(TYPE_RETURN);
 
-    protected ControlFlowGraph controlFlowGraph;
+    private ControlFlowGraph controlFlowGraph;
 
-    protected int index;
-    protected int type;
+    private int index;
+    private int type;
 
-    protected int fromOffset;
-    protected int toOffset;
+    private int fromOffset;
+    private int toOffset;
 
-    protected BasicBlock next;
-    protected BasicBlock branch;
-    protected BasicBlock condition;
-    protected boolean inverseCondition;
-    protected BasicBlock sub1;
-    protected BasicBlock sub2;
-    protected DefaultList<ExceptionHandler> exceptionHandlers = EMPTY_EXCEPTION_HANDLERS;
-    protected DefaultList<SwitchCase> switchCases = EMPTY_SWITCH_CASES;
-    protected Set<BasicBlock> predecessors;
+    private BasicBlock next;
+    private BasicBlock branch;
+    private BasicBlock condition;
+    private boolean inverseCondition;
+    private BasicBlock sub1;
+    private BasicBlock sub2;
+    private DefaultList<ExceptionHandler> exceptionHandlers = EMPTY_EXCEPTION_HANDLERS;
+    private DefaultList<SwitchCase> switchCases = EMPTY_SWITCH_CASES;
+    private Set<BasicBlock> predecessors;
+    private Loop enclosingLoop;
 
     public BasicBlock(ControlFlowGraph controlFlowGraph, int index, BasicBlock original) {
         this(controlFlowGraph, index, original, new HashSet<>());
@@ -383,7 +384,7 @@ public class BasicBlock {
 
     @Override
     public boolean equals(Object other) {
-        return other instanceof BasicBlock && index == ((BasicBlock)other).index;
+        return other instanceof BasicBlock otherBlock && index == otherBlock.index;
     }
 
     public static class ExceptionHandler {
@@ -518,5 +519,29 @@ public class BasicBlock {
         public int getFirstLineNumber() { return 0; }
         @Override
         public int getLastLineNumber() { return 0; }
+    }
+
+    public BasicBlock getSinglePredecessor(int type) {
+        if (predecessors.size() != 1) {
+            return null;
+        }
+        return getFirstPredecessor(type);
+    }
+
+    public BasicBlock getFirstPredecessor(int type) {
+        for (BasicBlock predecessor : predecessors) {
+            if (predecessor.getType() == type) {
+                return predecessor;
+            }
+        }
+        return null;
+    }
+
+    public Loop getEnclosingLoop() {
+        return enclosingLoop;
+    }
+
+    public void setEnclosingLoop(Loop enclosingLoop) {
+        this.enclosingLoop = enclosingLoop;
     }
 }

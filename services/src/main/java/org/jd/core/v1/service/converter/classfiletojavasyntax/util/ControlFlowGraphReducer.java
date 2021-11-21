@@ -6,16 +6,19 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
+import org.apache.commons.io.FileUtils;
+import org.jd.core.v1.cfg.ControlFlowGraphPlantUMLWriter;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.ExceptionHandler;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.SwitchCase;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.cfg.CmpDepthCFGReducer;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.cfg.MinDepthCFGReducer;
 
+import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.apache.bcel.Const.*;
@@ -27,17 +30,18 @@ public abstract class ControlFlowGraphReducer {
     protected ControlFlowGraphReducer(Method method) {
         controlFlowGraph = ControlFlowGraphMaker.make(method);
     }
-        public boolean reduce() {
-        if (controlFlowGraph != null) {
+
+	public boolean reduce() {
+		if (controlFlowGraph != null) {
             ControlFlowGraphGotoReducer.reduce(controlFlowGraph);
             ControlFlowGraphLoopReducer.reduce(controlFlowGraph);
-            BasicBlock start = controlFlowGraph.getStart();
-            BitSet jsrTargets = new BitSet();
-            BitSet visited = new BitSet(controlFlowGraph.getBasicBlocks().size());
-            return reduce(visited, start, jsrTargets);
-        }
-        return false;
-    }
+			BasicBlock start = controlFlowGraph.getStart();
+			BitSet jsrTargets = new BitSet();
+			BitSet visited = new BitSet(controlFlowGraph.getBasicBlocks().size());
+			return reduce(visited, start, jsrTargets);
+		}
+		return false;
+	}
 
     public boolean reduce(BitSet visited, BasicBlock basicBlock, BitSet jsrTargets) {
         if (!basicBlock.matchType(GROUP_END) && !visited.get(basicBlock.getIndex())) {
@@ -74,7 +78,7 @@ public abstract class ControlFlowGraphReducer {
         return true;
     }
 
-    protected boolean reduceConditionalBranch(BitSet visited, BasicBlock basicBlock, BitSet jsrTargets) {
+    private boolean reduceConditionalBranch(BitSet visited, BasicBlock basicBlock, BitSet jsrTargets) {
         while (aggregateConditionalBranches(basicBlock)) {
             // continue until aggregation is complete
         }
@@ -87,7 +91,7 @@ public abstract class ControlFlowGraphReducer {
         return reduced && reduceConditionalBranch(basicBlock);
     }
 
-    protected boolean reduceConditionalBranch(BasicBlock basicBlock) {
+    private boolean reduceConditionalBranch(BasicBlock basicBlock) {
         BasicBlock next = basicBlock.getNext();
         BasicBlock branch = basicBlock.getBranch();
         WatchDog watchdog = new WatchDog();
@@ -226,7 +230,7 @@ public abstract class ControlFlowGraphReducer {
         return false;
     }
 
-    protected void createIf(BasicBlock basicBlock, BasicBlock sub, BasicBlock last, BasicBlock next) {
+    private static void createIf(BasicBlock basicBlock, BasicBlock sub, BasicBlock last, BasicBlock next) {
         BasicBlock condition = basicBlock.getControlFlowGraph().newBasicBlock(basicBlock);
 
         condition.endCondition();
@@ -249,7 +253,7 @@ public abstract class ControlFlowGraphReducer {
         basicBlock.setNext(next);
     }
 
-    protected void createIfElse(int type, BasicBlock basicBlock, BasicBlock sub1, BasicBlock last1, BasicBlock sub2, BasicBlock last2, BasicBlock next) {
+    private static void createIfElse(int type, BasicBlock basicBlock, BasicBlock sub1, BasicBlock last1, BasicBlock sub2, BasicBlock last2, BasicBlock next) {
         BasicBlock condition = basicBlock.getControlFlowGraph().newBasicBlock(basicBlock);
 
         condition.endCondition();
@@ -269,21 +273,33 @@ public abstract class ControlFlowGraphReducer {
         next.getPredecessors().remove(last1);
         last2.setNext(END);
         next.getPredecessors().remove(last2);
-        next.getPredecessors().add(basicBlock);
         // Create 'if-else'
         basicBlock.setType(type);
         basicBlock.setToOffset(toOffset);
         basicBlock.setCondition(condition);
         basicBlock.setSub1(sub1);
         basicBlock.setSub2(sub2);
-        basicBlock.setNext(next);
+        BasicBlock tryBlock = next.getSinglePredecessor(TYPE_TRY_DECLARATION);
+        if (tryBlock != null) {
+        	tryBlock.getPredecessors().add(basicBlock);
+        	basicBlock.setNext(tryBlock);
+        } else {
+            Loop loopBlock = basicBlock.getEnclosingLoop();
+            if (loopBlock != null && !loopBlock.getMembers().contains(next)) {
+            	basicBlock.setNext(END);
+            } else {
+		        next.getPredecessors().add(basicBlock);
+			    basicBlock.setNext(next);
+            }
+        }
     }
 
     protected abstract boolean needToUpdateConditionTernaryOperator(BasicBlock basicBlock, BasicBlock nextNext);
     protected abstract boolean needToUpdateCondition(BasicBlock basicBlock, BasicBlock nextNext);
     protected abstract boolean needToCreateIf(BasicBlock branch, BasicBlock nextNext, int maxOffset);
     protected abstract boolean needToCreateIfElse(BasicBlock branch, BasicBlock nextNext, BasicBlock branchNext);
-        protected boolean aggregateConditionalBranches(BasicBlock basicBlock) {
+
+    private boolean aggregateConditionalBranches(BasicBlock basicBlock) {
         boolean change = false;
 
         BasicBlock next = basicBlock.getNext();
@@ -382,7 +398,7 @@ public abstract class ControlFlowGraphReducer {
         return change;
     }
 
-    protected BasicBlock createLeftCondition(BasicBlock basicBlock) {
+    private static BasicBlock createLeftCondition(BasicBlock basicBlock) {
         if (basicBlock.getType() == TYPE_CONDITIONAL_BRANCH) {
             return basicBlock.getControlFlowGraph().newBasicBlock(TYPE_CONDITION, basicBlock.getFromOffset(), basicBlock.getToOffset(), false);
         }
@@ -391,14 +407,14 @@ public abstract class ControlFlowGraphReducer {
         return left;
     }
 
-    protected BasicBlock createLeftInverseCondition(BasicBlock basicBlock) {
+    private static BasicBlock createLeftInverseCondition(BasicBlock basicBlock) {
         if (basicBlock.getType() == TYPE_CONDITIONAL_BRANCH) {
             return basicBlock.getControlFlowGraph().newBasicBlock(TYPE_CONDITION, basicBlock.getFromOffset(), basicBlock.getToOffset());
         }
         return basicBlock.getControlFlowGraph().newBasicBlock(basicBlock);
     }
 
-    protected void updateConditionalBranches(BasicBlock basicBlock, BasicBlock leftBasicBlock, int operator, BasicBlock subBasicBlock) {
+    private static void updateConditionalBranches(BasicBlock basicBlock, BasicBlock leftBasicBlock, int operator, BasicBlock subBasicBlock) {
         basicBlock.setType(operator);
         basicBlock.setToOffset(subBasicBlock.getToOffset());
         basicBlock.setNext(subBasicBlock.getNext());
@@ -411,7 +427,7 @@ public abstract class ControlFlowGraphReducer {
         subBasicBlock.getBranch().replace(subBasicBlock, basicBlock);
     }
 
-    protected void updateConditionTernaryOperator(BasicBlock basicBlock, BasicBlock nextNext) {
+    private static void updateConditionTernaryOperator(BasicBlock basicBlock, BasicBlock nextNext) {
         int fromOffset =  nextNext.getFromOffset();
         int toOffset = nextNext.getToOffset();
         BasicBlock next = nextNext.getNext();
@@ -453,7 +469,7 @@ public abstract class ControlFlowGraphReducer {
         basicBlock.getSub2().getPredecessors().clear();
     }
 
-    protected void updateCondition(BasicBlock basicBlock, BasicBlock nextNext, BasicBlock nextNextNextNext) {
+    private static void updateCondition(BasicBlock basicBlock, BasicBlock nextNext, BasicBlock nextNextNextNext) {
         int fromOffset =  nextNextNextNext.getFromOffset();
         int toOffset = nextNextNextNext.getToOffset();
         BasicBlock next = nextNextNextNext.getNext();
@@ -505,7 +521,7 @@ public abstract class ControlFlowGraphReducer {
         branch.replace(nextNextNextNext, basicBlock);
     }
 
-    protected void updateConditionTernaryOperator2(BasicBlock basicBlock) {
+    private void updateConditionTernaryOperator2(BasicBlock basicBlock) {
         BasicBlock next = basicBlock.getNext();
         BasicBlock branch = basicBlock.getBranch();
 
@@ -531,7 +547,7 @@ public abstract class ControlFlowGraphReducer {
         branch.getPredecessors().clear();
     }
 
-    protected void convertGotoInTernaryOperatorToCondition(BasicBlock basicBlock, BasicBlock next) {
+    private static void convertGotoInTernaryOperatorToCondition(BasicBlock basicBlock, BasicBlock next) {
         basicBlock.setType(TYPE_CONDITION);
         basicBlock.setNext(next.getNext());
         basicBlock.setBranch(next.getBranch());
@@ -542,7 +558,7 @@ public abstract class ControlFlowGraphReducer {
         next.setType(TYPE_DELETED);
     }
 
-    protected void convertConditionalBranchToGotoInTernaryOperator(BasicBlock basicBlock, BasicBlock next, BasicBlock nextNext) {
+    private static void convertConditionalBranchToGotoInTernaryOperator(BasicBlock basicBlock, BasicBlock next, BasicBlock nextNext) {
         basicBlock.setType(TYPE_GOTO_IN_TERNARY_OPERATOR);
         basicBlock.setNext(nextNext);
         basicBlock.getBranch().getPredecessors().remove(basicBlock);
@@ -554,7 +570,7 @@ public abstract class ControlFlowGraphReducer {
         next.setType(TYPE_DELETED);
     }
 
-    protected boolean checkJdk118TernaryOperatorPattern(BasicBlock next, BasicBlock nextNext, int ifByteCode) {
+    private static boolean checkJdk118TernaryOperatorPattern(BasicBlock next, BasicBlock nextNext, int ifByteCode) {
         if (nextNext.getToOffset() - nextNext.getFromOffset() == 3) {
             byte[] code = next.getControlFlowGraph().getMethod().<AttributeCode>getAttribute("Code").getCode();
             int nextFromOffset = next.getFromOffset();
@@ -568,7 +584,7 @@ public abstract class ControlFlowGraphReducer {
         return false;
     }
 
-    protected boolean reduceSwitchDeclaration(BitSet visited, BasicBlock basicBlock, BitSet jsrTargets) {
+    private boolean reduceSwitchDeclaration(BitSet visited, BasicBlock basicBlock, BitSet jsrTargets) {
         SwitchCase defaultSC = null;
         SwitchCase lastSC = null;
         int maxOffset = -1;
@@ -693,7 +709,7 @@ public abstract class ControlFlowGraphReducer {
         return reduced;
     }
 
-    protected boolean searchLoopStart(BasicBlock basicBlock, int maxOffset) {
+    private static boolean searchLoopStart(BasicBlock basicBlock, int maxOffset) {
         WatchDog watchdog = new WatchDog();
 
         BasicBlock bb;
@@ -742,7 +758,7 @@ public abstract class ControlFlowGraphReducer {
         return false;
     }
 
-    protected boolean reduceTryDeclaration(BitSet visited, BasicBlock basicBlock, BitSet jsrTargets) {
+    private boolean reduceTryDeclaration(BitSet visited, BasicBlock basicBlock, BitSet jsrTargets) {
         boolean reduced = true;
         BasicBlock finallyBB = null;
 
@@ -886,7 +902,7 @@ public abstract class ControlFlowGraphReducer {
         return reduced;
     }
 
-    protected boolean containsFinally(BasicBlock basicBlock) {
+    private static boolean containsFinally(BasicBlock basicBlock) {
         for (ExceptionHandler exceptionHandler : basicBlock.getExceptionHandlers()) {
             if (exceptionHandler.getInternalThrowableName() == null) {
                 return true;
@@ -896,7 +912,7 @@ public abstract class ControlFlowGraphReducer {
         return false;
     }
 
-    protected boolean checkEclipseFinallyPattern(BasicBlock basicBlock, BasicBlock finallyBB, int maxOffset) {
+    private static boolean checkEclipseFinallyPattern(BasicBlock basicBlock, BasicBlock finallyBB, int maxOffset) {
         int nextOpcode = ByteCodeUtil.searchNextOpcode(basicBlock, maxOffset);
 
         if (nextOpcode == 0   ||
@@ -920,7 +936,7 @@ public abstract class ControlFlowGraphReducer {
         return false;
     }
 
-    protected BasicBlock searchJsrTarget(BasicBlock basicBlock, BitSet jsrTargets) {
+    private static BasicBlock searchJsrTarget(BasicBlock basicBlock, BitSet jsrTargets) {
         for (ExceptionHandler exceptionHandler : basicBlock.getExceptionHandlers()) {
             if (exceptionHandler.getInternalThrowableName() == null) {
                 BasicBlock bb = exceptionHandler.getBasicBlock();
@@ -941,7 +957,7 @@ public abstract class ControlFlowGraphReducer {
         return null;
     }
 
-    protected BasicBlock searchEndBlock(BasicBlock basicBlock, int maxOffset) {
+    private BasicBlock searchEndBlock(BasicBlock basicBlock, int maxOffset) {
         BasicBlock end = null;
         BasicBlock last = splitSequence(basicBlock.getNext(), maxOffset);
 
@@ -1009,7 +1025,7 @@ public abstract class ControlFlowGraphReducer {
         return END;
     }
 
-    protected BasicBlock splitSequence(BasicBlock basicBlock, int maxOffset) {
+    private BasicBlock splitSequence(BasicBlock basicBlock, int maxOffset) {
         BasicBlock next = basicBlock.getNext();
         WatchDog watchdog = new WatchDog();
 
@@ -1038,7 +1054,7 @@ public abstract class ControlFlowGraphReducer {
         return basicBlock;
     }
 
-    protected BasicBlock updateBlock(BasicBlock basicBlock, BasicBlock end, int maxOffset) {
+    private static BasicBlock updateBlock(BasicBlock basicBlock, BasicBlock end, int maxOffset) {
         WatchDog watchdog = new WatchDog();
 
         BasicBlock next;
@@ -1058,7 +1074,7 @@ public abstract class ControlFlowGraphReducer {
         return basicBlock;
     }
 
-    protected void removeJsrAndMergeSubTry(BasicBlock basicBlock) {
+    private static void removeJsrAndMergeSubTry(BasicBlock basicBlock) {
         if (basicBlock.getExceptionHandlers().size() == 1) {
             BasicBlock subTry = basicBlock.getSub1();
 
@@ -1084,7 +1100,7 @@ public abstract class ControlFlowGraphReducer {
         }
     }
 
-    protected boolean reduceJsr(BitSet visited, BasicBlock basicBlock, BitSet jsrTargets) {
+    private boolean reduceJsr(BitSet visited, BasicBlock basicBlock, BitSet jsrTargets) {
         BasicBlock branch = basicBlock.getBranch();
         boolean reduced = true;
         reduced &= reduce(visited, basicBlock.getNext(), jsrTargets);
@@ -1149,7 +1165,7 @@ public abstract class ControlFlowGraphReducer {
         return reduced;
     }
 
-    protected boolean reduceLoop(BitSet visited, BasicBlock basicBlock, BitSet jsrTargets) {
+    private boolean reduceLoop(BitSet visited, BasicBlock basicBlock, BitSet jsrTargets) {
         Object clone = visited.clone();
         boolean reduced = reduce(visited, basicBlock.getSub1(), jsrTargets);
 
@@ -1203,7 +1219,7 @@ public abstract class ControlFlowGraphReducer {
         return reduced;
     }
 
-    protected void removeLastContinueLoop(BasicBlock basicBlock) {
+    private static void removeLastContinueLoop(BasicBlock basicBlock) {
         BitSet visited = new BitSet();
         BasicBlock next = basicBlock.getNext();
 
@@ -1218,7 +1234,7 @@ public abstract class ControlFlowGraphReducer {
         }
     }
 
-    protected BasicBlock getLastConditionalBranch(BitSet visited, BasicBlock basicBlock) {
+    private BasicBlock getLastConditionalBranch(BitSet visited, BasicBlock basicBlock) {
         if (!basicBlock.matchType(GROUP_END) && !visited.get(basicBlock.getIndex())) {
             visited.set(basicBlock.getIndex());
 
@@ -1260,7 +1276,7 @@ public abstract class ControlFlowGraphReducer {
         return null;
     }
 
-    protected void visit(BitSet visited, BasicBlock basicBlock, int maxOffset, Set<BasicBlock> ends) {
+    private void visit(BitSet visited, BasicBlock basicBlock, int maxOffset, Set<BasicBlock> ends) {
         if (basicBlock.getFromOffset() >= maxOffset) {
             ends.add(basicBlock);
         } else if (basicBlock.getIndex() >= 0 && !visited.get(basicBlock.getIndex())) {
@@ -1305,7 +1321,7 @@ public abstract class ControlFlowGraphReducer {
         }
     }
 
-    protected void replaceLoopStartWithSwitchBreak(BitSet visited, BasicBlock basicBlock) {
+    private void replaceLoopStartWithSwitchBreak(BitSet visited, BasicBlock basicBlock) {
         if (!basicBlock.matchType(GROUP_END) && !visited.get(basicBlock.getIndex())) {
             visited.set(basicBlock.getIndex());
             basicBlock.replace(LOOP_START, SWITCH_BREAK);
@@ -1348,7 +1364,7 @@ public abstract class ControlFlowGraphReducer {
         }
     }
 
-    protected BasicBlock searchUpdateBlockAndCreateContinueLoop(BitSet visited, BasicBlock basicBlock) {
+    private BasicBlock searchUpdateBlockAndCreateContinueLoop(BitSet visited, BasicBlock basicBlock) {
         BasicBlock updateBasicBlock = null;
 
         if (!basicBlock.matchType(GROUP_END) && !visited.get(basicBlock.getIndex())) {
@@ -1409,7 +1425,7 @@ public abstract class ControlFlowGraphReducer {
         return updateBasicBlock;
     }
 
-    protected BasicBlock searchUpdateBlockAndCreateContinueLoop(BitSet visited, BasicBlock basicBlock, BasicBlock subBasicBlock) {
+    private BasicBlock searchUpdateBlockAndCreateContinueLoop(BitSet visited, BasicBlock basicBlock, BasicBlock subBasicBlock) {
         if (subBasicBlock != null) {
             if (basicBlock.getFromOffset() < subBasicBlock.getFromOffset()) {
                 if (basicBlock.getFirstLineNumber() == Expression.UNKNOWN_LINE_NUMBER) {
@@ -1441,7 +1457,7 @@ public abstract class ControlFlowGraphReducer {
         return null;
     }
 
-    protected void removePredecessors(BasicBlock basicBlock) {
+    private static void removePredecessors(BasicBlock basicBlock) {
         Set<BasicBlock> predecessors = basicBlock.getPredecessors();
         Iterator<BasicBlock> iterator = predecessors.iterator();
 
@@ -1452,7 +1468,7 @@ public abstract class ControlFlowGraphReducer {
         predecessors.clear();
     }
 
-    protected void changeEndLoopToJump(BitSet visited, BasicBlock target, BasicBlock basicBlock) {
+    private void changeEndLoopToJump(BitSet visited, BasicBlock target, BasicBlock basicBlock) {
         if (!basicBlock.matchType(GROUP_END) && !visited.get(basicBlock.getIndex())) {
             visited.set(basicBlock.getIndex());
 
@@ -1538,7 +1554,7 @@ public abstract class ControlFlowGraphReducer {
         }
     }
 
-    protected BasicBlock newJumpBasicBlock(BasicBlock bb, BasicBlock target) {
+    private static BasicBlock newJumpBasicBlock(BasicBlock bb, BasicBlock target) {
         Set<BasicBlock> predecessors = new HashSet<>();
 
         predecessors.add(bb);
@@ -1547,7 +1563,7 @@ public abstract class ControlFlowGraphReducer {
         return bb.getControlFlowGraph().newBasicBlock(TYPE_JUMP, bb.getFromOffset(), target.getFromOffset(), predecessors);
     }
 
-    protected BasicBlock clone(BasicBlock bb, BasicBlock next) {
+    private static BasicBlock clone(BasicBlock bb, BasicBlock next) {
         BasicBlock clone = next.getControlFlowGraph().newBasicBlock(next.getType(), next.getFromOffset(), next.getToOffset());
         clone.setNext(END);
         clone.getPredecessors().add(bb);
