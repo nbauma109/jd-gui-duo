@@ -1,11 +1,27 @@
 buildscript {
     repositories {
         mavenCentral()
+        maven {
+	    	url 'https://jitpack.io'
+        }
+        maven {
+            url 'https://maven-eu.nuxeo.org/nexus/content/repositories/public'
+        }
+        maven {
+            url 'https://plugins.gradle.org/m2'
+        }
     }
+    dependencies {
+		classpath 'com.github.TheBoegl:gradle-launch4j:2.5.1'
+		classpath 'de.undercouch:gradle-download-task:4.1.2'
+	}
 }
 
 apply plugin: 'java'
+apply plugin: 'distribution'
+apply plugin: 'edu.sc.seis.launch4j'
 apply plugin: 'maven-publish'
+apply plugin: 'de.undercouch.download'
 
 // Common configuration //
 rootProject.version='1.6.6'
@@ -50,6 +66,7 @@ subprojects.each { subproject ->
 }
 
 jar {
+    dependsOn 'downloadAndUnzipFile'
     dependsOn subprojects.tasks['jar']
 
     // Add SPI directory
@@ -96,14 +113,45 @@ jar {
     }
 }
 
+// Java executable wrapper for Windows //
+task downloadZipFile(type: Download) {
+    src 'https://download.oracle.com/java/17/latest/jdk-17_windows-x64_bin.zip'
+    dest 'build/jdk-17_windows-x64_bin.zip'
+}
+
+task downloadAndUnzipFile(dependsOn: downloadZipFile, type: Copy) {
+    from zipTree(downloadZipFile.dest)
+    into buildDir
+}
+
+createExe {
+  dependsOn 'downloadAndUnzipFile'
+  mainClassName = 'org.jd.gui.App'
+  icon = "${projectDir}/src/launch4j/resources/images/jd-gui.ico"
+  bundledJre64Bit = 'true'
+  bundledJrePath = 'jdk-17.0.1'
+}
+
+// Distributions for OSX and Windows //
+distributions {
+    windows.contents {
+        into('jdk-17.0.1/') {
+            from 'build/jdk-17.0.1'
+        } 
+        from 'build/launch4j/jd-gui-bundle.exe'
+        from 'LICENSE', 'NOTICE', 'README.md'
+        from jar
+    }
+
+    installWindowsDist.dependsOn createExe
+    windowsDistZip.dependsOn createExe
+}
+
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        myDistribution(MavenPublication) {
             groupId = 'com.github.nbauma109'
-            artifactId = project.name
-            version = project.version
-
-            from components.java
+            artifact windowsDistZip
         }
     }
 }
