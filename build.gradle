@@ -115,8 +115,8 @@ jar {
 
 // Java executable wrapper for Windows //
 task downloadZipFile(type: Download) {
-    src 'https://download.oracle.com/java/17/latest/jdk-17_windows-x64_bin.zip'
-    dest 'build/jdk-17_windows-x64_bin.zip'
+    src 'https://cdn.azul.com/zulu/bin/zulu17.30.15-ca-jre17.0.1-win_x64.zip'
+    dest 'build/zulu17.30.15-ca-jre17.0.1-win_x64.zip'
 }
 
 task downloadAndUnzipFile(dependsOn: downloadZipFile, type: Copy) {
@@ -129,14 +129,14 @@ createExe {
   mainClassName = 'org.jd.gui.App'
   icon = "${projectDir}/src/launch4j/resources/images/jd-gui.ico"
   bundledJre64Bit = 'true'
-  bundledJrePath = 'jdk-17.0.1'
+  bundledJrePath = 'zulu17.30.15-ca-jre17.0.1-win_x64'
 }
 
 // Distributions for OSX and Windows //
 distributions {
     windows.contents {
-        into('jdk-17.0.1/') {
-            from 'build/jdk-17.0.1'
+        into('zulu17.30.15-ca-jre17.0.1-win_x64/') {
+            from 'build/zulu17.30.15-ca-jre17.0.1-win_x64'
         } 
         from 'build/launch4j/jd-gui-bundle.exe'
         from 'LICENSE', 'NOTICE', 'README.md'
