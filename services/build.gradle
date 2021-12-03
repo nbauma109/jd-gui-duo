@@ -5,15 +5,10 @@ dependencies {
     implementation 'org.ow2.asm:asm:9.1'
     implementation 'org.apache.bcel:bcel:6.5.0'
     implementation 'commons-io:commons-io:2.10.0'
-    implementation('org.eclipse.jdt:org.eclipse.jdt.core:3.26.0') {
-    	// re-used exclusions from https://github.com/forge/roaster/blob/master/impl/pom.xml
-        exclude group: 'org.eclipse.platform', module: 'org.eclipse.ant.core'
-        exclude group: 'org.eclipse.platform', module: 'org.eclipse.core.commands'
-        exclude group: 'org.eclipse.platform', module: 'org.eclipse.core.expressions'
-        exclude group: 'org.eclipse.platform', module: 'org.eclipse.equinox.app'
-        exclude group: 'org.eclipse.platform', module: 'org.eclipse.equinox.registry'
-        exclude group: 'org.eclipse.platform', module: 'org.eclipse.core.filesystem'
-    }    
+    implementation 'org.eclipse.jdt:org.eclipse.jdt.core:3.27.0'
+    implementation 'org.osgi:org.osgi.annotation.versioning:1.1.2'
+    implementation 'org.osgi:org.osgi.service.event:1.4.1'
+    implementation 'org.osgi:org.osgi.service.component.annotations:1.5.0'
     implementation project(':api')
     testImplementation 'junit:junit:4.12'
 }
