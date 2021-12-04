@@ -1,11 +1,11 @@
 jdk:
-  - openjdk16
+  - semjdk16
 before_install:
   - echo "Before Install"
-  - bash ensure-java-16 install
+  - bash ensure-java-16-sem install
 install:
   - echo "Install"
-  - if ! bash ensure-java-16 use; then source ~/.sdkman/bin/sdkman-init.sh; fi
+  - if ! bash ensure-java-16-sem use; then source ~/.sdkman/bin/sdkman-init.sh; fi
   - java -version
   - chmod u+x ./gradlew
   - ./gradlew publishToMavenLocal
