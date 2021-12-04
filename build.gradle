@@ -141,18 +141,16 @@ createExe {
   icon = "${projectDir}/src/launch4j/resources/images/jd-gui.ico"
   jar projectDir.path + '/' + proguard.outJarFiles[0]
   bundledJre64Bit = 'true'
-  bundledJrePath = 'ibm-semeru-open-jre_x64_windows_16.0.2_7_openj9-0.27.0'
+  bundledJrePath = 'jdk-16.0.2+7-jre'
 }
 
 // Distributions for Windows //
 distributions {
     windows.contents {
-        into('ibm-semeru-open-jre_x64_windows_16.0.2_7_openj9-0.27.0/') {
-            from 'build/ibm-semeru-open-jre_x64_windows_16.0.2_7_openj9-0.27.0'
+        into('jdk-16.0.2+7-jre/') {
+            from 'build/jdk-16.0.2+7-jre'
         } 
         from 'build/launch4j/jd-gui-bundle.exe'
-        from 'LICENSE', 'NOTICE', 'README.md'
-        from jar
     }
 
     installWindowsDist.dependsOn createExe
