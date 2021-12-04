@@ -151,6 +151,7 @@ distributions {
             from 'build/jdk-16.0.2+7-jre'
         } 
         from 'build/launch4j/jd-gui-bundle.exe'
+        from 'build/libs/' + project.name + '-' + project.version + '-min.jar'
     }
 
     installWindowsDist.dependsOn createExe

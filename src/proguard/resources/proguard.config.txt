@@ -5,20 +5,20 @@
 #-libraryjars  C:/Program Files/Java/jre1.8.0_121/lib/rt.jar
 #-printmapping myapplication.map
 
--keep public class org.jdv1.gui.App {
+-keep public class org.jd.gui.App {
     public static void main(java.lang.String[]);
 }
 
--keep public class org.jdv1.gui.OsxApp {
+-keep public class org.jd.gui.OsxApp {
     public static void main(java.lang.String[]);
 }
 
 -dontwarn com.apple.eawt.**
 -keepattributes Signature
 
--keep public interface org.jdv1.gui.api.** {*;}
--keep public interface org.jdv1.gui.spi.** {*;}
--keep public class * extends org.jdv1.gui.spi.*
+-keep public interface org.jd.gui.api.** {*;}
+-keep public interface org.jd.gui.spi.** {*;}
+-keep public class * extends org.jd.gui.spi.*
 
 -keep class org.fife.ui.rsyntaxtextarea.TokenTypes {public static final <fields>;}
 -keep class org.fife.ui.rsyntaxtextarea.DefaultTokenMakerFactory
