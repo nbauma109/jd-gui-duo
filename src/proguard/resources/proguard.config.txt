@@ -17,6 +17,8 @@
 -keepattributes Signature
 
 -keep public interface org.jd.gui.api.** {*;}
+-keep public interface org.jdv0.gui.api.** {*;}
+-keep public interface org.jdv1.gui.api.** {*;}
 -keep public interface org.jd.gui.spi.** {*;}
 -keep public class * extends org.jd.gui.spi.*
 
