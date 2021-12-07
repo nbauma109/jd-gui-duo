@@ -20,6 +20,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+@org.kohsuke.MetaInfServices(org.jd.gui.spi.TreeNodeFactory.class)
 public class JspFileTreeNodeFactoryProvider extends TextFileTreeNodeFactoryProvider {
     protected static final ImageIcon ICON = new ImageIcon(HtmlFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/html_obj.gif"));
 

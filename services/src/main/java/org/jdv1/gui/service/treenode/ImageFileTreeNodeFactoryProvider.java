@@ -21,6 +21,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+@org.kohsuke.MetaInfServices(org.jd.gui.spi.TreeNodeFactory.class)
 public class ImageFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvider {
     protected static final ImageIcon ICON = new ImageIcon(ImageFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/file-image.gif"));
 

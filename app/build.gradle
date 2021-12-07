@@ -1,6 +1,8 @@
 apply plugin: 'java'
 
 dependencies {
+    annotationProcessor 'org.kohsuke.metainf-services:metainf-services:1.8'
+    compileOnly 'org.kohsuke.metainf-services:metainf-services:1.8'
     compileOnly 'com.yuvimasory:orange-extensions:1.3.0'   // OSX support
     implementation project(':api')
     implementation project(':services')

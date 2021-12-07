@@ -19,6 +19,7 @@ import javax.swing.*;
 /**
  * Single instance is the default mode on Mac OSX, so this panel is not activated.
  */
+@org.kohsuke.MetaInfServices(PreferencesPanel.class)
 public class UISingleInstancePreferencesProvider extends JPanel implements PreferencesPanel {
 
     private static final long serialVersionUID = 1L;

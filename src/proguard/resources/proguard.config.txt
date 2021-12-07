@@ -13,20 +13,11 @@
     public static void main(java.lang.String[]);
 }
 
--optimizationpasses 3
--overloadaggressively
--repackageclasses ''
--allowaccessmodification
--mergeinterfacesaggressively
-
 -dontwarn com.apple.eawt.**
 -keepattributes Signature
 
--keep public interface org.jd.gui.api.** {*;}
--keep public interface org.jdv0.gui.api.** {*;}
--keep public interface org.jdv1.gui.api.** {*;}
--keep public interface org.jd.gui.spi.** {*;}
--keep public class * extends org.jd.gui.spi.*
+-keep interface org.jd.gui.spi.** {*;}
+-keep class * implements org.jd.gui.spi.* {*;}
 
 -keep class org.fife.ui.rsyntaxtextarea.TokenTypes {public static final <fields>;}
 -keep class org.fife.ui.rsyntaxtextarea.DefaultTokenMakerFactory

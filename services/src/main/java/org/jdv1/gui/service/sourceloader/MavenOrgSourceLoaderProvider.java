@@ -11,6 +11,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.model.container.entry.path.DirectoryEntryPath;
+import org.jd.gui.spi.FileLoader;
 import org.jd.gui.spi.SourceLoader;
 import org.jdv1.gui.service.preferencespanel.MavenOrgSourceLoaderPreferencesProvider;
 
@@ -27,6 +28,7 @@ import java.util.zip.ZipInputStream;
 import javax.xml.XMLConstants;
 import javax.xml.stream.*;
 
+@org.kohsuke.MetaInfServices({FileLoader.class,SourceLoader.class})
 public class MavenOrgSourceLoaderProvider implements SourceLoader {
     protected static final String MAVENORG_SEARCH_URL_PREFIX = "https://search.maven.org/solrsearch/select?q=1:%22";
     protected static final String MAVENORG_SEARCH_URL_SUFFIX = "%22&rows=20&wt=xml";

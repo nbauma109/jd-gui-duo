@@ -18,6 +18,7 @@ import java.io.File;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+@org.kohsuke.MetaInfServices(org.jd.gui.spi.TreeNodeFactory.class)
 public class WarFileTreeNodeFactoryProvider extends ZipFileTreeNodeFactoryProvider {
     protected static final ImageIcon ICON = new ImageIcon(JarFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/war_obj.gif"));
 

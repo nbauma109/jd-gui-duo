@@ -15,6 +15,7 @@ import org.jd.gui.spi.ContainerFactory;
 
 import java.nio.file.*;
 
+@org.kohsuke.MetaInfServices(ContainerFactory.class)
 public class EarContainerFactoryProvider implements ContainerFactory {
     @Override
     public String getType() { return "ear"; }

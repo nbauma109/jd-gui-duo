@@ -20,6 +20,7 @@ import javax.swing.event.DocumentListener;
 
 import static org.jd.gui.util.decompiler.GuiPreferences.MAXIMUM_DEPTH_KEY;
 
+@org.kohsuke.MetaInfServices(PreferencesPanel.class)
 public class DirectoryIndexerPreferencesProvider extends JPanel implements PreferencesPanel, DocumentListener {
 
     private static final long serialVersionUID = 1L;

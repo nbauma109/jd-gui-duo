@@ -24,6 +24,7 @@ import javax.swing.event.DocumentListener;
 
 import static org.jd.gui.util.decompiler.GuiPreferences.FONT_SIZE_KEY;
 
+@org.kohsuke.MetaInfServices(PreferencesPanel.class)
 public class ViewerPreferencesProvider extends JPanel implements PreferencesPanel, DocumentListener {
 
     private static final long serialVersionUID = 1L;

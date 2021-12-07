@@ -28,6 +28,7 @@ import static org.apache.bcel.Const.MAJOR_1_5;
 import jd.core.CoreConstants;
 import jd.core.process.deserializer.ClassFormatException;
 
+@org.kohsuke.MetaInfServices(org.jd.gui.spi.TreeNodeFactory.class)
 public class ClassFileTreeNodeFactoryProvider extends AbstractTypeFileTreeNodeFactoryProvider {
     protected static final ImageIcon CLASS_FILE_ICON = new ImageIcon(ClassFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/classf_obj.png"));
     protected static final Factory FACTORY = new Factory();

@@ -17,6 +17,7 @@ import org.jd.gui.util.io.TextReader;
 import java.io.IOException;
 import java.io.InputStream;
 
+@org.kohsuke.MetaInfServices(org.jd.gui.spi.Indexer.class)
 public class TextFileIndexerProvider extends AbstractIndexerProvider {
 
     @Override

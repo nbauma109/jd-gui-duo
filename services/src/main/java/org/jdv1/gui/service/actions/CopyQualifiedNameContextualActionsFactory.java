@@ -23,6 +23,7 @@ import java.util.Collections;
 
 import javax.swing.*;
 
+@org.kohsuke.MetaInfServices(ContextualActionsFactory.class)
 public class CopyQualifiedNameContextualActionsFactory implements ContextualActionsFactory {
 
     @Override

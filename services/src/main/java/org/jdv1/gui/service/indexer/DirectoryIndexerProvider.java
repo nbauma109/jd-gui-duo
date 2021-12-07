@@ -15,6 +15,7 @@ import org.jd.gui.service.indexer.AbstractIndexerProvider;
 import org.jd.gui.spi.Indexer;
 import org.jd.gui.util.decompiler.GuiPreferences;
 
+@org.kohsuke.MetaInfServices(org.jd.gui.spi.Indexer.class)
 public class DirectoryIndexerProvider extends AbstractIndexerProvider {
 
     @Override

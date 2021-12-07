@@ -19,6 +19,7 @@ import java.nio.file.*;
 import java.util.Collections;
 import java.util.Iterator;
 
+@org.kohsuke.MetaInfServices(org.jd.gui.spi.FileLoader.class)
 public class ZipFileLoaderProvider extends AbstractFileLoaderProvider {
     protected static final String[] EXTENSIONS = { "zip" };
 

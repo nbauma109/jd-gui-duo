@@ -1,6 +1,8 @@
 apply plugin: 'java'
 
 dependencies {
+    annotationProcessor 'org.kohsuke.metainf-services:metainf-services:1.8'
+    compileOnly 'org.kohsuke.metainf-services:metainf-services:1.8'
     implementation 'com.fifesoft:rsyntaxtextarea:3.0.4'
     implementation 'org.ow2.asm:asm:9.1'
     implementation 'org.apache.bcel:bcel:6.5.0'

@@ -24,6 +24,7 @@ import java.util.*;
 
 import javax.swing.Icon;
 
+@org.kohsuke.MetaInfServices(org.jd.gui.spi.TypeFactory.class)
 public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
 
     // Create cache

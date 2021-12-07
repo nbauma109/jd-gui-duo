@@ -14,6 +14,7 @@ import org.jd.gui.spi.UriLoader;
 import java.io.File;
 import java.net.URI;
 
+@org.kohsuke.MetaInfServices({UriLoader.class,FileLoader.class})
 public class FileUriLoaderProvider implements UriLoader {
     protected static final String[] SCHEMES = { "file" };
 

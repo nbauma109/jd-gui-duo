@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
+@org.kohsuke.MetaInfServices(org.jd.gui.spi.Indexer.class)
 public class EjbJarXmlFileIndexerProvider extends XmlBasedFileIndexerProvider {
 
     @Override

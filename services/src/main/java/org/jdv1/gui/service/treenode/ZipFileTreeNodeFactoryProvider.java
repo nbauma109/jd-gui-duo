@@ -19,6 +19,7 @@ import java.io.File;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+@org.kohsuke.MetaInfServices(org.jd.gui.spi.TreeNodeFactory.class)
 public class ZipFileTreeNodeFactoryProvider extends DirectoryTreeNodeFactoryProvider {
     protected static final ImageIcon ICON = new ImageIcon(ZipFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/zip_obj.png"));
 

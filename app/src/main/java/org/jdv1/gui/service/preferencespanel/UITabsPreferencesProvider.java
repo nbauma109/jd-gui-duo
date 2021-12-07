@@ -20,6 +20,7 @@ import javax.swing.*;
  * JTabbedPane.WRAP_TAB_LAYOUT is not supported by Aqua L&F.
  * This panel is not activated on Mac OSX.
  */
+@org.kohsuke.MetaInfServices(PreferencesPanel.class)
 public class UITabsPreferencesProvider extends JPanel implements PreferencesPanel {
 
     private static final long serialVersionUID = 1L;

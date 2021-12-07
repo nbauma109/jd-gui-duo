@@ -27,6 +27,7 @@ import static org.objectweb.asm.ClassReader.*;
 /**
  * Unsafe thread implementation of class file indexer.
  */
+@org.kohsuke.MetaInfServices(org.jd.gui.spi.Indexer.class)
 public class ClassFileIndexerProvider extends AbstractIndexerProvider {
     protected Set<String> typeDeclarationSet = new HashSet<>();
     protected Set<String> constructorDeclarationSet = new HashSet<>();

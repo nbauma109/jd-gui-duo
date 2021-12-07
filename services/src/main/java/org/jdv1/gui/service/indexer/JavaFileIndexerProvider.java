@@ -19,6 +19,7 @@ import org.jd.gui.util.parser.jdt.core.AbstractJavaListener;
 import java.util.*;
 
 /** Unsafe thread implementation of java file indexer. */
+@org.kohsuke.MetaInfServices(org.jd.gui.spi.Indexer.class)
 public class JavaFileIndexerProvider extends AbstractIndexerProvider {
     @Override
     public String[] getSelectors() {

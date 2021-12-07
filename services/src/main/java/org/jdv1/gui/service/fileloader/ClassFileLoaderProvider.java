@@ -15,6 +15,7 @@ import org.objectweb.asm.ClassReader;
 
 import java.io.*;
 
+@org.kohsuke.MetaInfServices(org.jd.gui.spi.FileLoader.class)
 public class ClassFileLoaderProvider extends AbstractTypeFileLoaderProvider {
     protected static final String[] EXTENSIONS = { "class" };
 

@@ -15,6 +15,7 @@ import org.jdv1.gui.model.container.JavaModuleContainer;
 
 import java.nio.file.*;
 
+@org.kohsuke.MetaInfServices(ContainerFactory.class)
 public class JavaModuleContainerFactoryProvider implements ContainerFactory {
     @Override
     public String getType() { return "jmod"; }

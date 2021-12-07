@@ -17,6 +17,7 @@ import org.jd.gui.spi.Indexer;
 import java.util.Collection;
 import java.util.Map;
 
+@org.kohsuke.MetaInfServices(org.jd.gui.spi.Indexer.class)
 public class JavaModuleFileIndexerProvider extends AbstractIndexerProvider {
 
     @Override
