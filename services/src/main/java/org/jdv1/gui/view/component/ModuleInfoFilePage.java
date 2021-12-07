@@ -40,7 +40,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
     static {
         // Add a new token maker for Java 9+ module
         AbstractTokenMakerFactory atmf = (AbstractTokenMakerFactory)TokenMakerFactory.getDefaultInstance();
-        atmf.putMapping(SYNTAX_STYLE_JAVA_MODULE, ModuleInfoTokenMaker.class.getName());
+        atmf.putMapping(SYNTAX_STYLE_JAVA_MODULE, ModuleInfoTokenMaker::new);
     }
 
     public ModuleInfoFilePage(API api, Container.Entry entry) {

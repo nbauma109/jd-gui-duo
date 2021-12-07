@@ -12,9 +12,9 @@ buildscript {
         }
     }
     dependencies {
-		classpath 'com.github.TheBoegl:gradle-launch4j:2.5.1'
-		classpath 'de.undercouch:gradle-download-task:4.1.2'
-		classpath 'com.guardsquare:proguard-gradle:7.1.1'
+	classpath 'com.github.TheBoegl:gradle-launch4j:2.5.1'
+	classpath 'de.undercouch:gradle-download-task:4.1.2'
+	classpath 'com.guardsquare:proguard-gradle:7.1.1'
     }
 }
 
@@ -45,6 +45,9 @@ allprojects {
 
     repositories {
         mavenCentral()
+        maven { 
+            url 'https://jitpack.io'
+        }
     }
 
     configurations {
