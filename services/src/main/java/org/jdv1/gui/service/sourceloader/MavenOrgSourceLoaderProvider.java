@@ -28,7 +28,7 @@ import java.util.zip.ZipInputStream;
 import javax.xml.XMLConstants;
 import javax.xml.stream.*;
 
-@org.kohsuke.MetaInfServices(SourceLoader.class)
+@org.kohsuke.MetaInfServices({FileLoader.class,SourceLoader.class})
 public class MavenOrgSourceLoaderProvider implements SourceLoader {
     protected static final String MAVENORG_SEARCH_URL_PREFIX = "https://search.maven.org/solrsearch/select?q=1:%22";
     protected static final String MAVENORG_SEARCH_URL_SUFFIX = "%22&rows=20&wt=xml";
