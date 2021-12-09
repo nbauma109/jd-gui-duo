@@ -13,7 +13,6 @@ import org.jd.gui.api.model.Indexes;
 import org.jd.gui.service.indexer.AbstractIndexerProvider;
 import org.jd.gui.spi.Indexer;
 
-@org.kohsuke.MetaInfServices(org.jd.gui.spi.Indexer.class)
 public class ZipFileIndexerProvider extends AbstractIndexerProvider {
 
     @Override

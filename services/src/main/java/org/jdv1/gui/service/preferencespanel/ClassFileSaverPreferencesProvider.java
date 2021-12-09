@@ -17,7 +17,6 @@ import javax.swing.*;
 
 import static org.jd.gui.util.decompiler.GuiPreferences.*;
 
-@org.kohsuke.MetaInfServices(PreferencesPanel.class)
 public class ClassFileSaverPreferencesProvider extends JPanel implements PreferencesPanel {
 
     private static final long serialVersionUID = 1L;

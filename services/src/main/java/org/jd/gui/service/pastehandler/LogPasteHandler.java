@@ -14,7 +14,6 @@ import org.jd.gui.view.component.LogPage;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@org.kohsuke.MetaInfServices(PasteHandler.class)
 public class LogPasteHandler implements PasteHandler {
     protected static AtomicInteger counter = new AtomicInteger(0);
 

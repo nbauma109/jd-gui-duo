@@ -29,7 +29,6 @@ import static org.apache.bcel.Const.MAJOR_1_1;
 import static org.apache.bcel.Const.MAJOR_1_5;
 import static org.jd.gui.util.decompiler.GuiPreferences.*;
 
-@org.kohsuke.MetaInfServices(org.jd.gui.spi.SourceSaver.class)
 public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
 
     protected static final ClassFileToJavaSourceDecompiler DECOMPILER = new ClassFileToJavaSourceDecompiler();

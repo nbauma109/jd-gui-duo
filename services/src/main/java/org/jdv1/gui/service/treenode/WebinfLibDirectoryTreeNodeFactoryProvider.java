@@ -9,7 +9,6 @@ package org.jdv1.gui.service.treenode;
 
 import javax.swing.ImageIcon;
 
-@org.kohsuke.MetaInfServices(org.jd.gui.spi.TreeNodeFactory.class)
 public class WebinfLibDirectoryTreeNodeFactoryProvider extends DirectoryTreeNodeFactoryProvider {
     protected static final ImageIcon ICON = new ImageIcon(WebinfLibDirectoryTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/archivefolder_obj.png"));
 

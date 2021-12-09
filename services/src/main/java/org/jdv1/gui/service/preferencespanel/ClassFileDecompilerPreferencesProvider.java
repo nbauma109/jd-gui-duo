@@ -18,7 +18,6 @@ import javax.swing.*;
 import static org.jd.gui.util.decompiler.GuiPreferences.ESCAPE_UNICODE_CHARACTERS;
 import static org.jd.gui.util.decompiler.GuiPreferences.REALIGN_LINE_NUMBERS;
 
-@org.kohsuke.MetaInfServices(PreferencesPanel.class)
 public class ClassFileDecompilerPreferencesProvider extends JPanel implements PreferencesPanel {
 
     private static final long serialVersionUID = 1L;

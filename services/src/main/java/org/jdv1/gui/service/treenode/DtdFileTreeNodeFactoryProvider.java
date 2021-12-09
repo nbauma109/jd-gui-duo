@@ -20,7 +20,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-@org.kohsuke.MetaInfServices(org.jd.gui.spi.TreeNodeFactory.class)
 public class DtdFileTreeNodeFactoryProvider extends TextFileTreeNodeFactoryProvider {
     protected static final ImageIcon ICON = new ImageIcon(DtdFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/dtd_obj.gif"));
 

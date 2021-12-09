@@ -1,0 +1,5 @@
+org.jdv1.gui.service.sourcesaver.ClassFileSourceSaverProvider
+org.jdv1.gui.service.sourcesaver.DirectorySourceSaverProvider
+org.jdv1.gui.service.sourcesaver.FileSourceSaverProvider
+org.jdv1.gui.service.sourcesaver.PackageSourceSaverProvider
+org.jdv1.gui.service.sourcesaver.ZipFileSourceSaverProvider

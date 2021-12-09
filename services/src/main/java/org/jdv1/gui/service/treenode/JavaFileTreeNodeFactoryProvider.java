@@ -20,7 +20,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-@org.kohsuke.MetaInfServices(org.jd.gui.spi.TreeNodeFactory.class)
 public class JavaFileTreeNodeFactoryProvider extends AbstractTypeFileTreeNodeFactoryProvider {
     protected static final ImageIcon JAVA_FILE_ICON = new ImageIcon(JavaFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/jcu_obj.png"));
     protected static final Factory FACTORY = new Factory();

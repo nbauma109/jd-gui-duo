@@ -13,7 +13,6 @@ import org.jd.gui.util.container.JarContainerEntryUtil;
 
 import java.util.Collection;
 
-@org.kohsuke.MetaInfServices(org.jd.gui.spi.SourceSaver.class)
 public class PackageSourceSaverProvider extends DirectorySourceSaverProvider {
 
     @Override

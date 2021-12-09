@@ -23,7 +23,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-@org.kohsuke.MetaInfServices(org.jd.gui.spi.TreeNodeFactory.class)
 public class TextFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvider {
     protected static final ImageIcon ICON = new ImageIcon(TextFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/ascii_obj.png"));
 

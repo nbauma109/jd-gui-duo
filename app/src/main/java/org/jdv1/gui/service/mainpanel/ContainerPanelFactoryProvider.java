@@ -24,7 +24,6 @@ import javax.swing.JComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
-@org.kohsuke.MetaInfServices(PanelFactory.class)
 public class ContainerPanelFactoryProvider implements PanelFactory {
     protected static final String[] TYPES = { "default" };
 

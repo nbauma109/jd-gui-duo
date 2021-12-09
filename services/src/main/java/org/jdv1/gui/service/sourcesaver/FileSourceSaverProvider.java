@@ -17,7 +17,6 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.*;
 
-@org.kohsuke.MetaInfServices(SourceSaver.class)
 public class FileSourceSaverProvider extends AbstractSourceSaverProvider {
 
     @Override

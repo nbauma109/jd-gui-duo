@@ -9,7 +9,6 @@ package org.jdv1.gui.service.treenode;
 
 import java.util.regex.Pattern;
 
-@org.kohsuke.MetaInfServices(org.jd.gui.spi.TreeNodeFactory.class)
 public class SpiFileTreeNodeFactoryProvider extends TextFileTreeNodeFactoryProvider {
     @Override
     public String[] getSelectors() {

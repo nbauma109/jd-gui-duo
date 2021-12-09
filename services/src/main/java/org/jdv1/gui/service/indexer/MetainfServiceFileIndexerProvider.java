@@ -18,7 +18,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-@org.kohsuke.MetaInfServices(org.jd.gui.spi.Indexer.class)
 public class MetainfServiceFileIndexerProvider extends AbstractIndexerProvider {
 
     @Override

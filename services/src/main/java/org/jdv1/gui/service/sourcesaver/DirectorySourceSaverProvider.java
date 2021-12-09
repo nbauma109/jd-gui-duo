@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@org.kohsuke.MetaInfServices(SourceSaver.class)
 public class DirectorySourceSaverProvider extends AbstractSourceSaverProvider {
 
     @Override

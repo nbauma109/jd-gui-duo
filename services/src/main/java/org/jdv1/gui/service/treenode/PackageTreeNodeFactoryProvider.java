@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-@org.kohsuke.MetaInfServices(org.jd.gui.spi.TreeNodeFactory.class)
 public class PackageTreeNodeFactoryProvider extends DirectoryTreeNodeFactoryProvider {
     protected static final ImageIcon ICON = new ImageIcon(PackageTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/package_obj.png"));
 

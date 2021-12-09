@@ -18,7 +18,6 @@ import java.util.*;
 
 import javax.xml.stream.*;
 
-@org.kohsuke.MetaInfServices(org.jd.gui.spi.Indexer.class)
 public class XmlBasedFileIndexerProvider extends AbstractIndexerProvider {
     protected XMLInputFactory factory;
 

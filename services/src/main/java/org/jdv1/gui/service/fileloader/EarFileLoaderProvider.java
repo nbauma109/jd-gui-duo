@@ -11,7 +11,6 @@ import org.jd.gui.api.API;
 
 import java.io.File;
 
-@org.kohsuke.MetaInfServices(org.jd.gui.spi.FileLoader.class)
 public class EarFileLoaderProvider extends ZipFileLoaderProvider {
     protected static final String[] EXTENSIONS = { "ear" };
 

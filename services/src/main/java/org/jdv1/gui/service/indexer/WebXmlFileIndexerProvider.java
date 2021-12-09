@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
-@org.kohsuke.MetaInfServices(org.jd.gui.spi.Indexer.class)
 public class WebXmlFileIndexerProvider extends XmlBasedFileIndexerProvider {
 
     @Override

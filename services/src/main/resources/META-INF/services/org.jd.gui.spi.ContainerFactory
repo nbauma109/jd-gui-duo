@@ -1,0 +1,7 @@
+# Order is important : 'GenericContainerFactoryProvider' must be the last
+org.jdv1.gui.service.container.KarContainerFactoryProvider
+org.jdv1.gui.service.container.JavaModuleContainerFactoryProvider
+org.jdv1.gui.service.container.EarContainerFactoryProvider
+org.jdv1.gui.service.container.WarContainerFactoryProvider
+org.jdv1.gui.service.container.JarContainerFactoryProvider
+org.jdv1.gui.service.container.GenericContainerFactoryProvider

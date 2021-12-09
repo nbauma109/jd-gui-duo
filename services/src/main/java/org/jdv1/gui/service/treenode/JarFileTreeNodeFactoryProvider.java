@@ -22,7 +22,6 @@ import java.util.Map;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-@org.kohsuke.MetaInfServices(org.jd.gui.spi.TreeNodeFactory.class)
 public class JarFileTreeNodeFactoryProvider extends ZipFileTreeNodeFactoryProvider {
     protected static final ImageIcon JAR_FILE_ICON = new ImageIcon(JarFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/jar_obj.png"));
     protected static final ImageIcon EJB_FILE_ICON = new ImageIcon(JarFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/ejbmodule_obj.gif"));

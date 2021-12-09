@@ -21,7 +21,6 @@ import java.util.Collection;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-@org.kohsuke.MetaInfServices(org.jd.gui.spi.TreeNodeFactory.class)
 public class DirectoryTreeNodeFactoryProvider extends AbstractTreeNodeFactoryProvider {
     protected static final ImageIcon ICON = new ImageIcon(DirectoryTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/folder.gif"));
     protected static final ImageIcon OPEN_ICON = new ImageIcon(DirectoryTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/folder_open.png"));

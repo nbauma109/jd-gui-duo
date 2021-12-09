@@ -1,0 +1,10 @@
+org.jdv1.gui.service.fileloader.AarFileLoaderProvider
+org.jdv1.gui.service.fileloader.ClassFileLoaderProvider
+org.jdv1.gui.service.fileloader.EarFileLoaderProvider
+org.jdv1.gui.service.fileloader.JarFileLoaderProvider
+org.jdv1.gui.service.fileloader.JavaFileLoaderProvider
+org.jdv1.gui.service.fileloader.JavaModuleFileLoaderProvider
+org.jdv1.gui.service.fileloader.KarFileLoaderProvider
+org.jdv1.gui.service.fileloader.LogFileLoaderProvider
+org.jdv1.gui.service.fileloader.WarFileLoaderProvider
+org.jdv1.gui.service.fileloader.ZipFileLoaderProvider

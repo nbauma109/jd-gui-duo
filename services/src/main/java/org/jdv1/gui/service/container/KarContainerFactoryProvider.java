@@ -15,7 +15,6 @@ import org.jdv1.gui.model.container.KarContainer;
 
 import java.nio.file.*;
 
-@org.kohsuke.MetaInfServices(ContainerFactory.class)
 public class KarContainerFactoryProvider implements ContainerFactory {
     @Override
     public String getType() { return "kar"; }

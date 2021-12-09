@@ -17,7 +17,6 @@ import java.io.File;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-@org.kohsuke.MetaInfServices(org.jd.gui.spi.TreeNodeFactory.class)
 public class JavaModuleFileTreeNodeFactoryProvider extends ZipFileTreeNodeFactoryProvider {
     @Override
     public String[] getSelectors() { return appendSelectors("*:file:*.jmod"); }

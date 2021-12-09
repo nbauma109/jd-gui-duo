@@ -18,7 +18,6 @@ import java.nio.file.*;
 import java.util.HashMap;
 import java.util.Map;
 
-@org.kohsuke.MetaInfServices(SourceSaver.class)
 public class ZipFileSourceSaverProvider extends DirectorySourceSaverProvider {
 
     @Override

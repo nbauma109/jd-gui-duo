@@ -22,7 +22,6 @@ import static org.objectweb.asm.ClassReader.*;
 /**
  * Unsafe thread implementation of class file indexer.
  */
-@org.kohsuke.MetaInfServices(org.jd.gui.spi.Indexer.class)
 public class JavaModuleInfoFileIndexerProvider extends AbstractIndexerProvider {
     protected Set<String> javaModuleDeclarationSet = new HashSet<>();
     protected Set<String> javaModuleReferenceSet = new HashSet<>();

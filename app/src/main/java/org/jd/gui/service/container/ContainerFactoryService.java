@@ -28,6 +28,6 @@ public class ContainerFactoryService {
             }
         }
 
-        return new org.jdv1.gui.service.container.GenericContainerFactoryProvider();
+        return null;
     }
 }

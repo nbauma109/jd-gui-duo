@@ -19,7 +19,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-@org.kohsuke.MetaInfServices(org.jd.gui.spi.TreeNodeFactory.class)
 public class EjbJarXmlFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvider {
     protected static final ImageIcon ICON = new ImageIcon(ManifestFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/xml_obj.gif"));
 

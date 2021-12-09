@@ -15,7 +15,6 @@ import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@org.kohsuke.MetaInfServices(org.jd.gui.spi.FileLoader.class)
 public class JavaFileLoaderProvider extends AbstractTypeFileLoaderProvider {
     protected static final String[] EXTENSIONS = { "java" };
 

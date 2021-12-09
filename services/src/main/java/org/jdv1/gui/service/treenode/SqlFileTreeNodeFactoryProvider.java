@@ -20,7 +20,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-@org.kohsuke.MetaInfServices(org.jd.gui.spi.TreeNodeFactory.class)
 public class SqlFileTreeNodeFactoryProvider extends TextFileTreeNodeFactoryProvider {
     protected static final ImageIcon ICON = new ImageIcon(SqlFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/sql_obj.png"));
 

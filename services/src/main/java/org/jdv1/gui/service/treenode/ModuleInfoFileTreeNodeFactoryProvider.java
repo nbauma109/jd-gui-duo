@@ -25,7 +25,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-@org.kohsuke.MetaInfServices(org.jd.gui.spi.TreeNodeFactory.class)
 public class ModuleInfoFileTreeNodeFactoryProvider extends ClassFileTreeNodeFactoryProvider {
     protected static final ImageIcon MODULE_FILE_ICON = new ImageIcon(ClassFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/module_obj.png"));
     protected static final Factory FACTORY = new Factory();

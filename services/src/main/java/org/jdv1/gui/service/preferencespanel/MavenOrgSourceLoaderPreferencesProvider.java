@@ -19,7 +19,6 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-@org.kohsuke.MetaInfServices(PreferencesPanel.class)
 public class MavenOrgSourceLoaderPreferencesProvider extends JPanel implements PreferencesPanel, DocumentListener, ActionListener {
 
     private static final long serialVersionUID = 1L;
