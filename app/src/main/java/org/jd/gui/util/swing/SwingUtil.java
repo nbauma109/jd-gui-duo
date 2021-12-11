@@ -58,7 +58,6 @@ public class SwingUtil {
 	 * objects of Swing so popup menu borders have a minimum thickness of 1 and menu
 	 * separators have a minimum vertical thickness of 1.
 	 */
-	@SuppressWarnings("all")
 	public static void installGtkPopupBugWorkaround() {
 		// Get current look-and-feel implementation class
 		LookAndFeel laf = UIManager.getLookAndFeel();
@@ -74,6 +73,7 @@ public class SwingUtil {
 		try {
 			// Access the GTK style factory
 			Field field = lafClass.getDeclaredField("styleFactory");
+			@SuppressWarnings("deprecation")
 			boolean accessible = field.isAccessible();
 			field.setAccessible(true);
 			Object styleFactory = field.get(laf);
@@ -101,9 +101,9 @@ public class SwingUtil {
 	 * @param fieldName The field name.
 	 * @throws Exception When reflection fails.
 	 */
-	@SuppressWarnings("all")
 	private static void fixGtkThickness(Object style, String fieldName) throws Exception {
 		Field field = style.getClass().getDeclaredField(fieldName);
+		@SuppressWarnings("deprecation")
 		boolean accessible = field.isAccessible();
 		field.setAccessible(true);
 		field.setInt(style, Math.max(1, field.getInt(style)));
@@ -120,7 +120,6 @@ public class SwingUtil {
 	 * @return The GTK style.
 	 * @throws Exception When reflection fails.
 	 */
-	@SuppressWarnings("all")
 	private static Object getGtkStyle(Object styleFactory, JComponent component, String regionName) throws Exception {
 		// Create the region object
 		Class<?> regionClass = Class.forName("javax.swing.plaf.synth.Region");
@@ -130,6 +129,7 @@ public class SwingUtil {
 		// Get and return the style
 		Class<?> styleFactoryClass = styleFactory.getClass();
 		Method method = styleFactoryClass.getMethod("getStyle", JComponent.class, regionClass);
+		@SuppressWarnings("deprecation")
 		boolean accessible = method.isAccessible();
 		method.setAccessible(true);
 		Object style = method.invoke(styleFactory, component, region);

@@ -12,9 +12,9 @@ buildscript {
         }
     }
     dependencies {
-	classpath 'com.github.TheBoegl:gradle-launch4j:2.5.1'
-	classpath 'de.undercouch:gradle-download-task:4.1.2'
-	classpath 'com.guardsquare:proguard-gradle:7.1.1'
+        classpath 'com.github.TheBoegl:gradle-launch4j:2.5.1'
+        classpath 'de.undercouch:gradle-download-task:4.1.2'
+        classpath 'com.guardsquare:proguard-gradle:7.1.1'
     }
 }
 
@@ -121,6 +121,7 @@ jar {
 task downloadZipFile(type: Download) {
     src 'https://github.com/ibmruntimes/semeru16-binaries/releases/download/jdk-16.0.2%2B7_openj9-0.27.0/ibm-semeru-open-jre_x64_windows_16.0.2_7_openj9-0.27.0.zip'
     dest 'build/ibm-semeru-open-jre_x64_windows_16.0.2_7_openj9-0.27.0.zip'
+    overwrite false
 }
 
 task downloadAndUnzipFile(dependsOn: downloadZipFile, type: Copy) {

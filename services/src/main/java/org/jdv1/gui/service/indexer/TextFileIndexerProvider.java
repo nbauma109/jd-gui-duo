@@ -19,20 +19,19 @@ import java.io.InputStream;
 
 public class TextFileIndexerProvider extends AbstractIndexerProvider {
 
-    @Override
-    public String[] getSelectors() {
-        return appendSelectors(
-                "*:file:*.txt", "*:file:*.html", "*:file:*.xhtml", "*:file:*.js", "*:file:*.jsp", "*:file:*.jspf",
-                "*:file:*.xml", "*:file:*.xsl", "*:file:*.xslt", "*:file:*.xsd", "*:file:*.properties", "*:file:*.sql",
-                "*:file:*.yaml", "*:file:*.yml", "*:file:*.json");
-    }
+	@Override
+	public String[] getSelectors() {
+		return appendSelectors("*:file:*.txt", "*:file:*.html", "*:file:*.xhtml", "*:file:*.js", "*:file:*.jsp", "*:file:*.jspf", "*:file:*.xml", "*:file:*.xsl", "*:file:*.xslt",
+		        "*:file:*.xsd", "*:file:*.properties", "*:file:*.sql", "*:file:*.yaml", "*:file:*.yml", "*:file:*.json");
+	}
 
-    @Override
-    public void index(API api, Container.Entry entry, Indexes indexes) {
-        try (InputStream inputStream = entry.getInputStream()) {
-            indexes.getIndex("strings").get(TextReader.getText(inputStream)).add(entry);
-        } catch (IOException e) {
-            assert ExceptionUtil.printStackTrace(e);
-        }
-    }
+	@SuppressWarnings("unchecked")
+	@Override
+	public void index(API api, Container.Entry entry, Indexes indexes) {
+		try (InputStream inputStream = entry.getInputStream()) {
+			indexes.getIndex("strings").get(TextReader.getText(inputStream)).add(entry);
+		} catch (IOException e) {
+			assert ExceptionUtil.printStackTrace(e);
+		}
+	}
 }
