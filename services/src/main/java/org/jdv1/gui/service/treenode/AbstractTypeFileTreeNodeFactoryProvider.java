@@ -24,201 +24,207 @@ import javax.swing.JComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public abstract class AbstractTypeFileTreeNodeFactoryProvider extends AbstractTreeNodeFactoryProvider {
-    protected static final TypeComparator TYPE_COMPARATOR = new TypeComparator();
-    protected static final FieldOrMethodBeanComparator FIELD_OR_METHOD_BEAN_COMPARATOR = new FieldOrMethodBeanComparator();
 
-    public static class BaseTreeNode extends DefaultMutableTreeNode implements ContainerEntryGettable, UriGettable, PageCreator {
+	protected static final TypeComparator TYPE_COMPARATOR = new TypeComparator();
+	protected static final FieldOrMethodBeanComparator FIELD_OR_METHOD_BEAN_COMPARATOR = new FieldOrMethodBeanComparator();
 
-        private static final long serialVersionUID = 1L;
-        protected transient Container.Entry entry;
-        protected transient PageAndTipFactory factory;
-        protected transient URI uri;
+	public static class BaseTreeNode extends DefaultMutableTreeNode implements ContainerEntryGettable, UriGettable, PageCreator {
 
-        public BaseTreeNode(Container.Entry entry, String fragment, Object userObject, PageAndTipFactory factory) {
-            super(userObject);
-            this.entry = entry;
-            this.factory = factory;
+		private static final long serialVersionUID = 1L;
+		protected transient Container.Entry entry;
+		protected transient PageAndTipFactory factory;
+		protected transient URI uri;
 
-            if (fragment != null) {
-                try {
-                    URI localURI = entry.getUri();
-                    this.uri = new URI(localURI.getScheme(), localURI.getHost(), localURI.getPath(), fragment);
-                } catch (URISyntaxException e) {
-                    assert ExceptionUtil.printStackTrace(e);
-                }
-            } else {
-                this.uri = entry.getUri();
-            }
-        }
+		public BaseTreeNode(Container.Entry entry, String fragment, Object userObject, PageAndTipFactory factory) {
+			super(userObject);
+			this.entry = entry;
+			this.factory = factory;
 
-        // --- ContainerEntryGettable --- //
-        @Override
-        public Container.Entry getEntry() { return entry; }
+			if (fragment != null) {
+				try {
+					URI localURI = entry.getUri();
+					this.uri = new URI(localURI.getScheme(), localURI.getHost(), localURI.getPath(), fragment);
+				} catch (URISyntaxException e) {
+					assert ExceptionUtil.printStackTrace(e);
+				}
+			} else {
+				this.uri = entry.getUri();
+			}
+		}
 
-        // --- UriGettable --- //
-        @Override
-        public URI getUri() { return uri; }
+		// --- ContainerEntryGettable --- //
+		@Override
+		public Container.Entry getEntry() {
+			return entry;
+		}
 
-        // --- PageCreator --- //
-        @Override
-        public <T extends JComponent & UriGettable> T createPage(API api) {
-            // Lazy 'tip' initialization
-            ((TreeNodeBean)userObject).setTip(factory.makeTip(api, entry));
-            return factory.makePage(api, entry);
-        }
-    }
+		// --- UriGettable --- //
+		@Override
+		public URI getUri() {
+			return uri;
+		}
 
-    protected static class FileTreeNode extends BaseTreeNode implements TreeNodeExpandable {
+		// --- PageCreator --- //
+		@Override
+		public <T extends JComponent & UriGettable> T createPage(API api) {
+			// Lazy 'tip' initialization
+			((TreeNodeBean) userObject).setTip(factory.makeTip(api, entry));
+			return factory.makePage(api, entry);
+		}
+	}
 
-        private static final long serialVersionUID = 1L;
-        protected boolean initialized;
+	protected static class FileTreeNode extends BaseTreeNode implements TreeNodeExpandable {
 
-        public FileTreeNode(Container.Entry entry, Object userObject, PageAndTipFactory pageAndTipFactory) {
-            this(entry, null, userObject, pageAndTipFactory);
-        }
+		private static final long serialVersionUID = 1L;
+		protected boolean initialized;
 
-        public FileTreeNode(Container.Entry entry, String fragment, Object userObject, PageAndTipFactory factory) {
-            super(entry, fragment, userObject, factory);
-            initialized = false;
-            // Add dummy node
-            add(new DefaultMutableTreeNode());
-        }
+		public FileTreeNode(Container.Entry entry, Object userObject, PageAndTipFactory pageAndTipFactory) {
+			this(entry, null, userObject, pageAndTipFactory);
+		}
 
-        // --- TreeNodeExpandable --- //
-        @Override
-        public void populateTreeNode(API api) {
-            if (!initialized) {
-                removeAllChildren();
-                // Create type node
-                TypeFactory typeFactory = api.getTypeFactory(entry);
+		public FileTreeNode(Container.Entry entry, String fragment, Object userObject, PageAndTipFactory factory) {
+			super(entry, fragment, userObject, factory);
+			initialized = false;
+			// Add dummy node
+			add(new DefaultMutableTreeNode());
+		}
 
-                if (typeFactory != null) {
-                    Collection<Type> types = typeFactory.make(api, entry);
+		// --- TreeNodeExpandable --- //
+		@Override
+		public void populateTreeNode(API api) {
+			if (!initialized) {
+				removeAllChildren();
+				// Create type node
+				TypeFactory typeFactory = api.getTypeFactory(entry);
 
-                    for (Type type : types) {
-                        add(new TypeTreeNode(entry, type, new TreeNodeBean(type.getDisplayTypeName(), type.getIcon()), factory));
-                    }
-                }
+				if (typeFactory != null) {
+					Collection<Type> types = typeFactory.make(api, entry);
 
-                initialized = true;
-            }
-        }
-    }
+					for (Type type : types) {
+						add(new TypeTreeNode(entry, type, new TreeNodeBean(type.getDisplayTypeName(), type.getIcon()), factory));
+					}
+				}
 
-    protected static class TypeTreeNode extends BaseTreeNode implements TreeNodeExpandable {
+				initialized = true;
+			}
+		}
+	}
 
-        private static final long serialVersionUID = 1L;
-        protected boolean initialized;
-        protected transient Type type;
+	protected static class TypeTreeNode extends BaseTreeNode implements TreeNodeExpandable {
 
-        public TypeTreeNode(Container.Entry entry, Type type, Object userObject, PageAndTipFactory factory) {
-            super(entry, type.getName(), userObject, factory);
-            this.initialized = false;
-            this.type = type;
-            // Add dummy node
-            add(new DefaultMutableTreeNode());
-        }
+		private static final long serialVersionUID = 1L;
+		protected boolean initialized;
+		protected transient Type type;
 
-        // --- TreeNodeExpandable --- //
-        @Override
-        public void populateTreeNode(API api) {
-            if (!initialized) {
-                removeAllChildren();
+		public TypeTreeNode(Container.Entry entry, Type type, Object userObject, PageAndTipFactory factory) {
+			super(entry, type.getName(), userObject, factory);
+			this.initialized = false;
+			this.type = type;
+			// Add dummy node
+			add(new DefaultMutableTreeNode());
+		}
 
-                String typeName = type.getName();
+		// --- TreeNodeExpandable --- //
+		@Override
+		public void populateTreeNode(API api) {
+			if (!initialized) {
+				removeAllChildren();
 
-                // Create inner types
-                Collection<Type> innerTypes = type.getInnerTypes();
+				String typeName = type.getName();
 
-                if (innerTypes != null) {
-                    List<Type> innerTypeList = new ArrayList<>(innerTypes);
-                    innerTypeList.sort(TYPE_COMPARATOR);
+				// Create inner types
+				Collection<Type> innerTypes = type.getInnerTypes();
 
-                    for (Type innerType : innerTypeList) {
-                        add(new TypeTreeNode(entry, innerType, new TreeNodeBean(innerType.getDisplayInnerTypeName(), innerType.getIcon()), factory));
-                    }
-                }
+				if (innerTypes != null) {
+					List<Type> innerTypeList = new ArrayList<>(innerTypes);
+					innerTypeList.sort(TYPE_COMPARATOR);
 
-                // Create fields
-                Collection<Type.Field> fields = type.getFields();
+					for (Type innerType : innerTypeList) {
+						add(new TypeTreeNode(entry, innerType, new TreeNodeBean(innerType.getDisplayInnerTypeName(), innerType.getIcon()), factory));
+					}
+				}
 
-                if (fields != null) {
-                    List<FieldOrMethodBean> beans = new ArrayList<>(fields.size());
+				// Create fields
+				Collection<Type.Field> fields = type.getFields();
 
-                    for (Type.Field field : fields) {
-                        String fragment = typeName + '-' + field.getName() + '-' + field.getDescriptor();
-                        beans.add(new FieldOrMethodBean(fragment, field.getDisplayName(), field.getIcon()));
-                    }
+				if (fields != null) {
+					List<FieldOrMethodBean> beans = new ArrayList<>(fields.size());
 
-                    beans.sort(FIELD_OR_METHOD_BEAN_COMPARATOR);
+					for (Type.Field field : fields) {
+						String fragment = typeName + '-' + field.getName() + '-' + field.getDescriptor();
+						beans.add(new FieldOrMethodBean(fragment, field.getDisplayName(), field.getIcon()));
+					}
 
-                    for (FieldOrMethodBean bean : beans) {
-                        add(new FieldOrMethodTreeNode(entry, bean.fragment, new TreeNodeBean(bean.label, bean.icon), factory));
-                    }
-                }
+					beans.sort(FIELD_OR_METHOD_BEAN_COMPARATOR);
 
-                // Create methods
-                Collection<Type.Method> methods = type.getMethods();
+					for (FieldOrMethodBean bean : beans) {
+						add(new FieldOrMethodTreeNode(entry, bean.fragment, new TreeNodeBean(bean.label, bean.icon), factory));
+					}
+				}
 
-                if (methods != null) {
-                    List<FieldOrMethodBean> beans = new ArrayList<>();
+				// Create methods
+				Collection<Type.Method> methods = type.getMethods();
 
-                    for (Type.Method method : methods) {
-                        if (!method.getName().equals("<clinit>")) {
-                            String fragment = typeName + '-' + method.getName() + '-' + method.getDescriptor();
-                            beans.add(new FieldOrMethodBean(fragment, method.getDisplayName(), method.getIcon()));
-                        }
-                    }
+				if (methods != null) {
+					List<FieldOrMethodBean> beans = new ArrayList<>();
 
-                    beans.sort(FIELD_OR_METHOD_BEAN_COMPARATOR);
+					for (Type.Method method : methods) {
+						if (!"<clinit>".equals(method.getName())) {
+							String fragment = typeName + '-' + method.getName() + '-' + method.getDescriptor();
+							beans.add(new FieldOrMethodBean(fragment, method.getDisplayName(), method.getIcon()));
+						}
+					}
 
-                    for (FieldOrMethodBean bean : beans) {
-                        add(new FieldOrMethodTreeNode(entry, bean.fragment, new TreeNodeBean(bean.label, bean.icon), factory));
-                    }
-                }
+					beans.sort(FIELD_OR_METHOD_BEAN_COMPARATOR);
 
-                initialized = true;
-            }
-        }
-    }
+					for (FieldOrMethodBean bean : beans) {
+						add(new FieldOrMethodTreeNode(entry, bean.fragment, new TreeNodeBean(bean.label, bean.icon), factory));
+					}
+				}
 
-    protected static class FieldOrMethodTreeNode extends BaseTreeNode {
+				initialized = true;
+			}
+		}
+	}
 
-        private static final long serialVersionUID = 1L;
+	protected static class FieldOrMethodTreeNode extends BaseTreeNode {
 
-        public FieldOrMethodTreeNode(Container.Entry entry, String fragment, Object userObject, PageAndTipFactory factory) {
-            super(entry, fragment, userObject, factory);
-        }
-    }
+		private static final long serialVersionUID = 1L;
 
-    protected static class FieldOrMethodBean {
-    	private final String fragment;
-    	private final String label;
-    	private final Icon icon;
+		public FieldOrMethodTreeNode(Container.Entry entry, String fragment, Object userObject, PageAndTipFactory factory) {
+			super(entry, fragment, userObject, factory);
+		}
+	}
 
-        public FieldOrMethodBean(String fragment, String label, Icon icon) {
-            this.fragment = fragment;
-            this.label = label;
-            this.icon = icon;
-        }
-    }
+	protected static class FieldOrMethodBean {
+		private final String fragment;
+		private final String label;
+		private final Icon icon;
 
-    protected interface PageAndTipFactory {
-        <T extends JComponent & UriGettable> T makePage(API api, Container.Entry entry);
-        String makeTip(API api, Container.Entry entry);
-    }
+		public FieldOrMethodBean(String fragment, String label, Icon icon) {
+			this.fragment = fragment;
+			this.label = label;
+			this.icon = icon;
+		}
+	}
 
-    protected static class TypeComparator implements Comparator<Type> {
-        @Override
-        public int compare(Type type1, Type type2) {
-            return type1.getName().compareTo(type2.getName());
-        }
-    }
+	protected interface PageAndTipFactory {
+		<T extends JComponent & UriGettable> T makePage(API api, Container.Entry entry);
 
-    protected static class FieldOrMethodBeanComparator implements Comparator<FieldOrMethodBean> {
-        @Override
-        public int compare(FieldOrMethodBean bean1, FieldOrMethodBean bean2) {
-            return bean1.label.compareTo(bean2.label);
-        }
-    }
+		String makeTip(API api, Container.Entry entry);
+	}
+
+	protected static class TypeComparator implements Comparator<Type> {
+		@Override
+		public int compare(Type type1, Type type2) {
+			return type1.getName().compareTo(type2.getName());
+		}
+	}
+
+	protected static class FieldOrMethodBeanComparator implements Comparator<FieldOrMethodBean> {
+		@Override
+		public int compare(FieldOrMethodBean bean1, FieldOrMethodBean bean2) {
+			return bean1.label.compareTo(bean2.label);
+		}
+	}
 }

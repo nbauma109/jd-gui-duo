@@ -14,18 +14,17 @@ import javax.swing.JButton;
 
 public class IconButton extends JButton {
 
-    private static final long serialVersionUID = 1L;
-    protected static final Insets INSETS0 = new Insets(0, 0, 0, 0);
+	private static final long serialVersionUID = 1L;
+	protected static final Insets INSETS0 = new Insets(0, 0, 0, 0);
 
-    public IconButton(String text, Action action) {
-        setFocusPainted(false);
-        setBorderPainted(false);
-        setMargin(INSETS0);
-        setAction(action);
-        setText(text);
-    }
+	public IconButton(String text, Action action) {
+		super(action);
+		setText(text);
+		setFocusPainted(false);
+	}
 
-    public IconButton(Action action) {
-        this(null, action);
-    }
+	public IconButton(Action action) {
+		super(action);
+		setFocusPainted(false);
+	}
 }

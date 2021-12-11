@@ -9,8 +9,10 @@ package org.jdv1.gui.service.treenode;
 
 import javax.swing.ImageIcon;
 
+import org.jd.gui.util.ImageUtil;
+
 public class MetainfDirectoryTreeNodeFactoryProvider extends DirectoryTreeNodeFactoryProvider {
-    protected static final ImageIcon ICON = new ImageIcon(MetainfDirectoryTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/inf_obj.png"));
+    protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/inf_obj.png"));
 
     @Override
     public String[] getSelectors() {

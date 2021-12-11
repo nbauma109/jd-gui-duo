@@ -14,6 +14,7 @@ import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Type;
 import org.jd.gui.spi.TypeFactory;
+import org.jd.gui.util.ImageUtil;
 import org.jd.gui.view.data.TreeNodeBean;
 import org.jdv1.gui.view.component.ModuleInfoFilePage;
 
@@ -26,78 +27,83 @@ import javax.swing.JComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public class ModuleInfoFileTreeNodeFactoryProvider extends ClassFileTreeNodeFactoryProvider {
-    protected static final ImageIcon MODULE_FILE_ICON = new ImageIcon(ClassFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/module_obj.png"));
-    protected static final Factory FACTORY = new Factory();
 
-    static {
-        // Early class loading
-        try {
-            Class.forName(ModuleInfoFilePage.class.getName());
-        } catch (Exception e) {
-            assert ExceptionUtil.printStackTrace(e);
-        }
-    }
+	protected static final ImageIcon MODULE_FILE_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/module_obj.png"));
+	protected static final Factory FACTORY = new Factory();
 
-    @Override
-    public String[] getSelectors() { return appendSelectors("*:file:*/module-info.class"); }
+	static {
+		// Early class loading
+		try {
+			Class.forName(ModuleInfoFilePage.class.getName());
+		} catch (Exception e) {
+			assert ExceptionUtil.printStackTrace(e);
+		}
+	}
 
-    @Override
-    public Pattern getPathPattern() { return externalPathPattern; }
+	@Override
+	public String[] getSelectors() {
+		return appendSelectors("*:file:*/module-info.class");
+	}
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
-        int lastSlashIndex = entry.getPath().lastIndexOf('/');
-        String label = entry.getPath().substring(lastSlashIndex+1);
-        return (T)new ModuleInfoFileTreeNode(entry, new TreeNodeBean(label, CLASS_FILE_ICON), FACTORY);
-    }
+	@Override
+	public Pattern getPathPattern() {
+		return externalPathPattern;
+	}
 
-    protected static class ModuleInfoFileTreeNode extends FileTreeNode {
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
+		int lastSlashIndex = entry.getPath().lastIndexOf('/');
+		String label = entry.getPath().substring(lastSlashIndex + 1);
+		return (T) new ModuleInfoFileTreeNode(entry, new TreeNodeBean(label, CLASS_FILE_ICON), FACTORY);
+	}
 
-        private static final long serialVersionUID = 1L;
+	protected static class ModuleInfoFileTreeNode extends FileTreeNode {
 
-        public ModuleInfoFileTreeNode(Container.Entry entry, Object userObject, PageAndTipFactory pageAndTipFactory) {
-            super(entry, null, userObject, pageAndTipFactory);
-        }
+		private static final long serialVersionUID = 1L;
 
-        // --- TreeNodeExpandable --- //
-        @Override
-        public void populateTreeNode(API api) {
-            if (!initialized) {
-                removeAllChildren();
-                // Create type node
-                TypeFactory typeFactory = api.getTypeFactory(entry);
+		public ModuleInfoFileTreeNode(Container.Entry entry, Object userObject, PageAndTipFactory pageAndTipFactory) {
+			super(entry, null, userObject, pageAndTipFactory);
+		}
 
-                if (typeFactory != null) {
-                    Collection<Type> types = typeFactory.make(api, entry);
+		// --- TreeNodeExpandable --- //
+		@Override
+		public void populateTreeNode(API api) {
+			if (!initialized) {
+				removeAllChildren();
+				// Create type node
+				TypeFactory typeFactory = api.getTypeFactory(entry);
 
-                    for (Type type : types) {
-                        add(new BaseTreeNode(entry, type.getName(), new TreeNodeBean(type.getDisplayTypeName(), MODULE_FILE_ICON), factory));
-                    }
-                }
+				if (typeFactory != null) {
+					Collection<Type> types = typeFactory.make(api, entry);
 
-                initialized = true;
-            }
-        }
-    }
+					for (Type type : types) {
+						add(new BaseTreeNode(entry, type.getName(), new TreeNodeBean(type.getDisplayTypeName(), MODULE_FILE_ICON), factory));
+					}
+				}
 
-    protected static class Factory implements AbstractTypeFileTreeNodeFactoryProvider.PageAndTipFactory {
-        // --- PageAndTipFactory --- //
-        @Override
-        @SuppressWarnings("unchecked")
-        public <T extends JComponent & UriGettable> T makePage(API a, Container.Entry e) {
-            return (T)new ModuleInfoFilePage(a, e);
-        }
+				initialized = true;
+			}
+		}
+	}
 
-        @Override
-        public String makeTip(API api, Container.Entry entry) {
-            String location = new File(entry.getUri()).getPath();
-            StringBuilder tip = new StringBuilder("<html>Location: ");
+	protected static class Factory implements AbstractTypeFileTreeNodeFactoryProvider.PageAndTipFactory {
+		// --- PageAndTipFactory --- //
+		@Override
+		@SuppressWarnings("unchecked")
+		public <T extends JComponent & UriGettable> T makePage(API a, Container.Entry e) {
+			return (T) new ModuleInfoFilePage(a, e);
+		}
 
-            tip.append(location);
-            tip.append("</html>");
+		@Override
+		public String makeTip(API api, Container.Entry entry) {
+			String location = new File(entry.getUri()).getPath();
+			StringBuilder tip = new StringBuilder("<html>Location: ");
 
-            return tip.toString();
-        }
-    }
+			tip.append(location);
+			tip.append("</html>");
+
+			return tip.toString();
+		}
+	}
 }

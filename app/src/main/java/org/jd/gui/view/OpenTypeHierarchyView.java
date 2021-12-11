@@ -11,6 +11,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.*;
 import org.jd.gui.api.model.Container;
+import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.function.TriConsumer;
 import org.jd.gui.util.swing.SwingUtil;
 import org.jd.gui.view.component.Tree;
@@ -28,454 +29,473 @@ import javax.swing.event.TreeExpansionListener;
 import javax.swing.tree.*;
 
 public class OpenTypeHierarchyView {
-    protected static final ImageIcon ROOT_CLASS_ICON = new ImageIcon(OpenTypeHierarchyView.class.getClassLoader().getResource("org/jd/gui/images/generate_class.png"));
-    protected static final ImageIcon ROOT_INTERFACE_ICON = new ImageIcon(OpenTypeHierarchyView.class.getClassLoader().getResource("org/jd/gui/images/generate_int.png"));
 
-    protected static final TreeNodeComparator TREE_NODE_COMPARATOR = new TreeNodeComparator();
+	protected static final ImageIcon ROOT_CLASS_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/generate_class.png"));
+	protected static final ImageIcon ROOT_INTERFACE_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/generate_int.png"));
 
-    protected API api;
-    protected Collection<Future<Indexes>> collectionOfFutureIndexes;
+	protected static final TreeNodeComparator TREE_NODE_COMPARATOR = new TreeNodeComparator();
 
-    protected JDialog openTypeHierarchyDialog;
-    protected Tree openTypeHierarchyTree;
+	protected API api;
+	protected Collection<Future<Indexes>> collectionOfFutureIndexes;
 
-    protected TriConsumer<Point, Collection<Container.Entry>, String> selectedTypeCallback;
+	protected JDialog openTypeHierarchyDialog;
+	protected Tree openTypeHierarchyTree;
 
-    public OpenTypeHierarchyView(API api, JFrame mainFrame, TriConsumer<Point, Collection<Container.Entry>, String> selectedTypeCallback) {
-        this.api = api;
-        this.selectedTypeCallback = selectedTypeCallback;
-        // Build GUI
-        SwingUtil.invokeLater(() -> {
-            openTypeHierarchyDialog = new JDialog(mainFrame, "Hierarchy Type", false);
+	protected TriConsumer<Point, Collection<Container.Entry>, String> selectedTypeCallback;
 
-            JPanel panel = new JPanel();
-            panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-            panel.setLayout(new BorderLayout());
-            openTypeHierarchyDialog.add(panel);
+	public OpenTypeHierarchyView(API api, JFrame mainFrame, TriConsumer<Point, Collection<Container.Entry>, String> selectedTypeCallback) {
+		this.api = api;
+		this.selectedTypeCallback = selectedTypeCallback;
+		// Build GUI
+		SwingUtil.invokeLater(() -> {
+			openTypeHierarchyDialog = new JDialog(mainFrame, "Hierarchy Type", false);
 
-            openTypeHierarchyTree = new Tree();
-            openTypeHierarchyTree.setModel(new DefaultTreeModel(new DefaultMutableTreeNode()));
-            openTypeHierarchyTree.setCellRenderer(new TreeNodeRenderer());
-            openTypeHierarchyTree.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    if (e.getClickCount() == 2) {
-                        onTypeSelected();
-                    }
-                }
-            });
-            openTypeHierarchyTree.addTreeExpansionListener(new TreeExpansionListener() {
-                @Override
-                public void treeExpanded(TreeExpansionEvent e) {
-                    TreeNode node = (TreeNode)e.getPath().getLastPathComponent();
-                    // Expand node and find the first leaf
-                    while (node.getChildCount() > 0) {
-                        if (((DefaultMutableTreeNode)node.getChildAt(0)).getUserObject() == null) {
-                            // Remove dummy node and create children
-                            populateTreeNode(node, null);
-                        }
-                        if (node.getChildCount() != 1) {
-                            break;
-                        }
-                        node = ((TreeNode)node.getChildAt(0));
-                    }
-                    DefaultTreeModel model = (DefaultTreeModel)openTypeHierarchyTree.getModel();
-                    model.reload((TreeNode)e.getPath().getLastPathComponent());
-                    openTypeHierarchyTree.setSelectionPath(new TreePath(node.getPath()));
-                }
-                @Override
-                public void treeCollapsed(TreeExpansionEvent e) {}
-            });
-            openTypeHierarchyTree.addKeyListener(new KeyAdapter() {
-                @Override
-                public void keyPressed(KeyEvent e) {
-                    if (e.getKeyCode() == KeyEvent.VK_F4) {
-                        TreeNode node = (TreeNode)openTypeHierarchyTree.getLastSelectedPathComponent();
-                        if (node != null) {
-                            updateTree(node.entry, node.typeName);
-                        }
-                    }
-                }
-            });
+			JPanel panel = new JPanel();
+			panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+			panel.setLayout(new BorderLayout());
+			openTypeHierarchyDialog.add(panel);
 
-            JScrollPane openTypeHierarchyScrollPane = new JScrollPane(openTypeHierarchyTree);
-            openTypeHierarchyScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-            openTypeHierarchyScrollPane.setPreferredSize(new Dimension(400, 150));
-            panel.add(openTypeHierarchyScrollPane, BorderLayout.CENTER);
+			openTypeHierarchyTree = new Tree();
+			openTypeHierarchyTree.setModel(new DefaultTreeModel(new DefaultMutableTreeNode()));
+			openTypeHierarchyTree.setCellRenderer(new TreeNodeRenderer());
+			openTypeHierarchyTree.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					if (e.getClickCount() == 2) {
+						onTypeSelected();
+					}
+				}
+			});
+			openTypeHierarchyTree.addTreeExpansionListener(new TreeExpansionListener() {
+				@Override
+				public void treeExpanded(TreeExpansionEvent e) {
+					TreeNode node = (TreeNode) e.getPath().getLastPathComponent();
+					// Expand node and find the first leaf
+					while (node.getChildCount() > 0) {
+						if (((DefaultMutableTreeNode) node.getChildAt(0)).getUserObject() == null) {
+							// Remove dummy node and create children
+							populateTreeNode(node, null);
+						}
+						if (node.getChildCount() != 1) {
+							break;
+						}
+						node = (TreeNode) node.getChildAt(0);
+					}
+					DefaultTreeModel model = (DefaultTreeModel) openTypeHierarchyTree.getModel();
+					model.reload((TreeNode) e.getPath().getLastPathComponent());
+					openTypeHierarchyTree.setSelectionPath(new TreePath(node.getPath()));
+				}
 
-            // Buttons "Open" and "Cancel"
-            Box vbox = Box.createVerticalBox();
-            panel.add(vbox, BorderLayout.SOUTH);
-            vbox.add(Box.createVerticalStrut(25));
-            Box hbox = Box.createHorizontalBox();
-            vbox.add(hbox);
-            hbox.add(Box.createHorizontalGlue());
-            JButton openTypeHierarchyOpenButton = new JButton("Open");
-            hbox.add(openTypeHierarchyOpenButton);
-            openTypeHierarchyOpenButton.setEnabled(false);
-            openTypeHierarchyOpenButton.addActionListener(e -> onTypeSelected());
-            hbox.add(Box.createHorizontalStrut(5));
-            JButton openTypeHierarchyCancelButton = new JButton("Cancel");
-            hbox.add(openTypeHierarchyCancelButton);
-            Action openTypeHierarchyCancelActionListener = new AbstractAction() {
+				@Override
+				public void treeCollapsed(TreeExpansionEvent e) {
+				}
+			});
+			openTypeHierarchyTree.addKeyListener(new KeyAdapter() {
+				@Override
+				public void keyPressed(KeyEvent e) {
+					if (e.getKeyCode() == KeyEvent.VK_F4) {
+						TreeNode node = (TreeNode) openTypeHierarchyTree.getLastSelectedPathComponent();
+						if (node != null) {
+							updateTree(node.entry, node.typeName);
+						}
+					}
+				}
+			});
 
-                private static final long serialVersionUID = 1L;
+			JScrollPane openTypeHierarchyScrollPane = new JScrollPane(openTypeHierarchyTree);
+			openTypeHierarchyScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+			openTypeHierarchyScrollPane.setPreferredSize(new Dimension(400, 150));
+			panel.add(openTypeHierarchyScrollPane, BorderLayout.CENTER);
 
-                @Override
-                public void actionPerformed(ActionEvent actionEvent) { openTypeHierarchyDialog.setVisible(false); }
-            };
-            openTypeHierarchyCancelButton.addActionListener(openTypeHierarchyCancelActionListener);
+			// Buttons "Open" and "Cancel"
+			Box vbox = Box.createVerticalBox();
+			panel.add(vbox, BorderLayout.SOUTH);
+			vbox.add(Box.createVerticalStrut(25));
+			Box hbox = Box.createHorizontalBox();
+			vbox.add(hbox);
+			hbox.add(Box.createHorizontalGlue());
+			JButton openTypeHierarchyOpenButton = new JButton("Open");
+			hbox.add(openTypeHierarchyOpenButton);
+			openTypeHierarchyOpenButton.setEnabled(false);
+			openTypeHierarchyOpenButton.addActionListener(e -> onTypeSelected());
+			hbox.add(Box.createHorizontalStrut(5));
+			JButton openTypeHierarchyCancelButton = new JButton("Cancel");
+			hbox.add(openTypeHierarchyCancelButton);
+			Action openTypeHierarchyCancelActionListener = new AbstractAction() {
 
-            openTypeHierarchyTree.addTreeSelectionListener(e -> {
-                Object o = openTypeHierarchyTree.getLastSelectedPathComponent();
-                if (o != null) {
-                    o = ((TreeNode)o).entry;
-                }
-                openTypeHierarchyOpenButton.setEnabled(o != null);
-            });
+				private static final long serialVersionUID = 1L;
 
-            // Last setup
-            JRootPane rootPane = openTypeHierarchyDialog.getRootPane();
-            rootPane.setDefaultButton(openTypeHierarchyOpenButton);
-            rootPane.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "OpenTypeHierarchyView.cancel");
-            rootPane.getActionMap().put("OpenTypeHierarchyView.cancel", openTypeHierarchyCancelActionListener);
+				@Override
+				public void actionPerformed(ActionEvent actionEvent) {
+					openTypeHierarchyDialog.setVisible(false);
+				}
+			};
+			openTypeHierarchyCancelButton.addActionListener(openTypeHierarchyCancelActionListener);
 
-            openTypeHierarchyDialog.setMinimumSize(openTypeHierarchyDialog.getSize());
+			openTypeHierarchyTree.addTreeSelectionListener(e -> {
+				Object o = openTypeHierarchyTree.getLastSelectedPathComponent();
+				if (o != null) {
+					o = ((TreeNode) o).entry;
+				}
+				openTypeHierarchyOpenButton.setEnabled(o != null);
+			});
 
-            // Prepare to display
-            openTypeHierarchyDialog.pack();
-            openTypeHierarchyDialog.setLocationRelativeTo(mainFrame);
-        });
-    }
+			// Last setup
+			JRootPane rootPane = openTypeHierarchyDialog.getRootPane();
+			rootPane.setDefaultButton(openTypeHierarchyOpenButton);
+			rootPane.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "OpenTypeHierarchyView.cancel");
+			rootPane.getActionMap().put("OpenTypeHierarchyView.cancel", openTypeHierarchyCancelActionListener);
 
-    public void show(Collection<Future<Indexes>> collectionOfFutureIndexes, Container.Entry entry, String typeName) {
-        this.collectionOfFutureIndexes = collectionOfFutureIndexes;
-        SwingUtil.invokeLater(() -> {
-            updateTree(entry, typeName);
-            openTypeHierarchyDialog.setVisible(true);
-            openTypeHierarchyTree.requestFocus();
-        });
-    }
+			openTypeHierarchyDialog.setMinimumSize(openTypeHierarchyDialog.getSize());
 
-    public boolean isVisible() { return openTypeHierarchyDialog.isVisible(); }
+			// Prepare to display
+			openTypeHierarchyDialog.pack();
+			openTypeHierarchyDialog.setLocationRelativeTo(mainFrame);
+		});
+	}
 
-    public void showWaitCursor() {
-        SwingUtil.invokeLater(() -> openTypeHierarchyDialog.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)));
-    }
+	public void show(Collection<Future<Indexes>> collectionOfFutureIndexes, Container.Entry entry, String typeName) {
+		this.collectionOfFutureIndexes = collectionOfFutureIndexes;
+		SwingUtil.invokeLater(() -> {
+			updateTree(entry, typeName);
+			openTypeHierarchyDialog.setVisible(true);
+			openTypeHierarchyTree.requestFocus();
+		});
+	}
 
-    public void hideWaitCursor() {
-        SwingUtil.invokeLater(() -> openTypeHierarchyDialog.setCursor(Cursor.getDefaultCursor()));
-    }
+	public boolean isVisible() {
+		return openTypeHierarchyDialog.isVisible();
+	}
 
-    public void updateTree(Collection<Future<Indexes>> collectionOfFutureIndexes) {
-        this.collectionOfFutureIndexes = collectionOfFutureIndexes;
-        TreeNode selectedTreeNode = (TreeNode)openTypeHierarchyTree.getLastSelectedPathComponent();
+	public void showWaitCursor() {
+		SwingUtil.invokeLater(() -> openTypeHierarchyDialog.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)));
+	}
 
-        if (selectedTreeNode != null) {
-            updateTree(selectedTreeNode.entry, selectedTreeNode.typeName);
-        }
-    }
+	public void hideWaitCursor() {
+		SwingUtil.invokeLater(() -> openTypeHierarchyDialog.setCursor(Cursor.getDefaultCursor()));
+	}
 
-    protected void updateTree(Container.Entry entry, String typeName) {
-        SwingUtil.invokeLater(() -> {
-            // Clear tree
-            DefaultTreeModel model = (DefaultTreeModel)openTypeHierarchyTree.getModel();
-            DefaultMutableTreeNode root = (DefaultMutableTreeNode)model.getRoot();
-            root.removeAllChildren();
+	public void updateTree(Collection<Future<Indexes>> collectionOfFutureIndexes) {
+		this.collectionOfFutureIndexes = collectionOfFutureIndexes;
+		TreeNode selectedTreeNode = (TreeNode) openTypeHierarchyTree.getLastSelectedPathComponent();
 
-            TreeNode selectedTreeNode = createTreeNode(entry, typeName);
-            TreeNode parentTreeNode = createParentTreeNode(selectedTreeNode);
+		if (selectedTreeNode != null) {
+			updateTree(selectedTreeNode.entry, selectedTreeNode.typeName);
+		}
+	}
 
-            root.add(parentTreeNode);
-            model.reload();
+	protected void updateTree(Container.Entry entry, String typeName) {
+		SwingUtil.invokeLater(() -> {
+			// Clear tree
+			DefaultTreeModel model = (DefaultTreeModel) openTypeHierarchyTree.getModel();
+			DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+			root.removeAllChildren();
 
-            if (selectedTreeNode != null) {
-                TreePath path = new TreePath(selectedTreeNode.getPath());
-                // Expand
-                openTypeHierarchyTree.expandPath(path);
-                // Scroll to show tree node
-                openTypeHierarchyTree.makeVisible(path);
-                Rectangle bounds = openTypeHierarchyTree.getPathBounds(path);
+			TreeNode selectedTreeNode = createTreeNode(entry, typeName);
+			TreeNode parentTreeNode = createParentTreeNode(selectedTreeNode);
 
-                if(bounds != null) {
-                    bounds.x = 0;
+			root.add(parentTreeNode);
+			model.reload();
 
-                    Rectangle lastRowBounds = openTypeHierarchyTree.getRowBounds(openTypeHierarchyTree.getRowCount()-1);
+			if (selectedTreeNode != null) {
+				TreePath path = new TreePath(selectedTreeNode.getPath());
+				// Expand
+				openTypeHierarchyTree.expandPath(path);
+				// Scroll to show tree node
+				openTypeHierarchyTree.makeVisible(path);
+				Rectangle bounds = openTypeHierarchyTree.getPathBounds(path);
 
-                    if (lastRowBounds != null) {
-                        bounds.y = Math.max(bounds.y-30, 0);
-                        bounds.height = Math.min(bounds.height+bounds.y+60, lastRowBounds.height+lastRowBounds.y) - bounds.y;
-                    }
+				if (bounds != null) {
+					bounds.x = 0;
 
-                    openTypeHierarchyTree.scrollRectToVisible(bounds);
-                    openTypeHierarchyTree.scrollPathToVisible(path);
-                    openTypeHierarchyTree.fireVisibleDataPropertyChange();
-                }
-                // Select tree node
-                openTypeHierarchyTree.setSelectionPath(path);
-            }
-        });
-    }
+					Rectangle lastRowBounds = openTypeHierarchyTree.getRowBounds(openTypeHierarchyTree.getRowCount() - 1);
 
-    protected TreeNode createTreeNode(Container.Entry entry, String typeName) {
-        Type type = api.getTypeFactory(entry).make(api, entry, typeName);
+					if (lastRowBounds != null) {
+						bounds.y = Math.max(bounds.y - 30, 0);
+						bounds.height = Math.min(bounds.height + bounds.y + 60, lastRowBounds.height + lastRowBounds.y) - bounds.y;
+					}
 
-        typeName = type.getName();
+					openTypeHierarchyTree.scrollRectToVisible(bounds);
+					openTypeHierarchyTree.scrollPathToVisible(path);
+					openTypeHierarchyTree.fireVisibleDataPropertyChange();
+				}
+				// Select tree node
+				openTypeHierarchyTree.setSelectionPath(path);
+			}
+		});
+	}
 
-        List<Container.Entry> entries = getEntries(typeName);
-        TreeNode treeNode = new TreeNode(entry, typeName, entries, new TreeNodeBean(type));
-        List<String> childTypeNames = getSubTypeNames(typeName);
+	protected TreeNode createTreeNode(Container.Entry entry, String typeName) {
+		Type type = api.getTypeFactory(entry).make(api, entry, typeName);
 
-        if (childTypeNames != null) {
-            // Add dummy node
-            treeNode.add(new DefaultMutableTreeNode());
-        }
+		typeName = type.getName();
 
-        return treeNode;
-    }
+		List<Container.Entry> entries = getEntries(typeName);
+		TreeNode treeNode = new TreeNode(entry, typeName, entries, new TreeNodeBean(type));
+		List<String> childTypeNames = getSubTypeNames(typeName);
 
-    /**
-     * Create parent and sibling tree nodes
-     */
-    protected TreeNode createParentTreeNode(TreeNode treeNode) {
-        Type type = api.getTypeFactory(treeNode.entry).make(api, treeNode.entry, treeNode.typeName);
-        String superTypeName = type.getSuperName();
+		if (childTypeNames != null) {
+			// Add dummy node
+			treeNode.add(new DefaultMutableTreeNode());
+		}
 
-        if (superTypeName != null) {
-            List<Container.Entry> superEntries = getEntries(superTypeName);
+		return treeNode;
+	}
 
-            // Search entry in the sane container of 'entry'
-            Container.Entry superEntry = null;
+	/**
+	 * Create parent and sibling tree nodes
+	 */
+	protected TreeNode createParentTreeNode(TreeNode treeNode) {
+		Type type = api.getTypeFactory(treeNode.entry).make(api, treeNode.entry, treeNode.typeName);
+		String superTypeName = type.getSuperName();
 
-            if ((superEntries != null) && !superEntries.isEmpty()) {
-                for (Container.Entry se : superEntries) {
-                    if (se.getContainer() == treeNode.entry.getContainer()) {
-                        superEntry = se;
-                        break;
-                    }
-                }
+		if (superTypeName != null) {
+			List<Container.Entry> superEntries = getEntries(superTypeName);
 
-                if (superEntry == null) {
-                    // Not found -> Choose 1st one
-                    superEntry = superEntries.get(0);
-                }
-            }
+			// Search entry in the sane container of 'entry'
+			Container.Entry superEntry = null;
 
-            if (superEntry != null) {
-                // Create parent tree node
-                TreeNode superTreeNode = createTreeNode(superEntry, superTypeName);
-                // Populate parent tree node
-                populateTreeNode(superTreeNode, treeNode);
-                // Recursive call
-                return createParentTreeNode(superTreeNode);
-            }
-            // Entry not found --> Most probable hypothesis : Java type entry
-            int lastPackageSeparatorIndex = superTypeName.lastIndexOf('/');
-            String packaze = superTypeName.substring(0, lastPackageSeparatorIndex).replace('/', '.');
-            String name = superTypeName.substring(lastPackageSeparatorIndex + 1).replace('$', '.');
-            String label = (packaze != null) ? name + " - " + packaze : name;
-            Icon icon = ((type.getFlags() & Type.FLAG_INTERFACE) == 0) ? ROOT_CLASS_ICON : ROOT_INTERFACE_ICON;
-            TreeNode rootTreeNode = new TreeNode(null, superTypeName, null, new TreeNodeBean(label, icon));
+			if (superEntries != null && !superEntries.isEmpty()) {
+				for (Container.Entry se : superEntries) {
+					if (se.getContainer() == treeNode.entry.getContainer()) {
+						superEntry = se;
+						break;
+					}
+				}
 
-            if (packaze != null && packaze.startsWith("java.")) {
-                // If root type is a JDK type, do not create a tree node for each child types
-                rootTreeNode.add(treeNode);
-            } else {
-                populateTreeNode(rootTreeNode, treeNode);
-            }
+				if (superEntry == null) {
+					// Not found -> Choose 1st one
+					superEntry = superEntries.get(0);
+				}
+			}
 
-            return rootTreeNode;
-        }
-        // super type undefined
-        return treeNode;
-    }
+			if (superEntry != null) {
+				// Create parent tree node
+				TreeNode superTreeNode = createTreeNode(superEntry, superTypeName);
+				// Populate parent tree node
+				populateTreeNode(superTreeNode, treeNode);
+				// Recursive call
+				return createParentTreeNode(superTreeNode);
+			}
+			// Entry not found --> Most probable hypothesis : Java type entry
+			int lastPackageSeparatorIndex = superTypeName.lastIndexOf('/');
+			String packaze = superTypeName.substring(0, lastPackageSeparatorIndex).replace('/', '.');
+			String name = superTypeName.substring(lastPackageSeparatorIndex + 1).replace('$', '.');
+			String label = packaze != null ? name + " - " + packaze : name;
+			Icon icon = (type.getFlags() & Type.FLAG_INTERFACE) == 0 ? ROOT_CLASS_ICON : ROOT_INTERFACE_ICON;
+			TreeNode rootTreeNode = new TreeNode(null, superTypeName, null, new TreeNodeBean(label, icon));
 
-    /**
-     * @param superTreeNode  node to populate
-     * @param activeTreeNode active child node
-     */
-    protected void populateTreeNode(TreeNode superTreeNode, TreeNode activeTreeNode) {
-        superTreeNode.removeAllChildren();
+			if (packaze != null && packaze.startsWith("java.")) {
+				// If root type is a JDK type, do not create a tree node for each child types
+				rootTreeNode.add(treeNode);
+			} else {
+				populateTreeNode(rootTreeNode, treeNode);
+			}
 
-        // Search preferred container: if 'superTreeNode' is a root with an unknown super entry, uses the container of active child node
-        Container.Entry notNullEntry = superTreeNode.entry;
+			return rootTreeNode;
+		}
+		// super type undefined
+		return treeNode;
+	}
 
-        if (notNullEntry == null) {
-            notNullEntry = activeTreeNode.entry;
-        }
+	/**
+	 * @param superTreeNode  node to populate
+	 * @param activeTreeNode active child node
+	 */
+	protected void populateTreeNode(TreeNode superTreeNode, TreeNode activeTreeNode) {
+		superTreeNode.removeAllChildren();
 
-        Container preferredContainer = notNullEntry.getContainer();
-        String activeTypName = null;
+		// Search preferred container: if 'superTreeNode' is a root with an unknown
+		// super entry, uses the container of active child node
+		Container.Entry notNullEntry = superTreeNode.entry;
 
-        if (activeTreeNode != null) {
-            activeTypName = activeTreeNode.typeName;
-        }
+		if (notNullEntry == null) {
+			notNullEntry = activeTreeNode.entry;
+		}
 
-        List<String> subTypeNames = getSubTypeNames(superTreeNode.typeName);
-        List<TreeNode> treeNodes = new ArrayList<>();
+		Container preferredContainer = notNullEntry.getContainer();
+		String activeTypName = null;
 
-        for (String subTypeName : subTypeNames) {
-            if (subTypeName.equals(activeTypName)) {
-                treeNodes.add(activeTreeNode);
-            } else {
-                // Search entry in the sane container of 'superTreeNode.entry'
-                List<Container.Entry> entries = getEntries(subTypeName);
-                Container.Entry entry = null;
+		if (activeTreeNode != null) {
+			activeTypName = activeTreeNode.typeName;
+		}
 
-                for (Container.Entry e : entries) {
-                    if (e.getContainer() == preferredContainer) {
-                        entry = e;
-                    }
-                }
+		List<String> subTypeNames = getSubTypeNames(superTreeNode.typeName);
+		List<TreeNode> treeNodes = new ArrayList<>();
 
-                if (entry == null) {
-                    // Not found -> Choose 1st one
-                    entry = entries.get(0);
-                }
-                if (entry != null) {
-                    // Create type
-                    Type t = api.getTypeFactory(entry).make(api, entry, subTypeName);
-                    if (t != null) {
-                        // Create tree node
-                        treeNodes.add(createTreeNode(entry, t.getName()));
-                    }
-                }
-            }
-        }
+		for (String subTypeName : subTypeNames) {
+			if (subTypeName.equals(activeTypName)) {
+				treeNodes.add(activeTreeNode);
+			} else {
+				// Search entry in the sane container of 'superTreeNode.entry'
+				List<Container.Entry> entries = getEntries(subTypeName);
+				Container.Entry entry = null;
 
-        treeNodes.sort(TREE_NODE_COMPARATOR);
+				for (Container.Entry e : entries) {
+					if (e.getContainer() == preferredContainer) {
+						entry = e;
+					}
+				}
 
-        for (TreeNode treeNode : treeNodes) {
-            superTreeNode.add(treeNode);
-        }
-    }
+				if (entry == null) {
+					// Not found -> Choose 1st one
+					entry = entries.get(0);
+				}
+				if (entry != null) {
+					// Create type
+					Type t = api.getTypeFactory(entry).make(api, entry, subTypeName);
+					if (t != null) {
+						// Create tree node
+						treeNodes.add(createTreeNode(entry, t.getName()));
+					}
+				}
+			}
+		}
 
-    public void focus() {
-        SwingUtil.invokeLater(() -> openTypeHierarchyTree.requestFocus());
-    }
+		treeNodes.sort(TREE_NODE_COMPARATOR);
 
-    protected void onTypeSelected() {
-        TreeNode selectedTreeNode = (TreeNode)openTypeHierarchyTree.getLastSelectedPathComponent();
+		for (TreeNode treeNode : treeNodes) {
+			superTreeNode.add(treeNode);
+		}
+	}
 
-        if (selectedTreeNode != null) {
-            TreePath path = new TreePath(selectedTreeNode.getPath());
-            Rectangle bounds = openTypeHierarchyTree.getPathBounds(path);
-            Point listLocation = openTypeHierarchyTree.getLocationOnScreen();
-            Point leftBottom = new Point(listLocation.x+bounds.x, listLocation.y+bounds.y+bounds.height);
-            selectedTypeCallback.accept(leftBottom, selectedTreeNode.entries, selectedTreeNode.typeName);
-        }
-    }
+	public void focus() {
+		SwingUtil.invokeLater(() -> openTypeHierarchyTree.requestFocus());
+	}
 
-    @SuppressWarnings({ "rawtypes" })
-    protected List<String> getSubTypeNames(String typeName) {
-        List<String> result = new ArrayList<>();
+	protected void onTypeSelected() {
+		TreeNode selectedTreeNode = (TreeNode) openTypeHierarchyTree.getLastSelectedPathComponent();
 
-        try {
-            for (Future<Indexes> futureIndexes : collectionOfFutureIndexes) {
-                if (futureIndexes.isDone()) {
-                    Map<String, Collection> subTypeNames = futureIndexes.get().getIndex("subTypeNames");
-                    if (subTypeNames != null) {
-                        @SuppressWarnings("unchecked")
+		if (selectedTreeNode != null) {
+			TreePath path = new TreePath(selectedTreeNode.getPath());
+			Rectangle bounds = openTypeHierarchyTree.getPathBounds(path);
+			Point listLocation = openTypeHierarchyTree.getLocationOnScreen();
+			Point leftBottom = new Point(listLocation.x + bounds.x, listLocation.y + bounds.y + bounds.height);
+			selectedTypeCallback.accept(leftBottom, selectedTreeNode.entries, selectedTreeNode.typeName);
+		}
+	}
+
+	@SuppressWarnings({ "rawtypes" })
+	protected List<String> getSubTypeNames(String typeName) {
+		List<String> result = new ArrayList<>();
+
+		try {
+			for (Future<Indexes> futureIndexes : collectionOfFutureIndexes) {
+				if (futureIndexes.isDone()) {
+					Map<String, Collection> subTypeNames = futureIndexes.get().getIndex("subTypeNames");
+					if (subTypeNames != null) {
+						@SuppressWarnings("unchecked")
 						Collection<String> collection = subTypeNames.get(typeName);
-                        if (collection != null) {
-                            for (String tn : collection) {
-                                if (tn != null) {
-                                    result.add(tn);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (InterruptedException e) {
-            assert ExceptionUtil.printStackTrace(e);
-            // Restore interrupted state...
-            Thread.currentThread().interrupt();
-        } catch (Exception e) {
-            assert ExceptionUtil.printStackTrace(e);
-        }
+						if (collection != null) {
+							for (String tn : collection) {
+								if (tn != null) {
+									result.add(tn);
+								}
+							}
+						}
+					}
+				}
+			}
+		} catch (InterruptedException e) {
+			assert ExceptionUtil.printStackTrace(e);
+			// Restore interrupted state...
+			Thread.currentThread().interrupt();
+		} catch (Exception e) {
+			assert ExceptionUtil.printStackTrace(e);
+		}
 
-        return result;
-    }
+		return result;
+	}
 
-    @SuppressWarnings({ "rawtypes" })
-    protected List<Container.Entry> getEntries(String typeName) {
-        List<Container.Entry> result = new ArrayList<>();
+	@SuppressWarnings({ "rawtypes" })
+	protected List<Container.Entry> getEntries(String typeName) {
+		List<Container.Entry> result = new ArrayList<>();
 
-        try {
-            for (Future<Indexes> futureIndexes : collectionOfFutureIndexes) {
-                if (futureIndexes.isDone()) {
-                    Map<String, Collection> typeDeclarations = futureIndexes.get().getIndex("typeDeclarations");
-                    if (typeDeclarations != null) {
-                        @SuppressWarnings("unchecked")
+		try {
+			for (Future<Indexes> futureIndexes : collectionOfFutureIndexes) {
+				if (futureIndexes.isDone()) {
+					Map<String, Collection> typeDeclarations = futureIndexes.get().getIndex("typeDeclarations");
+					if (typeDeclarations != null) {
+						@SuppressWarnings("unchecked")
 						Collection<Container.Entry> collection = typeDeclarations.get(typeName);
-                        if (collection != null) {
-                            for (Container.Entry e : collection) {
-                                if (e != null) {
-                                    result.add(e);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (InterruptedException e) {
-            assert ExceptionUtil.printStackTrace(e);
-            // Restore interrupted state...
-            Thread.currentThread().interrupt();
-        } catch (Exception e) {
-            assert ExceptionUtil.printStackTrace(e);
-        }
+						if (collection != null) {
+							for (Container.Entry e : collection) {
+								if (e != null) {
+									result.add(e);
+								}
+							}
+						}
+					}
+				}
+			}
+		} catch (InterruptedException e) {
+			assert ExceptionUtil.printStackTrace(e);
+			// Restore interrupted state...
+			Thread.currentThread().interrupt();
+		} catch (Exception e) {
+			assert ExceptionUtil.printStackTrace(e);
+		}
 
-        return result;
-    }
+		return result;
+	}
 
-    protected static class TreeNode extends DefaultMutableTreeNode {
+	protected static class TreeNode extends DefaultMutableTreeNode {
 
-        private static final long serialVersionUID = 1L;
-        private transient Container.Entry entry;
-        private String typeName;
-        private transient List<Container.Entry> entries;
+		private static final long serialVersionUID = 1L;
+		private transient Container.Entry entry;
+		private String typeName;
+		private transient List<Container.Entry> entries;
 
-        TreeNode(Container.Entry entry, String typeName, List<Container.Entry> entries, Object userObject) {
-            super(userObject);
-            this.entry = entry;
-            this.typeName = typeName;
-            this.entries = entries;
-        }
-    }
+		TreeNode(Container.Entry entry, String typeName, List<Container.Entry> entries, Object userObject) {
+			super(userObject);
+			this.entry = entry;
+			this.typeName = typeName;
+			this.entries = entries;
+		}
+	}
 
-    // Graphic data for renderer
-    protected static class TreeNodeBean implements TreeNodeData {
-        String label;
-        String tip;
-        Icon icon;
-        Icon openIcon;
+	// Graphic data for renderer
+	protected static class TreeNodeBean implements TreeNodeData {
+		String label;
+		String tip;
+		Icon icon;
+		Icon openIcon;
 
-        TreeNodeBean(Type type) {
-            this.label = (type.getDisplayPackageName() != null) ? type.getDisplayTypeName() + " - " + type.getDisplayPackageName() : type.getDisplayTypeName();
-            this.icon = type.getIcon();
-        }
+		TreeNodeBean(Type type) {
+			this.label = type.getDisplayPackageName() != null ? type.getDisplayTypeName() + " - " + type.getDisplayPackageName() : type.getDisplayTypeName();
+			this.icon = type.getIcon();
+		}
 
-        TreeNodeBean(String label, Icon icon) {
-            this.label = label;
-            this.icon = icon;
-        }
+		TreeNodeBean(String label, Icon icon) {
+			this.label = label;
+			this.icon = icon;
+		}
 
-        @Override
-        public String getLabel() { return label; }
-        @Override
-        public String getTip() { return tip; }
-        @Override
-        public Icon getIcon() { return icon; }
-        @Override
-        public Icon getOpenIcon() { return openIcon; }
-    }
+		@Override
+		public String getLabel() {
+			return label;
+		}
 
-    protected static class TreeNodeComparator implements Comparator<TreeNode> {
-        @Override
-        public int compare(TreeNode tn1, TreeNode tn2) {
-            return ((TreeNodeBean)tn1.getUserObject()).label.compareTo(((TreeNodeBean)tn2.getUserObject()).label);
-        }
-    }
+		@Override
+		public String getTip() {
+			return tip;
+		}
+
+		@Override
+		public Icon getIcon() {
+			return icon;
+		}
+
+		@Override
+		public Icon getOpenIcon() {
+			return openIcon;
+		}
+	}
+
+	protected static class TreeNodeComparator implements Comparator<TreeNode> {
+		@Override
+		public int compare(TreeNode tn1, TreeNode tn2) {
+			return ((TreeNodeBean) tn1.getUserObject()).label.compareTo(((TreeNodeBean) tn2.getUserObject()).label);
+		}
+	}
 }

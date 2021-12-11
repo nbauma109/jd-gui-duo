@@ -12,6 +12,7 @@ import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.model.container.entry.path.DirectoryEntryPath;
+import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.container.JarContainerEntryUtil;
 import org.jd.gui.view.data.TreeNodeBean;
 
@@ -23,51 +24,54 @@ import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public class JarFileTreeNodeFactoryProvider extends ZipFileTreeNodeFactoryProvider {
-    protected static final ImageIcon JAR_FILE_ICON = new ImageIcon(JarFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/jar_obj.png"));
-    protected static final ImageIcon EJB_FILE_ICON = new ImageIcon(JarFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/ejbmodule_obj.gif"));
 
-    @Override
-    public String[] getSelectors() { return appendSelectors("*:file:*.jar"); }
+	protected static final ImageIcon JAR_FILE_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/jar_obj.png"));
+	protected static final ImageIcon EJB_FILE_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/ejbmodule_obj.gif"));
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
-        int lastSlashIndex = entry.getPath().lastIndexOf("/");
-        String label = entry.getPath().substring(lastSlashIndex+1);
-        String location = new File(entry.getUri()).getPath();
-        ImageIcon icon = isAEjbModule(entry) ? EJB_FILE_ICON : JAR_FILE_ICON;
-        T node = (T)new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, icon));
-        // Add dummy node
-        node.add(new DefaultMutableTreeNode());
-        return node;
-    }
+	@Override
+	public String[] getSelectors() {
+		return appendSelectors("*:file:*.jar");
+	}
 
-    protected static boolean isAEjbModule(Container.Entry entry) {
-        Map<Container.EntryPath, Container.Entry> children = entry.getChildren();
-        if (children != null) {
-            Container.Entry metaInf = children.get(new DirectoryEntryPath("META-INF"));
-            if (metaInf != null) {
-                children = metaInf.getChildren();
-                if (children.containsKey(new DirectoryEntryPath("META-INF/ejb-jar.xml"))) {
-                    return true;
-                }
-            }
-        }
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
+		int lastSlashIndex = entry.getPath().lastIndexOf("/");
+		String label = entry.getPath().substring(lastSlashIndex + 1);
+		String location = new File(entry.getUri()).getPath();
+		ImageIcon icon = isAEjbModule(entry) ? EJB_FILE_ICON : JAR_FILE_ICON;
+		T node = (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, icon));
+		// Add dummy node
+		node.add(new DefaultMutableTreeNode());
+		return node;
+	}
 
-        return false;
-    }
+	protected static boolean isAEjbModule(Container.Entry entry) {
+		Map<Container.EntryPath, Container.Entry> children = entry.getChildren();
+		if (children != null) {
+			Container.Entry metaInf = children.get(new DirectoryEntryPath("META-INF"));
+			if (metaInf != null) {
+				children = metaInf.getChildren();
+				if (children.containsKey(new DirectoryEntryPath("META-INF/ejb-jar.xml"))) {
+					return true;
+				}
+			}
+		}
 
-    protected class TreeNode extends ZipFileTreeNodeFactoryProvider.TreeNode {
+		return false;
+	}
 
-        private static final long serialVersionUID = 1L;
+	protected class TreeNode extends ZipFileTreeNodeFactoryProvider.TreeNode {
 
-        public TreeNode(Container.Entry entry, Object userObject) {
-            super(entry, userObject);
-        }
+		private static final long serialVersionUID = 1L;
 
-        @Override
-        public Collection<Container.Entry> getChildren() {
-            return JarContainerEntryUtil.removeInnerTypeEntries(entry.getChildren());
-        }
-    }
+		public TreeNode(Container.Entry entry, Object userObject) {
+			super(entry, userObject);
+		}
+
+		@Override
+		public Collection<Container.Entry> getChildren() {
+			return JarContainerEntryUtil.removeInnerTypeEntries(entry.getChildren());
+		}
+	}
 }

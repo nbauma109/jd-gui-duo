@@ -14,6 +14,7 @@ import org.jd.gui.api.model.Type;
 import org.jd.gui.service.actions.InvalidFormatException;
 import org.jd.gui.spi.ContextualActionsFactory;
 import org.jd.gui.spi.TypeFactory;
+import org.jd.gui.util.ImageUtil;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
@@ -34,7 +35,7 @@ public class CopyQualifiedNameContextualActionsFactory implements ContextualActi
 
         private static final long serialVersionUID = 1L;
 
-        protected static final ImageIcon ICON = new ImageIcon(CopyQualifiedNameAction.class.getClassLoader().getResource("org/jd/gui/images/cpyqual_menu.png"));
+        protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/cpyqual_menu.png"));
 
         protected transient API api;
         protected transient Container.Entry entry;

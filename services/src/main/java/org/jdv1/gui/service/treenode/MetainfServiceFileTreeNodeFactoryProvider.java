@@ -10,6 +10,7 @@ package org.jdv1.gui.service.treenode;
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.*;
 import org.jd.gui.api.model.Container;
+import org.jd.gui.util.ImageUtil;
 import org.jd.gui.view.data.TreeNodeBean;
 import org.jdv1.gui.view.component.OneTypeReferencePerLinePage;
 
@@ -21,41 +22,44 @@ import javax.swing.JComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public class MetainfServiceFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvider {
-    protected static final ImageIcon ICON = new ImageIcon(TextFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/ascii_obj.png"));
 
-    @Override
-    public String[] getSelectors() { return appendSelectors("*:file:*"); }
+	protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/ascii_obj.png"));
 
-    @Override
-    public Pattern getPathPattern() {
-        if (externalPathPattern == null) {
-            return Pattern.compile("META-INF\\/services\\/[^\\/]+");
-        }
-        return externalPathPattern;
-    }
+	@Override
+	public String[] getSelectors() {
+		return appendSelectors("*:file:*");
+	}
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
-        int lastSlashIndex = entry.getPath().lastIndexOf("/");
-        String label = entry.getPath().substring(lastSlashIndex+1);
-        String location = new File(entry.getUri()).getPath();
-        return (T)new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
-    }
+	@Override
+	public Pattern getPathPattern() {
+		if (externalPathPattern == null) {
+			return Pattern.compile("META-INF\\/services\\/[^\\/]+");
+		}
+		return externalPathPattern;
+	}
 
-    protected static class TreeNode extends FileTreeNodeFactoryProvider.TreeNode implements PageCreator {
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
+		int lastSlashIndex = entry.getPath().lastIndexOf("/");
+		String label = entry.getPath().substring(lastSlashIndex + 1);
+		String location = new File(entry.getUri()).getPath();
+		return (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
+	}
 
-        private static final long serialVersionUID = 1L;
+	protected static class TreeNode extends FileTreeNodeFactoryProvider.TreeNode implements PageCreator {
 
-        public TreeNode(Container.Entry entry, Object userObject) {
-            super(entry, userObject);
-        }
+		private static final long serialVersionUID = 1L;
 
-        // --- PageCreator --- //
-        @Override
-        @SuppressWarnings("unchecked")
-        public <T extends JComponent & UriGettable> T createPage(API api) {
-            return (T)new OneTypeReferencePerLinePage(api, entry);
-        }
-    }
+		public TreeNode(Container.Entry entry, Object userObject) {
+			super(entry, userObject);
+		}
+
+		// --- PageCreator --- //
+		@Override
+		@SuppressWarnings("unchecked")
+		public <T extends JComponent & UriGettable> T createPage(API api) {
+			return (T) new OneTypeReferencePerLinePage(api, entry);
+		}
+	}
 }

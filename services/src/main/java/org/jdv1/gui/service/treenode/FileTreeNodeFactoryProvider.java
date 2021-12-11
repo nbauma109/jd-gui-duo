@@ -11,6 +11,7 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
+import org.jd.gui.util.ImageUtil;
 import org.jd.gui.view.data.TreeNodeBean;
 
 import java.io.File;
@@ -20,36 +21,43 @@ import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public class FileTreeNodeFactoryProvider extends AbstractTreeNodeFactoryProvider {
-    protected static final ImageIcon ICON = new ImageIcon(FileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/file_plain_obj.png"));
 
-    @Override
-    public String[] getSelectors() { return appendSelectors("*:file:*"); }
+	protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/file_plain_obj.png"));
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
-        int lastSlashIndex = entry.getPath().lastIndexOf('/');
-        String label = entry.getPath().substring(lastSlashIndex+1);
-        String location = new File(entry.getUri()).getPath();
-        return (T)new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
-    }
+	@Override
+	public String[] getSelectors() {
+		return appendSelectors("*:file:*");
+	}
 
-    protected static class TreeNode extends DefaultMutableTreeNode implements ContainerEntryGettable, UriGettable {
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
+		int lastSlashIndex = entry.getPath().lastIndexOf('/');
+		String label = entry.getPath().substring(lastSlashIndex + 1);
+		String location = new File(entry.getUri()).getPath();
+		return (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
+	}
 
-        private static final long serialVersionUID = 1L;
-        protected transient Container.Entry entry;
+	protected static class TreeNode extends DefaultMutableTreeNode implements ContainerEntryGettable, UriGettable {
 
-        public TreeNode(Container.Entry entry, Object userObject) {
-            super(userObject);
-            this.entry = entry;
-        }
+		private static final long serialVersionUID = 1L;
+		protected transient Container.Entry entry;
 
-        // --- ContainerEntryGettable --- //
-        @Override
-        public Container.Entry getEntry() { return entry; }
+		public TreeNode(Container.Entry entry, Object userObject) {
+			super(userObject);
+			this.entry = entry;
+		}
 
-        // --- UriGettable --- //
-        @Override
-        public URI getUri() { return entry.getUri(); }
-    }
+		// --- ContainerEntryGettable --- //
+		@Override
+		public Container.Entry getEntry() {
+			return entry;
+		}
+
+		// --- UriGettable --- //
+		@Override
+		public URI getUri() {
+			return entry.getUri();
+		}
+	}
 }

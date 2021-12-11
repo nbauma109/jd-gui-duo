@@ -12,6 +12,7 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
+import org.jd.gui.util.ImageUtil;
 import org.jd.gui.view.data.TreeNodeBean;
 
 import java.io.File;
@@ -21,37 +22,44 @@ import javax.swing.JComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public class JsonFileTreeNodeFactoryProvider extends TextFileTreeNodeFactoryProvider {
-    protected static final ImageIcon ICON = new ImageIcon(JsonFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/ascii_obj.png"));
 
-    @Override
-    public String[] getSelectors() { return appendSelectors("*:file:*.json"); }
+	protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/ascii_obj.png"));
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
-        int lastSlashIndex = entry.getPath().lastIndexOf("/");
-        String label = entry.getPath().substring(lastSlashIndex+1);
-        String location = new File(entry.getUri()).getPath();
-        return (T)new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
-    }
+	@Override
+	public String[] getSelectors() {
+		return appendSelectors("*:file:*.json");
+	}
 
-    protected static class TreeNode extends TextFileTreeNodeFactoryProvider.TreeNode {
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
+		int lastSlashIndex = entry.getPath().lastIndexOf("/");
+		String label = entry.getPath().substring(lastSlashIndex + 1);
+		String location = new File(entry.getUri()).getPath();
+		return (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
+	}
 
-        private static final long serialVersionUID = 1L;
+	protected static class TreeNode extends TextFileTreeNodeFactoryProvider.TreeNode {
 
-        public TreeNode(Container.Entry entry, Object userObject) { super(entry, userObject); }
+		private static final long serialVersionUID = 1L;
 
-        // --- PageCreator --- //
-        @Override
-        @SuppressWarnings("unchecked")
-        public <T extends JComponent & UriGettable> T createPage(API api) {
-            return (T)new TextFileTreeNodeFactoryProvider.Page(entry) {
+		public TreeNode(Container.Entry entry, Object userObject) {
+			super(entry, userObject);
+		}
 
-                private static final long serialVersionUID = 1L;
+		// --- PageCreator --- //
+		@Override
+		@SuppressWarnings("unchecked")
+		public <T extends JComponent & UriGettable> T createPage(API api) {
+			return (T) new TextFileTreeNodeFactoryProvider.Page(entry) {
 
-                @Override
-                public String getSyntaxStyle() { return SyntaxConstants.SYNTAX_STYLE_JSON; }
-            };
-        }
-    }
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public String getSyntaxStyle() {
+					return SyntaxConstants.SYNTAX_STYLE_JSON;
+				}
+			};
+		}
+	}
 }

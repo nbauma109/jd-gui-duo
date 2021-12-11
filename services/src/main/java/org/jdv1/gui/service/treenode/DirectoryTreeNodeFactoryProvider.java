@@ -12,6 +12,7 @@ import org.jd.gui.api.feature.*;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Container.Entry;
 import org.jd.gui.spi.TreeNodeFactory;
+import org.jd.gui.util.ImageUtil;
 import org.jd.gui.view.data.TreeNodeBean;
 
 import java.io.File;
@@ -22,89 +23,105 @@ import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public class DirectoryTreeNodeFactoryProvider extends AbstractTreeNodeFactoryProvider {
-    protected static final ImageIcon ICON = new ImageIcon(DirectoryTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/folder.gif"));
-    protected static final ImageIcon OPEN_ICON = new ImageIcon(DirectoryTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/folder_open.png"));
 
-    @Override
-    public String[] getSelectors() { return appendSelectors("*:dir:*"); }
+	protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/folder.gif"));
+	protected static final ImageIcon OPEN_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/folder_open.png"));
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Entry entry) {
-        int lastSlashIndex = entry.getPath().lastIndexOf('/');
-        Collection<Entry> entries = entry.getChildren().values();
+	@Override
+	public String[] getSelectors() {
+		return appendSelectors("*:dir:*");
+	}
 
-        // Aggregate directory names
-        while (entries.size() == 1) {
-            Entry child = entries.iterator().next();
-            if (!child.isDirectory() || api.getTreeNodeFactory(child) != this || entry.getContainer() != child.getContainer()) break;
-            entry = child;
-            entries = entry.getChildren().values();
-        }
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Entry entry) {
+		int lastSlashIndex = entry.getPath().lastIndexOf('/');
+		Collection<Entry> entries = entry.getChildren().values();
 
-        String label = entry.getPath().substring(lastSlashIndex+1);
-        String location = new File(entry.getUri()).getPath();
-        TreeNode node = new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, getIcon(), getOpenIcon()));
+		// Aggregate directory names
+		while (entries.size() == 1) {
+			Entry child = entries.iterator().next();
+			if (!child.isDirectory() || api.getTreeNodeFactory(child) != this || entry.getContainer() != child.getContainer()) {
+				break;
+			}
+			entry = child;
+			entries = entry.getChildren().values();
+		}
 
-        if (!entries.isEmpty()) {
-            // Add dummy node
-            node.add(new DefaultMutableTreeNode());
-        }
+		String label = entry.getPath().substring(lastSlashIndex + 1);
+		String location = new File(entry.getUri()).getPath();
+		TreeNode node = new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, getIcon(), getOpenIcon()));
 
-        return (T)node;
-    }
+		if (!entries.isEmpty()) {
+			// Add dummy node
+			node.add(new DefaultMutableTreeNode());
+		}
 
-    public ImageIcon getIcon() { return ICON; }
-    public ImageIcon getOpenIcon() { return OPEN_ICON; }
+		return (T) node;
+	}
 
-    protected class TreeNode extends DefaultMutableTreeNode implements ContainerEntryGettable, UriGettable, TreeNodeExpandable {
+	public ImageIcon getIcon() {
+		return ICON;
+	}
 
-        private static final long serialVersionUID = 1L;
+	public ImageIcon getOpenIcon() {
+		return OPEN_ICON;
+	}
 
-        protected transient Container.Entry entry;
-        protected boolean initialized;
+	protected class TreeNode extends DefaultMutableTreeNode implements ContainerEntryGettable, UriGettable, TreeNodeExpandable {
 
-        public TreeNode(Container.Entry entry, Object userObject) {
-            super(userObject);
-            this.entry = entry;
-            this.initialized = false;
-        }
+		private static final long serialVersionUID = 1L;
 
-        // --- ContainerEntryGettable --- //
-        @Override
-        public Container.Entry getEntry() { return entry; }
+		protected transient Container.Entry entry;
+		protected boolean initialized;
 
-        // --- UriGettable --- //
-        @Override
-        public URI getUri() { return entry.getUri(); }
+		public TreeNode(Container.Entry entry, Object userObject) {
+			super(userObject);
+			this.entry = entry;
+			this.initialized = false;
+		}
 
-        // --- TreeNodeExpandable --- //
-        @Override
-        public void populateTreeNode(API api) {
-            if (!initialized) {
-                removeAllChildren();
+		// --- ContainerEntryGettable --- //
+		@Override
+		public Container.Entry getEntry() {
+			return entry;
+		}
 
-                Collection<Container.Entry> entries = getChildren();
+		// --- UriGettable --- //
+		@Override
+		public URI getUri() {
+			return entry.getUri();
+		}
 
-                while (entries.size() == 1) {
-                    Entry child = entries.iterator().next();
-                    if (!child.isDirectory() || api.getTreeNodeFactory(child) != DirectoryTreeNodeFactoryProvider.this) {
-                        break;
-                    }
-                    entries = child.getChildren().values();
-                }
+		// --- TreeNodeExpandable --- //
+		@Override
+		public void populateTreeNode(API api) {
+			if (!initialized) {
+				removeAllChildren();
 
-                for (Entry nextEntry : entries) {
-                    TreeNodeFactory factory = api.getTreeNodeFactory(nextEntry);
-                    if (factory != null) {
-                        add(factory.make(api, nextEntry));
-                    }
-                }
+				Collection<Container.Entry> entries = getChildren();
 
-                initialized = true;
-            }
-        }
+				while (entries.size() == 1) {
+					Entry child = entries.iterator().next();
+					if (!child.isDirectory() || api.getTreeNodeFactory(child) != DirectoryTreeNodeFactoryProvider.this) {
+						break;
+					}
+					entries = child.getChildren().values();
+				}
 
-        public Collection<Container.Entry> getChildren() { return entry.getChildren().values(); }
-    }
+				for (Entry nextEntry : entries) {
+					TreeNodeFactory factory = api.getTreeNodeFactory(nextEntry);
+					if (factory != null) {
+						add(factory.make(api, nextEntry));
+					}
+				}
+
+				initialized = true;
+			}
+		}
+
+		public Collection<Container.Entry> getChildren() {
+			return entry.getChildren().values();
+		}
+	}
 }

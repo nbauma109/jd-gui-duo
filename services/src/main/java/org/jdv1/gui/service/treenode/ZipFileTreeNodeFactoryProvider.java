@@ -12,6 +12,7 @@ import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.spi.TreeNodeFactory;
+import org.jd.gui.util.ImageUtil;
 import org.jd.gui.view.data.TreeNodeBean;
 
 import java.io.File;
@@ -20,46 +21,49 @@ import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public class ZipFileTreeNodeFactoryProvider extends DirectoryTreeNodeFactoryProvider {
-    protected static final ImageIcon ICON = new ImageIcon(ZipFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/zip_obj.png"));
 
-    @Override
-    public String[] getSelectors() { return appendSelectors("*:file:*.zip", "*:file:*.aar"); }
+	protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/zip_obj.png"));
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
-        int lastSlashIndex = entry.getPath().lastIndexOf("/");
-        String label = entry.getPath().substring(lastSlashIndex+1);
-        String location = new File(entry.getUri()).getPath();
-        T node = (T)new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
-        // Add dummy node
-        node.add(new DefaultMutableTreeNode());
-        return node;
-    }
+	@Override
+	public String[] getSelectors() {
+		return appendSelectors("*:file:*.zip", "*:file:*.aar");
+	}
 
-    protected class TreeNode extends DirectoryTreeNodeFactoryProvider.TreeNode {
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
+		int lastSlashIndex = entry.getPath().lastIndexOf("/");
+		String label = entry.getPath().substring(lastSlashIndex + 1);
+		String location = new File(entry.getUri()).getPath();
+		T node = (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
+		// Add dummy node
+		node.add(new DefaultMutableTreeNode());
+		return node;
+	}
 
-        private static final long serialVersionUID = 1L;
+	protected class TreeNode extends DirectoryTreeNodeFactoryProvider.TreeNode {
 
-        public TreeNode(Container.Entry entry, Object userObject) {
-            super(entry, userObject);
-        }
+		private static final long serialVersionUID = 1L;
 
-        // --- TreeNodeExpandable --- //
-        @Override
-        public void populateTreeNode(API api) {
-            if (!initialized) {
-                removeAllChildren();
+		public TreeNode(Container.Entry entry, Object userObject) {
+			super(entry, userObject);
+		}
 
-                for (Container.Entry e : getChildren()) {
-                    TreeNodeFactory factory = api.getTreeNodeFactory(e);
-                    if (factory != null) {
-                        add(factory.make(api, e));
-                    }
-                }
+		// --- TreeNodeExpandable --- //
+		@Override
+		public void populateTreeNode(API api) {
+			if (!initialized) {
+				removeAllChildren();
 
-                initialized = true;
-            }
-        }
-    }
+				for (Container.Entry e : getChildren()) {
+					TreeNodeFactory factory = api.getTreeNodeFactory(e);
+					if (factory != null) {
+						add(factory.make(api, e));
+					}
+				}
+
+				initialized = true;
+			}
+		}
+	}
 }

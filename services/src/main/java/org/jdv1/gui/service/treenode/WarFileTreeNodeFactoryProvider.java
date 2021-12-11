@@ -11,6 +11,7 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
+import org.jd.gui.util.ImageUtil;
 import org.jd.gui.view.data.TreeNodeBean;
 
 import java.io.File;
@@ -19,20 +20,23 @@ import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public class WarFileTreeNodeFactoryProvider extends ZipFileTreeNodeFactoryProvider {
-    protected static final ImageIcon ICON = new ImageIcon(JarFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/war_obj.gif"));
 
-    @Override
-    public String[] getSelectors() { return appendSelectors("*:file:*.war"); }
+	protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/war_obj.gif"));
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
-        int lastSlashIndex = entry.getPath().lastIndexOf("/");
-        String label = entry.getPath().substring(lastSlashIndex+1);
-        String location = new File(entry.getUri()).getPath();
-        T node = (T)new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
-        // Add dummy node
-        node.add(new DefaultMutableTreeNode());
-        return node;
-    }
+	@Override
+	public String[] getSelectors() {
+		return appendSelectors("*:file:*.war");
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
+		int lastSlashIndex = entry.getPath().lastIndexOf("/");
+		String label = entry.getPath().substring(lastSlashIndex + 1);
+		String location = new File(entry.getUri()).getPath();
+		T node = (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
+		// Add dummy node
+		node.add(new DefaultMutableTreeNode());
+		return node;
+	}
 }

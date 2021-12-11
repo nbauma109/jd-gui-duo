@@ -11,6 +11,7 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
+import org.jd.gui.util.ImageUtil;
 import org.jd.gui.view.data.TreeNodeBean;
 import org.jdv1.gui.view.component.XmlFilePage;
 
@@ -21,31 +22,36 @@ import javax.swing.JComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public class XmlFileTreeNodeFactoryProvider extends TextFileTreeNodeFactoryProvider {
-    protected static final ImageIcon ICON = new ImageIcon(XmlFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/xml_obj.gif"));
 
-    @Override
-    public String[] getSelectors() { return appendSelectors("*:file:*.xml"); }
+	protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/xml_obj.gif"));
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
-        int lastSlashIndex = entry.getPath().lastIndexOf("/");
-        String label = entry.getPath().substring(lastSlashIndex+1);
-        String location = new File(entry.getUri()).getPath();
-        return (T)new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
-    }
+	@Override
+	public String[] getSelectors() {
+		return appendSelectors("*:file:*.xml");
+	}
 
-    protected static class TreeNode extends TextFileTreeNodeFactoryProvider.TreeNode {
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
+		int lastSlashIndex = entry.getPath().lastIndexOf("/");
+		String label = entry.getPath().substring(lastSlashIndex + 1);
+		String location = new File(entry.getUri()).getPath();
+		return (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
+	}
 
-        private static final long serialVersionUID = 1L;
+	protected static class TreeNode extends TextFileTreeNodeFactoryProvider.TreeNode {
 
-        public TreeNode(Container.Entry entry, Object userObject) { super(entry, userObject); }
+		private static final long serialVersionUID = 1L;
 
-        // --- PageCreator --- //
-        @Override
-        @SuppressWarnings("unchecked")
-        public <T extends JComponent & UriGettable> T createPage(API api) {
-            return (T)new XmlFilePage(api, entry);
-        }
-    }
+		public TreeNode(Container.Entry entry, Object userObject) {
+			super(entry, userObject);
+		}
+
+		// --- PageCreator --- //
+		@Override
+		@SuppressWarnings("unchecked")
+		public <T extends JComponent & UriGettable> T createPage(API api) {
+			return (T) new XmlFilePage(api, entry);
+		}
+	}
 }

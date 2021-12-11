@@ -11,6 +11,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.*;
 import org.jd.gui.api.model.Container;
+import org.jd.gui.util.ImageUtil;
 import org.jd.gui.view.data.TreeNodeBean;
 
 import java.awt.BorderLayout;
@@ -22,58 +23,65 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public class ImageFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvider {
-    protected static final ImageIcon ICON = new ImageIcon(ImageFileTreeNodeFactoryProvider.class.getClassLoader().getResource("org/jd/gui/images/file-image.gif"));
 
-    @Override
-    public String[] getSelectors() { return appendSelectors("*:file:*.gif", "*:file:*.jpg", "*:file:*.png"); }
+	protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/file-image.gif"));
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
-        int lastSlashIndex = entry.getPath().lastIndexOf("/");
-        String label = entry.getPath().substring(lastSlashIndex+1);
-        String location = new File(entry.getUri()).getPath();
-        return (T)new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
-    }
+	@Override
+	public String[] getSelectors() {
+		return appendSelectors("*:file:*.gif", "*:file:*.jpg", "*:file:*.png");
+	}
 
-    protected static class TreeNode extends FileTreeNodeFactoryProvider.TreeNode implements PageCreator {
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
+		int lastSlashIndex = entry.getPath().lastIndexOf("/");
+		String label = entry.getPath().substring(lastSlashIndex + 1);
+		String location = new File(entry.getUri()).getPath();
+		return (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
+	}
 
-        private static final long serialVersionUID = 1L;
+	protected static class TreeNode extends FileTreeNodeFactoryProvider.TreeNode implements PageCreator {
 
-        public TreeNode(Container.Entry entry, Object userObject) { super(entry, userObject); }
+		private static final long serialVersionUID = 1L;
 
-        // --- PageCreator --- //
-        @Override
-        @SuppressWarnings("unchecked")
-        public <T extends JComponent & UriGettable> T createPage(API api) {
-            return (T)new ImagePage(entry);
-        }
-    }
+		public TreeNode(Container.Entry entry, Object userObject) {
+			super(entry, userObject);
+		}
 
-    protected static class ImagePage extends JPanel implements UriGettable {
+		// --- PageCreator --- //
+		@Override
+		@SuppressWarnings("unchecked")
+		public <T extends JComponent & UriGettable> T createPage(API api) {
+			return (T) new ImagePage(entry);
+		}
+	}
 
-        private static final long serialVersionUID = 1L;
-        protected transient Container.Entry entry;
+	protected static class ImagePage extends JPanel implements UriGettable {
 
-        public ImagePage(Container.Entry entry) {
-            super(new BorderLayout());
+		private static final long serialVersionUID = 1L;
+		protected transient Container.Entry entry;
 
-            this.entry = entry;
+		public ImagePage(Container.Entry entry) {
+			super(new BorderLayout());
 
-            try (InputStream is = entry.getInputStream()) {
-                JScrollPane scrollPane = new JScrollPane(new JLabel(new ImageIcon(ImageIO.read(is))));
+			this.entry = entry;
 
-                scrollPane.getHorizontalScrollBar().setUnitIncrement(16);
-                scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+			try (InputStream is = entry.getInputStream()) {
+				JScrollPane scrollPane = new JScrollPane(new JLabel(new ImageIcon(ImageIO.read(is))));
 
-                add(scrollPane, BorderLayout.CENTER);
-            } catch (IOException e) {
-                assert ExceptionUtil.printStackTrace(e);
-            }
-        }
+				scrollPane.getHorizontalScrollBar().setUnitIncrement(16);
+				scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
-        // --- UriGettable --- //
-        @Override
-        public URI getUri() { return entry.getUri(); }
-    }
+				add(scrollPane, BorderLayout.CENTER);
+			} catch (IOException e) {
+				assert ExceptionUtil.printStackTrace(e);
+			}
+		}
+
+		// --- UriGettable --- //
+		@Override
+		public URI getUri() {
+			return entry.getUri();
+		}
+	}
 }
