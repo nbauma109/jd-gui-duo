@@ -59,7 +59,7 @@ public class SwitchStatementMaker {
                                         if (syntheticLV2.equals(((ClassFileLocalVariableReferenceExpression)boe2.getLeftExpression()).getLocalVariable())) {
                                             MethodInvocationExpression mie = (MethodInvocationExpression) previousSwitchStatement.getCondition();
 
-                                            if (mie.getName().equals("hashCode") && mie.getDescriptor().equals("()I")) {
+                                            if ("hashCode".equals(mie.getName()) && "()I".equals(mie.getDescriptor())) {
                                                 // Pattern found ==> Parse cases of the synthetic switch statement 'previousSwitchStatement'
                                                 Map<Integer, String> map = new HashMap<>();
 
@@ -153,7 +153,7 @@ public class SwitchStatementMaker {
         if (expression.isFieldReferenceExpression()) {
             FieldReferenceExpression fre = (FieldReferenceExpression)expression;
 
-            if (fre.getDescriptor().equals("[I") && fre.getName().startsWith("$SwitchMap$")) {
+            if ("[I".equals(fre.getDescriptor()) && fre.getName().startsWith("$SwitchMap$")) {
                 ClassFileTypeDeclaration syntheticClassDeclaration = bodyDeclaration.getInnerTypeDeclaration(fre.getInternalTypeName());
 
                 if (syntheticClassDeclaration != null) {
@@ -167,7 +167,7 @@ public class SwitchStatementMaker {
             MethodInvocationExpression mie = (MethodInvocationExpression)expression;
             String methodName = mie.getName();
 
-            if (mie.getDescriptor().equals("()[I") && methodName.startsWith("$SWITCH_TABLE$")) {
+            if ("()[I".equals(mie.getDescriptor()) && methodName.startsWith("$SWITCH_TABLE$")) {
                 // Eclipse compiler switch-enum pattern
                 for (ClassFileConstructorOrMethodDeclaration declaration : bodyDeclaration.getMethodDeclarations()) {
                      if (declaration.getMethod().getName().equals(methodName)) {

@@ -119,7 +119,7 @@ public class InitDexEnumFieldsReconstructor
                     constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
 
                 String name = constants.getConstantUtf8(cnat.getNameIndex());
-                if (! name.equals(StringConstants.ENUM_VALUES_ARRAY_NAME_ECLIPSE)) {
+                if (! StringConstants.ENUM_VALUES_ARRAY_NAME_ECLIPSE.equals(name)) {
 					break;
 				}
 

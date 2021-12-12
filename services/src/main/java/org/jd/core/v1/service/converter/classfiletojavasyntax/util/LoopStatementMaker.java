@@ -495,7 +495,7 @@ public class LoopStatementMaker {
 
         MethodInvocationExpression mie = (MethodInvocationExpression)condition;
 
-        if (!mie.getName().equals("hasNext") || !mie.getInternalTypeName().equals("java/util/Iterator") ||
+        if (!"hasNext".equals(mie.getName()) || !"java/util/Iterator".equals(mie.getInternalTypeName()) ||
                 !mie.getExpression().isLocalVariableReferenceExpression()) {
             return null;
         }
@@ -514,7 +514,7 @@ public class LoopStatementMaker {
 
         mie = (MethodInvocationExpression)boe.getRightExpression();
 
-        if (!mie.getName().equals("iterator") || !mie.getDescriptor().equals("()Ljava/util/Iterator;")) {
+        if (!"iterator".equals(mie.getName()) || !"()Ljava/util/Iterator;".equals(mie.getDescriptor())) {
             return null;
         }
         if (((ClassFileLocalVariableReferenceExpression)boe.getLeftExpression()).getLocalVariable() != syntheticIterator) {
@@ -545,8 +545,8 @@ public class LoopStatementMaker {
 
         mie = (MethodInvocationExpression)expression;
 
-        if (!mie.getName().equals("next") ||
-                !mie.getInternalTypeName().equals("java/util/Iterator") ||
+        if (!"next".equals(mie.getName()) ||
+                !"java/util/Iterator".equals(mie.getInternalTypeName()) ||
                 !mie.getExpression().isLocalVariableReferenceExpression()) {
             return null;
         }

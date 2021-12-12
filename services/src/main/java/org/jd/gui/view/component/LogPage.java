@@ -85,7 +85,7 @@ public class LogPage extends HyperlinkPage implements UriGettable, IndexesChange
                 int rightParenthesisIndex = text.indexOf(')', leftParenthesisIndex);
                 String lineNumberOrNativeMethodFlag = text.substring(leftParenthesisIndex, rightParenthesisIndex);
 
-                if (lineNumberOrNativeMethodFlag.equals("Native Method")) {
+                if ("Native Method".equals(lineNumberOrNativeMethodFlag)) {
                     // Example: at java.security.AccessController.doPrivileged(Native Method)
                     lastDotIndex = internalTypeName.lastIndexOf('/');
                     String shortTypeName = internalTypeName.substring(lastDotIndex + 1);

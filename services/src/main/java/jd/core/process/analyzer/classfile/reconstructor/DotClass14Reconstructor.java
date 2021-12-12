@@ -164,7 +164,7 @@ public class DotClass14Reconstructor
             String descriptorField =
                 constants.getConstantUtf8(cnatField.getSignatureIndex());
 
-            if (! descriptorField.equals(StringConstants.INTERNAL_CLASS_SIGNATURE)) {
+            if (! StringConstants.INTERNAL_CLASS_SIGNATURE.equals(descriptorField)) {
 				continue;
 			}
 
@@ -188,7 +188,7 @@ public class DotClass14Reconstructor
             String nameMethod =
                 constants.getConstantUtf8(cnatMethod.getNameIndex());
 
-            if (! nameMethod.equals(StringConstants.CLASS_DOLLAR)) {
+            if (! StringConstants.CLASS_DOLLAR.equals(nameMethod)) {
 				continue;
 			}
 

@@ -197,7 +197,7 @@ public class DotClass118BReconstructor
             String className =
                 constants.getConstantClassName(cmr.getClassIndex());
 
-            if (! className.equals(StringConstants.JAVA_LANG_CLASS)) {
+            if (! StringConstants.JAVA_LANG_CLASS.equals(className)) {
 				continue;
 			}
 
@@ -206,7 +206,7 @@ public class DotClass118BReconstructor
             String nameMethod =
                 constants.getConstantUtf8(cnatMethod.getNameIndex());
 
-            if (! nameMethod.equals(StringConstants.FORNAME_METHOD_NAME)) {
+            if (! StringConstants.FORNAME_METHOD_NAME.equals(nameMethod)) {
 				continue;
 			}
 

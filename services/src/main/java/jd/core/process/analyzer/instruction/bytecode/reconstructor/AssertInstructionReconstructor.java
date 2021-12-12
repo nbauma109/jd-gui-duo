@@ -104,7 +104,7 @@ public class AssertInstructionReconstructor
                 constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
             String fieldName = constants.getConstantUtf8(cnat.getNameIndex());
 
-            if (! fieldName.equals("$assertionsDisabled")) {
+            if (! "$assertionsDisabled".equals(fieldName)) {
 				continue;
 			}
 
@@ -113,7 +113,7 @@ public class AssertInstructionReconstructor
                 constants.getConstantMethodref(in.getIndex());
             String className = constants.getConstantClassName(cmr.getClassIndex());
 
-            if (! className.equals(StringConstants.JAVA_LANG_ASSERTION_ERROR)) {
+            if (! StringConstants.JAVA_LANG_ASSERTION_ERROR.equals(className)) {
 				continue;
 			}
 

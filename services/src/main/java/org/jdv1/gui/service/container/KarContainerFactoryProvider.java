@@ -28,7 +28,7 @@ public class KarContainerFactoryProvider implements ContainerFactory {
         // Extension: accept uncompressed KAR file containing a folder 'repository'
         try {
         	// do not try to close file system due to UnsupportedOperationException
-            return rootPath.getFileSystem().provider().getScheme().equals("file") && Files.exists(rootPath.resolve("repository"));
+            return "file".equals(rootPath.getFileSystem().provider().getScheme()) && Files.exists(rootPath.resolve("repository"));
         } catch (InvalidPathException e) {
             assert ExceptionUtil.printStackTrace(e);
             return false;

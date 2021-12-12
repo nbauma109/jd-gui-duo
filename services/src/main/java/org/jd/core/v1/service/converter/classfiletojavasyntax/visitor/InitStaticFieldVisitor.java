@@ -167,7 +167,7 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
         if (expression.getLeftExpression().isFieldReferenceExpression()) {
             FieldReferenceExpression fre = (FieldReferenceExpression) expression.getLeftExpression();
 
-            if (fre.getType() == PrimitiveType.TYPE_BOOLEAN && fre.getInternalTypeName().equals(internalTypeName) && fre.getName().equals("$assertionsDisabled")) {
+            if (fre.getType() == PrimitiveType.TYPE_BOOLEAN && fre.getInternalTypeName().equals(internalTypeName) && "$assertionsDisabled".equals(fre.getName())) {
                 return true;
             }
         }

@@ -115,7 +115,7 @@ public class SignatureLayouter
     private static boolean isObjectClass(
         char[] caSignature, int beginIndex, int endIndex)
     {
-        return CharArrayUtil.substring(caSignature, beginIndex, endIndex)
-                    .equals(StringConstants.INTERNAL_OBJECT_SIGNATURE);
+        return StringConstants.INTERNAL_OBJECT_SIGNATURE
+                    .equals(CharArrayUtil.substring(caSignature, beginIndex, endIndex));
     }
 }

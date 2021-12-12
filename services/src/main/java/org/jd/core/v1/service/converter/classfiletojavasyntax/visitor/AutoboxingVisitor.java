@@ -70,7 +70,7 @@ public class AutoboxingVisitor extends AbstractUpdateExpressionVisitor {
             if (expression.getExpression().isObjectTypeReferenceExpression()) {
                 // static method invocation
                 if (parameterSize == 1 &&
-                        expression.getName().equals("valueOf") &&
+                        "valueOf".equals(expression.getName()) &&
                         expression.getDescriptor().equals(VALUEOF_DESCRIPTOR_MAP.get(expression.getInternalTypeName())))
                 {
                     return expression.getParameters().getFirst();

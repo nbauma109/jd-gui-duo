@@ -166,7 +166,7 @@ public class DotClassEclipseReconstructor
 
             name = constants.getConstantClassName(cmr.getClassIndex());
 
-            if (! name.equals(StringConstants.JAVA_LANG_CLASS)) {
+            if (! StringConstants.JAVA_LANG_CLASS.equals(name)) {
 				continue;
 			}
 
@@ -174,7 +174,7 @@ public class DotClassEclipseReconstructor
                 constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
             name = constants.getConstantUtf8(cnatMethod.getNameIndex());
 
-            if (! name.equals(StringConstants.FORNAME_METHOD_NAME)) {
+            if (! StringConstants.FORNAME_METHOD_NAME.equals(name)) {
 				continue;
 			}
 
@@ -202,7 +202,7 @@ public class DotClassEclipseReconstructor
             String exceptionName =
                 constants.getConstantClassName(fc.getExceptionTypeIndex());
 
-            if (! exceptionName.equals(StringConstants.INTERNAL_CLASSNOTFOUNDEXCEPTION_SIGNATURE)) {
+            if (! StringConstants.INTERNAL_CLASSNOTFOUNDEXCEPTION_SIGNATURE.equals(exceptionName)) {
 				continue;
 			}
 

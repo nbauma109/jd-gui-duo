@@ -133,8 +133,8 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
 
                         if ((opcode==Const.BIPUSH ||
                              opcode==Const.SIPUSH) &&
-                             cmr.getReturnedSignature().equals("I") &&
-                             cmr.getListOfParameterSignatures().get(0).equals("I"))
+                             "I".equals(cmr.getReturnedSignature()) &&
+                             "I".equals(cmr.getListOfParameterSignatures().get(0)))
                         {
                             ConstantNameAndType cnat =
                                 this.constants.getConstantNameAndType(

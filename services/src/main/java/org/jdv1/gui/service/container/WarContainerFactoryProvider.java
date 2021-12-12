@@ -28,7 +28,7 @@ public class WarContainerFactoryProvider implements ContainerFactory {
         // Extension: accept uncompressed WAR file containing a folder 'WEB-INF'
         try {
         	// do not try to close file system due to UnsupportedOperationException
-            return rootPath.getFileSystem().provider().getScheme().equals("file") && Files.exists(rootPath.resolve("WEB-INF"));
+            return "file".equals(rootPath.getFileSystem().provider().getScheme()) && Files.exists(rootPath.resolve("WEB-INF"));
         } catch (InvalidPathException e) {
             assert ExceptionUtil.printStackTrace(e);
             return false;

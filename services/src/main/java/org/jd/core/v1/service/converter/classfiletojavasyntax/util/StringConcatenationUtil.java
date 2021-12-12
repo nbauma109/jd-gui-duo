@@ -71,7 +71,7 @@ public class StringConcatenationUtil {
 
         if (st.hasMoreTokens()) {
             String token = st.nextToken();
-            Expression expression = token.equals(StringConstants.START_OF_HEADING) ? createFirstStringConcatenationItem(parameters.getFirst()) : new StringConstantExpression(token);
+            Expression expression = StringConstants.START_OF_HEADING.equals(token) ? createFirstStringConcatenationItem(parameters.getFirst()) : new StringConstantExpression(token);
 
             if (parameters.isList()) {
                 DefaultList<Expression> list = parameters.getList();
@@ -79,13 +79,13 @@ public class StringConcatenationUtil {
 
                 while (st.hasMoreTokens()) {
                     token = st.nextToken();
-                    Expression e = token.equals(StringConstants.START_OF_HEADING) ? list.get(index++) : new StringConstantExpression(token);
+                    Expression e = StringConstants.START_OF_HEADING.equals(token) ? list.get(index++) : new StringConstantExpression(token);
                     expression = new BinaryOperatorExpression(expression.getLineNumber(), ObjectType.TYPE_STRING, expression, "+", e, 6);
                 }
             } else {
                 while (st.hasMoreTokens()) {
                     token = st.nextToken();
-                    Expression e = token.equals(StringConstants.START_OF_HEADING) ? parameters.getFirst() : new StringConstantExpression(token);
+                    Expression e = StringConstants.START_OF_HEADING.equals(token) ? parameters.getFirst() : new StringConstantExpression(token);
                     expression = new BinaryOperatorExpression(expression.getLineNumber(), ObjectType.TYPE_STRING, expression, "+", e, 6);
                 }
             }

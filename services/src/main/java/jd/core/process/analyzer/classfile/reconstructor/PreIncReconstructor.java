@@ -73,9 +73,9 @@ public class PreIncReconstructor
 
             int value;
 
-            if (boi.getOperator().equals("+")) {
+            if ("+".equals(boi.getOperator())) {
 				value = 1;
-			} else if (boi.getOperator().equals("-")) {
+			} else if ("-".equals(boi.getOperator())) {
 				value = -1;
 			} else {
 				continue;

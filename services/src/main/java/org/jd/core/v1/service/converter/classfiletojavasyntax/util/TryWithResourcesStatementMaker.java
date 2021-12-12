@@ -164,7 +164,7 @@ public class TryWithResourcesStatementMaker {
 
         mie = (MethodInvocationExpression) expression;
 
-        if (!mie.getName().equals("addSuppressed") || !mie.getDescriptor().equals("(Ljava/lang/Throwable;)V")) {
+        if (!"addSuppressed".equals(mie.getName()) || !"(Ljava/lang/Throwable;)V".equals(mie.getDescriptor())) {
             return null;
         }
 
@@ -189,7 +189,7 @@ public class TryWithResourcesStatementMaker {
             return null;
         }
 
-        if (!condition.getOperator().equals("!=") || !condition.getRightExpression().isNullExpression() || !condition.getLeftExpression().isLocalVariableReferenceExpression()) {
+        if (!"!=".equals(condition.getOperator()) || !condition.getRightExpression().isNullExpression() || !condition.getLeftExpression().isLocalVariableReferenceExpression()) {
             return null;
         }
 
@@ -197,7 +197,7 @@ public class TryWithResourcesStatementMaker {
     }
 
     protected static boolean checkCloseInvocation(MethodInvocationExpression mie, AbstractLocalVariable lv) {
-        if (mie.getName().equals("close") && mie.getDescriptor().equals("()V")) {
+        if ("close".equals(mie.getName()) && "()V".equals(mie.getDescriptor())) {
             Expression expression = mie.getExpression();
 
             if (expression.isLocalVariableReferenceExpression()) {
@@ -219,7 +219,7 @@ public class TryWithResourcesStatementMaker {
 
         MethodInvocationExpression mie = (MethodInvocationExpression) expression;
 
-        if (!mie.getName().equals("$closeResource") || !mie.getDescriptor().equals("(Ljava/lang/Throwable;Ljava/lang/AutoCloseable;)V")) {
+        if (!"$closeResource".equals(mie.getName()) || !"(Ljava/lang/Throwable;Ljava/lang/AutoCloseable;)V".equals(mie.getDescriptor())) {
             return null;
         }
 

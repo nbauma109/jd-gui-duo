@@ -75,7 +75,7 @@ public class ClassFileUtil
         {
             String methodName = constants.getConstantUtf8(method.getNameIndex());
 
-            if (methodName.equals(StringConstants.ENUM_VALUEOF_METHOD_NAME))
+            if (StringConstants.ENUM_VALUEOF_METHOD_NAME.equals(methodName))
             {
                 String s = "(Ljava/lang/String;)" + classFile.getInternalClassName();
                 if (s.equals(signature))
@@ -86,7 +86,7 @@ public class ClassFileUtil
                 }
             }
 
-            if (methodName.equals(StringConstants.ENUM_VALUES_METHOD_NAME))
+            if (StringConstants.ENUM_VALUES_METHOD_NAME.equals(methodName))
             {
                 String s = "()[" + classFile.getInternalClassName();
                 if (s.equals(signature))

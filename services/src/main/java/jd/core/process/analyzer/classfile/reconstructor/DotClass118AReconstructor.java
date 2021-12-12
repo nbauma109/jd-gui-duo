@@ -140,7 +140,7 @@ public class DotClass118AReconstructor
                 constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
             String nameMethod = constants.getConstantUtf8(cnatMethod.getNameIndex());
 
-            if (! nameMethod.equals(StringConstants.CLASS_DOLLAR)) {
+            if (! StringConstants.CLASS_DOLLAR.equals(nameMethod)) {
 				continue;
 			}
 
@@ -170,7 +170,7 @@ public class DotClass118AReconstructor
             String signatureField =
                 constants.getConstantUtf8(cnatField.getSignatureIndex());
 
-            if (! signatureField.equals(StringConstants.INTERNAL_CLASS_SIGNATURE)) {
+            if (! StringConstants.INTERNAL_CLASS_SIGNATURE.equals(signatureField)) {
 				continue;
 			}
 

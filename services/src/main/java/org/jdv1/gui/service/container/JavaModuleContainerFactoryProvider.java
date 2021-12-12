@@ -28,7 +28,7 @@ public class JavaModuleContainerFactoryProvider implements ContainerFactory {
         // Extension: accept uncompressed JMOD file containing a folder 'classes'
         try {
         	// do not try to close file system due to UnsupportedOperationException
-            return rootPath.getFileSystem().provider().getScheme().equals("file") && Files.exists(rootPath.resolve("classes"));
+            return "file".equals(rootPath.getFileSystem().provider().getScheme()) && Files.exists(rootPath.resolve("classes"));
         } catch (InvalidPathException e) {
             assert ExceptionUtil.printStackTrace(e);
             return false;
