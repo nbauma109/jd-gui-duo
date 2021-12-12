@@ -4,6 +4,7 @@ import org.apache.bcel.classfile.ConstantCP;
 import org.apache.bcel.classfile.Visitor;
 
 import java.util.List;
+import java.util.Objects;
 
 import static org.apache.bcel.Const.CONSTANT_Methodref;
 
@@ -69,18 +70,10 @@ public class ConstantMethodref extends ConstantCP {
 			return false;
 		}
 		ConstantMethodref other = (ConstantMethodref) obj;
-		if (listOfParameterSignatures == null) {
-			if (other.listOfParameterSignatures != null) {
-				return false;
-			}
-		} else if (!listOfParameterSignatures.equals(other.listOfParameterSignatures)) {
+		if (!Objects.equals(listOfParameterSignatures, other.listOfParameterSignatures)) {
 			return false;
 		}
-		if (returnedSignature == null) {
-			if (other.returnedSignature != null) {
-				return false;
-			}
-		} else if (!returnedSignature.equals(other.returnedSignature)) {
+		if (!Objects.equals(returnedSignature, other.returnedSignature)) {
 			return false;
 		}
 		return true;

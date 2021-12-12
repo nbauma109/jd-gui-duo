@@ -9,6 +9,8 @@ package org.jd.core.v1.model.javasyntax.declaration;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.util.DefaultList;
 
+import java.util.Objects;
+
 public class ArrayVariableInitializer extends DefaultList<VariableInitializer> implements VariableInitializer {
     private static final long serialVersionUID = 1L;
     protected transient Type type;
@@ -47,11 +49,7 @@ public class ArrayVariableInitializer extends DefaultList<VariableInitializer> i
 			return false;
 		}
 		ArrayVariableInitializer other = (ArrayVariableInitializer) obj;
-		if (type == null) {
-			if (other.type != null) {
-				return false;
-			}
-		} else if (!type.equals(other.type)) {
+		if (!Objects.equals(type, other.type)) {
 			return false;
 		}
 		return true;
