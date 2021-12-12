@@ -92,7 +92,7 @@ public abstract class TypeReferencePage extends HyperlinkPage {
         if (!ranges.isEmpty()) {
             textArea.setMarkAllHighlightColor(SELECT_HIGHLIGHT_COLOR);
             Marker.markAll(textArea, ranges);
-            ranges.sort(null);
+            Collections.sort(ranges);
             setCaretPositionAndCenter(ranges.get(0));
         }
 

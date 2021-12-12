@@ -163,7 +163,7 @@ public abstract class TypePage extends CustomLineNumbersPage
         if (!ranges.isEmpty()) {
             textArea.setMarkAllHighlightColor(SELECT_HIGHLIGHT_COLOR);
             Marker.markAll(textArea, ranges);
-            ranges.sort(null);
+            Collections.sort(ranges);
             setCaretPositionAndCenter(ranges.get(0));
         }
 

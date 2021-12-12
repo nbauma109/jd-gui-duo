@@ -199,7 +199,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
         if (!ranges.isEmpty()) {
             textArea.setMarkAllHighlightColor(SELECT_HIGHLIGHT_COLOR);
             Marker.markAll(textArea, ranges);
-            ranges.sort(null);
+            Collections.sort(ranges);
             setCaretPositionAndCenter(ranges.get(0));
         }
 

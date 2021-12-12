@@ -174,7 +174,7 @@ public class MainController implements API {
         StringBuilder sb = new StringBuilder();
         List<String> extensions = new ArrayList<>(loaders.keySet());
 
-        extensions.sort(null);
+        Collections.sort(extensions);
 
         for (String extension : extensions) {
             sb.append("*.").append(extension).append(", ");
