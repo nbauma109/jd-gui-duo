@@ -223,22 +223,20 @@ public class ModuleInfoFilePage extends ClassFilePage {
                     if (futureIndexes.isDone()) {
                         @SuppressWarnings("rawtypes")
                         Map<String, Collection> index;
-                        String key;
-
-                        switch (moduleInfoReferenceData.type) {
-                            case TYPE:
-                                index = futureIndexes.get().getIndex("typeDeclarations");
-                                key = reference.getTypeName();
-                                break;
-                            case PACKAGE:
-                                index = futureIndexes.get().getIndex("packageDeclarations");
-                                key = reference.getTypeName();
-                                break;
-                            default: // MODULE
-                                index = futureIndexes.get().getIndex("javaModuleDeclarations");
-                                key = reference.getName();
-                                break;
-                        }
+                        String key = switch (moduleInfoReferenceData.type) {
+						case TYPE -> {
+							index = futureIndexes.get().getIndex("typeDeclarations");
+							yield reference.getTypeName();
+						}
+						case PACKAGE -> {
+							index = futureIndexes.get().getIndex("packageDeclarations");
+							yield reference.getTypeName();
+						}
+						default -> {
+							index = futureIndexes.get().getIndex("javaModuleDeclarations");
+							yield reference.getName();
+						}
+						};
 
                         if (index != null && index.get(key) != null) {
                             enabled = true;

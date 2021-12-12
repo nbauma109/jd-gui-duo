@@ -20,17 +20,17 @@ public class GenerateParameterSuffixNameVisitor extends AbstractNopTypeArgumentV
 
     @Override
     public void visit(PrimitiveType type) {
-        switch (type.getJavaPrimitiveFlags()) {
-            case FLAG_BYTE : suffix = "Byte"; break;
-            case FLAG_CHAR : suffix = "Char"; break;
-            case FLAG_DOUBLE : suffix = "Double"; break;
-            case FLAG_FLOAT : suffix = "Float"; break;
-            case FLAG_INT : suffix = "Int"; break;
-            case FLAG_LONG : suffix = "Long"; break;
-            case FLAG_SHORT : suffix = "Short"; break;
-            case FLAG_BOOLEAN : suffix = "Boolean"; break;
-            default: throw new IllegalStateException();
-        }
+        suffix = switch (type.getJavaPrimitiveFlags()) {
+		case FLAG_BYTE -> "Byte";
+		case FLAG_CHAR -> "Char";
+		case FLAG_DOUBLE -> "Double";
+		case FLAG_FLOAT -> "Float";
+		case FLAG_INT -> "Int";
+		case FLAG_LONG -> "Long";
+		case FLAG_SHORT -> "Short";
+		case FLAG_BOOLEAN -> "Boolean";
+		default -> throw new IllegalStateException();
+		};
     }
 
     @Override

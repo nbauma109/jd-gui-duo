@@ -58,20 +58,11 @@ public class DefaultVariableNameGenerator implements VariableNameGenerator
             String signature, boolean appearsOnceFlag,
             boolean varargsFlag, int anonymousClassDepth)
     {
-        String prefix;
-
-        switch (anonymousClassDepth)
-        {
-        case 0:
-            prefix = "param";
-            break;
-        case 1:
-            prefix = "paramAnonymous";
-            break;
-        default:
-            prefix = "paramAnonymous" + anonymousClassDepth;
-            break;
-        }
+        String prefix = switch (anonymousClassDepth) {
+		case 0 -> "param";
+		case 1 -> "paramAnonymous";
+		default -> "paramAnonymous" + anonymousClassDepth;
+		};
 
         if (varargsFlag)
         {
