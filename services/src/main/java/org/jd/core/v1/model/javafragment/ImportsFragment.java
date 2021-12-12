@@ -12,7 +12,6 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.*;
 
 public class ImportsFragment extends FlexibleFragment implements JavaFragment {
-    protected static final ImportCountComparator COUNT_COMPARATOR = new ImportCountComparator();
 
     protected final Map<String, Import> importMap = new HashMap<>();
 
@@ -68,7 +67,12 @@ public class ImportsFragment extends FlexibleFragment implements JavaFragment {
             return importMap.values();
         }
         DefaultList<Import> imports = new DefaultList<>(importMap.values());
-        imports.sort(COUNT_COMPARATOR);
+        imports.sort(new Comparator<Import>() {
+            @Override
+            public int compare(Import tr1, Import tr2) {
+                return tr2.getCounter() - tr1.getCounter();
+            }
+        });
         // Remove less used imports
         List<Import> subList = imports.subList(lineCount, size);
         for (Import imp0rt : subList) {
@@ -108,10 +112,4 @@ public class ImportsFragment extends FlexibleFragment implements JavaFragment {
         visitor.visit(this);
     }
 
-    protected static class ImportCountComparator implements Comparator<Import> {
-        @Override
-        public int compare(Import tr1, Import tr2) {
-            return tr2.getCounter() - tr1.getCounter();
-        }
-    }
 }

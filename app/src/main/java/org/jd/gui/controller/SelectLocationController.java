@@ -9,6 +9,7 @@ package org.jd.gui.controller;
 
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
+import org.jd.gui.api.model.Container.Entry;
 import org.jd.gui.api.model.Type;
 import org.jd.gui.service.type.TypeFactoryService;
 import org.jd.gui.spi.TypeFactory;
@@ -23,7 +24,6 @@ import java.util.function.Consumer;
 import javax.swing.JFrame;
 
 public class SelectLocationController {
-    protected static final ContainerEntryComparator CONTAINER_ENTRY_COMPARATOR = new ContainerEntryComparator();
 
     protected API api;
     @SuppressWarnings("all")
@@ -142,7 +142,7 @@ public class SelectLocationController {
         // Return outer type entries sorted by path
         List<Container.Entry> result = new ArrayList<>(outerEntriesSet);
 
-        result.sort(CONTAINER_ENTRY_COMPARATOR);
+        result.sort(Comparator.comparing(Entry::getPath));
 
         return result;
     }
@@ -163,10 +163,4 @@ public class SelectLocationController {
         }
     }
 
-    protected static class ContainerEntryComparator implements Comparator<Container.Entry> {
-        @Override
-        public int compare(Container.Entry e1, Container.Entry e2) {
-            return e1.getPath().compareTo(e2.getPath());
-        }
-    }
 }

@@ -14,6 +14,7 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Type;
 import org.jd.gui.spi.TypeFactory;
 import org.jd.gui.view.data.TreeNodeBean;
+import org.jdv1.gui.service.treenode.AbstractTypeFileTreeNodeFactoryProvider.FieldOrMethodBean;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -24,9 +25,6 @@ import javax.swing.JComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public abstract class AbstractTypeFileTreeNodeFactoryProvider extends AbstractTreeNodeFactoryProvider {
-
-	protected static final TypeComparator TYPE_COMPARATOR = new TypeComparator();
-	protected static final FieldOrMethodBeanComparator FIELD_OR_METHOD_BEAN_COMPARATOR = new FieldOrMethodBeanComparator();
 
 	public static class BaseTreeNode extends DefaultMutableTreeNode implements ContainerEntryGettable, UriGettable, PageCreator {
 
@@ -137,7 +135,7 @@ public abstract class AbstractTypeFileTreeNodeFactoryProvider extends AbstractTr
 
 				if (innerTypes != null) {
 					List<Type> innerTypeList = new ArrayList<>(innerTypes);
-					innerTypeList.sort(TYPE_COMPARATOR);
+					innerTypeList.sort(Comparator.comparing(Type::getName));
 
 					for (Type innerType : innerTypeList) {
 						add(new TypeTreeNode(entry, innerType, new TreeNodeBean(innerType.getDisplayInnerTypeName(), innerType.getIcon()), factory));
@@ -155,7 +153,7 @@ public abstract class AbstractTypeFileTreeNodeFactoryProvider extends AbstractTr
 						beans.add(new FieldOrMethodBean(fragment, field.getDisplayName(), field.getIcon()));
 					}
 
-					beans.sort(FIELD_OR_METHOD_BEAN_COMPARATOR);
+					beans.sort(Comparator.comparing(FieldOrMethodBean::getLabel));
 
 					for (FieldOrMethodBean bean : beans) {
 						add(new FieldOrMethodTreeNode(entry, bean.fragment, new TreeNodeBean(bean.label, bean.icon), factory));
@@ -175,7 +173,7 @@ public abstract class AbstractTypeFileTreeNodeFactoryProvider extends AbstractTr
 						}
 					}
 
-					beans.sort(FIELD_OR_METHOD_BEAN_COMPARATOR);
+					beans.sort(Comparator.comparing(FieldOrMethodBean::getLabel));
 
 					for (FieldOrMethodBean bean : beans) {
 						add(new FieldOrMethodTreeNode(entry, bean.fragment, new TreeNodeBean(bean.label, bean.icon), factory));
@@ -206,6 +204,10 @@ public abstract class AbstractTypeFileTreeNodeFactoryProvider extends AbstractTr
 			this.label = label;
 			this.icon = icon;
 		}
+		
+		public String getLabel() {
+			return label;
+		}
 	}
 
 	protected interface PageAndTipFactory {
@@ -214,17 +216,4 @@ public abstract class AbstractTypeFileTreeNodeFactoryProvider extends AbstractTr
 		String makeTip(API api, Container.Entry entry);
 	}
 
-	protected static class TypeComparator implements Comparator<Type> {
-		@Override
-		public int compare(Type type1, Type type2) {
-			return type1.getName().compareTo(type2.getName());
-		}
-	}
-
-	protected static class FieldOrMethodBeanComparator implements Comparator<FieldOrMethodBean> {
-		@Override
-		public int compare(FieldOrMethodBean bean1, FieldOrMethodBean bean2) {
-			return bean1.label.compareTo(bean2.label);
-		}
-	}
 }

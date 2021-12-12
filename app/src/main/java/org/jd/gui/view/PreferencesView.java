@@ -76,7 +76,7 @@ public class PreferencesView implements PreferencesPanel.PreferencesPanelChangeL
                 vbox.setBorder(BorderFactory.createTitledBorder(groupName));
 
                 List<PreferencesPanel> sortedPreferencesPanels = groups.get(groupName);
-                Collections.sort(sortedPreferencesPanels, new PreferencesPanelComparator());
+                Collections.sort(sortedPreferencesPanels, Comparator.comparing(PreferencesPanel::getPreferencesPanelTitle));
 
                 for (PreferencesPanel pp : sortedPreferencesPanels) {
                     // Add title
@@ -194,10 +194,4 @@ public class PreferencesView implements PreferencesPanel.PreferencesPanelChangeL
         });
     }
 
-    protected static class PreferencesPanelComparator implements Comparator<PreferencesPanel> {
-        @Override
-        public int compare(PreferencesPanel pp1, PreferencesPanel pp2) {
-            return pp1.getPreferencesPanelTitle().compareTo(pp2.getPreferencesPanelTitle());
-        }
-    }
 }

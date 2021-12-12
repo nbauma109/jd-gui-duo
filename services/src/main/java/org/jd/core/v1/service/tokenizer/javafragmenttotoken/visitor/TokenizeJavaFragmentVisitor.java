@@ -8,13 +8,13 @@ package org.jd.core.v1.service.tokenizer.javafragmenttotoken.visitor;
 
 import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.model.javafragment.*;
+import org.jd.core.v1.model.javafragment.ImportsFragment.Import;
 import org.jd.core.v1.model.token.*;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.*;
 
 public class TokenizeJavaFragmentVisitor implements JavaFragmentVisitor {
-    protected static final ImportNameComparator NAME_COMPARATOR = new ImportNameComparator();
 
     protected static final KeywordToken DO = new KeywordToken("do");
     protected static final KeywordToken IMPORT = new KeywordToken("import");
@@ -254,7 +254,7 @@ public class TokenizeJavaFragmentVisitor implements JavaFragmentVisitor {
     public void visit(ImportsFragment fragment) {
         List<ImportsFragment.Import> imports = new DefaultList<>(fragment.getImports());
 
-        imports.sort(NAME_COMPARATOR);
+        imports.sort(Comparator.comparing(Import::getQualifiedName));
 
         tokens.add(StartMarkerToken.IMPORT_STATEMENTS);
 
@@ -493,13 +493,6 @@ public class TokenizeJavaFragmentVisitor implements JavaFragmentVisitor {
     public void visit(TokensFragment fragment) {
         for (Token token : fragment.getTokens()) {
             token.accept(unknownLineNumberTokenVisitor);
-        }
-    }
-
-    protected static class ImportNameComparator implements Comparator<ImportsFragment.Import> {
-        @Override
-        public int compare(ImportsFragment.Import tr1, ImportsFragment.Import tr2) {
-            return tr1.getQualifiedName().compareTo(tr2.getQualifiedName());
         }
     }
 

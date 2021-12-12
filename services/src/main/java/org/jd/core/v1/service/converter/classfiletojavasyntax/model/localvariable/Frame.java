@@ -22,7 +22,6 @@ import java.util.*;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
 
 public class Frame {
-    protected static final AbstractLocalVariableComparator ABSTRACT_LOCAL_VARIABLE_COMPARATOR = new AbstractLocalVariableComparator();
     protected static final Set<String> CAPITALIZED_JAVA_LANGUAGE_KEYWORDS = new HashSet<>(Arrays.asList(
         "Abstract", "Continue", "For", "New", "Switch", "Assert", "Default", "Goto", "Package", "Synchronized",
         "Boolean", "Do", "If", "Private", "This", "Break", "Double", "Implements", "Protected", "Throw", "Byte", "Else",
@@ -444,7 +443,12 @@ public class Frame {
                             }
 
                             DefaultList<AbstractLocalVariable> sorted = new DefaultList<>(undeclaredLocalVariablesInStatement);
-                            sorted.sort(ABSTRACT_LOCAL_VARIABLE_COMPARATOR);
+                            sorted.sort(new Comparator<AbstractLocalVariable>() {
+                                @Override
+                                public int compare(AbstractLocalVariable alv1, AbstractLocalVariable alv2) {
+                                    return alv1.getIndex() - alv2.getIndex();
+                                }
+                            });
 
                             for (AbstractLocalVariable lv : sorted) {
                                 // Add declaration before current statement
@@ -1028,10 +1032,4 @@ public class Frame {
         public void visit(WildcardTypeArgument type) {}
     }
 
-    protected static class AbstractLocalVariableComparator implements Comparator<AbstractLocalVariable> {
-        @Override
-        public int compare(AbstractLocalVariable alv1, AbstractLocalVariable alv2) {
-            return alv1.getIndex() - alv2.getIndex();
-        }
-    }
 }

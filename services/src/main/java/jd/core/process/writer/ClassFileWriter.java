@@ -542,7 +542,13 @@ public class ClassFileWriter
 
                 if (delta > 0)
                 {
-                    Collections.sort(references, new ReferenceByCountComparator());
+                    Collections.sort(references, new Comparator<Reference>()
+                    {
+                        @Override
+                        public int compare(Reference o1, Reference o2) {
+                            return o2.getCounter() - o1.getCounter();
+                        }
+                    });
 
                     int idx = references.size();
 
@@ -559,7 +565,7 @@ public class ClassFileWriter
                 if (!references.isEmpty())
                 {
                     Collections.sort(
-                        references, new ReferenceByInternalNameComparator());
+                        references, Comparator.comparing(Reference::getInternalName));
 
                     this.printer.debugStartOfLayoutBlock();
                     this.printer.startOfImportStatements();

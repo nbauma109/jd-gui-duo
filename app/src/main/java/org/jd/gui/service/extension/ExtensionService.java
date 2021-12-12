@@ -15,7 +15,6 @@ import java.util.*;
 
 public class ExtensionService {
     protected static final ExtensionService EXTENSION_SERVICE = new ExtensionService();
-    protected static final UrlComparator URL_COMPARATOR = new UrlComparator();
 
     protected ClassLoader extensionClassLoader;
 
@@ -36,7 +35,7 @@ public class ExtensionService {
 
                 if (!urls.isEmpty()) {
                     URL[] array = urls.toArray(new URL[urls.size()]);
-                    Arrays.sort(array, URL_COMPARATOR);
+                    Arrays.sort(array, Comparator.comparing(URL::getPath));
                     extensionClassLoader = new URLClassLoader(array, ExtensionService.class.getClassLoader());
                 }
             }
@@ -74,10 +73,4 @@ public class ExtensionService {
         return list;
     }
 
-    protected static class UrlComparator implements Comparator<URL> {
-        @Override
-        public int compare(URL url1, URL url2) {
-            return url1.getPath().compareTo(url2.getPath());
-        }
-    }
 }

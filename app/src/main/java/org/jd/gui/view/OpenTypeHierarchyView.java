@@ -14,6 +14,7 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.function.TriConsumer;
 import org.jd.gui.util.swing.SwingUtil;
+import org.jd.gui.view.OpenTypeHierarchyView.TreeNode;
 import org.jd.gui.view.component.Tree;
 import org.jd.gui.view.renderer.TreeNodeRenderer;
 
@@ -32,8 +33,6 @@ public class OpenTypeHierarchyView {
 
 	protected static final ImageIcon ROOT_CLASS_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/generate_class.png"));
 	protected static final ImageIcon ROOT_INTERFACE_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/generate_int.png"));
-
-	protected static final TreeNodeComparator TREE_NODE_COMPARATOR = new TreeNodeComparator();
 
 	protected API api;
 	protected Collection<Future<Indexes>> collectionOfFutureIndexes;
@@ -352,7 +351,7 @@ public class OpenTypeHierarchyView {
 			}
 		}
 
-		treeNodes.sort(TREE_NODE_COMPARATOR);
+		treeNodes.sort(Comparator.comparing(TreeNode::getLabel));
 
 		for (TreeNode treeNode : treeNodes) {
 			superTreeNode.add(treeNode);
@@ -452,6 +451,10 @@ public class OpenTypeHierarchyView {
 			this.typeName = typeName;
 			this.entries = entries;
 		}
+
+		public String getLabel() {
+			return ((TreeNodeBean) getUserObject()).getLabel();
+		}
 	}
 
 	// Graphic data for renderer
@@ -492,10 +495,4 @@ public class OpenTypeHierarchyView {
 		}
 	}
 
-	protected static class TreeNodeComparator implements Comparator<TreeNode> {
-		@Override
-		public int compare(TreeNode tn1, TreeNode tn2) {
-			return ((TreeNodeBean) tn1.getUserObject()).label.compareTo(((TreeNodeBean) tn2.getUserObject()).label);
-		}
-	}
 }

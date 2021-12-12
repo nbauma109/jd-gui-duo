@@ -27,7 +27,12 @@ public class InitEnumVisitor extends AbstractJavaSyntaxVisitor {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public DefaultList<EnumDeclaration.Constant> getConstants() {
 		if (!constants.isEmpty()) {
-			constants.sort(new EnumConstantComparator());
+			constants.sort(new Comparator<ClassFileEnumDeclaration.ClassFileConstant>() {
+				@Override
+				public int compare(ClassFileEnumDeclaration.ClassFileConstant ec1, ClassFileEnumDeclaration.ClassFileConstant ec2) {
+					return ec1.getIndex() - ec2.getIndex();
+				}
+			});
 		}
 
 		return new DefaultList(constants);
@@ -119,10 +124,4 @@ public class InitEnumVisitor extends AbstractJavaSyntaxVisitor {
 		}
 	}
 
-	protected static class EnumConstantComparator implements Comparator<ClassFileEnumDeclaration.ClassFileConstant> {
-		@Override
-		public int compare(ClassFileEnumDeclaration.ClassFileConstant ec1, ClassFileEnumDeclaration.ClassFileConstant ec2) {
-			return ec1.getIndex() - ec2.getIndex();
-		}
-	}
 }

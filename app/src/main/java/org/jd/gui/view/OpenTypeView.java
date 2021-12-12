@@ -29,7 +29,6 @@ import javax.swing.text.BadLocationException;
 
 public class OpenTypeView {
     protected static final int MAX_LINE_COUNT = 80;
-    protected static final TypeNameComparator TYPE_NAME_COMPARATOR = new TypeNameComparator();
 
     protected API api;
 
@@ -209,7 +208,7 @@ public class OpenTypeView {
             List<String> typeNames = new ArrayList<>(map.keySet());
             int index = 0;
 
-            typeNames.sort(TYPE_NAME_COMPARATOR);
+            typeNames.sort(Comparator.comparing(OpenTypeView::getSimpleTypeName));
 
             model.removeAllElements();
 
@@ -262,16 +261,7 @@ public class OpenTypeView {
         });
     }
 
-    protected static class TypeNameComparator implements Comparator<String> {
-        @Override
-        public int compare(String tn1, String tn2) {
-            int lasPackageSeparatorIndex = tn1.lastIndexOf('/');
-            String shortName1 = tn1.substring(lasPackageSeparatorIndex+1);
-
-            lasPackageSeparatorIndex = tn2.lastIndexOf('/');
-            String shortName2 = tn2.substring(lasPackageSeparatorIndex+1);
-
-            return shortName1.compareTo(shortName2);
-        }
-    }
+    private static String getSimpleTypeName(String typeName) {
+        return typeName.substring(typeName.lastIndexOf('/') + 1);
+	}
 }

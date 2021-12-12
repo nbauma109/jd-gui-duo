@@ -28,7 +28,6 @@ import javax.swing.event.*;
 import javax.swing.tree.*;
 
 public class SearchInConstantPoolsView<T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> {
-    protected static final ContainerComparator CONTAINER_COMPARATOR = new ContainerComparator();
 
     public static final int SEARCH_TYPE = 1;
     public static final int SEARCH_CONSTRUCTOR = 2;
@@ -413,7 +412,12 @@ public class SearchInConstantPoolsView<T extends DefaultMutableTreeNode & Contai
             if (containers != null) {
                 List<DelegatingFilterContainer> list = new ArrayList<>(containers);
 
-                list.sort(CONTAINER_COMPARATOR);
+                list.sort(new Comparator<Container>() {
+                    @Override
+                    public int compare(Container c1, Container c2) {
+                        return c1.getRoot().getUri().compareTo(c2.getRoot().getUri());
+                    }
+                });
 
                 Container.Entry parentEntry;
                 TreeNodeFactory treeNodeFactory;
@@ -456,10 +460,4 @@ public class SearchInConstantPoolsView<T extends DefaultMutableTreeNode & Contai
         });
     }
 
-    protected static class ContainerComparator implements Comparator<Container> {
-        @Override
-        public int compare(Container c1, Container c2) {
-            return c1.getRoot().getUri().compareTo(c2.getRoot().getUri());
-        }
-    }
 }

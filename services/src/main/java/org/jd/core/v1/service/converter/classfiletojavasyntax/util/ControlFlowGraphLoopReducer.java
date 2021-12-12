@@ -20,8 +20,6 @@ public class ControlFlowGraphLoopReducer {
     private ControlFlowGraphLoopReducer() {
     }
 
-    protected static final LoopComparator LOOP_COMPARATOR = new LoopComparator();
-
     public static BitSet[] buildDominatorIndexes(ControlFlowGraph cfg) {
         List<BasicBlock> list = cfg.getBasicBlocks();
         int length = list.size();
@@ -209,7 +207,12 @@ public class ControlFlowGraphLoopReducer {
             }
         }
 
-        loops.sort(LOOP_COMPARATOR);
+        loops.sort(new Comparator<Loop>() {
+            @Override
+            public int compare(Loop loop1, Loop loop2) {
+                return loop1.getMembers().size() - loop2.getMembers().size();
+            }
+        });
 
         return loops;
     }
@@ -725,13 +728,5 @@ public class ControlFlowGraphLoopReducer {
         }
 
         loops.forEach(Loop::updateEnclosingLoop);
-    }
-
-    /** Smaller loop first. */
-    public static class LoopComparator implements Comparator<Loop> {
-        @Override
-        public int compare(Loop loop1, Loop loop2) {
-            return loop1.getMembers().size() - loop2.getMembers().size();
-        }
     }
 }

@@ -316,7 +316,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
             }
 
             if (! localClassDeclarations.isEmpty()) {
-                localClassDeclarations.sort(new MemberDeclarationComparator());
+                localClassDeclarations.sort(Comparator.comparing(ClassFileMemberDeclaration::getFirstLineNumber));
                 declaration.accept(new AddLocalClassDeclarationVisitor());
             }
         }
@@ -338,7 +338,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
             }
 
             if (! localClassDeclarations.isEmpty()) {
-                localClassDeclarations.sort(new MemberDeclarationComparator());
+                localClassDeclarations.sort(Comparator.comparing(ClassFileMemberDeclaration::getFirstLineNumber));
                 declaration.accept(new AddLocalClassDeclarationVisitor());
             }
         }
@@ -354,7 +354,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
             }
 
             if (! localClassDeclarations.isEmpty()) {
-                localClassDeclarations.sort(new MemberDeclarationComparator());
+                localClassDeclarations.sort(Comparator.comparing(ClassFileMemberDeclaration::getFirstLineNumber));
                 declaration.accept(new AddLocalClassDeclarationVisitor());
             }
         }
@@ -714,13 +714,6 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                         }
                     }
                 }
-            }
-        }
-
-        protected class MemberDeclarationComparator implements Comparator<ClassFileMemberDeclaration> {
-            @Override
-            public int compare(ClassFileMemberDeclaration md1, ClassFileMemberDeclaration md2) {
-                return md1.getFirstLineNumber() - md2.getFirstLineNumber();
             }
         }
     }

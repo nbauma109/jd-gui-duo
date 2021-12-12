@@ -27,7 +27,6 @@ import javax.swing.*;
 import javax.swing.tree.*;
 
 public class SelectLocationView<T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> {
-    protected static final DelegatingFilterContainerComparator DELEGATING_FILTER_CONTAINER_COMPARATOR = new DelegatingFilterContainerComparator();
 
     protected API api;
 
@@ -113,7 +112,12 @@ public class SelectLocationView<T extends DefaultMutableTreeNode & ContainerEntr
             root.removeAllChildren();
 
             List<DelegatingFilterContainer> sortedContainers = new ArrayList<>(containers);
-            sortedContainers.sort(DELEGATING_FILTER_CONTAINER_COMPARATOR);
+            sortedContainers.sort(new Comparator<DelegatingFilterContainer>() {
+                @Override
+                public int compare(DelegatingFilterContainer fcw1, DelegatingFilterContainer fcw2) {
+                    return fcw1.getRoot().getUri().compareTo(fcw2.getRoot().getUri());
+                }
+            });
 
             for (DelegatingFilterContainer container : sortedContainers) {
                 Container.Entry parentEntry = container.getRoot().getParent();
@@ -198,10 +202,4 @@ public class SelectLocationView<T extends DefaultMutableTreeNode & ContainerEntr
         }
     }
 
-    protected static class DelegatingFilterContainerComparator implements Comparator<DelegatingFilterContainer> {
-        @Override
-        public int compare(DelegatingFilterContainer fcw1, DelegatingFilterContainer fcw2) {
-            return fcw1.getRoot().getUri().compareTo(fcw2.getRoot().getUri());
-        }
-    }
 }

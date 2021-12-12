@@ -21,7 +21,13 @@ public class ContextualActionsFactoryService {
 
     public static ContextualActionsFactoryService getInstance() { return CONTEXTUAL_ACTIONS_FACTORY_SERVICE; }
 
-    protected static final ActionNameComparator COMPARATOR = new ActionNameComparator();
+    private static String getActionName(Action a) {
+		String name = (String)a.getValue(Action.NAME);
+		if (name == null) {
+		    name = "";
+		}
+		return name;
+	}
 
     protected final Collection<ContextualActionsFactory> providers = ExtensionService.getInstance().load(ContextualActionsFactory.class);
 
@@ -51,7 +57,7 @@ public class ContextualActionsFactoryService {
                 }
                 // Sort by names
                 List<Action> actions = mapActions.get(groupName);
-                Collections.sort(actions, COMPARATOR);
+                Collections.sort(actions, Comparator.comparing(ContextualActionsFactoryService::getActionName));
                 result.addAll(actions);
             }
 
@@ -60,20 +66,4 @@ public class ContextualActionsFactoryService {
         return Collections.emptyList();
     }
 
-    protected static class ActionNameComparator implements Comparator<Action> {
-        @Override
-        public int compare(Action a1, Action a2) {
-            String n1 = (String)a1.getValue(Action.NAME);
-            if (n1 == null) {
-                n1 = "";
-            }
-
-            String n2 = (String)a2.getValue(Action.NAME);
-            if (n2 == null) {
-                n2 = "";
-            }
-
-            return n1.compareTo(n2);
-        }
-    }
 }
