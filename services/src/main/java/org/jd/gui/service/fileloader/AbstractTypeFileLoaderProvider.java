@@ -49,20 +49,19 @@ public abstract class AbstractTypeFileLoaderProvider extends AbstractFileLoaderP
             // Create panel
             JComponent mainPanel = load(api, rootFile, Paths.get(rootFile.toURI()));
 
-            if (mainPanel instanceof UriOpenable) {
-                try {
-                    // Open page
-                    pathSuffix = file.getAbsolutePath().substring(rootFile.getAbsolutePath().length()).replace(File.separator, "/");
-                    URI rootUri = rootFile.toURI();
-                    URI uri = new URI(rootUri.getScheme(), rootUri.getHost(), rootUri.getPath() + '!' + pathSuffix, null);
-                    ((UriOpenable)mainPanel).openUri(uri);
-                    return true;
-                } catch (URISyntaxException e) {
-                    assert ExceptionUtil.printStackTrace(e);
-                }
-            } else {
+            if (!(mainPanel instanceof UriOpenable)) {
                 return mainPanel != null;
             }
+			try {
+			    // Open page
+			    pathSuffix = file.getAbsolutePath().substring(rootFile.getAbsolutePath().length()).replace(File.separator, "/");
+			    URI rootUri = rootFile.toURI();
+			    URI uri = new URI(rootUri.getScheme(), rootUri.getHost(), rootUri.getPath() + '!' + pathSuffix, null);
+			    ((UriOpenable)mainPanel).openUri(uri);
+			    return true;
+			} catch (URISyntaxException e) {
+			    assert ExceptionUtil.printStackTrace(e);
+			}
         }
 
         return false;

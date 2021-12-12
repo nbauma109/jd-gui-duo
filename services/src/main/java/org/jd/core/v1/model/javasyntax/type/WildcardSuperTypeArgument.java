@@ -25,7 +25,8 @@ public class WildcardSuperTypeArgument implements TypeArgument {
     public boolean isTypeArgumentAssignableFrom(Map<String, BaseType> typeBounds, BaseTypeArgument typeArgument) {
         if (typeArgument.isWildcardSuperTypeArgument()) {
             return type.isTypeArgumentAssignableFrom(typeBounds, typeArgument.getType());
-        } else if (typeArgument instanceof Type) {
+        }
+		if (typeArgument instanceof Type) {
             return type.isTypeArgumentAssignableFrom(typeBounds, typeArgument);
         }
 

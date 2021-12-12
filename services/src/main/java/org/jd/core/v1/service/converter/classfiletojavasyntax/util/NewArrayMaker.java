@@ -61,7 +61,8 @@ public class NewArrayMaker {
                         array.add(new ExpressionVariableInitializer(boe.getRightExpression()));
                         li.remove();
                         continue;
-                    } else if (ae.getExpression().isNewArray()) {
+                    }
+					if (ae.getExpression().isNewArray()) {
                         Expression lastE = array.getLast().getExpression();
 
                         if (lastE.isNewArray() && (ae.getExpression() == lastE)) {

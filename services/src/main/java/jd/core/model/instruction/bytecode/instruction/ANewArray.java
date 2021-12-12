@@ -45,7 +45,7 @@ public class ANewArray extends IndexInstruction
         {
             return null;
         }
-        else if (str.charAt(0) == '[')
+		if (str.charAt(0) == '[')
         {
             return "[" + constants.getConstantClassName(this.getIndex());
         }

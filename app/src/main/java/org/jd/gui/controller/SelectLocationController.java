@@ -112,11 +112,10 @@ public class SelectLocationController {
 
                                 for (;;) {
                                     String typeName = innerTypeNameToOuterTypeName.get(outerTypeName);
-                                    if (typeName != null) {
-                                        outerTypeName = typeName;
-                                    } else {
+                                    if (typeName == null) {
                                         break;
                                     }
+									outerTypeName = typeName;
                                 }
 
                                 outerTypeEntry = typeNameToEntry.get(outerTypeName);

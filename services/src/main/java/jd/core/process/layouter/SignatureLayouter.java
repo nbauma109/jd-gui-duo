@@ -100,15 +100,11 @@ public class SignatureLayouter
                 }
                 else if (c == '>')
                 {
-                    if (depth > 1)
-                    {
-                        depth--;
-                    }
-                    else
-                    {
+                    if (depth <= 1) {
                         index++;
                         break;
                     }
+					depth--;
                 }
             }
         }

@@ -142,34 +142,7 @@ public class DescriptorMatcher {
 
                 char[] otherBuffer = other.buffer;
 
-                if ((buffer[offset] == '*') || (otherBuffer[other.offset] == '*')) {
-                    int start = offset;
-                    int otherStart = other.offset;
-
-                    // Search ';'
-                    if (!searchEndOfType() || !other.searchEndOfType()) {
-						return false;
-					}
-
-                    int current = offset - 1;
-                    int otherCurrent = other.offset - 1;
-
-                    // Backward comparison
-                    while ((start < current) && (otherStart < otherCurrent)) {
-                        c = buffer[--current];
-                        if (c == '*') {
-							return true;
-						}
-
-                        char otherC = otherBuffer[--otherCurrent];
-                        if (otherC == '*') {
-							return true;
-						}
-                        if (c != otherC) {
-							return false;
-						}
-                    }
-                } else {
+                if ((buffer[offset] != '*') && (otherBuffer[other.offset] != '*')) {
                     // Forward comparison
                     while (offset < length) {
                         c = buffer[offset++];
@@ -182,6 +155,32 @@ public class DescriptorMatcher {
                     }
                     return false;
                 }
+				int start = offset;
+				int otherStart = other.offset;
+
+				// Search ';'
+				if (!searchEndOfType() || !other.searchEndOfType()) {
+					return false;
+				}
+
+				int current = offset - 1;
+				int otherCurrent = other.offset - 1;
+
+				// Backward comparison
+				while ((start < current) && (otherStart < otherCurrent)) {
+				    c = buffer[--current];
+				    if (c == '*') {
+						return true;
+					}
+
+				    char otherC = otherBuffer[--otherCurrent];
+				    if (otherC == '*') {
+						return true;
+					}
+				    if (c != otherC) {
+						return false;
+					}
+				}
             }
 
             return true;

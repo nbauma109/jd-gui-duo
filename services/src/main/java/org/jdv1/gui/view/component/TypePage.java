@@ -141,7 +141,8 @@ public abstract class TypePage extends CustomLineNumbersPage
                     assert ExceptionUtil.printStackTrace(e);
                     return false;
                 }
-            } else if (parameters.containsKey("position")) {
+            }
+			if (parameters.containsKey("position")) {
                 String position = parameters.get("position");
 
                 try {
