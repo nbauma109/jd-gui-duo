@@ -112,7 +112,7 @@ public class MergeMembersUtil {
             if (lineNumber > 0 && lineNumber != lastLineNumber) {
                 if (lastLineNumber > 0) {
                     if (order == 0) { // Unknown order
-                        order = (lineNumber > lastLineNumber) ? 1 : 2;
+                        order = lineNumber > lastLineNumber ? 1 : 2;
                     } else if (order == 1) { // Ascendant order
                         if (lineNumber < lastLineNumber) {
                             order = 3; // Random order

@@ -54,7 +54,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
                 } else if (method.getParameterTypes() != null) {
                     if (method.getParameterTypes().isList()) {
                         for (Type type : method.getParameterTypes()) {
-                            if (type.isObjectType() && (type.getName() == null)) {
+                            if (type.isObjectType() && type.getName() == null) {
                                 // Synthetic type in parameters -> synthetic method
                                 method.setFlags(method.getFlags() | FLAG_SYNTHETIC);
                                 method.accept(this);
@@ -63,7 +63,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
                         }
                     } else {
                         Type type = method.getParameterTypes().getFirst();
-                        if (type.isObjectType() && (type.getName() == null)) {
+                        if (type.isObjectType() && type.getName() == null) {
                             // Synthetic type in parameters -> synthetic method
                             method.setFlags(method.getFlags() | FLAG_SYNTHETIC);
                             method.accept(this);
@@ -109,7 +109,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
             localVariableMaker.make(false, typeMaker);
         } else {
             StatementMaker statementMaker = new StatementMaker(typeMaker, localVariableMaker, comd);
-            boolean containsLineNumber = (attributeCode.getAttribute("LineNumberTable") != null);
+            boolean containsLineNumber = attributeCode.getAttribute("LineNumberTable") != null;
 
             List<ControlFlowGraphReducer> preferredReducers = ControlFlowGraphReducer.getPreferredReducers(method);
 

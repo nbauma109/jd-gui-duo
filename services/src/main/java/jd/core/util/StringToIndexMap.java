@@ -66,7 +66,7 @@ public class StringToIndexMap
 
     private static int hashCodeToIndex(int hash, int size)
     {
-        return hash & (size - 1);
+        return hash & size - 1;
     }
 
     private static class HashEntry

@@ -38,7 +38,7 @@ public class LocalVariableSet {
 
                 lv = lv.getNext();
 
-                while ((lv != null) && (lv.fromOffset > newLV.fromOffset)) {
+                while (lv != null && lv.fromOffset > newLV.fromOffset) {
                     previous = lv;
                     lv = lv.getNext();
                 }

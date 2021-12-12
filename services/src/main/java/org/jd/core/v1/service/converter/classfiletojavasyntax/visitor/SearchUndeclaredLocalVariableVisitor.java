@@ -29,7 +29,7 @@ public class SearchUndeclaredLocalVariableVisitor extends AbstractJavaSyntaxVisi
 
     @Override
     public void visit(BinaryOperatorExpression expression) {
-        if (expression.getLeftExpression().isLocalVariableReferenceExpression() && (expression.getOperator().equals("="))) {
+        if (expression.getLeftExpression().isLocalVariableReferenceExpression() && expression.getOperator().equals("=")) {
             AbstractLocalVariable lv = ((ClassFileLocalVariableReferenceExpression)expression.getLeftExpression()).getLocalVariable();
 
             if (!lv.isDeclared()) {

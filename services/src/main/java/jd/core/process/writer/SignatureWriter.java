@@ -225,7 +225,7 @@ public class SignatureWriter
                 index = SignatureUtil.skipSignature(caSignature, length, index);
             }
 
-            variableIndex += (firstChar == 'D' || firstChar == 'J') ? 2 : 1;
+            variableIndex += firstChar == 'D' || firstChar == 'J' ? 2 : 1;
             parameterIndex++;
         }
 

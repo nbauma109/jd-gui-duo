@@ -109,7 +109,7 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
                 DefaultList<Statement> list = statements.getList();
 
                 // Multiple statements
-                if ((!list.isEmpty()) && isAssertionsDisabledStatement(list.getFirst())) {
+                if (!list.isEmpty() && isAssertionsDisabledStatement(list.getFirst())) {
                     // Remove assert initialization statement
                     list.removeFirst();
                 }
@@ -145,17 +145,17 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
                     // Remove assert initialization statement
                     statements = null;
                 }
-                if ((statements != null) && setStaticFieldInitializer(statements.getFirst())) {
+                if (statements != null && setStaticFieldInitializer(statements.getFirst())) {
                     // Remove field initialization statement
                     statements = null;
                 }
             }
 
-            if ((statements == null) || (statements.size() == 0)) {
+            if (statements == null || statements.size() == 0) {
                 deleteStaticDeclaration = Boolean.TRUE;
             } else {
                 int firstLineNumber = getFirstLineNumber(statements);
-                sid.setFirstLineNumber((firstLineNumber==-1) ? 0 : firstLineNumber);
+                sid.setFirstLineNumber(firstLineNumber==-1 ? 0 : firstLineNumber);
                 deleteStaticDeclaration = Boolean.FALSE;
             }
         }
@@ -167,7 +167,7 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
         if (expression.getLeftExpression().isFieldReferenceExpression()) {
             FieldReferenceExpression fre = (FieldReferenceExpression) expression.getLeftExpression();
 
-            if ((fre.getType() == PrimitiveType.TYPE_BOOLEAN) && fre.getInternalTypeName().equals(internalTypeName) && fre.getName().equals("$assertionsDisabled")) {
+            if (fre.getType() == PrimitiveType.TYPE_BOOLEAN && fre.getInternalTypeName().equals(internalTypeName) && fre.getName().equals("$assertionsDisabled")) {
                 return true;
             }
         }
@@ -184,10 +184,10 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
             if (fre.getInternalTypeName().equals(internalTypeName)) {
                 FieldDeclarator fdr = fields.get(fre.getName());
 
-                if ((fdr != null) && (fdr.getVariableInitializer() == null)) {
+                if (fdr != null && fdr.getVariableInitializer() == null) {
                     FieldDeclaration fdn = fdr.getFieldDeclaration();
 
-                    if (((fdn.getFlags() & Declaration.FLAG_STATIC) != 0) && fdn.getType().getDescriptor().equals(fre.getDescriptor())) {
+                    if ((fdn.getFlags() & Declaration.FLAG_STATIC) != 0 && fdn.getType().getDescriptor().equals(fre.getDescriptor())) {
                         expression = expression.getRightExpression();
 
                         searchLocalVariableReferenceVisitor.init(-1);

@@ -58,7 +58,7 @@ public class ClassFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
         try (InputStream is = entry.getInputStream()) {
             ClassReader classReader = new ClassReader(is);
 
-            if ((fragment != null) && (!fragment.isEmpty())) {
+            if (fragment != null && !fragment.isEmpty()) {
                 // Search type name in fragment. URI format : see jd.gui.api.feature.UriOpener
                 int index = fragment.indexOf('-');
                 if (index != -1) {
@@ -136,9 +136,9 @@ public class ClassFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
             ClassVisitor classAndInnerClassesVisitor = new ClassVisitor(Opcodes.ASM7) {
                 @Override
                 public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-                    setFlags((outerAccess == -1) ? access : outerAccess);
+                    setFlags(outerAccess == -1 ? access : outerAccess);
                     setName(name);
-                    setSuperName(((access & Opcodes.ACC_INTERFACE) != 0) && StringConstants.JAVA_LANG_OBJECT.equals(superName) ? null : superName);
+                    setSuperName((access & Opcodes.ACC_INTERFACE) != 0 && StringConstants.JAVA_LANG_OBJECT.equals(superName) ? null : superName);
                 }
 
                 @Override
@@ -147,7 +147,7 @@ public class ClassFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
                         // Inner class path found
                         setOuterName(outerName);
                         setDisplayInnerTypeName(innerName);
-                    } else if (((access & (Opcodes.ACC_SYNTHETIC|Opcodes.ACC_BRIDGE)) == 0) && getName().equals(outerName)) {
+                    } else if ((access & (Opcodes.ACC_SYNTHETIC|Opcodes.ACC_BRIDGE)) == 0 && getName().equals(outerName)) {
                         Container.Entry innerEntry = getEntry(name);
 
                         if (innerEntry != null) {
@@ -230,7 +230,7 @@ public class ClassFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
 
                             @Override
                             public String getDisplayName() {
-                                boolean isInnerClass = (getDisplayInnerTypeName() != null);
+                                boolean isInnerClass = getDisplayInnerTypeName() != null;
                                 String constructorName = isInnerClass ? getDisplayInnerTypeName() : getDisplayTypeName();
                                 StringBuilder sb = new StringBuilder();
                                 writeMethodSignature(sb, getFlags(), access, isInnerClass, constructorName, name, descriptor);

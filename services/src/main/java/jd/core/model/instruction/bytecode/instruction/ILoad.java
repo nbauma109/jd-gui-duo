@@ -31,13 +31,13 @@ public class ILoad extends LoadInstruction
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        if ((constants == null) || (localVariables == null)) {
+        if (constants == null || localVariables == null) {
 			return null;
 		}
 
         LocalVariable lv = localVariables.getLocalVariableWithIndexAndOffset(this.getIndex(), this.getOffset());
 
-        if ((lv == null) || (lv.getSignatureIndex() < 0)) {
+        if (lv == null || lv.getSignatureIndex() < 0) {
 			return null;
 		}
 

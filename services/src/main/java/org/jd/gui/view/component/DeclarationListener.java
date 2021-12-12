@@ -51,7 +51,7 @@ public class DeclarationListener extends AbstractJavaListener {
 
         // Super type reference
         Type superType = getSuperType(node);
-        String superInternalTypeName = (superType != null) ? resolveInternalTypeName(superType) : null;
+        String superInternalTypeName = superType != null ? resolveInternalTypeName(superType) : null;
         TypeDeclarationData data = new TypeDeclarationData(position, typeName.length(), currentInternalTypeName,
                 superInternalTypeName);
 

@@ -52,8 +52,8 @@ public class SignatureLayouter
         // Affichage de la classe mere
         newIndex = SignatureUtil.skipSignature(caSignature, length, index);
 
-        if (((classFile.getAccessFlags() &
-                (Const.ACC_INTERFACE|Const.ACC_ENUM)) == 0) &&
+        if ((classFile.getAccessFlags() &
+                (Const.ACC_INTERFACE|Const.ACC_ENUM)) == 0 &&
             !isObjectClass(caSignature, index, newIndex))
         {
             displayExtendsOrImplementsFlag = true;

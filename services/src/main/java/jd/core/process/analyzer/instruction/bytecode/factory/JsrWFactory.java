@@ -37,8 +37,8 @@ public class JsrWFactory implements InstructionFactory
     {
         final int opcode = code[offset] & 255;
         final int value  =
-            ((code[offset+1] & 255) << 24) | ((code[offset+2] & 255) << 16) |
-            ((code[offset+3] & 255) <<  8) | (code[offset+4] & 255);
+            (code[offset+1] & 255) << 24 | (code[offset+2] & 255) << 16 |
+            (code[offset+3] & 255) <<  8 | code[offset+4] & 255;
 
         list.add(new Jsr(Const.JSR, offset, lineNumber, value));
 

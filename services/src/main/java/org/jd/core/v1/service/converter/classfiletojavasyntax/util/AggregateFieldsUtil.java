@@ -31,7 +31,7 @@ public class AggregateFieldsUtil {
                 for (int index=1; index<size; index++) {
                     ClassFileFieldDeclaration field = fields.get(index);
 
-                    if ((firstField.getFirstLineNumber() == 0) || (firstField.getFlags() != field.getFlags()) || !firstField.getType().equals(field.getType())) {
+                    if (firstField.getFirstLineNumber() == 0 || firstField.getFlags() != field.getFlags() || !firstField.getType().equals(field.getType())) {
                         firstField = field;
                         firstIndex = lastIndex = index;
                     } else {

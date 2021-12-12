@@ -34,7 +34,7 @@ public class TypeNameUtil
     public static String internalTypeNameToInternalPackageName(String path)
     {
         int index = path.lastIndexOf(StringConstants.INTERNAL_PACKAGE_SEPARATOR);
-        return (index == -1) ? "" : path.substring(0, index);
+        return index == -1 ? "" : path.substring(0, index);
     }
 
     public static String internalTypeNameToQualifiedTypeName(String path)

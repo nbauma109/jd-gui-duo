@@ -207,7 +207,7 @@ public class ByteCodeUtil
 				continue;
 			}
 			offset += 1 + Const.getNoOfOperands(getOpCode(code, offset));
-			if ((offset >= code.length) || !opCodeIn(code, offset, ALOAD, ALOAD_0, ALOAD_1, ALOAD_2, ALOAD_3)) {
+			if (offset >= code.length || !opCodeIn(code, offset, ALOAD, ALOAD_0, ALOAD_1, ALOAD_2, ALOAD_3)) {
 				continue;
 			}
 			if (getOpCode(code, offset) == ALOAD) {
@@ -332,7 +332,7 @@ public class ByteCodeUtil
 	}
 
 	public static boolean isIfInstruction(int opcode, boolean includeComplex) {
-		return (opcode >= IF && opcode <= IFXNULL) || (includeComplex && opcode == COMPLEXIF);
+		return opcode >= IF && opcode <= IFXNULL || includeComplex && opcode == COMPLEXIF;
 	}
 
 	public static boolean isIfOrGotoInstruction(int opcode, boolean includeComplex) {

@@ -127,12 +127,12 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
                 {
                     int nbrOfParameters = iv.getArgs().size();
 
-                    if ((1 <= nbrOfParameters) && (nbrOfParameters <= 2))
+                    if (1 <= nbrOfParameters && nbrOfParameters <= 2)
                     {
                         int opcode = iv.getArgs().get(0).getOpcode();
 
-                        if (((opcode==Const.BIPUSH) ||
-                             (opcode==Const.SIPUSH)) &&
+                        if ((opcode==Const.BIPUSH ||
+                             opcode==Const.SIPUSH) &&
                              cmr.getReturnedSignature().equals("I") &&
                              cmr.getListOfParameterSignatures().get(0).equals("I"))
                         {

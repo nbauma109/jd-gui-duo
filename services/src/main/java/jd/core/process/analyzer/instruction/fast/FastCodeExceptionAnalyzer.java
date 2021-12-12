@@ -120,8 +120,8 @@ public class FastCodeExceptionAnalyzer
 				}
 				// Update 'afterOffset'
 				if (fce2.getAfterOffset() == UtilConstants.INVALID_OFFSET ||
-						(fce1.getAfterOffset() != UtilConstants.INVALID_OFFSET &&
-						fce1.getAfterOffset() < fce2.getAfterOffset())) {
+						fce1.getAfterOffset() != UtilConstants.INVALID_OFFSET &&
+						fce1.getAfterOffset() < fce2.getAfterOffset()) {
 					fce2.setAfterOffset(fce1.getAfterOffset());
 				}
 				// Remove last FastCodeException
@@ -371,8 +371,8 @@ public class FastCodeExceptionAnalyzer
 						fastAggregatedCodeException.getEndPC() == fce.getTryToOffset() &&
 						fastAggregatedCodeException.getHandlerPC() > fce.maxOffset &&
 						!fastAggregatedCodeException.synchronizedFlag && (fce.getAfterOffset() == UtilConstants.INVALID_OFFSET ||
-						(fastAggregatedCodeException.getEndPC() < fce.getAfterOffset() &&
-						fastAggregatedCodeException.getHandlerPC() < fce.getAfterOffset())))
+						fastAggregatedCodeException.getEndPC() < fce.getAfterOffset() &&
+						fastAggregatedCodeException.getHandlerPC() < fce.getAfterOffset()))
 				{
 					fce.maxOffset = fastAggregatedCodeException.getHandlerPC();
 					fce.setFinallyFromOffset(fastAggregatedCodeException.getHandlerPC());
@@ -392,8 +392,8 @@ public class FastCodeExceptionAnalyzer
 						fastAggregatedCodeException.getEndPC() >= fce.getTryToOffset() &&
 						fastAggregatedCodeException.getHandlerPC() > fce.maxOffset &&
 						!fastAggregatedCodeException.synchronizedFlag && (fce.getAfterOffset() == UtilConstants.INVALID_OFFSET ||
-						(fastAggregatedCodeException.getEndPC() < fce.getAfterOffset() &&
-						fastAggregatedCodeException.getHandlerPC() < fce.getAfterOffset())))
+						fastAggregatedCodeException.getEndPC() < fce.getAfterOffset() &&
+						fastAggregatedCodeException.getHandlerPC() < fce.getAfterOffset()))
 				{
 					fce.maxOffset = fastAggregatedCodeException.getHandlerPC();
 					fce.setFinallyFromOffset(fastAggregatedCodeException.getHandlerPC());
@@ -1568,13 +1568,13 @@ public class FastCodeExceptionAnalyzer
 										beforeInstruction.getLineNumber())
 								{
 									// For instruction ?
-									if ((beforeInstruction.getOpcode() ==
+									if (beforeInstruction.getOpcode() ==
 											Const.ASTORE &&
 											((AStore)beforeInstruction).getValueref().getOpcode() ==
-											ByteCodeConstants.EXCEPTIONLOAD) || (beforeInstruction.getOpcode() ==
+											ByteCodeConstants.EXCEPTIONLOAD || beforeInstruction.getOpcode() ==
 											Const.POP &&
 											((Pop)beforeInstruction).getObjectref().getOpcode() ==
-											ByteCodeConstants.EXCEPTIONLOAD))
+											ByteCodeConstants.EXCEPTIONLOAD)
 									{
 										// Non
 										fastCodeException.setAfterOffset(instruction.getOffset());
@@ -1731,8 +1731,8 @@ public class FastCodeExceptionAnalyzer
 					{
 						instruction = list.get(index);
 
-						if (instruction.getOffset() <= maxOffset || (instruction.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER &&
-								instruction.getLineNumber() >= firstLineNumber))
+						if (instruction.getOffset() <= maxOffset || instruction.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER &&
+								instruction.getLineNumber() >= firstLineNumber)
 						{
 							break;
 						}
@@ -3125,11 +3125,11 @@ public class FastCodeExceptionAnalyzer
 	}
 
 	private static boolean findAloadForAThrow(int exceptionIndex, AThrow athrow) {
-		return (athrow.getValue().getOpcode() == Const.ALOAD &&
-				((ALoad)athrow.getValue()).getIndex() == exceptionIndex)
-				|| (athrow.getValue().getOpcode() == Const.CHECKCAST &&
+		return athrow.getValue().getOpcode() == Const.ALOAD &&
+				((ALoad)athrow.getValue()).getIndex() == exceptionIndex
+				|| athrow.getValue().getOpcode() == Const.CHECKCAST &&
 				((CheckCast)athrow.getValue()).getObjectref().getOpcode() == Const.ALOAD &&
-				((ALoad)((CheckCast)athrow.getValue()).getObjectref()).getIndex() == exceptionIndex);
+				((ALoad)((CheckCast)athrow.getValue()).getObjectref()).getIndex() == exceptionIndex;
 	}
 
 	public static class FastCodeExcepcion
@@ -3182,7 +3182,7 @@ public class FastCodeExceptionAnalyzer
 
 		@Override
 		public boolean equals(Object obj) {
-			return this == obj || (obj != null && getClass() == obj.getClass() && obj instanceof FastCodeExcepcion fce && compareTo(fce) == 0);
+			return this == obj || obj != null && getClass() == obj.getClass() && obj instanceof FastCodeExcepcion fce && compareTo(fce) == 0;
 		}
 
 		public int getTryFromOffset() {
@@ -3260,7 +3260,7 @@ public class FastCodeExceptionAnalyzer
 
 		@Override
 		public boolean equals(Object obj) {
-			return this == obj || (obj instanceof FastCodeExceptionCatch fcec && getClass() == obj.getClass() && compareTo(fcec) == 0);
+			return this == obj || obj instanceof FastCodeExceptionCatch fcec && getClass() == obj.getClass() && compareTo(fcec) == 0;
 		}
 	}
 

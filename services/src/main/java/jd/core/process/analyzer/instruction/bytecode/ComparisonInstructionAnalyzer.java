@@ -59,8 +59,8 @@ public class ComparisonInstructionAnalyzer
                     int prevBiJumpOffset = prevBi.getJumpOffset();
 
                     // Le 2eme if appartient-il au meme bloc que le 1er ?
-                            if ((prevBiJumpOffset == bi.getJumpOffset()) ||
-                                ((prevBi.getBranch() > 0) && (prevBiJumpOffset <= afterOffest)))
+                            if (prevBiJumpOffset == bi.getJumpOffset() ||
+                                prevBi.getBranch() > 0 && prevBiJumpOffset <= afterOffest)
                     {
                         // Oui
                         // Test complexe : plusieurs instructions byte-code de test
@@ -240,8 +240,8 @@ public class ComparisonInstructionAnalyzer
                         }
                     }
                 }
-                else if ((jumpOffset != lastBiJumpOffset) &&
-                         ((bi.getBranch() <= 0) || (jumpOffset > afterOffest)))
+                else if (jumpOffset != lastBiJumpOffset &&
+                         (bi.getBranch() <= 0 || jumpOffset > afterOffest))
                 {
                     break; // Non
                 }
@@ -252,9 +252,9 @@ public class ComparisonInstructionAnalyzer
                 int jumpOffset = g.getJumpOffset();
 
                 // Ce 'goto' appartient-il au meme bloc que le 1er 'if' ?
-                if ((jumpOffset != lastBiJumpOffset) &&
-                    ((jumpOffset <= nextInstruction.getOffset()) ||
-                     (jumpOffset > afterOffest)))
+                if (jumpOffset != lastBiJumpOffset &&
+                    (jumpOffset <= nextInstruction.getOffset() ||
+                     jumpOffset > afterOffest))
 				 {
 					break; // Non
 				}
@@ -387,8 +387,8 @@ public class ComparisonInstructionAnalyzer
                 int lastTernaryOpTestBiJumpOffset =
                     lastTernaryOpTestBi.getJumpOffset();
 
-                if ((lastTernaryOpTestBiJumpOffset >= 0) &&
-                    (lastBi.getOffset() >= lastTernaryOpTestBiJumpOffset) &&
+                if (lastTernaryOpTestBiJumpOffset >= 0 &&
+                    lastBi.getOffset() >= lastTernaryOpTestBiJumpOffset &&
                     offsetToPreviousGotoFlag[lastTernaryOpTestBiJumpOffset])
                 {
 	                // Extraction de la sous liste d'instructions constituant
@@ -416,8 +416,8 @@ public class ComparisonInstructionAnalyzer
 	                    int jumpOffset = bi.getOffset() + branchOffset;
 
 	                    // L'instruction if courante appartient-elle au meme bloc que le 1er ?
-	                    if ((jumpOffset != lastTernaryOpTestBiJumpOffset) &&
-	                        ((branchOffset <= 0) || (jumpOffset > nextOffest)))
+	                    if (jumpOffset != lastTernaryOpTestBiJumpOffset &&
+	                        (branchOffset <= 0 || jumpOffset > nextOffest))
 	                    {
 	                        // Non
 	                        index++;

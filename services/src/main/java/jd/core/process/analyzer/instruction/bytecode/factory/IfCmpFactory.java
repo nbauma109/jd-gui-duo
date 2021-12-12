@@ -45,7 +45,7 @@ public class IfCmpFactory implements InstructionFactory
     {
         final int opcode = code[offset] & 255;
         final int branch =
-            (short)(((code[offset+1] & 255) << 8) | (code[offset+2] & 255));
+            (short)((code[offset+1] & 255) << 8 | code[offset+2] & 255);
         final Instruction value2 = stack.pop();
         final Instruction value1 = stack.pop();
 

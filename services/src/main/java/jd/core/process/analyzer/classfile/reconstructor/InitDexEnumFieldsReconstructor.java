@@ -129,10 +129,10 @@ public class InitDexEnumFieldsReconstructor
                 {
                     Field field = fields[indexField];
 
-                    if (((field.getAccessFlags() & (Const.ACC_STATIC|Const.ACC_SYNTHETIC|Const.ACC_FINAL|Const.ACC_PRIVATE)) ==
-                            (Const.ACC_STATIC|Const.ACC_SYNTHETIC|Const.ACC_FINAL|Const.ACC_PRIVATE)) &&
-                        (cnat.getSignatureIndex() == field.getDescriptorIndex()) &&
-                        (cnat.getNameIndex() == field.getNameIndex()))
+                    if ((field.getAccessFlags() & (Const.ACC_STATIC|Const.ACC_SYNTHETIC|Const.ACC_FINAL|Const.ACC_PRIVATE)) ==
+                            (Const.ACC_STATIC|Const.ACC_SYNTHETIC|Const.ACC_FINAL|Const.ACC_PRIVATE) &&
+                        cnat.getSignatureIndex() == field.getDescriptorIndex() &&
+                        cnat.getNameIndex() == field.getNameIndex())
                     {
                         // "ENUM$VALUES = ..." found.
                         ALoad aload = (ALoad)putStatic.getValueref();
@@ -149,9 +149,9 @@ public class InitDexEnumFieldsReconstructor
 								break;
 							}
                             AAStore aastore = (AAStore)instruction;
-                            if ((aastore.getArrayref().getOpcode() != Const.ALOAD) ||
-                                (aastore.getValueref().getOpcode() != Const.GETSTATIC) ||
-                                (((ALoad)aastore.getArrayref()).getIndex() != localEnumArrayIndex)) {
+                            if (aastore.getArrayref().getOpcode() != Const.ALOAD ||
+                                aastore.getValueref().getOpcode() != Const.GETSTATIC ||
+                                ((ALoad)aastore.getArrayref()).getIndex() != localEnumArrayIndex) {
 								break;
 							}
                             values.add(aastore.getValueref());

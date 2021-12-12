@@ -1263,7 +1263,7 @@ public class LocalVariableAnalyzer
 				store.getValueref().getOpcode() == ByteCodeConstants.RETURNADDRESSLOAD;
 
 		if (lv == null || lv.isExceptionOrReturnAddress() ||
-				(isExceptionOrReturnAddress && lv.getStartPc() + lv.getLength() < offset))
+				isExceptionOrReturnAddress && lv.getStartPc() + lv.getLength() < offset)
 		{
 			localVariables.add(new LocalVariable(
 					offset, 1, -1, signatureInstructionIndex, index,

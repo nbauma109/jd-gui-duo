@@ -60,7 +60,7 @@ public class UpdateJavaSyntaxTreeStep2Visitor extends AbstractJavaSyntaxVisitor 
         if (bodyDeclaration.getOuterBodyDeclaration() == null) {
             // Main body declaration
 
-            if ((bodyDeclaration.getInnerTypeDeclarations() != null) && replaceBridgeMethodVisitor.init(bodyDeclaration)) {
+            if (bodyDeclaration.getInnerTypeDeclarations() != null && replaceBridgeMethodVisitor.init(bodyDeclaration)) {
                 // Replace bridge method invocation
                 replaceBridgeMethodVisitor.visit(bodyDeclaration);
             }

@@ -443,7 +443,7 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
     }
 
     protected Expression safeUpdateBooleanExpression(Expression expression) {
-        return (expression == null) ? null : updateBooleanExpression(expression);
+        return expression == null ? null : updateBooleanExpression(expression);
     }
 
     protected Expression updateBooleanExpression(Expression expression) {

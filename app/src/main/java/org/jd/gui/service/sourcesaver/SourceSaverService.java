@@ -32,7 +32,7 @@ public class SourceSaverService {
 
     public SourceSaver get(Container.Entry entry) {
         SourceSaver saver = get(entry.getContainer().getType(), entry);
-        return (saver != null) ? saver : get("*", entry);
+        return saver != null ? saver : get("*", entry);
     }
 
     protected SourceSaver get(String containerType, Container.Entry entry) {

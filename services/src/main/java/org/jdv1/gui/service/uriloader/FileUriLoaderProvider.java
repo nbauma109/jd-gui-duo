@@ -28,6 +28,6 @@ public class FileUriLoaderProvider implements UriLoader {
         File file = new File(uri.getPath());
         FileLoader fileLoader = api.getFileLoader(file);
 
-        return (fileLoader != null) && fileLoader.load(api, file);
+        return fileLoader != null && fileLoader.load(api, file);
     }
 }

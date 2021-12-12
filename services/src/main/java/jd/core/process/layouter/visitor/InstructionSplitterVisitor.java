@@ -55,14 +55,14 @@ public class InstructionSplitterVisitor extends BaseInstructionSplitterVisitor
     public void end()
     {
         // S'il reste un fragment d'instruction a traiter...
-        if ((this.offset1 == 0) || (this.offset1 != this.instruction.getOffset()))
+        if (this.offset1 == 0 || this.offset1 != this.instruction.getOffset())
         {
             // Add last part of instruction
             int lastLineNumber = MaxLineNumberVisitor.visit(instruction);
             int preferedLineNumber;
 
-            if ((firstLineNumber != Instruction.UNKNOWN_LINE_NUMBER) &&
-                (lastLineNumber != Instruction.UNKNOWN_LINE_NUMBER))
+            if (firstLineNumber != Instruction.UNKNOWN_LINE_NUMBER &&
+                lastLineNumber != Instruction.UNKNOWN_LINE_NUMBER)
             {
                 preferedLineNumber = lastLineNumber-firstLineNumber;
             }
@@ -88,8 +88,8 @@ public class InstructionSplitterVisitor extends BaseInstructionSplitterVisitor
         int lastLineNumber = MaxLineNumberVisitor.visit(in);
         int preferedLineNumber;
 
-        if ((this.firstLineNumber != Instruction.UNKNOWN_LINE_NUMBER) &&
-            (lastLineNumber != Instruction.UNKNOWN_LINE_NUMBER))
+        if (this.firstLineNumber != Instruction.UNKNOWN_LINE_NUMBER &&
+            lastLineNumber != Instruction.UNKNOWN_LINE_NUMBER)
         {
             preferedLineNumber = lastLineNumber-this.firstLineNumber;
         }

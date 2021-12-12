@@ -85,9 +85,9 @@ public class InitStaticFieldsReconstructor
             {
                 Field field = fields[indexField++];
 
-                if (((field.getAccessFlags() & Const.ACC_STATIC) != 0) &&
-                    (cnat.getSignatureIndex() == field.getDescriptorIndex()) &&
-                    (cnat.getNameIndex() == field.getNameIndex()))
+                if ((field.getAccessFlags() & Const.ACC_STATIC) != 0 &&
+                    cnat.getSignatureIndex() == field.getDescriptorIndex() &&
+                    cnat.getNameIndex() == field.getNameIndex())
                 {
                     Instruction valueref = putStatic.getValueref();
 
@@ -156,9 +156,9 @@ public class InitStaticFieldsReconstructor
                 {
                     Field field = fields[indexField];
 
-                    if (((field.getAccessFlags() & Const.ACC_STATIC) != 0) &&
-                        (cnat.getSignatureIndex() == field.getDescriptorIndex()) &&
-                        (cnat.getNameIndex() == field.getNameIndex()))
+                    if ((field.getAccessFlags() & Const.ACC_STATIC) != 0 &&
+                        cnat.getSignatureIndex() == field.getDescriptorIndex() &&
+                        cnat.getNameIndex() == field.getNameIndex())
                     {
                         Instruction valueref = putStatic.getValueref();
 

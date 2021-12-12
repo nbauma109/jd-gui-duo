@@ -40,7 +40,7 @@ public class RemoveBinaryOpReturnStatementsVisitor extends AbstractJavaSyntaxVis
                         if (leftExpression.isLocalVariableReferenceExpression()) {
                             ClassFileLocalVariableReferenceExpression lvr2 = (ClassFileLocalVariableReferenceExpression) leftExpression;
 
-                            if ((lvr1.getLocalVariable() == lvr2.getLocalVariable()) && (lvr1.getLocalVariable().getReferences().size() == 2)) {
+                            if (lvr1.getLocalVariable() == lvr2.getLocalVariable() && lvr1.getLocalVariable().getReferences().size() == 2) {
                                 ReturnExpressionStatement res = (ReturnExpressionStatement) lastStatement;
 
                                 // Remove synthetic assignment statement

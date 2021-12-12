@@ -43,6 +43,6 @@ public class Ldc2W extends LdcInstruction
 			return null;
 		}
 
-        return (cv instanceof ConstantDouble) ? "D" : "J";
+        return cv instanceof ConstantDouble ? "D" : "J";
     }
 }

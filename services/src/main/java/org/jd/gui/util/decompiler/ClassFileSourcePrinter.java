@@ -270,14 +270,14 @@ public abstract class ClassFileSourcePrinter implements Printer {
                     // Write octal format
                     append("\\u");
 
-                    int z = (c >> 12);
-                    append((char) ((z <= 9) ? ('0' + z) : (('A' - 10) + z)));
-                    z = ((c >> 8) & 0xF);
-                    append((char) ((z <= 9) ? ('0' + z) : (('A' - 10) + z)));
-                    z = ((c >> 4) & 0xF);
-                    append((char) ((z <= 9) ? ('0' + z) : (('A' - 10) + z)));
-                    z = (c & 0xF);
-                    append((char) ((z <= 9) ? ('0' + z) : (('A' - 10) + z)));
+                    int z = c >> 12;
+                    append((char) (z <= 9 ? '0' + z : 'A' - 10 + z));
+                    z = c >> 8 & 0xF;
+                    append((char) (z <= 9 ? '0' + z : 'A' - 10 + z));
+                    z = c >> 4 & 0xF;
+                    append((char) (z <= 9 ? '0' + z : 'A' - 10 + z));
+                    z = c & 0xF;
+                    append((char) (z <= 9 ? '0' + z : 'A' - 10 + z));
                 } else {
                     append(c);
                 }

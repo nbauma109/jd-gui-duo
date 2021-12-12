@@ -93,8 +93,8 @@ public class DotClass118AReconstructor
 
             TernaryOpStore tos = (TernaryOpStore)instruction;
 
-            if ((tos.getObjectref().getOpcode() != Const.GETSTATIC) ||
-                (gs.getIndex() != ((GetStatic)tos.getObjectref()).getIndex())) {
+            if (tos.getObjectref().getOpcode() != Const.GETSTATIC ||
+                gs.getIndex() != ((GetStatic)tos.getObjectref()).getIndex()) {
 				continue;
 			}
 
@@ -112,7 +112,7 @@ public class DotClass118AReconstructor
 				continue;
 			}
 
-            if ((g.getOffset() >= jumpOffset) || (jumpOffset > instruction.getOffset())) {
+            if (g.getOffset() >= jumpOffset || jumpOffset > instruction.getOffset()) {
 				continue;
 			}
 
@@ -159,8 +159,8 @@ public class DotClass118AReconstructor
 
             PutStatic ps = (PutStatic)instruction;
 
-            if ((ps.getValueref().getOpcode() != ByteCodeConstants.DUPLOAD) ||
-                (ds.getOffset() != ps.getValueref().getOffset())) {
+            if (ps.getValueref().getOpcode() != ByteCodeConstants.DUPLOAD ||
+                ds.getOffset() != ps.getValueref().getOffset()) {
 				continue;
 			}
 

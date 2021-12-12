@@ -47,7 +47,7 @@ public class MaxLineNumberVisitor
         case ByteCodeConstants.ASSERT:
             {
                 AssertInstruction ai = (AssertInstruction)instruction;
-                maxLineNumber = visit((ai.getMsg() == null) ? ai.getTest() : ai.getMsg());
+                maxLineNumber = visit(ai.getMsg() == null ? ai.getTest() : ai.getMsg());
             }
             break;
         case Const.ATHROW:

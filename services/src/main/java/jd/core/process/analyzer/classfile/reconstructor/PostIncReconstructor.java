@@ -61,11 +61,11 @@ public class PostIncReconstructor
                 switch (i.getOpcode())
                 {
                 case Const.ASTORE:
-                    if ((dupstore.getObjectref().getOpcode() == Const.ALOAD) &&
-                        (((IndexInstruction)i).getIndex() == ((IndexInstruction)dupstore.getObjectref()).getIndex()))
+                    if (dupstore.getObjectref().getOpcode() == Const.ALOAD &&
+                        ((IndexInstruction)i).getIndex() == ((IndexInstruction)dupstore.getObjectref()).getIndex())
                     {
                         i = ((StoreInstruction)i).getValueref();
-                        if ((i.getOpcode() == ByteCodeConstants.CONVERT) || (i.getOpcode() == ByteCodeConstants.IMPLICITCONVERT)) {
+                        if (i.getOpcode() == ByteCodeConstants.CONVERT || i.getOpcode() == ByteCodeConstants.IMPLICITCONVERT) {
 							i = ((ConvertInstruction)i).getValue();
 						}
                         if (i.getOpcode() == ByteCodeConstants.BINARYOP) {
@@ -74,11 +74,11 @@ public class PostIncReconstructor
                     }
                     break;
                 case Const.ISTORE:
-                    if ((dupstore.getObjectref().getOpcode() == Const.ILOAD) &&
-                        (((IndexInstruction)i).getIndex() == ((IndexInstruction)dupstore.getObjectref()).getIndex()))
+                    if (dupstore.getObjectref().getOpcode() == Const.ILOAD &&
+                        ((IndexInstruction)i).getIndex() == ((IndexInstruction)dupstore.getObjectref()).getIndex())
                     {
                         i = ((StoreInstruction)i).getValueref();
-                        if ((i.getOpcode() == ByteCodeConstants.CONVERT) || (i.getOpcode() == ByteCodeConstants.IMPLICITCONVERT)) {
+                        if (i.getOpcode() == ByteCodeConstants.CONVERT || i.getOpcode() == ByteCodeConstants.IMPLICITCONVERT) {
 							i = ((ConvertInstruction)i).getValue();
 						}
                         if (i.getOpcode() == ByteCodeConstants.BINARYOP) {
@@ -87,11 +87,11 @@ public class PostIncReconstructor
                     }
                     break;
                 case ByteCodeConstants.STORE:
-                    if ((dupstore.getObjectref().getOpcode() == ByteCodeConstants.LOAD) &&
-                        (((IndexInstruction)i).getIndex() == ((IndexInstruction)dupstore.getObjectref()).getIndex()))
+                    if (dupstore.getObjectref().getOpcode() == ByteCodeConstants.LOAD &&
+                        ((IndexInstruction)i).getIndex() == ((IndexInstruction)dupstore.getObjectref()).getIndex())
                     {
                         i = ((StoreInstruction)i).getValueref();
-                        if ((i.getOpcode() == ByteCodeConstants.CONVERT) || (i.getOpcode() == ByteCodeConstants.IMPLICITCONVERT)) {
+                        if (i.getOpcode() == ByteCodeConstants.CONVERT || i.getOpcode() == ByteCodeConstants.IMPLICITCONVERT) {
 							i = ((ConvertInstruction)i).getValue();
 						}
                         if (i.getOpcode() == ByteCodeConstants.BINARYOP) {
@@ -100,11 +100,11 @@ public class PostIncReconstructor
                     }
                     break;
                 case Const.PUTFIELD:
-                    if ((dupstore.getObjectref().getOpcode() == Const.GETFIELD) &&
-                        (((IndexInstruction)i).getIndex() == ((IndexInstruction)dupstore.getObjectref()).getIndex()))
+                    if (dupstore.getObjectref().getOpcode() == Const.GETFIELD &&
+                        ((IndexInstruction)i).getIndex() == ((IndexInstruction)dupstore.getObjectref()).getIndex())
                     {
                         i = ((PutField)i).getValueref();
-                        if ((i.getOpcode() == ByteCodeConstants.CONVERT) || (i.getOpcode() == ByteCodeConstants.IMPLICITCONVERT)) {
+                        if (i.getOpcode() == ByteCodeConstants.CONVERT || i.getOpcode() == ByteCodeConstants.IMPLICITCONVERT) {
 							i = ((ConvertInstruction)i).getValue();
 						}
                         if (i.getOpcode() == ByteCodeConstants.BINARYOP) {
@@ -113,11 +113,11 @@ public class PostIncReconstructor
                     }
                     break;
                 case Const.PUTSTATIC:
-                    if ((dupstore.getObjectref().getOpcode() == Const.GETSTATIC) &&
-                        (((IndexInstruction)i).getIndex() == ((IndexInstruction)dupstore.getObjectref()).getIndex()))
+                    if (dupstore.getObjectref().getOpcode() == Const.GETSTATIC &&
+                        ((IndexInstruction)i).getIndex() == ((IndexInstruction)dupstore.getObjectref()).getIndex())
                     {
                         i = ((PutStatic)i).getValueref();
-                        if ((i.getOpcode() == ByteCodeConstants.CONVERT) || (i.getOpcode() == ByteCodeConstants.IMPLICITCONVERT)) {
+                        if (i.getOpcode() == ByteCodeConstants.CONVERT || i.getOpcode() == ByteCodeConstants.IMPLICITCONVERT) {
 							i = ((ConvertInstruction)i).getValue();
 						}
                         if (i.getOpcode() == ByteCodeConstants.BINARYOP) {
@@ -127,13 +127,13 @@ public class PostIncReconstructor
                     break;
                 }
 
-                if ((boi == null) ||
-                    (boi.getValue1().getOpcode() != ByteCodeConstants.DUPLOAD) ||
-                    (boi.getValue1().getOffset() != dupstore.getOffset()) ||
-                    ((boi.getValue2().getOpcode() != ByteCodeConstants.ICONST) &&
-                     (boi.getValue2().getOpcode() != ByteCodeConstants.LCONST) &&
-                     (boi.getValue2().getOpcode() != ByteCodeConstants.DCONST) &&
-                     (boi.getValue2().getOpcode() != ByteCodeConstants.FCONST))) {
+                if (boi == null ||
+                    boi.getValue1().getOpcode() != ByteCodeConstants.DUPLOAD ||
+                    boi.getValue1().getOffset() != dupstore.getOffset() ||
+                    boi.getValue2().getOpcode() != ByteCodeConstants.ICONST &&
+                     boi.getValue2().getOpcode() != ByteCodeConstants.LCONST &&
+                     boi.getValue2().getOpcode() != ByteCodeConstants.DCONST &&
+                     boi.getValue2().getOpcode() != ByteCodeConstants.FCONST) {
 					continue;
 				}
 

@@ -66,7 +66,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             BaseFieldDeclarator annotationDeclaratorList = declaration.getAnnotationDeclarators();
             BodyDeclaration bodyDeclaration = declaration.getBodyDeclaration();
 
-            if ((annotationDeclaratorList == null) && (bodyDeclaration == null)) {
+            if (annotationDeclaratorList == null && bodyDeclaration == null) {
                 tokens.add(TextToken.SPACE);
                 tokens.add(TextToken.LEFTRIGHTCURLYBRACKETS);
             } else {
@@ -173,10 +173,10 @@ public class CompilationUnitVisitor extends StatementVisitor {
                 if (tokens.isEmpty()) {
                     JavaFragmentFactory.addSpacerBetweenArrayInitializerBlock(fragments);
 
-                    if ((size > 10) && (i % 10 == 0)) {
+                    if (size > 10 && i % 10 == 0) {
                         JavaFragmentFactory.addNewLineBetweenArrayInitializerBlock(fragments);
                     }
-                } else if ((size > 10) && (i % 10 == 0)) {
+                } else if (size > 10 && i % 10 == 0) {
                     fragments.addTokensFragment(tokens);
 
                     JavaFragmentFactory.addSpacerBetweenArrayInitializerBlock(fragments);
@@ -220,7 +220,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
             // Build fragments for super type
             BaseType superType = declaration.getSuperType();
-            if ((superType != null) && !superType.equals(ObjectType.TYPE_OBJECT)) {
+            if (superType != null && !superType.equals(ObjectType.TYPE_OBJECT)) {
                 fragments.addTokensFragment(tokens);
 
                 JavaFragmentFactory.addSpacerBeforeExtends(fragments);
@@ -416,7 +416,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
                 restoreContext();
 
                 fragments.add(EndMovableJavaBlockFragment.END_MOVABLE_BLOCK);
-            } else if ((statements != null) && (statements.size() > 0)) {
+            } else if (statements != null && statements.size() > 0) {
                 int fragmentCount0 = fragments.size();
                 fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_METHOD_BLOCK);
 
@@ -518,11 +518,11 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
             List<EnumDeclaration.Constant> constants = declaration.getConstants();
 
-            if ((constants != null) && (!constants.isEmpty())) {
+            if (constants != null && !constants.isEmpty()) {
                 int preferredLineNumber = 0;
 
                 for (EnumDeclaration.Constant constant : constants) {
-                    if ((constant.getArguments() != null) || (constant.getBodyDeclaration() != null)) {
+                    if (constant.getArguments() != null || constant.getBodyDeclaration() != null) {
                         preferredLineNumber = 1;
                         break;
                     }
@@ -546,7 +546,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             BodyDeclaration bodyDeclaration = declaration.getBodyDeclaration();
 
             if (bodyDeclaration != null) {
-                if ((constants != null) && (!constants.isEmpty())) {
+                if (constants != null && !constants.isEmpty()) {
                     Fragments f = fragments;
 
                     fragments = new Fragments();
@@ -845,7 +845,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
         tokens = new Tokens();
 
-        if ((declaration.getRequires() != null) && !declaration.getRequires().isEmpty()) {
+        if (declaration.getRequires() != null && !declaration.getRequires().isEmpty()) {
             Iterator<ModuleDeclaration.ModuleInfo> iterator = declaration.getRequires().iterator();
             visitModuleDeclaration(iterator.next());
             while (iterator.hasNext()) {
@@ -855,7 +855,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             needNewLine = true;
         }
 
-        if ((declaration.getExports() != null) && !declaration.getExports().isEmpty()) {
+        if (declaration.getExports() != null && !declaration.getExports().isEmpty()) {
             if (needNewLine) {
                 tokens.add(NewLineToken.NEWLINE_2);
             }
@@ -868,7 +868,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             needNewLine = true;
         }
 
-        if ((declaration.getOpens() != null) && !declaration.getOpens().isEmpty()) {
+        if (declaration.getOpens() != null && !declaration.getOpens().isEmpty()) {
             if (needNewLine) {
                 tokens.add(NewLineToken.NEWLINE_2);
             }
@@ -881,7 +881,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             needNewLine = true;
         }
 
-        if ((declaration.getUses() != null) && !declaration.getUses().isEmpty()) {
+        if (declaration.getUses() != null && !declaration.getUses().isEmpty()) {
             if (needNewLine) {
                 tokens.add(NewLineToken.NEWLINE_2);
             }
@@ -894,7 +894,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             needNewLine = true;
         }
 
-        if ((declaration.getProvides() != null) && !declaration.getProvides().isEmpty()) {
+        if (declaration.getProvides() != null && !declaration.getProvides().isEmpty()) {
             if (needNewLine) {
                 tokens.add(NewLineToken.NEWLINE_2);
             }
@@ -935,7 +935,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
         tokens.add(TextToken.SPACE);
         tokens.add(new ReferenceToken(Printer.PACKAGE, packageInfo.getInternalName(), packageInfo.getInternalName().replace('/', '.'), null, null));
 
-        if ((packageInfo.getModuleInfoNames() != null) && !packageInfo.getModuleInfoNames().isEmpty()) {
+        if (packageInfo.getModuleInfoNames() != null && !packageInfo.getModuleInfoNames().isEmpty()) {
             tokens.add(TextToken.SPACE);
             tokens.add(TO);
 
@@ -1072,7 +1072,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
                     iterator.next().accept(this);
                 }
 
-                if ((fragmentCount1 != -1) && (fragmentCount2 == fragments.size())) {
+                if (fragmentCount1 != -1 && fragmentCount2 == fragments.size()) {
                     fragments.subList(fragmentCount1, fragments.size()).clear();
                 }
             }

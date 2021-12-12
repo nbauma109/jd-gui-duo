@@ -74,6 +74,6 @@ public class ControlFlowGraph {
     }
 
     public int getLineNumber(int offset) {
-        return (offsetToLineNumbers == null || offset < 0) ? 0 : offsetToLineNumbers[offset];
+        return offsetToLineNumbers == null || offset < 0 ? 0 : offsetToLineNumbers[offset];
     }
 }

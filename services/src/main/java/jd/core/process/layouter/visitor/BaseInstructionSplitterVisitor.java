@@ -39,7 +39,7 @@ public abstract class BaseInstructionSplitterVisitor
     public void start(ClassFile classFile)
     {
         this.classFile = classFile;
-        this.constants = (classFile == null) ? null : classFile.getConstantPool();
+        this.constants = classFile == null ? null : classFile.getConstantPool();
     }
 
     public void visit(Instruction instruction)
@@ -162,12 +162,12 @@ public abstract class BaseInstructionSplitterVisitor
                     ClassFile innerClassFile =
                         this.classFile.getInnerClassFile(internalClassName);
 
-                    if ((innerClassFile != null) &&
-                        (innerClassFile.getInternalAnonymousClassName() != null))
+                    if (innerClassFile != null &&
+                        innerClassFile.getInternalAnonymousClassName() != null)
                     {
                         // Anonymous new invoke
                         visitAnonymousNewInvoke(
-                            (parent==null) ? in : parent, in, innerClassFile);
+                            parent==null ? in : parent, in, innerClassFile);
                     }
                     //else
                     //{

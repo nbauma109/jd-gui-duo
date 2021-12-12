@@ -29,7 +29,7 @@ public class SwitchStatementMaker {
         int size = statements.size();
         SwitchStatement previousSwitchStatement = (SwitchStatement)statements.get(size - 2);
 
-        if ((previousSwitchStatement.getCondition().getLineNumber() == switchStatement.getCondition().getLineNumber()) && previousSwitchStatement.getCondition().isMethodInvocationExpression()) {
+        if (previousSwitchStatement.getCondition().getLineNumber() == switchStatement.getCondition().getLineNumber() && previousSwitchStatement.getCondition().isMethodInvocationExpression()) {
             Expression expression = previousSwitchStatement.getCondition();
 
             if (expression.isMethodInvocationExpression()) {
@@ -67,7 +67,7 @@ public class SwitchStatementMaker {
                                                 for (SwitchStatement.Block block : previousSwitchStatement.getBlocks()) {
                                                     BaseStatement stmts = block.getStatements();
 
-                                                    assert (stmts != null) && stmts.isStatements() && (stmts.size() > 0);
+                                                    assert stmts != null && stmts.isStatements() && stmts.size() > 0;
 
                                                     for (Statement stmt : stmts) {
                                                         if (!stmt.isIfStatement()) {

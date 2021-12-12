@@ -36,7 +36,7 @@ public class SIPushFactory implements InstructionFactory
             int lineNumber, boolean[] jumps)
     {
         final int opcode = code[offset] & 255;
-        final int s = ((code[offset+1] & 0xFF) << 8) | (code[offset+2] & 0xFF);
+        final int s = (code[offset+1] & 0xFF) << 8 | code[offset+2] & 0xFF;
 
         stack.push(new SIPush(opcode, offset, lineNumber, s));
 

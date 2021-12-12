@@ -384,8 +384,8 @@ public class AccessorAnalyzer
             InvokeNoStaticInstruction insi =
                 (InvokeNoStaticInstruction)instruction;
 
-            if ((insi.getObjectref().getOpcode() != Const.ALOAD) ||
-                (((ALoad)insi.getObjectref()).getIndex() != 0)) {
+            if (insi.getObjectref().getOpcode() != Const.ALOAD ||
+                ((ALoad)insi.getObjectref()).getIndex() != 0) {
 				return false;
 			}
 

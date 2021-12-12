@@ -200,7 +200,7 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
         int lastLineNumber;
 
         if (expression == null) {
-            lastLineNumber = (firstLineNumber == UNKNOWN_LINE_NUMBER) ? UNKNOWN_LINE_NUMBER : firstLineNumber+1;
+            lastLineNumber = firstLineNumber == UNKNOWN_LINE_NUMBER ? UNKNOWN_LINE_NUMBER : firstLineNumber+1;
         } else {
             lastLineNumber = expression.getLineNumber();
         }
@@ -286,7 +286,7 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
 
                     int firstLineNumber = searchFirstLineNumberVisitor.getLineNumber();
 
-                    data.declaration.setFirstLineNumber((firstLineNumber==-1) ? 0 : firstLineNumber);
+                    data.declaration.setFirstLineNumber(firstLineNumber==-1 ? 0 : firstLineNumber);
                 }
             }
         }

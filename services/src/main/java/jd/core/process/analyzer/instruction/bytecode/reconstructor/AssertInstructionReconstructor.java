@@ -74,11 +74,11 @@ public class AssertInstructionReconstructor
             int jumpOffset = cbl.getJumpOffset();
             int lastOffset = list.get(index+1).getOffset();
 
-            if ((athrow.getOffset() >= jumpOffset) || (jumpOffset > lastOffset)) {
+            if (athrow.getOffset() >= jumpOffset || jumpOffset > lastOffset) {
 				continue;
 			}
 
-            if ((cbl.getCmp() != 2) || (cbl.getInstructions().isEmpty())) {
+            if (cbl.getCmp() != 2 || cbl.getInstructions().isEmpty()) {
 				continue;
 			}
 
@@ -88,7 +88,7 @@ public class AssertInstructionReconstructor
 			}
 
             IfInstruction if1 = (IfInstruction)instruction;
-            if ((if1.getCmp() != 7) || (if1.getValue().getOpcode() != Const.GETSTATIC)) {
+            if (if1.getCmp() != 7 || if1.getValue().getOpcode() != Const.GETSTATIC) {
 				continue;
 			}
 
@@ -120,7 +120,7 @@ public class AssertInstructionReconstructor
             // Remove first condition "!($assertionsDisabled)"
             cbl.getInstructions().remove(0);
 
-            Instruction msg = (in.getArgs().isEmpty()) ? null : in.getArgs().get(0);
+            Instruction msg = in.getArgs().isEmpty() ? null : in.getArgs().get(0);
             list.remove(index--);
 
             list.set(index, new AssertInstruction(

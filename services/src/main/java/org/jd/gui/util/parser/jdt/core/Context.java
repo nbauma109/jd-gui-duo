@@ -19,7 +19,7 @@ public class Context {
     public String getDescriptor(String name) {
         String descriptor = nameToDescriptor.get(name);
 
-        if ((descriptor == null) && (outerContext != null)) {
+        if (descriptor == null && outerContext != null) {
             descriptor = outerContext.getDescriptor(name);
         }
 

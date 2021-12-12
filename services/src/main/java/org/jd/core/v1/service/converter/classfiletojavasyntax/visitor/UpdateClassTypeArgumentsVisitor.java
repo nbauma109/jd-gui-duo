@@ -29,7 +29,7 @@ public class UpdateClassTypeArgumentsVisitor extends AbstractTypeArgumentVisitor
 
         type.accept(this);
 
-        result = (result == type) ? argument : new WildcardExtendsTypeArgument((Type)result);
+        result = result == type ? argument : new WildcardExtendsTypeArgument((Type)result);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class UpdateClassTypeArgumentsVisitor extends AbstractTypeArgumentVisitor
 
         type.accept(this);
 
-        result = (result == type) ? argument : new WildcardSuperTypeArgument((Type)result);
+        result = result == type ? argument : new WildcardSuperTypeArgument((Type)result);
     }
 
     @Override
@@ -83,7 +83,7 @@ public class UpdateClassTypeArgumentsVisitor extends AbstractTypeArgumentVisitor
                 result = type;
             } else {
                 typeArguments.accept(this);
-                result = (result == typeArguments) ? type : type.createType(result);
+                result = result == typeArguments ? type : type.createType(result);
             }
         } else {
             ObjectType outerObjectType = (ObjectType) result;

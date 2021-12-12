@@ -62,7 +62,7 @@ public class DirectoryIndexerPreferencesProvider extends JPanel implements Prefe
     public void loadPreferences(Map<String, String> preferences) {
         String preference = preferences.get(MAXIMUM_DEPTH_KEY);
 
-        maximumDepthTextField.setText((preference != null) ? preference : "15");
+        maximumDepthTextField.setText(preference != null ? preference : "15");
         maximumDepthTextField.setCaretPosition(maximumDepthTextField.getText().length());
     }
 
@@ -77,7 +77,7 @@ public class DirectoryIndexerPreferencesProvider extends JPanel implements Prefe
             String maxDepth = maximumDepthTextField.getText();
             if (maxDepth != null && maxDepth.matches("\\d+")) {
                 int i = Integer.parseInt(maxDepth);
-                return (i > 0) && (i <= MAX_VALUE);
+                return i > 0 && i <= MAX_VALUE;
             }
         } catch (NumberFormatException e) {
             assert ExceptionUtil.printStackTrace(e);

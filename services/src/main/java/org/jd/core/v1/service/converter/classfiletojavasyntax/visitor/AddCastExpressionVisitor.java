@@ -414,7 +414,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
                     ObjectType ot1 = (ObjectType)type;
                     ObjectType ot2 = (ObjectType)ceExpressionType;
 
-                    if (ot1.equals(ot2) || (unique && typeMaker.isAssignable(typeBounds, ot1, ot2))) {
+                    if (ot1.equals(ot2) || unique && typeMaker.isAssignable(typeBounds, ot1, ot2)) {
                         // Remove cast expression
                         expression = expression.getExpression();
                     }

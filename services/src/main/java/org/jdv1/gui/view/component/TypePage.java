@@ -172,7 +172,7 @@ public abstract class TypePage extends CustomLineNumbersPage
 
     public static void matchFragmentAndAddDocumentRange(String fragment, Map<String, DeclarationData> declarations,
             List<DocumentRange> ranges) {
-        if ((fragment.indexOf('?') != -1) || (fragment.indexOf('*') != -1)) {
+        if (fragment.indexOf('?') != -1 || fragment.indexOf('*') != -1) {
             // Unknown type and/or descriptor ==> Select all and scroll to the first one
             int lastDash = fragment.lastIndexOf('-');
 
@@ -205,7 +205,7 @@ public abstract class TypePage extends CustomLineNumbersPage
 
                     for (Map.Entry<String, DeclarationData> entry : declarations.entrySet()) {
                         String key = entry.getKey();
-                        if ((key.indexOf(slashAndTypeNameAndName) != -1) || (key.startsWith(typeNameAndName))) {
+                        if (key.indexOf(slashAndTypeNameAndName) != -1 || key.startsWith(typeNameAndName)) {
                             int index = key.lastIndexOf('-') + 1;
                             if (matchDescriptors.test(suffix, key.substring(index))) {
                                 ranges.add(new DocumentRange(entry.getValue().getStartPosition(),
@@ -248,7 +248,7 @@ public abstract class TypePage extends CustomLineNumbersPage
         String highlightFlags = parameters.get("highlightFlags");
         String highlightPattern = parameters.get("highlightPattern");
 
-        if ((highlightFlags != null) && (highlightPattern != null)) {
+        if (highlightFlags != null && highlightPattern != null) {
             String highlightScope = parameters.get("highlightScope");
             String regexp = createRegExp(highlightPattern);
             Pattern pattern = Pattern.compile(regexp + ".*");
@@ -269,10 +269,10 @@ public abstract class TypePage extends CustomLineNumbersPage
                 }
             }
 
-            boolean t = (highlightFlags.indexOf('t') != -1); // Highlight types
-            boolean f = (highlightFlags.indexOf('f') != -1); // Highlight fields
-            boolean m = (highlightFlags.indexOf('m') != -1); // Highlight methods
-            boolean c = (highlightFlags.indexOf('c') != -1); // Highlight constructors
+            boolean t = highlightFlags.indexOf('t') != -1; // Highlight types
+            boolean f = highlightFlags.indexOf('f') != -1; // Highlight fields
+            boolean m = highlightFlags.indexOf('m') != -1; // Highlight methods
+            boolean c = highlightFlags.indexOf('c') != -1; // Highlight constructors
 
             if (highlightFlags.indexOf('d') != -1) {
                 // Highlight declarations
@@ -280,11 +280,11 @@ public abstract class TypePage extends CustomLineNumbersPage
                     DeclarationData declaration = entry.getValue();
 
                     if (matchScope(highlightScope, declaration.getTypeName())) {
-                        if ((t && declaration.isAType()) || (c && declaration.isAConstructor())) {
+                        if (t && declaration.isAType() || c && declaration.isAConstructor()) {
                             matchAndAddDocumentRange(pattern, getMostInnerTypeName(declaration.getTypeName()),
                                     declaration.getStartPosition(), declaration.getEndPosition(), ranges);
                         }
-                        if ((f && declaration.isAField()) || (m && declaration.isAMethod())) {
+                        if (f && declaration.isAField() || m && declaration.isAMethod()) {
                             matchAndAddDocumentRange(pattern, declaration.getName(), declaration.getStartPosition(),
                                     declaration.getEndPosition(), ranges);
                         }
@@ -299,11 +299,11 @@ public abstract class TypePage extends CustomLineNumbersPage
                     ReferenceData reference = ((HyperlinkReferenceData) hyperlink).getReference();
 
                     if (matchScope(highlightScope, reference.getOwner())) {
-                        if ((t && reference.isAType()) || (c && reference.isAConstructor())) {
+                        if (t && reference.isAType() || c && reference.isAConstructor()) {
                             matchAndAddDocumentRange(pattern, getMostInnerTypeName(reference.getTypeName()),
                                     hyperlink.getStartPosition(), hyperlink.getEndPosition(), ranges);
                         }
-                        if ((f && reference.isAField()) || (m && reference.isAMethod())) {
+                        if (f && reference.isAField() || m && reference.isAMethod()) {
                             matchAndAddDocumentRange(pattern, reference.getName(), hyperlink.getStartPosition(),
                                     hyperlink.getEndPosition(), ranges);
                         }
@@ -314,7 +314,7 @@ public abstract class TypePage extends CustomLineNumbersPage
     }
 
     public static boolean matchScope(String scope, String type) {
-        if ((scope == null) || scope.isEmpty()) {
+        if (scope == null || scope.isEmpty()) {
             return true;
         }
         if (scope.charAt(0) == '*') {
@@ -378,7 +378,7 @@ public abstract class TypePage extends CustomLineNumbersPage
                         if (futureIndexes.isDone()) {
                             @SuppressWarnings("rawtypes")
                             Map<String, Collection> index = futureIndexes.get().getIndex("typeDeclarations");
-                            if ((index != null) && (index.get(typeName) != null)) {
+                            if (index != null && index.get(typeName) != null) {
                                 enabled = true;
                                 break;
                             }

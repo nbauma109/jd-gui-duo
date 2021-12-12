@@ -31,8 +31,8 @@ public class ReferenceData {
     }
 
     public boolean isAType() { return getName() == null; }
-    public boolean isAField() { return (getDescriptor() != null) && getDescriptor().charAt(0) != '('; }
-    public boolean isAMethod() { return (getDescriptor() != null) && getDescriptor().charAt(0) == '('; }
+    public boolean isAField() { return getDescriptor() != null && getDescriptor().charAt(0) != '('; }
+    public boolean isAMethod() { return getDescriptor() != null && getDescriptor().charAt(0) == '('; }
     public boolean isAConstructor() { return StringConstants.INSTANCE_CONSTRUCTOR.equals(getName()); }
 
     public void setTypeName(String typeName) {

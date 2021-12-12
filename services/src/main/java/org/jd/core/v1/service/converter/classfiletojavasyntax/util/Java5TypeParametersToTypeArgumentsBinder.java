@@ -377,7 +377,7 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
 
                     if (exp.isSuperExpression()) {
                         typeTypes = typeMaker.makeTypeTypes(internalTypeName);
-                        typeArguments = (typeTypes == null || typeTypes.getSuperType() == null) ? null : typeTypes.getSuperType().getTypeArguments();
+                        typeArguments = typeTypes == null || typeTypes.getSuperType() == null ? null : typeTypes.getSuperType().getTypeArguments();
                     } else if (exp.isMethodInvocationExpression()) {
                         Type t = getExpressionType((ClassFileMethodInvocationExpression) exp);
                         if (t != null && t.isObjectType()) {
@@ -541,7 +541,7 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
             ObjectType objectType = (ObjectType)type;
 
             if (objectType.getTypeArguments() != null && !objectType.getTypeArguments().equals(WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT)) {
-                if (!(expression.getType().isObjectType())) {
+                if (!expression.getType().isObjectType()) {
                     throw new IllegalArgumentException("TypeParametersToTypeArgumentsBinder.visit(CastExpression ce) : invalid object type");
                 }
 

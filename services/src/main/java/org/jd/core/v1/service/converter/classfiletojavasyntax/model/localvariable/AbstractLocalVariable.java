@@ -26,7 +26,7 @@ public abstract class AbstractLocalVariable {
     protected Set<AbstractLocalVariable> variablesOnLeft = null;
 
     protected AbstractLocalVariable(int index, int offset, String name) {
-        this(index, offset, name, (offset == 0));
+        this(index, offset, name, offset == 0);
     }
 
     protected AbstractLocalVariable(int index, int offset, String name, boolean declared) {

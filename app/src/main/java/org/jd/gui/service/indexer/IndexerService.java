@@ -32,7 +32,7 @@ public class IndexerService {
 
     public Indexer get(Container.Entry entry) {
         Indexer indexer = get(entry.getContainer().getType(), entry);
-        return (indexer != null) ? indexer : get("*", entry);
+        return indexer != null ? indexer : get("*", entry);
     }
 
     protected Indexer get(String containerType, Container.Entry entry) {

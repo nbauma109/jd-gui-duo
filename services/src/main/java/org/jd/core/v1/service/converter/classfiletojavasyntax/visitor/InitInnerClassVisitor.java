@@ -238,7 +238,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                 if (expression.getInternalTypeName().equals(bodyDeclaration.getInternalTypeName())) {
                     if (expression.getName().equals(outerTypeFieldName)) {
                         ObjectType objectType = (ObjectType)expression.getType();
-                        Expression exp = (expression.getExpression() == null) ? expression : expression.getExpression();
+                        Expression exp = expression.getExpression() == null ? expression : expression.getExpression();
                         expression.setExpression(new ObjectTypeReferenceExpression(exp.getLineNumber(), objectType.createType(null)));
                         expression.setName("this");
                     }
@@ -251,7 +251,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                         ObjectType objectType = (ObjectType)expression.getType();
 
                         if (outerInternalTypeName.equals(objectType.getInternalName())) {
-                            Expression exp = (expression.getExpression() == null) ? expression : expression.getExpression();
+                            Expression exp = expression.getExpression() == null ? expression : expression.getExpression();
                             expression.setExpression(new ObjectTypeReferenceExpression(exp.getLineNumber(), objectType.createType(null)));
                             expression.setName("this");
                         }

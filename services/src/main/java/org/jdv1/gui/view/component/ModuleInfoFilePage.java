@@ -146,7 +146,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
 
         Marker.clearMarkAllHighlights(textArea);
 
-        if ((fragment != null) && (listener.getDeclarations().size() == 1)) {
+        if (fragment != null && listener.getDeclarations().size() == 1) {
             DeclarationData declaration = listener.getDeclarations().entrySet().iterator().next().getValue();
 
             if (fragment.equals(declaration.getTypeName())) {
@@ -160,12 +160,12 @@ public class ModuleInfoFilePage extends ClassFilePage {
             String highlightFlags = parameters.get("highlightFlags");
             String highlightPattern = parameters.get("highlightPattern");
 
-            if ((highlightFlags != null) && (highlightPattern != null)) {
+            if (highlightFlags != null && highlightPattern != null) {
                 String regexp = createRegExp(highlightPattern);
                 Pattern pattern = Pattern.compile(regexp + ".*");
 
-                boolean t = (highlightFlags.indexOf('t') != -1); // Highlight types
-                boolean m = (highlightFlags.indexOf('M') != -1); // Highlight modules
+                boolean t = highlightFlags.indexOf('t') != -1; // Highlight types
+                boolean m = highlightFlags.indexOf('M') != -1; // Highlight modules
 
                 if (highlightFlags.indexOf('d') != -1) {
                     // Highlight declarations
@@ -185,10 +185,10 @@ public class ModuleInfoFilePage extends ClassFilePage {
                         ReferenceData reference = ((HyperlinkReferenceData)hyperlink).getReference();
                         ModuleInfoReferenceData moduleInfoReferenceData = (ModuleInfoReferenceData)reference;
 
-                        if (t && (moduleInfoReferenceData.type == TYPE)) {
+                        if (t && moduleInfoReferenceData.type == TYPE) {
                             matchAndAddDocumentRange(pattern, getMostInnerTypeName(moduleInfoReferenceData.getTypeName()), hyperlink.getStartPosition(), hyperlink.getEndPosition(), ranges);
                         }
-                        if (m && (moduleInfoReferenceData.type == MODULE)) {
+                        if (m && moduleInfoReferenceData.type == MODULE) {
                             matchAndAddDocumentRange(pattern, moduleInfoReferenceData.getName(), hyperlink.getStartPosition(), hyperlink.getEndPosition(), ranges);
                         }
                     }
@@ -240,7 +240,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
                                 break;
                         }
 
-                        if ((index != null) && (index.get(key) != null)) {
+                        if (index != null && index.get(key) != null) {
                             enabled = true;
                             break;
                         }
@@ -294,7 +294,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
 
         @Override
         public void printReference(int type, String internalTypeName, String name, String descriptor, String ownerInternalName) {
-            String key = (type == MODULE) ? name : internalTypeName;
+            String key = type == MODULE ? name : internalTypeName;
             ReferenceData reference = referencesCache.computeIfAbsent(key, k -> {
                 ReferenceData moduleInfoReferenceData = new ModuleInfoReferenceData(type, internalTypeName, name, descriptor, ownerInternalName);
                 listener.getReferences().add(moduleInfoReferenceData);
@@ -357,7 +357,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
                 switch (currentTokenType) {
                     case TokenTypes.NULL:
                         currentTokenStart = i;   // Starting a new token here.
-                        if (RSyntaxUtilities.isLetter(c) || (c == '_')) {
+                        if (RSyntaxUtilities.isLetter(c) || c == '_') {
                             currentTokenType = TokenTypes.IDENTIFIER;
                         } else {
                             currentTokenType = TokenTypes.WHITESPACE;
@@ -365,14 +365,14 @@ public class ModuleInfoFilePage extends ClassFilePage {
                         break;
                     default: // Should never happen
                     case TokenTypes.WHITESPACE:
-                        if (RSyntaxUtilities.isLetter(c) || (c == '_')) {
+                        if (RSyntaxUtilities.isLetter(c) || c == '_') {
                             addToken(text, currentTokenStart, i-1, TokenTypes.WHITESPACE, newStartOffset+currentTokenStart);
                             currentTokenStart = i;
                             currentTokenType = TokenTypes.IDENTIFIER;
                         }
                         break;
                     case TokenTypes.IDENTIFIER:
-                        if (!RSyntaxUtilities.isLetterOrDigit(c) && (c != '_') && (c != '.')) {
+                        if (!RSyntaxUtilities.isLetterOrDigit(c) && c != '_' && c != '.') {
                             addToken(text, currentTokenStart, i-1, TokenTypes.IDENTIFIER, newStartOffset+currentTokenStart);
                             currentTokenStart = i;
                             currentTokenType = TokenTypes.WHITESPACE;

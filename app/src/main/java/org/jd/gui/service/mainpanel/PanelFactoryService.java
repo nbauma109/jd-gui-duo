@@ -32,6 +32,6 @@ public class PanelFactoryService {
 
     public PanelFactory get(Container container) {
         PanelFactory factory = mapProviders.get(container.getType());
-        return (factory != null) ? factory : mapProviders.get("default");
+        return factory != null ? factory : mapProviders.get("default");
     }
 }

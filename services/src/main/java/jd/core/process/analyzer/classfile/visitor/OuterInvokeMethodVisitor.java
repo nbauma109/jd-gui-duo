@@ -71,8 +71,8 @@ public class OuterInvokeMethodVisitor extends OuterGetStaticVisitor
 
         Accessor accessor = classFile.getAccessor(name, descriptor);
 
-        if ((accessor == null) ||
-            (accessor.getTag() != AccessorConstants.ACCESSOR_INVOKEMETHOD)) {
+        if (accessor == null ||
+            accessor.getTag() != AccessorConstants.ACCESSOR_INVOKEMETHOD) {
 			return null;
 		}
 

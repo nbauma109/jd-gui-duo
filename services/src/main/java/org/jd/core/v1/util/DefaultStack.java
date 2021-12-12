@@ -70,7 +70,7 @@ public class DefaultStack<E> {
     public void replace(E old, E nevv) {
         int i = head - 1;
 
-        while ((i >=0) && (elements[i] == old)) {
+        while (i >=0 && elements[i] == old) {
             elements[i--] = nevv;
         }
     }

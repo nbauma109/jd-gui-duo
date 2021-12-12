@@ -45,7 +45,7 @@ public class IfFactory implements InstructionFactory
     {
         final int opcode = code[offset] & 255;
         final int branch =
-            (short)(((code[offset+1] & 255) << 8) | (code[offset+2] & 255));
+            (short)((code[offset+1] & 255) << 8 | code[offset+2] & 255);
         final Instruction value = stack.pop();
 
         list.add(new IfInstruction(

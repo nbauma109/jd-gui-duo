@@ -61,7 +61,7 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
         int lastOffset = this.list.get(this.index2).getOffset();
 
         // S'il reste un fragment d'instruction a traiter...
-        if ((this.index1 != this.index2) || (this.offset1 != lastOffset) || lastOffset == 0)
+        if (this.index1 != this.index2 || this.offset1 != lastOffset || lastOffset == 0)
         {
             // Add last part of instruction
             int lastLineNumber = Instruction.UNKNOWN_LINE_NUMBER;
@@ -174,8 +174,8 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
     {
         int preferedLineCount;
 
-        if ((this.firstLineNumber != Instruction.UNKNOWN_LINE_NUMBER) &&
-            (lastLineNumber != Instruction.UNKNOWN_LINE_NUMBER))
+        if (this.firstLineNumber != Instruction.UNKNOWN_LINE_NUMBER &&
+            lastLineNumber != Instruction.UNKNOWN_LINE_NUMBER)
         {
             if (lastLineNumber < this.firstLineNumber)
             {

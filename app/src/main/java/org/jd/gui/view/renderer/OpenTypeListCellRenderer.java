@@ -42,7 +42,7 @@ public class OpenTypeListCellRenderer implements ListCellRenderer<OpenTypeListCe
     }
 
     protected static Color infoColor(Color c) {
-        if (c.getRed() + c.getGreen() + c.getBlue() > (3*127)) {
+        if (c.getRed() + c.getGreen() + c.getBlue() > 3*127) {
             return new Color(
                     (int)((c.getRed()-127)  *0.7 + 127),
                     (int)((c.getGreen()-127)*0.7 + 127),
@@ -63,7 +63,7 @@ public class OpenTypeListCellRenderer implements ListCellRenderer<OpenTypeListCe
             label.setText(value.getLabel());
             label.setIcon(value.getIcon());
 
-            info.setText((value.getPackag() != null) ? " - "+value.getPackag() : "");
+            info.setText(value.getPackag() != null ? " - "+value.getPackag() : "");
 
             if (selected) {
                 label.setForeground(textSelectionColor);

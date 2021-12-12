@@ -26,7 +26,7 @@ public class StringConcatenationUtil {
         if (expression.isMethodInvocationExpression()) {
             MethodInvocationExpression mie = (MethodInvocationExpression) expression;
 
-            if ((mie.getParameters() != null) && !mie.getParameters().isList() && "append".equals(mie.getName())) {
+            if (mie.getParameters() != null && !mie.getParameters().isList() && "append".equals(mie.getName())) {
                 Expression concatenatedStringExpression = mie.getParameters().getFirst();
                 Expression expr = mie.getExpression();
                 boolean firstParameterHaveGenericType = false;
@@ -34,7 +34,7 @@ public class StringConcatenationUtil {
                 while (expr.isMethodInvocationExpression()) {
                     mie = (MethodInvocationExpression) expr;
 
-                    if ((mie.getParameters() == null) || mie.getParameters().isList() || !"append".equals(mie.getName())) {
+                    if (mie.getParameters() == null || mie.getParameters().isList() || !"append".equals(mie.getName())) {
                         break;
                     }
 

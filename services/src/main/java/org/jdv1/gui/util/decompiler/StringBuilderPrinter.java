@@ -44,7 +44,7 @@ public class StringBuilderPrinter implements Printer {
     }
 
     protected void escape(String s) {
-        if (unicodeEscape && (s != null)) {
+        if (unicodeEscape && s != null) {
             int length = s.length();
 
             for (int i = 0; i < length; i++) {
@@ -61,14 +61,14 @@ public class StringBuilderPrinter implements Printer {
                     // Write octal format
                     stringBuffer.append("\\u");
 
-                    int z = (c >> 12);
-                    stringBuffer.append((char) ((z <= 9) ? ('0' + z) : (('A' - 10) + z)));
-                    z = ((c >> 8) & 0xF);
-                    stringBuffer.append((char) ((z <= 9) ? ('0' + z) : (('A' - 10) + z)));
-                    z = ((c >> 4) & 0xF);
-                    stringBuffer.append((char) ((z <= 9) ? ('0' + z) : (('A' - 10) + z)));
-                    z = (c & 0xF);
-                    stringBuffer.append((char) ((z <= 9) ? ('0' + z) : (('A' - 10) + z)));
+                    int z = c >> 12;
+                    stringBuffer.append((char) (z <= 9 ? '0' + z : 'A' - 10 + z));
+                    z = c >> 8 & 0xF;
+                    stringBuffer.append((char) (z <= 9 ? '0' + z : 'A' - 10 + z));
+                    z = c >> 4 & 0xF;
+                    stringBuffer.append((char) (z <= 9 ? '0' + z : 'A' - 10 + z));
+                    z = c & 0xF;
+                    stringBuffer.append((char) (z <= 9 ? '0' + z : 'A' - 10 + z));
                 } else {
                     stringBuffer.append(c);
                 }

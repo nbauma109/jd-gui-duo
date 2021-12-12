@@ -130,7 +130,7 @@ public class IntSet
 
     public int get(int index)
     {
-        if ((this.values == null) || (index >= this.size)) {
+        if (this.values == null || index >= this.size) {
 			throw new IndexOutOfBoundsException(
                 "Index: "+index+", Size: "+size);
 		}

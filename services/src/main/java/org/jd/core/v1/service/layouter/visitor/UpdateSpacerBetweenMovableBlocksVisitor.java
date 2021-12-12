@@ -29,7 +29,7 @@ public class UpdateSpacerBetweenMovableBlocksVisitor implements FragmentVisitor 
     public void visit(StartMovableBlockFragment fragment) {
         if (lastSpacer != null) {
             // type=2 ==> Field
-            if ((lastStartMovableBlockFragmentType == 2) && (fragment.getType() == 2)) {
+            if (lastStartMovableBlockFragmentType == 2 && fragment.getType() == 2) {
                 // 1 new line between 2 field declarations
                 lastSpacer.setInitialLineCount(1);
             } else {

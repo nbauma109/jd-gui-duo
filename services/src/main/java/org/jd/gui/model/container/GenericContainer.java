@@ -101,7 +101,7 @@ public class GenericContainer implements Container {
 
                     int strPathLength = strPath.length();
 
-                    if ((strPathLength > 0) && strPath.charAt(strPathLength-1) == '/') {
+                    if (strPathLength > 0 && strPath.charAt(strPathLength-1) == '/') {
                         // Cut last separator
                         strPath = strPath.substring(0, strPathLength-1);
                     }

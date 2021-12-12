@@ -26,7 +26,7 @@ public class SourceLoaderService {
         for (SourceLoader provider : providers) {
             String source = provider.getSource(api, entry);
 
-            if ((source != null) && !source.isEmpty()) {
+            if (source != null && !source.isEmpty()) {
                 return source;
             }
         }
@@ -38,7 +38,7 @@ public class SourceLoaderService {
         for (SourceLoader provider : providers) {
             String source = provider.loadSource(api, entry);
 
-            if ((source != null) && !source.isEmpty()) {
+            if (source != null && !source.isEmpty()) {
                 return source;
             }
         }

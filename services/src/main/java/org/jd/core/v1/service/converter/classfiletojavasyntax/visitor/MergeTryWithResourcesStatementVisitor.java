@@ -43,7 +43,7 @@ public class MergeTryWithResourcesStatementVisitor implements StatementVisitor {
                 ClassFileTryStatement cfswrs1 = (ClassFileTryStatement)statement;
                 ClassFileTryStatement cfswrs2 = (ClassFileTryStatement)first;
 
-                if ((cfswrs2.getResources() != null) && (cfswrs2.getCatchClauses() == null) && (cfswrs2.getFinallyStatements() == null)) {
+                if (cfswrs2.getResources() != null && cfswrs2.getCatchClauses() == null && cfswrs2.getFinallyStatements() == null) {
                     // Merge 'try' and 'try-with-resources" statements
                     cfswrs1.setTryStatements(cfswrs2.getTryStatements());
                     cfswrs1.addResources(cfswrs2.getResources());

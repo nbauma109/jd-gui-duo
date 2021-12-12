@@ -46,7 +46,7 @@ public class Method {
 
     @SuppressWarnings("unchecked")
     public <T extends Attribute> T getAttribute(String name) {
-        return (attributes == null) ? null : (T)attributes.get(name);
+        return attributes == null ? null : (T)attributes.get(name);
     }
 
     public ConstantPool getConstants() {

@@ -78,14 +78,14 @@ public class ByteCodeUtil {
 		        offset += 2;
 		        break;
 		    case IFEQ, IFNE, IFLT, IFGE, IFGT, IFLE, IF_ICMPEQ, IF_ICMPNE, IF_ICMPLT, IF_ICMPGE, IF_ICMPGT, IF_ICMPLE, IF_ACMPEQ, IF_ACMPNE, GOTO, IFNULL, IFNONNULL:
-		        int deltaOffset = (short)(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+		        int deltaOffset = (short)((code[++offset] & 255) << 8 | code[++offset] & 255);
 
 		        if (deltaOffset > 0) {
 		            offset += deltaOffset - 2 - 1;
 		        }
 		        break;
 		    case GOTO_W:
-		        deltaOffset = (((code[++offset] & 255) << 24) | ((code[++offset] & 255) << 16) | ((code[++offset] & 255) << 8) | (code[++offset] & 255));
+		        deltaOffset = (code[++offset] & 255) << 24 | (code[++offset] & 255) << 16 | (code[++offset] & 255) << 8 | code[++offset] & 255;
 
 		        if (deltaOffset > 0) {
 		            offset += deltaOffset - 4 - 1;
@@ -104,21 +104,21 @@ public class ByteCodeUtil {
 		        offset += 4;
 		        break;
 		    case TABLESWITCH:
-		        offset = (offset + 4) & 0xFFFC; // Skip padding
+		        offset = offset + 4 & 0xFFFC; // Skip padding
 		        offset += 4; // Skip default offset
 
-		        int low = ((code[offset++] & 255) << 24) | ((code[offset++] & 255) << 16) | ((code[offset++] & 255) << 8) | (code[offset++] & 255);
-		        int high = ((code[offset++] & 255) << 24) | ((code[offset++] & 255) << 16) | ((code[offset++] & 255) << 8) | (code[offset++] & 255);
+		        int low = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
+		        int high = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
 
-		        offset += (4 * (high - low + 1)) - 1;
+		        offset += 4 * (high - low + 1) - 1;
 		        break;
 		    case LOOKUPSWITCH:
-		        offset = (offset + 4) & 0xFFFC; // Skip padding
+		        offset = offset + 4 & 0xFFFC; // Skip padding
 		        offset += 4; // Skip default offset
 
-		        int count = ((code[offset++] & 255) << 24) | ((code[offset++] & 255) << 16) | ((code[offset++] & 255) << 8) | (code[offset++] & 255);
+		        int count = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
 
-		        offset += (8 * count) - 1;
+		        offset += 8 * count - 1;
 		        break;
 		    case WIDE:
 		        opcode = code[++offset] & 255;
@@ -235,26 +235,26 @@ public class ByteCodeUtil {
                     offset++;
                     break;
                 case TABLESWITCH:
-                    offset = (offset + 4) & 0xFFFC; // Skip padding
+                    offset = offset + 4 & 0xFFFC; // Skip padding
                     offset += 4; // Skip default offset
 
-                    int low = ((code[offset++] & 255) << 24) | ((code[offset++] & 255) << 16) | ((code[offset++] & 255) << 8) | (code[offset++] & 255);
-                    int high = ((code[offset++] & 255) << 24) | ((code[offset++] & 255) << 16) | ((code[offset++] & 255) << 8) | (code[offset++] & 255);
+                    int low = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
+                    int high = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
 
-                    offset += (4 * (high - low + 1)) - 1;
+                    offset += 4 * (high - low + 1) - 1;
                     depth--;
                     break;
                 case LOOKUPSWITCH:
-                    offset = (offset + 4) & 0xFFFC; // Skip padding
+                    offset = offset + 4 & 0xFFFC; // Skip padding
                     offset += 4; // Skip default offset
 
-                    int count = ((code[offset++] & 255) << 24) | ((code[offset++] & 255) << 16) | ((code[offset++] & 255) << 8) | (code[offset++] & 255);
+                    int count = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
 
-                    offset += (8 * count) - 1;
+                    offset += 8 * count - 1;
                     depth--;
                     break;
                 case INVOKEVIRTUAL, INVOKESPECIAL:
-                    constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                    constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
                     descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     depth -= 1 + countMethodParameters(descriptor);
@@ -264,7 +264,7 @@ public class ByteCodeUtil {
                     }
                     break;
                 case INVOKESTATIC:
-                    constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                    constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
                     descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     depth -= countMethodParameters(descriptor);
@@ -274,7 +274,7 @@ public class ByteCodeUtil {
                     }
                     break;
                 case INVOKEINTERFACE:
-                    constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                    constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
                     descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     depth -= 1 + countMethodParameters(descriptor);
@@ -285,7 +285,7 @@ public class ByteCodeUtil {
                     }
                     break;
                 case INVOKEDYNAMIC:
-                    constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                    constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
                     descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     depth -= countMethodParameters(descriptor);
@@ -511,32 +511,32 @@ public class ByteCodeUtil {
                     depth++;
                     break;
                 case TABLESWITCH:
-                    offset = (offset + 4) & 0xFFFC; // Skip padding
+                    offset = offset + 4 & 0xFFFC; // Skip padding
                     offset += 4; // Skip default offset
 
-                    int low = ((code[offset++] & 255) << 24) | ((code[offset++] & 255) << 16) | ((code[offset++] & 255) << 8) | (code[offset++] & 255);
-                    int high = ((code[offset++] & 255) << 24) | ((code[offset++] & 255) << 16) | ((code[offset++] & 255) << 8) | (code[offset++] & 255);
+                    int low = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
+                    int high = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
 
-                    offset += (4 * (high - low + 1)) - 1;
+                    offset += 4 * (high - low + 1) - 1;
                     depth--;
                     if (minDepth > depth) {
 						minDepth = depth;
 					}
                     break;
                 case LOOKUPSWITCH:
-                    offset = (offset + 4) & 0xFFFC; // Skip padding
+                    offset = offset + 4 & 0xFFFC; // Skip padding
                     offset += 4; // Skip default offset
 
-                    int count = ((code[offset++] & 255) << 24) | ((code[offset++] & 255) << 16) | ((code[offset++] & 255) << 8) | (code[offset++] & 255);
+                    int count = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
 
-                    offset += (8 * count) - 1;
+                    offset += 8 * count - 1;
                     depth--;
                     if (minDepth > depth) {
 						minDepth = depth;
 					}
                     break;
                 case INVOKEVIRTUAL, INVOKESPECIAL:
-                    constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                    constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
                     descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     depth -= 1 + countMethodParameters(descriptor);
@@ -549,7 +549,7 @@ public class ByteCodeUtil {
                     }
                     break;
                 case INVOKESTATIC:
-                    constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                    constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
                     descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     depth -= countMethodParameters(descriptor);
@@ -562,7 +562,7 @@ public class ByteCodeUtil {
                     }
                     break;
                 case INVOKEINTERFACE:
-                    constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                    constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
                     descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     depth -= 1 + countMethodParameters(descriptor);
@@ -576,7 +576,7 @@ public class ByteCodeUtil {
                     }
                     break;
                 case INVOKEDYNAMIC:
-                    constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                    constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
                     descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     depth -= countMethodParameters(descriptor);
@@ -614,7 +614,7 @@ public class ByteCodeUtil {
                     break;
                 case MULTIANEWARRAY:
                     offset += 3;
-                    depth -= (code[offset] & 255);
+                    depth -= code[offset] & 255;
                     if (minDepth > depth) {
 						minDepth = depth;
 					}
@@ -638,7 +638,7 @@ public class ByteCodeUtil {
         int i = 2;
         char c = descriptor.charAt(1);
 
-        assert (descriptor.length() > 2) && (descriptor.charAt(0) == '(');
+        assert descriptor.length() > 2 && descriptor.charAt(0) == '(';
 
         while (c != ')') {
             while (c == '[') {

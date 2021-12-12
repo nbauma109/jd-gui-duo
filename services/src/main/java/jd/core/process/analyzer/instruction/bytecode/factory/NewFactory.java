@@ -36,7 +36,7 @@ public class NewFactory implements InstructionFactory
             int lineNumber, boolean[] jumps)
     {
         final int opcode = code[offset] & 255;
-        final int index = ((code[offset+1] & 255) << 8) | (code[offset+2] & 255);
+        final int index = (code[offset+1] & 255) << 8 | code[offset+2] & 255;
         final Instruction instruction = new New(
             opcode, offset, lineNumber, index);
 

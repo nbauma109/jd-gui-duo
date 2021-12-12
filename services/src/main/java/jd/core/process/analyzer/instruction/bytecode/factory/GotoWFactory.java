@@ -36,8 +36,8 @@ public class GotoWFactory implements InstructionFactory
             int lineNumber, boolean[] jumps)
     {
         final int opcode = code[offset] & 255;
-        final int value = ((code[offset+1] & 255) << 24) | ((code[offset+2] & 255) << 16) |
-                          ((code[offset+3] & 255) << 8 ) |  (code[offset+4] & 255);
+        final int value = (code[offset+1] & 255) << 24 | (code[offset+2] & 255) << 16 |
+                          (code[offset+3] & 255) << 8 |  code[offset+4] & 255;
 
         list.add(new Goto(
             Const.GOTO, offset, lineNumber, value));

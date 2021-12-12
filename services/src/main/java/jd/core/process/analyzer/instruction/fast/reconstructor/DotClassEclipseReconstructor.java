@@ -96,21 +96,21 @@ public class DotClassEclipseReconstructor
 
             FastTry ft = (FastTry)instruction;
 
-            if ((ft.getCatches().size() != 1) || (ft.getFinallyInstructions() != null) ||
-                (ft.getInstructions().size() != 2)) {
+            if (ft.getCatches().size() != 1 || ft.getFinallyInstructions() != null ||
+                ft.getInstructions().size() != 2) {
 				continue;
 			}
 
             FastCatch fc = ft.getCatches().get(0);
 
-            if ((fc.getInstructions().size() != 1) ||
-                (fc.getOtherExceptionTypeIndexes() != null)) {
+            if (fc.getInstructions().size() != 1 ||
+                fc.getOtherExceptionTypeIndexes() != null) {
 				continue;
 			}
 
             instruction = list.get(i+2);
 
-            if ((ft.getOffset() >= jumpOffset) || (jumpOffset > instruction.getOffset())) {
+            if (ft.getOffset() >= jumpOffset || jumpOffset > instruction.getOffset()) {
 				continue;
 			}
 
@@ -193,9 +193,9 @@ public class DotClassEclipseReconstructor
 
             PutStatic ps = (PutStatic)instruction;
 
-            if ((ps.getIndex() != gs.getIndex()) ||
-                (ps.getValueref().getOpcode() != ByteCodeConstants.DUPLOAD) ||
-                (ps.getValueref().getOffset() != ds.getOffset())) {
+            if (ps.getIndex() != gs.getIndex() ||
+                ps.getValueref().getOpcode() != ByteCodeConstants.DUPLOAD ||
+                ps.getValueref().getOffset() != ds.getOffset()) {
 				continue;
 			}
 

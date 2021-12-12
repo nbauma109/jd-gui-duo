@@ -96,7 +96,7 @@ public class ReplaceGetStaticVisitor
                 {
                     visit(ai.getTest());
 
-                    if ((this.parentFound == null) && (ai.getMsg() != null))
+                    if (this.parentFound == null && ai.getMsg() != null)
                     {
                         if (match(ai, ai.getMsg())) {
 							ai.setMsg(this.newInstruction);
@@ -229,7 +229,7 @@ public class ReplaceGetStaticVisitor
             {
                 List<Instruction> branchList =
                     ((ComplexConditionalBranchInstruction)instruction).getInstructions();
-                for (int i=branchList.size()-1; (i>=0) && (this.parentFound == null); --i)
+                for (int i=branchList.size()-1; i>=0 && this.parentFound == null; --i)
                 {
                     visit(branchList.get(i));
                 }
@@ -262,7 +262,7 @@ public class ReplaceGetStaticVisitor
              ByteCodeConstants.INVOKENEW:
             {
                 List<Instruction> list = ((InvokeInstruction)instruction).getArgs();
-                for (int i=list.size()-1; (i>=0) && (this.parentFound == null); --i)
+                for (int i=list.size()-1; i>=0 && this.parentFound == null; --i)
                 {
                     if (match(instruction, list.get(i))) {
 						list.set(i, this.newInstruction);
@@ -305,7 +305,7 @@ public class ReplaceGetStaticVisitor
         case Const.MULTIANEWARRAY:
             {
                 Instruction[] dimensions = ((MultiANewArray)instruction).getDimensions();
-                for (int i=dimensions.length-1; (i>=0) && (this.parentFound == null); --i)
+                for (int i=dimensions.length-1; i>=0 && this.parentFound == null; --i)
                 {
                     if (match(instruction, dimensions[i])) {
 						dimensions[i] = this.newInstruction;
@@ -518,7 +518,7 @@ public class ReplaceGetStaticVisitor
                 {
                     visit(iai.getNewArray());
 
-                    if ((this.parentFound == null) && (iai.getValues() != null)) {
+                    if (this.parentFound == null && iai.getValues() != null) {
 						visit(iai.getValues());
 					}
                 }
@@ -573,8 +573,8 @@ public class ReplaceGetStaticVisitor
 
     private boolean match(Instruction parent, Instruction i)
     {
-        if ((i.getOpcode() == Const.GETSTATIC) &&
-            (((GetStatic)i).getIndex() == this.index))
+        if (i.getOpcode() == Const.GETSTATIC &&
+            ((GetStatic)i).getIndex() == this.index)
         {
             this.parentFound = parent;
             return true;

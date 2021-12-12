@@ -44,7 +44,7 @@ public class UpdateOuterFieldTypeVisitor extends AbstractJavaSyntaxVisitor {
         if (!declaration.isStatic()) {
             ClassFileConstructorDeclaration cfcd = (ClassFileConstructorDeclaration) declaration;
 
-            if ((cfcd.getClassFile().getOuterClassFile() != null) && !declaration.isStatic()) {
+            if (cfcd.getClassFile().getOuterClassFile() != null && !declaration.isStatic()) {
                 Method method = cfcd.getMethod();
                 byte[] code = method.<AttributeCode>getAttribute("Code").getCode();
                 int offset = 0;
@@ -66,7 +66,7 @@ public class UpdateOuterFieldTypeVisitor extends AbstractJavaSyntaxVisitor {
                     return;
                 }
 
-                int index = ((code[++offset] & 255) << 8) | (code[++offset] & 255);
+                int index = (code[++offset] & 255) << 8 | code[++offset] & 255;
                 ConstantPool constants = method.getConstants();
                 ConstantMemberRef constantMemberRef = constants.getConstant(index);
                 String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
@@ -74,7 +74,7 @@ public class UpdateOuterFieldTypeVisitor extends AbstractJavaSyntaxVisitor {
                 String descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                 TypeMaker.TypeTypes typeTypes = typeMaker.makeTypeTypes(descriptor.substring(1, descriptor.length() - 1));
 
-                if ((typeTypes != null) && (typeTypes.getTypeParameters() != null)) {
+                if (typeTypes != null && typeTypes.getTypeParameters() != null) {
                     String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
                     searchFieldVisitor.init(name);
 

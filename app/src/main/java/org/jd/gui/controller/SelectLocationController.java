@@ -80,7 +80,7 @@ public class SelectLocationController {
             if (factory != null) {
                 Type type = factory.make(api, entry, null);
 
-                if ((type != null) && (type.getOuterName() != null)) {
+                if (type != null && type.getOuterName() != null) {
                     outerTypeEntry = innerTypeEntryToOuterTypeEntry.get(entry);
 
                     if (outerTypeEntry == null) {

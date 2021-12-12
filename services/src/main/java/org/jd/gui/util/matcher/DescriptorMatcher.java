@@ -41,7 +41,7 @@ public class DescriptorMatcher {
         CharBuffer cb1 = new CharBuffer(d1);
         CharBuffer cb2 = new CharBuffer(d2);
 
-        if ((cb1.read() != '(') || (cb2.read() != '(')) {
+        if (cb1.read() != '(' || cb2.read() != '(') {
 			return false;
 		}
 
@@ -62,7 +62,7 @@ public class DescriptorMatcher {
 			}
         }
 
-        if ((cb1.read() != ')') || (cb2.read() != ')')) {
+        if (cb1.read() != ')' || cb2.read() != ')') {
 			return false;
 		}
 
@@ -107,7 +107,7 @@ public class DescriptorMatcher {
             if (offset < length) {
                 char c = buffer[offset++];
 
-                while ((c == '[') && (offset < length)) {
+                while (c == '[' && offset < length) {
                     c = buffer[offset++];
                 }
 
@@ -136,13 +136,13 @@ public class DescriptorMatcher {
 			}
 
             if (c == 'L') {
-                if ((offset >= length) || (other.offset >= other.length)) {
+                if (offset >= length || other.offset >= other.length) {
 					return false;
 				}
 
                 char[] otherBuffer = other.buffer;
 
-                if ((buffer[offset] != '*') && (otherBuffer[other.offset] != '*')) {
+                if (buffer[offset] != '*' && otherBuffer[other.offset] != '*') {
                     // Forward comparison
                     while (offset < length) {
                         c = buffer[offset++];
@@ -167,7 +167,7 @@ public class DescriptorMatcher {
 				int otherCurrent = other.offset - 1;
 
 				// Backward comparison
-				while ((start < current) && (otherStart < otherCurrent)) {
+				while (start < current && otherStart < otherCurrent) {
 				    c = buffer[--current];
 				    if (c == '*') {
 						return true;

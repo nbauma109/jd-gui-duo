@@ -34,7 +34,7 @@ public class IndexesUtil {
             for (Future<Indexes> futureIndexes : collectionOfFutureIndexes) {
                 if (futureIndexes.isDone()) {
                     Map<String, Collection> index = futureIndexes.get().getIndex(indexName);
-                    if ((index != null) && (index.get(key) != null)) {
+                    if (index != null && index.get(key) != null) {
                         return true;
                     }
                 }

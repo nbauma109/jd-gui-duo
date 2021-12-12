@@ -55,8 +55,8 @@ public class RemoveDupConstantsAttributes
 
             if (/*(opcode != Const.GETFIELD) &&
                 (opcode != Const.GETSTATIC) &&*/
-                (opcode != Const.BIPUSH) &&
-                (opcode != Const.SIPUSH) /*&&
+                opcode != Const.BIPUSH &&
+                opcode != Const.SIPUSH /*&&
                 (opcode != Const.ALOAD) &&
                 (opcode != Const.ILOAD)*/) {
 				continue;

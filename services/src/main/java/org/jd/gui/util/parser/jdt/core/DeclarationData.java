@@ -22,8 +22,8 @@ public class DeclarationData {
     }
 
     public boolean isAType() { return getName() == null; }
-    public boolean isAField() { return (descriptor != null) && descriptor.charAt(0) != '('; }
-    public boolean isAMethod() { return (descriptor != null) && descriptor.charAt(0) == '('; }
+    public boolean isAField() { return descriptor != null && descriptor.charAt(0) != '('; }
+    public boolean isAMethod() { return descriptor != null && descriptor.charAt(0) == '('; }
     public boolean isAConstructor() { return StringConstants.INSTANCE_CONSTRUCTOR.equals(getName()); }
 
     public int getStartPosition() {

@@ -35,8 +35,8 @@ public class AAStore extends ArrayStoreInstruction
         String signature =
             this.getArrayref().getReturnedSignature(constants, localVariables);
 
-        if ((signature == null) || (signature.isEmpty()) ||
-            (signature.charAt(0) != '[')) {
+        if (signature == null || signature.isEmpty() ||
+            signature.charAt(0) != '[') {
 			return null;
 		}
 

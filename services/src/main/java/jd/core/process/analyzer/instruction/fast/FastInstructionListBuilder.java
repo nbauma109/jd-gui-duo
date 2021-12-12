@@ -1449,8 +1449,8 @@ public class FastInstructionListBuilder {
 						Instruction nextInstruction = list.get(index + 1);
 						// Si il n'y a pas assez de place pour une sequence
 						// 'if' + 'return', un simple 'if' sera cree.
-						if ((bi.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER)
-								&& (bi.getLineNumber() + 1 == nextInstruction.getLineNumber())) {
+						if (bi.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER
+								&& bi.getLineNumber() + 1 == nextInstruction.getLineNumber()) {
 							continue;
 						}
 					}
@@ -1459,20 +1459,20 @@ public class FastInstructionListBuilder {
 							.add(new Return(Const.RETURN, bi.getOffset(), Instruction.UNKNOWN_LINE_NUMBER));
 					list.set(index, new FastTestList(FastConstants.IF_SIMPLE, bi.getOffset(),
 							bi.getLineNumber(), jumpOffset - bi.getOffset(), bi, instructions));
-				} else if ((beforeLoopEntryOffset < jumpOffset) && (jumpOffset <= loopEntryOffset)) {
+				} else if (beforeLoopEntryOffset < jumpOffset && jumpOffset <= loopEntryOffset) {
 					if (index + 1 < length) {
 						Instruction nextInstruction = list.get(index + 1);
 						// Si il n'y a pas assez de place pour une sequence
 						// 'if' + 'continue', un simple 'if' sera cree.
-						if ((bi.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER) && (index + 1 < length)
-								&& (bi.getLineNumber() + 1 == nextInstruction.getLineNumber()))
+						if (bi.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER && index + 1 < length
+								&& bi.getLineNumber() + 1 == nextInstruction.getLineNumber())
 						 {
 							continue;
 						// Si l'instruction de test est suivie d'une seule instruction
 						// 'return', la sequence 'if' + 'continue' n'est pas construite.
 						}
-						if ((nextInstruction.getOpcode() == Const.RETURN)
-								|| (nextInstruction.getOpcode() == ByteCodeConstants.XRETURN)) {
+						if (nextInstruction.getOpcode() == Const.RETURN
+								|| nextInstruction.getOpcode() == ByteCodeConstants.XRETURN) {
 							continue;
 						}
 					}

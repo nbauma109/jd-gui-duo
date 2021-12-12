@@ -36,7 +36,7 @@ public class MultiANewArrayFactory implements InstructionFactory
             int lineNumber, boolean[] jumps)
     {
         final int opcode = code[offset] & 255;
-        final int index = ((code[offset+1] & 255) << 8) | (code[offset+2] & 255);
+        final int index = (code[offset+1] & 255) << 8 | code[offset+2] & 255;
         final int count = code[offset+3] & 255;
         final Instruction[] dimensions = new Instruction[count];
 

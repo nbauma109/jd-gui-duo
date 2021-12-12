@@ -30,7 +30,7 @@ public class ZipFileSourceSaverProvider extends DirectorySourceSaverProvider {
             Path path = rootPath.resolve(sourcePath);
             Path parentPath = path.getParent();
 
-            if ((parentPath != null) && !Files.exists(parentPath)) {
+            if (parentPath != null && !Files.exists(parentPath)) {
                 Files.createDirectories(parentPath);
             }
 

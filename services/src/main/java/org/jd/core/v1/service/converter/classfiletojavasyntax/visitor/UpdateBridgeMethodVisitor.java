@@ -77,12 +77,12 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
         exp = statement.getExpression();
 
         BaseType parameterTypes = bridgeMethodDeclaration.getParameterTypes();
-        int parameterTypesCount = (parameterTypes == null) ? 0 : parameterTypes.size();
+        int parameterTypesCount = parameterTypes == null ? 0 : parameterTypes.size();
 
         if (exp.isFieldReferenceExpression()) {
             FieldReferenceExpression fre = getFieldReferenceExpression(exp);
 
-            expression = (parameterTypesCount == 0) ? fre.getExpression() : mie1.getParameters().getFirst();
+            expression = parameterTypesCount == 0 ? fre.getExpression() : mie1.getParameters().getFirst();
 
             return new FieldReferenceExpression(mie1.getLineNumber(), fre.getType(), expression, fre.getInternalTypeName(), fre.getName(), fre.getDescriptor());
         }
@@ -134,7 +134,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
         } else if (exp.isPostOperatorExpression()) {
             FieldReferenceExpression fre = getFieldReferenceExpression(exp.getExpression());
 
-            expression = (parameterTypesCount == 0) ? fre.getExpression() : mie1.getParameters().getFirst();
+            expression = parameterTypesCount == 0 ? fre.getExpression() : mie1.getParameters().getFirst();
 
             return new PostOperatorExpression(
                     mie1.getLineNumber(),
@@ -143,7 +143,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
         } else if (exp.isPreOperatorExpression()) {
             FieldReferenceExpression fre = getFieldReferenceExpression(exp.getExpression());
 
-            expression = (parameterTypesCount == 0) ? fre.getExpression() : mie1.getParameters().getFirst();
+            expression = parameterTypesCount == 0 ? fre.getExpression() : mie1.getParameters().getFirst();
 
             return new PreOperatorExpression(
                     mie1.getLineNumber(),
@@ -243,7 +243,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
             exp = statement.getExpression();
 
             BaseType parameterTypes = bridgeMethodDeclaration.getParameterTypes();
-            int parameterTypesCount = (parameterTypes == null) ? 0 : parameterTypes.size();
+            int parameterTypesCount = parameterTypes == null ? 0 : parameterTypes.size();
 
             if (exp.isFieldReferenceExpression()) {
                 FieldReferenceExpression fre = (FieldReferenceExpression) exp;
@@ -315,7 +315,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
                     FieldReferenceExpression fre = (FieldReferenceExpression) exp.getLeftExpression();
                     return checkLocalVariableReference(fre.getExpression(), 0);
                 }
-            } else if (exp.isPostOperatorExpression() || (parameterTypesCount == 1 && exp.isPreOperatorExpression())) {
+            } else if (exp.isPostOperatorExpression() || parameterTypesCount == 1 && exp.isPreOperatorExpression()) {
                 exp = exp.getExpression();
 
                 if (exp.isFieldReferenceExpression()) {

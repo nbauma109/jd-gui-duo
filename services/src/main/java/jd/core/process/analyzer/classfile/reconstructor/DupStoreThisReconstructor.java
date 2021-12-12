@@ -49,8 +49,8 @@ public class DupStoreThisReconstructor
             // DupStore trouvé
             DupStore dupStore = (DupStore)list.get(dupStoreIndex);
 
-            if ((dupStore.getObjectref().getOpcode() != Const.ALOAD) ||
-                (((ALoad)dupStore.getObjectref()).getIndex() != 0)) {
+            if (dupStore.getObjectref().getOpcode() != Const.ALOAD ||
+                ((ALoad)dupStore.getObjectref()).getIndex() != 0) {
 				continue;
 			}
 
@@ -61,8 +61,8 @@ public class DupStoreThisReconstructor
                 if (instruction.getOpcode() == Const.MONITORENTER)
                 {
                     MonitorEnter me = (MonitorEnter)instruction;
-                    if ((me.getObjectref().getOpcode() == ByteCodeConstants.DUPLOAD) &&
-                        (((DupLoad)me.getObjectref()).getDupStore() == dupStore))
+                    if (me.getObjectref().getOpcode() == ByteCodeConstants.DUPLOAD &&
+                        ((DupLoad)me.getObjectref()).getDupStore() == dupStore)
                     {
                         // On passe
                         continue;

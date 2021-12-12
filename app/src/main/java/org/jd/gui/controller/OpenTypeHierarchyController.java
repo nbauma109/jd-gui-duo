@@ -66,7 +66,7 @@ public class OpenTypeHierarchyController implements IndexesChangeListener {
         } else {
             // Multiple entries -> Open a "Select location" popup
             selectLocationController.show(
-                new Point(leftBottom.x+(16+2), leftBottom.y+2),
+                new Point(leftBottom.x+16+2, leftBottom.y+2),
                 entries,
                 entry -> openCallback.accept(UriUtil.createURI(api, collectionOfFutureIndexes, entry, null, typeName)), // entry selected
                 () -> openTypeHierarchyView.focus());                                                                   // popup closeClosure

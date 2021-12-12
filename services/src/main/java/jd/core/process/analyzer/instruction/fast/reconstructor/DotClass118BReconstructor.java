@@ -106,8 +106,8 @@ public class DotClass118BReconstructor
 
             IfInstruction ii = (IfInstruction)instruction;
 
-            if ((ii.getValue().getOpcode() != ByteCodeConstants.DUPLOAD) ||
-                (ds.getOffset() != ii.getValue().getOffset())) {
+            if (ii.getValue().getOpcode() != ByteCodeConstants.DUPLOAD ||
+                ds.getOffset() != ii.getValue().getOffset()) {
 				continue;
 			}
 
@@ -119,8 +119,8 @@ public class DotClass118BReconstructor
 
             Pop pop = (Pop)instruction;
 
-            if ((pop.getObjectref().getOpcode() != ByteCodeConstants.DUPLOAD) ||
-                (ds.getOffset() != pop.getObjectref().getOffset())) {
+            if (pop.getObjectref().getOpcode() != ByteCodeConstants.DUPLOAD ||
+                ds.getOffset() != pop.getObjectref().getOffset()) {
 				continue;
 			}
 
@@ -132,17 +132,17 @@ public class DotClass118BReconstructor
 
             FastTry ft = (FastTry)instruction;
 
-            if ((ft.getFinallyInstructions() != null) ||
-                (ft.getInstructions().size() != 1) ||
-                (ft.getCatches().size() != 1)) {
+            if (ft.getFinallyInstructions() != null ||
+                ft.getInstructions().size() != 1 ||
+                ft.getCatches().size() != 1) {
 				continue;
 			}
 
             List<Instruction> catchInstructions =
                 ft.getCatches().get(0).getInstructions();
 
-            if ((catchInstructions.size() != 1) ||
-                (catchInstructions.get(0).getOpcode() != Const.ATHROW)) {
+            if (catchInstructions.size() != 1 ||
+                catchInstructions.get(0).getOpcode() != Const.ATHROW) {
 				continue;
 			}
 

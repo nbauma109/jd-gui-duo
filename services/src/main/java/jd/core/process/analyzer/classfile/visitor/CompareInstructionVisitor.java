@@ -41,8 +41,8 @@ public class CompareInstructionVisitor
         case Const.AASTORE,
              ByteCodeConstants.ARRAYSTORE:
             {
-                if ((Objects.compare(((ArrayStoreInstruction)i1).getSignature(),
-                        ((ArrayStoreInstruction)i2).getSignature(), Comparator.naturalOrder()) != 0) || ! visit(
+                if (Objects.compare(((ArrayStoreInstruction)i1).getSignature(),
+                        ((ArrayStoreInstruction)i2).getSignature(), Comparator.naturalOrder()) != 0 || ! visit(
                         ((ArrayStoreInstruction)i1).getArrayref(),
                         ((ArrayStoreInstruction)i2).getArrayref()) || ! visit(
                         ((ArrayStoreInstruction)i1).getIndexref(),
@@ -77,10 +77,10 @@ public class CompareInstructionVisitor
             return visit(((AThrow)i1).getValue(), ((AThrow)i2).getValue());
         case ByteCodeConstants.UNARYOP:
             {
-                if ((((UnaryOperatorInstruction)i1).getPriority() !=
-                    ((UnaryOperatorInstruction)i2).getPriority()) || (((UnaryOperatorInstruction)i1).getSignature().compareTo(
-                        ((UnaryOperatorInstruction)i2).getSignature()) != 0) || (((UnaryOperatorInstruction)i1).getOperator().compareTo(
-                        ((UnaryOperatorInstruction)i2).getOperator()) != 0)) {
+                if (((UnaryOperatorInstruction)i1).getPriority() !=
+                    ((UnaryOperatorInstruction)i2).getPriority() || ((UnaryOperatorInstruction)i1).getSignature().compareTo(
+                        ((UnaryOperatorInstruction)i2).getSignature()) != 0 || ((UnaryOperatorInstruction)i1).getOperator().compareTo(
+                        ((UnaryOperatorInstruction)i2).getOperator()) != 0) {
 					return false;
 				}
 
@@ -90,10 +90,10 @@ public class CompareInstructionVisitor
             }
         case ByteCodeConstants.BINARYOP:
             {
-                if ((((BinaryOperatorInstruction)i1).getPriority() !=
-                    ((BinaryOperatorInstruction)i2).getPriority()) || (((BinaryOperatorInstruction)i1).getSignature().compareTo(
-                        ((BinaryOperatorInstruction)i2).getSignature()) != 0) || (((BinaryOperatorInstruction)i1).getOperator().compareTo(
-                        ((BinaryOperatorInstruction)i2).getOperator()) != 0) || ! visit(
+                if (((BinaryOperatorInstruction)i1).getPriority() !=
+                    ((BinaryOperatorInstruction)i2).getPriority() || ((BinaryOperatorInstruction)i1).getSignature().compareTo(
+                        ((BinaryOperatorInstruction)i2).getSignature()) != 0 || ((BinaryOperatorInstruction)i1).getOperator().compareTo(
+                        ((BinaryOperatorInstruction)i2).getOperator()) != 0 || ! visit(
                         ((BinaryOperatorInstruction)i1).getValue1(),
                         ((BinaryOperatorInstruction)i2).getValue1())) {
 					return false;
@@ -150,7 +150,7 @@ public class CompareInstructionVisitor
                 //  if (((IfCmp)i1).branch != ((IfCmp)i2).branch)
                 //	  return false;
 
-                if ((((IfCmp)i1).getCmp() != ((IfCmp)i2).getCmp()) || ! visit(((IfCmp)i1).getValue1(), ((IfCmp)i2).getValue1())) {
+                if (((IfCmp)i1).getCmp() != ((IfCmp)i2).getCmp() || ! visit(((IfCmp)i1).getValue1(), ((IfCmp)i2).getValue1())) {
 					return false;
 				}
 
@@ -168,7 +168,7 @@ public class CompareInstructionVisitor
             }
         case ByteCodeConstants.COMPLEXIF:
             {
-                if ((((ComplexConditionalBranchInstruction)i1).getCmp() != ((ComplexConditionalBranchInstruction)i2).getCmp()) || (((ComplexConditionalBranchInstruction)i1).getBranch() != ((ComplexConditionalBranchInstruction)i2).getBranch())) {
+                if (((ComplexConditionalBranchInstruction)i1).getCmp() != ((ComplexConditionalBranchInstruction)i2).getCmp() || ((ComplexConditionalBranchInstruction)i1).getBranch() != ((ComplexConditionalBranchInstruction)i2).getBranch()) {
 					return false;
 				}
 
@@ -286,9 +286,9 @@ public class CompareInstructionVisitor
             }
         case ByteCodeConstants.ASSIGNMENT:
             {
-                if ((((AssignmentInstruction)i1).getPriority() !=
-                    ((AssignmentInstruction)i2).getPriority()) || (((AssignmentInstruction)i1).getOperator().compareTo(
-                        ((AssignmentInstruction)i2).getOperator()) != 0) || ! visit(
+                if (((AssignmentInstruction)i1).getPriority() !=
+                    ((AssignmentInstruction)i2).getPriority() || ((AssignmentInstruction)i1).getOperator().compareTo(
+                        ((AssignmentInstruction)i2).getOperator()) != 0 || ! visit(
                         ((AssignmentInstruction)i1).getValue1(),
                         ((AssignmentInstruction)i2).getValue1())) {
 					return false;

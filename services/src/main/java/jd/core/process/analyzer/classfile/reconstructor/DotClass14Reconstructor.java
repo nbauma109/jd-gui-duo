@@ -115,8 +115,8 @@ public class DotClass14Reconstructor
 
             PutStatic ps = (PutStatic)instruction;
 
-            if ((ps.getValueref().getOpcode() != ByteCodeConstants.DUPLOAD) ||
-                (ds.getOffset() != ps.getValueref().getOffset())) {
+            if (ps.getValueref().getOpcode() != ByteCodeConstants.DUPLOAD ||
+                ds.getOffset() != ps.getValueref().getOffset()) {
 				continue;
 			}
 
@@ -128,8 +128,8 @@ public class DotClass14Reconstructor
 
             TernaryOpStore tos = (TernaryOpStore)instruction;
 
-            if ((tos.getObjectref().getOpcode() != ByteCodeConstants.DUPLOAD) ||
-                (ds.getOffset() != tos.getObjectref().getOffset())) {
+            if (tos.getObjectref().getOpcode() != ByteCodeConstants.DUPLOAD ||
+                ds.getOffset() != tos.getObjectref().getOffset()) {
 				continue;
 			}
 
@@ -142,7 +142,7 @@ public class DotClass14Reconstructor
             Goto g = (Goto)instruction;
             instruction = list.get(i+5);
 
-            if ((g.getOffset() >= jumpOffset) || (jumpOffset > instruction.getOffset())) {
+            if (g.getOffset() >= jumpOffset || jumpOffset > instruction.getOffset()) {
 				continue;
 			}
 

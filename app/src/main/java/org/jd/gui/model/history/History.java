@@ -30,9 +30,9 @@ public class History {
         }
 
         if (uri.getPath().equals(current.getPath())) {
-            if ((uri.getFragment() == null) && (uri.getQuery() == null)) {
+            if (uri.getFragment() == null && uri.getQuery() == null) {
                 // Ignore
-            } else if ((current.getFragment() == null) && (current.getQuery() == null)) {
+            } else if (current.getFragment() == null && current.getQuery() == null) {
                 // Replace current URI
                 current = uri;
             } else {

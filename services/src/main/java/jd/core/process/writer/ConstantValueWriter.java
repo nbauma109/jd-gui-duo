@@ -157,7 +157,7 @@ public class ConstantValueWriter
                 {
                 case 'Z':
                     {
-                        printer.printKeyword((value == 0) ? "false" : "true");
+                        printer.printKeyword(value == 0 ? "false" : "true");
                     }
                     break;
                 case 'C':

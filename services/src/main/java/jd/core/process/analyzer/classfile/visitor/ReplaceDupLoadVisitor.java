@@ -222,7 +222,7 @@ public class ReplaceDupLoadVisitor
             {
                 List<Instruction> branchList =
                     ((ComplexConditionalBranchInstruction)instruction).getInstructions();
-                for (int i=branchList.size()-1; (i>=0) && (this.parentFound == null); --i)
+                for (int i=branchList.size()-1; i>=0 && this.parentFound == null; --i)
                 {
                     visit(branchList.get(i));
                 }
@@ -255,7 +255,7 @@ public class ReplaceDupLoadVisitor
              ByteCodeConstants.INVOKENEW:
             {
                 List<Instruction> list = ((InvokeInstruction)instruction).getArgs();
-                for (int i=list.size()-1; (i>=0) && (this.parentFound == null); --i)
+                for (int i=list.size()-1; i>=0 && this.parentFound == null; --i)
                 {
                     if (match(instruction, list.get(i))) {
 						list.set(i, this.newInstruction);
@@ -298,7 +298,7 @@ public class ReplaceDupLoadVisitor
         case Const.MULTIANEWARRAY:
             {
                 Instruction[] dimensions = ((MultiANewArray)instruction).getDimensions();
-                for (int i=dimensions.length-1; (i>=0) && (this.parentFound == null); --i)
+                for (int i=dimensions.length-1; i>=0 && this.parentFound == null; --i)
                 {
                     if (match(instruction, dimensions[i])) {
 						dimensions[i] = this.newInstruction;
@@ -499,7 +499,7 @@ public class ReplaceDupLoadVisitor
                 {
                     visit(iai.getNewArray());
 
-                    if ((this.parentFound == null) && (iai.getValues() != null)) {
+                    if (this.parentFound == null && iai.getValues() != null) {
 						visit(iai.getValues());
 					}
                 }
@@ -518,7 +518,7 @@ public class ReplaceDupLoadVisitor
 					}
                 }
 
-                if ((this.parentFound == null) && (ff.getInc() != null))
+                if (this.parentFound == null && ff.getInc() != null)
                 {
                     if (match(ff, ff.getInc())) {
 						ff.setInc(this.newInstruction);
@@ -635,7 +635,7 @@ public class ReplaceDupLoadVisitor
                     visit(fs.getTest());
 
                     FastSwitch.Pair[] pairs = fs.getPairs();
-                    for (int i=pairs.length-1; (i>=0) && (this.parentFound == null); --i) {
+                    for (int i=pairs.length-1; i>=0 && this.parentFound == null; --i) {
 						visit(pairs[i].getInstructions());
 					}
                 }
@@ -653,7 +653,7 @@ public class ReplaceDupLoadVisitor
 					}
 
                     List<FastCatch> catchs = ft.getCatches();
-                    for (int i=catchs.size()-1; (i>=0) && (this.parentFound == null); --i) {
+                    for (int i=catchs.size()-1; i>=0 && this.parentFound == null; --i) {
 						visit(catchs.get(i).getInstructions());
 					}
                 }

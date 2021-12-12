@@ -79,7 +79,7 @@ public class CheckLocalVariableUsedVisitor
                 LocalVariable lv =
                     localVariables.getLocalVariableWithIndexAndOffset(
                         si.getIndex(), si.getOffset());
-                return (lv != null && maxOffset <= lv.getStartPc()) || visit(localVariables, maxOffset, si.getValueref());
+                return lv != null && maxOffset <= lv.getStartPc() || visit(localVariables, maxOffset, si.getValueref());
             }
         case ByteCodeConstants.DUPSTORE:
             return visit(
@@ -227,12 +227,12 @@ public class CheckLocalVariableUsedVisitor
              ByteCodeConstants.NEWANDINITARRAY:
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
-                return visit(localVariables, maxOffset, iai.getNewArray()) || (iai.getValues() != null && visit(localVariables, maxOffset, iai.getValues()));
+                return visit(localVariables, maxOffset, iai.getNewArray()) || iai.getValues() != null && visit(localVariables, maxOffset, iai.getValues());
             }
         case FastConstants.FOR:
             {
                 FastFor ff = (FastFor)instruction;
-                return (ff.getInit() != null && visit(localVariables, maxOffset, ff.getInit())) || (ff.getInc() != null && visit(localVariables, maxOffset, ff.getInc()));
+                return ff.getInit() != null && visit(localVariables, maxOffset, ff.getInit()) || ff.getInc() != null && visit(localVariables, maxOffset, ff.getInc());
             }
         case FastConstants.WHILE,
              FastConstants.DO_WHILE,
@@ -289,7 +289,7 @@ public class CheckLocalVariableUsedVisitor
         case FastConstants.TRY:
             {
                 FastTry ft = (FastTry)instruction;
-                if (visit(localVariables, maxOffset, ft.getInstructions()) || (ft.getFinallyInstructions() != null && visit(localVariables, maxOffset, ft.getFinallyInstructions()))) {
+                if (visit(localVariables, maxOffset, ft.getInstructions()) || ft.getFinallyInstructions() != null && visit(localVariables, maxOffset, ft.getFinallyInstructions())) {
                     return true;
                 }
                 List<FastCatch> catchs = ft.getCatches();

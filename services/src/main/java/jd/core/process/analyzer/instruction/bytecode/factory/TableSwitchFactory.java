@@ -36,23 +36,23 @@ public class TableSwitchFactory implements InstructionFactory
         final int opcode = code[offset] & 255;
 
         // Skip padding
-        int i = (offset+4) & 0xFFFC;
+        int i = offset+4 & 0xFFFC;
 
         final int defaultOffset =
-            ((code[i  ] & 255) << 24) | ((code[i+1] & 255) << 16) |
-            ((code[i+2] & 255) << 8 ) |  (code[i+3] & 255);
+            (code[i  ] & 255) << 24 | (code[i+1] & 255) << 16 |
+            (code[i+2] & 255) << 8 |  code[i+3] & 255;
 
         i += 4;
 
         final int low =
-            ((code[i  ] & 255) << 24) | ((code[i+1] & 255) << 16) |
-            ((code[i+2] & 255) << 8 ) |  (code[i+3] & 255);
+            (code[i  ] & 255) << 24 | (code[i+1] & 255) << 16 |
+            (code[i+2] & 255) << 8 |  code[i+3] & 255;
 
         i += 4;
 
         final int high =
-            ((code[i  ] & 255) << 24) | ((code[i+1] & 255) << 16) |
-            ((code[i+2] & 255) << 8 ) |  (code[i+3] & 255);
+            (code[i  ] & 255) << 24 | (code[i+1] & 255) << 16 |
+            (code[i+2] & 255) << 8 |  code[i+3] & 255;
 
         i += 4;
 
@@ -62,8 +62,8 @@ public class TableSwitchFactory implements InstructionFactory
         for (int j=0; j<length; j++)
         {
             offsets[j] =
-                ((code[i  ] & 255) << 24) | ((code[i+1] & 255) << 16) |
-                ((code[i+2] & 255) << 8 ) |  (code[i+3] & 255);
+                (code[i  ] & 255) << 24 | (code[i+1] & 255) << 16 |
+                (code[i+2] & 255) << 8 |  code[i+3] & 255;
 
             i += 4;
         }
@@ -74,6 +74,6 @@ public class TableSwitchFactory implements InstructionFactory
             opcode, offset, lineNumber, key, defaultOffset,
             offsets, low));
 
-        return (i - offset - 1);
+        return i - offset - 1;
     }
 }

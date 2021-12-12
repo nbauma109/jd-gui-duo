@@ -52,7 +52,7 @@ public class ArrayExpression extends AbstractLineNumberTypeExpression {
         Type type = expression.getType();
         int dimension = type.getDimension();
 
-        return type.createType((dimension > 0) ? dimension-1 : 0);
+        return type.createType(dimension > 0 ? dimension-1 : 0);
     }
 
     @Override

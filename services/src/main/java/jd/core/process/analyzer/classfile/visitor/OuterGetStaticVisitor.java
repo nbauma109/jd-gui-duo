@@ -583,8 +583,8 @@ public class OuterGetStaticVisitor
 
         Accessor accessor = classFile.getAccessor(name, descriptor);
 
-        if ((accessor == null) ||
-            (accessor.getTag() != AccessorConstants.ACCESSOR_GETSTATIC)) {
+        if (accessor == null ||
+            accessor.getTag() != AccessorConstants.ACCESSOR_GETSTATIC) {
 			return null;
 		}
 

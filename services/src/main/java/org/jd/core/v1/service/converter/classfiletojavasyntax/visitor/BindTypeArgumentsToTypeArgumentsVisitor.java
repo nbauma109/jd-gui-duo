@@ -27,7 +27,7 @@ public class BindTypeArgumentsToTypeArgumentsVisitor extends AbstractTypeArgumen
     }
 
     public BaseTypeArgument getTypeArgument() {
-        if ((result == null) || TYPE_OBJECT.equals(result)) {
+        if (result == null || TYPE_OBJECT.equals(result)) {
             return null;
         }
         return result;

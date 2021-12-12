@@ -73,8 +73,8 @@ public class OuterPutStaticVisitor extends OuterGetStaticVisitor
 
         Accessor accessor = classFile.getAccessor(name, descriptor);
 
-        if ((accessor == null) ||
-            (accessor.getTag() != AccessorConstants.ACCESSOR_PUTSTATIC)) {
+        if (accessor == null ||
+            accessor.getTag() != AccessorConstants.ACCESSOR_PUTSTATIC) {
 			return null;
 		}
 

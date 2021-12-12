@@ -513,8 +513,8 @@ public class ReplaceOuterReferenceVisitor
     private boolean match(Instruction i)
     {
         return
-            (i.getOpcode() == this.opcode) &&
-            (((IndexInstruction)i).getIndex() == this.index);
+            i.getOpcode() == this.opcode &&
+            ((IndexInstruction)i).getIndex() == this.index;
     }
 
     private Instruction newInstruction(Instruction i)

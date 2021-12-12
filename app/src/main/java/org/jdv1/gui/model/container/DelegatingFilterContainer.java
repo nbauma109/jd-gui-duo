@@ -30,7 +30,7 @@ public class DelegatingFilterContainer implements Container {
         this.root = getDelegatedEntry(container.getRoot());
 
         for (Entry entry : entries) {
-            while ((entry != null) && !validEntries.contains(entry.getUri())) {
+            while (entry != null && !validEntries.contains(entry.getUri())) {
                 validEntries.add(entry.getUri());
                 entry = entry.getParent();
             }
@@ -52,7 +52,7 @@ public class DelegatingFilterContainer implements Container {
 
     protected DelegatedContainer getDelegatedContainer(Container container) {
         Entry localRoot = container.getRoot();
-        URI uri = (localRoot == null) ? DEFAULT_ROOT_URI : localRoot.getUri();
+        URI uri = localRoot == null ? DEFAULT_ROOT_URI : localRoot.getUri();
         return uriToDelegatedContainer.computeIfAbsent(uri, k -> new DelegatedContainer(container));
     }
 

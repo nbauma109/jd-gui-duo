@@ -539,8 +539,8 @@ public class ReplaceStringBuxxxerVisitor
             ConstantMethodref cmr = this.constants.getConstantMethodref(iv.getIndex());
             ConstantClass cc = this.constants.getConstantClass(cmr.getClassIndex());
 
-            if ((cc.getNameIndex() == constants.getStringBufferClassNameIndex()) ||
-                (cc.getNameIndex() == constants.getStringBuilderClassNameIndex()))
+            if (cc.getNameIndex() == constants.getStringBufferClassNameIndex() ||
+                cc.getNameIndex() == constants.getStringBuilderClassNameIndex())
             {
                 ConstantNameAndType cnat =
                     constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
@@ -567,8 +567,8 @@ public class ReplaceStringBuxxxerVisitor
                 ConstantNameAndType cnat =
                     constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 
-                if ((cnat.getNameIndex() == this.constants.getAppendIndex()) &&
-                    (insi.getArgs().size() == 1))
+                if (cnat.getNameIndex() == this.constants.getAppendIndex() &&
+                    insi.getArgs().size() == 1)
                 {
                     Instruction result = match(insi.getObjectref(), cmr.getClassIndex());
 
@@ -589,7 +589,7 @@ public class ReplaceStringBuxxxerVisitor
             ConstantMethodref cmr =
                 this.constants.getConstantMethodref(in.getIndex());
 
-            if ((cmr.getClassIndex() == classIndex) && (in.getArgs().size() == 1))
+            if (cmr.getClassIndex() == classIndex && in.getArgs().size() == 1)
             {
                 Instruction arg0 = in.getArgs().get(0);
 
@@ -605,8 +605,8 @@ public class ReplaceStringBuxxxerVisitor
                         ConstantNameAndType cnat =
                             this.constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 
-                        if ((cnat.getNameIndex() == this.constants.getValueOfIndex()) &&
-                            (is.getArgs().size() == 1)) {
+                        if (cnat.getNameIndex() == this.constants.getValueOfIndex() &&
+                            is.getArgs().size() == 1) {
 							return is.getArgs().get(0);
 						}
                     }

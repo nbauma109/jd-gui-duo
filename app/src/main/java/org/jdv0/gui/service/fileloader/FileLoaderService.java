@@ -37,7 +37,7 @@ public class FileLoaderService {
         String extension = name.substring(lastDot+1);
         FileLoader provider = mapProviders.get(extension);
 
-        if ((provider != null) && provider.accept(api, file)) {
+        if (provider != null && provider.accept(api, file)) {
             return provider;
         }
 

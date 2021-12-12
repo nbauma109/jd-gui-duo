@@ -59,7 +59,7 @@ public abstract class TypeReferencePage extends HyperlinkPage {
                 String highlightFlags = parameters.get("highlightFlags");
                 String highlightPattern = parameters.get("highlightPattern");
 
-                if ((highlightFlags != null) && (highlightPattern != null)) {
+                if (highlightFlags != null && highlightPattern != null) {
                     String regexp = createRegExp(highlightPattern);
 
                     if (highlightFlags.indexOf('s') != -1) {
@@ -72,7 +72,7 @@ public abstract class TypeReferencePage extends HyperlinkPage {
                         }
                     }
 
-                    if ((highlightFlags.indexOf('t') != -1) && (highlightFlags.indexOf('r') != -1)) {
+                    if (highlightFlags.indexOf('t') != -1 && highlightFlags.indexOf('r') != -1) {
                         // Highlight type references
                         Pattern pattern = Pattern.compile(regexp + ".*");
 

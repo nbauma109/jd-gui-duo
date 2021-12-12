@@ -21,7 +21,7 @@ public abstract class AbstractXmlPathFinder {
 
     protected AbstractXmlPathFinder(Collection<String> paths) {
         for (String path : paths) {
-            if ((path != null) && (!path.isEmpty())) {
+            if (path != null && !path.isEmpty()) {
                 // Normalize path
                 path = '/' + path;
                 int lastIndex = path.lastIndexOf('/');

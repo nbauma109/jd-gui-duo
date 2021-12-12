@@ -34,7 +34,7 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
     public SearchImportsVisitor(Loader loader, String mainInternalName) {
         this.loader = loader;
         int index = mainInternalName.lastIndexOf('/');
-        this.internalPackagePrefix = (index == -1) ? "" : mainInternalName.substring(0, index + 1);
+        this.internalPackagePrefix = index == -1 ? "" : mainInternalName.substring(0, index + 1);
     }
 
     public ImportsFragment getImportsFragment() {
@@ -355,7 +355,7 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
                             importTypeNames.add(typeName);
                         }
                     } else if (internalTypeName.startsWith(internalPackagePrefix)) {
-                        if ((internalTypeName.indexOf('/', internalPackagePrefix.length()) != -1) && !localTypeNames.contains(typeName)) {
+                        if (internalTypeName.indexOf('/', internalPackagePrefix.length()) != -1 && !localTypeNames.contains(typeName)) {
                             importsFragment.addImport(internalTypeName, type.getQualifiedName());
                             importTypeNames.add(typeName);
                         }

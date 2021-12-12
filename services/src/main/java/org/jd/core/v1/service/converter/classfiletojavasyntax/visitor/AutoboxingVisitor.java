@@ -55,7 +55,7 @@ public class AutoboxingVisitor extends AbstractUpdateExpressionVisitor {
     @Override
     public void visit(BodyDeclaration declaration) {
         ClassFileBodyDeclaration cfbd = (ClassFileBodyDeclaration)declaration;
-        boolean autoBoxingSupported = (cfbd.getClassFile().getMajorVersion() >= MAJOR_1_5);
+        boolean autoBoxingSupported = cfbd.getClassFile().getMajorVersion() >= MAJOR_1_5;
 
         if (autoBoxingSupported) {
             safeAccept(declaration.getMemberDeclarations());
@@ -65,18 +65,18 @@ public class AutoboxingVisitor extends AbstractUpdateExpressionVisitor {
     @Override
     protected Expression updateExpression(Expression expression) {
         if (expression.isMethodInvocationExpression() && expression.getInternalTypeName().startsWith("java/lang/")) {
-            int parameterSize = (expression.getParameters() == null) ? 0 : expression.getParameters().size();
+            int parameterSize = expression.getParameters() == null ? 0 : expression.getParameters().size();
 
             if (expression.getExpression().isObjectTypeReferenceExpression()) {
                 // static method invocation
-                if ((parameterSize == 1) &&
+                if (parameterSize == 1 &&
                         expression.getName().equals("valueOf") &&
                         expression.getDescriptor().equals(VALUEOF_DESCRIPTOR_MAP.get(expression.getInternalTypeName())))
                 {
                     return expression.getParameters().getFirst();
                 }
             } else // non-static method invocation
-			if ((parameterSize == 0) &&
+			if (parameterSize == 0 &&
 			        expression.getName().equals(VALUE_METHODNAME_MAP.get(expression.getInternalTypeName())) &&
 			        expression.getDescriptor().equals(VALUE_DESCRIPTOR_MAP.get(expression.getInternalTypeName())))
 			{

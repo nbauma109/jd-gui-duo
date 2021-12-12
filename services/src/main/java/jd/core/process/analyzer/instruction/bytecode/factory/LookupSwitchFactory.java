@@ -36,17 +36,17 @@ public class LookupSwitchFactory implements InstructionFactory
         final int opcode = code[offset] & 255;
 
         // Skip padding
-        int i = (offset+4) & 0xFFFC;
+        int i = offset+4 & 0xFFFC;
 
         final int defaultOffset =
-            ((code[i  ] & 255) << 24) | ((code[i+1] & 255) << 16) |
-            ((code[i+2] & 255) << 8 ) |  (code[i+3] & 255);
+            (code[i  ] & 255) << 24 | (code[i+1] & 255) << 16 |
+            (code[i+2] & 255) << 8 |  code[i+3] & 255;
 
         i += 4;
 
         final int npairs =
-            ((code[i  ] & 255) << 24) | ((code[i+1] & 255) << 16) |
-            ((code[i+2] & 255) << 8 ) |  (code[i+3] & 255);
+            (code[i  ] & 255) << 24 | (code[i+1] & 255) << 16 |
+            (code[i+2] & 255) << 8 |  code[i+3] & 255;
 
         i += 4;
 
@@ -56,14 +56,14 @@ public class LookupSwitchFactory implements InstructionFactory
         for (int j=0; j<npairs; j++)
         {
             keys[j] =
-                ((code[i  ] & 255) << 24) | ((code[i+1] & 255) << 16) |
-                ((code[i+2] & 255) << 8 ) |  (code[i+3] & 255);
+                (code[i  ] & 255) << 24 | (code[i+1] & 255) << 16 |
+                (code[i+2] & 255) << 8 |  code[i+3] & 255;
 
             i += 4;
 
             offsets[j] =
-                ((code[i  ] & 255) << 24) | ((code[i+1] & 255) << 16) |
-                ((code[i+2] & 255) << 8 ) |  (code[i+3] & 255);
+                (code[i  ] & 255) << 24 | (code[i+1] & 255) << 16 |
+                (code[i+2] & 255) << 8 |  code[i+3] & 255;
 
             i += 4;
         }
@@ -73,6 +73,6 @@ public class LookupSwitchFactory implements InstructionFactory
         list.add(new LookupSwitch(
             opcode, offset, lineNumber, key, defaultOffset, offsets, keys));
 
-        return (i - offset - 1);
+        return i - offset - 1;
     }
 }

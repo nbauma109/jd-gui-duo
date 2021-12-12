@@ -32,7 +32,7 @@ public class TreeNodeFactoryService {
 
     public TreeNodeFactory get(Container.Entry entry) {
         TreeNodeFactory factory = get(entry.getContainer().getType(), entry);
-        return (factory != null) ? factory : get("*", entry);
+        return factory != null ? factory : get("*", entry);
     }
 
     protected TreeNodeFactory get(String containerType, Container.Entry entry) {

@@ -26,7 +26,7 @@ public class UpdateJavaSyntaxTreeStep0Visitor extends AbstractJavaSyntaxVisitor 
     @Override
     public void visit(BodyDeclaration declaration) {
         ClassFileBodyDeclaration bodyDeclaration = (ClassFileBodyDeclaration)declaration;
-        boolean genericTypesSupported = (bodyDeclaration.getClassFile().getMajorVersion() >= MAJOR_1_5);
+        boolean genericTypesSupported = bodyDeclaration.getClassFile().getMajorVersion() >= MAJOR_1_5;
 
         if (genericTypesSupported) {
             updateOuterFieldTypeVisitor.safeAcceptListDeclaration(bodyDeclaration.getInnerTypeDeclarations());

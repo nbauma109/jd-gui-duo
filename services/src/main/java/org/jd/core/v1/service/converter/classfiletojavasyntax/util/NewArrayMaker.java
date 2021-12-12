@@ -29,7 +29,7 @@ public class NewArrayMaker {
         if (! statements.isEmpty()) {
             Expression ae = statements.getLast().getExpression().getLeftExpression();
 
-            if ((ae.getExpression() == newArray) && ae.getIndex().isIntegerConstantExpression()) {
+            if (ae.getExpression() == newArray && ae.getIndex().isIntegerConstantExpression()) {
                 return new NewInitializedArray(newArray.getLineNumber(), newArray.getType(), createVariableInitializer(statements.listIterator(statements.size()), newArray));
             }
         }
@@ -65,7 +65,7 @@ public class NewArrayMaker {
 					if (ae.getExpression().isNewArray()) {
                         Expression lastE = array.getLast().getExpression();
 
-                        if (lastE.isNewArray() && (ae.getExpression() == lastE)) {
+                        if (lastE.isNewArray() && ae.getExpression() == lastE) {
                             array.removeLast();
                             li.next();
                             array.add(createVariableInitializer(li, lastE));
@@ -88,10 +88,10 @@ public class NewArrayMaker {
             if (expression.isNewArray()) {
                 BaseExpression del = expression.getDimensionExpressionList();
 
-                if (del.isIntegerConstantExpression() && (del.getIntegerValue() == 0)) {
+                if (del.isIntegerConstantExpression() && del.getIntegerValue() == 0) {
                     Type t = expression.getType();
 
-                    if ((type.getDimension() == t.getDimension() + 1) && (type.getDescriptor().length() == t.getDescriptor().length() + 1) && type.getDescriptor().endsWith(t.getDescriptor())) {
+                    if (type.getDimension() == t.getDimension() + 1 && type.getDescriptor().length() == t.getDescriptor().length() + 1 && type.getDescriptor().endsWith(t.getDescriptor())) {
                         vii.set(EMPTY_ARRAY);
                     }
                 }
@@ -104,7 +104,7 @@ public class NewArrayMaker {
 
             type = type.createType(type.getDimension()-1);
 
-            if ((type.getDimension() == 0) && type.isPrimitiveType()) {
+            if (type.getDimension() == 0 && type.isPrimitiveType()) {
                 evi = new ExpressionVariableInitializer(new IntegerConstantExpression(type, 0));
             } else {
                 evi = new ExpressionVariableInitializer(new NullExpression(type));

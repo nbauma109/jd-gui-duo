@@ -38,7 +38,7 @@ public class TypeFactoryService {
 
     public TypeFactory get(Container.Entry entry) {
         TypeFactory typeFactory = get(entry.getContainer().getType(), entry);
-        return (typeFactory != null) ? typeFactory : get("*", entry);
+        return typeFactory != null ? typeFactory : get("*", entry);
     }
 
     public TypeFactory get(String containerType, Container.Entry entry) {

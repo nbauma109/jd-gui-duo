@@ -48,9 +48,9 @@ public class TernaryOpInReturnReconstructor
             ReturnInstruction ri1 = (ReturnInstruction)list.get(index);
             int opcode = ri1.getValueref().getOpcode();
 
-            if ((opcode != Const.SIPUSH) &&
-                (opcode != Const.BIPUSH) &&
-                (opcode != ByteCodeConstants.ICONST)) {
+            if (opcode != Const.SIPUSH &&
+                opcode != Const.BIPUSH &&
+                opcode != ByteCodeConstants.ICONST) {
 				continue;
 			}
 
@@ -72,16 +72,16 @@ public class TernaryOpInReturnReconstructor
 
             ReturnInstruction ri2 = (ReturnInstruction)list.get(index2);
 
-            if ((ri1.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER) &&
-                (ri1.getLineNumber() > ri2.getLineNumber())) {
+            if (ri1.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER &&
+                ri1.getLineNumber() > ri2.getLineNumber()) {
 				continue;
 			}
 
             opcode = ri2.getValueref().getOpcode();
 
-            if ((opcode != Const.SIPUSH) &&
-                (opcode != Const.BIPUSH) &&
-                (opcode != ByteCodeConstants.ICONST)) {
+            if (opcode != Const.SIPUSH &&
+                opcode != Const.BIPUSH &&
+                opcode != ByteCodeConstants.ICONST) {
 				continue;
 			}
 
@@ -106,7 +106,7 @@ public class TernaryOpInReturnReconstructor
             BranchInstruction bi = (BranchInstruction)instruction;
             int offset = bi.getJumpOffset();
 
-            if ((ri2.getOffset() >= offset) || (offset > ri1.getOffset())) {
+            if (ri2.getOffset() >= offset || offset > ri1.getOffset()) {
 				continue;
 			}
 
@@ -122,7 +122,7 @@ public class TernaryOpInReturnReconstructor
                 if (opcode == Const.GOTO)
                 {
                     int jumpOffset = ((Goto)instruction).getJumpOffset();
-                    if ((ri2.getOffset() < jumpOffset) && (jumpOffset <= ri1.getOffset()))
+                    if (ri2.getOffset() < jumpOffset && jumpOffset <= ri1.getOffset())
                     {
                         found = true;
                         break;
@@ -132,7 +132,7 @@ public class TernaryOpInReturnReconstructor
                 {
                     int jumpOffset =
                         ((BranchInstruction)instruction).getJumpOffset();
-                    if ((ri2.getOffset() < jumpOffset) && (jumpOffset <= ri1.getOffset()))
+                    if (ri2.getOffset() < jumpOffset && jumpOffset <= ri1.getOffset())
                     {
                         found = true;
                         break;

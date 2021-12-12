@@ -51,7 +51,7 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
         if (listener == null) {
             return null;
         }
-        if ((fragment != null) && (!fragment.isEmpty())) {
+        if (fragment != null && !fragment.isEmpty()) {
             // Search type name in fragment. URI format : see jd.gui.api.feature.UriOpener
             int index = fragment.indexOf('-');
 
@@ -250,7 +250,7 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
         @Override
         public String getDisplayName() {
             String constructorName = type.getDisplayInnerTypeName();
-            boolean isInnerClass = (constructorName != null);
+            boolean isInnerClass = constructorName != null;
 
             if (constructorName == null) {
                 constructorName = type.getDisplayTypeName();
@@ -305,7 +305,7 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
             String superQualifiedTypeName;
 
             if (superType == null) {
-                superQualifiedTypeName = ((access & Type.FLAG_INTERFACE) == 0) ? StringConstants.JAVA_LANG_OBJECT : "";
+                superQualifiedTypeName = (access & Type.FLAG_INTERFACE) == 0 ? StringConstants.JAVA_LANG_OBJECT : "";
             } else {
                 superQualifiedTypeName = resolveInternalTypeName(superType);
             }

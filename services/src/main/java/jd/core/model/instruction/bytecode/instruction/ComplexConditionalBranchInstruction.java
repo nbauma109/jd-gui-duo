@@ -44,7 +44,7 @@ public class ComplexConditionalBranchInstruction extends ConditionalBranchInstru
     @Override
     public int getPriority()
     {
-        return (this.getCmp() == ByteCodeConstants.CMP_AND) ? 12 : 13;
+        return this.getCmp() == ByteCodeConstants.CMP_AND ? 12 : 13;
     }
 
 	public List<Instruction> getInstructions() {

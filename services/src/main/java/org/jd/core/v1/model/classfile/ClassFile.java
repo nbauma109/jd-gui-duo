@@ -79,7 +79,7 @@ public class ClassFile {
 
     @SuppressWarnings("unchecked")
     public <T extends Attribute> T getAttribute(String name) {
-        return (attributes == null) ? null : (T)attributes.get(name);
+        return attributes == null ? null : (T)attributes.get(name);
     }
 
     public ClassFile getOuterClassFile() {

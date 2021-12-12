@@ -29,7 +29,7 @@ public class TryWithResourcesStatementMaker {
             DefaultList<TryStatement.CatchClause> catchClauses, Statements finallyStatements) {
         int size = statements.size();
 
-        if ((size < 2) || (finallyStatements == null) || (finallyStatements.size() != 1) || !checkThrowable(catchClauses)) {
+        if (size < 2 || finallyStatements == null || finallyStatements.size() != 1 || !checkThrowable(catchClauses)) {
             return null;
         }
 
@@ -77,7 +77,7 @@ public class TryWithResourcesStatementMaker {
 
         statement = finallyStatements.getFirst();
 
-        if (statement.isIfStatement() && (lv1 == getLocalVariable(statement.getCondition()))) {
+        if (statement.isIfStatement() && lv1 == getLocalVariable(statement.getCondition())) {
             statement = statement.getStatements().getFirst();
 
             if (statement.isIfElseStatement()) {
@@ -127,7 +127,7 @@ public class TryWithResourcesStatementMaker {
 
         MethodInvocationExpression mie = (MethodInvocationExpression) expression;
 
-        if ((ts.getFinallyStatements() != null) || (lv2 != getLocalVariable(ies.getCondition())) ||
+        if (ts.getFinallyStatements() != null || lv2 != getLocalVariable(ies.getCondition()) ||
                 !checkThrowable(ts.getCatchClauses()) || !checkCloseInvocation(mie, lv1)) {
             return null;
         }
@@ -181,7 +181,7 @@ public class TryWithResourcesStatementMaker {
     }
 
     protected static boolean checkThrowable(List<? extends TryStatement.CatchClause> catchClauses) {
-        return (catchClauses.size() == 1) && catchClauses.get(0).getType().equals(ObjectType.TYPE_THROWABLE);
+        return catchClauses.size() == 1 && catchClauses.get(0).getType().equals(ObjectType.TYPE_THROWABLE);
     }
 
     protected static AbstractLocalVariable getLocalVariable(Expression condition) {
