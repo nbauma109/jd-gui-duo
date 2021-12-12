@@ -11,7 +11,7 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.*;
 
 public class TypeArguments extends DefaultList<TypeArgument> implements BaseTypeArgument {
-	
+
     private static final long serialVersionUID = 1L;
 
     public TypeArguments() {}

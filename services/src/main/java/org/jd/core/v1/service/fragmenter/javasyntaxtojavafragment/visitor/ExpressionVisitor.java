@@ -25,12 +25,12 @@ import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_BOOLEAN;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_CHAR;
 
 public class ExpressionVisitor extends TypeVisitor {
-	
+
 	/*
 	 * Binary operators in order for binary search
 	 */
 	private static final String[] BIN_OPS = {"&", "&=", "^", "^=", "|", "|="};
-	
+
     public static final KeywordToken CLASS = new KeywordToken("class");
     public static final KeywordToken FALSE = new KeywordToken("false");
     public static final KeywordToken INSTANCEOF = new KeywordToken("instanceof");

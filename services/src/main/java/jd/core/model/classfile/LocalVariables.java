@@ -170,7 +170,7 @@ public class LocalVariables
 
         return null;
     }
-    
+
     public void removeUselessLocalVariables()
     {
 		for (int i = this.listOfLocalVariables.size() - 1; i >= 0; i--) {
@@ -180,7 +180,7 @@ public class LocalVariables
 			}
 		}
     }
-    
+
     public int size()
     {
         return this.listOfLocalVariables.size();

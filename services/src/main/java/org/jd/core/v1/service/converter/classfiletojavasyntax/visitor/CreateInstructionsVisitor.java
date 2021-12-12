@@ -112,7 +112,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
             boolean containsLineNumber = (attributeCode.getAttribute("LineNumberTable") != null);
 
             List<ControlFlowGraphReducer> preferredReducers = ControlFlowGraphReducer.getPreferredReducers(method);
-            
+
             boolean reduced = false;
          	for (ControlFlowGraphReducer controlFlowGraphReducer : preferredReducers) {
          		try {

@@ -52,7 +52,7 @@ public class ClassFileLocalVariableReferenceExpression extends LocalVariableRefe
     public String toString() {
         return "ClassFileLocalVariableReferenceExpression{type=" + localVariable.getType() + ", name=" + localVariable.getName() + "}";
     }
-    
+
     @Override
     public Expression copyTo(int lineNumber) {
     	return new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable);

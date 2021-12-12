@@ -175,7 +175,7 @@ public class CheckCastAndConvertInstructionVisitor
                                         ByteCodeConstants.CONVERT,
                                         arg.getOffset()-1, arg.getLineNumber(),
                                         arg, parameterSignature));
-                                } 
+                                }
                                 else
                                 {
                                     visit(constants, arg);

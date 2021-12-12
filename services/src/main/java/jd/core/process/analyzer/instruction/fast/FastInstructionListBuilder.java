@@ -1431,7 +1431,7 @@ public class FastInstructionListBuilder {
         }
     }
 
-    
+
 	private static void createContinue(List<Instruction> list, int beforeLoopEntryOffset, int loopEntryOffset,
 			int returnOffset) {
 		int length = list.size();
@@ -1479,7 +1479,7 @@ public class FastInstructionListBuilder {
 				break;
 			}
 		}
-	}    
+	}
 
     private static void createBreakAndContinue(Method method, List<Instruction> list, IntSet offsetLabelSet,
             int beforeLoopEntryOffset, int loopEntryOffset, int afterBodyLoopOffset, int afterListOffset,

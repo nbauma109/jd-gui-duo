@@ -1498,7 +1498,7 @@ public class LocalVariableAnalyzer
 				((IConst)asi.getValueref()).setReturnedSignature(
 						SignatureUtil.cutArrayDimensionPrefix(signature));
 			}
-			else if (asiArrayRefOpCode == Const.GETFIELD 
+			else if (asiArrayRefOpCode == Const.GETFIELD
                   || asiArrayRefOpCode == Const.GETSTATIC)
 			{
 				IndexInstruction ii = (IndexInstruction)asi.getArrayref();

@@ -99,12 +99,12 @@ public class FastSwitch extends BranchInstruction
             }
             return this.key - p.key;
         }
-        
+
         @Override
         public int hashCode() {
         	return Objects.hash(offset, key);
         }
-        
+
         @Override
         public boolean equals(Object obj) {
         	if (this == obj) {

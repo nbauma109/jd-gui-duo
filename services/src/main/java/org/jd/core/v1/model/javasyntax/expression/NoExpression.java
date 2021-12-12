@@ -19,7 +19,7 @@ public class NoExpression extends AbstractLineNumberTypeExpression {
     protected NoExpression(int lineNumber) {
     	super(lineNumber, PrimitiveType.TYPE_VOID);
     }
-    
+
     @Override
     public void accept(ExpressionVisitor visitor) {
         visitor.visit(this);

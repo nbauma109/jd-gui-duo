@@ -105,7 +105,7 @@ public class DelegatingFilterContainer implements Container {
             }
             return entry.getPath().compareTo(other.getPath());
         }
-        
+
         @Override
         public boolean equals(Object obj) {
         	if (this == obj) {
@@ -116,7 +116,7 @@ public class DelegatingFilterContainer implements Container {
         	}
         	return obj instanceof DelegatedEntry && compareTo((DelegatedEntry) obj) == 0;
         }
-        
+
         @Override
         public int hashCode() {
         	return Objects.hash(entry.isDirectory(), entry.getPath());

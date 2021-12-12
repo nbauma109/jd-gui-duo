@@ -78,7 +78,7 @@ public class NewInstructionReconstructorBase
 							}
 
                             int argOpCode = arg.getOpcode();
-							if (argOpCode == ByteCodeConstants.LOAD 
+							if (argOpCode == ByteCodeConstants.LOAD
                              || argOpCode == Const.ALOAD
                              || argOpCode == Const.ILOAD) {
 								LocalVariable lv =

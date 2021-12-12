@@ -72,7 +72,7 @@ public class SaveAllSourcesController implements SourcesSavable.Controller, Sour
          * FutureTask.run() catches Throwable and stores it in an outcome Object which
          * becomes the cause of the thrown ExecutionException.
          * We'll use Future.get() as below as opposed to catching Throwable.
-         * As we are in the event dispatch thread here, we'll wait for errors in a 
+         * As we are in the event dispatch thread here, we'll wait for errors in a
          * separate by submitting a new task to avoid freezing the GUI.
          */
         executor.submit(() -> {

@@ -338,7 +338,7 @@ public class ByteCodeUtil
 	public static boolean isIfOrGotoInstruction(int opcode, boolean includeComplex) {
 		return isIfInstruction(opcode, includeComplex) || opcode == GOTO;
 	}
-	
+
 	public static int getCmpPriority(int cmp) {
 		return cmp == ByteCodeConstants.CMP_EQ || cmp == ByteCodeConstants.CMP_NE ? 7 : 6;
 	}

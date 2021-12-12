@@ -39,7 +39,7 @@ public class Method {
     public String getDescriptor() {
         return descriptor;
     }
-    
+
     public String getClassName() {
     	return className;
     }

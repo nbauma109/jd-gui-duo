@@ -323,7 +323,7 @@ public class InitInstanceFieldsReconstructor
                             if (putField.getValueref() instanceof ALoad && ((ALoad)putField.getValueref()).getIndex() != 0) {
 								continue;
 							}
-                            
+
                             list.remove(index--);
 
                             if (++putFieldListIndex >= putFieldListLength) {

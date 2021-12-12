@@ -723,7 +723,7 @@ public class ControlFlowGraphLoopReducer {
                 }
             }
         }
-        
+
         loops.forEach(Loop::updateEnclosingLoop);
     }
 

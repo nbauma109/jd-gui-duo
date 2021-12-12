@@ -22,7 +22,7 @@ public class MethodPatcher {
 		URI jarURI = entry.getContainer().getRoot().getParent().getUri();
 		String unitName = entry.getPath();
 		ASTParserFactory.getInstanceWithBindings().newASTParser(sourceCodeV1.toCharArray(), unitName, jarURI, new ASTVisitor() {
-			
+
 			@Override
 			public boolean visit(MethodDeclaration node) {
 				int methodStart = node.getBody().getStartPosition();
@@ -40,7 +40,7 @@ public class MethodPatcher {
 		});
 		Map<Range, String> replacementMap = new HashMap<>();
 		ASTParserFactory.getInstanceWithBindings().newASTParser(sourceCodeV0.toCharArray(), unitName, jarURI, new ASTVisitor() {
-			
+
 			@Override
 			public boolean visit(MethodDeclaration node) {
 		        int methodStart = node.getBody().getStartPosition();
@@ -66,6 +66,6 @@ public class MethodPatcher {
 		});
 		return StringUtilities.applyModifications(sourceCodeV1, replacementMap);
 	}
-	
-	
+
+
 }

@@ -58,7 +58,7 @@ public abstract class Instruction
 	public int getOpcode() {
 		return opcode;
 	}
-	
+
 	public void setOpcode(int opcode) {
 		this.opcode = opcode;
 	}

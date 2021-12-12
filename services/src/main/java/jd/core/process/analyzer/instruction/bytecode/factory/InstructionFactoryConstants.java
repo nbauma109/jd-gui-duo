@@ -31,7 +31,7 @@ public class InstructionFactoryConstants
     public static InstructionFactory getInstructionFactory(int opcode) {
     	return FACTORIES[opcode];
     }
-    
+
     static
     {
         FACTORIES   = new InstructionFactory[256];

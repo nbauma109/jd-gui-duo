@@ -59,7 +59,7 @@ public class FastDeclaration extends Instruction
 			return false;
 		}
 		FastDeclaration other = (FastDeclaration) obj;
-		return getLv().getIndex() == other.getLv().getIndex() 
+		return getLv().getIndex() == other.getLv().getIndex()
             && getLv().getNameIndex() == other.getLv().getNameIndex()
             && getLv().getSignatureIndex() == other.getLv().getSignatureIndex();
 	}

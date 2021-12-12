@@ -8,7 +8,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGr
 import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.*;
 
 public class MinDepthCFGReducer extends ControlFlowGraphReducer {
-    
+
     public MinDepthCFGReducer(Method method) {
         super(method);
     }

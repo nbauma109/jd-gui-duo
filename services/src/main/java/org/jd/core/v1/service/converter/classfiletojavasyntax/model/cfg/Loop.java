@@ -43,11 +43,11 @@ public class Loop {
     public void updateEnclosingLoop() {
     	members.forEach(this::updateEnclosingLoop);
     }
-    
+
     private void updateEnclosingLoop(BasicBlock member) {
     	member.setEnclosingLoop(this);
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

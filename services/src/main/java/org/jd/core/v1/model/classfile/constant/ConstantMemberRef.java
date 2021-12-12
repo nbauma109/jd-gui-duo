@@ -16,7 +16,7 @@ import org.apache.bcel.classfile.Visitor;
 public class ConstantMemberRef extends ConstantCP {
 
     public static final byte CONSTANT_MEMBER_REF = 19; // Unofficial constant
-	
+
     public ConstantMemberRef(int classIndex, int nameAndTypeIndex) {
         super(CONSTANT_MEMBER_REF, classIndex, nameAndTypeIndex);
     }

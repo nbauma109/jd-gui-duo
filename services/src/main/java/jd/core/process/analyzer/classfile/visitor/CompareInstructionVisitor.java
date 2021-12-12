@@ -143,7 +143,7 @@ public class CompareInstructionVisitor
             }
         case ByteCodeConstants.IFCMP:
             {
-                
+
 
                 // Ce test perturbe le retrait des instructions 'finally' dans
                 // les blocs 'try' et 'catch'.

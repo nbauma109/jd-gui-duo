@@ -3,7 +3,7 @@ package org.jd.util;
 import java.util.Objects;
 
 public class Range {
-	
+
 	private final int minimum;
 	private final int maximum;
 

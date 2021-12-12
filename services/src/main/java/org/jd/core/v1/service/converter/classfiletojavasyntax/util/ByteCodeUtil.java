@@ -655,7 +655,7 @@ public class ByteCodeUtil {
 
         return count;
     }
-    
+
     public static boolean isStaticAccess(byte[] code, int offset) {
     	int opCode = code[offset] & 255;
     	return opCode == GETSTATIC

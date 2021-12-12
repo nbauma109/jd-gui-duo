@@ -174,7 +174,7 @@ public class SignatureUtil
     {
     	return isPrimitiveSignature(signature, BYTE_SHORT_SIGNATURES);
     }
-    
+
     private static boolean isPrimitiveSignature(String signature, char[] letters)
     {
     	if (signature == null || signature.length() != 1) {
@@ -192,7 +192,7 @@ public class SignatureUtil
     {
     	return isObjectSignature(signature, OBJECT_SIGNATURE);
     }
-    
+
     private static boolean isObjectSignature(String signature, char[] letters)
     {
         if (signature == null || signature.length() <= 2) {
