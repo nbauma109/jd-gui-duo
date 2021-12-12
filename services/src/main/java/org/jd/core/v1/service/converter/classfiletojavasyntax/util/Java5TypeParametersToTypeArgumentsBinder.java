@@ -533,7 +533,7 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
 
     @Override
     public void visit(CastExpression expression) {
-        if (!(TYPE_OBJECT.equals(type) || type.getDimension() == expression.getType().getDimension())) {
+        if ((!TYPE_OBJECT.equals(type) && (type.getDimension() != expression.getType().getDimension()))) {
             throw new IllegalArgumentException("TypeParametersToTypeArgumentsBinder.visit(CastExpression ce) : invalid array type");
         }
 
