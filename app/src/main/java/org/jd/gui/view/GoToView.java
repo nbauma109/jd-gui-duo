@@ -78,7 +78,7 @@ public class GoToView {
             hbox.add(goToOkButton);
             goToOkButton.setEnabled(false);
             goToOkButton.addActionListener(e -> {
-                okCallback.accept(Integer.valueOf(goToEnterLineNumberTextField.getText()));
+                okCallback.accept(Integer.parseInt(goToEnterLineNumberTextField.getText()));
                 goToDialog.setVisible(false);
             });
             hbox.add(Box.createHorizontalStrut(5));

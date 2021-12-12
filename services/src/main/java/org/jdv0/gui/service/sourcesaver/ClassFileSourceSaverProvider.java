@@ -163,6 +163,6 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
         if (v == null) {
             return defaultValue;
         }
-        return Boolean.valueOf(v);
+        return Boolean.parseBoolean(v);
     }
 }

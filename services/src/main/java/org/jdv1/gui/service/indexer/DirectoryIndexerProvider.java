@@ -25,7 +25,7 @@ public class DirectoryIndexerProvider extends AbstractIndexerProvider {
         int depth = 15;
 
         try {
-            depth = Integer.valueOf(api.getPreferences().get(GuiPreferences.MAXIMUM_DEPTH_KEY));
+            depth = Integer.parseInt(api.getPreferences().get(GuiPreferences.MAXIMUM_DEPTH_KEY));
         } catch (NumberFormatException e) {
             assert ExceptionUtil.printStackTrace(e);
         }
