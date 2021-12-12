@@ -31,15 +31,17 @@ public class AnnotationDeserializer
         throws IOException
     {
         int numAnnotations = di.readUnsignedShort();
-        if (numAnnotations == 0)
-            return null;
+        if (numAnnotations == 0) {
+			return null;
+		}
 
         Annotation[] annotations = new Annotation[numAnnotations];
 
-        for (int i=0; i<numAnnotations; i++)
-            annotations[i] = new Annotation(
+        for (int i=0; i<numAnnotations; i++) {
+			annotations[i] = new Annotation(
                     di.readUnsignedShort(),
                     deserializeElementValuePairs(di));
+		}
 
         return annotations;
     }
@@ -48,15 +50,17 @@ public class AnnotationDeserializer
         throws IOException
     {
         int numElementValuePairs = di.readUnsignedShort();
-        if (numElementValuePairs == 0)
-            return null;
+        if (numElementValuePairs == 0) {
+			return null;
+		}
 
         ElementValuePair[] pairs = new ElementValuePair[numElementValuePairs];
 
-        for(int i=0; i < numElementValuePairs; i++)
-            pairs[i] = new ElementValuePair(
+        for(int i=0; i < numElementValuePairs; i++) {
+			pairs[i] = new ElementValuePair(
                                 di.readUnsignedShort(),
                                 deserializeElementValue(di));
+		}
 
         return pairs;
     }
@@ -99,13 +103,15 @@ public class AnnotationDeserializer
         throws IOException
     {
         int numValues = di.readUnsignedShort();
-        if (numValues == 0)
-            return null;
+        if (numValues == 0) {
+			return null;
+		}
 
         ElementValue[] values = new ElementValue[numValues];
 
-        for (int i=0; i<numValues; i++)
-            values[i] = deserializeElementValue(di);
+        for (int i=0; i<numValues; i++) {
+			values[i] = deserializeElementValue(di);
+		}
 
         return values;
     }

@@ -69,8 +69,9 @@ public class DotClass118BReconstructor
     {
         int i = list.size();
 
-        if  (i < 5)
-            return;
+        if  (i < 5) {
+			return;
+		}
 
         i -= 4;
         ConstantPool constants = classFile.getConstantPool();
@@ -79,86 +80,101 @@ public class DotClass118BReconstructor
         {
             Instruction instruction = list.get(i);
 
-            if (instruction.getOpcode() != ByteCodeConstants.DUPSTORE)
-                continue;
+            if (instruction.getOpcode() != ByteCodeConstants.DUPSTORE) {
+				continue;
+			}
 
             DupStore ds = (DupStore)instruction;
 
-            if (ds.getObjectref().getOpcode() != Const.GETSTATIC)
-                continue;
+            if (ds.getObjectref().getOpcode() != Const.GETSTATIC) {
+				continue;
+			}
 
             GetStatic gs = (GetStatic)ds.getObjectref();
 
             ConstantFieldref cfr = constants.getConstantFieldref(gs.getIndex());
 
-            if (cfr.getClassIndex() != classFile.getThisClassIndex())
-                continue;
+            if (cfr.getClassIndex() != classFile.getThisClassIndex()) {
+				continue;
+			}
 
             instruction = list.get(i+1);
 
-            if (instruction.getOpcode() != ByteCodeConstants.IFXNULL)
-                continue;
+            if (instruction.getOpcode() != ByteCodeConstants.IFXNULL) {
+				continue;
+			}
 
             IfInstruction ii = (IfInstruction)instruction;
 
             if ((ii.getValue().getOpcode() != ByteCodeConstants.DUPLOAD) ||
-                (ds.getOffset() != ii.getValue().getOffset()))
-                continue;
+                (ds.getOffset() != ii.getValue().getOffset())) {
+				continue;
+			}
 
             instruction = list.get(i+2);
 
-            if (instruction.getOpcode() != Const.POP)
-                continue;
+            if (instruction.getOpcode() != Const.POP) {
+				continue;
+			}
 
             Pop pop = (Pop)instruction;
 
             if ((pop.getObjectref().getOpcode() != ByteCodeConstants.DUPLOAD) ||
-                (ds.getOffset() != pop.getObjectref().getOffset()))
-                continue;
+                (ds.getOffset() != pop.getObjectref().getOffset())) {
+				continue;
+			}
 
             instruction = list.get(i+3);
 
-            if (instruction.getOpcode() != FastConstants.TRY)
-                continue;
+            if (instruction.getOpcode() != FastConstants.TRY) {
+				continue;
+			}
 
             FastTry ft = (FastTry)instruction;
 
             if ((ft.getFinallyInstructions() != null) ||
                 (ft.getInstructions().size() != 1) ||
-                (ft.getCatches().size() != 1))
-                continue;
+                (ft.getCatches().size() != 1)) {
+				continue;
+			}
 
             List<Instruction> catchInstructions =
                 ft.getCatches().get(0).getInstructions();
 
             if ((catchInstructions.size() != 1) ||
-                (catchInstructions.get(0).getOpcode() != Const.ATHROW))
-                continue;
+                (catchInstructions.get(0).getOpcode() != Const.ATHROW)) {
+				continue;
+			}
 
             instruction = ft.getInstructions().get(0);
 
-            if (instruction.getOpcode() != ByteCodeConstants.TERNARYOPSTORE)
-                continue;
+            if (instruction.getOpcode() != ByteCodeConstants.TERNARYOPSTORE) {
+				continue;
+			}
 
             TernaryOpStore tos = (TernaryOpStore)instruction;
 
-            if (tos.getObjectref().getOpcode() != ByteCodeConstants.ASSIGNMENT)
-                continue;
+            if (tos.getObjectref().getOpcode() != ByteCodeConstants.ASSIGNMENT) {
+				continue;
+			}
 
             AssignmentInstruction ai = (AssignmentInstruction)tos.getObjectref();
 
-            if (ai.getValue2().getOpcode() != Const.INVOKESTATIC)
-                continue;
+            if (ai.getValue2().getOpcode() != Const.INVOKESTATIC) {
+				continue;
+			}
 
             Invokestatic is = (Invokestatic)ai.getValue2();
 
-            if (is.getArgs().size() != 1)
-                continue;
+            if (is.getArgs().size() != 1) {
+				continue;
+			}
 
             instruction = is.getArgs().get(0);
 
-            if (instruction.getOpcode() != Const.LDC)
-                continue;
+            if (instruction.getOpcode() != Const.LDC) {
+				continue;
+			}
 
             ConstantNameAndType cnatField = constants.getConstantNameAndType(
                 cfr.getNameAndTypeIndex());
@@ -166,35 +182,40 @@ public class DotClass118BReconstructor
             String signature =
                 constants.getConstantUtf8(cnatField.getSignatureIndex());
 
-            if (! StringConstants.INTERNAL_CLASS_SIGNATURE.equals(signature))
-                continue;
+            if (! StringConstants.INTERNAL_CLASS_SIGNATURE.equals(signature)) {
+				continue;
+			}
 
             String nameField = constants.getConstantUtf8(cnatField.getNameIndex());
 
-            if (! nameField.startsWith(StringConstants.CLASS_DOLLAR))
-                continue;
+            if (! nameField.startsWith(StringConstants.CLASS_DOLLAR)) {
+				continue;
+			}
 
             ConstantMethodref cmr = constants.getConstantMethodref(is.getIndex());
 
             String className =
                 constants.getConstantClassName(cmr.getClassIndex());
 
-            if (! className.equals(StringConstants.JAVA_LANG_CLASS))
-                continue;
+            if (! className.equals(StringConstants.JAVA_LANG_CLASS)) {
+				continue;
+			}
 
             ConstantNameAndType cnatMethod =
                 constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
             String nameMethod =
                 constants.getConstantUtf8(cnatMethod.getNameIndex());
 
-            if (! nameMethod.equals(StringConstants.FORNAME_METHOD_NAME))
-                continue;
+            if (! nameMethod.equals(StringConstants.FORNAME_METHOD_NAME)) {
+				continue;
+			}
 
             Ldc ldc = (Ldc)instruction;
             Constant cv = constants.getConstantValue(ldc.getIndex());
 
-            if (!(cv instanceof ConstantString))
-                continue;
+            if (!(cv instanceof ConstantString)) {
+				continue;
+			}
 
             // Trouve !
             ConstantString cs = (ConstantString)cv;

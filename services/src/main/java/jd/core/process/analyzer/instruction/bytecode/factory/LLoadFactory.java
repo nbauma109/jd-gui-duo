@@ -39,10 +39,11 @@ public class LLoadFactory implements InstructionFactory
         final int opcode = code[offset] & 255;
         int index;
 
-        if (opcode == Const.LLOAD)
-            index = code[offset+1] & 255;
-        else
-            index = opcode - Const.LLOAD_0;
+        if (opcode == Const.LLOAD) {
+			index = code[offset+1] & 255;
+		} else {
+			index = opcode - Const.LLOAD_0;
+		}
 
         final Instruction instruction = new LoadInstruction(
             ByteCodeConstants.LOAD, offset, lineNumber, index, "J");

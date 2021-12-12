@@ -43,10 +43,11 @@ public class ReplaceGetStaticVisitor
         case Const.ARRAYLENGTH:
             {
                 ArrayLength al = (ArrayLength)instruction;
-                if (match(al, al.getArrayref()))
-                    al.setArrayref(this.newInstruction);
-                else
-                    visit(al.getArrayref());
+                if (match(al, al.getArrayref())) {
+					al.setArrayref(this.newInstruction);
+				} else {
+					visit(al.getArrayref());
+				}
             }
             break;
         case Const.AASTORE,
@@ -73,10 +74,11 @@ public class ReplaceGetStaticVisitor
 
                             if (this.parentFound == null)
                             {
-                                if (match(asi, asi.getValueref()))
-                                    asi.setValueref(this.newInstruction);
-                                else
-                                    visit(asi.getValueref());
+                                if (match(asi, asi.getValueref())) {
+									asi.setValueref(this.newInstruction);
+								} else {
+									visit(asi.getValueref());
+								}
                             }
                         }
                     }
@@ -96,10 +98,11 @@ public class ReplaceGetStaticVisitor
 
                     if ((this.parentFound == null) && (ai.getMsg() != null))
                     {
-                        if (match(ai, ai.getMsg()))
-                            ai.setMsg(this.newInstruction);
-                        else
-                            visit(ai.getMsg());
+                        if (match(ai, ai.getMsg())) {
+							ai.setMsg(this.newInstruction);
+						} else {
+							visit(ai.getMsg());
+						}
                     }
                 }
             }
@@ -107,19 +110,21 @@ public class ReplaceGetStaticVisitor
         case Const.ATHROW:
             {
                 AThrow aThrow = (AThrow)instruction;
-                if (match(aThrow, aThrow.getValue()))
-                    aThrow.setValue(this.newInstruction);
-                else
-                    visit(aThrow.getValue());
+                if (match(aThrow, aThrow.getValue())) {
+					aThrow.setValue(this.newInstruction);
+				} else {
+					visit(aThrow.getValue());
+				}
             }
             break;
         case ByteCodeConstants.UNARYOP:
             {
                 UnaryOperatorInstruction uoi = (UnaryOperatorInstruction)instruction;
-                if (match(uoi, uoi.getValue()))
-                    uoi.setValue(this.newInstruction);
-                else
-                    visit(uoi.getValue());
+                if (match(uoi, uoi.getValue())) {
+					uoi.setValue(this.newInstruction);
+				} else {
+					visit(uoi.getValue());
+				}
             }
             break;
         case ByteCodeConstants.BINARYOP:
@@ -135,10 +140,11 @@ public class ReplaceGetStaticVisitor
 
                     if (this.parentFound == null)
                     {
-                        if (match(boi, boi.getValue2()))
-                            boi.setValue2(this.newInstruction);
-                        else
-                            visit(boi.getValue2());
+                        if (match(boi, boi.getValue2())) {
+							boi.setValue2(this.newInstruction);
+						} else {
+							visit(boi.getValue2());
+						}
                     }
                 }
             }
@@ -146,10 +152,11 @@ public class ReplaceGetStaticVisitor
         case Const.CHECKCAST:
             {
                 CheckCast checkCast = (CheckCast)instruction;
-                if (match(checkCast, checkCast.getObjectref()))
-                    checkCast.setObjectref(this.newInstruction);
-                else
-                    visit(checkCast.getObjectref());
+                if (match(checkCast, checkCast.getObjectref())) {
+					checkCast.setObjectref(this.newInstruction);
+				} else {
+					visit(checkCast.getObjectref());
+				}
             }
             break;
         case ByteCodeConstants.STORE,
@@ -157,29 +164,32 @@ public class ReplaceGetStaticVisitor
              Const.ISTORE:
             {
                 StoreInstruction storeInstruction = (StoreInstruction)instruction;
-                if (match(storeInstruction, storeInstruction.getValueref()))
-                    storeInstruction.setValueref(this.newInstruction);
-                else
-                    visit(storeInstruction.getValueref());
+                if (match(storeInstruction, storeInstruction.getValueref())) {
+					storeInstruction.setValueref(this.newInstruction);
+				} else {
+					visit(storeInstruction.getValueref());
+				}
             }
             break;
         case ByteCodeConstants.DUPSTORE:
             {
                 DupStore dupStore = (DupStore)instruction;
-                if (match(dupStore, dupStore.getObjectref()))
-                    dupStore.setObjectref(this.newInstruction);
-                else
-                    visit(dupStore.getObjectref());
+                if (match(dupStore, dupStore.getObjectref())) {
+					dupStore.setObjectref(this.newInstruction);
+				} else {
+					visit(dupStore.getObjectref());
+				}
             }
             break;
         case ByteCodeConstants.CONVERT,
              ByteCodeConstants.IMPLICITCONVERT:
             {
                 ConvertInstruction ci = (ConvertInstruction)instruction;
-                if (match(ci, ci.getValue()))
-                    ci.setValue(this.newInstruction);
-                else
-                    visit(ci.getValue());
+                if (match(ci, ci.getValue())) {
+					ci.setValue(this.newInstruction);
+				} else {
+					visit(ci.getValue());
+				}
             }
             break;
         case ByteCodeConstants.IFCMP:
@@ -195,10 +205,11 @@ public class ReplaceGetStaticVisitor
 
                     if (this.parentFound == null)
                     {
-                        if (match(ifCmp, ifCmp.getValue2()))
-                            ifCmp.setValue2(this.newInstruction);
-                        else
-                            visit(ifCmp.getValue2());
+                        if (match(ifCmp, ifCmp.getValue2())) {
+							ifCmp.setValue2(this.newInstruction);
+						} else {
+							visit(ifCmp.getValue2());
+						}
                     }
                 }
             }
@@ -207,10 +218,11 @@ public class ReplaceGetStaticVisitor
              ByteCodeConstants.IFXNULL:
             {
                 IfInstruction iff = (IfInstruction)instruction;
-                if (match(iff, iff.getValue()))
-                    iff.setValue(this.newInstruction);
-                else
-                    visit(iff.getValue());
+                if (match(iff, iff.getValue())) {
+					iff.setValue(this.newInstruction);
+				} else {
+					visit(iff.getValue());
+				}
             }
             break;
         case ByteCodeConstants.COMPLEXIF:
@@ -226,10 +238,11 @@ public class ReplaceGetStaticVisitor
         case Const.INSTANCEOF:
             {
                 InstanceOf instanceOf = (InstanceOf)instruction;
-                if (match(instanceOf, instanceOf.getObjectref()))
-                    instanceOf.setObjectref(this.newInstruction);
-                else
-                    visit(instanceOf.getObjectref());
+                if (match(instanceOf, instanceOf.getObjectref())) {
+					instanceOf.setObjectref(this.newInstruction);
+				} else {
+					visit(instanceOf.getObjectref());
+				}
             }
             break;
         case Const.INVOKEINTERFACE,
@@ -238,10 +251,11 @@ public class ReplaceGetStaticVisitor
             {
                 InvokeNoStaticInstruction insi =
                     (InvokeNoStaticInstruction)instruction;
-                if (match(insi, insi.getObjectref()))
-                    insi.setObjectref(this.newInstruction);
-                else
-                    visit(insi.getObjectref());
+                if (match(insi, insi.getObjectref())) {
+					insi.setObjectref(this.newInstruction);
+				} else {
+					visit(insi.getObjectref());
+				}
             }
             // intended fall through
         case Const.INVOKESTATIC,
@@ -250,38 +264,42 @@ public class ReplaceGetStaticVisitor
                 List<Instruction> list = ((InvokeInstruction)instruction).getArgs();
                 for (int i=list.size()-1; (i>=0) && (this.parentFound == null); --i)
                 {
-                    if (match(instruction, list.get(i)))
-                        list.set(i, this.newInstruction);
-                    else
-                        visit(list.get(i));
+                    if (match(instruction, list.get(i))) {
+						list.set(i, this.newInstruction);
+					} else {
+						visit(list.get(i));
+					}
                 }
             }
             break;
         case Const.LOOKUPSWITCH:
             {
                 LookupSwitch ls = (LookupSwitch)instruction;
-                if (match(ls, ls.getKey()))
-                    ls.setKey(this.newInstruction);
-                else
-                    visit(ls.getKey());
+                if (match(ls, ls.getKey())) {
+					ls.setKey(this.newInstruction);
+				} else {
+					visit(ls.getKey());
+				}
             }
             break;
         case Const.MONITORENTER:
             {
                 MonitorEnter monitorEnter = (MonitorEnter)instruction;
-                if (match(monitorEnter, monitorEnter.getObjectref()))
-                    monitorEnter.setObjectref(this.newInstruction);
-                else
-                    visit(monitorEnter.getObjectref());
+                if (match(monitorEnter, monitorEnter.getObjectref())) {
+					monitorEnter.setObjectref(this.newInstruction);
+				} else {
+					visit(monitorEnter.getObjectref());
+				}
             }
             break;
         case Const.MONITOREXIT:
             {
                 MonitorExit monitorExit = (MonitorExit)instruction;
-                if (match(monitorExit, monitorExit.getObjectref()))
-                    monitorExit.setObjectref(this.newInstruction);
-                else
-                    visit(monitorExit.getObjectref());
+                if (match(monitorExit, monitorExit.getObjectref())) {
+					monitorExit.setObjectref(this.newInstruction);
+				} else {
+					visit(monitorExit.getObjectref());
+				}
             }
             break;
         case Const.MULTIANEWARRAY:
@@ -289,38 +307,42 @@ public class ReplaceGetStaticVisitor
                 Instruction[] dimensions = ((MultiANewArray)instruction).getDimensions();
                 for (int i=dimensions.length-1; (i>=0) && (this.parentFound == null); --i)
                 {
-                    if (match(instruction, dimensions[i]))
-                        dimensions[i] = this.newInstruction;
-                    else
-                        visit(dimensions[i]);
+                    if (match(instruction, dimensions[i])) {
+						dimensions[i] = this.newInstruction;
+					} else {
+						visit(dimensions[i]);
+					}
                 }
             }
             break;
         case Const.NEWARRAY:
             {
                 NewArray newArray = (NewArray)instruction;
-                if (match(newArray, newArray.getDimension()))
-                    newArray.setDimension(this.newInstruction);
-                else
-                    visit(newArray.getDimension());
+                if (match(newArray, newArray.getDimension())) {
+					newArray.setDimension(this.newInstruction);
+				} else {
+					visit(newArray.getDimension());
+				}
             }
             break;
         case Const.ANEWARRAY:
             {
                 ANewArray aNewArray = (ANewArray)instruction;
-                if (match(aNewArray, aNewArray.getDimension()))
-                    aNewArray.setDimension(this.newInstruction);
-                else
-                    visit(aNewArray.getDimension());
+                if (match(aNewArray, aNewArray.getDimension())) {
+					aNewArray.setDimension(this.newInstruction);
+				} else {
+					visit(aNewArray.getDimension());
+				}
             }
             break;
         case Const.POP:
             {
                 Pop pop = (Pop)instruction;
-                if (match(pop, pop.getObjectref()))
-                    pop.setObjectref(this.newInstruction);
-                else
-                    visit(pop.getObjectref());
+                if (match(pop, pop.getObjectref())) {
+					pop.setObjectref(this.newInstruction);
+				} else {
+					visit(pop.getObjectref());
+				}
             }
             break;
         case Const.PUTFIELD:
@@ -336,10 +358,11 @@ public class ReplaceGetStaticVisitor
 
                     if (this.parentFound == null)
                     {
-                        if (match(putField, putField.getValueref()))
-                            putField.setValueref(this.newInstruction);
-                        else
-                            visit(putField.getValueref());
+                        if (match(putField, putField.getValueref())) {
+							putField.setValueref(this.newInstruction);
+						} else {
+							visit(putField.getValueref());
+						}
                     }
                 }
             }
@@ -347,37 +370,41 @@ public class ReplaceGetStaticVisitor
         case Const.PUTSTATIC:
             {
                 PutStatic putStatic = (PutStatic)instruction;
-                if (match(putStatic, putStatic.getValueref()))
-                    putStatic.setValueref(this.newInstruction);
-                else
-                    visit(putStatic.getValueref());
+                if (match(putStatic, putStatic.getValueref())) {
+					putStatic.setValueref(this.newInstruction);
+				} else {
+					visit(putStatic.getValueref());
+				}
             }
             break;
         case ByteCodeConstants.XRETURN:
             {
                 ReturnInstruction ri = (ReturnInstruction)instruction;
-                if (match(ri, ri.getValueref()))
-                    ri.setValueref(this.newInstruction);
-                else
-                    visit(ri.getValueref());
+                if (match(ri, ri.getValueref())) {
+					ri.setValueref(this.newInstruction);
+				} else {
+					visit(ri.getValueref());
+				}
             }
             break;
         case Const.TABLESWITCH:
             {
                 TableSwitch ts = (TableSwitch)instruction;
-                if (match(ts, ts.getKey()))
-                    ts.setKey(this.newInstruction);
-                else
-                    visit(ts.getKey());
+                if (match(ts, ts.getKey())) {
+					ts.setKey(this.newInstruction);
+				} else {
+					visit(ts.getKey());
+				}
             }
             break;
         case ByteCodeConstants.TERNARYOPSTORE:
             {
                 TernaryOpStore tos = (TernaryOpStore)instruction;
-                if (match(tos, tos.getObjectref()))
-                    tos.setObjectref(this.newInstruction);
-                else
-                    visit(tos.getObjectref());
+                if (match(tos, tos.getObjectref())) {
+					tos.setObjectref(this.newInstruction);
+				} else {
+					visit(tos.getObjectref());
+				}
             }
             break;
         case ByteCodeConstants.TERNARYOP:
@@ -403,10 +430,11 @@ public class ReplaceGetStaticVisitor
 
                             if (this.parentFound == null)
                             {
-                                if (match(to, to.getValue2()))
-                                    to.setValue2(this.newInstruction);
-                                else
-                                    visit(to.getValue2());
+                                if (match(to, to.getValue2())) {
+									to.setValue2(this.newInstruction);
+								} else {
+									visit(to.getValue2());
+								}
                             }
                         }
                     }
@@ -426,10 +454,11 @@ public class ReplaceGetStaticVisitor
 
                     if (this.parentFound == null)
                     {
-                        if (match(ai, ai.getValue2()))
-                            ai.setValue2(this.newInstruction);
-                        else
-                            visit(ai.getValue2());
+                        if (match(ai, ai.getValue2())) {
+							ai.setValue2(this.newInstruction);
+						} else {
+							visit(ai.getValue2());
+						}
                     }
                 }
             }
@@ -447,10 +476,11 @@ public class ReplaceGetStaticVisitor
 
                     if (this.parentFound == null)
                     {
-                        if (match(ali, ali.getIndexref()))
-                            ali.setIndexref(this.newInstruction);
-                        else
-                            visit(ali.getIndexref());
+                        if (match(ali, ali.getIndexref())) {
+							ali.setIndexref(this.newInstruction);
+						} else {
+							visit(ali.getIndexref());
+						}
                     }
                 }
             }
@@ -459,19 +489,21 @@ public class ReplaceGetStaticVisitor
              ByteCodeConstants.POSTINC:
             {
                 IncInstruction ii = (IncInstruction)instruction;
-                if (match(ii, ii.getValue()))
-                    ii.setValue(this.newInstruction);
-                else
-                    visit(ii.getValue());
+                if (match(ii, ii.getValue())) {
+					ii.setValue(this.newInstruction);
+				} else {
+					visit(ii.getValue());
+				}
             }
             break;
         case Const.GETFIELD:
             {
                 GetField gf = (GetField)instruction;
-                if (match(gf, gf.getObjectref()))
-                    gf.setObjectref(this.newInstruction);
-                else
-                    visit(gf.getObjectref());
+                if (match(gf, gf.getObjectref())) {
+					gf.setObjectref(this.newInstruction);
+				} else {
+					visit(gf.getObjectref());
+				}
             }
             break;
         case ByteCodeConstants.INITARRAY,
@@ -486,8 +518,9 @@ public class ReplaceGetStaticVisitor
                 {
                     visit(iai.getNewArray());
 
-                    if ((this.parentFound == null) && (iai.getValues() != null))
-                        visit(iai.getValues());
+                    if ((this.parentFound == null) && (iai.getValues() != null)) {
+						visit(iai.getValues());
+					}
                 }
             }
             break;
@@ -525,8 +558,9 @@ public class ReplaceGetStaticVisitor
 
     private void visit(List<Instruction> instructions)
     {
-        for (int i=instructions.size()-1; i>=0; --i)
-            visit(instructions.get(i));
+        for (int i=instructions.size()-1; i>=0; --i) {
+			visit(instructions.get(i));
+		}
     }
 
     /**

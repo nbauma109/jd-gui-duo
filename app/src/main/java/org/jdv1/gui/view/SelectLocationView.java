@@ -151,10 +151,12 @@ public class SelectLocationView<T extends DefaultMutableTreeNode & ContainerEntr
 
             // Resize
             Dimension ps = selectLocationTree.getPreferredSize();
-            if (ps.width < 200)
-                ps.width = 200;
-            if (ps.height < 50)
-                ps.height = 50;
+            if (ps.width < 200) {
+				ps.width = 200;
+			}
+            if (ps.height < 50) {
+				ps.height = 50;
+			}
             selectLocationTree.setPreferredSize(ps);
 
             selectLocationLabel.setText("" + locationCount + " locations:");

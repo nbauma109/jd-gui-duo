@@ -60,8 +60,9 @@ public class DotClass14Reconstructor
     {
         int i = list.size();
 
-        if  (i < 6)
-            return;
+        if  (i < 6) {
+			return;
+		}
 
         i -= 5;
         ConstantPool constants = classFile.getConstantPool();
@@ -70,78 +71,92 @@ public class DotClass14Reconstructor
         {
             Instruction instruction = list.get(i);
 
-            if (instruction.getOpcode() != ByteCodeConstants.IFXNULL)
-                continue;
+            if (instruction.getOpcode() != ByteCodeConstants.IFXNULL) {
+				continue;
+			}
 
             IfInstruction ii = (IfInstruction)instruction;
 
-            if (ii.getValue().getOpcode() != Const.GETSTATIC)
-                continue;
+            if (ii.getValue().getOpcode() != Const.GETSTATIC) {
+				continue;
+			}
 
             int jumpOffset = ii.getJumpOffset();
 
             instruction = list.get(i+1);
 
-            if (instruction.getOpcode() != ByteCodeConstants.DUPSTORE)
-                continue;
+            if (instruction.getOpcode() != ByteCodeConstants.DUPSTORE) {
+				continue;
+			}
 
             DupStore ds = (DupStore)instruction;
 
-            if (ds.getObjectref().getOpcode() != Const.INVOKESTATIC)
-                continue;
+            if (ds.getObjectref().getOpcode() != Const.INVOKESTATIC) {
+				continue;
+			}
 
             Invokestatic is = (Invokestatic)ds.getObjectref();
 
-            if (is.getArgs().size() != 1)
-                continue;
+            if (is.getArgs().size() != 1) {
+				continue;
+			}
 
             instruction = is.getArgs().get(0);
 
-            if (instruction.getOpcode() != Const.LDC)
-                continue;
+            if (instruction.getOpcode() != Const.LDC) {
+				continue;
+			}
 
             instruction = list.get(i+2);
 
-            if (instruction.getOpcode() != Const.PUTSTATIC)
-                continue;
+            if (instruction.getOpcode() != Const.PUTSTATIC) {
+				continue;
+			}
 
             PutStatic ps = (PutStatic)instruction;
 
             if ((ps.getValueref().getOpcode() != ByteCodeConstants.DUPLOAD) ||
-                (ds.getOffset() != ps.getValueref().getOffset()))
-                continue;
+                (ds.getOffset() != ps.getValueref().getOffset())) {
+				continue;
+			}
 
             instruction = list.get(i+3);
 
-            if (instruction.getOpcode() != ByteCodeConstants.TERNARYOPSTORE)
-                continue;
+            if (instruction.getOpcode() != ByteCodeConstants.TERNARYOPSTORE) {
+				continue;
+			}
 
             TernaryOpStore tos = (TernaryOpStore)instruction;
 
             if ((tos.getObjectref().getOpcode() != ByteCodeConstants.DUPLOAD) ||
-                (ds.getOffset() != tos.getObjectref().getOffset()))
-                continue;
+                (ds.getOffset() != tos.getObjectref().getOffset())) {
+				continue;
+			}
 
             instruction = list.get(i+4);
 
-            if (instruction.getOpcode() != Const.GOTO)
-                continue;
+            if (instruction.getOpcode() != Const.GOTO) {
+				continue;
+			}
 
             Goto g = (Goto)instruction;
             instruction = list.get(i+5);
 
-            if ((g.getOffset() >= jumpOffset) || (jumpOffset > instruction.getOffset()))
-                continue;
+            if ((g.getOffset() >= jumpOffset) || (jumpOffset > instruction.getOffset())) {
+				continue;
+			}
 
             GetStatic gs = (GetStatic)ii.getValue();
 
-            if (ps.getIndex() != gs.getIndex())
-                continue;
+            if (ps.getIndex() != gs.getIndex()) {
+				continue;
+			}
 
             ConstantFieldref cfr = constants.getConstantFieldref(gs.getIndex());
 
-            if (searchMatchingClassFile(cfr.getClassIndex(), classFile) == null)
-                continue;
+            if (searchMatchingClassFile(cfr.getClassIndex(), classFile) == null) {
+				continue;
+			}
 
             ConstantNameAndType cnatField = constants.getConstantNameAndType(
                     cfr.getNameAndTypeIndex());
@@ -149,35 +164,40 @@ public class DotClass14Reconstructor
             String descriptorField =
                 constants.getConstantUtf8(cnatField.getSignatureIndex());
 
-            if (! descriptorField.equals(StringConstants.INTERNAL_CLASS_SIGNATURE))
-                continue;
+            if (! descriptorField.equals(StringConstants.INTERNAL_CLASS_SIGNATURE)) {
+				continue;
+			}
 
             String nameField = constants.getConstantUtf8(cnatField.getNameIndex());
 
             if (!nameField.startsWith(StringConstants.CLASS_DOLLAR) &&
-                !nameField.startsWith(StringConstants.ARRAY_DOLLAR))
-                continue;
+                !nameField.startsWith(StringConstants.ARRAY_DOLLAR)) {
+				continue;
+			}
 
             ConstantMethodref cmr = constants.getConstantMethodref(is.getIndex());
 
             ClassFile matchingClassFile =
                 searchMatchingClassFile(cmr.getClassIndex(), classFile);
-            if (matchingClassFile == null)
-                continue;
+            if (matchingClassFile == null) {
+				continue;
+			}
 
             ConstantNameAndType cnatMethod =
                 constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
             String nameMethod =
                 constants.getConstantUtf8(cnatMethod.getNameIndex());
 
-            if (! nameMethod.equals(StringConstants.CLASS_DOLLAR))
-                continue;
+            if (! nameMethod.equals(StringConstants.CLASS_DOLLAR)) {
+				continue;
+			}
 
             Ldc ldc = (Ldc)is.getArgs().get(0);
             Constant cv = constants.getConstantValue(ldc.getIndex());
 
-            if (!(cv instanceof ConstantString))
-                continue;
+            if (!(cv instanceof ConstantString)) {
+				continue;
+			}
 
             // Trouve !
             ConstantString cs = (ConstantString)cv;
@@ -353,8 +373,9 @@ public class DotClass14Reconstructor
     private static ClassFile searchMatchingClassFile(
         int classIndex, ClassFile classFile)
     {
-        if (classIndex == classFile.getThisClassIndex())
-            return classFile;
+        if (classIndex == classFile.getThisClassIndex()) {
+			return classFile;
+		}
 
         String className =
             classFile.getConstantPool().getConstantClassName(classIndex);
@@ -363,11 +384,13 @@ public class DotClass14Reconstructor
         {
             classFile = classFile.getOuterClass();
 
-            if (classFile == null)
-                return null;
+            if (classFile == null) {
+				return null;
+			}
 
-            if (classFile.getThisClassName().equals(className))
-                return classFile;
+            if (classFile.getThisClassName().equals(className)) {
+				return classFile;
+			}
         }
     }
 }

@@ -31,8 +31,9 @@ public class New extends IndexInstruction
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        if (constants == null)
-            return null;
+        if (constants == null) {
+			return null;
+		}
 
         return SignatureUtil.createTypeName(
             constants.getConstantClassName(this.getIndex()));

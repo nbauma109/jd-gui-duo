@@ -44,8 +44,9 @@ public class AttributeDeserializer
         throws IOException
     {
         int count = di.readUnsignedShort();
-        if (count == 0)
-            return null;
+        if (count == 0) {
+			return null;
+		}
 
         Attribute[] attributes = new Attribute[count];
 
@@ -72,23 +73,26 @@ public class AttributeDeserializer
             }
             else if (attributeNameIndex == constants.getConstantValueAttributeNameIndex())
             {
-                if (attributeLength != 2)
-                    throw new InvalidAttributeLengthException();
+                if (attributeLength != 2) {
+					throw new InvalidAttributeLengthException();
+				}
                 attributes[i] = new AttributeConstantValue(
                         Const.ATTR_CONSTANT_VALUE,
                         di.readUnsignedShort());
             }
             else if (attributeNameIndex == constants.getDeprecatedAttributeNameIndex())
             {
-                if (attributeLength != 0)
-                    throw new InvalidAttributeLengthException();
+                if (attributeLength != 0) {
+					throw new InvalidAttributeLengthException();
+				}
                 attributes[i] = new AttributeDeprecated(
                         Const.ATTR_DEPRECATED);
             }
             else if (attributeNameIndex == constants.getEnclosingMethodAttributeNameIndex())
             {
-                if (attributeLength != 4)
-                    throw new InvalidAttributeLengthException();
+                if (attributeLength != 4) {
+					throw new InvalidAttributeLengthException();
+				}
                 di.skipBytes(attributeLength);
                 attributes[i] = new AttributeEnclosingMethod(
                         Const.ATTR_ENCLOSING_METHOD);
@@ -149,24 +153,27 @@ public class AttributeDeserializer
             }
             else if (attributeNameIndex == constants.getSignatureAttributeNameIndex())
             {
-                if (attributeLength != 2)
-                    throw new InvalidAttributeLengthException();
+                if (attributeLength != 2) {
+					throw new InvalidAttributeLengthException();
+				}
                 attributes[i] = new AttributeSignature(
                         Const.ATTR_SIGNATURE,
                         di.readUnsignedShort());
             }
             else if (attributeNameIndex == constants.getSourceFileAttributeNameIndex())
             {
-                if (attributeLength != 2)
-                    throw new InvalidAttributeLengthException();
+                if (attributeLength != 2) {
+					throw new InvalidAttributeLengthException();
+				}
                 di.skipBytes(attributeLength);
                 attributes[i] = new AttributeSourceFile(
                         Const.ATTR_SOURCE_FILE);
             }
             else if (attributeNameIndex == constants.getSyntheticAttributeNameIndex())
             {
-                if (attributeLength != 0)
-                    throw new InvalidAttributeLengthException();
+                if (attributeLength != 0) {
+					throw new InvalidAttributeLengthException();
+				}
                 attributes[i] = new AttributeSynthetic(
                         Const.ATTR_SYNTHETIC);
             }
@@ -174,8 +181,9 @@ public class AttributeDeserializer
             {
                 attributes[i] = new UnknowAttribute(
                         Const.ATTR_UNKNOWN);
-                for (int j=0; j<attributeLength; j++)
-                    di.readByte();
+                for (int j=0; j<attributeLength; j++) {
+					di.readByte();
+				}
             }
         }
 
@@ -186,8 +194,9 @@ public class AttributeDeserializer
         throws IOException
     {
         int codeLength = di.readInt();
-        if (codeLength == 0)
-            return null;
+        if (codeLength == 0) {
+			return null;
+		}
 
         byte[] code = new byte[codeLength];
         di.readFully(code);
@@ -199,16 +208,18 @@ public class AttributeDeserializer
         throws IOException
     {
         int count = di.readUnsignedShort();
-        if (count == 0)
-            return null;
+        if (count == 0) {
+			return null;
+		}
 
         List<Entry<Integer, CodeException>> codeExceptions = new ArrayList<>();
 
-        for (int i=0; i<count; i++)
-            codeExceptions.add(new SimpleEntry<>(i, new CodeException(di.readUnsignedShort(),
+        for (int i=0; i<count; i++) {
+			codeExceptions.add(new SimpleEntry<>(i, new CodeException(di.readUnsignedShort(),
                                                                   di.readUnsignedShort(),
                                                                   di.readUnsignedShort(),
                                                                   di.readUnsignedShort())));
+		}
         return codeExceptions;
     }
 
@@ -216,14 +227,16 @@ public class AttributeDeserializer
         throws IOException
     {
         int count = di.readUnsignedShort();
-        if (count == 0)
-            return null;
+        if (count == 0) {
+			return null;
+		}
 
         LineNumber[] lineNumbers = new LineNumber[count];
 
-        for (int i=0; i<count; i++)
-            lineNumbers[i] = new LineNumber(di.readUnsignedShort(),
+        for (int i=0; i<count; i++) {
+			lineNumbers[i] = new LineNumber(di.readUnsignedShort(),
                                             di.readUnsignedShort());
+		}
         return lineNumbers;
     }
 
@@ -231,17 +244,19 @@ public class AttributeDeserializer
         throws IOException
     {
         int count = di.readUnsignedShort();
-        if (count == 0)
-            return null;
+        if (count == 0) {
+			return null;
+		}
 
         LocalVariable[] localVariables = new LocalVariable[count];
 
-        for (int i=0; i<count; i++)
-            localVariables[i] = new LocalVariable(di.readUnsignedShort(),
+        for (int i=0; i<count; i++) {
+			localVariables[i] = new LocalVariable(di.readUnsignedShort(),
                                                   di.readUnsignedShort(),
                                                   di.readUnsignedShort(),
                                                   di.readUnsignedShort(),
                                                   di.readUnsignedShort());
+		}
 
         return localVariables;
     }
@@ -250,13 +265,15 @@ public class AttributeDeserializer
         throws IOException
     {
         int numberOfExceptions = di.readUnsignedShort();
-        if (numberOfExceptions == 0)
-            return null;
+        if (numberOfExceptions == 0) {
+			return null;
+		}
 
         int[] exceptionIndexTable = new int[numberOfExceptions];
 
-        for(int i=0; i < numberOfExceptions; i++)
-            exceptionIndexTable[i] = di.readUnsignedShort();
+        for(int i=0; i < numberOfExceptions; i++) {
+			exceptionIndexTable[i] = di.readUnsignedShort();
+		}
 
         return exceptionIndexTable;
     }
@@ -265,16 +282,18 @@ public class AttributeDeserializer
         throws IOException
     {
         int numberOfClasses = di.readUnsignedShort();
-        if (numberOfClasses == 0)
-            return null;
+        if (numberOfClasses == 0) {
+			return null;
+		}
 
         InnerClass[] classes = new InnerClass[numberOfClasses];
 
-        for(int i=0; i < numberOfClasses; i++)
-            classes[i] = new InnerClass(di.readUnsignedShort(),
+        for(int i=0; i < numberOfClasses; i++) {
+			classes[i] = new InnerClass(di.readUnsignedShort(),
                                      di.readUnsignedShort(),
                                      di.readUnsignedShort(),
                                      di.readUnsignedShort());
+		}
 
         return classes;
     }
@@ -284,15 +303,17 @@ public class AttributeDeserializer
         throws IOException
     {
         int numParameters = di.readUnsignedByte();
-        if (numParameters == 0)
-            return null;
+        if (numParameters == 0) {
+			return null;
+		}
 
         ParameterAnnotations[] parameterAnnotations =
             new ParameterAnnotations[numParameters];
 
-        for(int i=0; i < numParameters; i++)
-            parameterAnnotations[i] = new ParameterAnnotations(
+        for(int i=0; i < numParameters; i++) {
+			parameterAnnotations[i] = new ParameterAnnotations(
                     AnnotationDeserializer.deserialize(di));
+		}
 
         return parameterAnnotations;
     }

@@ -237,8 +237,9 @@ public class CompilationUnitVisitor extends StatementVisitor {
             // Build fragments for interfaces
             BaseType interfaces = declaration.getInterfaces();
             if (interfaces != null) {
-                if (!tokens.isEmpty())
-                    fragments.addTokensFragment(tokens);
+                if (!tokens.isEmpty()) {
+					fragments.addTokensFragment(tokens);
+				}
 
                 JavaFragmentFactory.addSpacerBeforeImplements(fragments);
 

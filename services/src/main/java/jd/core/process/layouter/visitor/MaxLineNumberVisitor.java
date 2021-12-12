@@ -78,8 +78,9 @@ public class MaxLineNumberVisitor
         case FastConstants.DECLARE:
             {
                 FastDeclaration fd = (FastDeclaration)instruction;
-                if (fd.getInstruction() != null)
-                    maxLineNumber = visit(fd.getInstruction());
+                if (fd.getInstruction() != null) {
+					maxLineNumber = visit(fd.getInstruction());
+				}
             }
             break;
         case ByteCodeConstants.IFCMP:
@@ -120,8 +121,9 @@ public class MaxLineNumberVisitor
                     for (int i=length-1; i>0; i--)
                     {
                         int lineNumber = visit(list.get(i));
-                        if (maxLineNumber < lineNumber)
-                            maxLineNumber = lineNumber;
+                        if (maxLineNumber < lineNumber) {
+							maxLineNumber = lineNumber;
+						}
                     }
                 }
             }
@@ -145,8 +147,9 @@ public class MaxLineNumberVisitor
                     for (int i=length-1; i>0; i--)
                     {
                         int lineNumber = visit(list.get(i));
-                        if (maxLineNumber < lineNumber)
-                            maxLineNumber = lineNumber;
+                        if (maxLineNumber < lineNumber) {
+							maxLineNumber = lineNumber;
+						}
                     }
                 }
             }
@@ -164,8 +167,9 @@ public class MaxLineNumberVisitor
             {
                 Instruction[] dimensions = ((MultiANewArray)instruction).getDimensions();
                 int length = dimensions.length;
-                if (length > 0)
-                    maxLineNumber = visit(dimensions[length-1]);
+                if (length > 0) {
+					maxLineNumber = visit(dimensions[length-1]);
+				}
             }
             break;
         case Const.NEWARRAY:
@@ -202,8 +206,9 @@ public class MaxLineNumberVisitor
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
                 int length = iai.getValues().size();
-                if (length > 0)
-                    maxLineNumber = visit(iai.getValues().get(length-1));
+                if (length > 0) {
+					maxLineNumber = visit(iai.getValues().get(length-1));
+				}
             }
             break;
         case ByteCodeConstants.TERNARYOP:

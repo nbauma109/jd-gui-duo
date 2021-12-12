@@ -45,24 +45,28 @@ public class AssertInstructionReconstructor
     public static void reconstruct(ClassFile classFile, List<Instruction> list)
     {
         int index = list.size();
-        if (index-- == 0)
-            return;
+        if (index-- == 0) {
+			return;
+		}
 
         while (index-- > 1)
         {
             Instruction instruction = list.get(index);
 
-            if (instruction.getOpcode() != Const.ATHROW)
-                continue;
+            if (instruction.getOpcode() != Const.ATHROW) {
+				continue;
+			}
 
             // AThrow trouve
             AThrow athrow = (AThrow)instruction;
-            if (athrow.getValue().getOpcode() != ByteCodeConstants.INVOKENEW)
-                continue;
+            if (athrow.getValue().getOpcode() != ByteCodeConstants.INVOKENEW) {
+				continue;
+			}
 
             instruction = list.get(index-1);
-            if (instruction.getOpcode() != ByteCodeConstants.COMPLEXIF)
-                continue;
+            if (instruction.getOpcode() != ByteCodeConstants.COMPLEXIF) {
+				continue;
+			}
 
             // ComplexConditionalBranchInstruction trouve
             ComplexConditionalBranchInstruction cbl =
@@ -70,41 +74,48 @@ public class AssertInstructionReconstructor
             int jumpOffset = cbl.getJumpOffset();
             int lastOffset = list.get(index+1).getOffset();
 
-            if ((athrow.getOffset() >= jumpOffset) || (jumpOffset > lastOffset))
-                continue;
+            if ((athrow.getOffset() >= jumpOffset) || (jumpOffset > lastOffset)) {
+				continue;
+			}
 
-            if ((cbl.getCmp() != 2) || (cbl.getInstructions().isEmpty()))
-                continue;
+            if ((cbl.getCmp() != 2) || (cbl.getInstructions().isEmpty())) {
+				continue;
+			}
 
             instruction = cbl.getInstructions().get(0);
-            if (instruction.getOpcode() != ByteCodeConstants.IF)
-                continue;
+            if (instruction.getOpcode() != ByteCodeConstants.IF) {
+				continue;
+			}
 
             IfInstruction if1 = (IfInstruction)instruction;
-            if ((if1.getCmp() != 7) || (if1.getValue().getOpcode() != Const.GETSTATIC))
-                continue;
+            if ((if1.getCmp() != 7) || (if1.getValue().getOpcode() != Const.GETSTATIC)) {
+				continue;
+			}
 
             GetStatic gs = (GetStatic)if1.getValue();
             ConstantPool constants = classFile.getConstantPool();
             ConstantFieldref cfr = constants.getConstantFieldref(gs.getIndex());
 
-            if (cfr.getClassIndex() != classFile.getThisClassIndex())
-                continue;
+            if (cfr.getClassIndex() != classFile.getThisClassIndex()) {
+				continue;
+			}
 
             ConstantNameAndType cnat =
                 constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
             String fieldName = constants.getConstantUtf8(cnat.getNameIndex());
 
-            if (! fieldName.equals("$assertionsDisabled"))
-                continue;
+            if (! fieldName.equals("$assertionsDisabled")) {
+				continue;
+			}
 
             InvokeNew in = (InvokeNew)athrow.getValue();
             ConstantMethodref cmr =
                 constants.getConstantMethodref(in.getIndex());
             String className = constants.getConstantClassName(cmr.getClassIndex());
 
-            if (! className.equals(StringConstants.JAVA_LANG_ASSERTION_ERROR))
-                continue;
+            if (! className.equals(StringConstants.JAVA_LANG_ASSERTION_ERROR)) {
+				continue;
+			}
 
             // Remove first condition "!($assertionsDisabled)"
             cbl.getInstructions().remove(0);

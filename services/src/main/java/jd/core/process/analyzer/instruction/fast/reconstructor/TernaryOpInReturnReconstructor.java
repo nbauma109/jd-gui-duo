@@ -41,63 +41,74 @@ public class TernaryOpInReturnReconstructor
     {
         for (int index=list.size()-1; index>=0; --index)
         {
-            if (list.get(index).getOpcode() != ByteCodeConstants.XRETURN)
-                continue;
+            if (list.get(index).getOpcode() != ByteCodeConstants.XRETURN) {
+				continue;
+			}
 
             ReturnInstruction ri1 = (ReturnInstruction)list.get(index);
             int opcode = ri1.getValueref().getOpcode();
 
             if ((opcode != Const.SIPUSH) &&
                 (opcode != Const.BIPUSH) &&
-                (opcode != ByteCodeConstants.ICONST))
-                continue;
+                (opcode != ByteCodeConstants.ICONST)) {
+				continue;
+			}
 
             IConst iConst1 = (IConst)ri1.getValueref();
 
-            if (!"Z".equals(iConst1.getSignature()))
-                continue;
+            if (!"Z".equals(iConst1.getSignature())) {
+				continue;
+			}
 
-            if (index <= 0)
-                continue;
+            if (index <= 0) {
+				continue;
+			}
 
             int index2 = index - 1;
 
-            if (list.get(index2).getOpcode() != ByteCodeConstants.XRETURN)
-                continue;
+            if (list.get(index2).getOpcode() != ByteCodeConstants.XRETURN) {
+				continue;
+			}
 
             ReturnInstruction ri2 = (ReturnInstruction)list.get(index2);
 
             if ((ri1.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER) &&
-                (ri1.getLineNumber() > ri2.getLineNumber()))
-                continue;
+                (ri1.getLineNumber() > ri2.getLineNumber())) {
+				continue;
+			}
 
             opcode = ri2.getValueref().getOpcode();
 
             if ((opcode != Const.SIPUSH) &&
                 (opcode != Const.BIPUSH) &&
-                (opcode != ByteCodeConstants.ICONST))
-                continue;
+                (opcode != ByteCodeConstants.ICONST)) {
+				continue;
+			}
 
             IConst iConst2 = (IConst)ri2.getValueref();
 
-            if (!"Z".equals(iConst2.getSignature()))
-                continue;
+            if (!"Z".equals(iConst2.getSignature())) {
+				continue;
+			}
 
-            if (index2 <= 0)
-                continue;
+            if (index2 <= 0) {
+				continue;
+			}
 
             Instruction instruction = list.get(--index2);
 
             opcode = instruction.getOpcode();
 
-            if (!ByteCodeUtil.isIfInstruction(opcode, true))
-                continue;
+            if (!ByteCodeUtil.isIfInstruction(opcode, true)) {
+				continue;
+			}
 
             BranchInstruction bi = (BranchInstruction)instruction;
             int offset = bi.getJumpOffset();
 
-            if ((ri2.getOffset() >= offset) || (offset > ri1.getOffset()))
-                continue;
+            if ((ri2.getOffset() >= offset) || (offset > ri1.getOffset())) {
+				continue;
+			}
 
             // Verification qu'aucune instruction saute sur 'ri1'
             boolean found = false;
@@ -129,11 +140,13 @@ public class TernaryOpInReturnReconstructor
                 }
             }
 
-            if (found)
-                continue;
+            if (found) {
+				continue;
+			}
 
-            if (iConst2.getValue() == 1)
-                ComparisonInstructionAnalyzer.inverseComparison( bi );
+            if (iConst2.getValue() == 1) {
+				ComparisonInstructionAnalyzer.inverseComparison( bi );
+			}
 
             list.remove(index);
             list.remove(index2);

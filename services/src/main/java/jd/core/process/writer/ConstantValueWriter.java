@@ -91,8 +91,9 @@ public class ConstantValueWriter
                 {
                     // TODO Conversion de la valeur en constante ?
                     String value = String.valueOf(d);
-                    if (value.indexOf('.') == -1)
-                        value += ".0";
+                    if (value.indexOf('.') == -1) {
+						value += ".0";
+					}
                     printer.printNumeric(value + 'D');
                 }
             }
@@ -141,8 +142,9 @@ public class ConstantValueWriter
                 {
                     // TODO Conversion de la valeur en constante ?
                     String s = String.valueOf(value);
-                    if (s.indexOf('.') == -1)
-                        s += ".0";
+                    if (s.indexOf('.') == -1) {
+						s += ".0";
+					}
                     printer.printNumeric(s + 'F');
                 }
             }

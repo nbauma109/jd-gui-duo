@@ -58,8 +58,9 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
             {
                 AssertInstruction ai = (AssertInstruction)instruction;
                 visit(ai.getTest());
-                if (ai.getMsg() != null)
-                    visit(ai.getMsg());
+                if (ai.getMsg() != null) {
+					visit(ai.getMsg());
+				}
             }
             break;
         case Const.ATHROW:
@@ -107,8 +108,9 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
             {
                 List<Instruction> branchList =
                     ((ComplexConditionalBranchInstruction)instruction).getInstructions();
-                for (int i=branchList.size()-1; i>=0; --i)
-                    visit(branchList.get(i));
+                for (int i=branchList.size()-1; i>=0; --i) {
+					visit(branchList.get(i));
+				}
             }
             break;
         case Const.INSTANCEOF:
@@ -161,8 +163,9 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
              ByteCodeConstants.INVOKENEW:
             {
                 List<Instruction> list = ((InvokeInstruction)instruction).getArgs();
-                for (int i=list.size()-1; i>=0; --i)
-                    visit(list.get(i));
+                for (int i=list.size()-1; i>=0; --i) {
+					visit(list.get(i));
+				}
             }
             break;
         case Const.LOOKUPSWITCH:
@@ -177,8 +180,9 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
         case Const.MULTIANEWARRAY:
             {
                 Instruction[] dimensions = ((MultiANewArray)instruction).getDimensions();
-                for (int i=dimensions.length-1; i>=0; --i)
-                    visit(dimensions[i]);
+                for (int i=dimensions.length-1; i>=0; --i) {
+					visit(dimensions[i]);
+				}
             }
             break;
         case Const.NEWARRAY:
@@ -221,8 +225,9 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
                 visit(iai.getNewArray());
-                if (iai.getValues() != null)
-                    visit(iai.getValues());
+                if (iai.getValues() != null) {
+					visit(iai.getValues());
+				}
             }
             break;
         case Const.ACONST_NULL,
@@ -261,7 +266,8 @@ public class SetConstantTypeInStringIndexOfMethodsVisitor
 
     public void visit(List<Instruction> instructions)
     {
-        for (int i=instructions.size()-1; i>=0; --i)
-            visit(instructions.get(i));
+        for (int i=instructions.size()-1; i>=0; --i) {
+			visit(instructions.get(i));
+		}
     }
 }

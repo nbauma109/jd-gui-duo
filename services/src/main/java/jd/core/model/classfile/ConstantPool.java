@@ -209,8 +209,9 @@ public class ConstantPool
 
     public int addConstantUtf8(String s)
     {
-        if (s == null)
-            throw new IllegalArgumentException("Constant string is null");
+        if (s == null) {
+			throw new IllegalArgumentException("Constant string is null");
+		}
 
         if (s.startsWith("L[")) {
             throw new IllegalArgumentException("Constant string starts with L[");
@@ -235,8 +236,9 @@ public class ConstantPool
         String internalName = getConstantUtf8(nameIndex);
         if ((internalName == null) ||
             (internalName.isEmpty()) ||
-            (internalName.charAt(internalName.length()-1) == ';'))
-            System.err.println("ConstantPool.addConstantClass: invalid name index");
+            (internalName.charAt(internalName.length()-1) == ';')) {
+			System.err.println("ConstantPool.addConstantClass: invalid name index");
+		}
 
         int index = this.constantClassToIndex.get(nameIndex);
 
@@ -260,14 +262,16 @@ public class ConstantPool
         {
             Constant constant = this.listOfConstants.get(index);
 
-            if (!(constant instanceof ConstantNameAndType))
-                continue;
+            if (!(constant instanceof ConstantNameAndType)) {
+				continue;
+			}
 
             ConstantNameAndType cnat = (ConstantNameAndType)constant;
 
             if ((cnat.getNameIndex() == nameIndex) &&
-                (cnat.getSignatureIndex() == descriptorIndex))
-                return index;
+                (cnat.getSignatureIndex() == descriptorIndex)) {
+				return index;
+			}
         }
 
         ConstantNameAndType cnat = new ConstantNameAndType(nameIndex, descriptorIndex);
@@ -285,14 +289,16 @@ public class ConstantPool
         {
             Constant constant = this.listOfConstants.get(index);
 
-            if (!(constant instanceof ConstantFieldref))
-                continue;
+            if (!(constant instanceof ConstantFieldref)) {
+				continue;
+			}
 
             ConstantFieldref cfr = (ConstantFieldref)constant;
 
             if ((cfr.getClassIndex() == classIndex) &&
-                (cfr.getNameAndTypeIndex() == nameAndTypeIndex))
-                return index;
+                (cfr.getNameAndTypeIndex() == nameAndTypeIndex)) {
+				return index;
+			}
         }
 
         ConstantFieldref cfr = new ConstantFieldref(classIndex, nameAndTypeIndex);
@@ -318,14 +324,16 @@ public class ConstantPool
         {
             Constant constant = this.listOfConstants.get(index);
 
-            if (!(constant instanceof ConstantMethodref))
-                continue;
+            if (!(constant instanceof ConstantMethodref)) {
+				continue;
+			}
 
             ConstantMethodref cmr = (ConstantMethodref)constant;
 
             if ((cmr.getClassIndex() == classIndex) &&
-                (cmr.getNameAndTypeIndex() == nameAndTypeIndex))
-                return index;
+                (cmr.getNameAndTypeIndex() == nameAndTypeIndex)) {
+				return index;
+			}
         }
 
         ConstantMethodref cfr = new ConstantMethodref(classIndex, nameAndTypeIndex,

@@ -255,7 +255,9 @@ public class ComparisonInstructionAnalyzer
                 if ((jumpOffset != lastBiJumpOffset) &&
                     ((jumpOffset <= nextInstruction.getOffset()) ||
                      (jumpOffset > afterOffest)))
-                    break; // Non
+				 {
+					break; // Non
+				}
 
                 // Recherche de l'offset de l'instruction avant le 'goto'
                 if (index <= 0)

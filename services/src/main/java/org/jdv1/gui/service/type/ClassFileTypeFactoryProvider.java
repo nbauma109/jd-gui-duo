@@ -77,8 +77,9 @@ public class ClassFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
                             String pathToFind = entry.getPath().substring(0, entry.getPath().length() - entryTypePath.length()) + fragmentTypePath;
                             Container.Entry entryFound = entry.getParent().getChildren().get(new FileEntryPath(pathToFind));
 
-                            if (entryFound == null)
-                                return null;
+                            if (entryFound == null) {
+								return null;
+							}
 
                             entry = entryFound;
 

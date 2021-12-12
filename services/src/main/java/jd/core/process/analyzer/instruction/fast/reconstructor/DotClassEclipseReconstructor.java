@@ -65,8 +65,9 @@ public class DotClassEclipseReconstructor
     {
         int i = list.size();
 
-        if  (i < 3)
-            return;
+        if  (i < 3) {
+			return;
+		}
 
         i -= 2;
         ConstantPool constants = classFile.getConstantPool();
@@ -75,44 +76,51 @@ public class DotClassEclipseReconstructor
         {
             Instruction instruction = list.get(i);
 
-            if (instruction.getOpcode() != ByteCodeConstants.IFXNULL)
-                continue;
+            if (instruction.getOpcode() != ByteCodeConstants.IFXNULL) {
+				continue;
+			}
 
             IfInstruction ii = (IfInstruction)instruction;
 
-            if (ii.getValue().getOpcode() != Const.GETSTATIC)
-                continue;
+            if (ii.getValue().getOpcode() != Const.GETSTATIC) {
+				continue;
+			}
 
             int jumpOffset = ii.getJumpOffset();
 
             instruction = list.get(i+1);
 
-            if (instruction.getOpcode() != FastConstants.TRY)
-                continue;
+            if (instruction.getOpcode() != FastConstants.TRY) {
+				continue;
+			}
 
             FastTry ft = (FastTry)instruction;
 
             if ((ft.getCatches().size() != 1) || (ft.getFinallyInstructions() != null) ||
-                (ft.getInstructions().size() != 2))
-                continue;
+                (ft.getInstructions().size() != 2)) {
+				continue;
+			}
 
             FastCatch fc = ft.getCatches().get(0);
 
             if ((fc.getInstructions().size() != 1) ||
-                (fc.getOtherExceptionTypeIndexes() != null))
-                    continue;
+                (fc.getOtherExceptionTypeIndexes() != null)) {
+				continue;
+			}
 
             instruction = list.get(i+2);
 
-            if ((ft.getOffset() >= jumpOffset) || (jumpOffset > instruction.getOffset()))
-                continue;
+            if ((ft.getOffset() >= jumpOffset) || (jumpOffset > instruction.getOffset())) {
+				continue;
+			}
 
             GetStatic gs = (GetStatic)ii.getValue();
 
             ConstantFieldref cfr = constants.getConstantFieldref(gs.getIndex());
 
-            if (cfr.getClassIndex() != classFile.getThisClassIndex())
-                continue;
+            if (cfr.getClassIndex() != classFile.getThisClassIndex()) {
+				continue;
+			}
 
             ConstantNameAndType cnatField = constants.getConstantNameAndType(
                     cfr.getNameAndTypeIndex());
@@ -120,74 +128,87 @@ public class DotClassEclipseReconstructor
             String signature =
                 constants.getConstantUtf8(cnatField.getSignatureIndex());
 
-            if (! StringConstants.INTERNAL_CLASS_SIGNATURE.equals(signature))
-                continue;
+            if (! StringConstants.INTERNAL_CLASS_SIGNATURE.equals(signature)) {
+				continue;
+			}
 
             String name = constants.getConstantUtf8(cnatField.getNameIndex());
 
-            if (! name.startsWith(StringConstants.CLASS_DOLLAR))
-                continue;
+            if (! name.startsWith(StringConstants.CLASS_DOLLAR)) {
+				continue;
+			}
 
             instruction = ft.getInstructions().get(0);
 
-            if (instruction.getOpcode() != ByteCodeConstants.DUPSTORE)
-                continue;
+            if (instruction.getOpcode() != ByteCodeConstants.DUPSTORE) {
+				continue;
+			}
 
             DupStore ds = (DupStore)instruction;
 
-            if (ds.getObjectref().getOpcode() != Const.INVOKESTATIC)
-                continue;
+            if (ds.getObjectref().getOpcode() != Const.INVOKESTATIC) {
+				continue;
+			}
 
             Invokestatic is = (Invokestatic)ds.getObjectref();
 
-            if (is.getArgs().size() != 1)
-                continue;
+            if (is.getArgs().size() != 1) {
+				continue;
+			}
 
             instruction = is.getArgs().get(0);
 
-            if (instruction.getOpcode() != Const.LDC)
-                continue;
+            if (instruction.getOpcode() != Const.LDC) {
+				continue;
+			}
 
             ConstantMethodref cmr = constants.getConstantMethodref(is.getIndex());
 
             name = constants.getConstantClassName(cmr.getClassIndex());
 
-            if (! name.equals(StringConstants.JAVA_LANG_CLASS))
-                continue;
+            if (! name.equals(StringConstants.JAVA_LANG_CLASS)) {
+				continue;
+			}
 
             ConstantNameAndType cnatMethod =
                 constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
             name = constants.getConstantUtf8(cnatMethod.getNameIndex());
 
-            if (! name.equals(StringConstants.FORNAME_METHOD_NAME))
-                continue;
+            if (! name.equals(StringConstants.FORNAME_METHOD_NAME)) {
+				continue;
+			}
 
             Ldc ldc = (Ldc)instruction;
             Constant cv = constants.getConstantValue(ldc.getIndex());
 
-            if (!(cv instanceof ConstantString))
-                continue;
+            if (!(cv instanceof ConstantString)) {
+				continue;
+			}
 
             instruction = ft.getInstructions().get(1);
 
-            if (instruction.getOpcode() != Const.PUTSTATIC)
-                continue;
+            if (instruction.getOpcode() != Const.PUTSTATIC) {
+				continue;
+			}
 
             PutStatic ps = (PutStatic)instruction;
 
             if ((ps.getIndex() != gs.getIndex()) ||
                 (ps.getValueref().getOpcode() != ByteCodeConstants.DUPLOAD) ||
-                (ps.getValueref().getOffset() != ds.getOffset()))
-                continue;
+                (ps.getValueref().getOffset() != ds.getOffset())) {
+				continue;
+			}
 
             String exceptionName =
                 constants.getConstantClassName(fc.getExceptionTypeIndex());
 
-            if (! exceptionName.equals(StringConstants.INTERNAL_CLASSNOTFOUNDEXCEPTION_SIGNATURE))
-                continue;
+            if (! exceptionName.equals(StringConstants.INTERNAL_CLASSNOTFOUNDEXCEPTION_SIGNATURE)) {
+				continue;
+			}
 
-            if (fc.getInstructions().get(0).getOpcode() != Const.ATHROW)
-                continue;
+            if (fc.getInstructions().get(0).getOpcode() != Const.ATHROW) {
+				continue;
+			}
 
             // Trouve !
             ConstantString cs = (ConstantString)cv;

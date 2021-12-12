@@ -41,10 +41,11 @@ public class ILoadFactory implements InstructionFactory
         final int opcode = code[offset] & 255;
         int index;
 
-        if (opcode == Const.ILOAD)
-            index = code[offset+1] & 255;
-        else
-            index = opcode - Const.ILOAD_0;
+        if (opcode == Const.ILOAD) {
+			index = code[offset+1] & 255;
+		} else {
+			index = opcode - Const.ILOAD_0;
+		}
 
         Instruction instruction =
             new ILoad(Const.ILOAD, offset, lineNumber, index);

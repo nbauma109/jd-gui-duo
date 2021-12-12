@@ -39,10 +39,11 @@ public class DLoadFactory implements InstructionFactory
         final int opcode = code[offset] & 255;
         int index;
 
-        if (opcode == Const.DLOAD)
-            index = code[offset+1] & 255;
-        else
-            index = opcode - Const.DLOAD_0;
+        if (opcode == Const.DLOAD) {
+			index = code[offset+1] & 255;
+		} else {
+			index = opcode - Const.DLOAD_0;
+		}
 
         final Instruction instruction = new LoadInstruction(
             ByteCodeConstants.LOAD, offset, lineNumber, index, "D");

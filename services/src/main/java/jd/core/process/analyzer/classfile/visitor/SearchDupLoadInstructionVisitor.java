@@ -42,8 +42,9 @@ public class SearchDupLoadInstructionVisitor
             {
                 ArrayLoadInstruction ali = (ArrayLoadInstruction)instruction;
                 DupLoad dupLoad = visit(ali.getArrayref(), dupStore);
-                if (dupLoad != null)
-                    return dupLoad;
+                if (dupLoad != null) {
+					return dupLoad;
+				}
                 return visit(ali.getIndexref(), dupStore);
             }
         case Const.AASTORE,
@@ -51,21 +52,25 @@ public class SearchDupLoadInstructionVisitor
             {
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
                 DupLoad dupLoad = visit(asi.getArrayref(), dupStore);
-                if (dupLoad != null)
-                    return dupLoad;
+                if (dupLoad != null) {
+					return dupLoad;
+				}
                 dupLoad = visit(asi.getIndexref(), dupStore);
-                if (dupLoad != null)
-                    return dupLoad;
+                if (dupLoad != null) {
+					return dupLoad;
+				}
                 return visit(asi.getValueref(), dupStore);
             }
         case ByteCodeConstants.ASSERT:
             {
                 AssertInstruction ai = (AssertInstruction)instruction;
                 DupLoad dupLoad = visit(ai.getTest(), dupStore);
-                if (dupLoad != null)
-                    return dupLoad;
-                if (ai.getMsg() == null)
-                    return null;
+                if (dupLoad != null) {
+					return dupLoad;
+				}
+                if (ai.getMsg() == null) {
+					return null;
+				}
                 return visit(ai.getMsg(), dupStore);
             }
         case Const.ATHROW:
@@ -78,8 +83,9 @@ public class SearchDupLoadInstructionVisitor
                 BinaryOperatorInstruction boi =
                     (BinaryOperatorInstruction)instruction;
                 DupLoad dupLoad = visit(boi.getValue1(), dupStore);
-                if (dupLoad != null)
-                    return dupLoad;
+                if (dupLoad != null) {
+					return dupLoad;
+				}
                 return visit(boi.getValue2(), dupStore);
             }
         case Const.CHECKCAST:
@@ -89,8 +95,9 @@ public class SearchDupLoadInstructionVisitor
              Const.ISTORE:
             return visit(((StoreInstruction)instruction).getValueref(), dupStore);
         case ByteCodeConstants.DUPLOAD:
-            if (((DupLoad)instruction).getDupStore() == dupStore)
-                return (DupLoad)instruction;
+            if (((DupLoad)instruction).getDupStore() == dupStore) {
+				return (DupLoad)instruction;
+			}
             break;
         case ByteCodeConstants.DUPSTORE:
             return visit(((DupStore)instruction).getObjectref(), dupStore);
@@ -101,8 +108,9 @@ public class SearchDupLoadInstructionVisitor
             {
                 IfCmp ifCmp = (IfCmp)instruction;
                 DupLoad dupLoad = visit(ifCmp.getValue1(), dupStore);
-                if (dupLoad != null)
-                    return dupLoad;
+                if (dupLoad != null) {
+					return dupLoad;
+				}
                 return visit(ifCmp.getValue2(), dupStore);
             }
         case ByteCodeConstants.IF,
@@ -115,8 +123,9 @@ public class SearchDupLoadInstructionVisitor
                 for (int i=branchList.size()-1; i>=0; --i)
                 {
                     DupLoad dupLoad = visit(branchList.get(i), dupStore);
-                    if (dupLoad != null)
-                        return dupLoad;
+                    if (dupLoad != null) {
+						return dupLoad;
+					}
                 }
             }
             break;
@@ -128,8 +137,9 @@ public class SearchDupLoadInstructionVisitor
             {
                 DupLoad dupLoad = visit(
                     ((InvokeNoStaticInstruction)instruction).getObjectref(), dupStore);
-                if (dupLoad != null)
-                    return dupLoad;
+                if (dupLoad != null) {
+					return dupLoad;
+				}
             }
             // intended fall through
         case Const.INVOKESTATIC,
@@ -139,8 +149,9 @@ public class SearchDupLoadInstructionVisitor
                 for (int i=list.size()-1; i>=0; --i)
                 {
                     DupLoad dupLoad = visit(list.get(i), dupStore);
-                    if (dupLoad != null)
-                        return dupLoad;
+                    if (dupLoad != null) {
+						return dupLoad;
+					}
                 }
             }
             break;
@@ -156,8 +167,9 @@ public class SearchDupLoadInstructionVisitor
                 for (int i=dimensions.length-1; i>=0; --i)
                 {
                     DupLoad dupLoad = visit(dimensions[i], dupStore);
-                    if (dupLoad != null)
-                        return dupLoad;
+                    if (dupLoad != null) {
+						return dupLoad;
+					}
                 }
             }
             break;
@@ -171,8 +183,9 @@ public class SearchDupLoadInstructionVisitor
             {
                 PutField putField = (PutField)instruction;
                 DupLoad dupLoad = visit(putField.getObjectref(), dupStore);
-                if (dupLoad != null)
-                    return dupLoad;
+                if (dupLoad != null) {
+					return dupLoad;
+				}
                 return visit(putField.getValueref(), dupStore);
             }
         case Const.PUTSTATIC:
@@ -193,10 +206,12 @@ public class SearchDupLoadInstructionVisitor
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
                 DupLoad dupLoad = visit(iai.getNewArray(), dupStore);
-                if (dupLoad != null)
-                    return dupLoad;
-                if (iai.getValues() != null)
-                    return visit(iai.getValues(), dupStore);
+                if (dupLoad != null) {
+					return dupLoad;
+				}
+                if (iai.getValues() != null) {
+					return visit(iai.getValues(), dupStore);
+				}
             }
             break;
         case Const.ACONST_NULL,
@@ -239,8 +254,9 @@ public class SearchDupLoadInstructionVisitor
         for (int i=instructions.size()-1; i>=0; --i)
         {
             DupLoad dupLoad = visit(instructions.get(i), dupStore);
-            if (dupLoad != null)
-                return dupLoad;
+            if (dupLoad != null) {
+				return dupLoad;
+			}
         }
 
         return null;

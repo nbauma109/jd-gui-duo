@@ -60,15 +60,17 @@ public class ClassFileFormalParameter extends FormalParameter implements LocalVa
     public String toString() {
         String s = "ClassFileFormalParameter{";
 
-        if (annotationReferences != null)
-            s += annotationReferences + " ";
+        if (annotationReferences != null) {
+			s += annotationReferences + " ";
+		}
 
         Type type = localVariable.getType();
 
-        if (varargs)
-            s += type.createType(type.getDimension()-1) + "... ";
-        else
-            s += type + " ";
+        if (varargs) {
+			s += type.createType(type.getDimension()-1) + "... ";
+		} else {
+			s += type + " ";
+		}
 
         return s + localVariable.getName() + "}";
     }

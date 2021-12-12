@@ -48,13 +48,15 @@ public class NewInstructionReconstructor extends NewInstructionReconstructorBase
     {
         for (int dupStoreIndex=0; dupStoreIndex<list.size(); dupStoreIndex++)
         {
-            if (list.get(dupStoreIndex).getOpcode() != ByteCodeConstants.DUPSTORE)
-                continue;
+            if (list.get(dupStoreIndex).getOpcode() != ByteCodeConstants.DUPSTORE) {
+				continue;
+			}
 
             DupStore ds = (DupStore)list.get(dupStoreIndex);
 
-            if (ds.getObjectref().getOpcode() != Const.NEW)
-                continue;
+            if (ds.getObjectref().getOpcode() != Const.NEW) {
+				continue;
+			}
 
             int invokespecialIndex = dupStoreIndex;
             final int length = list.size();
@@ -63,18 +65,21 @@ public class NewInstructionReconstructor extends NewInstructionReconstructorBase
             {
                 Instruction instruction = list.get(invokespecialIndex);
 
-                if (instruction.getOpcode() != Const.INVOKESPECIAL)
-                    continue;
+                if (instruction.getOpcode() != Const.INVOKESPECIAL) {
+					continue;
+				}
 
                 Invokespecial is = (Invokespecial)instruction;
 
-                if (is.getObjectref().getOpcode() != ByteCodeConstants.DUPLOAD)
-                    continue;
+                if (is.getObjectref().getOpcode() != ByteCodeConstants.DUPLOAD) {
+					continue;
+				}
 
                 DupLoad dl = (DupLoad)is.getObjectref();
 
-                if (dl.getOffset() != ds.getOffset())
-                    continue;
+                if (dl.getOffset() != ds.getOffset()) {
+					continue;
+				}
 
                 ConstantPool constants = classFile.getConstantPool();
                 ConstantMethodref cmr = constants.getConstantMethodref(is.getIndex());
@@ -92,10 +97,11 @@ public class NewInstructionReconstructor extends NewInstructionReconstructorBase
                         list, invokespecialIndex+1, ds, invokeNew);
 
                     list.remove(invokespecialIndex);
-                    if (parentFound == null)
-                        list.set(dupStoreIndex, invokeNew);
-                    else
-                        list.remove(dupStoreIndex--);
+                    if (parentFound == null) {
+						list.set(dupStoreIndex, invokeNew);
+					} else {
+						list.remove(dupStoreIndex--);
+					}
 
                     initAnonymousClassConstructorParameterName(
                         classFile, method, invokeNew);

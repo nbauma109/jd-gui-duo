@@ -164,10 +164,12 @@ public class PrintTokenVisitor implements TokenVisitor {
         for (int i=index; i>=0; i--) {
             tokens.get(i).accept(searchLineNumberVisitor);
 
-            if (searchLineNumberVisitor.lineNumber != UNKNOWN_LINE_NUMBER)
-                return searchLineNumberVisitor.lineNumber;
-            if (searchLineNumberVisitor.newLineCounter > 0)
-                break;
+            if (searchLineNumberVisitor.lineNumber != UNKNOWN_LINE_NUMBER) {
+				return searchLineNumberVisitor.lineNumber;
+			}
+            if (searchLineNumberVisitor.newLineCounter > 0) {
+				break;
+			}
         }
 
         // Forward search
@@ -178,10 +180,12 @@ public class PrintTokenVisitor implements TokenVisitor {
         for (int i=index; i<size; i++) {
             tokens.get(i).accept(searchLineNumberVisitor);
 
-            if (searchLineNumberVisitor.lineNumber != UNKNOWN_LINE_NUMBER)
-                return searchLineNumberVisitor.lineNumber;
-            if (searchLineNumberVisitor.newLineCounter > 0)
-                break;
+            if (searchLineNumberVisitor.lineNumber != UNKNOWN_LINE_NUMBER) {
+				return searchLineNumberVisitor.lineNumber;
+			}
+            if (searchLineNumberVisitor.newLineCounter > 0) {
+				break;
+			}
         }
 
         return UNKNOWN_LINE_NUMBER;

@@ -42,15 +42,17 @@ public class DupStoreThisReconstructor
     {
         for (int dupStoreIndex=0; dupStoreIndex<list.size(); dupStoreIndex++)
         {
-            if (list.get(dupStoreIndex).getOpcode() != ByteCodeConstants.DUPSTORE)
-                continue;
+            if (list.get(dupStoreIndex).getOpcode() != ByteCodeConstants.DUPSTORE) {
+				continue;
+			}
 
             // DupStore trouvé
             DupStore dupStore = (DupStore)list.get(dupStoreIndex);
 
             if ((dupStore.getObjectref().getOpcode() != Const.ALOAD) ||
-                (((ALoad)dupStore.getObjectref()).getIndex() != 0))
-                continue;
+                (((ALoad)dupStore.getObjectref()).getIndex() != 0)) {
+				continue;
+			}
 
             // Fait-il parti d'un motif 'synchronized' ?
             if (dupStoreIndex+2 < list.size())
@@ -77,8 +79,9 @@ public class DupStoreThisReconstructor
             for (; index<length; index++)
             {
                 visitor.visit(list.get(index));
-                if (visitor.getParentFound() != null)
-                    break;
+                if (visitor.getParentFound() != null) {
+					break;
+				}
             }
 
             visitor.init(dupStore, dupStore.getObjectref());
@@ -86,8 +89,9 @@ public class DupStoreThisReconstructor
             for (; index<length; index++)
             {
                 visitor.visit(list.get(index));
-                if (visitor.getParentFound() != null)
-                    break;
+                if (visitor.getParentFound() != null) {
+					break;
+				}
             }
 
             list.remove(dupStoreIndex--);

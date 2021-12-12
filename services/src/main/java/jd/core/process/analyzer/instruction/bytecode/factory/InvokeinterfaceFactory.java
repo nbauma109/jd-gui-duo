@@ -44,15 +44,17 @@ public class InvokeinterfaceFactory implements InstructionFactory
 
         ConstantInterfaceMethodref cimr =
             classFile.getConstantPool().getConstantInterfaceMethodref(index);
-        if (cimr == null)
-            throw new IllegalArgumentException(
+        if (cimr == null) {
+			throw new IllegalArgumentException(
                     "Invalid ConstantInterfaceMethodref index");
+		}
 
         int nbrOfParameters = cimr.getNbrOfParameters();
         List<Instruction> args = new ArrayList<>(nbrOfParameters);
 
-        for (int i=nbrOfParameters; i>0; --i)
-            args.add(stack.pop());
+        for (int i=nbrOfParameters; i>0; --i) {
+			args.add(stack.pop());
+		}
 
         Collections.reverse(args);
 
@@ -61,10 +63,11 @@ public class InvokeinterfaceFactory implements InstructionFactory
         final Instruction instruction = new Invokeinterface(
             opcode, offset, lineNumber, index, objectref, args);
 
-        if (cimr.returnAResult())
-            stack.push(instruction);
-        else
-            list.add(instruction);
+        if (cimr.returnAResult()) {
+			stack.push(instruction);
+		} else {
+			list.add(instruction);
+		}
 
         listForAnalyze.add(instruction);
 

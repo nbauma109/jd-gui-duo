@@ -41,30 +41,39 @@ public class AttributeCode extends Attribute
 
     public AttributeNumberTable getAttributeLineNumberTable()
     {
-        if (this.attributes != null)
-            for (int i=this.attributes.length-1; i>=0; --i)
-                if (this.attributes[i].getTag() == Const.ATTR_LINE_NUMBER_TABLE)
-                    return (AttributeNumberTable)this.attributes[i];
+        if (this.attributes != null) {
+			for (int i=this.attributes.length-1; i>=0; --i) {
+				if (this.attributes[i].getTag() == Const.ATTR_LINE_NUMBER_TABLE) {
+					return (AttributeNumberTable)this.attributes[i];
+				}
+			}
+		}
 
         return null;
     }
 
     public AttributeLocalVariableTable getAttributeLocalVariableTable()
     {
-        if (this.attributes != null)
-            for (int i=this.attributes.length-1; i>=0; --i)
-                if (this.attributes[i].getTag() == Const.ATTR_LOCAL_VARIABLE_TABLE)
-                    return (AttributeLocalVariableTable)this.attributes[i];
+        if (this.attributes != null) {
+			for (int i=this.attributes.length-1; i>=0; --i) {
+				if (this.attributes[i].getTag() == Const.ATTR_LOCAL_VARIABLE_TABLE) {
+					return (AttributeLocalVariableTable)this.attributes[i];
+				}
+			}
+		}
 
         return null;
     }
 
     public AttributeLocalVariableTable getAttributeLocalVariableTypeTable()
     {
-        if (this.attributes != null)
-            for (int i=this.attributes.length-1; i>=0; --i)
-                if (this.attributes[i].getTag() == Const.ATTR_LOCAL_VARIABLE_TYPE_TABLE)
-                    return (AttributeLocalVariableTable)this.attributes[i];
+        if (this.attributes != null) {
+			for (int i=this.attributes.length-1; i>=0; --i) {
+				if (this.attributes[i].getTag() == Const.ATTR_LOCAL_VARIABLE_TYPE_TABLE) {
+					return (AttributeLocalVariableTable)this.attributes[i];
+				}
+			}
+		}
 
         return null;
     }

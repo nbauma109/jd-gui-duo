@@ -36,8 +36,9 @@ public class AALoad extends ArrayLoadInstruction
             this.getArrayref().getReturnedSignature(constants, localVariables);
 
         if ((signature == null) || (signature.isEmpty()) ||
-            (signature.charAt(0) != '['))
-            return null;
+            (signature.charAt(0) != '[')) {
+			return null;
+		}
 
         return signature.substring(1);
     }

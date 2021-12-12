@@ -45,18 +45,21 @@ public class EmptySynchronizedBlockReconstructor
         {
             Instruction monitorExit = list.get(index);
 
-            if (monitorExit.getOpcode() != Const.MONITOREXIT)
-                continue;
+            if (monitorExit.getOpcode() != Const.MONITOREXIT) {
+				continue;
+			}
 
             Instruction instruction = list.get(index-1);
 
-            if (instruction.getOpcode() != Const.MONITORENTER)
-                continue;
+            if (instruction.getOpcode() != Const.MONITORENTER) {
+				continue;
+			}
 
             MonitorEnter me = (MonitorEnter)instruction;
 
-            if (me.getObjectref().getOpcode() != ByteCodeConstants.DUPLOAD)
-                continue;
+            if (me.getObjectref().getOpcode() != ByteCodeConstants.DUPLOAD) {
+				continue;
+			}
 
             DupStore dupStore;
             instruction = list.get(index-2);
@@ -67,14 +70,16 @@ public class EmptySynchronizedBlockReconstructor
             }
             else if (instruction.getOpcode() == Const.ASTORE)
             {
-                if (index <= 2)
-                    continue;
+                if (index <= 2) {
+					continue;
+				}
 
                 AStore astore = (AStore)instruction;
 
                 instruction = list.get(index-3);
-                if (instruction.getOpcode() != ByteCodeConstants.DUPSTORE)
-                    continue;
+                if (instruction.getOpcode() != ByteCodeConstants.DUPSTORE) {
+					continue;
+				}
 
                 dupStore = (DupStore)instruction;
 

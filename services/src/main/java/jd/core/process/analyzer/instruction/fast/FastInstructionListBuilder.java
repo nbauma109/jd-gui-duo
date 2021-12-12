@@ -1450,8 +1450,9 @@ public class FastInstructionListBuilder {
 						// Si il n'y a pas assez de place pour une sequence
 						// 'if' + 'return', un simple 'if' sera cree.
 						if ((bi.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER)
-								&& (bi.getLineNumber() + 1 == nextInstruction.getLineNumber()))
+								&& (bi.getLineNumber() + 1 == nextInstruction.getLineNumber())) {
 							continue;
+						}
 					}
 					List<Instruction> instructions = new ArrayList<>(1);
 					instructions
@@ -1465,12 +1466,15 @@ public class FastInstructionListBuilder {
 						// 'if' + 'continue', un simple 'if' sera cree.
 						if ((bi.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER) && (index + 1 < length)
 								&& (bi.getLineNumber() + 1 == nextInstruction.getLineNumber()))
+						 {
 							continue;
 						// Si l'instruction de test est suivie d'une seule instruction
 						// 'return', la sequence 'if' + 'continue' n'est pas construite.
+						}
 						if ((nextInstruction.getOpcode() == Const.RETURN)
-								|| (nextInstruction.getOpcode() == ByteCodeConstants.XRETURN))
+								|| (nextInstruction.getOpcode() == ByteCodeConstants.XRETURN)) {
 							continue;
+						}
 					}
 					list.set(index, new FastInstruction(FastConstants.IF_CONTINUE, bi.getOffset(),
 							bi.getLineNumber(), bi));

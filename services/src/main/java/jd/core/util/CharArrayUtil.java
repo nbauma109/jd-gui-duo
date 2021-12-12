@@ -33,8 +33,9 @@ public class CharArrayUtil
 
         while (fromIndex < length)
         {
-            if (ca[fromIndex] == ch)
-                return fromIndex;
+            if (ca[fromIndex] == ch) {
+				return fromIndex;
+			}
             fromIndex++;
         }
 

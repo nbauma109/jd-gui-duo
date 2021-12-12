@@ -118,8 +118,9 @@ public class LocalVariables
             LocalVariable lv = this.listOfLocalVariables.get(i);
 
             if ((lv.getIndex() == index) && (lv.getStartPc() <= offset)
-                    && (offset < lv.getStartPc() + lv.getLength()))
-                return lv;
+                    && (offset < lv.getStartPc() + lv.getLength())) {
+				return lv;
+			}
         }
 
         return null;
@@ -132,8 +133,9 @@ public class LocalVariables
         for (int i = length - 1; i >= 0; --i) {
             LocalVariable lv = this.listOfLocalVariables.get(i);
 
-            if (lv.getNameIndex() == nameIndex)
-                return true;
+            if (lv.getNameIndex() == nameIndex) {
+				return true;
+			}
         }
 
         return false;
@@ -164,8 +166,9 @@ public class LocalVariables
         {
             LocalVariable lv = this.listOfLocalVariables.get(i);
 
-            if ((lv.getIndex() == index) && (lv.getStartPc() <= offset))
-                return lv;
+            if ((lv.getIndex() == index) && (lv.getStartPc() <= offset)) {
+				return lv;
+			}
         }
 
         return null;

@@ -39,8 +39,9 @@ public class ReconstructorUtil
         for (int i=index; i<length; i++)
         {
             visitor.visit(list.get(i));
-            if (visitor.getParentFound() != null)
-                break;
+            if (visitor.getParentFound() != null) {
+				break;
+			}
         }
 
         return visitor.getParentFound();

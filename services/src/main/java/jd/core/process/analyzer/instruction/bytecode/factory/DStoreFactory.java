@@ -39,10 +39,11 @@ public class DStoreFactory implements InstructionFactory
         final int opcode = code[offset] & 255;
         int index;
 
-        if (opcode == Const.DSTORE)
-            index = code[offset+1] & 255;
-        else
-            index = opcode - Const.DSTORE_0;
+        if (opcode == Const.DSTORE) {
+			index = code[offset+1] & 255;
+		} else {
+			index = opcode - Const.DSTORE_0;
+		}
 
         final Instruction instruction = new StoreInstruction(
             ByteCodeConstants.STORE, offset, lineNumber,

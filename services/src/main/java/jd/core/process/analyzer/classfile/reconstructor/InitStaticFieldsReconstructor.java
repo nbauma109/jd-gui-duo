@@ -40,16 +40,19 @@ public class InitStaticFieldsReconstructor
     public static void reconstruct(ClassFile classFile)
     {
         Method method = classFile.getStaticMethod();
-        if (method == null)
-            return;
+        if (method == null) {
+			return;
+		}
 
         Field[] fields = classFile.getFields();
-        if (fields == null)
-            return;
+        if (fields == null) {
+			return;
+		}
 
         List<Instruction> list = method.getFastNodes();
-        if (list == null)
-            return;
+        if (list == null) {
+			return;
+		}
 
         ConstantPool constants = classFile.getConstantPool();
 
@@ -62,14 +65,16 @@ public class InitStaticFieldsReconstructor
         {
             Instruction instruction = list.get(indexInstruction);
 
-            if (instruction.getOpcode() != Const.PUTSTATIC)
-                break;
+            if (instruction.getOpcode() != Const.PUTSTATIC) {
+				break;
+			}
 
             PutStatic putStatic = (PutStatic)instruction;
             ConstantFieldref cfr = constants.getConstantFieldref(putStatic.getIndex());
 
-            if (cfr.getClassIndex() != classFile.getThisClassIndex())
-                break;
+            if (cfr.getClassIndex() != classFile.getThisClassIndex()) {
+				break;
+			}
 
             ConstantNameAndType cnat =
                 constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
@@ -87,18 +92,22 @@ public class InitStaticFieldsReconstructor
                     Instruction valueref = putStatic.getValueref();
 
                     if (SearchInstructionByOpcodeVisitor.visit(
-                            valueref, Const.ALOAD) != null)
-                        break;
+                            valueref, Const.ALOAD) != null) {
+						break;
+					}
                     if (SearchInstructionByOpcodeVisitor.visit(
-                            valueref, ByteCodeConstants.LOAD) != null)
-                        break;
+                            valueref, ByteCodeConstants.LOAD) != null) {
+						break;
+					}
                     if (SearchInstructionByOpcodeVisitor.visit(
-                            valueref, Const.ILOAD) != null)
-                        break;
+                            valueref, Const.ILOAD) != null) {
+						break;
+					}
 
                     field.setValueAndMethod(valueref, method);
-                    if (valueref.getOpcode() == ByteCodeConstants.NEWANDINITARRAY)
-                        valueref.setOpcode(ByteCodeConstants.INITARRAY);
+                    if (valueref.getOpcode() == ByteCodeConstants.NEWANDINITARRAY) {
+						valueref.setOpcode(ByteCodeConstants.INITARRAY);
+					}
                     list.remove(indexInstruction--);
                     break;
                 }
@@ -127,14 +136,16 @@ public class InitStaticFieldsReconstructor
             {
                 Instruction instruction = list.get(indexInstruction);
 
-                if (instruction.getOpcode() != Const.PUTSTATIC)
-                    break;
+                if (instruction.getOpcode() != Const.PUTSTATIC) {
+					break;
+				}
 
                 PutStatic putStatic = (PutStatic)instruction;
                 ConstantFieldref cfr = constants.getConstantFieldref(putStatic.getIndex());
 
-                if (cfr.getClassIndex() != classFile.getThisClassIndex())
-                    break;
+                if (cfr.getClassIndex() != classFile.getThisClassIndex()) {
+					break;
+				}
 
                 ConstantNameAndType cnat =
                     constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
@@ -152,18 +163,22 @@ public class InitStaticFieldsReconstructor
                         Instruction valueref = putStatic.getValueref();
 
                         if (SearchInstructionByOpcodeVisitor.visit(
-                                valueref, Const.ALOAD) != null)
-                            break;
+                                valueref, Const.ALOAD) != null) {
+							break;
+						}
                         if (SearchInstructionByOpcodeVisitor.visit(
-                                valueref, ByteCodeConstants.LOAD) != null)
-                            break;
+                                valueref, ByteCodeConstants.LOAD) != null) {
+							break;
+						}
                         if (SearchInstructionByOpcodeVisitor.visit(
-                                valueref, Const.ILOAD) != null)
-                            break;
+                                valueref, Const.ILOAD) != null) {
+							break;
+						}
 
                         field.setValueAndMethod(valueref, method);
-                        if (valueref.getOpcode() == ByteCodeConstants.NEWANDINITARRAY)
-                            valueref.setOpcode(ByteCodeConstants.INITARRAY);
+                        if (valueref.getOpcode() == ByteCodeConstants.NEWANDINITARRAY) {
+							valueref.setOpcode(ByteCodeConstants.INITARRAY);
+						}
                         list.remove(indexInstruction);
                         break;
                     }

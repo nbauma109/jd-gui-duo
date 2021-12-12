@@ -39,10 +39,11 @@ public class ALoadFactory implements InstructionFactory
 
         int index;
 
-        if (opcode == Const.ALOAD)
-            index = code[offset+1] & 255;
-        else
-            index = opcode - Const.ALOAD_0;
+        if (opcode == Const.ALOAD) {
+			index = code[offset+1] & 255;
+		} else {
+			index = opcode - Const.ALOAD_0;
+		}
 
         final Instruction instruction =
             new ALoad(Const.ALOAD, offset, lineNumber, index);

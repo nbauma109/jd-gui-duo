@@ -209,8 +209,9 @@ public class CountDupLoadVisitor
             break;
         case ByteCodeConstants.DUPLOAD:
             {
-                if (((DupLoad)instruction).getDupStore() == this.dupStore)
-                    this.counter++;
+                if (((DupLoad)instruction).getDupStore() == this.dupStore) {
+					this.counter++;
+				}
             }
             break;
         case ByteCodeConstants.INITARRAY,
@@ -218,17 +219,20 @@ public class CountDupLoadVisitor
             {
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
                 visit(iai.getNewArray());
-                if (iai.getValues() != null)
-                    visit(iai.getValues());
+                if (iai.getValues() != null) {
+					visit(iai.getValues());
+				}
             }
             break;
         case FastConstants.FOR:
             {
                 FastFor ff = (FastFor)instruction;
-                if (ff.getInit() != null)
-                    visit(ff.getInit());
-                if (ff.getInc() != null)
-                    visit(ff.getInc());
+                if (ff.getInit() != null) {
+					visit(ff.getInit());
+				}
+                if (ff.getInc() != null) {
+					visit(ff.getInc());
+				}
             }
             // intended fall through
         case FastConstants.WHILE,
@@ -236,16 +240,18 @@ public class CountDupLoadVisitor
              FastConstants.IF_SIMPLE:
             {
                 Instruction test = ((FastTestList)instruction).getTest();
-                if (test != null)
-                    visit(test);
+                if (test != null) {
+					visit(test);
+				}
             }
             // intended fall through
         case FastConstants.INFINITE_LOOP:
             {
                 List<Instruction> instructions =
                     ((FastList)instruction).getInstructions();
-                if (instructions != null)
-                    visit(instructions);
+                if (instructions != null) {
+					visit(instructions);
+				}
             }
             break;
         case FastConstants.FOREACH:
@@ -272,8 +278,9 @@ public class CountDupLoadVisitor
              FastConstants.GOTO_LABELED_BREAK:
             {
                 FastInstruction fi = (FastInstruction)instruction;
-                if (fi.getInstruction() != null)
-                    visit(fi.getInstruction());
+                if (fi.getInstruction() != null) {
+					visit(fi.getInstruction());
+				}
             }
             break;
         case FastConstants.SWITCH,
@@ -286,8 +293,9 @@ public class CountDupLoadVisitor
                 for (int i=pairs.length-1; i>=0; --i)
                 {
                     List<Instruction> instructions = pairs[i].getInstructions();
-                    if (instructions != null)
-                        visit(instructions);
+                    if (instructions != null) {
+						visit(instructions);
+					}
                 }
             }
             break;
@@ -295,11 +303,13 @@ public class CountDupLoadVisitor
             {
                 FastTry ft = (FastTry)instruction;
                 visit(ft.getInstructions());
-                if (ft.getFinallyInstructions() != null)
-                    visit(ft.getFinallyInstructions());
+                if (ft.getFinallyInstructions() != null) {
+					visit(ft.getFinallyInstructions());
+				}
                 List<FastCatch> catchs = ft.getCatches();
-                for (int i=catchs.size()-1; i>=0; --i)
-                    visit(catchs.get(i).getInstructions());
+                for (int i=catchs.size()-1; i>=0; --i) {
+					visit(catchs.get(i).getInstructions());
+				}
             }
             break;
         case FastConstants.SYNCHRONIZED:
@@ -312,15 +322,17 @@ public class CountDupLoadVisitor
         case FastConstants.LABEL:
             {
                 FastLabel fl = (FastLabel)instruction;
-                if (fl.getInstruction() != null)
-                    visit(fl.getInstruction());
+                if (fl.getInstruction() != null) {
+					visit(fl.getInstruction());
+				}
             }
             break;
         case FastConstants.DECLARE:
             {
                 FastDeclaration fd = (FastDeclaration)instruction;
-                if (fd.getInstruction() != null)
-                    visit(fd.getInstruction());
+                if (fd.getInstruction() != null) {
+					visit(fd.getInstruction());
+				}
             }
             break;
         case Const.GETSTATIC,
@@ -357,8 +369,9 @@ public class CountDupLoadVisitor
 
     private void visit(List<Instruction> instructions)
     {
-        for (int i=instructions.size()-1; i>=0; --i)
-            visit(instructions.get(i));
+        for (int i=instructions.size()-1; i>=0; --i) {
+			visit(instructions.get(i));
+		}
     }
 
     /**

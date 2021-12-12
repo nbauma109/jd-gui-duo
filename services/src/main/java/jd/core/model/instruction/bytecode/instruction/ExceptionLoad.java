@@ -35,8 +35,9 @@ public class ExceptionLoad extends IndexInstruction
     public String getReturnedSignature(
             ConstantPool constants, LocalVariables localVariables)
     {
-        if ((constants == null) || (this.getExceptionNameIndex() == 0))
-            return null;
+        if ((constants == null) || (this.getExceptionNameIndex() == 0)) {
+			return null;
+		}
 
         return constants.getConstantUtf8(this.getExceptionNameIndex());
     }

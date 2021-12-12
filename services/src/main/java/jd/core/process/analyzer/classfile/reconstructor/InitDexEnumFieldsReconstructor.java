@@ -72,16 +72,19 @@ public class InitDexEnumFieldsReconstructor
     public static void reconstruct(ClassFile classFile)
     {
         Method method = classFile.getStaticMethod();
-        if (method == null)
-            return;
+        if (method == null) {
+			return;
+		}
 
         Field[] fields = classFile.getFields();
-        if (fields == null)
-            return;
+        if (fields == null) {
+			return;
+		}
 
         List<Instruction> list = method.getFastNodes();
-        if (list == null)
-            return;
+        if (list == null) {
+			return;
+		}
 
         ConstantPool constants = classFile.getConstantPool();
 
@@ -98,23 +101,27 @@ public class InitDexEnumFieldsReconstructor
             while (indexInstruction-- > 0)
             {
                 Instruction instruction = list.get(indexInstruction);
-                if (instruction.getOpcode() != Const.PUTSTATIC)
-                    break;
+                if (instruction.getOpcode() != Const.PUTSTATIC) {
+					break;
+				}
 
                 PutStatic putStatic = (PutStatic)instruction;
-                if (putStatic.getValueref().getOpcode() != Const.ALOAD)
-                    break;
+                if (putStatic.getValueref().getOpcode() != Const.ALOAD) {
+					break;
+				}
 
                 ConstantFieldref cfr = constants.getConstantFieldref(putStatic.getIndex());
-                if (cfr.getClassIndex() != classFile.getThisClassIndex())
-                    break;
+                if (cfr.getClassIndex() != classFile.getThisClassIndex()) {
+					break;
+				}
 
                 ConstantNameAndType cnat =
                     constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
 
                 String name = constants.getConstantUtf8(cnat.getNameIndex());
-                if (! name.equals(StringConstants.ENUM_VALUES_ARRAY_NAME_ECLIPSE))
-                    break;
+                if (! name.equals(StringConstants.ENUM_VALUES_ARRAY_NAME_ECLIPSE)) {
+					break;
+				}
 
                 int indexField = fields.length;
 
@@ -138,25 +145,30 @@ public class InitDexEnumFieldsReconstructor
                         while (index-- > 0)
                         {
                             instruction = list.get(index);
-                            if (instruction.getOpcode() != Const.AASTORE)
-                                break;
+                            if (instruction.getOpcode() != Const.AASTORE) {
+								break;
+							}
                             AAStore aastore = (AAStore)instruction;
                             if ((aastore.getArrayref().getOpcode() != Const.ALOAD) ||
                                 (aastore.getValueref().getOpcode() != Const.GETSTATIC) ||
-                                (((ALoad)aastore.getArrayref()).getIndex() != localEnumArrayIndex))
-                                break;
+                                (((ALoad)aastore.getArrayref()).getIndex() != localEnumArrayIndex)) {
+								break;
+							}
                             values.add(aastore.getValueref());
                         }
 
                         // FastDeclaration(AStore(...))
-                        if (instruction.getOpcode() != FastConstants.DECLARE)
-                            break;
+                        if (instruction.getOpcode() != FastConstants.DECLARE) {
+							break;
+						}
                         FastDeclaration declaration = (FastDeclaration)instruction;
-                        if (declaration.getInstruction().getOpcode() != Const.ASTORE)
-                            break;
+                        if (declaration.getInstruction().getOpcode() != Const.ASTORE) {
+							break;
+						}
                         AStore astore = (AStore)declaration.getInstruction();
-                        if (astore.getIndex() != localEnumArrayIndex)
-                            break;
+                        if (astore.getIndex() != localEnumArrayIndex) {
+							break;
+						}
 
                         int valuesLength = values.size();
 
@@ -186,8 +198,9 @@ public class InitDexEnumFieldsReconstructor
                             // Remove PutStatic
                             list.remove(indexInstruction);
                             // Remove AAStores
-                            while (--indexInstruction > index)
-                                list.remove(indexInstruction);
+                            while (--indexInstruction > index) {
+								list.remove(indexInstruction);
+							}
                             // Remove FastDeclaration
                             list.remove(indexInstruction);
                         }
