@@ -97,7 +97,7 @@ public class UnmodifiableTypes extends Types {
     }
 
     /** --- ListIterator --- */
-    private class UnmodifiableTypesListIterator implements ListIterator<Type> {
+    private static class UnmodifiableTypesListIterator implements ListIterator<Type> {
         protected ListIterator<Type> listIterator;
 
         public UnmodifiableTypesListIterator(ListIterator<Type> listIterator) {
