@@ -14,7 +14,6 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.function.TriConsumer;
 import org.jd.gui.util.swing.SwingUtil;
-import org.jd.gui.view.OpenTypeHierarchyView.TreeNode;
 import org.jd.gui.view.component.Tree;
 import org.jd.gui.view.renderer.TreeNodeRenderer;
 

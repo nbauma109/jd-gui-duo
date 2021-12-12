@@ -14,8 +14,6 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Type;
 import org.jd.gui.spi.TypeFactory;
 import org.jd.gui.view.data.TreeNodeBean;
-import org.jdv1.gui.service.treenode.AbstractTypeFileTreeNodeFactoryProvider.FieldOrMethodBean;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
