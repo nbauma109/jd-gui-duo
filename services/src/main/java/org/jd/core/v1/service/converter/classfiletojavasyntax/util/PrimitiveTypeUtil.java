@@ -81,27 +81,24 @@ public class PrimitiveTypeUtil {
             case FLAG_VOID:
                 return TYPE_VOID;
             default:
-                if (flags == (FLAG_CHAR|FLAG_INT)) {
-					return MAYBE_CHAR_TYPE;
-				}
-                if (flags == (FLAG_CHAR|FLAG_SHORT|FLAG_INT)) {
-					return MAYBE_SHORT_TYPE;
-				}
-                if (flags == (FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT)) {
-					return MAYBE_BYTE_TYPE;
-				}
-                if (flags == (FLAG_BOOLEAN|FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT)) {
-					return MAYBE_BOOLEAN_TYPE;
-				}
-                if (flags == (FLAG_BYTE|FLAG_SHORT|FLAG_INT)) {
-					return MAYBE_NEGATIVE_BYTE_TYPE;
-				}
-                if (flags == (FLAG_SHORT|FLAG_INT)) {
-					return MAYBE_NEGATIVE_SHORT_TYPE;
-				}
-                if (flags == (FLAG_BOOLEAN|FLAG_BYTE|FLAG_SHORT|FLAG_INT)) {
-					return MAYBE_NEGATIVE_BOOLEAN_TYPE;
-				}
+			switch (flags) {
+			case (FLAG_CHAR|FLAG_INT):
+				return MAYBE_CHAR_TYPE;
+			case (FLAG_CHAR|FLAG_SHORT|FLAG_INT):
+				return MAYBE_SHORT_TYPE;
+			case (FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT):
+				return MAYBE_BYTE_TYPE;
+			case (FLAG_BOOLEAN|FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT):
+				return MAYBE_BOOLEAN_TYPE;
+			case (FLAG_BYTE|FLAG_SHORT|FLAG_INT):
+				return MAYBE_NEGATIVE_BYTE_TYPE;
+			case (FLAG_SHORT|FLAG_INT):
+				return MAYBE_NEGATIVE_SHORT_TYPE;
+			case (FLAG_BOOLEAN|FLAG_BYTE|FLAG_SHORT|FLAG_INT):
+				return MAYBE_NEGATIVE_BOOLEAN_TYPE;
+			default:
+				break;
+			}
                 break;
         }
 
