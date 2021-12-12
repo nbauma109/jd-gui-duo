@@ -443,12 +443,7 @@ public class Frame {
                             }
 
                             DefaultList<AbstractLocalVariable> sorted = new DefaultList<>(undeclaredLocalVariablesInStatement);
-                            sorted.sort(new Comparator<AbstractLocalVariable>() {
-                                @Override
-                                public int compare(AbstractLocalVariable alv1, AbstractLocalVariable alv2) {
-                                    return alv1.getIndex() - alv2.getIndex();
-                                }
-                            });
+                            sorted.sort(Comparator.comparing(AbstractLocalVariable::getIndex));
 
                             for (AbstractLocalVariable lv : sorted) {
                                 // Add declaration before current statement

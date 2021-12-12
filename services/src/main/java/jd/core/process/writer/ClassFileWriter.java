@@ -542,13 +542,7 @@ public class ClassFileWriter
 
                 if (delta > 0)
                 {
-                    Collections.sort(references, new Comparator<Reference>()
-                    {
-                        @Override
-                        public int compare(Reference o1, Reference o2) {
-                            return o2.getCounter() - o1.getCounter();
-                        }
-                    });
+                    Collections.sort(references, Comparator.comparing(Reference::getCounter).reversed());
 
                     int idx = references.size();
 

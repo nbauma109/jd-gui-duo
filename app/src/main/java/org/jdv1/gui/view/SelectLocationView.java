@@ -112,12 +112,7 @@ public class SelectLocationView<T extends DefaultMutableTreeNode & ContainerEntr
             root.removeAllChildren();
 
             List<DelegatingFilterContainer> sortedContainers = new ArrayList<>(containers);
-            sortedContainers.sort(new Comparator<DelegatingFilterContainer>() {
-                @Override
-                public int compare(DelegatingFilterContainer fcw1, DelegatingFilterContainer fcw2) {
-                    return fcw1.getRoot().getUri().compareTo(fcw2.getRoot().getUri());
-                }
-            });
+            sortedContainers.sort(Comparator.comparing(Container::getRootUri));
 
             for (DelegatingFilterContainer container : sortedContainers) {
                 Container.Entry parentEntry = container.getRoot().getParent();

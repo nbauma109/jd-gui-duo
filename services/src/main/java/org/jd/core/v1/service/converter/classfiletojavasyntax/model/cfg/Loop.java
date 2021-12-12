@@ -32,6 +32,10 @@ public class Loop {
         return members;
     }
 
+    public int getMemberCount() {
+    	return members.size();
+    }
+
     public BasicBlock getEnd() {
         return end;
     }

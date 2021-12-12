@@ -412,12 +412,7 @@ public class SearchInConstantPoolsView<T extends DefaultMutableTreeNode & Contai
             if (containers != null) {
                 List<DelegatingFilterContainer> list = new ArrayList<>(containers);
 
-                list.sort(new Comparator<Container>() {
-                    @Override
-                    public int compare(Container c1, Container c2) {
-                        return c1.getRoot().getUri().compareTo(c2.getRoot().getUri());
-                    }
-                });
+                list.sort(Comparator.comparing(Container::getRootUri));
 
                 Container.Entry parentEntry;
                 TreeNodeFactory treeNodeFactory;

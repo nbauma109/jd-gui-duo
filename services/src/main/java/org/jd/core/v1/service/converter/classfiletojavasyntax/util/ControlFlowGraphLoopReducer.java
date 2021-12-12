@@ -207,12 +207,7 @@ public class ControlFlowGraphLoopReducer {
             }
         }
 
-        loops.sort(new Comparator<Loop>() {
-            @Override
-            public int compare(Loop loop1, Loop loop2) {
-                return loop1.getMembers().size() - loop2.getMembers().size();
-            }
-        });
+        loops.sort(Comparator.comparing(Loop::getMemberCount));
 
         return loops;
     }

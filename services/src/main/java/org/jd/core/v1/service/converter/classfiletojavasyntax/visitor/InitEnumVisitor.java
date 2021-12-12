@@ -10,6 +10,7 @@ import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileEnumDeclaration.ClassFileConstant;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.Comparator;
@@ -27,12 +28,7 @@ public class InitEnumVisitor extends AbstractJavaSyntaxVisitor {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public DefaultList<EnumDeclaration.Constant> getConstants() {
 		if (!constants.isEmpty()) {
-			constants.sort(new Comparator<ClassFileEnumDeclaration.ClassFileConstant>() {
-				@Override
-				public int compare(ClassFileEnumDeclaration.ClassFileConstant ec1, ClassFileEnumDeclaration.ClassFileConstant ec2) {
-					return ec1.getIndex() - ec2.getIndex();
-				}
-			});
+			constants.sort(Comparator.comparing(ClassFileConstant::getIndex));
 		}
 
 		return new DefaultList(constants);

@@ -67,12 +67,7 @@ public class ImportsFragment extends FlexibleFragment implements JavaFragment {
             return importMap.values();
         }
         DefaultList<Import> imports = new DefaultList<>(importMap.values());
-        imports.sort(new Comparator<Import>() {
-            @Override
-            public int compare(Import tr1, Import tr2) {
-                return tr2.getCounter() - tr1.getCounter();
-            }
-        });
+        imports.sort(Comparator.comparing(Import::getCounter).reversed());
         // Remove less used imports
         List<Import> subList = imports.subList(lineCount, size);
         for (Import imp0rt : subList) {
