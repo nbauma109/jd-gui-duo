@@ -44,11 +44,7 @@ public class ContainerLoader implements Loader {
             return entry;
         }
         Map<Container.EntryPath, Container.Entry> children = entry.getParent().getChildren();
-        Entry childEntry = children.get(new FileEntryPath(internalPath));
-        if (childEntry != null) {
-            return childEntry;
-        }
-        return null;
+        return children.get(new FileEntryPath(internalPath));
     }
 
     @Override
