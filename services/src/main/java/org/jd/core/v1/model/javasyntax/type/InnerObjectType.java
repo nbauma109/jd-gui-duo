@@ -67,11 +67,9 @@ public class InnerObjectType extends ObjectType {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof InnerObjectType) || !super.equals(o)) {
+        if (!(o instanceof InnerObjectType that) || !super.equals(o)) {
             return false;
         }
-
-        InnerObjectType that = (InnerObjectType) o;
 
         return outerType.equals(that.outerType);
     }

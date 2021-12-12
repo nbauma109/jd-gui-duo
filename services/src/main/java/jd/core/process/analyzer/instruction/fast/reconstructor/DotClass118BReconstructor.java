@@ -213,12 +213,10 @@ public class DotClass118BReconstructor
             Ldc ldc = (Ldc)instruction;
             Constant cv = constants.getConstantValue(ldc.getIndex());
 
-            if (!(cv instanceof ConstantString)) {
+            if (!(cv instanceof ConstantString cs)) {
 				continue;
 			}
 
-            // Trouve !
-            ConstantString cs = (ConstantString)cv;
             String dotClassName = constants.getConstantUtf8(cs.getStringIndex());
             String internalName = dotClassName.replace(
                 StringConstants.PACKAGE_SEPARATOR,

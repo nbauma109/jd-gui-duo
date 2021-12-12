@@ -31,11 +31,9 @@ public class TypeArguments extends DefaultList<TypeArgument> implements BaseType
 
     @Override
     public boolean isTypeArgumentAssignableFrom(Map<String, BaseType> typeBounds, BaseTypeArgument typeArgument) {
-        if (!(typeArgument instanceof TypeArguments)) {
+        if (!(typeArgument instanceof TypeArguments ata)) {
             return false;
         }
-
-        TypeArguments ata = (TypeArguments)typeArgument;
 
         if (size() != ata.size()) {
             return false;

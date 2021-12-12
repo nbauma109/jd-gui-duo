@@ -57,11 +57,9 @@ public class FieldDeclarator implements BaseFieldDeclarator {
         if (this == o) {
 			return true;
 		}
-        if (!(o instanceof FieldDeclarator)) {
+        if (!(o instanceof FieldDeclarator that)) {
 			return false;
 		}
-
-        FieldDeclarator that = (FieldDeclarator) o;
 
         return dimension == that.dimension && name.equals(that.name) && (variableInitializer != null ? variableInitializer.equals(that.variableInitializer) : that.variableInitializer == null);
     }

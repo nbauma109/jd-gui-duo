@@ -34,11 +34,9 @@ public class ExpressionVariableInitializer implements VariableInitializer {
         if (this == o) {
 			return true;
 		}
-        if (!(o instanceof ExpressionVariableInitializer)) {
+        if (!(o instanceof ExpressionVariableInitializer that)) {
 			return false;
 		}
-
-        ExpressionVariableInitializer that = (ExpressionVariableInitializer) o;
 
         return expression != null ? expression.equals(that.expression) : that.expression == null;
     }

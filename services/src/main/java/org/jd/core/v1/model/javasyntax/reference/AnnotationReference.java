@@ -51,11 +51,9 @@ public class AnnotationReference implements BaseAnnotationReference {
         if (this == o) {
 			return true;
 		}
-        if (!(o instanceof AnnotationReference)) {
+        if (!(o instanceof AnnotationReference that)) {
 			return false;
 		}
-
-        AnnotationReference that = (AnnotationReference) o;
 
         if (elementValue != null ? !elementValue.equals(that.elementValue) : that.elementValue != null) {
 			return false;

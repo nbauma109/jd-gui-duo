@@ -195,12 +195,10 @@ public class DotClass14Reconstructor
             Ldc ldc = (Ldc)is.getArgs().get(0);
             Constant cv = constants.getConstantValue(ldc.getIndex());
 
-            if (!(cv instanceof ConstantString)) {
+            if (!(cv instanceof ConstantString cs)) {
 				continue;
 			}
 
-            // Trouve !
-            ConstantString cs = (ConstantString)cv;
             String signature = constants.getConstantUtf8(cs.getStringIndex());
 
             if (SignatureUtil.getArrayDimensionCount(signature) == 0)

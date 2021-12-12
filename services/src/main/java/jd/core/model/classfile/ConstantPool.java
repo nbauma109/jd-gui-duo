@@ -262,11 +262,9 @@ public class ConstantPool
         {
             Constant constant = this.listOfConstants.get(index);
 
-            if (!(constant instanceof ConstantNameAndType)) {
+            if (!(constant instanceof ConstantNameAndType cnat)) {
 				continue;
 			}
-
-            ConstantNameAndType cnat = (ConstantNameAndType)constant;
 
             if (cnat.getNameIndex() == nameIndex &&
                 cnat.getSignatureIndex() == descriptorIndex) {
@@ -289,11 +287,9 @@ public class ConstantPool
         {
             Constant constant = this.listOfConstants.get(index);
 
-            if (!(constant instanceof ConstantFieldref)) {
+            if (!(constant instanceof ConstantFieldref cfr)) {
 				continue;
 			}
-
-            ConstantFieldref cfr = (ConstantFieldref)constant;
 
             if (cfr.getClassIndex() == classIndex &&
                 cfr.getNameAndTypeIndex() == nameAndTypeIndex) {
@@ -324,11 +320,9 @@ public class ConstantPool
         {
             Constant constant = this.listOfConstants.get(index);
 
-            if (!(constant instanceof ConstantMethodref)) {
+            if (!(constant instanceof ConstantMethodref cmr)) {
 				continue;
 			}
-
-            ConstantMethodref cmr = (ConstantMethodref)constant;
 
             if (cmr.getClassIndex() == classIndex &&
                 cmr.getNameAndTypeIndex() == nameAndTypeIndex) {

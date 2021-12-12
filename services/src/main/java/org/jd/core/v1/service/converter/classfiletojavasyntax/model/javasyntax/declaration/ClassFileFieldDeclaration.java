@@ -46,11 +46,9 @@ public class ClassFileFieldDeclaration extends FieldDeclaration implements Class
         if (this == o) {
 			return true;
 		}
-        if (!(o instanceof ClassFileFieldDeclaration) || !super.equals(o)) {
+        if (!(o instanceof ClassFileFieldDeclaration that) || !super.equals(o)) {
 			return false;
 		}
-
-        ClassFileFieldDeclaration that = (ClassFileFieldDeclaration) o;
 
         return firstLineNumber == that.firstLineNumber;
     }
