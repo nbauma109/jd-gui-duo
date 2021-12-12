@@ -98,11 +98,9 @@ public class DelegatingFilterContainer implements Container {
                 if (!other.isDirectory()) {
                     return -1;
                 }
-            } else {
-                if (other.isDirectory()) {
-                    return 1;
-                }
-            }
+            } else if (other.isDirectory()) {
+			    return 1;
+			}
             return entry.getPath().compareTo(other.getPath());
         }
 

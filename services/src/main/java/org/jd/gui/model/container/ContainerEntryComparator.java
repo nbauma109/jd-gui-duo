@@ -23,11 +23,9 @@ public class ContainerEntryComparator implements Comparator<EntryPath> {
             if (!e2.isDirectory()) {
                 return -1;
             }
-        } else {
-            if (e2.isDirectory()) {
-                return 1;
-            }
-        }
+        } else if (e2.isDirectory()) {
+		    return 1;
+		}
         return e1.getPath().compareTo(e2.getPath());
     }
 }

@@ -164,23 +164,19 @@ public class CheckCastAndConvertInstructionVisitor
                                         arg.getOffset()-1, arg.getLineNumber(),
                                         arg, parameterSignature));
                                 }
-                            }
-                            else
-                            {
-                                if (SignatureUtil.isByteOrShortSignature(parameterSignature))
-                                {
-                                    // Ajout d'une instruction cast pour les
-                                    // parametres numeriques de type byte ou short
-                                    args.set(j, new ConvertInstruction(
-                                        ByteCodeConstants.CONVERT,
-                                        arg.getOffset()-1, arg.getLineNumber(),
-                                        arg, parameterSignature));
-                                }
-                                else
-                                {
-                                    visit(constants, arg);
-                                }
-                            }
+                            } else if (SignatureUtil.isByteOrShortSignature(parameterSignature))
+							{
+							    // Ajout d'une instruction cast pour les
+							    // parametres numeriques de type byte ou short
+							    args.set(j, new ConvertInstruction(
+							        ByteCodeConstants.CONVERT,
+							        arg.getOffset()-1, arg.getLineNumber(),
+							        arg, parameterSignature));
+							}
+							else
+							{
+							    visit(constants, arg);
+							}
                         }
                         else
                         {

@@ -75,15 +75,13 @@ public class AutoboxingVisitor extends AbstractUpdateExpressionVisitor {
                 {
                     return expression.getParameters().getFirst();
                 }
-            } else {
-                // non-static method invocation
-                if ((parameterSize == 0) &&
-                        expression.getName().equals(VALUE_METHODNAME_MAP.get(expression.getInternalTypeName())) &&
-                        expression.getDescriptor().equals(VALUE_DESCRIPTOR_MAP.get(expression.getInternalTypeName())))
-                {
-                    return expression.getExpression();
-                }
-            }
+            } else // non-static method invocation
+			if ((parameterSize == 0) &&
+			        expression.getName().equals(VALUE_METHODNAME_MAP.get(expression.getInternalTypeName())) &&
+			        expression.getDescriptor().equals(VALUE_DESCRIPTOR_MAP.get(expression.getInternalTypeName())))
+			{
+			    return expression.getExpression();
+			}
         }
 
         return expression;
