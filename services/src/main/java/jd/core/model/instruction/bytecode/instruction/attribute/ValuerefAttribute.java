@@ -20,5 +20,5 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public interface ValuerefAttribute
 {
-    public Instruction getValueref();
+    Instruction getValueref();
 }

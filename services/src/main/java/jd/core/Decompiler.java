@@ -24,7 +24,7 @@ import jd.core.printer.Printer;
 
 public interface Decompiler
 {
-    public void decompile(
+    void decompile(
             Preferences preferences, Loader loader,
             Printer printer, String internalClassPath)
         throws LoaderException;

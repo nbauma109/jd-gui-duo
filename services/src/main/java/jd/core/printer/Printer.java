@@ -18,101 +18,101 @@ package jd.core.printer;
 
 public interface Printer
 {
-    public static int UNKNOWN_LINE_NUMBER = 0;
+    int UNKNOWN_LINE_NUMBER = 0;
 
-    public void print(byte b);
-    public void print(char c);
-    public void print(int i);
-    public void print(String s);
+    void print(byte b);
+    void print(char c);
+    void print(int i);
+    void print(String s);
 
-    public void printNumeric(String s);
-    public void printString(String s, String scopeInternalName);
+    void printNumeric(String s);
+    void printString(String s, String scopeInternalName);
 
-    public void printKeyword(String keyword);
-    public void printJavaWord(String s);
+    void printKeyword(String keyword);
+    void printJavaWord(String s);
 
-    public void printType(String internalName, String name, String scopeInternalName);
-    public void printTypeDeclaration(String internalName, String name);
-    public void printTypeImport(String internalName, String name);
+    void printType(String internalName, String name, String scopeInternalName);
+    void printTypeDeclaration(String internalName, String name);
+    void printTypeImport(String internalName, String name);
 
-    public void printField(
+    void printField(
         String internalName, String name,
         String descriptor, String scopeInternalName);
-    public void printFieldDeclaration(
+    void printFieldDeclaration(
         String internalName, String name, String descriptor);
 
-    public void printStaticField(
+    void printStaticField(
         String internalName, String name,
         String descriptor, String scopeInternalName);
-    public void printStaticFieldDeclaration(
+    void printStaticFieldDeclaration(
         String internalName, String name, String descriptor);
 
-    public void printConstructor(
+    void printConstructor(
         String internalName, String name,
         String descriptor, String scopeInternalName);
-    public void printConstructorDeclaration(
+    void printConstructorDeclaration(
         String internalName, String name, String descriptor);
 
-    public void printStaticConstructorDeclaration(
+    void printStaticConstructorDeclaration(
         String internalName, String name);
 
-    public void printMethod(
+    void printMethod(
         String internalName, String name,
         String descriptor, String scopeInternalName);
-    public void printMethodDeclaration(
+    void printMethodDeclaration(
         String internalName, String name, String descriptor);
 
-    public void printStaticMethod(
+    void printStaticMethod(
         String internalName, String name,
         String descriptor, String scopeInternalName);
-    public void printStaticMethodDeclaration(
+    void printStaticMethodDeclaration(
         String internalName, String name, String descriptor);
 
-    public void start(int maxLineNumber, int majorVersion, int minorVersion);
-    public void end();
+    void start(int maxLineNumber, int majorVersion, int minorVersion);
+    void end();
 
-    public void indent();
-    public void desindent();
+    void indent();
+    void desindent();
 
-    public void startOfLine(int lineNumber);
-    public void endOfLine();
-    public void extraLine(int count);
+    void startOfLine(int lineNumber);
+    void endOfLine();
+    void extraLine(int count);
 
-    public void startOfComment();
-    public void endOfComment();
+    void startOfComment();
+    void endOfComment();
 
-    public void startOfJavadoc();
-    public void endOfJavadoc();
+    void startOfJavadoc();
+    void endOfJavadoc();
 
-    public void startOfXdoclet();
-    public void endOfXdoclet();
+    void startOfXdoclet();
+    void endOfXdoclet();
 
-    public void startOfError();
-    public void endOfError();
+    void startOfError();
+    void endOfError();
 
-    public void startOfImportStatements();
-    public void endOfImportStatements();
+    void startOfImportStatements();
+    void endOfImportStatements();
 
-    public void startOfTypeDeclaration(String internalPath);
-    public void endOfTypeDeclaration();
+    void startOfTypeDeclaration(String internalPath);
+    void endOfTypeDeclaration();
 
-    public void startOfAnnotationName();
-    public void endOfAnnotationName();
+    void startOfAnnotationName();
+    void endOfAnnotationName();
 
-    public void startOfOptionalPrefix();
-    public void endOfOptionalPrefix();
+    void startOfOptionalPrefix();
+    void endOfOptionalPrefix();
 
-    public void debugStartOfLayoutBlock();
-    public void debugEndOfLayoutBlock();
-    public void debugStartOfSeparatorLayoutBlock();
-    public void debugEndOfSeparatorLayoutBlock(int min, int value, int max);
-    public void debugStartOfStatementsBlockLayoutBlock();
-    public void debugEndOfStatementsBlockLayoutBlock(int min, int value, int max);
-    public void debugStartOfInstructionBlockLayoutBlock();
-    public void debugEndOfInstructionBlockLayoutBlock();
-    public void debugStartOfCommentDeprecatedLayoutBlock();
-    public void debugEndOfCommentDeprecatedLayoutBlock();
-    public void debugMarker(String marker);
-    public void debugStartOfCaseBlockLayoutBlock();
-    public void debugEndOfCaseBlockLayoutBlock();
+    void debugStartOfLayoutBlock();
+    void debugEndOfLayoutBlock();
+    void debugStartOfSeparatorLayoutBlock();
+    void debugEndOfSeparatorLayoutBlock(int min, int value, int max);
+    void debugStartOfStatementsBlockLayoutBlock();
+    void debugEndOfStatementsBlockLayoutBlock(int min, int value, int max);
+    void debugStartOfInstructionBlockLayoutBlock();
+    void debugEndOfInstructionBlockLayoutBlock();
+    void debugStartOfCommentDeprecatedLayoutBlock();
+    void debugEndOfCommentDeprecatedLayoutBlock();
+    void debugMarker(String marker);
+    void debugStartOfCaseBlockLayoutBlock();
+    void debugEndOfCaseBlockLayoutBlock();
 }
