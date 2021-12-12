@@ -14,7 +14,7 @@ buildscript {
     dependencies {
         classpath 'com.github.TheBoegl:gradle-launch4j:2.5.1'
         classpath 'de.undercouch:gradle-download-task:4.1.2'
-        classpath 'com.guardsquare:proguard-gradle:7.1.1'
+        classpath 'com.guardsquare:proguard-gradle:7.2.0-beta2'
     }
 }
 
@@ -27,8 +27,8 @@ apply plugin: 'de.undercouch.download'
 // Common configuration //
 rootProject.version='1.6.6'
 rootProject.ext.set('jdCoreVersion', '1.1.3')
-sourceCompatibility = '16'
-targetCompatibility = '16'
+sourceCompatibility = '17'
+targetCompatibility = '17'
 
 allprojects {
     apply plugin: 'eclipse'
@@ -36,8 +36,8 @@ allprojects {
     apply plugin: 'maven-publish'
 
     tasks.withType(JavaCompile) {
-        sourceCompatibility = '16'
-        targetCompatibility = '16'
+        sourceCompatibility = '17'
+        targetCompatibility = '17'
         options.compilerArgs << '-Xlint:deprecation'
         options.compilerArgs << '-Xlint:unchecked'
         options.encoding = 'UTF-8'
@@ -119,8 +119,8 @@ jar {
 
 // Download the JRE to be bundled in the windows distribution //
 task downloadZipFile(type: Download) {
-    src 'https://github.com/ibmruntimes/semeru16-binaries/releases/download/jdk-16.0.2%2B7_openj9-0.27.0/ibm-semeru-open-jre_x64_windows_16.0.2_7_openj9-0.27.0.zip'
-    dest 'build/ibm-semeru-open-jre_x64_windows_16.0.2_7_openj9-0.27.0.zip'
+    src 'https://github.com/ibmruntimes/semeru17-binaries/releases/download/jdk-17.0.1%2B12_openj9-0.29.1/ibm-semeru-open-jre_x64_windows_17.0.1_12_openj9-0.29.1.zip'
+    dest 'build/ibm-semeru-open-jre_x64_windows_17.0.1_12_openj9-0.29.1.zip'
     overwrite false
 }
 
@@ -145,14 +145,14 @@ createExe {
   icon = "${projectDir}/src/launch4j/resources/images/jd-gui.ico"
   jar projectDir.path + '/' + proguard.outJarFiles[0]
   bundledJre64Bit = 'true'
-  bundledJrePath = 'jdk-16.0.2+7-jre'
+  bundledJrePath = 'jdk-17.0.1+12-jre'
 }
 
 // Distributions for Windows //
 distributions {
     windows.contents {
-        into('jdk-16.0.2+7-jre/') {
-            from 'build/jdk-16.0.2+7-jre'
+        into('jdk-17.0.1+12-jre/') {
+            from 'build/jdk-17.0.1+12-jre'
         } 
         from 'build/launch4j/jd-gui-bundle.exe'
         from 'build/libs/' + project.name + '-' + project.version + '-min.jar'
