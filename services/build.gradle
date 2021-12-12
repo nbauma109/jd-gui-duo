@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
 dependencies {
-    implementation 'com.github.nbauma109:rsyntaxtextarea:f9dd19e788'
+    implementation 'com.fifesoft:rsyntaxtextarea:3.1.4'
     implementation 'org.ow2.asm:asm:9.1'
     implementation 'org.apache.bcel:bcel:6.5.0'
     implementation 'commons-io:commons-io:2.10.0'
