@@ -61,13 +61,14 @@ public class MavenOrgSourceLoaderPreferencesProvider extends JPanel implements P
         if (osName.contains("windows")) {
             spacer.setPreferredSize(new Dimension(22, -1));
             scrollPane.setPreferredSize(new Dimension(-1, 50));
-        } else if (osName.contains("mac os")) {
-            spacer.setPreferredSize(new Dimension(28, -1));
-            scrollPane.setPreferredSize(new Dimension(-1, 56));
         } else {
-            spacer.setPreferredSize(new Dimension(22, -1));
-            scrollPane.setPreferredSize(new Dimension(-1, 56));
-        }
+			if (osName.contains("mac os")) {
+			    spacer.setPreferredSize(new Dimension(28, -1));
+			} else {
+			    spacer.setPreferredSize(new Dimension(22, -1));
+			}
+			scrollPane.setPreferredSize(new Dimension(-1, 56));
+		}
 
         resetButton = new JButton("Reset");
         resetButton.addActionListener(this);

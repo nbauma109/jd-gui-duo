@@ -675,13 +675,11 @@ public class CompilationUnitVisitor extends StatementVisitor {
                 break;
         }
 
-        if (variableInitializer == null) {
-            fragments.addTokensFragment(tokens);
-        } else {
+        if ((variableInitializer != null)) {
             tokens.add(TextToken.SPACE_EQUAL_SPACE);
             variableInitializer.accept(this);
-            fragments.addTokensFragment(tokens);
         }
+		fragments.addTokensFragment(tokens);
     }
 
     @Override
@@ -1148,10 +1146,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             if (statements == null) {
                 BaseElementValue elementValue = declaration.getDefaultAnnotationValue();
 
-                if (elementValue == null) {
-                    tokens.add(TextToken.SEMICOLON);
-                    fragments.addTokensFragment(tokens);
-                } else {
+                if ((elementValue != null)) {
                     tokens.add(TextToken.SPACE);
                     tokens.add(DEFAULT);
                     tokens.add(TextToken.SPACE);
@@ -1160,9 +1155,9 @@ public class CompilationUnitVisitor extends StatementVisitor {
                     elementValue.accept(this);
 
                     tokens = new Tokens();
-                    tokens.add(TextToken.SEMICOLON);
-                    fragments.addTokensFragment(tokens);
                 }
+				tokens.add(TextToken.SEMICOLON);
+				fragments.addTokensFragment(tokens);
             } else {
                 fragments.addTokensFragment(tokens);
                 singleLineStatementVisitor.init();

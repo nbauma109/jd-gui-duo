@@ -71,7 +71,6 @@ public class ILoadFactory implements InstructionFactory
                     instruction = new IncInstruction(
                             ByteCodeConstants.PREINC, iinc.getOffset(),
                             iinc.getLineNumber(), instruction, iinc.getCount());
-                    stack.push(instruction);
                 }
                 else
                 {
@@ -79,9 +78,8 @@ public class ILoadFactory implements InstructionFactory
                     stack.pop();
                     list.add(last);
                     listForAnalyze.add(last);
-                    // Store ILoad instruction
-                    stack.push(instruction);
                 }
+				stack.push(instruction);
             }
             else
             {

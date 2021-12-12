@@ -94,16 +94,15 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
 			if (c == '\r') {
                 // CR followed by LF ?
                 if (index-startLineIndex >= 70 && index+1 < length && text.charAt(index+1) == ' ') {
-                    // Multiline value
-                    startLineIndex = index+1;
                 } else if (index-startLineIndex >= 70 && index+2 < length && text.charAt(index+1) == '\n' && text.charAt(index+2) == ' ') {
                     // Multiline value
                     index++;
-                    startLineIndex = index+1;
                 } else {
                     // (End of file) or (single line value) => return end index
                     return index;
                 }
+				// Multiline value
+				startLineIndex = index+1;
 			}
 			if (c == '\n') {
                 if (index-startLineIndex < 70 || index+1 >= length || text.charAt(index+1) != ' ') {

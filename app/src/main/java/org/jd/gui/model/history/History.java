@@ -32,15 +32,16 @@ public class History {
         if (uri.getPath().equals(current.getPath())) {
             if (uri.getFragment() == null && uri.getQuery() == null) {
                 // Ignore
-            } else if (current.getFragment() == null && current.getQuery() == null) {
-                // Replace current URI
-                current = uri;
             } else {
-                // Store URI
-                forward.clear();
-                backward.add(current);
+				if (current.getFragment() == null && current.getQuery() == null) {
+				} else {
+				    // Store URI
+				    forward.clear();
+				    backward.add(current);
+				}
+				// Replace current URI
                 current = uri;
-            }
+			}
             return;
         }
 

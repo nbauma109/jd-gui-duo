@@ -381,12 +381,10 @@ public class ModuleInfoFilePage extends ClassFilePage {
                 }
             }
 
-            if (currentTokenType == TokenTypes.NULL) {
-                addNullToken();
-            }else {
+            if ((currentTokenType != TokenTypes.NULL)) {
                 addToken(text, currentTokenStart,end-1, currentTokenType, newStartOffset+currentTokenStart);
-                addNullToken();
             }
+			addNullToken();
 
             return firstToken;
         }

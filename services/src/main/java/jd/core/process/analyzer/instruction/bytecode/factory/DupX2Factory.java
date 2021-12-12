@@ -52,8 +52,6 @@ public class DupX2Factory implements InstructionFactory
         {
             // ..., value2, value1 => ..., value1, value2, value1
             stack.push(dupStore1.getDupLoad1());
-            stack.push(i2);
-            stack.push(dupStore1.getDupLoad2());
         }
         else
         {
@@ -62,9 +60,9 @@ public class DupX2Factory implements InstructionFactory
 
             stack.push(dupStore1.getDupLoad1());
             stack.push(i3);
-            stack.push(i2);
-            stack.push(dupStore1.getDupLoad2());
         }
+		stack.push(i2);
+		stack.push(dupStore1.getDupLoad2());
 
         return Const.getNoOfOperands(opcode);
     }
