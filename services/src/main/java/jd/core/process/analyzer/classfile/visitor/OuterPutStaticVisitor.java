@@ -74,7 +74,7 @@ public class OuterPutStaticVisitor extends OuterGetStaticVisitor
         Accessor accessor = classFile.getAccessor(name, descriptor);
 
         if (accessor == null ||
-            accessor.getTag() != AccessorConstants.ACCESSOR_PUTSTATIC) {
+            accessor.tag() != AccessorConstants.ACCESSOR_PUTSTATIC) {
 			return null;
 		}
 
@@ -87,13 +87,13 @@ public class OuterPutStaticVisitor extends OuterGetStaticVisitor
         PutStaticAccessor psa = (PutStaticAccessor)a;
         Invokestatic is = (Invokestatic)i;
 
-        int nameIndex = this.constants.addConstantUtf8(psa.getFieldName());
+        int nameIndex = this.constants.addConstantUtf8(psa.fieldName());
         int descriptorIndex =
-            this.constants.addConstantUtf8(psa.getFieldDescriptor());
+            this.constants.addConstantUtf8(psa.fieldDescriptor());
         int cnatIndex =
             this.constants.addConstantNameAndType(nameIndex, descriptorIndex);
 
-        int classNameIndex = this.constants.addConstantUtf8(psa.getClassName());
+        int classNameIndex = this.constants.addConstantUtf8(psa.className());
         int classIndex = this.constants.addConstantClass(classNameIndex);
 
         int cfrIndex =

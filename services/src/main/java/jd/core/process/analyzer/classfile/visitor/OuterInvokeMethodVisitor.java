@@ -72,7 +72,7 @@ public class OuterInvokeMethodVisitor extends OuterGetStaticVisitor
         Accessor accessor = classFile.getAccessor(name, descriptor);
 
         if (accessor == null ||
-            accessor.getTag() != AccessorConstants.ACCESSOR_INVOKEMETHOD) {
+            accessor.tag() != AccessorConstants.ACCESSOR_INVOKEMETHOD) {
 			return null;
 		}
 
@@ -85,20 +85,20 @@ public class OuterInvokeMethodVisitor extends OuterGetStaticVisitor
         InvokeMethodAccessor ima = (InvokeMethodAccessor)a;
         Invokestatic is = (Invokestatic)i;
 
-        int nameIndex = this.constants.addConstantUtf8(ima.getMethodName());
+        int nameIndex = this.constants.addConstantUtf8(ima.methodName());
         int descriptorIndex =
-            this.constants.addConstantUtf8(ima.getMethodDescriptor());
+            this.constants.addConstantUtf8(ima.methodDescriptor());
         int cnatIndex =
             this.constants.addConstantNameAndType(nameIndex, descriptorIndex);
 
-        int classNameIndex = this.constants.addConstantUtf8(ima.getClassName());
+        int classNameIndex = this.constants.addConstantUtf8(ima.className());
         int classIndex = this.constants.addConstantClass(classNameIndex);
 
         int cmrIndex = constants.addConstantMethodref(
             classIndex, cnatIndex,
-            ima.getListOfParameterSignatures(), ima.getReturnedSignature());
+            ima.listOfParameterSignatures(), ima.returnedSignature());
 
-        switch (ima.getMethodOpcode())
+        switch (ima.methodOpcode())
         {
         case Const.INVOKESPECIAL:
             {

@@ -31,8 +31,8 @@ public class StringUtilities {
         Set<Integer> indexes = new TreeSet<>();
         indexes.add(0);
         for (Range range : ranges) {
-            indexes.add(range.getMinimum());
-            indexes.add(range.getMaximum());
+            indexes.add(range.minimum());
+            indexes.add(range.maximum());
         }
         indexes.add(length);
         return new ArrayList<>(indexes);

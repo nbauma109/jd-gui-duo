@@ -46,43 +46,9 @@ public class FastTry extends FastList
 		return finallyInstructions;
 	}
 
-	public static class FastCatch
-    {
-        private final int exceptionOffset;
-        private final int exceptionTypeIndex;
-        private final int[] otherExceptionTypeIndexes;
-        private final int localVarIndex;
-        private final List<Instruction> instructions;
-
-        public FastCatch(int exceptionOffset, int exceptionTypeIndex,
+	public record FastCatch(int exceptionOffset, int exceptionTypeIndex,
                 int[] otherExceptionTypeIndexes, int localVarIndex,
                 List<Instruction> instructions)
-        {
-            this.exceptionOffset = exceptionOffset;
-            this.exceptionTypeIndex = exceptionTypeIndex;
-            this.otherExceptionTypeIndexes = otherExceptionTypeIndexes;
-            this.localVarIndex = localVarIndex;
-            this.instructions = instructions;
-        }
-
-		public int getExceptionTypeIndex() {
-			return exceptionTypeIndex;
-		}
-
-		public int[] getOtherExceptionTypeIndexes() {
-			return otherExceptionTypeIndexes;
-		}
-
-		public List<Instruction> getInstructions() {
-			return instructions;
-		}
-
-		public int getLocalVarIndex() {
-			return localVarIndex;
-		}
-
-		public int getExceptionOffset() {
-			return exceptionOffset;
-		}
+    {
     }
 }

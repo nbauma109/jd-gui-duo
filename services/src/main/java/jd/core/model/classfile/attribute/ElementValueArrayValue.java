@@ -16,17 +16,6 @@
  ******************************************************************************/
 package jd.core.model.classfile.attribute;
 
-public class ElementValueArrayValue extends ElementValue
+public record ElementValueArrayValue(byte tag, ElementValue[] values) implements ElementValue
 {
-    private final ElementValue[] values;
-
-    public ElementValueArrayValue(byte tag, ElementValue[] values)
-    {
-        super(tag);
-        this.values = values;
-    }
-
-	public ElementValue[] getValues() {
-		return values;
-	}
 }

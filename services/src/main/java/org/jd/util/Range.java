@@ -2,15 +2,7 @@ package org.jd.util;
 
 import java.util.Objects;
 
-public class Range {
-
-	private final int minimum;
-	private final int maximum;
-
-	private Range(int minimum, int maximum) {
-		this.minimum = minimum;
-		this.maximum = maximum;
-	}
+public record Range(int minimum, int maximum) {
 
 	public static Range between(int minimum, int maximum) {
 		return new Range(minimum, maximum);
@@ -31,14 +23,6 @@ public class Range {
 		}
 		Range other = (Range) obj;
 		return maximum == other.maximum && minimum == other.minimum;
-	}
-
-	public int getMinimum() {
-		return minimum;
-	}
-
-	public int getMaximum() {
-		return maximum;
 	}
 
 	@Override

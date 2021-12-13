@@ -178,7 +178,7 @@ public class FastInstructionListBuilder {
 			List<List<Instruction>> instructions = new ArrayList<>();
 			instructions.add(fastTry.getInstructions());
 			for (FastCatch fastCatch : fastTry.getCatches()) {
-				instructions.add(fastCatch.getInstructions());
+				instructions.add(fastCatch.instructions());
 			}
 			if (fastTry.getFinallyInstructions() != null) {
 				instructions.add(fastTry.getFinallyInstructions());
@@ -726,7 +726,7 @@ public class FastInstructionListBuilder {
 				FastCatch fc;
 				while (i-- > 0) {
                     fc = ft.getCatches().get(i);
-                    removeAllMonitorExitInstructions(fc.getInstructions(), fc.getInstructions().size(), monitorLocalVariableIndex);
+                    removeAllMonitorExitInstructions(fc.instructions(), fc.instructions().size(), monitorLocalVariableIndex);
                 }
 				if (ft.getFinallyInstructions() != null) {
                     removeAllMonitorExitInstructions(ft.getFinallyInstructions(), ft.getFinallyInstructions().size(),
@@ -930,7 +930,7 @@ public class FastInstructionListBuilder {
             List<Instruction> catchInstructions;
             for (int j = 0; j < length; ++j) {
                 fc = catches.get(j);
-                catchInstructions = fc.getInstructions();
+                catchInstructions = fc.instructions();
                 executeReconstructors(referenceMap, classFile, catchInstructions, localVariables);
             }
         }
@@ -1245,7 +1245,7 @@ public class FastInstructionListBuilder {
                 // Catch blocks
                 int length = ft.getCatches().size();
                 for (int i = 0; i < length; i++) {
-                    analyzeList(classFile, method, ft.getCatches().get(i).getInstructions(), localVariables, offsetLabelSet,
+                    analyzeList(classFile, method, ft.getCatches().get(i).instructions(), localVariables, offsetLabelSet,
                             beforeLoopEntryOffset, loopEntryOffset, afterBodyLoopOffset, tmpBeforeListOffset,
                             afterListOffset, breakOffset, returnOffset);
                 }
@@ -2515,7 +2515,7 @@ public class FastInstructionListBuilder {
                 int i = ft.getCatches().size();
                 while (i-- > 0)
                 {
-                    List<Instruction> catchInstructions = ft.getCatches().get(i).getInstructions();
+                    List<Instruction> catchInstructions = ft.getCatches().get(i).instructions();
                     jumpOffset = searchMinusJumpOffset(catchInstructions, 0, catchInstructions.size(),
                             beforeListOffset, lastListOffset);
 
@@ -4407,7 +4407,7 @@ public class FastInstructionListBuilder {
 
             if (!found && ft.getCatches() != null) {
                 for (int i = ft.getCatches().size() - 1; i >= 0 && !found; --i) {
-                    found = searchInstructionAndAddLabel(ft.getCatches().get(i).getInstructions(), labelOffset);
+                    found = searchInstructionAndAddLabel(ft.getCatches().get(i).instructions(), labelOffset);
                 }
             }
 

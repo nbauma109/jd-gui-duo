@@ -16,16 +16,7 @@
  ******************************************************************************/
 package jd.core.model.classfile.accessor;
 
-public class Accessor
+public interface Accessor
 {
-    private final byte tag;
-
-    protected Accessor(byte tag)
-    {
-        this.tag = tag;
-    }
-
-	public byte getTag() {
-		return tag;
-	}
+	byte tag();
 }

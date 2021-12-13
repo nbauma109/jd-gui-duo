@@ -653,7 +653,7 @@ public class ReplaceInstructionVisitor
 					}
 
                     for (int i=ft.getCatches().size()-1; i>=0 && this.oldInstruction == null; --i) {
-						visit(ft.getCatches().get(i).getInstructions());
+						visit(ft.getCatches().get(i).instructions());
 					}
                 }
             }

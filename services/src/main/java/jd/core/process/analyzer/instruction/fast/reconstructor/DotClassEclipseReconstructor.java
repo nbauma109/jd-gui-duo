@@ -103,8 +103,8 @@ public class DotClassEclipseReconstructor
 
             FastCatch fc = ft.getCatches().get(0);
 
-            if (fc.getInstructions().size() != 1 ||
-                fc.getOtherExceptionTypeIndexes() != null) {
+            if (fc.instructions().size() != 1 ||
+                fc.otherExceptionTypeIndexes() != null) {
 				continue;
 			}
 
@@ -200,13 +200,13 @@ public class DotClassEclipseReconstructor
 			}
 
             String exceptionName =
-                constants.getConstantClassName(fc.getExceptionTypeIndex());
+                constants.getConstantClassName(fc.exceptionTypeIndex());
 
             if (! StringConstants.INTERNAL_CLASSNOTFOUNDEXCEPTION_SIGNATURE.equals(exceptionName)) {
 				continue;
 			}
 
-            if (fc.getInstructions().get(0).getOpcode() != Const.ATHROW) {
+            if (fc.instructions().get(0).getOpcode() != Const.ATHROW) {
 				continue;
 			}
 

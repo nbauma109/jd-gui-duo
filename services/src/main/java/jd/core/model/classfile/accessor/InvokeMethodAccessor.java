@@ -18,50 +18,9 @@ package jd.core.model.classfile.accessor;
 
 import java.util.List;
 
-public class InvokeMethodAccessor extends Accessor
-{
-    private final String className;
-    private final int methodOpcode;
-    private final String methodName;
-    private final String methodDescriptor;
-    private final List<String> listOfParameterSignatures;
-    private final String returnedSignature;
-
-    public InvokeMethodAccessor(
+public record InvokeMethodAccessor(
         byte tag, String className, int methodOpcode,
         String methodName, String methodDescriptor,
-        List<String> listOfParameterSignatures, String returnedSignature)
-    {
-        super(tag);
-        this.className = className;
-        this.methodOpcode = methodOpcode;
-        this.methodName = methodName;
-        this.methodDescriptor = methodDescriptor;
-        this.listOfParameterSignatures = listOfParameterSignatures;
-        this.returnedSignature = returnedSignature;
-    }
-
-	public String getMethodName() {
-		return methodName;
-	}
-
-	public String getMethodDescriptor() {
-		return methodDescriptor;
-	}
-
-	public String getClassName() {
-		return className;
-	}
-
-	public List<String> getListOfParameterSignatures() {
-		return listOfParameterSignatures;
-	}
-
-	public String getReturnedSignature() {
-		return returnedSignature;
-	}
-
-	public int getMethodOpcode() {
-		return methodOpcode;
-	}
+        List<String> listOfParameterSignatures, String returnedSignature) implements Accessor
+{
 }

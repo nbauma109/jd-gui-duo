@@ -711,7 +711,7 @@ public class JavaSourceLayouter
 
 					createBlockForSubList(
 							preferences, layoutBlockList, classFile,
-							method, fc.getInstructions(), false, 2);
+							method, fc.instructions(), false, 2);
 				}
 
 				// Last catch block
@@ -725,7 +725,7 @@ public class JavaSourceLayouter
 
 				createBlockForSubList(
 						preferences, layoutBlockList, classFile, method,
-						fc.getInstructions(), false, blockEndPreferedLineCount);
+						fc.instructions(), false, blockEndPreferedLineCount);
 			}
 		}
 

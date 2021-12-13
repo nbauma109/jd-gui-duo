@@ -16,16 +16,7 @@
  ******************************************************************************/
 package jd.core.model.classfile.attribute;
 
-public class ElementValue
+public interface ElementValue
 {
-    private final byte tag;
-
-    public ElementValue(byte tag)
-    {
-        this.tag = tag;
-    }
-
-	public byte getTag() {
-		return tag;
-	}
+    byte tag();
 }

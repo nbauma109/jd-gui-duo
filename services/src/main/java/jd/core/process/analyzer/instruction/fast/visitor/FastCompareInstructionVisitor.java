@@ -85,10 +85,10 @@ public class FastCompareInstructionVisitor extends CompareInstructionVisitor
                     FastCatch fc1 = ft1.getCatches().get(i);
                     FastCatch fc2 = ft2.getCatches().get(i);
 
-                    if (fc1.getExceptionTypeIndex() != fc2.getExceptionTypeIndex() ||
-                        ! visit(fc1.getInstructions(), fc2.getInstructions()) ||
+                    if (fc1.exceptionTypeIndex() != fc2.exceptionTypeIndex() ||
+                        ! visit(fc1.instructions(), fc2.instructions()) ||
                         ! compareExceptionTypeIndexes(
-                            fc1.getOtherExceptionTypeIndexes(), fc2.getOtherExceptionTypeIndexes())) {
+                            fc1.otherExceptionTypeIndexes(), fc2.otherExceptionTypeIndexes())) {
 						return false;
 					}
                 }

@@ -2290,11 +2290,11 @@ public class ClassFileWriter
         Method method = fslb.getMethod();
         FastCatch fc = fslb.getFc();
 
-        writeCatchType(classFile, constants, fc.getExceptionTypeIndex());
+        writeCatchType(classFile, constants, fc.exceptionTypeIndex());
 
-        if (fc.getOtherExceptionTypeIndexes() != null)
+        if (fc.otherExceptionTypeIndexes() != null)
         {
-            int[] otherExceptionTypeIndexes = fc.getOtherExceptionTypeIndexes();
+            int[] otherExceptionTypeIndexes = fc.otherExceptionTypeIndexes();
             int otherExceptionTypeIndexesLength =
                     otherExceptionTypeIndexes.length;
 
@@ -2313,7 +2313,7 @@ public class ClassFileWriter
 
         LocalVariable lv = method.getLocalVariables()
             .searchLocalVariableWithIndexAndOffset(
-                fc.getLocalVarIndex(), fc.getExceptionOffset());
+                fc.localVarIndex(), fc.exceptionOffset());
 
         if (lv == null)
         {

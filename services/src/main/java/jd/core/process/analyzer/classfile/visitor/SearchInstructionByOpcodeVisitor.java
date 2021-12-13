@@ -209,7 +209,7 @@ public class SearchInstructionByOpcodeVisitor
                 List<FastCatch> catches = ft.getCatches();
                 for (int i=catches.size()-1; i>=0; --i)
                 {
-                    tmp = visit(catches.get(i).getInstructions(), opcode);
+                    tmp = visit(catches.get(i).instructions(), opcode);
                     if (tmp != null) {
 						return tmp;
 					}

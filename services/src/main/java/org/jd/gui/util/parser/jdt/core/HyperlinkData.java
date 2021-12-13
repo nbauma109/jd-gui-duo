@@ -2,8 +2,8 @@ package org.jd.gui.util.parser.jdt.core;
 
 public class HyperlinkData {
 
-    private final int startPosition;
-    private final int endPosition;
+    protected int startPosition;
+    protected int endPosition;
 
     public HyperlinkData(int startPosition, int endPosition) {
         this.startPosition = startPosition;

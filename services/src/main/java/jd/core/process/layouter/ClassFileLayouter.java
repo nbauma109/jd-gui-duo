@@ -380,7 +380,7 @@ public class ClassFileLayouter {
                         }
 
                         vam = field.getValueAndMethod();
-                        invokeNew = (InvokeNew)vam.getValue();
+                        invokeNew = (InvokeNew)vam.value();
 
                         invokeNew.transformToEnumValue(getStatic);
 
@@ -492,8 +492,8 @@ public class ClassFileLayouter {
             if (field.getValueAndMethod() != null)
             {
                 ValueAndMethod valueAndMethod = field.getValueAndMethod();
-                Instruction value = valueAndMethod.getValue();
-                Method method = valueAndMethod.getMethod();
+                Instruction value = valueAndMethod.value();
+                Method method = valueAndMethod.method();
 
                 firstLineNumber = value.getLineNumber();
                 lastLineNumber = MaxLineNumberVisitor.visit(value);

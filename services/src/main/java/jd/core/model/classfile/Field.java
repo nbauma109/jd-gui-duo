@@ -92,25 +92,6 @@ public class Field extends FieldOrMethod
 		this.outerMethodLocalVariableNameIndex = outerMethodLocalVariableNameIndex;
 	}
 
-	public static class ValueAndMethod
-    {
-        private final Instruction value;
-        private final Method method;
-
-        ValueAndMethod(Instruction value, Method method)
-        {
-            this.value = value;
-            this.method = method;
-        }
-
-        public Method getMethod()
-        {
-            return method;
-        }
-
-        public Instruction getValue()
-        {
-            return value;
-        }
-    }
+	public record ValueAndMethod(Instruction value, Method method) {
+	}
 }

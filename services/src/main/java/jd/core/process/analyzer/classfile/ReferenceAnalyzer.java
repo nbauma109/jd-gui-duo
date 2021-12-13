@@ -138,7 +138,7 @@ public class ReferenceAnalyzer
         {
             for (int j=elementValuePairs.length-1; j>=0; --j) {
                 countElementValue(
-                    referenceMap, constants, elementValuePairs[j].getElementValue());
+                    referenceMap, constants, elementValuePairs[j].elementValue());
             }
         }
     }
@@ -152,7 +152,7 @@ public class ReferenceAnalyzer
             Annotation[] annotations;
             for (int i=parameterAnnotations.length-1; i>=0; --i)
             {
-                annotations = parameterAnnotations[i].getAnnotations();
+                annotations = parameterAnnotations[i].annotations();
                 if (annotations != null)
                 {
                     for (int j=annotations.length-1; j>=0; --j) {
@@ -170,12 +170,12 @@ public class ReferenceAnalyzer
         String signature;
         ElementValueClassInfo evci;
 
-        switch (ev.getTag())
+        switch (ev.tag())
         {
         case ElementValueContants.EV_CLASS_INFO:
             {
                 evci = (ElementValueClassInfo)ev;
-                signature = constants.getConstantUtf8(evci.getClassInfoIndex());
+                signature = constants.getConstantUtf8(evci.classInfoIndex());
                 SignatureAnalyzer.analyzeSimpleSignature(referenceMap, signature);
             }
             break;
@@ -183,22 +183,22 @@ public class ReferenceAnalyzer
             {
                 ElementValueAnnotationValue evanv = (ElementValueAnnotationValue)ev;
                 countAnnotationReference(
-                        referenceMap, constants, evanv.getAnnotationValue());
+                        referenceMap, constants, evanv.annotationValue());
             }
             break;
         case ElementValueContants.EV_ARRAY_VALUE:
             {
                 ElementValueArrayValue evarv = (ElementValueArrayValue)ev;
-                ElementValue[] values = evarv.getValues();
+                ElementValue[] values = evarv.values();
 
                 if (values != null)
                 {
                     for (int i=values.length-1; i>=0; --i) {
-                        if (values[i].getTag() == ElementValueContants.EV_CLASS_INFO)
+                        if (values[i].tag() == ElementValueContants.EV_CLASS_INFO)
                         {
                             evci = (ElementValueClassInfo)values[i];
                             signature =
-                                constants.getConstantUtf8(evci.getClassInfoIndex());
+                                constants.getConstantUtf8(evci.classInfoIndex());
                             SignatureAnalyzer.analyzeSimpleSignature(referenceMap, signature);
                         }
                     }
@@ -208,7 +208,7 @@ public class ReferenceAnalyzer
         case ElementValueContants.EV_ENUM_CONST_VALUE:
             {
                 ElementValueEnumConstValue evecv = (ElementValueEnumConstValue)ev;
-                signature = constants.getConstantUtf8(evecv.getTypeNameIndex());
+                signature = constants.getConstantUtf8(evecv.typeNameIndex());
                 SignatureAnalyzer.analyzeSimpleSignature(referenceMap, signature);
             }
             break;
@@ -245,7 +245,7 @@ public class ReferenceAnalyzer
             SignatureAnalyzer.analyzeSimpleSignature(referenceMap, signature);
 
             if (field.getValueAndMethod() != null) {
-                visitor.visit(field.getValueAndMethod().getValue());
+                visitor.visit(field.getValueAndMethod().value());
             }
         }
     }

@@ -139,7 +139,7 @@ public class DotClass118BReconstructor
 			}
 
             List<Instruction> catchInstructions =
-                ft.getCatches().get(0).getInstructions();
+                ft.getCatches().get(0).instructions();
 
             if (catchInstructions.size() != 1 ||
                 catchInstructions.get(0).getOpcode() != Const.ATHROW) {

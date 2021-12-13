@@ -1955,7 +1955,7 @@ public class FastCodeExceptionAnalyzer
 		List<Instruction> catchInstructions;
 		while (i-- > 0)
 		{
-			catchInstructions = fastTry.getCatches().get(i).getInstructions();
+			catchInstructions = fastTry.getCatches().get(i).instructions();
 
 			// Remove first catch instruction in each catch block
 			if (formatCatchRemoveFirstCatchInstruction(catchInstructions.get(0))) {
@@ -2182,7 +2182,7 @@ public class FastCodeExceptionAnalyzer
 		if (i >= 0)
 		{
 			List<Instruction>  catchInstructions =
-					fastTry.getCatches().get(i).getInstructions();
+					fastTry.getCatches().get(i).instructions();
 			int catchInstructionsLength = catchInstructions.size();
 			if (catchInstructionsLength > 0) {
 				catchInstructionsLength--;
@@ -2210,7 +2210,7 @@ public class FastCodeExceptionAnalyzer
 			int catchLastOpCode;
 			while (i-- > 0)
 			{
-				catchInstructions = fastTry.getCatches().get(i).getInstructions();
+				catchInstructions = fastTry.getCatches().get(i).instructions();
 				catchInstructionsLength = catchInstructions.size();
 
 				catchInstructionsLength--;
@@ -2268,7 +2268,7 @@ public class FastCodeExceptionAnalyzer
 		Instruction in;
 		while (i-- > 0)
 		{
-			catchInstructions = fastTry.getCatches().get(i).getInstructions();
+			catchInstructions = fastTry.getCatches().get(i).instructions();
 			catchInstructionsLength = catchInstructions.size();
 			// Remove 'goto' instruction in catch block
 			in = catchInstructions.remove(catchInstructionsLength - 1);
@@ -2325,7 +2325,7 @@ public class FastCodeExceptionAnalyzer
 			while (i-- > 0)
 			{
 				List<Instruction> catchInstructions =
-						fastTry.getCatches().get(i).getInstructions();
+						fastTry.getCatches().get(i).instructions();
 
 				if (catchInstructions.isEmpty() ||
 						catchInstructions.get(0).getOffset() > jumpOffset) {
@@ -2351,7 +2351,7 @@ public class FastCodeExceptionAnalyzer
 			List<Instruction> catchInstructions;
 			while (i-- > 0)
 			{
-				catchInstructions = fastTry.getCatches().get(i).getInstructions();
+				catchInstructions = fastTry.getCatches().get(i).instructions();
 				length = catchInstructions.size();
 
 				// Remove last 'goto' instruction
@@ -2388,7 +2388,7 @@ public class FastCodeExceptionAnalyzer
 			List<Instruction> catchInstructions;
 			while (i-- > 0)
 			{
-				catchInstructions = fastTry.getCatches().get(i).getInstructions();
+				catchInstructions = fastTry.getCatches().get(i).instructions();
 				length = catchInstructions.size();
 
 				// Remove last 'goto' instruction
@@ -2477,7 +2477,7 @@ public class FastCodeExceptionAnalyzer
 				int catchLastOpCode;
 				while (i-- > 0)
 				{
-					catchInstructions = fastTry.getCatches().get(i).getInstructions();
+					catchInstructions = fastTry.getCatches().get(i).instructions();
 
 					length = catchInstructions.size();
 
@@ -2510,7 +2510,7 @@ public class FastCodeExceptionAnalyzer
 			List<Instruction> catchInstructions;
 			while (i-- > 0)
 			{
-				catchInstructions = fastTry.getCatches().get(i).getInstructions();
+				catchInstructions = fastTry.getCatches().get(i).instructions();
 
 				// Remove first catch instruction in each catch block
 				if (!catchInstructions.isEmpty() && formatCatchRemoveFirstCatchInstruction(catchInstructions.get(0))) {
@@ -2637,7 +2637,7 @@ public class FastCodeExceptionAnalyzer
 					{
 						format142RemoveFinallyInstructionsBeforeReturnAndCompactStoreReturn(
 								localVariables, visitor,
-								ft.getCatches().get(i).getInstructions(), finallyInstructions);
+								ft.getCatches().get(i).instructions(), finallyInstructions);
 					}
 				}
 
@@ -2737,7 +2737,7 @@ public class FastCodeExceptionAnalyzer
 		List<Instruction> catchInstructions;
 		while (i-- > 0)
 		{
-			catchInstructions = fastTry.getCatches().get(i).getInstructions();
+			catchInstructions = fastTry.getCatches().get(i).instructions();
 			lastIndex = catchInstructions.size()-1;
 
 			// Remove last 'goto' instruction in try block
@@ -2961,7 +2961,7 @@ public class FastCodeExceptionAnalyzer
 		Instruction catchInstr;
 		// Remove catch instructions that are out of bounds and should be found in finally instructions
 		for (FastCatch fastCatch : fastTry.getCatches()) {
-			for (Iterator<Instruction> catchIter = fastCatch.getInstructions().iterator(); catchIter.hasNext();) {
+			for (Iterator<Instruction> catchIter = fastCatch.instructions().iterator(); catchIter.hasNext();) {
 				catchInstr = catchIter.next();
 				if (catchInstr.getLineNumber() >= astore.getLineNumber()) {
 					catchIter.remove();
@@ -3081,7 +3081,7 @@ public class FastCodeExceptionAnalyzer
 			while (i-- > 0)
 			{
 				fastCatch = fastTry.getCatches().get(i);
-				catchInstructions = fastCatch.getInstructions();
+				catchInstructions = fastCatch.instructions();
 				index = catchInstructions.size();
 
 				lastInstruction = catchInstructions.get(index-1);

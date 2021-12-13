@@ -130,7 +130,7 @@ public class ReturnLineNumberAnalyzer
                         for (int i=ft.getCatches().size()-1; i>=0; --i)
                         {
                             List<Instruction> catchInstructions =
-                                ft.getCatches().get(i).getInstructions();
+                                ft.getCatches().get(i).instructions();
                             recursiveCheck(
                                 catchInstructions, afterListLineNumber);
                             if (!catchInstructions.isEmpty())

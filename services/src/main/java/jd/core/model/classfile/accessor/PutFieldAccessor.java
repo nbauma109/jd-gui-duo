@@ -16,30 +16,6 @@
  ******************************************************************************/
 package jd.core.model.classfile.accessor;
 
-public class PutFieldAccessor extends Accessor
+public record PutFieldAccessor(byte tag, String className, String fieldName, String fieldDescriptor) implements Accessor
 {
-    private final String className;
-    private final String fieldName;
-    private final String fieldDescriptor;
-
-    public PutFieldAccessor(
-        byte tag, String className, String fieldName, String fieldDescriptor)
-    {
-        super(tag);
-        this.className = className;
-        this.fieldName = fieldName;
-        this.fieldDescriptor = fieldDescriptor;
-    }
-
-	public String getFieldName() {
-		return fieldName;
-	}
-
-	public String getFieldDescriptor() {
-		return fieldDescriptor;
-	}
-
-	public String getClassName() {
-		return className;
-	}
 }

@@ -294,7 +294,7 @@ public class CheckLocalVariableUsedVisitor
                 }
                 List<FastCatch> catchs = ft.getCatches();
                 for (int i=catchs.size()-1; i>=0; --i) {
-                    if (visit(localVariables, maxOffset, catchs.get(i).getInstructions())) {
+                    if (visit(localVariables, maxOffset, catchs.get(i).instructions())) {
                         return true;
                     }
                 }

@@ -16,16 +16,6 @@
  ******************************************************************************/
 package jd.core.model.classfile.attribute;
 
-public class ParameterAnnotations
+public record ParameterAnnotations(Annotation[] annotations)
 {
-    private final Annotation[] annotations;
-
-    public ParameterAnnotations(Annotation[] annotations)
-    {
-        this.annotations = annotations;
-    }
-
-	public Annotation[] getAnnotations() {
-		return annotations;
-	}
 }

@@ -362,7 +362,7 @@ public class ReferenceVisitor
                 visit(ft.getInstructions());
                 List<FastCatch> catches = ft.getCatches();
                 for (int i=catches.size()-1; i>=0; --i) {
-					visit(catches.get(i).getInstructions());
+					visit(catches.get(i).instructions());
 				}
                 visit(ft.getFinallyInstructions());
             }

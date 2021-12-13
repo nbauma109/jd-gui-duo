@@ -654,7 +654,7 @@ public class ReplaceDupLoadVisitor
 
                     List<FastCatch> catchs = ft.getCatches();
                     for (int i=catchs.size()-1; i>=0 && this.parentFound == null; --i) {
-						visit(catchs.get(i).getInstructions());
+						visit(catchs.get(i).instructions());
 					}
                 }
             }

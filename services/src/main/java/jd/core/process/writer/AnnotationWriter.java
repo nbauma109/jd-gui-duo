@@ -38,7 +38,7 @@ public class AnnotationWriter
             return;
         }
 
-        Annotation[] annotations = parameterAnnotation.getAnnotations();
+        Annotation[] annotations = parameterAnnotation.annotations();
 
         if (annotations == null) {
             return;
@@ -70,7 +70,7 @@ public class AnnotationWriter
             printer.print('(');
 
             ConstantPool constants = classFile.getConstantPool();
-            String name = constants.getConstantUtf8(evps[0].getElementNameIndex());
+            String name = constants.getConstantUtf8(evps[0].elementNameIndex());
 
             if (evps.length > 1 || !"value".equals(name))
             {
@@ -79,18 +79,18 @@ public class AnnotationWriter
             }
             ElementValueWriter.writeElementValue(
                 loader, printer, referenceMap,
-                classFile, evps[0].getElementValue());
+                classFile, evps[0].elementValue());
 
             for (int j=1; j<evps.length; j++)
             {
-                name = constants.getConstantUtf8(evps[j].getElementNameIndex());
+                name = constants.getConstantUtf8(evps[j].elementNameIndex());
 
                 printer.print(", ");
                 printer.print(name);
                 printer.print('=');
                 ElementValueWriter.writeElementValue(
                     loader, printer, referenceMap,
-                    classFile, evps[j].getElementValue());
+                    classFile, evps[j].elementValue());
             }
 
             printer.print(')');

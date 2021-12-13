@@ -16,22 +16,6 @@
  ******************************************************************************/
 package jd.core.model.classfile.attribute;
 
-public class ElementValuePair
+public record ElementValuePair(int elementNameIndex, ElementValue elementValue)
 {
-    private final int elementNameIndex;
-    private final ElementValue elementValue;
-
-    public ElementValuePair(int elementNameIndex, ElementValue elementValue)
-    {
-        this.elementNameIndex = elementNameIndex;
-        this.elementValue = elementValue;
-    }
-
-	public int getElementNameIndex() {
-		return elementNameIndex;
-	}
-
-	public ElementValue getElementValue() {
-		return elementValue;
-	}
 }

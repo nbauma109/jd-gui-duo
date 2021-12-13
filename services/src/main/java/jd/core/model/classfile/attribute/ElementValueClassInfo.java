@@ -16,17 +16,6 @@
  ******************************************************************************/
 package jd.core.model.classfile.attribute;
 
-public class ElementValueClassInfo extends ElementValue
+public record ElementValueClassInfo(byte tag, int classInfoIndex) implements ElementValue
 {
-    private final int classInfoIndex;
-
-    public ElementValueClassInfo(byte tag, int classInfoIndex)
-    {
-        super(tag);
-        this.classInfoIndex = classInfoIndex;
-    }
-
-	public int getClassInfoIndex() {
-		return classInfoIndex;
-	}
 }

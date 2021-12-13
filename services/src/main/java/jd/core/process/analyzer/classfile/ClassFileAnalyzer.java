@@ -1304,7 +1304,7 @@ public class ClassFileAnalyzer
 				continue;
 			}
 
-			instruction = field.getValueAndMethod().getValue();
+			instruction = field.getValueAndMethod().value();
 
 			if (instruction.getOpcode() != ByteCodeConstants.INITARRAY &&
 					instruction.getOpcode() != ByteCodeConstants.NEWANDINITARRAY ||

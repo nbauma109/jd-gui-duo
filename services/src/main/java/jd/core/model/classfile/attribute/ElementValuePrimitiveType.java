@@ -16,26 +16,9 @@
  ******************************************************************************/
 package jd.core.model.classfile.attribute;
 
-public class ElementValuePrimitiveType extends ElementValue
+public record ElementValuePrimitiveType(byte tag, byte type, int constValueIndex) implements ElementValue
 {
     /*
      * type = {'B', 'D', 'F', 'I', 'J', 'S', 'Z', 'C', 's'}
      */
-    private final byte type;
-    private final int constValueIndex;
-
-    public ElementValuePrimitiveType(byte tag, byte type, int constValueIndex)
-    {
-        super(tag);
-        this.type = type;
-        this.constValueIndex = constValueIndex;
-    }
-
-	public byte getType() {
-		return type;
-	}
-
-	public int getConstValueIndex() {
-		return constValueIndex;
-	}
 }

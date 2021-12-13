@@ -16,25 +16,8 @@
  ******************************************************************************/
 package jd.core.model.classfile.attribute;
 
-public class ElementValueEnumConstValue extends ElementValue
+public record ElementValueEnumConstValue(byte tag,
+        int typeNameIndex,
+        int constNameIndex) implements ElementValue
 {
-    private final int typeNameIndex;
-    private final int constNameIndex;
-
-    public ElementValueEnumConstValue(byte tag,
-                                      int typeNameIndex,
-                                      int constNameIndex)
-    {
-        super(tag);
-        this.typeNameIndex = typeNameIndex;
-        this.constNameIndex = constNameIndex;
-    }
-
-	public int getTypeNameIndex() {
-		return typeNameIndex;
-	}
-
-	public int getConstNameIndex() {
-		return constNameIndex;
-	}
 }

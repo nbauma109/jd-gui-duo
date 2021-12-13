@@ -111,7 +111,7 @@ public class DupLocalVariableAnalyzer
 						for (int i=ft.getCatches().size()-1; i>=0; --i) {
 							recursiveDeclare(
                                 constants, localVariables,
-                                codeLength, ft.getCatches().get(i).getInstructions());
+                                codeLength, ft.getCatches().get(i).instructions());
 						}
 					}
 

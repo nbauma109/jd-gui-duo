@@ -51,7 +51,7 @@ public class MethodPatcher {
 					String methodKey = methodBinding.getKey();
 					Range rangeV1 = methodKeyPositionRanges.get(methodKey);
 			        if (rangeV1 != null) {
-			        	String methodV1 = sourceCodeV1.substring(rangeV1.getMinimum(), rangeV1.getMaximum());
+			        	String methodV1 = sourceCodeV1.substring(rangeV1.minimum(), rangeV1.maximum());
 			        	int methodV0LineCount = (int) methodV0.lines().count();
 			        	int methodV1LineCount = (int) methodV1.lines().count();
 			        	StringBuilder newMethod = new StringBuilder(methodV0);

@@ -74,7 +74,7 @@ public class OuterGetFieldVisitor extends OuterGetStaticVisitor
         Accessor accessor = classFile.getAccessor(name, descriptor);
 
         if (accessor == null ||
-            accessor.getTag() != AccessorConstants.ACCESSOR_GETFIELD) {
+            accessor.tag() != AccessorConstants.ACCESSOR_GETFIELD) {
 			return null;
 		}
 
@@ -87,13 +87,13 @@ public class OuterGetFieldVisitor extends OuterGetStaticVisitor
         GetFieldAccessor gfa = (GetFieldAccessor)a;
         Invokestatic is = (Invokestatic)i;
 
-        int nameIndex = this.constants.addConstantUtf8(gfa.getFieldName());
+        int nameIndex = this.constants.addConstantUtf8(gfa.fieldName());
         int descriptorIndex =
-            this.constants.addConstantUtf8(gfa.getFieldDescriptor());
+            this.constants.addConstantUtf8(gfa.fieldDescriptor());
         int cnatIndex =
             this.constants.addConstantNameAndType(nameIndex, descriptorIndex);
 
-        int classNameIndex = this.constants.addConstantUtf8(gfa.getClassName());
+        int classNameIndex = this.constants.addConstantUtf8(gfa.className());
         int classIndex = this.constants.addConstantClass(classNameIndex);
 
         int cfrIndex =
