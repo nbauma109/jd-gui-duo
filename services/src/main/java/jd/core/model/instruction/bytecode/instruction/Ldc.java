@@ -16,6 +16,7 @@
  ******************************************************************************/
 package jd.core.model.instruction.bytecode.instruction;
 
+import org.apache.bcel.Const;
 import org.apache.bcel.classfile.Constant;
 import org.jd.core.v1.util.StringConstants;
 
@@ -43,15 +44,15 @@ public class Ldc extends LdcInstruction
 			return null;
 		}
 
-        switch (c.getClass().getSimpleName())
+        switch (c.getTag())
         {
-        case "ConstantFloat":
+        case Const.CONSTANT_Float:
             return "F";
-        case "ConstantInteger":
+        case Const.CONSTANT_Integer:
             return "I";
-        case "ConstantString":
+        case Const.CONSTANT_String:
             return StringConstants.INTERNAL_STRING_SIGNATURE;
-        case "ConstantClass":
+        case Const.CONSTANT_Class:
             return StringConstants.INTERNAL_CLASS_SIGNATURE;
             /*{
                 int index = ((ConstantClass)c).nameIndex;

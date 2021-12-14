@@ -7,6 +7,7 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
+import org.apache.bcel.Const;
 import org.apache.bcel.classfile.*;
 import org.jd.core.v1.model.classfile.ConstantPool;
 import org.jd.core.v1.model.classfile.Method;
@@ -299,24 +300,24 @@ public class ByteCodeWriter {
     }
 
     protected static void writeLDC(StringBuilder sb, ConstantPool constants, Constant constant) {
-        switch (constant.getClass().getSimpleName()) {
-            case "ConstantInteger":
+        switch (constant.getTag()) {
+            case Const.CONSTANT_Integer:
                 sb.append(' ').append(((ConstantInteger) constant).getBytes());
                 break;
-            case "ConstantFloat":
+            case Const.CONSTANT_Float:
                 sb.append(' ').append(((ConstantFloat) constant).getBytes());
                 break;
-            case "ConstantClass":
+            case Const.CONSTANT_Class:
                 int typeNameIndex = ((ConstantClass) constant).getNameIndex();
                 sb.append(' ').append(((ConstantUtf8)constants.getConstant(typeNameIndex)).getBytes());
                 break;
-            case "ConstantLong":
+            case Const.CONSTANT_Long:
                 sb.append(' ').append(((ConstantLong) constant).getBytes());
                 break;
-            case "ConstantDouble":
+            case Const.CONSTANT_Double:
                 sb.append(' ').append(((ConstantDouble) constant).getBytes());
                 break;
-            case "ConstantString":
+            case Const.CONSTANT_String:
                 sb.append(" '");
                 int stringIndex = ((ConstantString) constant).getStringIndex();
                 String str = constants.getConstantUtf8(stringIndex);

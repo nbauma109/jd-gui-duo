@@ -16,6 +16,7 @@
  ******************************************************************************/
 package jd.core.process.writer;
 
+import org.apache.bcel.Const;
 import org.apache.bcel.classfile.*;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.util.StringConstants;
@@ -45,9 +46,9 @@ public class ConstantValueWriter
     {
         ConstantPool constants = classFile.getConstantPool();
 
-        switch (cv.getClass().getSimpleName())
+        switch (cv.getTag())
         {
-          case "ConstantDouble":
+          case Const.CONSTANT_Double:
             {
                 double d = ((ConstantDouble)cv).getBytes();
 
@@ -98,7 +99,7 @@ public class ConstantValueWriter
                 }
             }
             break;
-          case "ConstantFloat":
+          case Const.CONSTANT_Float:
             {
                 float value = ((ConstantFloat)cv).getBytes();
 
@@ -149,7 +150,7 @@ public class ConstantValueWriter
                 }
             }
             break;
-          case "ConstantInteger":
+          case Const.CONSTANT_Integer:
             {
                 int value = ((ConstantInteger)cv).getBytes();
 
@@ -189,7 +190,7 @@ public class ConstantValueWriter
                 }
             }
             break;
-          case "ConstantLong":
+          case Const.CONSTANT_Long:
             {
                 long value = ((ConstantLong)cv).getBytes();
 
@@ -211,7 +212,7 @@ public class ConstantValueWriter
                 }
             }
             break;
-          case "ConstantString":
+          case Const.CONSTANT_String:
             {
                 String s = constants.getConstantUtf8(
                     ((ConstantString)cv).getStringIndex());
@@ -241,13 +242,13 @@ public class ConstantValueWriter
         Loader loader, Printer printer, ReferenceMap referenceMap,
         ClassFile classFile, Constant cv)
     {
-        switch (cv.getClass().getSimpleName())
+        switch (cv.getTag())
         {
-        case "ConstantInteger":
+        case Const.CONSTANT_Integer:
             printer.printNumeric(
                 "0x" + Integer.toHexString( ((ConstantInteger)cv).getBytes() ).toUpperCase());
             break;
-        case "ConstantLong":
+        case Const.CONSTANT_Long:
             printer.printNumeric(
                 "0x" + Long.toHexString( ((ConstantLong)cv).getBytes() ).toUpperCase());
             break;

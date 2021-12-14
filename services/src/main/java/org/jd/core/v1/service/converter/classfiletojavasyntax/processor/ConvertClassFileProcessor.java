@@ -6,6 +6,7 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.processor;
 
+import org.apache.bcel.Const;
 import org.apache.bcel.classfile.*;
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.classfile.Field;
@@ -291,12 +292,12 @@ public class ConvertClassFileProcessor {
             return null;
         }
         Constant constantValue = acv.getConstantValue();
-        Expression expression = switch (constantValue.getClass().getSimpleName()) {
-			case "ConstantInteger" -> new IntegerConstantExpression(typeField, ((ConstantInteger)constantValue).getBytes());
-			case "ConstantFloat" -> new FloatConstantExpression(((ConstantFloat)constantValue).getBytes());
-			case "ConstantLong" -> new LongConstantExpression(((ConstantLong)constantValue).getBytes());
-			case "ConstantDouble" -> new DoubleConstantExpression(((ConstantDouble)constantValue).getBytes());
-			case "ConstantUtf8" -> new StringConstantExpression(((ConstantUtf8)constantValue).getBytes());
+        Expression expression = switch (constantValue.getTag()) {
+			case Const.CONSTANT_Integer -> new IntegerConstantExpression(typeField, ((ConstantInteger)constantValue).getBytes());
+			case Const.CONSTANT_Float -> new FloatConstantExpression(((ConstantFloat)constantValue).getBytes());
+			case Const.CONSTANT_Long -> new LongConstantExpression(((ConstantLong)constantValue).getBytes());
+			case Const.CONSTANT_Double -> new DoubleConstantExpression(((ConstantDouble)constantValue).getBytes());
+			case Const.CONSTANT_Utf8 -> new StringConstantExpression(((ConstantUtf8)constantValue).getBytes());
 			default -> throw new ConvertClassFileException("Invalid attributes");
 		};
         return new ExpressionVariableInitializer(expression);

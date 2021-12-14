@@ -989,12 +989,12 @@ public class ByteCodeParser {
     }
 
     private void parseLDC(DefaultStack<Expression> stack, ConstantPool constants, int lineNumber, Constant constant) {
-        switch (constant.getClass().getSimpleName()) {
-            case "ConstantInteger":
+        switch (constant.getTag()) {
+            case Const.CONSTANT_Integer:
                 int i = ((ConstantInteger)constant).getBytes();
                 stack.push(new IntegerConstantExpression(lineNumber, PrimitiveTypeUtil.getPrimitiveTypeFromValue(i), i));
                 break;
-            case "ConstantFloat":
+            case Const.CONSTANT_Float:
                 float f = ((ConstantFloat)constant).getBytes();
 
                 if (f == Float.MIN_VALUE) {
@@ -1011,7 +1011,7 @@ public class ByteCodeParser {
                     stack.push(new FloatConstantExpression(lineNumber, f));
                 }
                 break;
-            case "ConstantClass":
+            case Const.CONSTANT_Class:
                 int typeNameIndex = ((ConstantClass) constant).getNameIndex();
                 String typeName = ((ConstantUtf8)constants.getConstant(typeNameIndex)).getBytes();
                 Type type = typeMaker.makeFromDescriptorOrInternalTypeName(typeName);
@@ -1020,7 +1020,7 @@ public class ByteCodeParser {
                 }
                 stack.push(new TypeReferenceDotClassExpression(lineNumber, type));
                 break;
-            case "ConstantLong":
+            case Const.CONSTANT_Long:
                 long l = ((ConstantLong)constant).getBytes();
 
                 if (l == Long.MIN_VALUE) {
@@ -1031,7 +1031,7 @@ public class ByteCodeParser {
                     stack.push(new LongConstantExpression(lineNumber, l));
                 }
                 break;
-            case "ConstantDouble":
+            case Const.CONSTANT_Double:
                 double d = ((ConstantDouble)constant).getBytes();
 
                 if (Double.compare(d, Double.MIN_VALUE) == 0) {
@@ -1052,7 +1052,7 @@ public class ByteCodeParser {
                     stack.push(new DoubleConstantExpression(lineNumber, d));
                 }
                 break;
-            case "ConstantString":
+            case Const.CONSTANT_String:
                 int stringIndex = ((ConstantString)constant).getStringIndex();
                 stack.push(new StringConstantExpression(lineNumber, constants.getConstantUtf8(stringIndex)));
                 break;
