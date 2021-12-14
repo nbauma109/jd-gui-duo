@@ -12,12 +12,15 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.jar.*;
 
 public class ASTParserFactory {
 
-	private ASTParserFactory(boolean resolveBindings, boolean bindingRecovery, boolean statementRecovery) {
+	private static final String DEFAULT_JDK_VERSION = JavaCore.VERSION_1_8;
+
+    private ASTParserFactory(boolean resolveBindings, boolean bindingRecovery, boolean statementRecovery) {
 		this.resolveBindings = resolveBindings;
 		this.bindingRecovery = bindingRecovery;
 		this.statementRecovery = statementRecovery;
@@ -36,6 +39,8 @@ public class ASTParserFactory {
 		private static final ASTParserFactory BINDING_INSTANCE = new ASTParserFactory(true, true, true);
 	}
 
+	private static final Map<URI, String> jarTojdkVersion = new HashMap<>();
+	
 	private final boolean resolveBindings;
 	private final boolean bindingRecovery;
 	private final boolean statementRecovery;
@@ -67,42 +72,54 @@ public class ASTParserFactory {
 		}
 
 		Map<String, String> options = getDefaultOptions();
-		File file = new File(jarURI);
-		if (file.isFile() && file.getName().endsWith(".jar")) {
-			try (JarFile jarFile = new JarFile(file)) {
-				Manifest manifest = jarFile.getManifest();
-				if (manifest != null) {
-					Attributes mainAttributes = manifest.getMainAttributes();
-					if (mainAttributes != null) {
-						String jdkVersion = mainAttributes.getValue("Build-Jdk");
-						if (jdkVersion != null) {
-							String majorVersion = resolveJDKVersion(jdkVersion);
-							options.put(JavaCore.COMPILER_COMPLIANCE, majorVersion);
-							options.put(JavaCore.COMPILER_SOURCE, majorVersion);
-						}
-					}
-				}
-			} catch (IOException e) {
-				assert ExceptionUtil.printStackTrace(e);
-			}
-		}
+		String majorVersion = jarTojdkVersion.computeIfAbsent(jarURI, this::resolveJDKVersion);
+		options.put(JavaCore.COMPILER_COMPLIANCE, majorVersion);
+		options.put(JavaCore.COMPILER_SOURCE, majorVersion);
 		parser.setCompilerOptions(options);
 
 		parser.createAST(null).accept(listener);
 		return parser;
 	}
 
+    private String resolveJDKVersion(URI jarURI) {
+        File file = new File(jarURI);
+        String majorVersion = DEFAULT_JDK_VERSION;
+        if (file.isFile() && file.getName().endsWith(".jar")) {
+            try (JarFile jarFile = new JarFile(file)) {
+                Manifest manifest = jarFile.getManifest();
+                if (manifest != null) {
+                    Attributes mainAttributes = manifest.getMainAttributes();
+                    if (mainAttributes != null) {
+                        String jdkVersion = mainAttributes.getValue("Build-Jdk");
+                        if (jdkVersion != null) {
+                            majorVersion = resolveJDKVersion(jdkVersion);
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                assert ExceptionUtil.printStackTrace(e);
+            }
+        }
+        return majorVersion;
+    }
+
 	protected Map<String, String> getDefaultOptions() {
 		Map<String, String> options = JavaCore.getOptions();
 		options.put(JavaCore.CORE_ENCODING, StandardCharsets.UTF_8.name());
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_COMPLIANCE, DEFAULT_JDK_VERSION);
+		options.put(JavaCore.COMPILER_SOURCE, DEFAULT_JDK_VERSION);
 		return options;
 	}
 
 	private static final String resolveJDKVersion(String longVersion) {
+		if (longVersion.startsWith(JavaCore.VERSION_17)) {
+			return JavaCore.VERSION_17;
+		}
+		if (longVersion.startsWith(JavaCore.VERSION_16)) {
+		    return JavaCore.VERSION_16;
+		}
 		if (longVersion.startsWith(JavaCore.VERSION_15)) {
-			return JavaCore.VERSION_15;
+		    return JavaCore.VERSION_15;
 		}
 		if (longVersion.startsWith(JavaCore.VERSION_14)) {
 			return JavaCore.VERSION_14;
@@ -146,7 +163,6 @@ public class ASTParserFactory {
 		if (longVersion.startsWith(JavaCore.VERSION_1_1)) {
 			return JavaCore.VERSION_1_1;
 		}
-		// default to JAVA 8
-		return JavaCore.VERSION_1_8;
+		return DEFAULT_JDK_VERSION;
 	}
 }
