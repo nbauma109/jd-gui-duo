@@ -287,7 +287,7 @@ public class ReferenceListener extends AbstractJavaListener {
     /** --- Add strings --- */
     @Override
     public boolean visit(StringLiteral node) {
-        strings.add(new StringData(node.getStartPosition(), node.getLiteralValue(), currentInternalTypeName));
+        strings.add(new StringData(node.getStartPosition() + 1, node.getLiteralValue(), currentInternalTypeName));
         return true;
     }
 
