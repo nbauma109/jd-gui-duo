@@ -258,9 +258,9 @@ public abstract class TypePage extends CustomLineNumbersPage
                 Pattern patternForString = Pattern.compile(regexp);
 
                 for (StringData data : strings) {
-                    if (matchScope(highlightScope, data.getOwner())) {
-                        Matcher matcher = patternForString.matcher(data.getText());
-                        int offset = data.getStartPosition();
+                    if (matchScope(highlightScope, data.owner())) {
+                        Matcher matcher = patternForString.matcher(data.text());
+                        int offset = data.startPosition();
 
                         while (matcher.find()) {
                             ranges.add(new DocumentRange(offset + matcher.start(), offset + matcher.end()));
