@@ -165,7 +165,7 @@ public class ReferenceListener extends AbstractJavaListener {
         // Constructor call -> Add a link to the constructor declaration
         @SuppressWarnings("unchecked")
 		List<Expression> expressionList = node.arguments();
-        String descriptor = expressionList != null ? getParametersDescriptor(expressionList).append('V').toString()
+        String descriptor = expressionList != null ? getParametersDescriptor(expressionList.size()).append('V').toString()
                 : "()V";
 
         ReferenceData refData = newReferenceData(internalTypeName, StringConstants.INSTANCE_CONSTRUCTOR, descriptor);
@@ -173,9 +173,9 @@ public class ReferenceListener extends AbstractJavaListener {
         return true;
     }
 
-    private static StringBuilder getParametersDescriptor(List<Expression> expressionList) {
+    private static StringBuilder getParametersDescriptor(int paramCount) {
         StringBuilder sb = new StringBuilder("(");
-        for (@SuppressWarnings("unused") Expression exp : expressionList) {
+        for (int i = 0; i < paramCount; i++) {
             sb.append('?');
         }
         sb.append(')');
@@ -217,7 +217,7 @@ public class ReferenceListener extends AbstractJavaListener {
     public boolean visit(ConstructorInvocation node) {
         @SuppressWarnings("unchecked")
 		List<Expression> args = node.arguments();
-        String methodDescriptor = args != null ? getParametersDescriptor(args).append('?').toString() : "()?";
+        String methodDescriptor = args != null ? getParametersDescriptor(args.size()).append('?').toString() : "()?";
         ReferenceData refData = newReferenceData(currentInternalTypeName, StringConstants.INSTANCE_CONSTRUCTOR, methodDescriptor);
         int position = node.getStartPosition();
         addHyperlink(new HyperlinkReferenceData(position, 4 /* this */, refData));
@@ -228,11 +228,11 @@ public class ReferenceListener extends AbstractJavaListener {
     public boolean visit(SuperConstructorInvocation node) {
         @SuppressWarnings("unchecked")
 		List<Expression> args = node.arguments();
-        String methodDescriptor = args != null ? getParametersDescriptor(args).append('?').toString() : "()?";
+        String methodDescriptor = args != null ? getParametersDescriptor(args.size()).append('?').toString() : "()?";
         DeclarationData data = getDeclarations().get(currentInternalTypeName);
 
-        if (data instanceof TypeDeclarationData) {
-            String methodTypeName = ((TypeDeclarationData) data).getSuperTypeName();
+        if (data instanceof TypeDeclarationData tdd) {
+            String methodTypeName = tdd.getSuperTypeName();
             ReferenceData refData = newReferenceData(methodTypeName, StringConstants.INSTANCE_CONSTRUCTOR, methodDescriptor);
             int position = node.getStartPosition();
             addHyperlink(new HyperlinkReferenceData(position, 5 /* super */, refData));
@@ -242,29 +242,36 @@ public class ReferenceListener extends AbstractJavaListener {
 
     @Override
     public boolean visit(MethodInvocation node) {
-        IMethodBinding methodBinding = node.resolveMethodBinding();
+        visitMethodBinding(node.getName(), node.resolveMethodBinding());
+        Expression subject = node.getExpression();
+        if (subject instanceof SimpleName subjectName) {
+            String internalTypeName = nameToInternalTypeName.get(subjectName.getIdentifier());
+            if (internalTypeName != null) {
+                ReferenceData refData = newReferenceData(internalTypeName, null, null);
+                addHyperlink(new HyperlinkReferenceData(subjectName.getStartPosition(), subjectName.getLength(), refData));
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean visit(ExpressionMethodReference node) {
+        return visitMethodBinding(node.getName(), node.resolveMethodBinding());
+    }
+
+    private boolean visitMethodBinding(SimpleName name, IMethodBinding methodBinding) {
         if (methodBinding != null) {
-            String methodName = node.getName().getIdentifier();
+            String methodName = name.getIdentifier();
             ITypeBinding declaringClass = methodBinding.getDeclaringClass();
             String binaryName = declaringClass.getBinaryName();
             if (binaryName != null) {
                 String methodTypeName = binaryName.replace('.', '/');
-                @SuppressWarnings("unchecked")
-				List<Expression> args = node.arguments();
-                String methodDescriptor = !args.isEmpty() ? getParametersDescriptor(args).append('?').toString()
+                ITypeBinding[] args = methodBinding.getParameterTypes();
+                String methodDescriptor = args.length > 0 ? getParametersDescriptor(args.length).append('?').toString()
                         : "()?";
                 ReferenceData refData = newReferenceData(methodTypeName, methodName, methodDescriptor);
-                int position = node.getName().getStartPosition();
+                int position = name.getStartPosition();
                 addHyperlink(new HyperlinkReferenceData(position, methodName.length(), refData));
-            }
-        }
-        Expression subject = node.getExpression();
-        if (subject instanceof SimpleName subjectName) {
-            int position = subjectName.getStartPosition();
-            String internalTypeName = nameToInternalTypeName.get(subjectName.getIdentifier());
-            if (internalTypeName != null) {
-                ReferenceData refData = newReferenceData(internalTypeName, null, null);
-                addHyperlink(new HyperlinkReferenceData(position, subjectName.getLength(), refData));
             }
         }
         return true;
