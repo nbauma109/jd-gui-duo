@@ -72,7 +72,7 @@ public class MainController implements API {
     public MainController(Configuration configuration) {
         this.configuration = configuration;
 
-        SwingUtil.invokeLater(() -> {
+        SwingUtil.invokeLater(() ->
 
             // Create main frame
             mainView = new MainView<>(
@@ -103,8 +103,8 @@ public class MainController implements API {
                 e -> onAbout(),
                 this::panelClosed,
                 this::onCurrentPageChanged,
-                this::openFile);
-        });
+                this::openFile)
+        );
     }
 
     // --- Show GUI --- //
