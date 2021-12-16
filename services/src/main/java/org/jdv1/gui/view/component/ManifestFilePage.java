@@ -94,6 +94,7 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
 			if (c == '\r') {
                 // CR followed by LF ?
                 if (index-startLineIndex >= 70 && index+1 < length && text.charAt(index+1) == ' ') {
+                    // skip whitespace
                 } else if (index-startLineIndex >= 70 && index+2 < length && text.charAt(index+1) == '\n' && text.charAt(index+2) == ' ') {
                     // Multiline value
                     index++;

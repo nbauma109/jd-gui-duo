@@ -33,8 +33,7 @@ public class History {
             if (uri.getFragment() == null && uri.getQuery() == null) {
                 // Ignore
             } else {
-				if (current.getFragment() == null && current.getQuery() == null) {
-				} else {
+				if (current.getFragment() != null || current.getQuery() != null) {
 				    // Store URI
 				    forward.clear();
 				    backward.add(current);
