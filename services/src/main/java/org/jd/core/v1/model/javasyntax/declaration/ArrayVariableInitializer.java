@@ -49,9 +49,6 @@ public class ArrayVariableInitializer extends DefaultList<VariableInitializer> i
 			return false;
 		}
 		ArrayVariableInitializer other = (ArrayVariableInitializer) obj;
-		if (!Objects.equals(type, other.type)) {
-			return false;
-		}
-		return true;
+		return Objects.equals(type, other.type);
 	}
 }

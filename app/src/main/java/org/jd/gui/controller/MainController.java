@@ -19,7 +19,6 @@ import org.jd.gui.service.container.ContainerFactoryService;
 import org.jd.gui.service.indexer.IndexerService;
 import org.jd.gui.service.mainpanel.PanelFactoryService;
 import org.jd.gui.service.pastehandler.PasteHandlerService;
-import org.jd.gui.service.platform.PlatformService;
 import org.jd.gui.service.preferencespanel.PreferencesPanelService;
 import org.jd.gui.service.sourcesaver.SourceSaverService;
 import org.jd.gui.service.treenode.TreeNodeFactoryService;

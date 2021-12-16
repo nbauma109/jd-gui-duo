@@ -217,10 +217,7 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
 				return false;
 			}
 			MapMapCollectionWithDefault other = (MapMapCollectionWithDefault) obj;
-			if (!Objects.equals(wrappers, other.wrappers)) {
-				return false;
-			}
-			return true;
+			return Objects.equals(wrappers, other.wrappers);
 		}
     }
 }

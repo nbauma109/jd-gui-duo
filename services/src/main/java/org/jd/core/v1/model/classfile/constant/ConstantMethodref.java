@@ -70,12 +70,7 @@ public class ConstantMethodref extends ConstantCP {
 			return false;
 		}
 		ConstantMethodref other = (ConstantMethodref) obj;
-		if (!Objects.equals(listOfParameterSignatures, other.listOfParameterSignatures)) {
-			return false;
-		}
-		if (!Objects.equals(returnedSignature, other.returnedSignature)) {
-			return false;
-		}
-		return true;
+		return Objects.equals(listOfParameterSignatures, other.listOfParameterSignatures) 
+            && Objects.equals(returnedSignature, other.returnedSignature);
 	}
 }
