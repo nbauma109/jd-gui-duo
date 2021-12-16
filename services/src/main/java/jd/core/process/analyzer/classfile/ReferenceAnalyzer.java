@@ -129,11 +129,11 @@ public class ReferenceAnalyzer
             ReferenceMap referenceMap, ConstantPool constants,
             Annotation annotation)
     {
-        String typeName = constants.getConstantUtf8(annotation.getTypeIndex());
+        String typeName = constants.getConstantUtf8(annotation.typeIndex());
         SignatureAnalyzer.analyzeSimpleSignature(referenceMap, typeName);
 
         ElementValuePair[] elementValuePairs =
-            annotation.getElementValuePairs();
+            annotation.elementValuePairs();
         if (elementValuePairs != null)
         {
             for (int j=elementValuePairs.length-1; j>=0; --j) {

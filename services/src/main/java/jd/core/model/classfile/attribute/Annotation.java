@@ -16,22 +16,6 @@
  ******************************************************************************/
 package jd.core.model.classfile.attribute;
 
-public class Annotation
+public record Annotation(int typeIndex, ElementValuePair[] elementValuePairs)
 {
-    private final int typeIndex;
-    private final ElementValuePair[] elementValuePairs;
-
-    public Annotation(int typeIndex, ElementValuePair[] elementValuePairs)
-    {
-        this.typeIndex = typeIndex;
-        this.elementValuePairs = elementValuePairs;
-    }
-
-	public int getTypeIndex() {
-		return typeIndex;
-	}
-
-	public ElementValuePair[] getElementValuePairs() {
-		return elementValuePairs;
-	}
 }

@@ -59,12 +59,12 @@ public class AnnotationWriter
         printer.startOfAnnotationName();
         printer.print('@');
         String annotationName =
-            classFile.getConstantPool().getConstantUtf8(annotation.getTypeIndex());
+            classFile.getConstantPool().getConstantUtf8(annotation.typeIndex());
         SignatureWriter.writeSignature(
             loader, printer, referenceMap, classFile, annotationName);
         printer.endOfAnnotationName();
 
-        ElementValuePair[] evps = annotation.getElementValuePairs();
+        ElementValuePair[] evps = annotation.elementValuePairs();
         if (evps != null && evps.length > 0)
         {
             printer.print('(');

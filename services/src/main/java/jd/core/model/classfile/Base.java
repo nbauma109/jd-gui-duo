@@ -91,7 +91,7 @@ public class Base
 					classFile.getConstantPool().getInternalDeprecatedSignatureIndex();
 
 			for (int i=annotations.length-1; i>=0; --i) {
-				if (idsIndex == annotations[i].getTypeIndex()) {
+				if (idsIndex == annotations[i].typeIndex()) {
 					return true;
 				}
 			}
