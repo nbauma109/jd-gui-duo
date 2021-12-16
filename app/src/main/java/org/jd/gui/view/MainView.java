@@ -25,6 +25,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.net.URI;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -61,19 +62,15 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
 	protected Color findBackgroundColor;
 	protected Color findErrorBackgroundColor;
 	
-	static {
-	    Stream.of("newFolder", "upFolder", "viewMenu").forEach(MainView::adaptFileChooserIconKey);
-	}
-
-    private static void adaptFileChooserIconKey(String shortKey) {
-        String key = getFileChooserIconKey(shortKey);
-        if (UIManager.get(key) instanceof ImageIcon imageIcon) {
-            UIManager.put(key, new ImageIcon(new CustomMultiResolutionImage(imageIcon.getImage())));
+    static {
+        Enumeration<Object> keys = UIManager.getDefaults().keys();
+        while (keys.hasMoreElements()) {
+            Object key = keys.nextElement();
+            Icon icon = UIManager.getIcon(key);
+            if (icon instanceof ImageIcon imageIcon) {
+                UIManager.put(key, new ImageIcon(new CustomMultiResolutionImage(imageIcon.getImage())));
+            }
         }
-    }
-    
-    private static String getFileChooserIconKey(String shortKey) {
-        return "FileChooser." + shortKey + "Icon";
     }
 
     private static String getAppIconPath(int size) {
