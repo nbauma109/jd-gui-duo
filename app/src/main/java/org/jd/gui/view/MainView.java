@@ -34,7 +34,6 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.plaf.IconUIResource;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
@@ -406,8 +405,8 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
 	public void closeCurrentTab() {
 		invokeLater(() -> {
 			Component component = mainTabbedPanel.getTabbedPane().getSelectedComponent();
-			if (component instanceof PageClosable) {
-				if (!((PageClosable) component).closePage()) {
+			if (component instanceof PageClosable pc) {
+				if (!pc.closePage()) {
 					mainTabbedPanel.removeComponent(component);
 				}
 			} else {

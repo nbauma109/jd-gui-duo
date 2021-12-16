@@ -82,15 +82,13 @@ public class ConstantPool
             int index = this.listOfConstants.size();
             this.listOfConstants.add(constant);
 
-            if (constant instanceof ConstantUtf8)
+            if (constant instanceof ConstantUtf8 cu)
             {
-                this.constantUtf8ToIndex.put(
-                        ((ConstantUtf8)constant).getBytes(), index);
+                this.constantUtf8ToIndex.put(cu.getBytes(), index);
             }
-            if (constant instanceof ConstantClass)
+            if (constant instanceof ConstantClass cc)
             {
-                this.constantClassToIndex.put(
-                        ((ConstantClass)constant).getNameIndex(), index);
+                this.constantClassToIndex.put(cc.getNameIndex(), index);
             }
         }
 

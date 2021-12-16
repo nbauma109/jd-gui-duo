@@ -506,8 +506,8 @@ public class RoundMarkErrorStrip extends JComponent {
         @Override
         public void mouseClicked(MouseEvent e) {
             Component source = (Component)e.getSource();
-            if (source instanceof Marker) {
-                ((Marker)source).mouseClicked();
+            if (source instanceof Marker m) {
+                m.mouseClicked();
                 return;
             }
 
@@ -579,7 +579,7 @@ public class RoundMarkErrorStrip extends JComponent {
         @Override
         public boolean equals(Object o) {
             // FindBugs - Define equals() when defining compareTo()
-            return o instanceof ParserNotice && compareTo((ParserNotice)o)==0;
+            return o instanceof ParserNotice pn && compareTo(pn)==0;
         }
 
         @Override

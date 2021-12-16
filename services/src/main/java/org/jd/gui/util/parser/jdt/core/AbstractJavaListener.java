@@ -253,12 +253,12 @@ public abstract class AbstractJavaListener extends ASTVisitor {
 	}
 
 	protected int countDimension(Type type) {
-		return type instanceof ArrayType ? ((ArrayType) type).getDimensions() : 0;
+		return type instanceof ArrayType at ? at.getDimensions() : 0;
 	}
 
 	protected Type getSuperType(AbstractTypeDeclaration node) {
-		if (node instanceof TypeDeclaration) {
-			Type superclassType = ((TypeDeclaration) node).getSuperclassType();
+		if (node instanceof TypeDeclaration td) {
+			Type superclassType = td.getSuperclassType();
 			if (superclassType != null) {
 				return superclassType;
 			}

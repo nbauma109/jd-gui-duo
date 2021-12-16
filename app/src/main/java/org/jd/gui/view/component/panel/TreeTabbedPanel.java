@@ -167,8 +167,8 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
     protected <P extends JComponent & UriGettable> boolean showPage(URI uri, URI baseUri, DefaultMutableTreeNode baseNode) {
         P page = (P)tabbedPanel.showPage(baseUri);
 
-        if (page == null && baseNode instanceof PageCreator) {
-            page = ((PageCreator)baseNode).createPage(api);
+        if (page == null && baseNode instanceof PageCreator pc) {
+            page = pc.createPage(api);
             page.putClientProperty("node", baseNode);
 
             String path = baseUri.getPath();
@@ -182,8 +182,8 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
             }
         }
 
-        if (openUriEnabled && page instanceof UriOpenable) {
-            ((UriOpenable)page).openUri(uri);
+        if (openUriEnabled && page instanceof UriOpenable uo) {
+            uo.openUri(uri);
         }
 
         return page != null;
@@ -269,8 +269,8 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
 
     @SuppressWarnings("unchecked")
     protected DefaultMutableTreeNode searchTreeNode(URI uri, DefaultMutableTreeNode node) {
-        if (node instanceof TreeNodeExpandable) {
-            ((TreeNodeExpandable)node).populateTreeNode(api);
+        if (node instanceof TreeNodeExpandable tne) {
+            tne.populateTreeNode(api);
         }
 
         String u = uri.toString();

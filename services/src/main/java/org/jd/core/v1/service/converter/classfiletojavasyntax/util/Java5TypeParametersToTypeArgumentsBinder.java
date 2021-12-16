@@ -391,8 +391,8 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
                             typeBound.accept(getTypeArgumentVisitor);
                             typeArguments = getTypeArgumentVisitor.getTypeArguments();
                         }
-                    } else if (expressionType instanceof ObjectType) {
-                        typeArguments = ((ObjectType)expressionType).getTypeArguments();
+                    } else if (expressionType instanceof ObjectType ot) {
+                        typeArguments = ot.getTypeArguments();
                     }
 
                     Type t = mie.getType();

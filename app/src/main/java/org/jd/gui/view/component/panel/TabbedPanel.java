@@ -208,8 +208,8 @@ public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel impl
 			}
 
 			// Add SPI popup menu entries
-			if (component instanceof ContainerEntryGettable) {
-				Collection<Action> actions = api.getContextualActions(((ContainerEntryGettable) component).getEntry(), null);
+			if (component instanceof ContainerEntryGettable ceg) {
+				Collection<Action> actions = api.getContextualActions(ceg.getEntry(), null);
 
 				if (actions != null) {
 					addSeparator();

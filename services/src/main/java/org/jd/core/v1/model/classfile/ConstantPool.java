@@ -41,8 +41,8 @@ public class ConstantPool {
     public Constant getConstantValue(int index) {
         Constant constant = constants[index];
 
-        if (constant instanceof ConstantString) {
-            constant = constants[((ConstantString)constant).getStringIndex()];
+        if (constant instanceof ConstantString cs) {
+            constant = constants[cs.getStringIndex()];
         }
 
         return constant;

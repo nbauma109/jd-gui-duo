@@ -600,12 +600,12 @@ public class LoopStatementMaker {
 
                 if (type != null) {
                     if (TYPE_OBJECT.equals(item.getType())) {
-                        if (item instanceof ObjectLocalVariable) {
-                            ((ObjectLocalVariable) item).setType(typeBounds, type);
+                        if (item instanceof ObjectLocalVariable olv) {
+                            olv.setType(typeBounds, type);
                         }
                     } else if (item.getType().isGenericType()) {
-                        if (item instanceof GenericLocalVariable) {
-                            ((GenericLocalVariable) item).setType((GenericType) type);
+                        if (item instanceof GenericLocalVariable glv) {
+                            glv.setType((GenericType) type);
                         }
                     } else {
                         item.typeOnRight(typeBounds, type);

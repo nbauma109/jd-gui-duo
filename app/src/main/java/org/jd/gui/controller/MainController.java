@@ -203,11 +203,11 @@ public class MainController implements API {
     }
 
     protected void onSaveSource() {
-        if (currentPage instanceof ContentSavable) {
+        if (currentPage instanceof ContentSavable cs) {
             JFileChooser chooser = new JFileChooser();
             JFrame mainFrame = mainView.getMainFrame();
 
-            chooser.setSelectedFile(new File(configuration.getRecentSaveDirectory(), ((ContentSavable)currentPage).getFileName()));
+            chooser.setSelectedFile(new File(configuration.getRecentSaveDirectory(), cs.getFileName()));
 
             if (chooser.showSaveDialog(mainFrame) == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = chooser.getSelectedFile();
@@ -266,8 +266,8 @@ public class MainController implements API {
     }
 
     protected void onCopy() {
-        if (currentPage instanceof ContentCopyable) {
-            ((ContentCopyable)currentPage).copy();
+        if (currentPage instanceof ContentCopyable cc) {
+            cc.copy();
         }
     }
 
@@ -289,8 +289,8 @@ public class MainController implements API {
     }
 
     protected void onSelectAll() {
-        if (currentPage instanceof ContentSelectable) {
-            ((ContentSelectable)currentPage).selectAll();
+        if (currentPage instanceof ContentSelectable cs) {
+            cs.selectAll();
         }
     }
 
@@ -301,14 +301,14 @@ public class MainController implements API {
     }
 
     protected void onFindCriteriaChanged() {
-        if (currentPage instanceof ContentSearchable) {
-            mainView.setFindBackgroundColor(((ContentSearchable)currentPage).highlightText(mainView.getFindText(), mainView.getFindCaseSensitive()));
+        if (currentPage instanceof ContentSearchable cs) {
+            mainView.setFindBackgroundColor(cs.highlightText(mainView.getFindText(), mainView.getFindCaseSensitive()));
         }
     }
 
     protected void onFindNext() {
-        if (currentPage instanceof ContentSearchable) {
-            ((ContentSearchable)currentPage).findNext(mainView.getFindText(), mainView.getFindCaseSensitive());
+        if (currentPage instanceof ContentSearchable cs) {
+            cs.findNext(mainView.getFindText(), mainView.getFindCaseSensitive());
         }
     }
 
@@ -396,25 +396,25 @@ public class MainController implements API {
     }
 
     protected void checkPreferencesChange(JComponent page) {
-        if (page instanceof PreferencesChangeListener) {
+        if (page instanceof PreferencesChangeListener pcl) {
             Map<String, String> preferences = configuration.getPreferences();
             Integer currentHashcode = preferences.hashCode();
             Integer lastHashcode = (Integer)page.getClientProperty("preferences-hashCode");
             if (!currentHashcode.equals(lastHashcode)) {
-                ((PreferencesChangeListener)page).preferencesChanged(preferences);
+                pcl.preferencesChanged(preferences);
                 page.putClientProperty("preferences-hashCode", currentHashcode);
             }
         }
     }
 
     protected void checkIndexesChange(JComponent page) {
-        if (page instanceof IndexesChangeListener) {
+        if (page instanceof IndexesChangeListener icl) {
             Collection<Future<Indexes>> collectionOfFutureIndexes = getCollectionOfFutureIndexes();
             Integer currentHashcode = collectionOfFutureIndexes.hashCode();
             Integer lastHashcode = (Integer)page.getClientProperty("collectionOfFutureIndexes-hashCode");
 
             if (!currentHashcode.equals(lastHashcode)) {
-                ((IndexesChangeListener)page).indexesChanged(collectionOfFutureIndexes);
+                icl.indexesChanged(collectionOfFutureIndexes);
                 page.putClientProperty("collectionOfFutureIndexes-hashCode", currentHashcode);
             }
         }
@@ -533,8 +533,8 @@ public class MainController implements API {
             for (IndexesChangeListener listener : containerChangeListeners) {
                 listener.indexesChanged(collectionOfFutureIndexes);
             }
-            if (currentPage instanceof IndexesChangeListener) {
-                ((IndexesChangeListener)currentPage).indexesChanged(collectionOfFutureIndexes);
+            if (currentPage instanceof IndexesChangeListener icl) {
+                icl.indexesChanged(collectionOfFutureIndexes);
             }
         });
     }
@@ -594,9 +594,9 @@ public class MainController implements API {
     public <T extends JComponent & UriGettable> void addPanel(String title, Icon icon, String tip, T component) {
         mainView.addMainPanel(title, icon, tip, component);
 
-        if (component instanceof ContentIndexable) {
+        if (component instanceof ContentIndexable ci) {
             Future<Indexes> futureIndexes = executor.submit(() -> {
-                Indexes indexes = ((ContentIndexable)component).index(this);
+                Indexes indexes = ci.index(this);
 
                 SwingUtil.invokeLater(() -> {
                     // Fire 'indexesChanged' event
@@ -604,8 +604,8 @@ public class MainController implements API {
                     for (IndexesChangeListener listener : containerChangeListeners) {
                         listener.indexesChanged(collectionOfFutureIndexes);
                     }
-                    if (currentPage instanceof IndexesChangeListener) {
-                        ((IndexesChangeListener) currentPage).indexesChanged(collectionOfFutureIndexes);
+                    if (currentPage instanceof IndexesChangeListener icl) {
+                        icl.indexesChanged(collectionOfFutureIndexes);
                     }
                 });
 

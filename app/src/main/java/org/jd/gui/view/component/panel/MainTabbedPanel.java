@@ -91,8 +91,8 @@ public class MainTabbedPanel<T extends JComponent & UriGettable> extends TabbedP
                         listener.pageChanged(page);
                     }
                     // Update current sub-page preferences
-                    if (subPage instanceof PreferencesChangeListener) {
-                        ((PreferencesChangeListener)subPage).preferencesChanged(preferences);
+                    if (subPage instanceof PreferencesChangeListener pcl) {
+                        pcl.preferencesChanged(preferences);
                     }
                 }
             }
@@ -122,8 +122,8 @@ public class MainTabbedPanel<T extends JComponent & UriGettable> extends TabbedP
     @Override
     public void addPage(String title, Icon icon, String tip, T page) {
         super.addPage(title, icon, tip, page);
-        if (page instanceof PageChangeable) {
-            ((PageChangeable)page).addPageChangeListener(this);
+        if (page instanceof PageChangeable pc) {
+            pc.addPageChangeListener(this);
         }
     }
 
@@ -150,11 +150,11 @@ public class MainTabbedPanel<T extends JComponent & UriGettable> extends TabbedP
             T page = showPage(uri);
 
             if (page != null) {
-                if (page instanceof UriOpenable) {
+                if (page instanceof UriOpenable uo) {
                     // Enable page changed event
                     pageChangedListenersEnabled = true;
                     // Search & display sub tab
-                    return ((UriOpenable)page).openUri(uri);
+                    return uo.openUri(uri);
                 }
                 return true;
             }
@@ -193,8 +193,8 @@ public class MainTabbedPanel<T extends JComponent & UriGettable> extends TabbedP
 
         // Update current sub-page preferences
         Component subPage = tabbedPane.getSelectedComponent();
-        if (subPage instanceof PreferencesChangeListener) {
-            ((PreferencesChangeListener)subPage).preferencesChanged(preferences);
+        if (subPage instanceof PreferencesChangeListener pcl) {
+            pcl.preferencesChanged(preferences);
         }
     }
 }

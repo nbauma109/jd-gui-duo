@@ -331,9 +331,9 @@ public class SearchInConstantPoolsView<T extends DefaultMutableTreeNode & Contai
 
     @SuppressWarnings("unchecked")
     protected void populate(T node) {
-        if (node instanceof TreeNodeExpandable && !expanded.contains(node.getUri())) {
+        if (node instanceof TreeNodeExpandable tne && !expanded.contains(node.getUri())) {
             // Populate
-            ((TreeNodeExpandable)node).populateTreeNode(api);
+            tne.populateTreeNode(api);
             expanded.add(node.getUri());
             // Filter
             int i = node.getChildCount();

@@ -170,8 +170,8 @@ public class BindTypeArgumentsToTypeArgumentsVisitor extends AbstractTypeArgumen
 
         if (ta == null) {
             result = null;
-        } else if (ta instanceof Type) {
-            result = ((Type)ta).createType(type.getDimension());
+        } else if (ta instanceof Type t) {
+            result = t.createType(type.getDimension());
         } else {
             result = ta;
         }

@@ -437,10 +437,9 @@ public class ReferenceVisitor
     {
         Constant c = constants.get(index);
 
-        if (c instanceof ConstantClass)
+        if (c instanceof ConstantClass cc)
         {
-            addReference(
-                constants.getConstantUtf8(((ConstantClass)c).getNameIndex()));
+            addReference(constants.getConstantUtf8(cc.getNameIndex()));
         }
     }
 
