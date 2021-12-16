@@ -12,7 +12,6 @@ import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.model.Container;
-import org.jd.gui.api.model.Container.Entry;
 import org.jd.gui.model.container.entry.path.FileEntryPath;
 
 import java.io.IOException;
