@@ -1437,11 +1437,7 @@ public class FastInstructionListBuilder {
 		int length = list.size();
 		for (int index = 0; index < length; index++) {
 			Instruction instruction = list.get(index);
-			switch (instruction.getOpcode()) {
-			case ByteCodeConstants.IF:
-			case ByteCodeConstants.IFCMP:
-			case ByteCodeConstants.IFXNULL:
-			case ByteCodeConstants.COMPLEXIF: {
+			if (ByteCodeUtil.isIfInstruction(instruction.getOpcode(), true)) {
 				BranchInstruction bi = (BranchInstruction) instruction;
 				int jumpOffset = bi.getJumpOffset();
 				if (jumpOffset == returnOffset) {
@@ -1479,8 +1475,6 @@ public class FastInstructionListBuilder {
 					list.set(index, new FastInstruction(FastConstants.IF_CONTINUE, bi.getOffset(),
 							bi.getLineNumber(), bi));
 				}
-			}
-				break;
 			}
 		}
 	}
