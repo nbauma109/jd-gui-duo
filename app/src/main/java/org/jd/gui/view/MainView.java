@@ -14,6 +14,7 @@ import org.jd.gui.api.feature.*;
 import org.jd.gui.model.configuration.Configuration;
 import org.jd.gui.model.history.History;
 import org.jd.gui.service.platform.PlatformService;
+import org.jd.gui.util.CustomMultiResolutionImage;
 import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.decompiler.GuiPreferences;
 import org.jd.gui.util.swing.SwingUtil;
@@ -33,6 +34,7 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.plaf.IconUIResource;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
@@ -59,22 +61,61 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
 	protected JCheckBox findCaseSensitive;
 	protected Color findBackgroundColor;
 	protected Color findErrorBackgroundColor;
+	
+	static {
+	    Stream.of("newFolder", "upFolder", "viewMenu").forEach(MainView::adaptFileChooserIconKey);
+	}
 
-	public MainView(Configuration configuration, API api, History history, ActionListener openActionListener, ActionListener closeActionListener, ActionListener saveActionListener,
-	        ActionListener saveAllSourcesActionListener, ActionListener exitActionListener, ActionListener copyActionListener, ActionListener pasteActionListener,
-	        ActionListener selectAllActionListener, ActionListener findActionListener, ActionListener findPreviousActionListener, ActionListener findNextActionListener,
-	        ActionListener findCaseSensitiveActionListener, Runnable findCriteriaChangedCallback, ActionListener openTypeActionListener,
-	        ActionListener openTypeHierarchyActionListener, ActionListener goToActionListener, ActionListener backwardActionListener, ActionListener forwardActionListener,
-	        ActionListener searchActionListener, ActionListener jdWebSiteActionListener, ActionListener jdGuiIssuesActionListener, ActionListener jdCoreIssuesActionListener,
-	        ActionListener preferencesActionListener, ActionListener aboutActionListener, Runnable panelClosedCallback, Consumer<T> currentPageChangedCallback,
-	        Consumer<File> openFilesCallback) {
+    private static void adaptFileChooserIconKey(String shortKey) {
+        String key = getFileChooserIconKey(shortKey);
+        if (UIManager.get(key) instanceof ImageIcon imageIcon) {
+            UIManager.put(key, new ImageIcon(new CustomMultiResolutionImage(imageIcon.getImage())));
+        }
+    }
+    
+    private static String getFileChooserIconKey(String shortKey) {
+        return "FileChooser." + shortKey + "Icon";
+    }
+
+    private static String getAppIconPath(int size) {
+        return "/org/jd/gui/images/jd_icon_" + size + ".png";
+    }
+
+	public MainView(
+            Configuration configuration, API api, History history,
+            ActionListener openActionListener,
+            ActionListener closeActionListener,
+            ActionListener saveActionListener,
+            ActionListener saveAllSourcesActionListener,
+            ActionListener exitActionListener,
+            ActionListener copyActionListener,
+            ActionListener pasteActionListener,
+            ActionListener selectAllActionListener,
+            ActionListener findActionListener,
+            ActionListener findPreviousActionListener,
+            ActionListener findNextActionListener,
+            ActionListener findCaseSensitiveActionListener,
+            Runnable findCriteriaChangedCallback,
+            ActionListener openTypeActionListener,
+            ActionListener openTypeHierarchyActionListener,
+            ActionListener goToActionListener,
+            ActionListener backwardActionListener,
+            ActionListener forwardActionListener,
+            ActionListener searchActionListener,
+            ActionListener jdWebSiteActionListener,
+            ActionListener jdGuiIssuesActionListener,
+            ActionListener jdCoreIssuesActionListener,
+            ActionListener preferencesActionListener,
+            ActionListener aboutActionListener,
+            Runnable panelClosedCallback,
+            Consumer<T> currentPageChangedCallback,
+            Consumer<File> openFilesCallback) {
 		this.history = history;
 		this.openFilesCallback = openFilesCallback;
 		// Build GUI
 		SwingUtil.invokeLater(() -> {
 			mainFrame = new JFrame(JAVA_DECOMPILER);
-			mainFrame.setIconImages(
-			        Stream.of("/org/jd/gui/images/jd_icon_32.png", "/org/jd/gui/images/jd_icon_64.png", "/org/jd/gui/images/jd_icon_128.png").map(ImageUtil::getImage).toList());
+			mainFrame.setIconImages(Stream.of(32, 64, 128).map(MainView::getAppIconPath).map(ImageUtil::getImage).toList());
 			mainFrame.setMinimumSize(new Dimension(Constants.MINIMAL_WIDTH, Constants.MINIMAL_HEIGHT));
 			mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
