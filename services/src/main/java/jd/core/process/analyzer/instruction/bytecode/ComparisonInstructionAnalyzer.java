@@ -34,7 +34,7 @@ public class ComparisonInstructionAnalyzer
     }
 
     /*
-     *                            dÃ©but de liste        fin de liste
+     *                            début de liste        fin de liste
      *                            |                                |
      * Liste    ... --|----|---|==0===1===2===3===4===5===6==7=...=n---|--| ...
      */
@@ -58,7 +58,7 @@ public class ComparisonInstructionAnalyzer
 
                     int prevBiJumpOffset = prevBi.getJumpOffset();
 
-                    // Le 2eme if appartient-il au meme bloc que le 1er ?
+                    // Le 2eme if appartient-il au même bloc que le 1er ?
                             if (prevBiJumpOffset == bi.getJumpOffset() ||
                                 prevBi.getBranch() > 0 && prevBiJumpOffset <= afterOffest)
                     {
@@ -75,7 +75,7 @@ public class ComparisonInstructionAnalyzer
     }
 
     /*
-     *                            dÃ©but de liste        fin de liste
+     *                            début de liste        fin de liste
      *                            |               index            |
      *                            |                   |            |
      * Liste    ... --|----|---|==0===1===2===3===4===5===6==7=...=n---|--| ...
@@ -195,7 +195,7 @@ public class ComparisonInstructionAnalyzer
                 BranchInstruction bi = (BranchInstruction)instruction;
                 int jumpOffset = bi.getJumpOffset();
 
-                // L'instruction if courante appartient-elle au meme bloc que le 1er ?
+                // L'instruction if courante appartient-elle au même bloc que le 1er ?
                 if (jumpOffset == lastBiJumpOffset)
                 {
                     if (bi.getBranch() > 0 &&
@@ -209,7 +209,7 @@ public class ComparisonInstructionAnalyzer
                             break; // Non
                         }
                         // Est-ce que l'une des instructions suivantes a un
-                        // numero de ligne <= a instruction.lineNumber et <
+                        // numéro de ligne <= a instruction.lineNumber et <
                         // a nextInstruction.lineNumber
                         int length = list.size();
                         boolean instructionBetweenIf = false;
@@ -251,7 +251,7 @@ public class ComparisonInstructionAnalyzer
                 Goto g = (Goto)instruction;
                 int jumpOffset = g.getJumpOffset();
 
-                // Ce 'goto' appartient-il au meme bloc que le 1er 'if' ?
+                // Ce 'goto' appartient-il au même bloc que le 1er 'if' ?
                 if (jumpOffset != lastBiJumpOffset &&
                     (jumpOffset <= nextInstruction.getOffset() ||
                      jumpOffset > afterOffest))
@@ -306,7 +306,7 @@ public class ComparisonInstructionAnalyzer
 
                 if (jumpOffsetValue1 == jumpOffsetValue2)
                 {
-                    // Oui ! SÃ©quence dans le bon sens
+                    // Oui ! séquence dans le bon sens
                     int nextOffset = nextInstruction.getOffset();
                     for (int j=g.getOffset()+1; j<nextOffset; j++) {
 						offsetToPreviousGotoFlag[j] = true;
@@ -314,8 +314,8 @@ public class ComparisonInstructionAnalyzer
                 }
                 else if (jumpOffset == jumpOffsetValue2)
                 {
-                    // Oui ! SÃ©quence inversee : les offsets du Goto et du 1er
-                    // sous-test sont inversÃ©s => il FAUT inverser le 1er test
+                    // Oui ! séquence inversee : les offsets du Goto et du 1er
+                    // sous-test sont inversés => il FAUT inverser le 1er test
                     int nextOffset = nextInstruction.getOffset();
                     for (int j=g.getOffset()+1; j<nextOffset; j++) {
 						offsetToPreviousGotoFlag[j] = true;
@@ -415,7 +415,7 @@ public class ComparisonInstructionAnalyzer
 	                    int branchOffset = bi.getBranch();
 	                    int jumpOffset = bi.getOffset() + branchOffset;
 
-	                    // L'instruction if courante appartient-elle au meme bloc que le 1er ?
+	                    // L'instruction if courante appartient-elle au même bloc que le 1er ?
 	                    if (jumpOffset != lastTernaryOpTestBiJumpOffset &&
 	                        (branchOffset <= 0 || jumpOffset > nextOffest))
 	                    {
@@ -806,7 +806,7 @@ public class ComparisonInstructionAnalyzer
         while (--index > firstIndex)
         {
             // Verification que la potentielle derniere instruction de saut a
-            // comme premiere instruction l'instruction Ã  l'indexe 'firstIndex'
+            // comme premiere instruction l'instruction à  l'indexe 'firstIndex'
             // Recherche de l'indexe de la premiere instruction 'if' du bloc et
             // initialisation de 'offsetToPreviousGotoFlag'
             BranchInstruction lastBi = (BranchInstruction)list.get(index);
@@ -819,7 +819,7 @@ public class ComparisonInstructionAnalyzer
 
             if (firstIndex == firstIndexTmp)
             {
-                // TrouvÃ©
+                // trouvé
                 break;
             }
         }

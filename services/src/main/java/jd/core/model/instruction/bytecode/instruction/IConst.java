@@ -20,7 +20,7 @@ import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.LocalVariables;
 
 /**
- * Pseudo type 'X' correspond ├а char, byte, short ou int ...
+ * Pseudo type 'X' correspond ра char, byte, short ou int ...
  */
 public class IConst extends ConstInstruction
 {

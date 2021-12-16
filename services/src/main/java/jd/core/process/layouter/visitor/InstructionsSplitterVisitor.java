@@ -95,7 +95,7 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
     {
         if (this.firstLineNumber == Instruction.UNKNOWN_LINE_NUMBER)
         {
-            // Bloc executÃ© soit lors de la visite de
+            // Bloc exécuté soit lors de la visite de
             // - du 1er statement
             // - d'un statement qui suit un statement dont la derniere
             //   instruction est 'AnonymousNewInvoke'
@@ -107,7 +107,7 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
 
             if (initialFirstLineNumber != Instruction.UNKNOWN_LINE_NUMBER)
             {
-                // Si la mÃ©thode possÃ¨de des numeros de lignes
+                // Si la méthode possède des numéros de lignes
                 if (initialFirstLineNumber < instruction.getLineNumber())
                 {
                     // Cas d'un statement qui suit un statement dont la derniere
@@ -139,14 +139,14 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
         }
         else if (instruction.getLineNumber() < this.maxLineNumber)
         {
-            // Modification du numero de ligne fournit dans le fichier CLASS !
+            // Modification du numéro de ligne fournit dans le fichier CLASS !
             instruction.setLineNumber(this.maxLineNumber);
         }
 
         if (this.firstLineNumber == Instruction.UNKNOWN_LINE_NUMBER)
         {
-            // Bloc executÃ© si une instruction 'AnonymousNewInvoke' vient
-            // d'Ãªtre traitee.
+            // Bloc exécuté si une instruction 'AnonymousNewInvoke' vient
+            // d'être traitée.
             this.firstLineNumber = instruction.getLineNumber();
         }
 
@@ -179,8 +179,8 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
         {
             if (lastLineNumber < this.firstLineNumber)
             {
-                // Les instructions newAnonymousClass imbriquÃ©es n'ont pas de
-                // numÃ©ros de ligne correctes. Exemple: com.googlecode.dex2jar.v3.Dex2jar
+                // Les instructions newAnonymousClass imbriquées n'ont pas de
+                // numéros de ligne correctes. Exemple: com.googlecode.dex2jar.v3.Dex2jar
                 lastLineNumber = this.firstLineNumber;
             }
             preferedLineCount = lastLineNumber - this.firstLineNumber;

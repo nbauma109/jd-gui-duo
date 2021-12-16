@@ -138,7 +138,7 @@ public class InitInstanceFieldsReconstructor
                     int lineNumberAfter = instruction.getLineNumber();
 
                     // Si l'instruction qui suit la serie de 'PUTFIELD' est une
-                    // 'RETURN' ayant le meme numero de ligne que le dernier
+                    // 'RETURN' ayant le même numéro de ligne que le dernier
                     // 'PUTFIELD', le constructeur est synthetique et ne sera
                     // pas filtre.
                     if (instruction.getOpcode() != Const.RETURN ||

@@ -132,7 +132,7 @@ public class AddCheckCastVisitor
                         this.localVariables.getLocalVariableWithIndexAndOffset(
                             storeInstruction.getIndex(), storeInstruction.getOffset());
 
-                    // AStore est associÃ© Ã  une variable correctment typÃ©e
+                    // AStore est associé à  une variable correctement typée
                     if (lv.getSignatureIndex() > 0 && lv.getSignatureIndex() != this.constants.getObjectSignatureIndex())
                     {
                         String signature =

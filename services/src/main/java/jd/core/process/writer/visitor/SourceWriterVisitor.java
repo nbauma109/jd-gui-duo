@@ -827,8 +827,8 @@ public class SourceWriterVisitor
     {
         if (this.classFile.getField(fieldNameIndex, fieldDescriptorIndex) != null)
         {
-            // La classe courante contient un champ ayant le meme nom et la
-            // meme signature
+            // La classe courante contient un champ ayant le même nom et la
+            // même signature
             return true;
         }
 
@@ -853,7 +853,7 @@ public class SourceWriterVisitor
             if (outerClassFile.getField(fieldName, fieldDescriptor) != null)
             {
                 // La classe englobante courante contient un champ ayant le
-                // meme nom et la meme signature
+                // même nom et la même signature
                 return true;
             }
 
@@ -1473,7 +1473,7 @@ public class SourceWriterVisitor
             field.getOuterMethodLocalVariableNameIndex() != UtilConstants.INVALID_INDEX)
         {
             // Specificite des classes anonymes : affichage du nom du champs de
-            // la mÃ©thode englobante plutot que le nom du champs
+            // la méthode englobante plutot que le nom du champs
             if (this.firstOffset <= this.previousOffset &&
                 getField.getOffset() <= this.lastOffset)
             {
@@ -1652,8 +1652,8 @@ public class SourceWriterVisitor
     {
         if (this.classFile.getMethod(methodNameIndex, methodDescriptorIndex) != null)
         {
-            // La classe courante contient une method ayant le meme nom et la
-            // meme signature
+            // La classe courante contient une method ayant le même nom et la
+            // même signature
             return true;
         }
 
@@ -1678,7 +1678,7 @@ public class SourceWriterVisitor
             if (outerClassFile.getMethod(methodName, methodDescriptor) != null)
             {
                 // La classe englobante courante contient une method ayant le
-                // meme nom et la meme signature
+                // même nom et la même signature
                 return true;
             }
 
@@ -1752,7 +1752,7 @@ public class SourceWriterVisitor
         }
         else
         {
-            // Appel a une mÃ©thode privee?
+            // Appel a une méthode privee?
             firstIndex = 0;
         }
 
@@ -1781,7 +1781,7 @@ public class SourceWriterVisitor
                 }
                 else
                 {
-                    // Appel a une mÃ©thode privee?
+                    // Appel a une méthode privee?
                     Method method = this.classFile.getMethod(
                         cnat.getNameIndex(), cnat.getSignatureIndex());
 
@@ -2018,7 +2018,7 @@ public class SourceWriterVisitor
             ii.getOffset() <= this.lastOffset)
         {
             // Dans les specs, LDC pointe vers une constante du pool. Lors de la
-            // declaration d'enumeration, le byte code de la mÃ©thode
+            // declaration d'enumeration, le byte code de la méthode
             // 'Enum.valueOf(Class<T> enumType, String name)' contient une
             // instruction LDC pointant un objet de type 'ConstantClass'.
             Constant cst = constants.get(ii.getIndex());
@@ -2038,7 +2038,7 @@ public class SourceWriterVisitor
             }
             else
             {
-                // Cas gÃ©nÃ©ral
+                // Cas général
                 this.printer.addNewLinesAndPrefix(lineNumber);
                 ConstantValueWriter.write(
                     this.loader, this.printer, this.referenceMap,
@@ -2183,7 +2183,7 @@ public class SourceWriterVisitor
             this.printer.print(lineNumber, " = ");
         }
 
-        // Est-il necessaire de parenthÃ©ser l'expression ?
+        // Est-il necessaire de parenthéser l'expression ?
         // visit(putStatic, putStatic.valueref);
         return visit(putStatic.getValueref());
     }
@@ -2216,7 +2216,7 @@ public class SourceWriterVisitor
             this.printer.print(lineNumber, " = ");
         }
 
-        // Est-il necessaire de parenthÃ©ser l'expression ?
+        // Est-il necessaire de parenthéser l'expression ?
         // visit(storeInstruction, storeInstruction.valueref);
         return visit(storeInstruction.getValueref());
     }

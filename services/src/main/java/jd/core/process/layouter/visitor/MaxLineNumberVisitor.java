@@ -114,7 +114,7 @@ public class MaxLineNumberVisitor
                 }
                 else
                 {
-                    // Correction pour un tres curieux bug : les numeros de
+                    // Correction pour un tres curieux bug : les numéros de
                     // ligne des parametres ne sont pas toujours en ordre croissant
                     maxLineNumber = visit(list.get(0));
 
@@ -140,7 +140,7 @@ public class MaxLineNumberVisitor
                 }
                 else
                 {
-                    // Correction pour un tres curieux bug : les numeros de
+                    // Correction pour un tres curieux bug : les numéros de
                     // ligne des parametres ne sont pas toujours en ordre croissant
                     maxLineNumber = visit(list.get(0));
 
@@ -217,7 +217,7 @@ public class MaxLineNumberVisitor
         }
 
         // Autre curieux bug : les constantes finales passees en parametres
-        // peuvent avoir un numero de ligne plus petit que le numero de ligne
+        // peuvent avoir un numéro de ligne plus petit que le numéro de ligne
         // de l'instruction INVOKE*
         if (maxLineNumber < instruction.getLineNumber())
         {

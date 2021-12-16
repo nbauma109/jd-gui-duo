@@ -80,7 +80,7 @@ public class ClassFileUtil
                 String s = "(Ljava/lang/String;)" + classFile.getInternalClassName();
                 if (s.equals(signature))
                 {
-                    // Ne pas afficher la mÃ©thode
+                    // Ne pas afficher la méthode
                     // "public static enumXXX valueOf(String paramString)".
                     return true;
                 }
@@ -91,7 +91,7 @@ public class ClassFileUtil
                 String s = "()[" + classFile.getInternalClassName();
                 if (s.equals(signature))
                 {
-                    // Ne pas afficher la mÃ©thode
+                    // Ne pas afficher la méthode
                     // "public static enumXXX[] values()".
                     return true;
                 }

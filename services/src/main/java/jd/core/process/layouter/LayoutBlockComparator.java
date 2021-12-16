@@ -22,7 +22,7 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.layout.block.LayoutBlock;
 
 /*
- * Tri par ordre croissant, les blocs sans numero de ligne sont places a la fin.
+ * Tri par ordre croissant, les blocs sans numéro de ligne sont places a la fin.
  */
 public class LayoutBlockComparator implements Comparator<LayoutBlock>
 {
@@ -32,7 +32,7 @@ public class LayoutBlockComparator implements Comparator<LayoutBlock>
         {
             if (lb2.getLastLineNumber() == Instruction.UNKNOWN_LINE_NUMBER)
             {
-                // Tri par l'index pour Ã©viter les ecarts de tri entre la
+                // Tri par l'index pour éviter les ecarts de tri entre la
                 // version Java et C++
                 return lb1.getIndex() - lb2.getIndex();
             }

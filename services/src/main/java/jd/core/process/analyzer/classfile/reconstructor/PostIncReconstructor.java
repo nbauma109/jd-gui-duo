@@ -48,7 +48,7 @@ public class PostIncReconstructor
 				continue;
 			}
 
-            // DupStore trouvÃ©
+            // DupStore trouvé
             DupStore dupstore = (DupStore)list.get(dupStoreIndex);
 
             int xstorePutfieldPutstaticIndex = dupStoreIndex;

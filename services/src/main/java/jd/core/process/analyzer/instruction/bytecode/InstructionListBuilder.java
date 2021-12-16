@@ -64,16 +64,16 @@ public class InstructionListBuilder
 				// Declaration du tableau de sauts utile pour reconstruire les
 				// instructions de pre et post incrementation : si une
 				// instruction 'iinc' est une instruction vers laquelle on
-				// saute, elle ne sera pas agregÃ©e a l'instruction precedante
+				// saute, elle ne sera pas agregée a l'instruction precedante
 				// ou suivante.
 				boolean[] jumps = new boolean[length];
 
 				// Declaration du tableau des sauts vers les sous procedures
-				// (jsr ... ret). A chaque dÃ©but de sous procedures, une pseudo
-				// adresse de retour doit Ãªtre inseree sur la pile.
+				// (jsr ... ret). A chaque début de sous procedures, une pseudo
+				// adresse de retour doit être inseree sur la pile.
 				IntSet offsetSet = new IntSet();
 
-				// Population des deux tableaux dans la meme passe.
+				// Population des deux tableaux dans la même passe.
 				populateJumpsArrayAndSubProcOffsets(code, length, jumps, offsetSet);
 
 				// Initialisation de variables additionnelles pour le traitement
@@ -103,7 +103,7 @@ public class InstructionListBuilder
 				}
 
 				// Declaration de variables additionnelles pour le traitement
-				// des numeros de ligne
+				// des numéros de ligne
 				LineNumber[] lineNumbers = method.getLineNumbers();
 				int lineNumbersIndex = 0;
 				int lineNumber;
@@ -150,7 +150,7 @@ public class InstructionListBuilder
 					if (offset == exceptionOffset && codeExceptions != null)
 					{
 						// Ajout d'une pseudo instruction de lecture
-						// d'exception en dÃ©but de bloc catch
+						// d'exception en début de bloc catch
 						int catchType =
 								codeExceptions.get(codeExceptionsIndex).getValue().getCatchType();
 						int signatureIndex;
@@ -196,9 +196,9 @@ public class InstructionListBuilder
 					// Ajout de ReturnAddressLoad
 					if (offset == subProcOffset)
 					{
-						// Ajout d'une pseudo adresse de retour en dÃ©but de
+						// Ajout d'une pseudo adresse de retour en début de
 						// sous procedure. Lors de l'execution, cette
-						// adresse est normalement placÃ©e sur la pile par
+						// adresse est normalement placée sur la pile par
 						// l'instruction JSR.
 						stack.push(new ReturnAddressLoad(
 								ByteCodeConstants.RETURNADDRESSLOAD,
@@ -213,7 +213,7 @@ public class InstructionListBuilder
 						}
 					}
 
-					// Traitement des numeros de ligne
+					// Traitement des numéros de ligne
 					if (lineNumbers != null && offset == nextLineOffset)
 					{
 						LineNumber ln = lineNumbers[lineNumbersIndex];
