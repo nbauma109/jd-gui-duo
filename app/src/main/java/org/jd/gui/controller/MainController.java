@@ -74,10 +74,6 @@ public class MainController implements API {
         this.configuration = configuration;
 
         SwingUtil.invokeLater(() -> {
-            if (PlatformService.getInstance().isLinux()) {
-                // Fix for GTKLookAndFeel
-                SwingUtil.installGtkPopupBugWorkaround();
-            }
 
             // Create main frame
             mainView = new MainView<>(
