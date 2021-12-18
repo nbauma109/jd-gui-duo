@@ -84,7 +84,31 @@ public abstract class ControlFlowGraphReducer {
         boolean reduced = true;
         reduced &= reduce(visited, basicBlock.getNext(), jsrTargets);
         reduced &= reduce(visited, basicBlock.getBranch(), jsrTargets);
-        return reduced && reduceConditionalBranch(basicBlock);
+        try {
+            return reduced && reduceConditionalBranch(basicBlock);
+        } finally {
+            mergeTernaryOperators(basicBlock);
+        }
+    }
+
+    private static void mergeTernaryOperators(BasicBlock basicBlock) {
+        BasicBlock condition = basicBlock.getCondition();
+        if (condition.getType() == TYPE_CONDITION_TERNARY_OPERATOR 
+         && condition.getSub1().getType() == TYPE_CONDITION_TERNARY_OPERATOR
+         && condition.getSub2().getIndex() == condition.getSub1().getSub2().getIndex()) {
+            BasicBlock subCondition1 = condition.getCondition();
+            BasicBlock subCondition2 = condition.getSub1().getCondition();
+            ControlFlowGraph cfg = basicBlock.getControlFlowGraph();
+            BasicBlock mergedCondition = cfg.newBasicBlock(TYPE_CONDITION_AND, subCondition1.getFromOffset(), subCondition2.getToOffset());
+            mergedCondition.setSub1(subCondition1);
+            mergedCondition.setSub2(subCondition2);
+            BasicBlock mergedTernaryOp = cfg.newBasicBlock(TYPE_CONDITION_TERNARY_OPERATOR, condition.getFromOffset(), condition.getToOffset());
+            basicBlock.setCondition(mergedTernaryOp);
+            mergedTernaryOp.setSub1(condition.getSub1().getSub1());
+            mergedTernaryOp.setSub2(condition.getSub1().getSub2());
+            mergedTernaryOp.getSub1().inverseCondition();
+            mergedTernaryOp.setCondition(mergedCondition);
+        }
     }
 
     private boolean reduceConditionalBranch(BasicBlock basicBlock) {
