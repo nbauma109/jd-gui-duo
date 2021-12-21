@@ -12,8 +12,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.*;
 
 public class ASTParserFactory {
@@ -39,7 +39,7 @@ public class ASTParserFactory {
 		private static final ASTParserFactory BINDING_INSTANCE = new ASTParserFactory(true, true, true);
 	}
 
-	private static final Map<URI, String> jarTojdkVersion = new HashMap<>();
+	private static final Map<URI, String> jarTojdkVersion = new ConcurrentHashMap<>();
 	
 	private final boolean resolveBindings;
 	private final boolean bindingRecovery;
