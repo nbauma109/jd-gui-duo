@@ -261,7 +261,7 @@ public class StatementMaker {
             case TYPE_LOOP_START, TYPE_LOOP_CONTINUE:
                 statements.add(ContinueStatement.CONTINUE);
                 break;
-        case TYPE_JUMP:
+            case TYPE_JUMP:
                 Statement jump = new ClassFileBreakContinueStatement(basicBlock.getFromOffset(), basicBlock.getToOffset());
                 statements.add(jump);
                 jumps.add(jump);
@@ -399,7 +399,10 @@ public class StatementMaker {
         Statements finallyStatements = null;
 
         tryStatements = makeSubStatements(watchdog, basicBlock.getSub1(), statements, jumps);
-
+        if (basicBlock.getNext().getType() == TYPE_LOOP_CONTINUE) {
+            tryStatements.add(ContinueStatement.CONTINUE);
+            basicBlock.setNext(END);
+        }
         for (ExceptionHandler exceptionHandler : basicBlock.getExceptionHandlers()) {
             if (exceptionHandler.getInternalThrowableName() == null) {
                 // 'finally' handler
@@ -456,6 +459,11 @@ public class StatementMaker {
 
                 AbstractLocalVariable exception = localVariableMaker.getExceptionLocalVariable(index, offset, ot);
 
+                if (bb != null && bb.getNext().getPredecessors().size() > 1) {
+                    bb.getNext().getPredecessors().remove(bb);
+                    bb.setNext(END);
+                }
+
                 makeStatements(watchdog, bb, catchStatements, jumps);
                 localVariableMaker.popFrame();
                 removeExceptionReference(catchStatements);
@@ -501,6 +509,7 @@ public class StatementMaker {
 
         statements.add(statement);
         makeStatements(watchdog, basicBlock.getNext(), statements, jumps);
+        
     }
 
     protected void removeExceptionReference(Statements catchStatements) {
@@ -608,10 +617,10 @@ public class StatementMaker {
             sub1 = sub1.getSub1();
         }
 
-        if (sub1.getType() == TYPE_IF) {
+        if (sub1.getType() == TYPE_IF || (sub1.getType() == TYPE_IF_ELSE && sub1.getSub2() == LOOP_END)) {
             BasicBlock ifBB = sub1;
 
-            if (ifBB.getNext() == LOOP_END) {
+            if (ifBB.getNext() == LOOP_END || ifBB.getSub2() == LOOP_END) {
                 // 'while' or 'for' loop
                 makeStatements(watchdog, ifBB.getCondition(), statements, jumps);
                 statements.add(LoopStatementMaker.makeLoop(

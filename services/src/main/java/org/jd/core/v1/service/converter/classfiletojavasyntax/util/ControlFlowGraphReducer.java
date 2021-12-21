@@ -6,6 +6,7 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
+import org.apache.bcel.classfile.CodeException;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
@@ -21,23 +22,17 @@ import static org.apache.bcel.Const.*;
 import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.*;
 
 public abstract class ControlFlowGraphReducer {
-    private final ControlFlowGraph controlFlowGraph;
+    private ControlFlowGraph controlFlowGraph;
 
-    protected ControlFlowGraphReducer(Method method) {
-        controlFlowGraph = ControlFlowGraphMaker.make(method);
+    public boolean reduce(Method method) {
+        controlFlowGraph = new ControlFlowGraphMaker(this::makeKey).make(method);
+        ControlFlowGraphGotoReducer.reduce(controlFlowGraph);
+        ControlFlowGraphLoopReducer.reduce(controlFlowGraph);
+        BasicBlock start = controlFlowGraph.getStart();
+        BitSet jsrTargets = new BitSet();
+        BitSet visited = new BitSet(controlFlowGraph.getBasicBlocks().size());
+        return reduce(visited, start, jsrTargets);
     }
-
-	public boolean reduce() {
-		if (controlFlowGraph != null) {
-            ControlFlowGraphGotoReducer.reduce(controlFlowGraph);
-            ControlFlowGraphLoopReducer.reduce(controlFlowGraph);
-			BasicBlock start = controlFlowGraph.getStart();
-			BitSet jsrTargets = new BitSet();
-			BitSet visited = new BitSet(controlFlowGraph.getBasicBlocks().size());
-			return reduce(visited, start, jsrTargets);
-		}
-		return false;
-	}
 
     public boolean reduce(BitSet visited, BasicBlock basicBlock, BitSet jsrTargets) {
         if (!basicBlock.matchType(GROUP_END) && !visited.get(basicBlock.getIndex())) {
@@ -288,11 +283,14 @@ public abstract class ControlFlowGraphReducer {
             }
         }
 
-        // Split sequences
-        last1.setNext(END);
-        next.getPredecessors().remove(last1);
-        last2.setNext(END);
-        next.getPredecessors().remove(last2);
+        Loop loop = basicBlock.getEnclosingLoop();
+        if (!basicBlock.isLoopExitCondition(loop)) {
+            // Split sequences
+            last1.setNext(END);
+            next.getPredecessors().remove(last1);
+            last2.setNext(END);
+            next.getPredecessors().remove(last2);
+        }
         // Create 'if-else'
         basicBlock.setType(type);
         basicBlock.setToOffset(toOffset);
@@ -301,19 +299,17 @@ public abstract class ControlFlowGraphReducer {
         basicBlock.setSub2(sub2);
         BasicBlock tryBlock = next.getSinglePredecessor(TYPE_TRY_DECLARATION);
         if (tryBlock != null) {
-        	tryBlock.getPredecessors().add(basicBlock);
-        	basicBlock.setNext(tryBlock);
+            tryBlock.getPredecessors().add(basicBlock);
+            basicBlock.setNext(tryBlock);
+        } else if (next.isOutsideLoop(loop) || basicBlock.isLoopExitCondition(loop)) {
+            basicBlock.setNext(END);
         } else {
-            Loop loopBlock = basicBlock.getEnclosingLoop();
-            if (loopBlock != null && !loopBlock.getMembers().contains(next)) {
-            	basicBlock.setNext(END);
-            } else {
-		        next.getPredecessors().add(basicBlock);
-			    basicBlock.setNext(next);
-            }
+            next.getPredecessors().add(basicBlock);
+            basicBlock.setNext(next);
         }
     }
 
+    protected abstract String makeKey(CodeException codeException);
     protected abstract boolean needToUpdateConditionTernaryOperator(BasicBlock basicBlock, BasicBlock nextNext);
     protected abstract boolean needToUpdateCondition(BasicBlock basicBlock, BasicBlock nextNext);
     protected abstract boolean needToCreateIf(BasicBlock branch, BasicBlock nextNext, int maxOffset);
@@ -778,7 +774,7 @@ public abstract class ControlFlowGraphReducer {
         return false;
     }
 
-    private boolean reduceTryDeclaration(BitSet visited, BasicBlock basicBlock, BitSet jsrTargets) {
+    protected boolean reduceTryDeclaration(BitSet visited, BasicBlock basicBlock, BitSet jsrTargets) {
         boolean reduced = true;
         BasicBlock finallyBB = null;
 
@@ -824,9 +820,7 @@ public abstract class ControlFlowGraphReducer {
 
                 if (predecessors.size() == 1) {
                     tryWithResourcesFlag = false;
-                } else {
-                    assert predecessors.size() == 2;
-
+                } else if (predecessors.size() == 2) {
                     if (tryWithResourcesBB == null) {
                         for (BasicBlock predecessor : predecessors) {
                             if (predecessor != basicBlock) {
@@ -857,7 +851,7 @@ public abstract class ControlFlowGraphReducer {
 
             updateBlock(tryBB, end, maxOffset);
 
-            if (finallyBB != null && basicBlock.getExceptionHandlers().size() == 1 && tryBB.getType() == TYPE_TRY && tryBB.getNext() == END && basicBlock.getFromOffset() == tryBB.getFromOffset() && !containsFinally(tryBB)) {
+            if (/*finallyBB != null && */basicBlock.getExceptionHandlers().size() == 1 && tryBB.getType() == TYPE_TRY && tryBB.getNext() == END && basicBlock.getFromOffset() == tryBB.getFromOffset() && !containsFinally(tryBB)) {
                 // Merge inner try
                 basicBlock.getExceptionHandlers().addAll(0, tryBB.getExceptionHandlers());
 
@@ -1599,13 +1593,12 @@ public abstract class ControlFlowGraphReducer {
     /**
      * A list of preferred implementations of reducers, ordered from the most preferred to the least preferred.
      * In case of failure, the next one in the list of preferred implementations is used.
-     * @param method
      * @return
      */
-    public static List<ControlFlowGraphReducer> getPreferredReducers(Method method) {
+    public static List<ControlFlowGraphReducer> getPreferredReducers() {
         List<ControlFlowGraphReducer> preferredReducers = new ArrayList<>();
-        preferredReducers.add(new MinDepthCFGReducer(method));
-        preferredReducers.add(new CmpDepthCFGReducer(method));
+        preferredReducers.add(new MinDepthCFGReducer());
+        preferredReducers.add(new CmpDepthCFGReducer());
         return preferredReducers;
     }
 }

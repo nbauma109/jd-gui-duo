@@ -69,7 +69,7 @@ public class BasicBlock {
 
     private ControlFlowGraph controlFlowGraph;
 
-    private int index;
+    private final int index;
     private int type;
 
     private int fromOffset;
@@ -96,7 +96,7 @@ public class BasicBlock {
         this.type = original.type;
         this.fromOffset = original.fromOffset;
         this.toOffset = original.toOffset;
-        this.next = original.next;
+        this.setNext(original.next);
         this.branch = original.branch;
         this.condition = original.condition;
         this.inverseCondition = original.inverseCondition;
@@ -248,7 +248,7 @@ public class BasicBlock {
 
     public void replace(BasicBlock old, BasicBlock nevv) {
         if (next == old) {
-			next = nevv;
+			setNext(nevv);
 		}
 
         if (branch == old) {
@@ -278,7 +278,7 @@ public class BasicBlock {
 
     public void replace(Set<BasicBlock> olds, BasicBlock nevv) {
         if (olds.contains(next)) {
-			next = nevv;
+			setNext(nevv);
 		}
 
         if (olds.contains(branch)) {
@@ -354,6 +354,14 @@ public class BasicBlock {
         return TYPE_NAMES[type==0 ? 0 : Integer.numberOfTrailingZeros(type)+1];
     }
 
+    public boolean isLoopExitCondition(Loop loop) {
+        return loop != null && index == loop.getStart().getIndex() && branch == LOOP_END;
+    }
+    
+    public boolean isOutsideLoop(Loop loop) {
+        return loop != null && !loop.getMembers().contains(this);
+    }
+
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder("BasicBlock{index=").append(index).append(", from=").append(fromOffset).append(", to=").append(toOffset).append(", type=")
@@ -388,9 +396,9 @@ public class BasicBlock {
     }
 
     public static class ExceptionHandler {
-        protected String internalThrowableName;
-        protected DefaultList<String> otherInternalThrowableNames;
-        protected BasicBlock basicBlock;
+        private final String internalThrowableName;
+        private DefaultList<String> otherInternalThrowableNames;
+        private BasicBlock basicBlock;
 
         public ExceptionHandler(String internalThrowableName, BasicBlock basicBlock) {
             this.internalThrowableName = internalThrowableName;
@@ -544,4 +552,5 @@ public class BasicBlock {
     public void setEnclosingLoop(Loop enclosingLoop) {
         this.enclosingLoop = enclosingLoop;
     }
+
 }

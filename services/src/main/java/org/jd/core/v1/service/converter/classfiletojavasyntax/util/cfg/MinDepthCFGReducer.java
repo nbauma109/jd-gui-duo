@@ -1,17 +1,17 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util.cfg;
 
-import org.jd.core.v1.model.classfile.Method;
+import org.apache.bcel.classfile.CodeException;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeUtil;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphReducer;
 
+import java.util.BitSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.*;
 
 public class MinDepthCFGReducer extends ControlFlowGraphReducer {
-
-    public MinDepthCFGReducer(Method method) {
-        super(method);
-    }
 
     @Override
     protected boolean needToUpdateConditionTernaryOperator(BasicBlock basicBlock, BasicBlock nextNext) {
@@ -40,5 +40,22 @@ public class MinDepthCFGReducer extends ControlFlowGraphReducer {
     @Override
     protected boolean needToCreateIfElse(BasicBlock branch, BasicBlock nextNext, BasicBlock branchNext) {
         return nextNext.getFromOffset() > branch.getFromOffset() && branchNext.matchType(GROUP_END);
+    }
+
+    @Override
+    public String makeKey(CodeException ce) {
+       return Stream.of(ce.getStartPC(), ce.getEndPC(), ce.getHandlerPC()).map(String::valueOf).collect(Collectors.joining("-"));
+    }
+    
+    @Override
+    protected boolean reduceTryDeclaration(BitSet visited, BasicBlock basicBlock, BitSet jsrTargets) {
+        BasicBlock next = basicBlock.getNext();
+        if (next != null && next.matchType(TYPE_LOOP)) {
+            BasicBlock sub1 = next.getSub1();
+            if (sub1 != null && sub1.matchType(TYPE_TRY|TYPE_TRY_JSR|TYPE_TRY_ECLIPSE|TYPE_TRY_DECLARATION)) {
+                return false;
+            }
+        }
+        return super.reduceTryDeclaration(visited, basicBlock, jsrTargets);
     }
 }

@@ -17,9 +17,9 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlo
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.SwitchCase;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
 import org.jd.core.v1.util.DefaultList;
-import org.jd.util.Range;
 
 import java.util.*;
+import java.util.function.Function;
 
 import static org.apache.bcel.Const.*;
 import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.*;
@@ -30,10 +30,13 @@ public class ControlFlowGraphMaker {
 
     protected static final CodeExceptionComparator CODE_EXCEPTION_COMPARATOR = new CodeExceptionComparator();
 
-    private ControlFlowGraphMaker() {
+    private Function<CodeException, String> codeExceptionKeyMaker;
+    
+    public ControlFlowGraphMaker(Function<CodeException, String> codeExceptionKeyMaker) {
+        this.codeExceptionKeyMaker = codeExceptionKeyMaker;
     }
 
-    public static ControlFlowGraph make(Method method) {
+    public ControlFlowGraph make(Method method) {
         AttributeCode attributeCode = method.getAttribute("Code");
 
         if (attributeCode == null) {
@@ -492,7 +495,7 @@ public class ControlFlowGraphMaker {
         }
         // --- Create try-catch-finally basic blocks --- //
         if (codeExceptions != null) {
-            Map<Range, BasicBlock> cache = new HashMap<>();
+            Map<String, BasicBlock> cache = new HashMap<>();
             ConstantPool constantPool = method.getConstants();
             // Reuse arrays
             int[] handlePcToStartPc = branchOffsets;
@@ -508,7 +511,8 @@ public class ControlFlowGraphMaker {
 
                 if (startPc != handlerPc && (handlePcMarks[handlerPc] != 'T' || startPc <= map[handlePcToStartPc[handlerPc]].getFromOffset())) {
                     int catchType = codeException.getCatchType();
-                    BasicBlock tcf = cache.get(Range.between(codeException.getStartPC(), codeException.getEndPC()));
+                    String key = codeExceptionKeyMaker.apply(codeException);
+                    BasicBlock tcf = cache.get(key);
 
                     if (tcf == null) {
                         int endPc = codeException.getEndPC();
@@ -541,7 +545,7 @@ public class ControlFlowGraphMaker {
                         map[startPc] = tcf;
 
                         // Store to objectTypeCache
-                        cache.put(Range.between(codeException.getStartPC(), codeException.getEndPC()), tcf);
+                        cache.put(key, tcf);
                     }
 
                     String internalThrowableName = catchType == 0 ? null : constantPool.getConstantTypeName(catchType);

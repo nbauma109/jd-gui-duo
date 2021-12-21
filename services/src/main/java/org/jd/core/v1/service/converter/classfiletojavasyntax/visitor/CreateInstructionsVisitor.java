@@ -111,12 +111,12 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
             StatementMaker statementMaker = new StatementMaker(typeMaker, localVariableMaker, comd);
             boolean containsLineNumber = attributeCode.getAttribute("LineNumberTable") != null;
 
-            List<ControlFlowGraphReducer> preferredReducers = ControlFlowGraphReducer.getPreferredReducers(method);
+            List<ControlFlowGraphReducer> preferredReducers = ControlFlowGraphReducer.getPreferredReducers();
 
             boolean reduced = false;
          	for (ControlFlowGraphReducer controlFlowGraphReducer : preferredReducers) {
          		try {
-                    if (controlFlowGraphReducer.reduce()) {
+                    if (controlFlowGraphReducer.reduce(method)) {
                     	if (comd.getStatements() instanceof Statements stmts){
                     		comd.setStatements(statementMaker.make(controlFlowGraphReducer.getControlFlowGraph(), stmts));
                     	} else {

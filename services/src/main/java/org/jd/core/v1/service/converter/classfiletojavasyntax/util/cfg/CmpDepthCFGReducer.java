@@ -1,15 +1,13 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util.cfg;
 
-import org.jd.core.v1.model.classfile.Method;
+import org.apache.bcel.classfile.CodeException;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeUtil;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphReducer;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.*;
+
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CmpDepthCFGReducer extends ControlFlowGraphReducer {
-
-    public CmpDepthCFGReducer(Method method) {
-        super(method);
-    }
 
     @Override
     protected boolean needToUpdateConditionTernaryOperator(BasicBlock basicBlock, BasicBlock nextNext) {
@@ -29,5 +27,10 @@ public class CmpDepthCFGReducer extends ControlFlowGraphReducer {
     @Override
     protected boolean needToCreateIfElse(BasicBlock branch, BasicBlock nextNext, BasicBlock branchNext) {
         return true;
+    }
+
+    @Override
+    public String makeKey(CodeException ce) {
+       return Stream.of(ce.getStartPC(), ce.getEndPC()).map(String::valueOf).collect(Collectors.joining("-"));
     }
 }
