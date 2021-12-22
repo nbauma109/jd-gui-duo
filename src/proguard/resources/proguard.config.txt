@@ -5,6 +5,8 @@
 #-libraryjars  C:/Program Files/Java/jre1.8.0_121/lib/rt.jar
 #-printmapping myapplication.map
 
+-libraryjars <java.home>/jmods/java.base.jmod(!**.jar;!module-info.class)
+
 -keepclasseswithmembers public class * {
     public static void main(java.lang.String[]);
 }
