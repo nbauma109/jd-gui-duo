@@ -13,6 +13,7 @@ import org.jd.core.v1.cfg.ControlFlowGraphPlantUMLWriter;
 import org.jd.core.v1.cfg.MethodUtil;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.*;
+import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.service.actions.InvalidFormatException;
 import org.jd.gui.spi.ContextualActionsFactory;
@@ -31,9 +32,11 @@ public class ShowControlFlowGraphContextualActionsFactory implements ContextualA
     @Override
     public Collection<Action> make(org.jd.gui.api.API api, Container.Entry entry, String fragment) {
         Collection<Action> actions = new ArrayList<>();
-        actions.add(new ShowControlFlowGraphAction(entry, fragment, null));
-        for (ControlFlowGraphReducer controlFlowGraphReducer : ControlFlowGraphReducer.getPreferredReducers()) {
-            actions.add(new ShowControlFlowGraphAction(entry, fragment, controlFlowGraphReducer));
+        if (entry.getPath().endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
+            actions.add(new ShowControlFlowGraphAction(entry, fragment, null));
+            for (ControlFlowGraphReducer controlFlowGraphReducer : ControlFlowGraphReducer.getPreferredReducers()) {
+                actions.add(new ShowControlFlowGraphAction(entry, fragment, controlFlowGraphReducer));
+            }
         }
         return actions;
     }
