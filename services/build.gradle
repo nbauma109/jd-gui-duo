@@ -9,7 +9,7 @@ dependencies {
     implementation 'org.osgi:org.osgi.annotation.versioning:1.1.2'
     implementation 'org.osgi:org.osgi.service.event:1.4.1'
     implementation 'org.osgi:org.osgi.service.component.annotations:1.5.0'
-    implementation 'com.github.nbauma109:plantuml:5b3a0d6b41'
+    implementation 'com.github.nbauma109:plantuml:a15fc63089'
     implementation project(':api')
     testImplementation 'junit:junit:4.12'
 }
