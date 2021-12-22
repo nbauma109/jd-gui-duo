@@ -1,1 +1,1 @@
-build\jdk-17.0.1+12-jre\bin\java -jar build\libs\jd-gui-bundle-1.6.6.jar
+build\jdk-17.0.1+12-jre\bin\java -jar build\libs\jd-gui-bundle-SNAPSHOT.jar
