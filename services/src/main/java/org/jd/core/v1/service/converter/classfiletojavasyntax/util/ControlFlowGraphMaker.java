@@ -36,6 +36,10 @@ public class ControlFlowGraphMaker {
         this.codeExceptionKeyMaker = codeExceptionKeyMaker;
     }
 
+    public ControlFlowGraphMaker() {
+        this(ControlFlowGraphMaker::makeLongKey);
+    }
+
     public ControlFlowGraph make(Method method) {
         AttributeCode attributeCode = method.getAttribute("Code");
 
@@ -607,6 +611,14 @@ public class ControlFlowGraphMaker {
         return false;
     }
 
+    public static final String makeLongKey(CodeException ce) {
+        return ce.getStartPC() + "-" + ce.getEndPC() + "-" + ce.getHandlerPC();
+    }
+    
+    public static final String makeShortKey(CodeException ce) {
+        return ce.getStartPC() + "-" + ce.getEndPC();
+    }
+    
     /** 1) Smaller 'startPc' first 2) Smaller 'endPc' first. */
     public static class CodeExceptionComparator implements Comparator<CodeException> {
         @Override

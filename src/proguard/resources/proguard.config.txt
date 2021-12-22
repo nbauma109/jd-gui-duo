@@ -40,6 +40,16 @@
 
 -keepnames class org.eclipse.jdt.internal.compiler.parser.Parser
 
+-keepnames class net.sourceforge.plantuml.windowsdot.WindowsDotArchive
+-keepnames class net.sourceforge.plantuml.brotli.Dictionary
+-keep class net.sourceforge.plantuml.brotli.DictionaryData {*;}
+-keep enum net.sourceforge.plantuml.graphic.HorizontalAlignment {*;}
+-keep enum net.sourceforge.plantuml.cucadiagram.EntityPortion {*;}
+-keep enum net.sourceforge.plantuml.project.time.DayOfWeek {*;}
+-keep enum net.sourceforge.plantuml.graphic.FontStyle {*;}
+-keep enum net.sourceforge.plantuml.style.PName {*;}
+-keep enum net.sourceforge.plantuml.graphic.color.ColorType {*;}
+
 -keep class org.fife.ui.rsyntaxtextarea.TokenTypes {
     public static final <fields>;
 }

@@ -6,7 +6,6 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
-import org.apache.bcel.classfile.CodeException;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
@@ -25,7 +24,7 @@ public abstract class ControlFlowGraphReducer {
     private ControlFlowGraph controlFlowGraph;
 
     public boolean reduce(Method method) {
-        controlFlowGraph = new ControlFlowGraphMaker(this::makeKey).make(method);
+        controlFlowGraph = getControlFlowGraphMaker().make(method);
         ControlFlowGraphGotoReducer.reduce(controlFlowGraph);
         ControlFlowGraphLoopReducer.reduce(controlFlowGraph);
         BasicBlock start = controlFlowGraph.getStart();
@@ -309,7 +308,8 @@ public abstract class ControlFlowGraphReducer {
         }
     }
 
-    protected abstract String makeKey(CodeException codeException);
+    public abstract String getLabel();
+    protected abstract ControlFlowGraphMaker getControlFlowGraphMaker();
     protected abstract boolean needToUpdateConditionTernaryOperator(BasicBlock basicBlock, BasicBlock nextNext);
     protected abstract boolean needToUpdateCondition(BasicBlock basicBlock, BasicBlock nextNext);
     protected abstract boolean needToCreateIf(BasicBlock branch, BasicBlock nextNext, int maxOffset);

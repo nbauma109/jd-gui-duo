@@ -1,13 +1,9 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util.cfg;
 
-import org.apache.bcel.classfile.CodeException;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeUtil;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphReducer;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.*;
 
 import java.util.BitSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.*;
 
@@ -41,11 +37,6 @@ public class MinDepthCFGReducer extends ControlFlowGraphReducer {
     protected boolean needToCreateIfElse(BasicBlock branch, BasicBlock nextNext, BasicBlock branchNext) {
         return nextNext.getFromOffset() > branch.getFromOffset() && branchNext.matchType(GROUP_END);
     }
-
-    @Override
-    public String makeKey(CodeException ce) {
-       return Stream.of(ce.getStartPC(), ce.getEndPC(), ce.getHandlerPC()).map(String::valueOf).collect(Collectors.joining("-"));
-    }
     
     @Override
     protected boolean reduceTryDeclaration(BitSet visited, BasicBlock basicBlock, BitSet jsrTargets) {
@@ -57,5 +48,15 @@ public class MinDepthCFGReducer extends ControlFlowGraphReducer {
             }
         }
         return super.reduceTryDeclaration(visited, basicBlock, jsrTargets);
+    }
+
+    @Override
+    public String getLabel() {
+        return "Show Minimum-Depth Control Flow Graph";
+    }
+
+    @Override
+    protected ControlFlowGraphMaker getControlFlowGraphMaker() {
+        return new ControlFlowGraphMaker(ControlFlowGraphMaker::makeLongKey);
     }
 }

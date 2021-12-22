@@ -1,1 +1,2 @@
 org.jdv1.gui.service.actions.CopyQualifiedNameContextualActionsFactory
+org.jdv1.gui.service.actions.ShowControlFlowGraphContextualActionsFactory

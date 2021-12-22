@@ -1,11 +1,7 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util.cfg;
 
-import org.apache.bcel.classfile.CodeException;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.*;
-
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class CmpDepthCFGReducer extends ControlFlowGraphReducer {
 
@@ -30,7 +26,12 @@ public class CmpDepthCFGReducer extends ControlFlowGraphReducer {
     }
 
     @Override
-    public String makeKey(CodeException ce) {
-       return Stream.of(ce.getStartPC(), ce.getEndPC()).map(String::valueOf).collect(Collectors.joining("-"));
+    public String getLabel() {
+        return "Show Compare-Depth Control Flow Graph";
+    }
+
+    @Override
+    protected ControlFlowGraphMaker getControlFlowGraphMaker() {
+        return new ControlFlowGraphMaker(ControlFlowGraphMaker::makeShortKey);
     }
 }
