@@ -91,7 +91,7 @@ public class AboutView {
 				assert ExceptionUtil.printStackTrace(e);
 			}
 
-			subsubpanel.add(new JLabel("JD-GUI-BUNDLE"));
+			subsubpanel.add(new JLabel("JD-GUI-DUO"));
 			subsubpanel.add(new JLabel("version " + jdGuiVersion));
 			subsubpanel.add(new JLabel("JD-Core"));
 			subsubpanel.add(new JLabel("version " + jdCoreVersion));

@@ -1,4 +1,4 @@
 include 'api', 'app', 'services'
 
-rootProject.name='jd-gui-bundle'
+rootProject.name='jd-gui-duo'
 

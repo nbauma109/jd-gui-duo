@@ -142,6 +142,7 @@ createExe {
   dependsOn 'downloadAndUnzipFile'
   dependsOn 'proguard'
   mainClassName = 'org.jd.gui.App'
+  outfile project.name + '-' + project.version + '.exe'
   icon = "${projectDir}/src/launch4j/resources/images/jd-gui.ico"
   jar projectDir.path + '/' + proguard.outJarFiles[0]
   bundledJre64Bit = 'true'
@@ -154,7 +155,7 @@ distributions {
         into('jdk-17.0.1+12-jre/') {
             from 'build/jdk-17.0.1+12-jre'
         } 
-        from 'build/launch4j/jd-gui-bundle.exe'
+        from 'build/launch4j/' + project.name + '-' + project.version + '.exe'
         from 'build/libs/' + project.name + '-' + project.version + '-min.jar'
     }
 
