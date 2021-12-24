@@ -10,6 +10,7 @@ dependencies {
     implementation 'org.osgi:org.osgi.service.event:1.4.1'
     implementation 'org.osgi:org.osgi.service.component.annotations:1.5.0'
     implementation 'net.sourceforge.plantuml:plantuml:1.2021.16'
+    implementation 'org.apache.ant:ant:1.10.12'
     implementation project(':api')
     testImplementation 'junit:junit:4.12'
 }
