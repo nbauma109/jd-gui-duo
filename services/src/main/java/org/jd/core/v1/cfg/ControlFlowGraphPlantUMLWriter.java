@@ -40,7 +40,7 @@ public class ControlFlowGraphPlantUMLWriter {
     private static final String AS = "\" as ";
 
     private static final String STATE = "state \"";
-
+    
     private static final int MAX_OFFSET = Integer.MAX_VALUE;
 
     private ControlFlowGraphPlantUMLWriter() {
@@ -56,8 +56,10 @@ public class ControlFlowGraphPlantUMLWriter {
             // The XML is stored into svg
             final String svg = new String(os.toByteArray(), StandardCharsets.UTF_8);
             Method method = cfg.getMethod();
-            String svgFileName = String.join(".", method.getClassName(), method.getName()).replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+            String className = method.getClassName().replace('/', '.');
+            String svgFileName = className + '.' + method.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
             File svgFile = File.createTempFile(svgFileName, ".svg");
+            svgFile.deleteOnExit();
             Files.write(svgFile.toPath(), svg.getBytes(StandardCharsets.UTF_8));
             if (Desktop.isDesktopSupported()) {
                 Desktop desktop = Desktop.getDesktop();
