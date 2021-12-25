@@ -26,7 +26,7 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.process.analyzer.classfile.visitor.ReplaceDupLoadVisitor;
 
 /*
- * Retrait des instructions DupLoads & DupStore associés à  une constante ou un
+ * Retrait des instructions DupLoads & DupStore associÃ©s Ã Â  une constante ou un
  * attribut:
  * DupStore( GetField | GetStatic | BIPush | SIPush | ALoad )
  * ...
@@ -48,7 +48,7 @@ public class RemoveDupConstantsAttributes
 				continue;
 			}
 
-            // DupStore trouvé
+            // DupStore trouvÃ©
             DupStore dupstore = (DupStore)list.get(dupStoreIndex);
 
             int opcode = dupstore.getObjectref().getOpcode();

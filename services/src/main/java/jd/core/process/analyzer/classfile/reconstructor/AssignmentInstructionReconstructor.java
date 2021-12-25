@@ -50,14 +50,14 @@ public class AssignmentInstructionReconstructor
 				continue;
 			}
 
-            // DupStore trouvé
+            // DupStore trouvÃ©
             DupStore dupStore = (DupStore)list.get(dupStoreIndex);
 
             int length = list.size();
 
             // Ne pas prendre en compte les instructions DupStore suivie par une
             // instruction AASTORE ou ARRAYSTORE dont l'attribut arrayref pointe
-            // vers l'instruction DupStore : ce cas est traité par
+            // vers l'instruction DupStore : ce cas est traitÃ© par
             // 'InitArrayInstructionReconstructor'.
             if (dupStoreIndex+1 < length)
             {
@@ -89,7 +89,7 @@ public class AssignmentInstructionReconstructor
                     if (i.getOpcode() == ByteCodeConstants.DUPLOAD &&
                         ((DupLoad)i).getDupStore() == dupStore)
                     {
-                        // 1er DupLoad trouvé
+                        // 1er DupLoad trouvÃ©
                         dupload1 = i;
                     }
                 } else if (xstorePutfieldPutstatic.getOpcode() == Const.DSTORE
@@ -135,7 +135,7 @@ public class AssignmentInstructionReconstructor
                     // Mise a jour de toutes les instructions TernaryOpStore
                     // pointant vers cette instruction d'assignation.
                     // Explication:
-                    //	ternaryOp2ndValueOffset est initialisée avec l'offset de
+                    //	ternaryOp2ndValueOffset est initialisÃ©e avec l'offset de
                     //  la derniere instruction poussant une valeur sur la pile.
                     //  Dans le cas d'une instruction d'assignation contenue
                     //  dans un operateur ternaire, ternaryOp2ndValueOffset est
@@ -148,7 +148,7 @@ public class AssignmentInstructionReconstructor
                     {
                         if (list.get(j).getOpcode() == ByteCodeConstants.TERNARYOPSTORE)
                         {
-                            // TernaryOpStore trouvé
+                            // TernaryOpStore trouvÃ©
                             TernaryOpStore tos = (TernaryOpStore)list.get(j);
                             if (tos.getTernaryOp2ndValueOffset() == dupStore.getOffset())
                             {

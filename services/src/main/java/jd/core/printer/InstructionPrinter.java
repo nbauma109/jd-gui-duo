@@ -68,8 +68,8 @@ public class InstructionPrinter implements Printer
     {
         if (!this.active)
         {
-            // Instruction non commencée, en cours d'affichage. Restoration de
-            // l'état précédent.
+            // Instruction non commencÃ©e, en cours d'affichage. Restoration de
+            // l'Ã©tat prÃ©cÃ©dent.
             this.multiLineInstruction = this.states.remove(this.states.size()-1);
             /* State state = this.states.remove(this.states.size()-1);
             this.newInstruction = state.newInstruction;
@@ -142,7 +142,7 @@ public class InstructionPrinter implements Printer
     {
         if (this.active)
         {
-            // Instruction non terminée. Sauvegarde de l'état courant.
+            // Instruction non terminÃ©e. Sauvegarde de l'Ã©tat courant.
             this.states.add(this.multiLineInstruction);
             /* this.states.add(
                 new State(this.newInstruction, this.multiLineInstruction)); */

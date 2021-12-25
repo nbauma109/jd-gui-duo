@@ -603,8 +603,8 @@ public class JavaSourceLayouter
 
 			if (ali.getArrayref().getOpcode() == Const.INVOKESTATIC)
 			{
-				// Dans le cas des instructions Switch+Enum d'Eclipse, la clé de la map
-				// est l'indexe du nom de la méthode
+				// Dans le cas des instructions Switch+Enum d'Eclipse, la clÃ© de la map
+				// est l'indexe du nom de la mÃ©thode
 				// "static int[] $SWITCH_TABLE$basic$data$TestEnum$enum1()".
 				Invokestatic is = (Invokestatic)ali.getArrayref();
 				ConstantMethodref cmr = constants.getConstantMethodref(is.getIndex());
@@ -613,7 +613,7 @@ public class JavaSourceLayouter
 			else if (ali.getArrayref().getOpcode() == Const.GETSTATIC)
 			{
 				// Dans le cas des instructions Switch+Enum des autres compilateurs,
-				// la clé de la map est l'indexe du nom de la classe interne
+				// la clÃ© de la map est l'indexe du nom de la classe interne
 				// "static class 1" contenant le tableau de correspondance
 				// "$SwitchMap$basic$data$TestEnum$enum1".
 				GetStatic gs = (GetStatic)ali.getArrayref();

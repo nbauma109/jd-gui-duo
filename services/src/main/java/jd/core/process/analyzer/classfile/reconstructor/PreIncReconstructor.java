@@ -48,7 +48,7 @@ public class PreIncReconstructor
 				continue;
 			}
 
-            // DupStore trouvé
+            // DupStore trouvÃ©
             DupStore dupstore = (DupStore)list.get(dupStoreIndex);
 
             if (dupstore.getObjectref().getOpcode() != ByteCodeConstants.BINARYOP) {
@@ -93,7 +93,7 @@ public class PreIncReconstructor
                     if (boi.getValue1().getOpcode() == Const.ALOAD &&
                         ((StoreInstruction)i).getValueref().getOpcode() == ByteCodeConstants.DUPLOAD &&
                         ((IndexInstruction)i).getIndex() == ((IndexInstruction)boi.getValue1()).getIndex()) {
-						// 1er DupLoad trouvé
+						// 1er DupLoad trouvÃ©
                         dupload = ((StoreInstruction)i).getValueref();
 					}
                     break;
@@ -101,7 +101,7 @@ public class PreIncReconstructor
                     if (boi.getValue1().getOpcode() == Const.ILOAD &&
                         ((StoreInstruction)i).getValueref().getOpcode() == ByteCodeConstants.DUPLOAD &&
                         ((IndexInstruction)i).getIndex() == ((IndexInstruction)boi.getValue1()).getIndex()) {
-						// 1er DupLoad trouvé
+						// 1er DupLoad trouvÃ©
                         dupload = ((StoreInstruction)i).getValueref();
 					}
                     break;
@@ -109,7 +109,7 @@ public class PreIncReconstructor
                     if (boi.getValue1().getOpcode() == ByteCodeConstants.LOAD &&
                         ((StoreInstruction)i).getValueref().getOpcode() == ByteCodeConstants.DUPLOAD &&
                         ((IndexInstruction)i).getIndex() == ((IndexInstruction)boi.getValue1()).getIndex()) {
-						// 1er DupLoad trouvé
+						// 1er DupLoad trouvÃ©
                         dupload = ((StoreInstruction)i).getValueref();
 					}
                     break;
@@ -117,7 +117,7 @@ public class PreIncReconstructor
                     if (boi.getValue1().getOpcode() == Const.GETFIELD &&
                         ((PutField)i).getValueref().getOpcode() == ByteCodeConstants.DUPLOAD &&
                         ((IndexInstruction)i).getIndex() == ((IndexInstruction)boi.getValue1()).getIndex()) {
-						// 1er DupLoad trouvé
+						// 1er DupLoad trouvÃ©
                         dupload = ((PutField)i).getValueref();
 					}
                     break;
@@ -125,7 +125,7 @@ public class PreIncReconstructor
                     if (boi.getValue1().getOpcode() == Const.GETSTATIC &&
                         ((PutStatic)i).getValueref().getOpcode() == ByteCodeConstants.DUPLOAD &&
                         ((IndexInstruction)i).getIndex() == ((IndexInstruction)boi.getValue1()).getIndex()) {
-						// 1er DupLoad trouvé
+						// 1er DupLoad trouvÃ©
                         dupload = ((PutStatic)i).getValueref();
 					}
                     break;

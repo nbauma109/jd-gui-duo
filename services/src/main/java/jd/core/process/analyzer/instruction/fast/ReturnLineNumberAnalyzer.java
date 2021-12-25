@@ -30,7 +30,7 @@ import jd.core.model.instruction.fast.instruction.FastTest2Lists;
 import jd.core.model.instruction.fast.instruction.FastTry;
 
 /*
- * Le numéro de ligne des instructions 'return' genere par les compilateurs
+ * Le numÃ©ro de ligne des instructions 'return' genere par les compilateurs
  * sont faux et perturbe l'affichage des sources
  */
 public class ReturnLineNumberAnalyzer

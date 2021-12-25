@@ -525,7 +525,7 @@ public class ClassFileLayouter {
 
     /**
      * @return liste de sequences de 'LayoutBlock'
-     * Sequence produite pour chaque méthode:
+     * Sequence produite pour chaque mÃ©thode:
      *  - MethodBlockStartLayoutBlock
      *  -  CommentDeprecatedLayoutBlock ?
      *  -  AnnotationsLayoutBlock ?
@@ -579,7 +579,7 @@ public class ClassFileLayouter {
             as = method.getAttributeSignature();
 
             // Le descripteur et la signature sont differentes pour les
-            // constructeurs des Enums ! Cette information est passée à 
+            // constructeurs des Enums ! Cette information est passÃ©e Ã Â 
             // "SignatureWriter.writeMethodSignature(...)".
             signatureIndex = as == null ?
                     method.getDescriptorIndex() : as.getSignatureIndex();
@@ -654,7 +654,7 @@ public class ClassFileLayouter {
                 classFile, method.getAttributes(), subLayoutBlockList);
 
             // Information utilisee par 'PrintWriter' pour afficher un ';'
-            // après les méthodes sans code. Evite d'instancier un object
+            // aprÃ¨s les mÃ©thodes sans code. Evite d'instancier un object
             // 'EmptyCodeLayoutBlock'.
             nullCodeFlag = method.getCode() == null;
             displayThrowsFlag = false;
@@ -874,7 +874,7 @@ public class ClassFileLayouter {
     private static List<SubListLayoutBlock> sortBlocks(
         List<SubListLayoutBlock> blockList)
     {
-        // Detection de l'ordre de génération des champs par le compilateur:
+        // Detection de l'ordre de gÃ©nÃ©ration des champs par le compilateur:
         // ascendant (1), descendant (2) ou aleatoire (3)
         int length = blockList.size();
         int lineNumber = Instruction.UNKNOWN_LINE_NUMBER;
@@ -921,7 +921,7 @@ public class ClassFileLayouter {
             {
                 blockList.get(i).setIndex(i);
             }
-            // Tri par ordre croissant, les blocs sans numéro de ligne
+            // Tri par ordre croissant, les blocs sans numÃ©ro de ligne
             // sont places a la fin.
             Collections.sort(blockList, new LayoutBlockComparator());
         }
@@ -931,7 +931,7 @@ public class ClassFileLayouter {
     /* POURQUOI AVOIR UTILISE UNE SIGNATURE SI COMPLEXE A CONVERTIR EN C++ ?
      * private static <T extends LayoutBlock> List<T> SortBlocks(List<T> blockList)
     {
-        // Detection de l'ordre de génération des champs par le compilateur:
+        // Detection de l'ordre de gÃ©nÃ©ration des champs par le compilateur:
         // ascendant (1), descendant (2) ou aleatoire (3)
         int length = blockList.size();
         int lineNumber = Instruction.UNKNOWN_LINE_NUMBER;
@@ -979,7 +979,7 @@ public class ClassFileLayouter {
             Collections.reverse(blockList);
             break;
         case 3: // Aleatoire
-            // Tri par ordre croissant, les blocs sans numéro de ligne
+            // Tri par ordre croissant, les blocs sans numÃ©ro de ligne
             // sont places a la fin.
             Collections.sort(blockList, new LayoutBlockComparator());
             break;
@@ -990,9 +990,9 @@ public class ClassFileLayouter {
 
     /** Premiere phase du realignement,
      * 3 jeux de cartes,
-     * Conserver l'ordre naturel jusqu'à  une impossibilite:
-     * Copie des blocs sans numéro de ligne des champs au plus tot
-     * Copie des blocs sans numéro de ligne des méthodes et des classes internes au plus tard
+     * Conserver l'ordre naturel jusqu'Ã Â  une impossibilite:
+     * Copie des blocs sans numÃ©ro de ligne des champs au plus tot
+     * Copie des blocs sans numÃ©ro de ligne des mÃ©thodes et des classes internes au plus tard
      */
     private static int mergeBlocks(
         List<LayoutBlock> layoutBlockList,
@@ -1006,7 +1006,7 @@ public class ClassFileLayouter {
         Collections.reverse(sortedMethodBlockList);
         Collections.reverse(sortedInnerClassBlockList);
 
-        // Recherche du bloc ayant un numéro de ligne defini
+        // Recherche du bloc ayant un numÃ©ro de ligne defini
         int minLineNumberMethod =
             searchMinimalLineNumber(sortedMethodBlockList);
         int minLineNumberInnerClass =
@@ -1025,15 +1025,15 @@ public class ClassFileLayouter {
                         layoutBlockList, sortedFieldBlockList, maxLineNumber);
                     break;
                 }
-                // Copie des champs avec et sans numéro de ligne
+                // Copie des champs avec et sans numÃ©ro de ligne
                 maxLineNumber = exclusiveMergeFieldBlockList(
                     layoutBlockList, sortedFieldBlockList,
                     minLineNumberInnerClass, maxLineNumber);
-                // Copie de toutes les méthodes sans numéro de ligne
+                // Copie de toutes les mÃ©thodes sans numÃ©ro de ligne
                 maxLineNumber = mergeBlockList(
                     layoutBlockList, sortedMethodBlockList, maxLineNumber);
-                // Copie des classes internes jusqu'à  l'inner classe ayant
-                // le plus petit numéro de ligne
+                // Copie des classes internes jusqu'Ã Â  l'inner classe ayant
+                // le plus petit numÃ©ro de ligne
                 maxLineNumber = inclusiveMergeBlockList(
                     layoutBlockList, sortedInnerClassBlockList,
                     minLineNumberInnerClass, maxLineNumber);
@@ -1042,12 +1042,12 @@ public class ClassFileLayouter {
             } else if (minLineNumberInnerClass == Instruction.UNKNOWN_LINE_NUMBER ||
                 minLineNumberMethod < minLineNumberInnerClass)
             {
-                // Copie des champs avec et sans numéro de ligne
+                // Copie des champs avec et sans numÃ©ro de ligne
                 maxLineNumber = exclusiveMergeFieldBlockList(
                     layoutBlockList, sortedFieldBlockList,
                     minLineNumberMethod, maxLineNumber);
-                // Copie des méthodes jusqu'à  la méthode ayant le plus
-                // petit numéro de ligne
+                // Copie des mÃ©thodes jusqu'Ã Â  la mÃ©thode ayant le plus
+                // petit numÃ©ro de ligne
                 maxLineNumber = inclusiveMergeBlockList(
                     layoutBlockList, sortedMethodBlockList,
                     minLineNumberMethod, maxLineNumber);
@@ -1056,16 +1056,16 @@ public class ClassFileLayouter {
             }
             else
             {
-                // Copie des champs avec et sans numéro de ligne
+                // Copie des champs avec et sans numÃ©ro de ligne
                 maxLineNumber = exclusiveMergeFieldBlockList(
                     layoutBlockList, sortedFieldBlockList,
                     minLineNumberInnerClass, maxLineNumber);
-                // Copie des méthodes avec et sans numéro de ligne
+                // Copie des mÃ©thodes avec et sans numÃ©ro de ligne
                 maxLineNumber = exclusiveMergeMethodOrInnerClassBlockList(
                     layoutBlockList, sortedMethodBlockList,
                     minLineNumberInnerClass, maxLineNumber);
-                // Copie des classes internes jusqu'à  l'inner classe ayant
-                // le plus petit numéro de ligne
+                // Copie des classes internes jusqu'Ã Â  l'inner classe ayant
+                // le plus petit numÃ©ro de ligne
                 maxLineNumber = inclusiveMergeBlockList(
                     layoutBlockList, sortedInnerClassBlockList,
                     minLineNumberInnerClass, maxLineNumber);
@@ -1083,12 +1083,12 @@ public class ClassFileLayouter {
                     layoutBlockList, sortedMethodBlockList, maxLineNumber);
                 break;
             }
-            // Copie des méthodes avec et sans numéro de ligne
+            // Copie des mÃ©thodes avec et sans numÃ©ro de ligne
             maxLineNumber = exclusiveMergeMethodOrInnerClassBlockList(
                 layoutBlockList, sortedMethodBlockList,
                 minLineNumberInnerClass, maxLineNumber);
-            // Copie des classes internes jusqu'à  l'inner classe ayant le
-            // plus petit numéro de ligne
+            // Copie des classes internes jusqu'Ã Â  l'inner classe ayant le
+            // plus petit numÃ©ro de ligne
             maxLineNumber = inclusiveMergeBlockList(
                 layoutBlockList, sortedInnerClassBlockList,
                 minLineNumberInnerClass, maxLineNumber);
@@ -1753,7 +1753,7 @@ public class ClassFileLayouter {
             oldDelta = delta;
 
             LayoutBlock lb;
-            // Compact début de bloc des méthodes
+            // Compact dÃ©but de bloc des mÃ©thodes
             for (int i=lastIndex; i>=firstIndex && delta>0; i--)
             {
                 lb = layoutBlockList.get(i);
@@ -1797,7 +1797,7 @@ public class ClassFileLayouter {
             oldDelta = delta;
 
             LayoutBlock lb;
-            // Compact fin de bloc des méthodes
+            // Compact fin de bloc des mÃ©thodes
             for (int i=lastIndex; i>=firstIndex && delta>0; i--)
             {
                 lb = layoutBlockList.get(i);
@@ -1844,7 +1844,7 @@ public class ClassFileLayouter {
             oldDelta = delta;
 
             LayoutBlock lb;
-            // Compact fin de bloc des méthodes
+            // Compact fin de bloc des mÃ©thodes
             for (int i=firstIndex; i<=lastIndex && delta>0; i++)
             {
                 lb = layoutBlockList.get(i);
@@ -1883,7 +1883,7 @@ public class ClassFileLayouter {
             oldDelta = delta;
 
             LayoutBlock lb;
-            // Compact fin de bloc des méthodes
+            // Compact fin de bloc des mÃ©thodes
             for (int i=lastIndex; i>=firstIndex && delta>0; i--)
             {
                 lb = layoutBlockList.get(i);
@@ -1928,7 +1928,7 @@ public class ClassFileLayouter {
         {
             oldDelta = delta;
 
-            // Compact début de bloc des méthodes
+            // Compact dÃ©but de bloc des mÃ©thodes
             for (int i=lastIndex; i>=firstIndex && delta>0; i--)
             {
                 LayoutBlock lb = layoutBlockList.get(i);
@@ -1978,7 +1978,7 @@ public class ClassFileLayouter {
             }
 
             LayoutBlock lb;
-            // Compact fin de bloc des méthodes
+            // Compact fin de bloc des mÃ©thodes
             for (int i=lastIndex; i>=firstIndex && delta>0; i--)
             {
                 lb = layoutBlockList.get(i);
@@ -2169,7 +2169,7 @@ public class ClassFileLayouter {
         {
             oldDelta = delta;
 
-            // Expand fin de bloc des méthodes
+            // Expand fin de bloc des mÃ©thodes
             for (int i=firstIndex; i<=lastIndex && delta>0; i++)
             {
                 LayoutBlock lb = layoutBlockList.get(i);
@@ -2207,7 +2207,7 @@ public class ClassFileLayouter {
             }
 
             LayoutBlock lb;
-            // Expand début de bloc du corps des classes internes
+            // Expand dÃ©but de bloc du corps des classes internes
             for (int i=firstIndex; i<=lastIndex && delta>0; i++)
             {
                 lb = layoutBlockList.get(i);
@@ -2290,7 +2290,7 @@ public class ClassFileLayouter {
         {
             oldDelta = delta;
 
-            // Compact fin de bloc des méthodes
+            // Compact fin de bloc des mÃ©thodes
             for (int i=firstIndex; i<=lastIndex && delta>0; i++)
             {
                 lb = layoutBlockList.get(i);
@@ -2339,7 +2339,7 @@ public class ClassFileLayouter {
                 }
             }
 
-            // Expand début de bloc du corps des classes internes
+            // Expand dÃ©but de bloc du corps des classes internes
             for (int i=firstIndex; i<=lastIndex && delta>0; i++)
             {
                 lb = layoutBlockList.get(i);
@@ -2693,22 +2693,22 @@ public class ClassFileLayouter {
 
             if (lb.getTag() == markerEndTag)
             {
-                // Tag de marqueur de fin trouvé.
+                // Tag de marqueur de fin trouvÃ©.
                 MarkerLayoutBlock mlb = (MarkerLayoutBlock)lb;
 
                 if (mlb.getSection() != mlb.getOther().getSection() || mlb.getOther().getIndex() <= firstBlockIndex)
                 {
-                    // Le marqueur de début est avant la limite.
+                    // Le marqueur de dÃ©but est avant la limite.
                     return false;
                 }
 
-                // trouvé.
+                // trouvÃ©.
 
                 // -- 1 ----------------------------------------------------- //
                 int lastEndTagBlockIndex = blockIndex;
 
                 // Rechercher du nombre de blocs a deplacer =>
-                //  Trouver le premier block de type 'tag' sans numéro de ligne
+                //  Trouver le premier block de type 'tag' sans numÃ©ro de ligne
                 int counter = 1;
 
                 blockIndex = mlb.getOther().getIndex();
@@ -2724,12 +2724,12 @@ public class ClassFileLayouter {
                     }
                     if (lb.getTag() == markerEndTag)
                     {
-                        // Tag de marqueur de fin trouvé.
+                        // Tag de marqueur de fin trouvÃ©.
                         mlb = (MarkerLayoutBlock)lb;
 
                         if (mlb.getSection() != mlb.getOther().getSection() || mlb.getOther().getIndex() <= firstBlockIndex)
                         {
-                            // Le marqueur de début est avant la limite.
+                            // Le marqueur de dÃ©but est avant la limite.
                             break;
                         }
 
@@ -2744,11 +2744,11 @@ public class ClassFileLayouter {
                     }
                 }
 
-                // Un ou plusieurs blocs a deplacer trouvés.
+                // Un ou plusieurs blocs a deplacer trouvÃ©s.
 
                 // Rechercher de l'index d'insertion =>
-                //  Trouver la section ayant le score le plus bas jusqu'à  la
-                //  section contenant un block de type 'tag' ayant un numéro
+                //  Trouver la section ayant le score le plus bas jusqu'Ã Â  la
+                //  section contenant un block de type 'tag' ayant un numÃ©ro
                 //  de ligne defini
                 int blockLength = layoutBlockList.size();
                 blockIndex = lastEndTagBlockIndex;
@@ -2764,7 +2764,7 @@ public class ClassFileLayouter {
 //						(lb.tag == LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK) ||
                         lb.getTag() == markerStartTag)
                     {
-                        // Fin de corps ou début d'un bloc
+                        // Fin de corps ou dÃ©but d'un bloc
                         if (lowerScore > lb.getSection().getScore())
                         {
                             lowerScore = lb.getSection().getScore();
@@ -2773,8 +2773,8 @@ public class ClassFileLayouter {
 
                         // Impossible de deplacer un bloc au dessus
                         // - d'une fin de corps
-                        // - d'un autre du même type
-                        // => On s'arrête.
+                        // - d'un autre du mÃªme type
+                        // => On s'arrÃªte.
                         break;
                     }
                     if (lb.getTag() == LayoutBlockConstants.FIELD_MARKER_START ||
@@ -2795,11 +2795,11 @@ public class ClassFileLayouter {
 
                 if (lowerScore != lsSource.getScore())
                 {
-                    // trouvé.
+                    // trouvÃ©.
 
                     // -- 2 ------------------------------------------------- //
 
-                    // Rechercher de l'index de début du bloc de type 'tag'
+                    // Rechercher de l'index de dÃ©but du bloc de type 'tag'
                     // counter/2 en partant de 'lastEndTagBlockIndex'
                     counter = (counter + 1) / 2;
                     int firstStartTagBlockIndex =
@@ -2827,7 +2827,7 @@ public class ClassFileLayouter {
                         blockIndex--;
                     }
 
-                    // trouvé.
+                    // trouvÃ©.
 
                     // -- 3 ------------------------------------------------- //
 
@@ -2874,7 +2874,7 @@ public class ClassFileLayouter {
                         layoutBlockList.get(blockIndex).setPreferedLineCount(2);
                     }
 
-                    // Blocs pas encore inserés.
+                    // Blocs pas encore inserÃ©s.
                     lowerScoreBlockIndex -= sourceDeltaIndex;
 
                     int targetDeltaIndex = 0;
@@ -3106,22 +3106,22 @@ public class ClassFileLayouter {
 
             if (lb.getTag() == markerStartTag)
             {
-                // Tag de marqueur de début trouvé.
+                // Tag de marqueur de dÃ©but trouvÃ©.
                 MarkerLayoutBlock mlb = (MarkerLayoutBlock)lb;
 
                 if (mlb.getSection() != mlb.getOther().getSection() || mlb.getOther().getIndex() >= lastBlockIndex)
                 {
-                    // Le marqueur de fin est après la limite.
+                    // Le marqueur de fin est aprÃ¨s la limite.
                     return false;
                 }
 
-                // trouvé.
+                // trouvÃ©.
 
                 // -- 1 ----------------------------------------------------- //
                 int firstStartTagBlockIndex = blockIndex;
 
                 // Rechercher du nombre de blocs a deplacer =>
-                //  Trouver le dernier block de type 'tag' sans numéro de ligne
+                //  Trouver le dernier block de type 'tag' sans numÃ©ro de ligne
                 int counter = 1;
 
                 blockIndex = mlb.getOther().getIndex();
@@ -3137,12 +3137,12 @@ public class ClassFileLayouter {
                     }
                     if (lb.getTag() == markerStartTag)
                     {
-                        // Tag de marqueur de fin trouvé.
+                        // Tag de marqueur de fin trouvÃ©.
                         mlb = (MarkerLayoutBlock)lb;
 
                         if (mlb.getSection() != mlb.getOther().getSection() || mlb.getOther().getIndex() >= lastBlockIndex)
                         {
-                            // Le marqueur de début est avant la limite.
+                            // Le marqueur de dÃ©but est avant la limite.
                             break;
                         }
 
@@ -3157,11 +3157,11 @@ public class ClassFileLayouter {
                     }
                 }
 
-                // Un ou plusieurs blocs a deplacer trouvés.
+                // Un ou plusieurs blocs a deplacer trouvÃ©s.
 
                 // Rechercher de l'index d'insertion =>
-                //  Trouver la section ayant le score le plus bas jusqu'à  la
-                //  section contenant un block de type 'tag' ayant un numéro
+                //  Trouver la section ayant le score le plus bas jusqu'Ã Â  la
+                //  section contenant un block de type 'tag' ayant un numÃ©ro
                 //  de ligne defini
                 blockIndex = firstStartTagBlockIndex;
 
@@ -3176,7 +3176,7 @@ public class ClassFileLayouter {
 //						(lb.tag == LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK) ||
                         lb.getTag() == markerEndTag)
                     {
-                        // début de corps ou fin d'un bloc
+                        // dÃ©but de corps ou fin d'un bloc
                         if (lowerScore > lb.getSection().getScore())
                         {
                             lowerScore = lb.getSection().getScore();
@@ -3184,9 +3184,9 @@ public class ClassFileLayouter {
                         }
 
                         // Impossible de deplacer un bloc au dessus
-                        // - d'un début de corps
-                        // - d'un autre du même type
-                        // => On s'arrête.
+                        // - d'un dÃ©but de corps
+                        // - d'un autre du mÃªme type
+                        // => On s'arrÃªte.
                         break;
                     }
                     if (lb.getTag() == LayoutBlockConstants.FIELD_MARKER_END ||
@@ -3207,11 +3207,11 @@ public class ClassFileLayouter {
 
                 if (lowerScore != lsSource.getScore())
                 {
-                    // trouvé.
+                    // trouvÃ©.
 
                     // -- 2 ------------------------------------------------- //
 
-                    // Rechercher de l'index de début du bloc de type 'tag'
+                    // Rechercher de l'index de dÃ©but du bloc de type 'tag'
                     // counter/2 en partant de 'lastEndTagBlockIndex'
                     counter = (counter + 1) / 2;
                     int lastEndTagBlockIndex =
@@ -3239,7 +3239,7 @@ public class ClassFileLayouter {
                         blockIndex++;
                     }
 
-                    // trouvé.
+                    // trouvÃ©.
 
                     // -- 3 ------------------------------------------------- //
 
@@ -3286,7 +3286,7 @@ public class ClassFileLayouter {
                         layoutBlockList.get(blockIndex).setPreferedLineCount(2);
                     }
 
-                    // Blocs pas encore inserés.
+                    // Blocs pas encore inserÃ©s.
                     lowerScoreBlockIndex++;
 
                     int targetDeltaIndex = 0;
