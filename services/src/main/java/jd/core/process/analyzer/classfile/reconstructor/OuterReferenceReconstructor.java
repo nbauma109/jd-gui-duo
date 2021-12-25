@@ -29,7 +29,7 @@ import jd.core.process.analyzer.classfile.visitor.*;
 import jd.core.util.SignatureUtil;
 
 /*
- * Recontruction des references externes dans le corps des mï¿½thodes des classes
+ * Recontruction des references externes dans le corps des méthodes des classes
  * internes.
  */
 public class OuterReferenceReconstructor
@@ -71,7 +71,7 @@ public class OuterReferenceReconstructor
             new OuterGetStaticVisitor(innerClassesMap, constants);
         this.outerPutStaticVisitor =
             new OuterPutStaticVisitor(innerClassesMap, constants);
-        // Initialisation du visiteur traitant l'acces des mï¿½thodes externes
+        // Initialisation du visiteur traitant l'acces des méthodes externes
         this.outerMethodVisitor =
             new OuterInvokeMethodVisitor(innerClassesMap, constants);
     }

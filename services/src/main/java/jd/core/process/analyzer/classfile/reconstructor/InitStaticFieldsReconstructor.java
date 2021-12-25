@@ -116,7 +116,7 @@ public class InitStaticFieldsReconstructor
             // La substitution a-t-elle ete faite ?
             if (lengthBeforeSubstitution == list.size())
             {
-                // Non -> On arrï¿½te.
+                // Non -> On arrête.
                 break;
             }
 
@@ -187,7 +187,7 @@ public class InitStaticFieldsReconstructor
                 // La substitution a-t-elle ete faite ?
                 if (lengthBeforeSubstitution == list.size())
                 {
-                    // Non -> On arrï¿½te.
+                    // Non -> On arrête.
                     break;
                 }
             }

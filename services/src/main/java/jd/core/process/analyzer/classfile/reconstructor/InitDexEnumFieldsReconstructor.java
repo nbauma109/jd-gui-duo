@@ -60,7 +60,7 @@ import jd.core.model.instruction.fast.instruction.FastDeclaration;
  *   ENUM$VALUES = alocationprovider;
  * }
  *
- * --> Les instructions d'initialisation et les champs ne sont pas classes dans le mï¿½me ordre.
+ * --> Les instructions d'initialisation et les champs ne sont pas classes dans le même ordre.
  * --> Un tableau local est utilise.
  */
 public class InitDexEnumFieldsReconstructor

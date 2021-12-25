@@ -28,7 +28,7 @@ import jd.core.model.instruction.fast.instruction.FastSwitch.Pair;
 import jd.core.model.instruction.fast.instruction.FastTry.FastCatch;
 
 /*
- * utilisï¿½ par TernaryOpReconstructor
+ * utilisé par TernaryOpReconstructor
  */
 public class SearchInstructionByOpcodeVisitor
 {

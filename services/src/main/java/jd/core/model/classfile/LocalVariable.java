@@ -27,10 +27,10 @@ public class LocalVariable
     private int signatureIndex;
     private final int index;
     private boolean exceptionOrReturnAddress;
-    // Champ de bits utilisï¿½ pour determiner le type de la variable (byte, char,
+    // Champ de bits utilisé pour determiner le type de la variable (byte, char,
     // short, int).
     private int typesBitField;
-    // Champs utilisï¿½ lors de la gï¿½nï¿½ration des dï¿½clarations de variables
+    // Champs utilisé lors de la génération des déclarations de variables
     // locales (FastDeclarationAnalyzer.Analyze).
     private boolean declarationFlag = false;
 

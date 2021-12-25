@@ -336,7 +336,7 @@ public class ByteCodeWriter
 	private static void writeAttributeNumberTables(
 			Printer printer, Method method)
 	{
-		// Ecriture de la table des numï¿½ros de ligne
+		// Ecriture de la table des numéros de ligne
 		LineNumber[] lineNumbers = method.getLineNumbers();
 		if (lineNumbers != null)
 		{

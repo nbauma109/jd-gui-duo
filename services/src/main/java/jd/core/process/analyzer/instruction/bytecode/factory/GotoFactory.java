@@ -89,7 +89,7 @@ public class GotoFactory implements InstructionFactory
         while (offset < jumpOffset)
         {
             int opcode = code[offset] & 255;
-            // on retient l'offset de la derniere opï¿½ration placant une
+            // on retient l'offset de la derniere opération placant une
             // information sur la pile.
             if (opcode >= ACONST_NULL   && opcode <= SALOAD          // 1..53
              || opcode >= DUP           && opcode <= DCMPG           // 89..152

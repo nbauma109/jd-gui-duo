@@ -134,7 +134,7 @@ public class SignatureWriter
         // - var 2: index de la valeur => ne pas afficher
         // Signature:
         // - variableIndex = 1 + 1 + 1
-        // Le premier parametre des mï¿½thodes non statiques est 'this'
+        // Le premier parametre des méthodes non statiques est 'this'
         printer.print('(');
 
         int variableIndex = staticMethodFlag ? 0 : 1;
@@ -192,8 +192,8 @@ public class SignatureWriter
 
                 LocalVariable lv = null;
 
-                // TODO Test ï¿½ retirer. Ce test a ï¿½tï¿½ ajoutï¿½ lors du codage
-                // de la gestion des enum pour ï¿½viter un NullPointerException
+                // TODO Test à  retirer. Ce test a été ajouté lors du codage
+                // de la gestion des enum pour éviter un NullPointerException
                 if (method.getLocalVariables() != null) {
                     lv = method.getLocalVariables().searchLocalVariableWithIndexAndOffset(variableIndex, 0);
 
@@ -538,7 +538,7 @@ public class SignatureWriter
 
                 if (classFile.getInternalPackageName().equals(internalPackageName))
                 {
-                    // Classe appartenant au mï¿½me package que la classe courante
+                    // Classe appartenant au même package que la classe courante
                     if (classFile.getInnerClassFile(internalName) != null)
                     {
                         // Dans le cas d'une classe interne, on retire le nom
@@ -570,7 +570,7 @@ public class SignatureWriter
 
                     if (loader.canLoad(currentPackageNamePlusInternalClassName)) {
                         // Une class du package local contient une classe qui
-                        // porte le mï¿½me nom que la classe du package "java.lang".
+                        // porte le même nom que la classe du package "java.lang".
                         // On conserve le nom du package.
                         internalName = internalName.replace(StringConstants.INTERNAL_PACKAGE_SEPARATOR,
                             StringConstants.PACKAGE_SEPARATOR);

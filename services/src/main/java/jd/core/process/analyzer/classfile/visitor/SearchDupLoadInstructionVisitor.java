@@ -24,7 +24,7 @@ import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.*;
 
 /*
- * utilisï¿½ par TernaryOpReconstructor
+ * utilisé par TernaryOpReconstructor
  */
 public class SearchDupLoadInstructionVisitor
 {

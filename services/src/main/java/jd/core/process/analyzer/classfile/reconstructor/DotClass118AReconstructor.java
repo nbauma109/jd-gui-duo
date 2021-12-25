@@ -178,7 +178,7 @@ public class DotClass118AReconstructor
 
             if (nameField.startsWith(StringConstants.CLASS_DOLLAR))
             {
-                // motif 'x.class' classique trouvï¿½ !
+                // motif 'x.class' classique trouvé !
                 // Substitution par une constante de type 'ClassConstant'
                 ConstantString cs = (ConstantString)cv;
                 String signature = constants.getConstantUtf8(cs.getStringIndex());
@@ -209,7 +209,7 @@ public class DotClass118AReconstructor
             }
             else if (nameField.startsWith(StringConstants.ARRAY_DOLLAR))
             {
-                // motif 'x[].class' trouvï¿½ !
+                // motif 'x[].class' trouvé !
                 // Substitution par l'expression 'new x[0].getClass()'
                 ConstantString cs = (ConstantString)cv;
                 String signature = constants.getConstantUtf8(cs.getStringIndex());
@@ -253,7 +253,7 @@ public class DotClass118AReconstructor
                         iconst0);
                 }
 
-                // Ajout de la mï¿½thode 'getClass'
+                // Ajout de la méthode 'getClass'
                 int methodNameIndex = constants.addConstantUtf8("getClass");
                 int methodDescriptorIndex =
                     constants.addConstantUtf8("()Ljava/lang/Class;");
@@ -309,7 +309,7 @@ public class DotClass118AReconstructor
                 }
             }
 
-            // Recherche de la mï¿½thode statique et ajout de l'attribut SYNTHETIC
+            // Recherche de la méthode statique et ajout de l'attribut SYNTHETIC
             Method[] methods = classFile.getMethods();
             j = methods.length;
 

@@ -58,11 +58,11 @@ public class ClassFile extends Base
 
     /**
      * Attention :
-     * - Dans le cas des instructions Switch+Enum d'Eclipse, la clï¿½ de la map
-     *   est l'indexe du nom de la mï¿½thode
+     * - Dans le cas des instructions Switch+Enum d'Eclipse, la clé de la map
+     *   est l'indexe du nom de la méthode
      *   "static int[] $SWITCH_TABLE$basic$data$TestEnum$enum1()".
      * - Dans le cas des instructions Switch+Enum des autres compilateurs, la
-     *   clï¿½ de la map est l'indexe du nom de la classe interne "static class 1"
+     *   clé de la map est l'indexe du nom de la classe interne "static class 1"
      *   contenant le tableau de correspondance
      *   "$SwitchMap$basic$data$TestEnum$enum1".
      */
