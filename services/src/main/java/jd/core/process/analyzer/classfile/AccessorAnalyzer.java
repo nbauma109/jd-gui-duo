@@ -66,7 +66,7 @@ public class AccessorAnalyzer
 			return;
 		}
 
-        // Recherche des accesseurs de méthodes
+        // Recherche des accesseurs de mï¿½thodes
         //   static void access$100(EntitlementFunctionLibrary, EvaluationCtx, URI, Bag, Bag[])
         searchInvokeMethodAccessor(classFile, method);
     }
@@ -335,7 +335,7 @@ public class AccessorAnalyzer
         return true;
     }
 
-    /* Recherche des accesseurs de méthodes:
+    /* Recherche des accesseurs de mï¿½thodes:
      *     static void access$100(EntitlementFunctionLibrary, EvaluationCtx, URI, Bag, Bag[])
      *     {
      *       Byte code:

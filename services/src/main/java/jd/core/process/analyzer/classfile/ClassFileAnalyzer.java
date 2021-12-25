@@ -54,7 +54,7 @@ public class ClassFileAnalyzer
 	public static void analyze(ReferenceMap referenceMap, ClassFile classFile)
 	{
 		// Creation du tableau associatif [nom de classe interne, objet class].
-		// Ce tableau est utilisé pour la suppression des accesseurs des
+		// Ce tableau est utilisï¿½ pour la suppression des accesseurs des
 		// classes internes.
 		Map<String, ClassFile> innerClassesMap;
 		if (classFile.getInnerClassFiles() != null)
@@ -106,10 +106,10 @@ public class ClassFileAnalyzer
 		{
 			// L'analyse preliminaire permet d'identifier l'attribut de chaque
 			// classe interne non statique portant la reference vers la classe
-			// externe. 'PreAnalyzeMethods' doit être execute avant l'analyse
+			// externe. 'PreAnalyzeMethods' doit ï¿½tre execute avant l'analyse
 			// des classes internes. Elle permet egalement de construire la liste
 			// des accesseurs et de parser les tableaux "SwitchMap" produit par le
-			// compilateur d'Eclipse et utilisé pour le Switch+Enum.
+			// compilateur d'Eclipse et utilisï¿½ pour le Switch+Enum.
 			preAnalyzeMethods(classFile);
 
 			// Analyse des classes internes avant l'analyse de la classe pour
@@ -723,7 +723,7 @@ public class ClassFileAnalyzer
 						LocalVariableAnalyzer.analyze(
 								classFile, method, variableNameGenerator, list, listForAnalyze);
 
-						// Recherche du numéro de l'attribut contenant la reference
+						// Recherche du numï¿½ro de l'attribut contenant la reference
 						// de la classe externe
 						outerThisFieldrefIndex = searchOuterThisFieldrefIndex(
 								classFile, method, list, outerThisFieldrefIndex);
@@ -763,7 +763,7 @@ public class ClassFileAnalyzer
 		int length = methods.length;
 
 		// Initialisation du reconstructeur traitant l'acces des champs et
-		// méthodes externes si la classe courante est une classe interne ou
+		// mï¿½thodes externes si la classe courante est une classe interne ou
 		// si elle contient des classes internes
 		OuterReferenceReconstructor outerReferenceReconstructor =
 				innerClassesMap != null ?
@@ -795,10 +795,10 @@ public class ClassFileAnalyzer
 				PreIncReconstructor.reconstruct(list);
 				// Recontruction des instructions de post-incrementation non entier
 				PostIncReconstructor.reconstruct(list);
-				// Recontruction du mot clé '.class' pour le JDK 1.1.8 - A
+				// Recontruction du mot clï¿½ '.class' pour le JDK 1.1.8 - A
 				DotClass118AReconstructor.reconstruct(
 						referenceMap, classFile, list);
-				// Recontruction du mot clé '.class' pour le JDK 1.4
+				// Recontruction du mot clï¿½ '.class' pour le JDK 1.4
 				DotClass14Reconstructor.reconstruct(
 						referenceMap, classFile, list);
 				// Replace StringBuffer and StringBuilder in java source line
@@ -809,15 +809,15 @@ public class ClassFileAnalyzer
 				transformTestOnLongOrDouble(list);
 				// Set constant type of "String.indexOf(...)" methods
 				setConstantTypeInStringIndexOfMethods(classFile, list);
-				// Elimine la séquence DupStore(this) ... DupLoad() ... DupLoad().
-				// Cette operation doit être executee avant
+				// Elimine la sï¿½quence DupStore(this) ... DupLoad() ... DupLoad().
+				// Cette operation doit ï¿½tre executee avant
 				// 'AssignmentInstructionReconstructor'.
 				DupStoreThisReconstructor.reconstruct(list);
 				// Recontruction des affectations multiples
-				// Cette operation doit être executee avant
+				// Cette operation doit ï¿½tre executee avant
 				// 'InitArrayInstructionReconstructor', 'TernaryOpReconstructor'
 				// et la construction des instructions try-catch et finally.
-				// Cette operation doit être executee après 'DupStoreThisReconstructor'.
+				// Cette operation doit ï¿½tre executee aprï¿½s 'DupStoreThisReconstructor'.
 				AssignmentInstructionReconstructor.reconstruct(list);
 				// Elimine les doubles casts et ajoute des casts devant les
 				// constantes numeriques si necessaire.
@@ -836,7 +836,7 @@ public class ClassFileAnalyzer
 				FastInstructionListBuilder.build(
 						referenceMap, classFile, method, fastList);
 
-				// Ajout des déclarations des variables locales temporaires
+				// Ajout des dï¿½clarations des variables locales temporaires
 				DupLocalVariableAnalyzer.declare(classFile, method, fastList);
 			}
 			catch (Exception e)
@@ -1124,7 +1124,7 @@ public class ClassFileAnalyzer
 									if (count == 2)
 									{
 										// Retrait de l'appel du constructeur s'il
-										// n'a que les deux paramètres standard.
+										// n'a que les deux paramï¿½tres standard.
 										list.remove(0);
 									}
 								} else if (count == 0)

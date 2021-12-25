@@ -316,7 +316,7 @@ public class SignatureUtil
     {
         /*
          * Pour une constante de type 'signature', les types de variable
-         * possible est retournée.
+         * possible est retournï¿½e.
          */
         switch (signature.charAt(0))
         {
@@ -335,7 +335,7 @@ public class SignatureUtil
     {
         /*
          * Pour un argument de type 'signature', les types de variable possible
-         * est retournée.
+         * est retournï¿½e.
          */
         switch (signature.charAt(0))
         {
@@ -353,7 +353,7 @@ public class SignatureUtil
     public static String getSignatureFromTypesBitField(int typesBitField)
     {
         /*
-         * Lorsqu'un choix est possible, le plus 'gros' type est retourné.
+         * Lorsqu'un choix est possible, le plus 'gros' type est retournï¿½.
          */
         if ((typesBitField & ByteCodeConstants.TBF_INT_INT) != 0) {
 			return "I";

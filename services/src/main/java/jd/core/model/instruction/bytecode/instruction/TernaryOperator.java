@@ -20,10 +20,10 @@ import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.LocalVariables;
 
 /*
- * La construction de cette instruction ne suit pas les règles générales !
+ * La construction de cette instruction ne suit pas les rï¿½gles gï¿½nï¿½rales !
  * C'est la seule exception. Cette instruction, appartement au package
- * 'bytecode', ne peut être construite qu'après avoir aggloméré les instructions
- * 'if'. Cette instruction est affichée par une classe du package 'bytecode' et
+ * 'bytecode', ne peut ï¿½tre construite qu'aprï¿½s avoir agglomï¿½rï¿½ les instructions
+ * 'if'. Cette instruction est affichï¿½e par une classe du package 'bytecode' et
  * est construite par une classe du package 'fast'.
  */
 public class TernaryOperator extends Instruction

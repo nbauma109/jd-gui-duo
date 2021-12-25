@@ -36,7 +36,7 @@ import jd.core.process.analyzer.util.ReconstructorUtil;
  * ...
  * ???( DupLoadN )
  *
- * Cette operation doit être executee avant 'AssignmentInstructionReconstructor'.
+ * Cette operation doit ï¿½tre executee avant 'AssignmentInstructionReconstructor'.
  */
 public class InitArrayInstructionReconstructor
 {
@@ -71,7 +71,7 @@ public class InitArrayInstructionReconstructor
 	private static void reconstructAInstruction(
 			List<Instruction> list, int index, DupStore dupStore)
 	{
-		// 1er DupStore trouvé
+		// 1er DupStore trouvï¿½
 		final int length = list.size();
 		int firstDupStoreIndex = index;
 		DupStore lastDupStore = dupStore;

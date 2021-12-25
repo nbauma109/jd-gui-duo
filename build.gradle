@@ -40,7 +40,7 @@ allprojects {
         targetCompatibility = '17'
         options.compilerArgs << '-Xlint:deprecation'
         options.compilerArgs << '-Xlint:unchecked'
-        options.encoding = 'ISO-8859-1'
+        options.encoding = 'UTF-8'
     }
 
     repositories {

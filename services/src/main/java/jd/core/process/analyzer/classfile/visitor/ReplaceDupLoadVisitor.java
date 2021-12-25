@@ -743,7 +743,7 @@ public class ReplaceDupLoadVisitor
     }
 
     /**
-     * @return le dernier parent sur lequel une substitution a été faite
+     * @return le dernier parent sur lequel une substitution a ï¿½tï¿½ faite
      */
     public Instruction getParentFound()
     {

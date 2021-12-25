@@ -29,9 +29,9 @@ public class Field extends FieldOrMethod
     private ValueAndMethod valueAndMethod = null;
     /*
      * Attributs pour l'affichage des champs synthetique des classes anonymes.
-     * Champs modifié par:
+     * Champs modifiï¿½ par:
      * 1) ClassFileAnalyzer.AnalyseAndModifyConstructors(...) pour y placer le
-     *    numéro (position) du parametre du constructeur initialisant le champs.
+     *    numï¿½ro (position) du parametre du constructeur initialisant le champs.
      */
     private int anonymousClassConstructorParameterIndex;
     /*

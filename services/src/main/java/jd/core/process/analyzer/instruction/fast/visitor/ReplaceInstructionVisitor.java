@@ -29,7 +29,7 @@ import jd.core.model.instruction.fast.instruction.FastTestList;
 import jd.core.model.instruction.fast.instruction.FastTry;
 
 /*
- * utilisé par TernaryOpReconstructor
+ * utilisï¿½ par TernaryOpReconstructor
  */
 public class ReplaceInstructionVisitor
 {
