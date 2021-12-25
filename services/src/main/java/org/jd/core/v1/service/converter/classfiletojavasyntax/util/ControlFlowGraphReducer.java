@@ -26,7 +26,7 @@ public abstract class ControlFlowGraphReducer {
     private ControlFlowGraph controlFlowGraph;
 
     public boolean reduce(Method method) {
-        controlFlowGraph = getControlFlowGraphMaker().make(method);
+        controlFlowGraph = new ControlFlowGraphMaker().make(method);
         ControlFlowGraphGotoReducer.reduce(controlFlowGraph);
         ControlFlowGraphLoopReducer.reduce(controlFlowGraph);
         BasicBlock start = controlFlowGraph.getStart();
@@ -317,7 +317,6 @@ public abstract class ControlFlowGraphReducer {
     }
 
     public abstract String getLabel();
-    protected abstract ControlFlowGraphMaker getControlFlowGraphMaker();
     protected abstract boolean needToUpdateConditionTernaryOperator(BasicBlock basicBlock, BasicBlock nextNext);
     protected abstract boolean needToUpdateCondition(BasicBlock basicBlock, BasicBlock nextNext);
     protected abstract boolean needToCreateIf(BasicBlock branch, BasicBlock nextNext, int maxOffset);
@@ -859,7 +858,11 @@ public abstract class ControlFlowGraphReducer {
 
             updateBlock(tryBB, end, maxOffset);
 
-            if (/*finallyBB != null && */basicBlock.getExceptionHandlers().size() == 1 && tryBB.getType() == TYPE_TRY && tryBB.getNext() == END && basicBlock.getFromOffset() == tryBB.getFromOffset() && !containsFinally(tryBB)) {
+            if (finallyBB != null && basicBlock.getExceptionHandlers().size() == 1 
+                    && tryBB.getType() == TYPE_TRY 
+                    && tryBB.getNext() == END 
+                    && basicBlock.getFromOffset() == tryBB.getFromOffset() 
+                    && !containsFinally(tryBB)) {
                 // Merge inner try
                 basicBlock.getExceptionHandlers().addAll(0, tryBB.getExceptionHandlers());
 

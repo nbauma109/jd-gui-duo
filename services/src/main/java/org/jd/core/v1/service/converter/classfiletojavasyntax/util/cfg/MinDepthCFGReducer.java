@@ -54,9 +54,4 @@ public class MinDepthCFGReducer extends ControlFlowGraphReducer {
     public String getLabel() {
         return "Show Minimum-Depth Control Flow Graph";
     }
-
-    @Override
-    protected ControlFlowGraphMaker getControlFlowGraphMaker() {
-        return new ControlFlowGraphMaker(ControlFlowGraphMaker::makeLongKey);
-    }
 }

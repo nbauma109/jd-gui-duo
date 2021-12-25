@@ -29,9 +29,4 @@ public class CmpDepthCFGReducer extends ControlFlowGraphReducer {
     public String getLabel() {
         return "Show Compare-Depth Control Flow Graph";
     }
-
-    @Override
-    protected ControlFlowGraphMaker getControlFlowGraphMaker() {
-        return new ControlFlowGraphMaker(ControlFlowGraphMaker::makeShortKey);
-    }
 }

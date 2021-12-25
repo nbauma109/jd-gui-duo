@@ -19,7 +19,6 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlF
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.*;
-import java.util.function.Function;
 
 import static org.apache.bcel.Const.*;
 import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.*;
@@ -29,16 +28,6 @@ public class ControlFlowGraphMaker {
     protected static final BasicBlock MARK = END;
 
     protected static final CodeExceptionComparator CODE_EXCEPTION_COMPARATOR = new CodeExceptionComparator();
-
-    private Function<CodeException, String> codeExceptionKeyMaker;
-    
-    public ControlFlowGraphMaker(Function<CodeException, String> codeExceptionKeyMaker) {
-        this.codeExceptionKeyMaker = codeExceptionKeyMaker;
-    }
-
-    public ControlFlowGraphMaker() {
-        this(ControlFlowGraphMaker::makeLongKey);
-    }
 
     public ControlFlowGraph make(Method method) {
         AttributeCode attributeCode = method.getAttribute("Code");
@@ -515,7 +504,7 @@ public class ControlFlowGraphMaker {
 
                 if (startPc != handlerPc && (handlePcMarks[handlerPc] != 'T' || startPc <= map[handlePcToStartPc[handlerPc]].getFromOffset())) {
                     int catchType = codeException.getCatchType();
-                    String key = codeExceptionKeyMaker.apply(codeException);
+                    String key = makeShortKey(codeException);
                     BasicBlock tcf = cache.get(key);
 
                     if (tcf == null) {
@@ -609,10 +598,6 @@ public class ControlFlowGraphMaker {
         }
 
         return false;
-    }
-
-    public static final String makeLongKey(CodeException ce) {
-        return ce.getStartPC() + "-" + ce.getEndPC() + "-" + ce.getHandlerPC();
     }
     
     public static final String makeShortKey(CodeException ce) {
