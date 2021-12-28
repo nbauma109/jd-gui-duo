@@ -10,8 +10,8 @@ import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class FieldDeclaration implements MemberDeclaration {
-    protected BaseAnnotationReference annotationReferences;
-    protected int flags;
+    private BaseAnnotationReference annotationReferences;
+    private int flags;
     protected final Type type;
     protected BaseFieldDeclarator fieldDeclarators;
 

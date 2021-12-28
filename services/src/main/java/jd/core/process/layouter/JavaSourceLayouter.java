@@ -27,12 +27,44 @@ import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
-import jd.core.model.instruction.bytecode.instruction.*;
+import jd.core.model.instruction.bytecode.instruction.ArrayLoadInstruction;
+import jd.core.model.instruction.bytecode.instruction.BranchInstruction;
+import jd.core.model.instruction.bytecode.instruction.GetStatic;
+import jd.core.model.instruction.bytecode.instruction.Instruction;
+import jd.core.model.instruction.bytecode.instruction.Invokestatic;
+import jd.core.model.instruction.bytecode.instruction.Invokevirtual;
 import jd.core.model.instruction.fast.FastConstants;
-import jd.core.model.instruction.fast.instruction.*;
+import jd.core.model.instruction.fast.instruction.FastDeclaration;
+import jd.core.model.instruction.fast.instruction.FastFor;
+import jd.core.model.instruction.fast.instruction.FastForEach;
+import jd.core.model.instruction.fast.instruction.FastInstruction;
+import jd.core.model.instruction.fast.instruction.FastLabel;
+import jd.core.model.instruction.fast.instruction.FastList;
+import jd.core.model.instruction.fast.instruction.FastSwitch;
 import jd.core.model.instruction.fast.instruction.FastSwitch.Pair;
+import jd.core.model.instruction.fast.instruction.FastSynchronized;
+import jd.core.model.instruction.fast.instruction.FastTest2Lists;
+import jd.core.model.instruction.fast.instruction.FastTestList;
+import jd.core.model.instruction.fast.instruction.FastTry;
 import jd.core.model.instruction.fast.instruction.FastTry.FastCatch;
-import jd.core.model.layout.block.*;
+import jd.core.model.layout.block.BlockLayoutBlock;
+import jd.core.model.layout.block.CaseBlockEndLayoutBlock;
+import jd.core.model.layout.block.CaseBlockStartLayoutBlock;
+import jd.core.model.layout.block.CaseEnumLayoutBlock;
+import jd.core.model.layout.block.CaseLayoutBlock;
+import jd.core.model.layout.block.DeclareLayoutBlock;
+import jd.core.model.layout.block.FastCatchLayoutBlock;
+import jd.core.model.layout.block.FragmentLayoutBlock;
+import jd.core.model.layout.block.LayoutBlock;
+import jd.core.model.layout.block.LayoutBlockConstants;
+import jd.core.model.layout.block.OffsetLayoutBlock;
+import jd.core.model.layout.block.SeparatorLayoutBlock;
+import jd.core.model.layout.block.SingleStatementBlockEndLayoutBlock;
+import jd.core.model.layout.block.SingleStatementBlockStartLayoutBlock;
+import jd.core.model.layout.block.StatementsBlockEndLayoutBlock;
+import jd.core.model.layout.block.StatementsBlockStartLayoutBlock;
+import jd.core.model.layout.block.SwitchBlockEndLayoutBlock;
+import jd.core.model.layout.block.SwitchBlockStartLayoutBlock;
 import jd.core.preferences.Preferences;
 import jd.core.process.layouter.visitor.InstructionSplitterVisitor;
 import jd.core.process.layouter.visitor.InstructionsSplitterVisitor;
@@ -40,8 +72,8 @@ import jd.core.process.layouter.visitor.MaxLineNumberVisitor;
 
 public class JavaSourceLayouter
 {
-	InstructionSplitterVisitor instructionSplitterVisitor;
-	InstructionsSplitterVisitor instructionsSplitterVisitor;
+	private InstructionSplitterVisitor instructionSplitterVisitor;
+	private InstructionsSplitterVisitor instructionsSplitterVisitor;
 
 	public JavaSourceLayouter()
 	{

@@ -13,7 +13,9 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.model.container.JarContainer;
 import org.jd.gui.spi.ContainerFactory;
 
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 
 public class JarContainerFactoryProvider implements ContainerFactory {
     @Override

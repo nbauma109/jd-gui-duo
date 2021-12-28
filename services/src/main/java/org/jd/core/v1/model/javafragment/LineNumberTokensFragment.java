@@ -8,13 +8,16 @@ package org.jd.core.v1.model.javafragment;
 
 import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.model.fragment.FixedFragment;
-import org.jd.core.v1.model.token.*;
+import org.jd.core.v1.model.token.AbstractNopTokenVisitor;
+import org.jd.core.v1.model.token.LineNumberToken;
+import org.jd.core.v1.model.token.NewLineToken;
+import org.jd.core.v1.model.token.Token;
 
 import java.util.Arrays;
 import java.util.List;
 
 public class LineNumberTokensFragment extends FixedFragment implements JavaFragment {
-    protected List<Token> tokens;
+    private List<Token> tokens;
 
     public LineNumberTokensFragment(Token... tokens) {
         this(Arrays.asList(tokens));
@@ -64,11 +67,6 @@ public class LineNumberTokensFragment extends FixedFragment implements JavaFragm
     protected static class SearchLineNumberVisitor extends AbstractNopTokenVisitor {
     	private int lineNumber;
     	private int newLineCounter;
-
-        public void reset() {
-            this.lineNumber = Printer.UNKNOWN_LINE_NUMBER;
-            this.newLineCounter = 0;
-        }
 
         @Override
         public void visit(LineNumberToken token) {

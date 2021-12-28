@@ -11,14 +11,16 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.service.extension.ExtensionService;
 import org.jd.gui.spi.SourceSaver;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SourceSaverService {
     protected static final SourceSaverService SOURCE_SAVER_SERVICE = new SourceSaverService();
 
     public static SourceSaverService getInstance() { return SOURCE_SAVER_SERVICE; }
 
-    protected Map<String, SourceSavers> mapProviders = new HashMap<>();
+    private Map<String, SourceSavers> mapProviders = new HashMap<>();
 
     protected SourceSaverService() {
         Collection<SourceSaver> providers = ExtensionService.getInstance().load(SourceSaver.class);
@@ -80,8 +82,8 @@ public class SourceSaverService {
     }
 
     protected static class SourceSavers {
-        protected Map<String, SourceSaver> savers = new HashMap<>();
-        protected SourceSaver defaultSaver;
+        private Map<String, SourceSaver> savers = new HashMap<>();
+        private SourceSaver defaultSaver;
 
         void add(SourceSaver saver) {
             if (saver.getPathPattern() != null) {

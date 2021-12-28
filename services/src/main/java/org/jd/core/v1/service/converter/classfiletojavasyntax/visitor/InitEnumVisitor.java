@@ -7,23 +7,42 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
-import org.jd.core.v1.model.javasyntax.declaration.*;
-import org.jd.core.v1.model.javasyntax.expression.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
+import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ConstructorDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.Declaration;
+import org.jd.core.v1.model.javasyntax.declaration.EnumDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
+import org.jd.core.v1.model.javasyntax.declaration.FormalParameters;
+import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.StaticInitializerDeclaration;
+import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
+import org.jd.core.v1.model.javasyntax.expression.Expression;
+import org.jd.core.v1.model.javasyntax.expression.Expressions;
+import org.jd.core.v1.model.javasyntax.expression.IntegerConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.NewExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileEnumDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileEnumDeclaration.ClassFileConstant;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileFieldDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMethodDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileTypeDeclaration;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.Comparator;
 
-import static org.jd.core.v1.model.javasyntax.declaration.Declaration.*;
+import static org.apache.bcel.Const.ACC_ENUM;
+import static org.apache.bcel.Const.ACC_PUBLIC;
+import static org.apache.bcel.Const.ACC_STATIC;
+import static org.apache.bcel.Const.ACC_SYNTHETIC;
 
 public class InitEnumVisitor extends AbstractJavaSyntaxVisitor {
-	protected ClassFileBodyDeclaration bodyDeclaration;
-	protected BodyDeclaration constantBodyDeclaration;
-	protected DefaultList<ClassFileEnumDeclaration.ClassFileConstant> constants = new DefaultList<>();
-	protected int lineNumber;
-	protected int index;
-	protected BaseExpression arguments;
+	private ClassFileBodyDeclaration bodyDeclaration;
+	private BodyDeclaration constantBodyDeclaration;
+	private DefaultList<ClassFileEnumDeclaration.ClassFileConstant> constants = new DefaultList<>();
+	private int lineNumber;
+	private int index;
+	private BaseExpression arguments;
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public DefaultList<EnumDeclaration.Constant> getConstants() {
@@ -47,8 +66,8 @@ public class InitEnumVisitor extends AbstractJavaSyntaxVisitor {
 
 	@Override
 	public void visit(ConstructorDeclaration declaration) {
-		if ((declaration.getFlags() & FLAG_ANONYMOUS) != 0 || declaration.getStatements().size() <= 1) {
-			declaration.setFlags(FLAG_SYNTHETIC);
+		if ((declaration.getFlags() & Declaration.FLAG_ANONYMOUS) != 0 || declaration.getStatements().size() <= 1) {
+			declaration.setFlags(ACC_SYNTHETIC);
 		} else {
 			FormalParameters parameters = (FormalParameters) declaration.getFormalParameters();
 			// Remove name & index parameterTypes
@@ -66,18 +85,18 @@ public class InitEnumVisitor extends AbstractJavaSyntaxVisitor {
 
 	@Override
 	public void visit(MethodDeclaration declaration) {
-		if ((declaration.getFlags() & (FLAG_STATIC | FLAG_PUBLIC)) != 0 && ("values".equals(declaration.getName()) || "valueOf".equals(declaration.getName()))) {
+		if ((declaration.getFlags() & (ACC_STATIC | ACC_PUBLIC)) != 0 && ("values".equals(declaration.getName()) || "valueOf".equals(declaration.getName()))) {
 			ClassFileMethodDeclaration cfmd = (ClassFileMethodDeclaration) declaration;
-			cfmd.setFlags(cfmd.getFlags() | FLAG_SYNTHETIC);
+			cfmd.setFlags(cfmd.getFlags() | ACC_SYNTHETIC);
 		}
 	}
 
 	@Override
 	public void visit(FieldDeclaration declaration) {
-		if ((declaration.getFlags() & FLAG_ENUM) != 0) {
+		if ((declaration.getFlags() & ACC_ENUM) != 0) {
 			ClassFileFieldDeclaration cffd = (ClassFileFieldDeclaration) declaration;
 			cffd.getFieldDeclarators().accept(this);
-			cffd.setFlags(cffd.getFlags() | FLAG_SYNTHETIC);
+			cffd.setFlags(cffd.getFlags() | ACC_SYNTHETIC);
 		}
 	}
 

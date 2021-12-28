@@ -9,37 +9,66 @@ package org.jd.gui.view;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
-import org.jd.gui.api.model.*;
 import org.jd.gui.api.model.Container;
+import org.jd.gui.api.model.Indexes;
+import org.jd.gui.api.model.TreeNodeData;
+import org.jd.gui.api.model.Type;
 import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.function.TriConsumer;
 import org.jd.gui.util.swing.SwingUtil;
 import org.jd.gui.view.component.Tree;
 import org.jd.gui.view.renderer.TreeNodeRenderer;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
+import java.awt.BorderLayout;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JRootPane;
+import javax.swing.JScrollPane;
+import javax.swing.KeyStroke;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
-import javax.swing.tree.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 
 public class OpenTypeHierarchyView {
 
 	protected static final ImageIcon ROOT_CLASS_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/generate_class.png"));
 	protected static final ImageIcon ROOT_INTERFACE_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/generate_int.png"));
 
-	protected API api;
-	protected Collection<Future<Indexes>> collectionOfFutureIndexes;
+	private API api;
+	private Collection<Future<Indexes>> collectionOfFutureIndexes;
 
-	protected JDialog openTypeHierarchyDialog;
-	protected Tree openTypeHierarchyTree;
+	private JDialog openTypeHierarchyDialog;
+	private Tree openTypeHierarchyTree;
 
-	protected TriConsumer<Point, Collection<Container.Entry>, String> selectedTypeCallback;
+	private TriConsumer<Point, Collection<Container.Entry>, String> selectedTypeCallback;
 
 	public OpenTypeHierarchyView(API api, JFrame mainFrame, TriConsumer<Point, Collection<Container.Entry>, String> selectedTypeCallback) {
 		this.api = api;
@@ -458,10 +487,10 @@ public class OpenTypeHierarchyView {
 
 	// Graphic data for renderer
 	protected static class TreeNodeBean implements TreeNodeData {
-		String label;
-		String tip;
-		Icon icon;
-		Icon openIcon;
+		private String label;
+		private String tip;
+		private Icon icon;
+		private Icon openIcon;
 
 		TreeNodeBean(Type type) {
 			this.label = type.getDisplayPackageName() != null ? type.getDisplayTypeName() + " - " + type.getDisplayPackageName() : type.getDisplayTypeName();

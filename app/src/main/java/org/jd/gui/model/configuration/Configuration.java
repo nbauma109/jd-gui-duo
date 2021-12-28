@@ -12,20 +12,23 @@ import org.jd.gui.Constants;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Configuration {
-    protected Point mainWindowLocation;
-    protected Dimension mainWindowSize;
-    protected boolean mainWindowMaximize;
-    protected String lookAndFeel;
+    private Point mainWindowLocation;
+    private Dimension mainWindowSize;
+    private boolean mainWindowMaximize;
+    private String lookAndFeel;
 
-    protected List<File> recentFiles = new ArrayList<>();
+    private List<File> recentFiles = new ArrayList<>();
 
-    protected File recentLoadDirectory;
-    protected File recentSaveDirectory;
+    private File recentLoadDirectory;
+    private File recentSaveDirectory;
 
-    protected final Map<String, String> preferences = new HashMap<>();
+    private final Map<String, String> preferences = new HashMap<>();
 
     public Point getMainWindowLocation() {
         return mainWindowLocation;

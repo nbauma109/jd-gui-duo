@@ -16,7 +16,7 @@ public class StartBlockToken implements Token {
     public static final StartBlockToken START_RESOURCES_BLOCK = new StartBlockToken("(");
     public static final StartBlockToken START_DECLARATION_OR_STATEMENT_BLOCK = new StartBlockToken("");
 
-    protected String text;
+    private String text;
 
     protected StartBlockToken(String text) {
         this.text = text;

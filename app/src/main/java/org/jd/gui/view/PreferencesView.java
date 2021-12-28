@@ -12,23 +12,47 @@ import org.jd.gui.spi.PreferencesPanel;
 import org.jd.gui.util.decompiler.GuiPreferences;
 import org.jd.gui.util.swing.SwingUtil;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Insets;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRootPane;
+import javax.swing.JScrollPane;
+import javax.swing.KeyStroke;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingUtilities;
 
 public class PreferencesView implements PreferencesPanel.PreferencesPanelChangeListener {
-    protected Map<String, String> preferences;
-    protected Collection<PreferencesPanel> panels;
-    protected Map<PreferencesPanel, Boolean> valids = new HashMap<>();
+    private Map<String, String> preferences;
+    private Collection<PreferencesPanel> panels;
+    private Map<PreferencesPanel, Boolean> valids = new HashMap<>();
 
-    protected JDialog preferencesDialog;
-    protected JButton preferencesOkButton = new JButton();
+    private JDialog preferencesDialog;
+    private JButton preferencesOkButton = new JButton();
 
-    protected Runnable okCallback;
+    private Runnable okCallback;
 
     public PreferencesView(Configuration configuration, JFrame mainFrame, Collection<PreferencesPanel> panels) {
         this.preferences = configuration.getPreferences();

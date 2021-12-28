@@ -15,7 +15,7 @@ public class NewLineToken implements Token {
     public static final NewLineToken NEWLINE_1 = new NewLineToken(1);
     public static final NewLineToken NEWLINE_2 = new NewLineToken(2);
 
-    protected int count;
+    private int count;
 
     public NewLineToken(int count) {
         this.count = count;

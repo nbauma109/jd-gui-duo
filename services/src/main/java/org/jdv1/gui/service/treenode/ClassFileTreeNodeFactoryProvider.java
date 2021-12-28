@@ -16,7 +16,11 @@ import org.jd.gui.util.ImageUtil;
 import org.jd.gui.view.data.TreeNodeBean;
 import org.jdv1.gui.view.component.DynamicPage;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.EOFException;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;

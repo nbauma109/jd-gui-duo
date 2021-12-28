@@ -29,7 +29,14 @@ import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.Field;
 import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
-import jd.core.model.instruction.bytecode.instruction.*;
+import jd.core.model.instruction.bytecode.instruction.AAStore;
+import jd.core.model.instruction.bytecode.instruction.ALoad;
+import jd.core.model.instruction.bytecode.instruction.ANewArray;
+import jd.core.model.instruction.bytecode.instruction.AStore;
+import jd.core.model.instruction.bytecode.instruction.IConst;
+import jd.core.model.instruction.bytecode.instruction.InitArrayInstruction;
+import jd.core.model.instruction.bytecode.instruction.Instruction;
+import jd.core.model.instruction.bytecode.instruction.PutStatic;
 import jd.core.model.instruction.fast.FastConstants;
 import jd.core.model.instruction.fast.instruction.FastDeclaration;
 

@@ -19,7 +19,17 @@ package jd.core.process.layouter.visitor;
 import org.apache.bcel.Const;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
-import jd.core.model.instruction.bytecode.instruction.*;
+import jd.core.model.instruction.bytecode.instruction.ArrayLoadInstruction;
+import jd.core.model.instruction.bytecode.instruction.ArrayStoreInstruction;
+import jd.core.model.instruction.bytecode.instruction.AssignmentInstruction;
+import jd.core.model.instruction.bytecode.instruction.BinaryOperatorInstruction;
+import jd.core.model.instruction.bytecode.instruction.IncInstruction;
+import jd.core.model.instruction.bytecode.instruction.InstanceOf;
+import jd.core.model.instruction.bytecode.instruction.Instruction;
+import jd.core.model.instruction.bytecode.instruction.InvokeNoStaticInstruction;
+import jd.core.model.instruction.bytecode.instruction.Pop;
+import jd.core.model.instruction.bytecode.instruction.PutField;
+import jd.core.model.instruction.bytecode.instruction.TernaryOperator;
 
 public class MinLineNumberVisitor
 {

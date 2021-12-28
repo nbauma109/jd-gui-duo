@@ -77,8 +77,8 @@ public class ByteCodeConstants
 	public static final int CMP_EQ  = 0;
 	public static final int CMP_LT  = 1;
 	public static final int CMP_GT  = 2;
-	public static final int CMP_UEQ = 3;
-	public static final int CMP_UNE = 4;
+	public static final int CMP_UEQ = 3; // NO_UCD (unused code)
+	public static final int CMP_UNE = 4; // NO_UCD (unused code)
 	public static final int CMP_LE  = 5;
 	public static final int CMP_GE  = 6;
 	public static final int CMP_NE  = 7;

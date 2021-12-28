@@ -16,11 +16,8 @@ import java.io.File;
 import java.util.Collection;
 
 public class SourceLoaderService {
-    protected static final SourceLoaderService SOURCE_LOADER_SERVICE = new SourceLoaderService();
 
-    public static SourceLoaderService getInstance() { return SOURCE_LOADER_SERVICE; }
-
-    protected Collection<SourceLoader> providers = ExtensionService.getInstance().load(SourceLoader.class);
+    private Collection<SourceLoader> providers = ExtensionService.getInstance().load(SourceLoader.class);
 
     public String getSource(API api, Container.Entry entry) {
         for (SourceLoader provider : providers) {

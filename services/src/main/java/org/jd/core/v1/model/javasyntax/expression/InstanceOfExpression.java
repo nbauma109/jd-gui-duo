@@ -7,16 +7,12 @@
 
 package org.jd.core.v1.model.javasyntax.expression;
 
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
+import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class InstanceOfExpression extends AbstractLineNumberExpression {
-    protected Expression expression;
-    protected Type instanceOfType;
-
-    public InstanceOfExpression(Expression expression, ObjectType instanceOfType) {
-        this.expression = expression;
-        this.instanceOfType = instanceOfType;
-    }
+    private Expression expression;
+    private Type instanceOfType;
 
     public InstanceOfExpression(int lineNumber, Expression expression, Type instanceOfType) {
         super(lineNumber);

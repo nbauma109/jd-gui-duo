@@ -11,19 +11,36 @@ import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
-import org.jd.core.v1.model.javasyntax.declaration.*;
+import org.jd.core.v1.model.javasyntax.declaration.AnnotationDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ClassDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ConstructorDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.EnumDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.InterfaceDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.StaticInitializerDeclaration;
 import org.jd.core.v1.model.javasyntax.statement.Statements;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeWriter;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphReducer;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.LocalVariableMaker;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.StatementMaker;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
 import java.util.List;
 
-import static org.jd.core.v1.model.javasyntax.declaration.Declaration.*;
+import static org.apache.bcel.Const.ACC_ABSTRACT;
+import static org.apache.bcel.Const.ACC_BRIDGE;
+import static org.apache.bcel.Const.ACC_PUBLIC;
+import static org.apache.bcel.Const.ACC_STATIC;
+import static org.apache.bcel.Const.ACC_SYNTHETIC;
 
 public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
-    protected TypeMaker typeMaker;
+    private TypeMaker typeMaker;
 
     public CreateInstructionsVisitor(TypeMaker typeMaker) {
         this.typeMaker = typeMaker;
@@ -43,12 +60,12 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
 
         if (methods != null) {
             for (ClassFileConstructorOrMethodDeclaration method : methods) {
-                if ((method.getFlags() & (FLAG_SYNTHETIC|FLAG_BRIDGE)) != 0) {
+                if ((method.getFlags() & (ACC_SYNTHETIC|ACC_BRIDGE)) != 0) {
                     method.accept(this);
-                } else if ((method.getFlags() & (FLAG_STATIC|FLAG_BRIDGE)) == FLAG_STATIC) {
+                } else if ((method.getFlags() & (ACC_STATIC|ACC_BRIDGE)) == ACC_STATIC) {
                     if (method.getMethod().getName().startsWith("access$")) {
                         // Accessor -> bridge method
-                        method.setFlags(method.getFlags() | FLAG_BRIDGE);
+                        method.setFlags(method.getFlags() | ACC_BRIDGE);
                         method.accept(this);
                     }
                 } else if (method.getParameterTypes() != null) {
@@ -56,7 +73,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
                         for (Type type : method.getParameterTypes()) {
                             if (type.isObjectType() && type.getName() == null) {
                                 // Synthetic type in parameters -> synthetic method
-                                method.setFlags(method.getFlags() | FLAG_SYNTHETIC);
+                                method.setFlags(method.getFlags() | ACC_SYNTHETIC);
                                 method.accept(this);
                                 break;
                             }
@@ -65,7 +82,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
                         Type type = method.getParameterTypes().getFirst();
                         if (type.isObjectType() && type.getName() == null) {
                             // Synthetic type in parameters -> synthetic method
-                            method.setFlags(method.getFlags() | FLAG_SYNTHETIC);
+                            method.setFlags(method.getFlags() | ACC_SYNTHETIC);
                             method.accept(this);
                             break;
                         }
@@ -74,7 +91,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
             }
 
             for (ClassFileConstructorOrMethodDeclaration method : methods) {
-                if ((method.getFlags() & (FLAG_SYNTHETIC|FLAG_BRIDGE)) == 0) {
+                if ((method.getFlags() & (ACC_SYNTHETIC|ACC_BRIDGE)) == 0) {
                     method.accept(this);
                 }
             }
@@ -140,7 +157,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
         comd.setFormalParameters(localVariableMaker.getFormalParameters());
 
         if (classFile.isInterface()) {
-            comd.setFlags(comd.getFlags() & ~(FLAG_PUBLIC|FLAG_ABSTRACT));
+            comd.setFlags(comd.getFlags() & ~(ACC_PUBLIC|ACC_ABSTRACT));
         }
     }
 

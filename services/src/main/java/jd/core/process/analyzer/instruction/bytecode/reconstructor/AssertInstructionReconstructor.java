@@ -27,7 +27,13 @@ import java.util.List;
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
-import jd.core.model.instruction.bytecode.instruction.*;
+import jd.core.model.instruction.bytecode.instruction.AThrow;
+import jd.core.model.instruction.bytecode.instruction.AssertInstruction;
+import jd.core.model.instruction.bytecode.instruction.ComplexConditionalBranchInstruction;
+import jd.core.model.instruction.bytecode.instruction.GetStatic;
+import jd.core.model.instruction.bytecode.instruction.IfInstruction;
+import jd.core.model.instruction.bytecode.instruction.Instruction;
+import jd.core.model.instruction.bytecode.instruction.InvokeNew;
 
 /*
  * Recontruction des des instructions 'assert' depuis le motif :

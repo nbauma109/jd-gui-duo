@@ -10,8 +10,8 @@ package org.jd.core.v1.model.javasyntax.expression;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class ArrayExpression extends AbstractLineNumberTypeExpression {
-    protected Expression expression;
-    protected Expression index;
+    private Expression expression;
+    private Expression index;
 
     public ArrayExpression(Expression expression, Expression index) {
         super(createItemType(expression));

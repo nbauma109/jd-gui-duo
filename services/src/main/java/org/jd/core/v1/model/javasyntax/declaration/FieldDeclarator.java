@@ -7,10 +7,10 @@
 package org.jd.core.v1.model.javasyntax.declaration;
 
 public class FieldDeclarator implements BaseFieldDeclarator {
-    protected FieldDeclaration fieldDeclaration;
-    protected String name;
-    protected int dimension;
-    protected VariableInitializer variableInitializer;
+    private FieldDeclaration fieldDeclaration;
+    private String name;
+    private int dimension;
+    private VariableInitializer variableInitializer;
 
     public FieldDeclarator(String name) {
         this.name = name;
@@ -18,12 +18,6 @@ public class FieldDeclarator implements BaseFieldDeclarator {
 
     public FieldDeclarator(String name, VariableInitializer variableInitializer) {
         this.name = name;
-        this.variableInitializer = variableInitializer;
-    }
-
-    public FieldDeclarator(String name, int dimension, VariableInitializer variableInitializer) {
-        this.name = name;
-        this.dimension = dimension;
         this.variableInitializer = variableInitializer;
     }
 

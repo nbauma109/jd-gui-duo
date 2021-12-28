@@ -7,12 +7,15 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.AbstractNopTypeArgumentVisitor;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
 
 import java.util.Set;
 
 public class PopulateBlackListNamesVisitor extends AbstractNopTypeArgumentVisitor {
-    protected Set<String> blackListNames;
+    private Set<String> blackListNames;
 
     public PopulateBlackListNamesVisitor(Set<String> blackListNames) {
         this.blackListNames = blackListNames;

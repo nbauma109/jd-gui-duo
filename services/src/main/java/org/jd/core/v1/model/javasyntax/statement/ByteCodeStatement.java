@@ -9,11 +9,7 @@ package org.jd.core.v1.model.javasyntax.statement;
 
 
 public class ByteCodeStatement implements Statement {
-    protected String text;
-
-    public ByteCodeStatement(String text) {
-        this.text = text;
-    }
+    private String text;
 
     public String getText() {
         return text;

@@ -10,14 +10,21 @@ package org.jd.gui.util.xml;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 
 import java.io.StringReader;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import javax.xml.XMLConstants;
-import javax.xml.stream.*;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 public abstract class AbstractXmlPathFinder {
-    protected Map<String, Set<String>> tagNameToPaths = new HashMap<>();
-    protected StringBuilder sb = new StringBuilder(200);
+    private Map<String, Set<String>> tagNameToPaths = new HashMap<>();
+    private StringBuilder sb = new StringBuilder(200);
 
     protected AbstractXmlPathFinder(Collection<String> paths) {
         for (String path : paths) {

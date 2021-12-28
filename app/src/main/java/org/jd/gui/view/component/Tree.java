@@ -10,7 +10,9 @@ package org.jd.gui.view.component;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 
-import javax.swing.*;
+import javax.swing.InputMap;
+import javax.swing.JTree;
+import javax.swing.KeyStroke;
 
 public class Tree extends JTree {
 

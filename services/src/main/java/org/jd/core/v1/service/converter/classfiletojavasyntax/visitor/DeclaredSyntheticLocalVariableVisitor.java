@@ -8,15 +8,37 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
-import org.jd.core.v1.model.javasyntax.declaration.*;
-import org.jd.core.v1.model.javasyntax.expression.*;
-import org.jd.core.v1.model.javasyntax.statement.*;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.FormalParameter;
+import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
+import org.jd.core.v1.model.javasyntax.expression.ArrayExpression;
+import org.jd.core.v1.model.javasyntax.expression.CastExpression;
+import org.jd.core.v1.model.javasyntax.expression.ConstructorReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.DoubleConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.FieldReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.FloatConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.InstanceOfExpression;
+import org.jd.core.v1.model.javasyntax.expression.IntegerConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.LocalVariableReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.LongConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.MethodReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.NewArray;
+import org.jd.core.v1.model.javasyntax.expression.NewExpression;
+import org.jd.core.v1.model.javasyntax.expression.NewInitializedArray;
+import org.jd.core.v1.model.javasyntax.expression.NullExpression;
+import org.jd.core.v1.model.javasyntax.expression.ObjectTypeReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.ThisExpression;
+import org.jd.core.v1.model.javasyntax.expression.TypeReferenceDotClassExpression;
+import org.jd.core.v1.model.javasyntax.statement.ForEachStatement;
+import org.jd.core.v1.model.javasyntax.statement.SwitchStatement;
+import org.jd.core.v1.model.javasyntax.statement.TryStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
 import org.jd.core.v1.util.DefaultList;
 
 public class DeclaredSyntheticLocalVariableVisitor extends AbstractJavaSyntaxVisitor {
-    protected DefaultList<LocalVariableReferenceExpression> localVariableReferenceExpressions = new DefaultList<>();
+    private DefaultList<LocalVariableReferenceExpression> localVariableReferenceExpressions = new DefaultList<>();
 
     public void init() {
         localVariableReferenceExpressions.clear();

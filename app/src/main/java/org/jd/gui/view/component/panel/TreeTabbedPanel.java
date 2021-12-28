@@ -9,37 +9,60 @@ package org.jd.gui.view.component.panel;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
-import org.jd.gui.api.feature.*;
+import org.jd.gui.api.feature.ContainerEntryGettable;
+import org.jd.gui.api.feature.PageChangeListener;
+import org.jd.gui.api.feature.PageChangeable;
+import org.jd.gui.api.feature.PageClosable;
+import org.jd.gui.api.feature.PageCreator;
+import org.jd.gui.api.feature.PreferencesChangeListener;
+import org.jd.gui.api.feature.TreeNodeExpandable;
+import org.jd.gui.api.feature.UriGettable;
+import org.jd.gui.api.feature.UriOpenable;
 import org.jd.gui.api.model.TreeNodeData;
 import org.jd.gui.view.component.Tree;
 import org.jd.gui.view.renderer.TreeNodeRenderer;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 
-import javax.swing.*;
+import javax.swing.Action;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTree;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
-import javax.swing.tree.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 
 public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> extends JPanel implements UriGettable, UriOpenable, PageChangeable, PageClosable, PreferencesChangeListener {
 
     private static final long serialVersionUID = 1L;
     protected transient API api;
-    protected URI uri;
+    private URI uri;
     protected Tree tree;
     @SuppressWarnings("rawtypes")
-    protected TabbedPanel tabbedPanel;
-    protected transient List<PageChangeListener> pageChangedListeners = new ArrayList<>();
+    private TabbedPanel tabbedPanel;
+    private transient List<PageChangeListener> pageChangedListeners = new ArrayList<>();
     // Flags to prevent the event cascades
-    protected boolean updateTreeMenuEnabled = true;
-    protected boolean openUriEnabled = true;
-    protected boolean treeNodeChangedEnabled = true;
+    private boolean updateTreeMenuEnabled = true;
+    private boolean openUriEnabled = true;
+    private boolean treeNodeChangedEnabled = true;
 
     @SuppressWarnings("unchecked")
     public TreeTabbedPanel(API api, URI uri) {

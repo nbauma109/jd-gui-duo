@@ -16,7 +16,9 @@ import org.jd.gui.util.xml.AbstractXmlPathFinder;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 
 public class WebXmlFileIndexerProvider extends XmlBasedFileIndexerProvider {
 
@@ -35,8 +37,8 @@ public class WebXmlFileIndexerProvider extends XmlBasedFileIndexerProvider {
     }
 
     protected static class WebXmlPathFinder extends AbstractXmlPathFinder {
-        Container.Entry entry;
-        @SuppressWarnings("all")
+        private Container.Entry entry;
+        private @SuppressWarnings("all")
         Map<String, Collection> index;
 
         public WebXmlPathFinder(Container.Entry entry, Indexes indexes) {

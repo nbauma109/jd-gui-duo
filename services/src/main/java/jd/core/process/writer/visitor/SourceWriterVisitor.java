@@ -17,12 +17,18 @@
 package jd.core.process.writer.visitor;
 
 import org.apache.bcel.Const;
-import org.apache.bcel.classfile.*;
+import org.apache.bcel.classfile.Constant;
+import org.apache.bcel.classfile.ConstantClass;
+import org.apache.bcel.classfile.ConstantFieldref;
+import org.apache.bcel.classfile.ConstantNameAndType;
+import org.apache.bcel.classfile.ConstantUtf8;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
 import org.jd.core.v1.util.StringConstants;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ConstantPool;
@@ -31,14 +37,60 @@ import jd.core.model.classfile.LocalVariable;
 import jd.core.model.classfile.LocalVariables;
 import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
-import jd.core.model.instruction.bytecode.instruction.*;
+import jd.core.model.instruction.bytecode.instruction.ALoad;
+import jd.core.model.instruction.bytecode.instruction.ANewArray;
+import jd.core.model.instruction.bytecode.instruction.AThrow;
+import jd.core.model.instruction.bytecode.instruction.ArrayLength;
+import jd.core.model.instruction.bytecode.instruction.ArrayLoadInstruction;
+import jd.core.model.instruction.bytecode.instruction.ArrayStoreInstruction;
+import jd.core.model.instruction.bytecode.instruction.AssertInstruction;
+import jd.core.model.instruction.bytecode.instruction.AssignmentInstruction;
+import jd.core.model.instruction.bytecode.instruction.BinaryOperatorInstruction;
+import jd.core.model.instruction.bytecode.instruction.CheckCast;
+import jd.core.model.instruction.bytecode.instruction.ComplexConditionalBranchInstruction;
+import jd.core.model.instruction.bytecode.instruction.ConstInstruction;
+import jd.core.model.instruction.bytecode.instruction.ConvertInstruction;
+import jd.core.model.instruction.bytecode.instruction.DupLoad;
+import jd.core.model.instruction.bytecode.instruction.DupStore;
+import jd.core.model.instruction.bytecode.instruction.ExceptionLoad;
+import jd.core.model.instruction.bytecode.instruction.GetField;
+import jd.core.model.instruction.bytecode.instruction.GetStatic;
+import jd.core.model.instruction.bytecode.instruction.Goto;
+import jd.core.model.instruction.bytecode.instruction.IConst;
+import jd.core.model.instruction.bytecode.instruction.IInc;
+import jd.core.model.instruction.bytecode.instruction.IfCmp;
+import jd.core.model.instruction.bytecode.instruction.IfInstruction;
+import jd.core.model.instruction.bytecode.instruction.IncInstruction;
+import jd.core.model.instruction.bytecode.instruction.IndexInstruction;
+import jd.core.model.instruction.bytecode.instruction.InitArrayInstruction;
+import jd.core.model.instruction.bytecode.instruction.InstanceOf;
+import jd.core.model.instruction.bytecode.instruction.Instruction;
+import jd.core.model.instruction.bytecode.instruction.InvokeNew;
+import jd.core.model.instruction.bytecode.instruction.InvokeNoStaticInstruction;
+import jd.core.model.instruction.bytecode.instruction.Invokestatic;
+import jd.core.model.instruction.bytecode.instruction.Jsr;
+import jd.core.model.instruction.bytecode.instruction.LoadInstruction;
+import jd.core.model.instruction.bytecode.instruction.LookupSwitch;
+import jd.core.model.instruction.bytecode.instruction.MultiANewArray;
+import jd.core.model.instruction.bytecode.instruction.NewArray;
+import jd.core.model.instruction.bytecode.instruction.Pop;
+import jd.core.model.instruction.bytecode.instruction.PutField;
+import jd.core.model.instruction.bytecode.instruction.PutStatic;
+import jd.core.model.instruction.bytecode.instruction.ReturnInstruction;
+import jd.core.model.instruction.bytecode.instruction.StoreInstruction;
+import jd.core.model.instruction.bytecode.instruction.TableSwitch;
+import jd.core.model.instruction.bytecode.instruction.TernaryOpStore;
+import jd.core.model.instruction.bytecode.instruction.TernaryOperator;
+import jd.core.model.instruction.bytecode.instruction.UnaryOperatorInstruction;
 import jd.core.model.instruction.fast.FastConstants;
 import jd.core.model.instruction.fast.instruction.FastDeclaration;
 import jd.core.model.reference.ReferenceMap;
 import jd.core.printer.InstructionPrinter;
 import jd.core.process.writer.ConstantValueWriter;
 import jd.core.process.writer.SignatureWriter;
-import jd.core.util.*;
+import jd.core.util.SignatureUtil;
+import jd.core.util.StringUtil;
+import jd.core.util.UtilConstants;
 
 public class SourceWriterVisitor
 {
@@ -46,18 +98,18 @@ public class SourceWriterVisitor
 			"==", "<", ">", "", "!", "<=", ">=", "!=" };
     private static final char[] BIN_OPS = {'&', '^', '|'};
 
-    protected Loader loader;
-    protected InstructionPrinter printer;
-    protected ReferenceMap referenceMap;
-    protected Set<String> keywordSet;
-    protected ConstantPool constants;
-    protected LocalVariables localVariables;
+    private Loader loader;
+    private InstructionPrinter printer;
+    private ReferenceMap referenceMap;
+    private Set<String> keywordSet;
+    private ConstantPool constants;
+    private LocalVariables localVariables;
 
-    protected ClassFile classFile;
-    protected int methodAccessFlags;
-    protected int firstOffset;
-    protected int lastOffset;
-    protected int previousOffset;
+    private ClassFile classFile;
+    private int methodAccessFlags;
+    private int firstOffset;
+    private int lastOffset;
+    private int previousOffset;
 
     public SourceWriterVisitor(
         Loader loader,

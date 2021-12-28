@@ -9,15 +9,30 @@ package org.jd.gui.view;
 
 import org.jd.gui.util.swing.SwingUtil;
 
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
+import javax.swing.JRootPane;
+import javax.swing.KeyStroke;
 
 public class SaveAllSourcesView {
-    protected JDialog saveAllSourcesDialog;
-    protected JLabel saveAllSourcesLabel;
-    protected JProgressBar saveAllSourcesProgressBar;
+    private JDialog saveAllSourcesDialog;
+    private JLabel saveAllSourcesLabel;
+    private JProgressBar saveAllSourcesProgressBar;
 
     public SaveAllSourcesView(JFrame mainFrame, Runnable cancelCallback) {
         // Build GUI

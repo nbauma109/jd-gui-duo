@@ -8,17 +8,39 @@
 package org.jd.gui.view.component.panel;
 
 import org.jd.gui.api.API;
-import org.jd.gui.api.feature.*;
+import org.jd.gui.api.feature.ContainerEntryGettable;
+import org.jd.gui.api.feature.PreferencesChangeListener;
+import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.service.platform.PlatformService;
 import org.jd.gui.util.ImageUtil;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
 
-import javax.swing.*;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
+import javax.swing.ToolTipManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -31,7 +53,7 @@ public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel impl
 
 	protected static final String TAB_LAYOUT = "UITabsPreferencesProvider.singleLineTabs";
 
-	protected transient API api;
+	private transient API api;
 	protected CardLayout cardLayout;
 	protected JTabbedPane tabbedPane;
 	protected transient Map<String, String> preferences;
@@ -231,7 +253,7 @@ public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel impl
 	}
 
 	protected class SubMenuItemActionListener implements ActionListener {
-		protected int index;
+		private int index;
 
 		public SubMenuItemActionListener(int index) {
 			this.index = index;

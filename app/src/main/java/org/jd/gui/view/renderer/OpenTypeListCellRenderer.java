@@ -9,21 +9,27 @@ package org.jd.gui.view.renderer;
 
 import org.jd.gui.view.bean.OpenTypeListCellBean;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 
-import javax.swing.*;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.ListCellRenderer;
+import javax.swing.UIManager;
 
 public class OpenTypeListCellRenderer implements ListCellRenderer<OpenTypeListCellBean> {
-    protected Color textSelectionColor;
-    protected Color textNonSelectionColor;
-    protected Color infoSelectionColor;
-    protected Color infoNonSelectionColor;
-    protected Color backgroundSelectionColor;
-    protected Color backgroundNonSelectionColor;
+    private Color textSelectionColor;
+    private Color textNonSelectionColor;
+    private Color infoSelectionColor;
+    private Color infoNonSelectionColor;
+    private Color backgroundSelectionColor;
+    private Color backgroundNonSelectionColor;
 
-    protected JPanel panel;
-    protected JLabel label;
-    protected JLabel info;
+    private JPanel panel;
+    private JLabel label;
+    private JLabel info;
 
     public OpenTypeListCellRenderer() {
         textSelectionColor = UIManager.getColor("List.selectionForeground");

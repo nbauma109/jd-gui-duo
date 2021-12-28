@@ -12,7 +12,7 @@ public class PlatformService {
 
     public enum OS { LINUX, MAC_OSX, WINDOWS }
 
-    protected OS os;
+    private OS os;
 
     protected PlatformService() {
         String osName = System.getProperty("os.name").toLowerCase();

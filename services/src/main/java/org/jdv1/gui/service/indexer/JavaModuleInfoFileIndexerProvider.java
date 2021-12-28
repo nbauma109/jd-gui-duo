@@ -12,12 +12,19 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.service.indexer.AbstractIndexerProvider;
-import org.objectweb.asm.*;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.ModuleVisitor;
+import org.objectweb.asm.Opcodes;
 
 import java.io.InputStream;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
-import static org.objectweb.asm.ClassReader.*;
+import static org.objectweb.asm.ClassReader.SKIP_CODE;
+import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
+import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 
 /**
  * Unsafe thread implementation of class file indexer.
@@ -54,7 +61,7 @@ public class JavaModuleInfoFileIndexerProvider extends AbstractIndexerProvider {
     }
 
     protected class ClassIndexer extends ClassVisitor {
-        protected ModuleIndexer moduleIndexer = new ModuleIndexer();
+        private ModuleIndexer moduleIndexer = new ModuleIndexer();
 
         public ClassIndexer() { super(Opcodes.ASM7); }
 

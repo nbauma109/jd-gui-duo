@@ -9,10 +9,19 @@ package org.jd.gui.view.component;
 
 import org.jd.gui.api.model.TreeNodeData;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Insets;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.InputMap;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.KeyStroke;
+import javax.swing.ListCellRenderer;
+import javax.swing.UIManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 @SuppressWarnings("rawtypes")
@@ -36,12 +45,12 @@ public class List extends JList {
 	}
 
 	protected class Renderer implements ListCellRenderer {
-		protected Color textSelectionColor;
-		protected Color backgroundSelectionColor;
-		protected Color textNonSelectionColor;
-		protected Color backgroundNonSelectionColor;
+		private Color textSelectionColor;
+		private Color backgroundSelectionColor;
+		private Color textNonSelectionColor;
+		private Color backgroundNonSelectionColor;
 
-		protected JLabel label;
+		private JLabel label;
 
 		public Renderer() {
 			label = new JLabel();

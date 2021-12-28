@@ -7,7 +7,18 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
 import org.apache.bcel.Const;
-import org.apache.bcel.classfile.*;
+import org.apache.bcel.classfile.BootstrapMethod;
+import org.apache.bcel.classfile.Constant;
+import org.apache.bcel.classfile.ConstantClass;
+import org.apache.bcel.classfile.ConstantDouble;
+import org.apache.bcel.classfile.ConstantFloat;
+import org.apache.bcel.classfile.ConstantInteger;
+import org.apache.bcel.classfile.ConstantLong;
+import org.apache.bcel.classfile.ConstantMethodHandle;
+import org.apache.bcel.classfile.ConstantMethodType;
+import org.apache.bcel.classfile.ConstantNameAndType;
+import org.apache.bcel.classfile.ConstantString;
+import org.apache.bcel.classfile.ConstantUtf8;
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.classfile.ConstantPool;
 import org.jd.core.v1.model.classfile.Method;
@@ -15,33 +26,100 @@ import org.jd.core.v1.model.classfile.attribute.AttributeBootstrapMethods;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
-import org.jd.core.v1.model.javasyntax.declaration.*;
-import org.jd.core.v1.model.javasyntax.expression.*;
-import org.jd.core.v1.model.javasyntax.statement.*;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.declaration.AbstractNopDeclarationVisitor;
+import org.jd.core.v1.model.javasyntax.declaration.BaseFormalParameter;
+import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
+import org.jd.core.v1.model.javasyntax.declaration.FormalParameter;
+import org.jd.core.v1.model.javasyntax.declaration.FormalParameters;
+import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
+import org.jd.core.v1.model.javasyntax.expression.ArrayExpression;
+import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
+import org.jd.core.v1.model.javasyntax.expression.BinaryOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.CastExpression;
+import org.jd.core.v1.model.javasyntax.expression.ConstructorReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.DoubleConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.Expression;
+import org.jd.core.v1.model.javasyntax.expression.Expressions;
+import org.jd.core.v1.model.javasyntax.expression.FieldReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.FloatConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.InstanceOfExpression;
+import org.jd.core.v1.model.javasyntax.expression.IntegerConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.LambdaIdentifiersExpression;
+import org.jd.core.v1.model.javasyntax.expression.LengthExpression;
+import org.jd.core.v1.model.javasyntax.expression.LongConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.MethodInvocationExpression;
+import org.jd.core.v1.model.javasyntax.expression.MethodReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.NewArray;
+import org.jd.core.v1.model.javasyntax.expression.NullExpression;
+import org.jd.core.v1.model.javasyntax.expression.ObjectTypeReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.PostOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.PreOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.StringConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.SuperExpression;
+import org.jd.core.v1.model.javasyntax.expression.ThisExpression;
+import org.jd.core.v1.model.javasyntax.expression.TypeReferenceDotClassExpression;
+import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
+import org.jd.core.v1.model.javasyntax.statement.ExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.LambdaExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.ReturnExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.Statement;
+import org.jd.core.v1.model.javasyntax.statement.Statements;
+import org.jd.core.v1.model.javasyntax.statement.SwitchStatement;
+import org.jd.core.v1.model.javasyntax.statement.ThrowStatement;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
+import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.WildcardTypeArgument;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileClassDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileFieldDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMethodDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileTypeDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileCmpExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileNewExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileMonitorEnterStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileMonitorExitStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.*;
-import org.jd.core.v1.util.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.EraseTypeArgumentVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.RenameLocalVariablesVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchFirstLineNumberVisitor;
+import org.jd.core.v1.util.DefaultList;
+import org.jd.core.v1.util.DefaultStack;
+import org.jd.core.v1.util.StringConstants;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import static org.apache.bcel.Const.*;
-import static org.jd.core.v1.model.javasyntax.declaration.Declaration.*;
 import static org.jd.core.v1.model.javasyntax.statement.ReturnStatement.RETURN;
-import static org.jd.core.v1.model.javasyntax.type.ObjectType.*;
-import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
+import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_CLASS;
+import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
+import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_BOOLEAN;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_DOUBLE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_FLOAT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_LONG;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_BOOLEAN_TYPE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_BYTE_TYPE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_NEGATIVE_BYTE_TYPE;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_BOOLEAN;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_BYTE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_CHAR;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_DOUBLE;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_FLOAT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_INT;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_LONG;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_SHORT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_VOID;
 
 public class ByteCodeParser {
     private static final JsrReturnAddressExpression JSR_RETURN_ADDRESS_EXPRESSION = new JsrReturnAddressExpression();
@@ -54,7 +132,7 @@ public class ByteCodeParser {
 
     private final TypeMaker typeMaker;
     private final LocalVariableMaker localVariableMaker;
-    protected boolean genericTypesSupported;
+    private boolean genericTypesSupported;
     private final String internalTypeName;
     private AbstractTypeParametersToTypeArgumentsBinder typeParametersToTypeArgumentsBinder;
     private final AttributeBootstrapMethods attributeBootstrapMethods;
@@ -89,7 +167,7 @@ public class ByteCodeParser {
         Method method = cfg.getMethod();
         ConstantPool constants = method.getConstants();
         byte[] code = method.<AttributeCode>getAttribute("Code").getCode();
-        boolean syntheticFlag = (method.getAccessFlags() & FLAG_SYNTHETIC) != 0;
+        boolean syntheticFlag = (method.getAccessFlags() & ACC_SYNTHETIC) != 0;
 
         Expression indexRef;
         Expression arrayRef;
@@ -166,7 +244,7 @@ public class ByteCodeParser {
                 case ALOAD:
                     i = code[++offset] & 255;
                     localVariable = localVariableMaker.getLocalVariable(i, offset);
-                    if (i == 0 && (method.getAccessFlags() & FLAG_STATIC) == 0) {
+                    if (i == 0 && (method.getAccessFlags() & ACC_STATIC) == 0) {
                         stack.push(new ThisExpression(lineNumber, localVariable.getType()));
                     } else {
                         stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable));
@@ -190,7 +268,7 @@ public class ByteCodeParser {
                     break;
                 case ALOAD_0:
                     localVariable = localVariableMaker.getLocalVariable(0, offset);
-                    if ((method.getAccessFlags() & FLAG_STATIC) == 0) {
+                    if ((method.getAccessFlags() & ACC_STATIC) == 0) {
                         stack.push(new ThisExpression(lineNumber, localVariable.getType()));
                     } else {
                         stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable));
@@ -990,11 +1068,11 @@ public class ByteCodeParser {
 
     private void parseLDC(DefaultStack<Expression> stack, ConstantPool constants, int lineNumber, Constant constant) {
         switch (constant.getTag()) {
-            case Const.CONSTANT_Integer:
+            case CONSTANT_Integer:
                 int i = ((ConstantInteger)constant).getBytes();
                 stack.push(new IntegerConstantExpression(lineNumber, PrimitiveTypeUtil.getPrimitiveTypeFromValue(i), i));
                 break;
-            case Const.CONSTANT_Float:
+            case CONSTANT_Float:
                 float f = ((ConstantFloat)constant).getBytes();
 
                 if (f == Float.MIN_VALUE) {
@@ -1011,7 +1089,7 @@ public class ByteCodeParser {
                     stack.push(new FloatConstantExpression(lineNumber, f));
                 }
                 break;
-            case Const.CONSTANT_Class:
+            case CONSTANT_Class:
                 int typeNameIndex = ((ConstantClass) constant).getNameIndex();
                 String typeName = ((ConstantUtf8)constants.getConstant(typeNameIndex)).getBytes();
                 Type type = typeMaker.makeFromDescriptorOrInternalTypeName(typeName);
@@ -1020,7 +1098,7 @@ public class ByteCodeParser {
                 }
                 stack.push(new TypeReferenceDotClassExpression(lineNumber, type));
                 break;
-            case Const.CONSTANT_Long:
+            case CONSTANT_Long:
                 long l = ((ConstantLong)constant).getBytes();
 
                 if (l == Long.MIN_VALUE) {
@@ -1031,7 +1109,7 @@ public class ByteCodeParser {
                     stack.push(new LongConstantExpression(lineNumber, l));
                 }
                 break;
-            case Const.CONSTANT_Double:
+            case CONSTANT_Double:
                 double d = ((ConstantDouble)constant).getBytes();
 
                 if (Double.compare(d, Double.MIN_VALUE) == 0) {
@@ -1052,7 +1130,7 @@ public class ByteCodeParser {
                     stack.push(new DoubleConstantExpression(lineNumber, d));
                 }
                 break;
-            case Const.CONSTANT_String:
+            case CONSTANT_String:
                 int stringIndex = ((ConstantString)constant).getStringIndex();
                 stack.push(new StringConstantExpression(lineNumber, constants.getConstantUtf8(stringIndex)));
                 break;
@@ -1308,7 +1386,7 @@ public class ByteCodeParser {
 
         if (typeName.equals(internalTypeName)) {
             for (ClassFileConstructorOrMethodDeclaration methodDeclaration : bodyDeclaration.getMethodDeclarations()) {
-                if ((methodDeclaration.getFlags() & (FLAG_SYNTHETIC|FLAG_PRIVATE)) == (FLAG_SYNTHETIC|FLAG_PRIVATE) && methodDeclaration.getMethod().getName().equals(name1) && methodDeclaration.getMethod().getDescriptor().equals(descriptor1)) {
+                if ((methodDeclaration.getFlags() & (ACC_SYNTHETIC|ACC_PRIVATE)) == (ACC_SYNTHETIC|ACC_PRIVATE) && methodDeclaration.getMethod().getName().equals(name1) && methodDeclaration.getMethod().getDescriptor().equals(descriptor1)) {
                     // Create lambda expression
                     ClassFileMethodDeclaration cfmd = (ClassFileMethodDeclaration)methodDeclaration;
                     if (cfmd.getStatements() == null) {

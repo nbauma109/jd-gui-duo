@@ -18,16 +18,23 @@ import org.jdv1.gui.view.SelectLocationView;
 
 import java.awt.Point;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import javax.swing.JFrame;
 
 public class SelectLocationController {
 
-    protected API api;
+    private API api;
     @SuppressWarnings("all")
-    protected SelectLocationView selectLocationView;
+    private SelectLocationView selectLocationView;
 
     public SelectLocationController(API api, JFrame mainFrame) {
         this.api = api;

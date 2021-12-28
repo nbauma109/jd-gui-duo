@@ -17,7 +17,12 @@
 package jd.core.process.writer;
 
 import org.apache.bcel.Const;
-import org.apache.bcel.classfile.*;
+import org.apache.bcel.classfile.Constant;
+import org.apache.bcel.classfile.ConstantDouble;
+import org.apache.bcel.classfile.ConstantFloat;
+import org.apache.bcel.classfile.ConstantInteger;
+import org.apache.bcel.classfile.ConstantLong;
+import org.apache.bcel.classfile.ConstantString;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.util.StringConstants;
 

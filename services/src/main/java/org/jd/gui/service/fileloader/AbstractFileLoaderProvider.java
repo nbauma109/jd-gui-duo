@@ -13,9 +13,16 @@ import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Container.Entry;
 import org.jd.gui.api.model.TreeNodeData;
-import org.jd.gui.spi.*;
+import org.jd.gui.spi.ContainerFactory;
+import org.jd.gui.spi.FileLoader;
+import org.jd.gui.spi.PanelFactory;
+import org.jd.gui.spi.TreeNodeFactory;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -64,10 +71,10 @@ public abstract class AbstractFileLoaderProvider implements FileLoader {
             public Container.Entry getRoot() { return null; }
         };
 
-        protected Map<Container.EntryPath, Container.Entry> children = Collections.emptyMap();
-        protected File file;
-        protected URI uri;
-        protected String path;
+        private Map<Container.EntryPath, Container.Entry> children = Collections.emptyMap();
+        private File file;
+        private URI uri;
+        private String path;
 
         public ContainerEntry(File file) {
             this.file = file;

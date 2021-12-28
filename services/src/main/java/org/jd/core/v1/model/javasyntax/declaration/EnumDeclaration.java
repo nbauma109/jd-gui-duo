@@ -14,7 +14,7 @@ import org.jd.core.v1.model.javasyntax.type.BaseType;
 import java.util.List;
 
 public class EnumDeclaration extends TypeDeclaration {
-    protected BaseType interfaces;
+    private BaseType interfaces;
     protected List<Constant> constants;
 
     public EnumDeclaration(int flags, String internalName, String name, List<Constant> constants, BodyDeclaration bodyDeclaration) {
@@ -47,18 +47,13 @@ public class EnumDeclaration extends TypeDeclaration {
     }
 
     public static class Constant implements Declaration {
-        protected int lineNumber;
-        protected BaseAnnotationReference annotationReferences;
+        private int lineNumber;
+        private BaseAnnotationReference annotationReferences;
         protected String name;
-        protected BaseExpression arguments;
-        protected BodyDeclaration bodyDeclaration;
+        private BaseExpression arguments;
+        private BodyDeclaration bodyDeclaration;
 
         public Constant(String name) {
-            this.name = name;
-        }
-
-        public Constant(int lineNumber, String name) {
-            this.lineNumber = lineNumber;
             this.name = name;
         }
 
@@ -67,22 +62,8 @@ public class EnumDeclaration extends TypeDeclaration {
             this.arguments = arguments;
         }
 
-        public Constant(int lineNumber, String name, BaseExpression arguments) {
-            this.lineNumber = lineNumber;
-            this.name = name;
-            this.arguments = arguments;
-        }
-
         public Constant(int lineNumber, String name, BaseExpression arguments, BodyDeclaration bodyDeclaration) {
             this.lineNumber = lineNumber;
-            this.name = name;
-            this.arguments = arguments;
-            this.bodyDeclaration = bodyDeclaration;
-        }
-
-        public Constant(int lineNumber, BaseAnnotationReference annotationReferences, String name, BaseExpression arguments, BodyDeclaration bodyDeclaration) {
-            this.lineNumber = lineNumber;
-            this.annotationReferences = annotationReferences;
             this.name = name;
             this.arguments = arguments;
             this.bodyDeclaration = bodyDeclaration;

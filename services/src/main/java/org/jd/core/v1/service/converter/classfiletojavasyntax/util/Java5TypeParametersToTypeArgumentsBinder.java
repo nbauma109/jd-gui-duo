@@ -6,40 +6,103 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
-import org.jd.core.v1.model.javasyntax.expression.*;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.expression.AbstractNopExpressionVisitor;
+import org.jd.core.v1.model.javasyntax.expression.ArrayExpression;
+import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
+import org.jd.core.v1.model.javasyntax.expression.BinaryOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.BooleanExpression;
+import org.jd.core.v1.model.javasyntax.expression.CastExpression;
+import org.jd.core.v1.model.javasyntax.expression.CommentExpression;
+import org.jd.core.v1.model.javasyntax.expression.ConstructorInvocationExpression;
+import org.jd.core.v1.model.javasyntax.expression.ConstructorReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.DoubleConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.EnumConstantReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.Expression;
+import org.jd.core.v1.model.javasyntax.expression.ExpressionVisitor;
+import org.jd.core.v1.model.javasyntax.expression.Expressions;
+import org.jd.core.v1.model.javasyntax.expression.FieldReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.FloatConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.InstanceOfExpression;
+import org.jd.core.v1.model.javasyntax.expression.IntegerConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.LambdaFormalParametersExpression;
+import org.jd.core.v1.model.javasyntax.expression.LambdaIdentifiersExpression;
+import org.jd.core.v1.model.javasyntax.expression.LengthExpression;
+import org.jd.core.v1.model.javasyntax.expression.LocalVariableReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.LongConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.MethodInvocationExpression;
+import org.jd.core.v1.model.javasyntax.expression.MethodReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.NewArray;
+import org.jd.core.v1.model.javasyntax.expression.NewExpression;
+import org.jd.core.v1.model.javasyntax.expression.NewInitializedArray;
+import org.jd.core.v1.model.javasyntax.expression.NoExpression;
+import org.jd.core.v1.model.javasyntax.expression.NullExpression;
+import org.jd.core.v1.model.javasyntax.expression.ObjectTypeReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.ParenthesesExpression;
+import org.jd.core.v1.model.javasyntax.expression.PostOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.PreOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.StringConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.SuperConstructorInvocationExpression;
+import org.jd.core.v1.model.javasyntax.expression.SuperExpression;
+import org.jd.core.v1.model.javasyntax.expression.TernaryOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.ThisExpression;
+import org.jd.core.v1.model.javasyntax.expression.TypeReferenceDotClassExpression;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.TypeArgument;
+import org.jd.core.v1.model.javasyntax.type.TypeArguments;
+import org.jd.core.v1.model.javasyntax.type.TypeParameter;
+import org.jd.core.v1.model.javasyntax.type.WildcardTypeArgument;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileConstructorInvocationExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileMethodInvocationExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileNewExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileSuperConstructorInvocationExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.BaseTypeToTypeArgumentVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.BindTypeParametersToNonWildcardTypeArgumentsVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.BindTypesToTypesVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.GetTypeArgumentVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.PopulateBindingsWithTypeArgumentVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.PopulateBindingsWithTypeParameterVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchInTypeArgumentVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.TypeArgumentToTypeVisitor;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
-import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_STATIC;
-import static org.jd.core.v1.model.javasyntax.type.ObjectType.*;
+import static org.apache.bcel.Const.ACC_STATIC;
+import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
+import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_STRING;
+import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
 
 public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParametersToTypeArgumentsBinder implements ExpressionVisitor {
     protected static final RemoveNonWildcardTypeArgumentsVisitor REMOVE_NON_WILDCARD_TYPE_ARGUMENTS_VISITOR = new RemoveNonWildcardTypeArgumentsVisitor();
 
-    protected PopulateBindingsWithTypeParameterVisitor populateBindingsWithTypeParameterVisitor = new PopulateBindingsWithTypeParameterVisitor();
-    protected BindTypesToTypesVisitor bindTypesToTypesVisitor = new BindTypesToTypesVisitor();
-    protected SearchInTypeArgumentVisitor searchInTypeArgumentVisitor = new SearchInTypeArgumentVisitor();
-    protected TypeArgumentToTypeVisitor typeArgumentToTypeVisitor = new TypeArgumentToTypeVisitor();
-    protected BaseTypeToTypeArgumentVisitor baseTypeToTypeArgumentVisitor = new BaseTypeToTypeArgumentVisitor();
-    protected GetTypeArgumentVisitor getTypeArgumentVisitor = new GetTypeArgumentVisitor();
-    protected BindTypeParametersToNonWildcardTypeArgumentsVisitor bindTypeParametersToNonWildcardTypeArgumentsVisitor = new BindTypeParametersToNonWildcardTypeArgumentsVisitor();
+    private PopulateBindingsWithTypeParameterVisitor populateBindingsWithTypeParameterVisitor = new PopulateBindingsWithTypeParameterVisitor();
+    private BindTypesToTypesVisitor bindTypesToTypesVisitor = new BindTypesToTypesVisitor();
+    private SearchInTypeArgumentVisitor searchInTypeArgumentVisitor = new SearchInTypeArgumentVisitor();
+    private TypeArgumentToTypeVisitor typeArgumentToTypeVisitor = new TypeArgumentToTypeVisitor();
+    private BaseTypeToTypeArgumentVisitor baseTypeToTypeArgumentVisitor = new BaseTypeToTypeArgumentVisitor();
+    private GetTypeArgumentVisitor getTypeArgumentVisitor = new GetTypeArgumentVisitor();
+    private BindTypeParametersToNonWildcardTypeArgumentsVisitor bindTypeParametersToNonWildcardTypeArgumentsVisitor = new BindTypeParametersToNonWildcardTypeArgumentsVisitor();
 
-    protected TypeMaker typeMaker;
-    protected String internalTypeName;
-    protected boolean staticMethod;
-    protected PopulateBindingsWithTypeArgumentVisitor populateBindingsWithTypeArgumentVisitor;
-    protected Map<String, TypeArgument> contextualBindings;
-    protected Map<String, BaseType> contextualTypeBounds;
+    private TypeMaker typeMaker;
+    private String internalTypeName;
+    private boolean staticMethod;
+    private PopulateBindingsWithTypeArgumentVisitor populateBindingsWithTypeArgumentVisitor;
+    private Map<String, TypeArgument> contextualBindings;
+    private Map<String, BaseType> contextualTypeBounds;
 
     public Java5TypeParametersToTypeArgumentsBinder(TypeMaker typeMaker, String internalTypeName, ClassFileConstructorOrMethodDeclaration comd) {
         this.typeMaker = typeMaker;
         this.internalTypeName = internalTypeName;
-        this.staticMethod = (comd.getFlags() & FLAG_STATIC) != 0;
+        this.staticMethod = (comd.getFlags() & ACC_STATIC) != 0;
         this.populateBindingsWithTypeArgumentVisitor = new PopulateBindingsWithTypeArgumentVisitor(typeMaker);
         this.contextualBindings = comd.getBindings();
         this.contextualTypeBounds = comd.getTypeBounds();
@@ -355,7 +418,7 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
     }
 
     /** --- ExpressionVisitor --- */
-    protected Type type;
+    private Type type;
 
     @Override
     public void visit(MethodInvocationExpression expression) {

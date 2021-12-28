@@ -11,14 +11,16 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.service.extension.ExtensionService;
 import org.jd.gui.spi.TypeFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TypeFactoryService {
     protected static final TypeFactoryService TYPE_FACTORY_SERVICE = new TypeFactoryService();
 
-    protected Map<String, TypeFactories> mapProviders;
+    private Map<String, TypeFactories> mapProviders;
 
     public static TypeFactoryService getInstance() {
         return TYPE_FACTORY_SERVICE;
@@ -87,8 +89,8 @@ public class TypeFactoryService {
     }
 
     protected static class TypeFactories {
-        protected Map<String, TypeFactory> factories = new HashMap<>();
-        protected TypeFactory defaultFactory;
+        private Map<String, TypeFactory> factories = new HashMap<>();
+        private TypeFactory defaultFactory;
 
         public void add(TypeFactory factory) {
             Pattern pathPattern = factory.getPathPattern();

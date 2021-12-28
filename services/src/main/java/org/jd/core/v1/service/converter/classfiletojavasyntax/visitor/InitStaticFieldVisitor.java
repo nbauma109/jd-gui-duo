@@ -7,24 +7,43 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
+import org.apache.bcel.Const;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
-import org.jd.core.v1.model.javasyntax.declaration.*;
+import org.jd.core.v1.model.javasyntax.declaration.AnnotationDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ClassDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ConstructorDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.EnumDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ExpressionVariableInitializer;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
+import org.jd.core.v1.model.javasyntax.declaration.InstanceInitializerDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.InterfaceDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.StaticInitializerDeclaration;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.model.javasyntax.expression.FieldReferenceExpression;
-import org.jd.core.v1.model.javasyntax.statement.*;
+import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
+import org.jd.core.v1.model.javasyntax.statement.Statement;
+import org.jd.core.v1.model.javasyntax.statement.Statements;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileFieldDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileStaticInitializerDeclaration;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
-    protected SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
-    protected SearchLocalVariableReferenceVisitor searchLocalVariableReferenceVisitor = new SearchLocalVariableReferenceVisitor();
-    protected String internalTypeName;
-    protected Map<String, FieldDeclarator> fields = new HashMap<>();
-    protected List<ClassFileConstructorOrMethodDeclaration> methods;
-    protected Boolean deleteStaticDeclaration;
+    private SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
+    private SearchLocalVariableReferenceVisitor searchLocalVariableReferenceVisitor = new SearchLocalVariableReferenceVisitor();
+    private String internalTypeName;
+    private Map<String, FieldDeclarator> fields = new HashMap<>();
+    private List<ClassFileConstructorOrMethodDeclaration> methods;
+    private Boolean deleteStaticDeclaration;
 
     void setInternalTypeName(String internalTypeName) {
         this.internalTypeName = internalTypeName;
@@ -187,7 +206,7 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
                 if (fdr != null && fdr.getVariableInitializer() == null) {
                     FieldDeclaration fdn = fdr.getFieldDeclaration();
 
-                    if ((fdn.getFlags() & Declaration.FLAG_STATIC) != 0 && fdn.getType().getDescriptor().equals(fre.getDescriptor())) {
+                    if ((fdn.getFlags() & Const.ACC_STATIC) != 0 && fdn.getType().getDescriptor().equals(fre.getDescriptor())) {
                         expression = expression.getRightExpression();
 
                         searchLocalVariableReferenceVisitor.init(-1);

@@ -6,39 +6,64 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
-import org.jd.core.v1.model.classfile.*;
-import org.jd.core.v1.model.classfile.attribute.*;
+import org.apache.bcel.Const;
+import org.jd.core.v1.model.classfile.ClassFile;
+import org.jd.core.v1.model.classfile.Field;
+import org.jd.core.v1.model.classfile.Method;
+import org.jd.core.v1.model.classfile.attribute.Annotations;
+import org.jd.core.v1.model.classfile.attribute.AttributeCode;
+import org.jd.core.v1.model.classfile.attribute.AttributeLocalVariableTable;
+import org.jd.core.v1.model.classfile.attribute.AttributeLocalVariableTypeTable;
+import org.jd.core.v1.model.classfile.attribute.AttributeParameterAnnotations;
+import org.jd.core.v1.model.classfile.attribute.LocalVariableType;
 import org.jd.core.v1.model.javasyntax.declaration.BaseFormalParameter;
 import org.jd.core.v1.model.javasyntax.declaration.FormalParameters;
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
 import org.jd.core.v1.model.javasyntax.statement.Statements;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
+import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.WildcardTypeArgument;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileFormalParameter;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.Frame;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.LocalVariableSet;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.ObjectLocalVariable;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.PrimitiveLocalVariable;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.RootFrame;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.CreateLocalVariableVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.CreateParameterVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.GenerateParameterSuffixNameVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.PopulateBlackListNamesVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchInTypeArgumentVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.UpdateTypeVisitor;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_STATIC;
-import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_VARARGS;
+import static org.apache.bcel.Const.ACC_STATIC;
 
 public class LocalVariableMaker {
-    protected LocalVariableSet localVariableSet = new LocalVariableSet();
-    protected Set<String> names = new HashSet<>();
-    protected Set<String> blackListNames = new HashSet<>();
-    protected Frame currentFrame = new RootFrame();
-    protected AbstractLocalVariable[] localVariableCache;
+    private LocalVariableSet localVariableSet = new LocalVariableSet();
+    private Set<String> names = new HashSet<>();
+    private Set<String> blackListNames = new HashSet<>();
+    private Frame currentFrame = new RootFrame();
+    private AbstractLocalVariable[] localVariableCache;
 
-    protected TypeMaker typeMaker;
-    protected Map<String, BaseType> typeBounds;
-    protected FormalParameters formalParameters;
+    private TypeMaker typeMaker;
+    private Map<String, BaseType> typeBounds;
+    private FormalParameters formalParameters;
 
-    protected PopulateBlackListNamesVisitor populateBlackListNamesVisitor = new PopulateBlackListNamesVisitor(blackListNames);
-    protected SearchInTypeArgumentVisitor searchInTypeArgumentVisitor = new SearchInTypeArgumentVisitor();
-    protected CreateParameterVisitor createParameterVisitor;
-    protected CreateLocalVariableVisitor createLocalVariableVisitor;
+    private PopulateBlackListNamesVisitor populateBlackListNamesVisitor = new PopulateBlackListNamesVisitor(blackListNames);
+    private SearchInTypeArgumentVisitor searchInTypeArgumentVisitor = new SearchInTypeArgumentVisitor();
+    private CreateParameterVisitor createParameterVisitor;
+    private CreateLocalVariableVisitor createLocalVariableVisitor;
 
     public LocalVariableMaker(TypeMaker typeMaker, ClassFileConstructorOrMethodDeclaration comd, boolean constructor) {
         ClassFile classFile = comd.getClassFile();
@@ -90,7 +115,7 @@ public class LocalVariableMaker {
         // Initialize local variables from access flags & signature
         int firstVariableIndex = 0;
 
-        if ((method.getAccessFlags() & FLAG_STATIC) == 0) {
+        if ((method.getAccessFlags() & ACC_STATIC) == 0) {
             if (localVariableSet.root(0) == null) {
                 // Local variable missing
                 localVariableSet.add(0, new ObjectLocalVariable(typeMaker, 0, 0, typeMaker.makeFromInternalTypeName(classFile.getInternalTypeName()), "this"));
@@ -116,7 +141,7 @@ public class LocalVariableMaker {
 
         if (parameterTypes != null) {
             int lastParameterIndex = parameterTypes.size() - 1;
-            boolean varargs = (method.getAccessFlags() & FLAG_VARARGS) != 0;
+            boolean varargs = (method.getAccessFlags() & Const.ACC_VARARGS) != 0;
 
             initLocalVariablesFromParameterTypes(classFile, parameterTypes, varargs, firstVariableIndex, lastParameterIndex);
 
@@ -175,7 +200,7 @@ public class LocalVariableMaker {
             AttributeLocalVariableTable localVariableTable = code.getAttribute("LocalVariableTable");
 
             if (localVariableTable != null) {
-                boolean staticFlag = (method.getAccessFlags() & FLAG_STATIC) != 0;
+                boolean staticFlag = (method.getAccessFlags() & ACC_STATIC) != 0;
 
                 int index;
                 int startPc;

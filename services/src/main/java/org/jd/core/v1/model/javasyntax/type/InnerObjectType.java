@@ -7,16 +7,10 @@
 package org.jd.core.v1.model.javasyntax.type;
 
 public class InnerObjectType extends ObjectType {
-    protected ObjectType outerType;
+    private ObjectType outerType;
 
     public InnerObjectType(String internalName, String qualifiedName, String name, ObjectType outerType) {
         super(internalName, qualifiedName, name);
-        this.outerType = outerType;
-        checkArguments(qualifiedName, name);
-    }
-
-    public InnerObjectType(String internalName, String qualifiedName, String name, int dimension, ObjectType outerType) {
-        super(internalName, qualifiedName, name, dimension);
         this.outerType = outerType;
         checkArguments(qualifiedName, name);
     }
@@ -31,11 +25,6 @@ public class InnerObjectType extends ObjectType {
         super(internalName, qualifiedName, name, typeArguments, dimension);
         this.outerType = outerType;
         checkArguments(qualifiedName, name);
-    }
-
-    public InnerObjectType(InnerObjectType iot) {
-        super(iot);
-        this.outerType = iot.outerType;
     }
 
     protected void checkArguments(String qualifiedName, String name) {

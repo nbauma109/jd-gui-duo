@@ -12,10 +12,16 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.FocusedTypeGettable;
 import org.jd.gui.api.feature.UriGettable;
-import org.jd.gui.api.model.*;
+import org.jd.gui.api.model.Container;
+import org.jd.gui.api.model.Indexes;
+import org.jd.gui.api.model.Type;
 import org.jd.gui.util.matcher.DescriptorMatcher;
 import org.jd.gui.util.parser.jdt.ASTParserFactory;
-import org.jd.gui.util.parser.jdt.core.*;
+import org.jd.gui.util.parser.jdt.core.DeclarationData;
+import org.jd.gui.util.parser.jdt.core.HyperlinkData;
+import org.jd.gui.util.parser.jdt.core.HyperlinkReferenceData;
+import org.jd.gui.util.parser.jdt.core.ReferenceData;
+import org.jd.gui.util.parser.jdt.core.StringData;
 import org.jd.gui.view.component.CustomLineNumbersPage;
 import org.jd.gui.view.component.ReferenceListener;
 import org.jdv1.gui.api.feature.IndexesChangeListener;
@@ -24,7 +30,11 @@ import org.jdv1.gui.util.index.IndexesUtil;
 import java.awt.Point;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.BiPredicate;
@@ -35,8 +45,6 @@ public abstract class TypePage extends CustomLineNumbersPage
         implements UriGettable, IndexesChangeListener, FocusedTypeGettable {
 
     private static final long serialVersionUID = 1L;
-
-    protected static Map<String, ReferenceData> referencesCache = new HashMap<>();
 
     protected transient API api;
     protected transient Container.Entry entry;

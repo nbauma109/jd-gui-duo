@@ -11,16 +11,18 @@ import org.jd.gui.service.extension.ExtensionService;
 import org.jd.gui.spi.FileLoader;
 
 import java.io.File;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FileLoaderService {
     protected static final FileLoaderService FILE_LOADER_SERVICE = new FileLoaderService();
 
     public static FileLoaderService getInstance() { return FILE_LOADER_SERVICE; }
 
-    protected final Collection<FileLoader> providers = ExtensionService.getInstance().load(FileLoader.class);
+    private final Collection<FileLoader> providers = ExtensionService.getInstance().load(FileLoader.class);
 
-    protected Map<String, FileLoader> mapProviders = new HashMap<>();
+    private Map<String, FileLoader> mapProviders = new HashMap<>();
 
     protected FileLoaderService() {
         for (FileLoader provider : providers) {

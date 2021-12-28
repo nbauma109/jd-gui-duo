@@ -9,7 +9,7 @@ package org.jd.core.v1.model.token;
 
 public class ReferenceToken extends DeclarationToken {
 
-    protected String ownerInternalName;
+    private String ownerInternalName;
 
     /**
      * @param type @see org.jd.core.v1.model.token.DeclarationToken

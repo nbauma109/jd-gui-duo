@@ -6,16 +6,42 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable;
 
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
+import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
 
 import java.util.Map;
 
-import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_BOOLEAN;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_BYTE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_CHAR;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_DOUBLE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_FLOAT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_INT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_LONG;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_SHORT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_VOID;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_BOOLEAN_TYPE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_BYTE_TYPE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_CHAR_TYPE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_NEGATIVE_BOOLEAN_TYPE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_NEGATIVE_BYTE_TYPE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_NEGATIVE_SHORT_TYPE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_SHORT_TYPE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_BOOLEAN;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_BYTE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_CHAR;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_DOUBLE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_FLOAT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_INT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_LONG;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_SHORT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_VOID;
 
 public class PrimitiveLocalVariable extends AbstractLocalVariable {
     private static final String NON_ZERO_DIMENSION = "Non-zero dimension";
-    protected int flags;
+    private int flags;
 
     public PrimitiveLocalVariable(int index, int offset, PrimitiveType type, String name) {
         super(index, offset, name);

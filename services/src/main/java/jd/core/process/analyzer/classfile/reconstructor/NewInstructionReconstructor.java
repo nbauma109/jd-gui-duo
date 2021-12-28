@@ -26,7 +26,12 @@ import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
-import jd.core.model.instruction.bytecode.instruction.*;
+import jd.core.model.instruction.bytecode.instruction.DupLoad;
+import jd.core.model.instruction.bytecode.instruction.DupStore;
+import jd.core.model.instruction.bytecode.instruction.Instruction;
+import jd.core.model.instruction.bytecode.instruction.InvokeNew;
+import jd.core.model.instruction.bytecode.instruction.Invokespecial;
+import jd.core.model.instruction.bytecode.instruction.New;
 import jd.core.process.analyzer.util.ReconstructorUtil;
 
 /*

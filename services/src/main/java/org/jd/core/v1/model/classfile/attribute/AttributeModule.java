@@ -9,15 +9,15 @@ package org.jd.core.v1.model.classfile.attribute;
 
 // Example: https://github.com/netroby/jdk9-dev/blob/master/jdk/src/java.management/share/classes/module-info.java
 public class AttributeModule implements Attribute {
-    protected String name;
-    protected int flags;
-    protected String version;
+    private String name;
+    private int flags;
+    private String version;
 
-    protected ModuleInfo[]  requires;
-    protected PackageInfo[] exports;
-    protected PackageInfo[] opens;
-    protected String[]      uses;
-    protected ServiceInfo[] provides;
+    private ModuleInfo[]  requires;
+    private PackageInfo[] exports;
+    private PackageInfo[] opens;
+    private String[]      uses;
+    private ServiceInfo[] provides;
 
     public AttributeModule(String name, int flags, String version, ModuleInfo[] requires, PackageInfo[] exports, PackageInfo[] opens, String[] uses, ServiceInfo[] provides) {
         this.name = name;

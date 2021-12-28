@@ -1,10 +1,16 @@
 package org.jd.core.v1.compiler;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
-import javax.tools.*;
+import javax.tools.FileObject;
+import javax.tools.ForwardingJavaFileManager;
+import javax.tools.JavaFileManager;
+import javax.tools.JavaFileObject;
 import javax.tools.JavaFileObject.Kind;
+import javax.tools.StandardLocation;
 
 public class InMemoryJavaFileManager extends ForwardingJavaFileManager<JavaFileManager> {
     private final List<InMemoryJavaSourceFileObject> sources;

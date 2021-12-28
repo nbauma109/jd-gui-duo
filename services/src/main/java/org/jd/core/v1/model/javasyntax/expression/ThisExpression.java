@@ -10,8 +10,8 @@ package org.jd.core.v1.model.javasyntax.expression;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class ThisExpression extends AbstractLineNumberExpression {
-    protected Type type;
-    protected final boolean explicit;
+    private Type type;
+    private final boolean explicit;
 
     public ThisExpression(Type type) {
         this.type = type;

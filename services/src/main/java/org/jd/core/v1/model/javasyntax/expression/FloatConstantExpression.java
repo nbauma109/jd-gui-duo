@@ -10,7 +10,7 @@ package org.jd.core.v1.model.javasyntax.expression;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 
 public class FloatConstantExpression extends AbstractLineNumberTypeExpression {
-    protected float value;
+    private float value;
 
     public FloatConstantExpression(float value) {
         super(PrimitiveType.TYPE_FLOAT);

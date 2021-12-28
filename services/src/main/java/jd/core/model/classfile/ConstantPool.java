@@ -16,7 +16,11 @@
  ******************************************************************************/
 package jd.core.model.classfile;
 
-import org.apache.bcel.classfile.*;
+import org.apache.bcel.classfile.Constant;
+import org.apache.bcel.classfile.ConstantClass;
+import org.apache.bcel.classfile.ConstantFieldref;
+import org.apache.bcel.classfile.ConstantNameAndType;
+import org.apache.bcel.classfile.ConstantUtf8;
 import org.jd.core.v1.model.classfile.constant.ConstantInterfaceMethodref;
 import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
 import org.jd.core.v1.util.StringConstants;
@@ -377,11 +381,6 @@ public class ConstantPool
     public Constant getConstantValue(int index)
     {
         return this.listOfConstants.get(index);
-    }
-
-    public ConstantInteger getConstantInteger(int index)
-    {
-        return (ConstantInteger)this.listOfConstants.get(index);
     }
 
 	public int getAnnotationDefaultAttributeNameIndex() {

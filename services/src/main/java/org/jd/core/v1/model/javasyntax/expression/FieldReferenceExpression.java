@@ -10,10 +10,10 @@ package org.jd.core.v1.model.javasyntax.expression;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class FieldReferenceExpression extends AbstractLineNumberTypeExpression {
-    protected Expression expression;
-    protected String internalTypeName;
-    protected String name;
-    protected String descriptor;
+    private Expression expression;
+    private String internalTypeName;
+    private String name;
+    private String descriptor;
 
     public FieldReferenceExpression(Type type, Expression expression, String internalTypeName, String name, String descriptor) {
         super(type);

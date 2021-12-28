@@ -12,14 +12,20 @@ import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
 import org.jd.core.v1.model.javasyntax.declaration.MemberDeclarations;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileClassDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileFieldDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMemberDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.MergeMembersUtil;
 import org.jd.core.v1.util.DefaultList;
 import org.jd.core.v1.util.StringConstants;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class MergeMembersUtilTest {
 

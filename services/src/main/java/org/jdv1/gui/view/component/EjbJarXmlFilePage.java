@@ -25,16 +25,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 
 public class EjbJarXmlFilePage extends TypeReferencePage implements UriGettable, IndexesChangeListener {
 
     private static final long serialVersionUID = 1L;
 
-    protected transient API api;
-    protected transient Container.Entry entry;
-    protected transient Collection<Future<Indexes>> collectionOfFutureIndexes = Collections.emptyList();
+    private transient API api;
+    private transient Container.Entry entry;
+    private transient Collection<Future<Indexes>> collectionOfFutureIndexes = Collections.emptyList();
 
     public EjbJarXmlFilePage(API api, Container.Entry entry) {
         this.api = api;

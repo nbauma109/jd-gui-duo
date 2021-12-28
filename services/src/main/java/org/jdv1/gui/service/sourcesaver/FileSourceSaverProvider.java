@@ -13,9 +13,13 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.service.sourcesaver.AbstractSourceSaverProvider;
 import org.jd.gui.spi.SourceSaver;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 public class FileSourceSaverProvider extends AbstractSourceSaverProvider {
 

@@ -10,12 +10,12 @@ package org.jd.core.v1.model.javasyntax.declaration;
 import java.util.List;
 
 public class ModuleDeclaration extends TypeDeclaration {
-    protected String            version;
-    protected List<ModuleInfo>  requires;
-    protected List<PackageInfo> exports;
-    protected List<PackageInfo> opens;
-    protected List<String>      uses;
-    protected List<ServiceInfo> provides;
+    private String            version;
+    private List<ModuleInfo>  requires;
+    private List<PackageInfo> exports;
+    private List<PackageInfo> opens;
+    private List<String>      uses;
+    private List<ServiceInfo> provides;
 
     public ModuleDeclaration(int flags, String internalName, String name, String version, List<ModuleInfo> requires, List<PackageInfo> exports, List<PackageInfo> opens, List<String> uses, List<ServiceInfo> provides) {
         super(null, flags, internalName, name, null);
@@ -45,9 +45,9 @@ public class ModuleDeclaration extends TypeDeclaration {
     }
 
     public static class ModuleInfo {
-        protected String name;
-        protected int flags;
-        protected String version;
+        private String name;
+        private int flags;
+        private String version;
 
         public ModuleInfo(String name, int flags, String version) {
             this.name = name;
@@ -75,9 +75,9 @@ public class ModuleDeclaration extends TypeDeclaration {
     }
 
     public static class PackageInfo {
-        protected String       internalName;
-        protected int flags;
-        protected List<String> moduleInfoNames;
+        private String       internalName;
+        private int flags;
+        private List<String> moduleInfoNames;
 
         public PackageInfo(String internalName, int flags, List<String> moduleInfoNames) {
             this.internalName = internalName;
@@ -105,8 +105,8 @@ public class ModuleDeclaration extends TypeDeclaration {
     }
 
     public static class ServiceInfo {
-        protected String       interfaceTypeName;
-        protected List<String> implementationTypeNames;
+        private String       interfaceTypeName;
+        private List<String> implementationTypeNames;
 
         public ServiceInfo(String interfaceTypeName, List<String> implementationTypeNames) {
             this.interfaceTypeName = interfaceTypeName;

@@ -15,7 +15,9 @@ import org.jd.gui.service.configuration.ConfigurationPersisterService;
 import org.jd.gui.util.net.InterProcessCommunicationUtil;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;

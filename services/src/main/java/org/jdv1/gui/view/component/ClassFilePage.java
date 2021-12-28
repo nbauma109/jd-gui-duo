@@ -16,15 +16,21 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
-import org.jd.gui.util.decompiler.*;
+import org.jd.gui.util.decompiler.ClassFileSourcePrinter;
+import org.jd.gui.util.decompiler.ContainerLoader;
+import org.jd.gui.util.decompiler.GuiPreferences;
 import org.jd.gui.util.io.NewlineOutputStream;
-import org.jd.gui.util.parser.jdt.core.*;
+import org.jd.gui.util.parser.jdt.core.DeclarationData;
+import org.jd.gui.util.parser.jdt.core.HyperlinkReferenceData;
+import org.jd.gui.util.parser.jdt.core.StringData;
 import org.jdv1.gui.util.MethodPatcher;
 import org.jdv1.gui.util.decompiler.LineNumberStringBuilderPrinter;
 import org.jdv1.gui.util.decompiler.StringBuilderPrinter;
 
 import java.awt.Color;
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +39,9 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 
 import static org.jd.gui.util.Key.key;
-import static org.jd.gui.util.decompiler.GuiPreferences.*;
+import static org.jd.gui.util.decompiler.GuiPreferences.ESCAPE_UNICODE_CHARACTERS;
+import static org.jd.gui.util.decompiler.GuiPreferences.REALIGN_LINE_NUMBERS;
+import static org.jd.gui.util.decompiler.GuiPreferences.USE_JD_CORE_V0;
 
 import jd.core.Decompiler;
 import jd.core.process.DecompilerImpl;
@@ -47,7 +55,7 @@ public class ClassFilePage extends TypePage {
     protected static final ClassFileToJavaSourceDecompiler DECOMPILER = new ClassFileToJavaSourceDecompiler();
     protected static final Decompiler DECOMPILERV0 = new DecompilerImpl();
 
-    protected int maximumLineNumber = -1;
+    private int maximumLineNumber = -1;
 
     public ClassFilePage(API api, Container.Entry entry) {
         super(api, entry);
@@ -218,10 +226,10 @@ public class ClassFilePage extends TypePage {
     }
 
     public class Printer extends ClassFileSourcePrinter {
-        protected StringBuilder sb = new StringBuilder();
-        protected boolean realignmentLineNumber;
-        protected boolean showPrefixThis;
-        protected boolean unicodeEscape;
+        private StringBuilder sb = new StringBuilder();
+        private boolean realignmentLineNumber;
+        private boolean showPrefixThis;
+        private boolean unicodeEscape;
 
         public Printer(GuiPreferences preferences) {
             this.realignmentLineNumber = preferences.getRealignmentLineNumber();
@@ -255,7 +263,7 @@ public class ClassFilePage extends TypePage {
         }
 
         // Manage line number and misalignment
-        int textAreaLineNumber = 1;
+        private int textAreaLineNumber = 1;
 
         @Override
         public void start(int maxLineNumber, int majorVersion, int minorVersion) {
@@ -404,7 +412,7 @@ public class ClassFilePage extends TypePage {
     public class ClassFilePrinter extends StringBuilderPrinter {
 
         // Manage line number and misalignment
-        int textAreaLineNumber = 1;
+        private int textAreaLineNumber = 1;
 
         @Override
         public void start(int maxLineNumber, int majorVersion, int minorVersion) {

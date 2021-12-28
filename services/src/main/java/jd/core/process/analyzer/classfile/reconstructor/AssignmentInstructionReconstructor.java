@@ -21,9 +21,30 @@ import org.apache.bcel.Const;
 import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
-import jd.core.model.instruction.bytecode.instruction.*;
+import jd.core.model.instruction.bytecode.instruction.AALoad;
+import jd.core.model.instruction.bytecode.instruction.AAStore;
+import jd.core.model.instruction.bytecode.instruction.ALoad;
+import jd.core.model.instruction.bytecode.instruction.AStore;
+import jd.core.model.instruction.bytecode.instruction.ArrayLoadInstruction;
+import jd.core.model.instruction.bytecode.instruction.ArrayStoreInstruction;
+import jd.core.model.instruction.bytecode.instruction.AssignmentInstruction;
+import jd.core.model.instruction.bytecode.instruction.BinaryOperatorInstruction;
+import jd.core.model.instruction.bytecode.instruction.DupLoad;
+import jd.core.model.instruction.bytecode.instruction.DupStore;
+import jd.core.model.instruction.bytecode.instruction.GetField;
+import jd.core.model.instruction.bytecode.instruction.GetStatic;
+import jd.core.model.instruction.bytecode.instruction.ILoad;
+import jd.core.model.instruction.bytecode.instruction.IStore;
+import jd.core.model.instruction.bytecode.instruction.Instruction;
+import jd.core.model.instruction.bytecode.instruction.LoadInstruction;
+import jd.core.model.instruction.bytecode.instruction.PutField;
+import jd.core.model.instruction.bytecode.instruction.PutStatic;
+import jd.core.model.instruction.bytecode.instruction.StoreInstruction;
+import jd.core.model.instruction.bytecode.instruction.TernaryOpStore;
 import jd.core.model.instruction.bytecode.instruction.attribute.ValuerefAttribute;
-import jd.core.process.analyzer.classfile.visitor.*;
+import jd.core.process.analyzer.classfile.visitor.CompareInstructionVisitor;
+import jd.core.process.analyzer.classfile.visitor.ReplaceDupLoadVisitor;
+import jd.core.process.analyzer.classfile.visitor.SearchDupLoadInstructionVisitor;
 
 /*
  * Recontruction des affectations multiples depuis le motif :

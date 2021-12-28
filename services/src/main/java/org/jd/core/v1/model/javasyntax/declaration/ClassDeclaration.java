@@ -8,10 +8,12 @@
 package org.jd.core.v1.model.javasyntax.declaration;
 
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
 
 public class ClassDeclaration extends InterfaceDeclaration {
-    protected ObjectType superType;
+    private ObjectType superType;
 
     public ClassDeclaration(int flags, String internalName, String name, BodyDeclaration bodyDeclaration) {
         super(null, flags, internalName, name, null, null, bodyDeclaration);

@@ -1,25 +1,60 @@
 package org.jd.gui.view.component;
 
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionMethodReference;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.model.Container;
-import org.jd.gui.util.parser.jdt.core.*;
+import org.jd.gui.util.parser.jdt.core.AbstractJavaListener;
+import org.jd.gui.util.parser.jdt.core.Context;
+import org.jd.gui.util.parser.jdt.core.DeclarationData;
+import org.jd.gui.util.parser.jdt.core.HyperlinkData;
+import org.jd.gui.util.parser.jdt.core.HyperlinkReferenceData;
+import org.jd.gui.util.parser.jdt.core.ReferenceData;
+import org.jd.gui.util.parser.jdt.core.StringData;
+import org.jd.gui.util.parser.jdt.core.TypeDeclarationData;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import static org.jd.gui.util.Key.key;
 
 public class ReferenceListener extends AbstractJavaListener {
-    protected StringBuilder sbTypeDeclaration = new StringBuilder();
-    protected Map<String, ReferenceData> referencesCache = new HashMap<>();
-    protected String currentInternalTypeName;
-    protected Context currentContext;
+    private StringBuilder sbTypeDeclaration = new StringBuilder();
+    private Map<String, ReferenceData> referencesCache = new HashMap<>();
+    private String currentInternalTypeName;
+    private Context currentContext;
 
-    protected DeclarationListener declarationListener;
+    private DeclarationListener declarationListener;
 
-    protected final List<ReferenceData> references = new ArrayList<>();
-    protected final List<StringData> strings = new ArrayList<>();
-    protected SortedMap<Integer, HyperlinkData> hyperlinks = new TreeMap<>();
+    private final List<ReferenceData> references = new ArrayList<>();
+    private final List<StringData> strings = new ArrayList<>();
+    private SortedMap<Integer, HyperlinkData> hyperlinks = new TreeMap<>();
 
     public ReferenceListener(Container.Entry entry) {
         super(entry);
@@ -80,20 +115,6 @@ public class ReferenceListener extends AbstractJavaListener {
         }
 
         currentInternalTypeName = sbTypeDeclaration.toString();
-    }
-
-    protected void enterFormalParameters(MethodDeclaration node) {
-        @SuppressWarnings("unchecked")
-		List<SingleVariableDeclaration> formalParameters = node.parameters();
-        int dimensionOnParameter;
-        String descriptor;
-        String name;
-        for (SingleVariableDeclaration formalParameter : formalParameters) {
-            dimensionOnParameter = formalParameter.getExtraDimensions();
-            descriptor = createDescriptor(formalParameter.getType(), dimensionOnParameter);
-            name = formalParameter.getName().getIdentifier();
-            currentContext.put(name, descriptor);
-        }
     }
 
     /** --- Add references --- */

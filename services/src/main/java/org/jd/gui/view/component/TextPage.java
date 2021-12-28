@@ -9,11 +9,15 @@ package org.jd.gui.view.component;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
-import org.jd.gui.api.feature.*;
+import org.jd.gui.api.feature.ContentCopyable;
+import org.jd.gui.api.feature.ContentSavable;
+import org.jd.gui.api.feature.ContentSelectable;
 import org.jd.gui.util.io.NewlineOutputStream;
 
 import java.awt.datatransfer.StringSelection;
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 
 public class TextPage extends AbstractTextPage implements ContentCopyable, ContentSelectable, ContentSavable {

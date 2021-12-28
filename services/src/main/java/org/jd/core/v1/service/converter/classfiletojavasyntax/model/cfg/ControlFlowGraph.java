@@ -13,8 +13,8 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.Set;
 
 public class ControlFlowGraph {
-    protected Method method;
-    protected DefaultList<BasicBlock> list = new DefaultList<>() {
+    private Method method;
+    private DefaultList<BasicBlock> list = new DefaultList<>() {
 
         private static final long serialVersionUID = 1L;
 
@@ -23,7 +23,7 @@ public class ControlFlowGraph {
             throw new UnsupportedOperationException();
         }
     };
-    protected int[] offsetToLineNumbers = null;
+    private int[] offsetToLineNumbers = null;
 
     public ControlFlowGraph(Method method) {
         this.method = method;

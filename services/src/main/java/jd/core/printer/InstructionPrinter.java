@@ -21,7 +21,7 @@ import java.util.List;
 
 public class InstructionPrinter implements Printer
 {
-    protected Printer printer;
+    private Printer printer;
     private int previousLineNumber;
     private boolean newInstruction;
     private boolean multiLineInstruction;
@@ -150,12 +150,6 @@ public class InstructionPrinter implements Printer
     }
 
     // -------------------------------------------------------------------------
-    public void print(int lineNumber, byte b)
-    {
-        addNewLinesAndPrefix(lineNumber);
-        this.printer.print(b);
-    }
-
     public void print(int lineNumber, char c)
     {
         addNewLinesAndPrefix(lineNumber);

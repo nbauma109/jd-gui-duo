@@ -12,9 +12,9 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class ForEachStatement implements Statement {
     protected Type type;
-    protected String name;
+    private String name;
     protected Expression expression;
-    protected BaseStatement statements;
+    private BaseStatement statements;
 
     public ForEachStatement(Type type, String name, Expression expression, BaseStatement statements) {
         this.type = type;

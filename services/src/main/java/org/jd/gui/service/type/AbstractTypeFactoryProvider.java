@@ -8,7 +8,6 @@ package org.jd.gui.service.type;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;
-import org.jd.gui.api.model.Type;
 import org.jd.gui.spi.TypeFactory;
 import org.jd.gui.util.CustomMultiResolutionImage;
 import org.jd.gui.util.ImageUtil;
@@ -17,15 +16,28 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
 import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
 
+import static org.apache.bcel.Const.ACC_ABSTRACT;
+import static org.apache.bcel.Const.ACC_ANNOTATION;
+import static org.apache.bcel.Const.ACC_ENUM;
+import static org.apache.bcel.Const.ACC_FINAL;
+import static org.apache.bcel.Const.ACC_INTERFACE;
+import static org.apache.bcel.Const.ACC_PRIVATE;
+import static org.apache.bcel.Const.ACC_PROTECTED;
+import static org.apache.bcel.Const.ACC_PUBLIC;
+import static org.apache.bcel.Const.ACC_STATIC;
+import static org.apache.bcel.Const.ACC_VARARGS;
+
 public abstract class AbstractTypeFactoryProvider implements TypeFactory {
 
-	protected List<String> externalSelectors;
-	protected Pattern externalPathPattern;
+	private List<String> externalSelectors;
+	private Pattern externalPathPattern;
 
 	/**
 	 * Initialize "selectors" and "pathPattern" with optional external properties
@@ -60,17 +72,6 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
 		String[] array = new String[size + 1];
 		externalSelectors.toArray(array);
 		array[size] = selector;
-		return array;
-	}
-
-	protected String[] appendSelectors(String... selectors) {
-		if (externalSelectors == null) {
-			return selectors;
-		}
-		int size = externalSelectors.size();
-		String[] array = new String[size + selectors.length];
-		externalSelectors.toArray(array);
-		System.arraycopy(selectors, 0, array, size, selectors.length);
 		return array;
 	}
 
@@ -257,7 +258,7 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
 			index++;
 
 			if (descriptor.charAt(index) != ')') {
-				if (isAConstructor && isInnerClass && (typeAccess & Type.FLAG_STATIC) == 0) {
+				if (isAConstructor && isInnerClass && (typeAccess & ACC_STATIC) == 0) {
 					// Skip first parameter
 					int lengthBackup = sb.length();
 					index = writeSignature(sb, descriptor, length, index, false);
@@ -267,7 +268,7 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
 				if (descriptor.charAt(index) != ')') {
 					int varargsParameterIndex;
 
-					if ((methodAccess & Type.FLAG_VARARGS) == 0) {
+					if ((methodAccess & ACC_VARARGS) == 0) {
 						varargsParameterIndex = Integer.MAX_VALUE;
 					} else {
 						// Count parameters
@@ -310,13 +311,13 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
 
 	/** Icon getters. */
 	protected static ImageIcon getTypeIcon(int access) {
-		if ((access & Type.FLAG_ANNOTATION) != 0) {
+		if ((access & ACC_ANNOTATION) != 0) {
 			return ANNOTATION_ICON;
 		}
-		if ((access & Type.FLAG_INTERFACE) != 0) {
+		if ((access & ACC_INTERFACE) != 0) {
 			return INTERFACE_ICONS[accessToIndex(access)];
 		}
-		if ((access & Type.FLAG_ENUM) != 0) {
+		if ((access & ACC_ENUM) != 0) {
 			return ENUM_ICON;
 		}
 		return CLASS_ICONS[accessToIndex(access)];
@@ -333,25 +334,25 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
 	protected static int accessToIndex(int access) {
 		int index = 0;
 
-		if ((access & Type.FLAG_STATIC) != 0) {
+		if ((access & ACC_STATIC) != 0) {
 			index += 4;
 		}
 
-		if ((access & Type.FLAG_FINAL) != 0) {
+		if ((access & ACC_FINAL) != 0) {
 			index += 8;
 		}
 
-		if ((access & Type.FLAG_ABSTRACT) != 0) {
+		if ((access & ACC_ABSTRACT) != 0) {
 			index += 16;
 		}
 
-		if ((access & Type.FLAG_PUBLIC) != 0) {
+		if ((access & ACC_PUBLIC) != 0) {
 			return index + 1;
 		}
-		if ((access & Type.FLAG_PROTECTED) != 0) {
+		if ((access & ACC_PROTECTED) != 0) {
 			return index + 2;
 		}
-		if ((access & Type.FLAG_PRIVATE) != 0) {
+		if ((access & ACC_PRIVATE) != 0) {
 			return index + 3;
 		}
 		return index;

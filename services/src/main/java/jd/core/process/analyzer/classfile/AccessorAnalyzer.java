@@ -26,9 +26,22 @@ import java.util.List;
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.Method;
-import jd.core.model.classfile.accessor.*;
+import jd.core.model.classfile.accessor.AccessorConstants;
+import jd.core.model.classfile.accessor.GetFieldAccessor;
+import jd.core.model.classfile.accessor.GetStaticAccessor;
+import jd.core.model.classfile.accessor.InvokeMethodAccessor;
+import jd.core.model.classfile.accessor.PutFieldAccessor;
+import jd.core.model.classfile.accessor.PutStaticAccessor;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
-import jd.core.model.instruction.bytecode.instruction.*;
+import jd.core.model.instruction.bytecode.instruction.ALoad;
+import jd.core.model.instruction.bytecode.instruction.GetField;
+import jd.core.model.instruction.bytecode.instruction.GetStatic;
+import jd.core.model.instruction.bytecode.instruction.Instruction;
+import jd.core.model.instruction.bytecode.instruction.InvokeInstruction;
+import jd.core.model.instruction.bytecode.instruction.InvokeNoStaticInstruction;
+import jd.core.model.instruction.bytecode.instruction.PutField;
+import jd.core.model.instruction.bytecode.instruction.PutStatic;
+import jd.core.model.instruction.bytecode.instruction.ReturnInstruction;
 import jd.core.util.SignatureUtil;
 
 /*

@@ -8,13 +8,17 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.classfile.attribute.LocalVariableType;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.AbstractNopTypeArgumentVisitor;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.LocalVariableSet;
 
 public class UpdateTypeVisitor extends AbstractNopTypeArgumentVisitor {
-    protected UpdateClassTypeArgumentsVisitor updateClassTypeArgumentsVisitor = new UpdateClassTypeArgumentsVisitor();
-    protected LocalVariableSet localVariableSet;
-    protected LocalVariableType localVariableType;
+    private UpdateClassTypeArgumentsVisitor updateClassTypeArgumentsVisitor = new UpdateClassTypeArgumentsVisitor();
+    private LocalVariableSet localVariableSet;
+    private LocalVariableType localVariableType;
 
     public UpdateTypeVisitor(LocalVariableSet localVariableSet) {
         this.localVariableSet = localVariableSet;

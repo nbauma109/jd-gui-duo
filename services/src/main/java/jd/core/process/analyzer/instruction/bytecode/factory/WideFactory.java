@@ -24,7 +24,13 @@ import java.util.List;
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
-import jd.core.model.instruction.bytecode.instruction.*;
+import jd.core.model.instruction.bytecode.instruction.ALoad;
+import jd.core.model.instruction.bytecode.instruction.AStore;
+import jd.core.model.instruction.bytecode.instruction.IInc;
+import jd.core.model.instruction.bytecode.instruction.Instruction;
+import jd.core.model.instruction.bytecode.instruction.LoadInstruction;
+import jd.core.model.instruction.bytecode.instruction.Ret;
+import jd.core.model.instruction.bytecode.instruction.StoreInstruction;
 
 public class WideFactory implements InstructionFactory
 {

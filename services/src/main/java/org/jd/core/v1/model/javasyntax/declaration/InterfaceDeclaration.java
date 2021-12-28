@@ -12,8 +12,8 @@ import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
 
 public class InterfaceDeclaration extends TypeDeclaration {
-    protected BaseTypeParameter typeParameters;
-    protected BaseType interfaces;
+    private BaseTypeParameter typeParameters;
+    private BaseType interfaces;
 
     public InterfaceDeclaration(int flags, String internalName, String name, BaseType interfaces) {
         super(null, flags, internalName, name, null);

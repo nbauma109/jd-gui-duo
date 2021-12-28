@@ -13,9 +13,8 @@ public abstract class ClassFileSourcePrinter implements Printer {
     protected static final String TAB = "  ";
     protected static final String NEWLINE = "\n";
 
-    protected int maxLineNumber = 0;
-    protected int indentationCount;
-    protected boolean display;
+    private int indentationCount;
+    private boolean display;
 
     protected abstract boolean getRealignmentLineNumber();
     protected abstract boolean isShowPrefixThis();
@@ -132,7 +131,6 @@ public abstract class ClassFileSourcePrinter implements Printer {
     public void start(int maxLineNumber, int majorVersion, int minorVersion) {
         this.indentationCount = 0;
         this.display = true;
-        this.maxLineNumber = maxLineNumber;
     }
 
     @Override

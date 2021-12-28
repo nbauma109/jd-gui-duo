@@ -8,8 +8,8 @@
 package org.jd.core.v1.model.javasyntax.declaration;
 
 public class LocalVariableDeclarator implements BaseLocalVariableDeclarator {
-    protected int lineNumber;
-    protected String name;
+    private int lineNumber;
+    private String name;
     protected int dimension;
     protected VariableInitializer variableInitializer;
 

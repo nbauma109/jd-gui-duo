@@ -19,17 +19,21 @@ import java.util.Map;
 
 import static org.apache.bcel.Const.MAJOR_1_1;
 import static org.apache.bcel.Const.MAJOR_1_5;
-import static org.jd.gui.util.decompiler.GuiPreferences.*;
+import static org.jd.gui.util.decompiler.GuiPreferences.ESCAPE_UNICODE_CHARACTERS;
+import static org.jd.gui.util.decompiler.GuiPreferences.JD_CORE_VERSION;
+import static org.jd.gui.util.decompiler.GuiPreferences.REALIGN_LINE_NUMBERS;
+import static org.jd.gui.util.decompiler.GuiPreferences.WRITE_LINE_NUMBERS;
+import static org.jd.gui.util.decompiler.GuiPreferences.WRITE_METADATA;
 
 public class LineNumberStringBuilderPrinter extends StringBuilderPrinter {
-    protected boolean showLineNumbers;
+    private boolean showLineNumbers;
 
-    protected int maxLineNumber;
-    protected int digitCount;
+    private int maxLineNumber;
+    private int digitCount;
 
-    protected String lineNumberBeginPrefix;
-    protected String lineNumberEndPrefix;
-    protected String unknownLineNumberPrefix;
+    private String lineNumberBeginPrefix;
+    private String lineNumberEndPrefix;
+    private String unknownLineNumberPrefix;
 
     public void setShowLineNumbers(boolean showLineNumbers) { this.showLineNumbers = showLineNumbers; }
 

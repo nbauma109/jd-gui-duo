@@ -7,29 +7,63 @@
 package org.jd.core.v1.service.tokenizer.javafragmenttotoken.visitor;
 
 import org.jd.core.v1.api.printer.Printer;
-import org.jd.core.v1.model.javafragment.*;
+import org.jd.core.v1.model.javafragment.EndBlockFragment;
+import org.jd.core.v1.model.javafragment.EndBlockInParameterFragment;
+import org.jd.core.v1.model.javafragment.EndBodyFragment;
+import org.jd.core.v1.model.javafragment.EndBodyInParameterFragment;
+import org.jd.core.v1.model.javafragment.EndMovableJavaBlockFragment;
+import org.jd.core.v1.model.javafragment.EndSingleStatementBlockFragment;
+import org.jd.core.v1.model.javafragment.EndStatementsBlockFragment;
+import org.jd.core.v1.model.javafragment.ImportsFragment;
 import org.jd.core.v1.model.javafragment.ImportsFragment.Import;
-import org.jd.core.v1.model.token.*;
+import org.jd.core.v1.model.javafragment.JavaFragmentVisitor;
+import org.jd.core.v1.model.javafragment.LineNumberTokensFragment;
+import org.jd.core.v1.model.javafragment.SpaceSpacerFragment;
+import org.jd.core.v1.model.javafragment.SpacerBetweenMembersFragment;
+import org.jd.core.v1.model.javafragment.SpacerFragment;
+import org.jd.core.v1.model.javafragment.StartBlockFragment;
+import org.jd.core.v1.model.javafragment.StartBodyFragment;
+import org.jd.core.v1.model.javafragment.StartMovableJavaBlockFragment;
+import org.jd.core.v1.model.javafragment.StartSingleStatementBlockFragment;
+import org.jd.core.v1.model.javafragment.StartStatementsBlockFragment;
+import org.jd.core.v1.model.javafragment.StartStatementsDoWhileBlockFragment;
+import org.jd.core.v1.model.javafragment.StartStatementsTryBlockFragment;
+import org.jd.core.v1.model.javafragment.TokensFragment;
+import org.jd.core.v1.model.token.AbstractNopTokenVisitor;
+import org.jd.core.v1.model.token.BooleanConstantToken;
+import org.jd.core.v1.model.token.CharacterConstantToken;
+import org.jd.core.v1.model.token.DeclarationToken;
+import org.jd.core.v1.model.token.EndBlockToken;
+import org.jd.core.v1.model.token.EndMarkerToken;
+import org.jd.core.v1.model.token.KeywordToken;
+import org.jd.core.v1.model.token.LineNumberToken;
+import org.jd.core.v1.model.token.NewLineToken;
+import org.jd.core.v1.model.token.NumericConstantToken;
+import org.jd.core.v1.model.token.ReferenceToken;
+import org.jd.core.v1.model.token.StartBlockToken;
+import org.jd.core.v1.model.token.StartMarkerToken;
+import org.jd.core.v1.model.token.StringConstantToken;
+import org.jd.core.v1.model.token.TextToken;
+import org.jd.core.v1.model.token.Token;
+import org.jd.core.v1.model.token.TokenVisitor;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 
 public class TokenizeJavaFragmentVisitor implements JavaFragmentVisitor {
 
     protected static final KeywordToken DO = new KeywordToken("do");
     protected static final KeywordToken IMPORT = new KeywordToken("import");
-    protected static final KeywordToken FOR = new KeywordToken("for");
-    protected static final KeywordToken TRUE = new KeywordToken("true");
     protected static final KeywordToken TRY = new KeywordToken("try");
-    protected static final KeywordToken WHILE = new KeywordToken("while");
 
     protected static final List<Token> DO_TOKENS = Arrays.asList((Token)DO);
-    protected static final List<Token> EMPTY_FOR_TOKENS = Arrays.asList(FOR, TextToken.INFINITE_FOR);
-    protected static final List<Token> EMPTY_WHILE_TOKENS = Arrays.asList(WHILE, TextToken.SPACE, TextToken.LEFTROUNDBRACKET, TRUE, TextToken.RIGHTROUNDBRACKET);
     protected static final List<Token> TRY_TOKENS = Arrays.asList((Token)TRY);
 
-    protected KnownLineNumberTokenVisitor knownLineNumberTokenVisitor = new KnownLineNumberTokenVisitor();
-    protected UnknownLineNumberTokenVisitor unknownLineNumberTokenVisitor = new UnknownLineNumberTokenVisitor();
+    private KnownLineNumberTokenVisitor knownLineNumberTokenVisitor = new KnownLineNumberTokenVisitor();
+    private UnknownLineNumberTokenVisitor unknownLineNumberTokenVisitor = new UnknownLineNumberTokenVisitor();
     protected DefaultList<Token> tokens;
 
     public TokenizeJavaFragmentVisitor(int initialCapacity) {
@@ -472,16 +506,6 @@ public class TokenizeJavaFragmentVisitor implements JavaFragmentVisitor {
     @Override
     public void visit(StartStatementsDoWhileBlockFragment fragment) {
         visit(fragment, DO_TOKENS);
-    }
-
-    @Override
-    public void visit(StartStatementsInfiniteForBlockFragment fragment) {
-        visit(fragment, EMPTY_FOR_TOKENS);
-    }
-
-    @Override
-    public void visit(StartStatementsInfiniteWhileBlockFragment fragment) {
-        visit(fragment, EMPTY_WHILE_TOKENS);
     }
 
     @Override

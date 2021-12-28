@@ -11,7 +11,7 @@ import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.model.javasyntax.statement.CommentStatement;
 
 public class ClassFileMonitorExitStatement extends CommentStatement {
-    protected Expression monitor;
+    private Expression monitor;
 
     public ClassFileMonitorExitStatement(Expression monitor) {
         super("/* monitor exit " + monitor + " */");

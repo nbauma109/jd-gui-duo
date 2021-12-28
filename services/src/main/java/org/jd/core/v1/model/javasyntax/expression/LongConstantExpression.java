@@ -10,7 +10,7 @@ package org.jd.core.v1.model.javasyntax.expression;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 
 public class LongConstantExpression extends AbstractLineNumberTypeExpression {
-    protected long value;
+    private long value;
 
     public LongConstantExpression(long value) {
         super(PrimitiveType.TYPE_LONG);

@@ -13,8 +13,12 @@ import org.jd.gui.util.parser.jdt.core.HyperlinkData;
 
 import java.awt.Cursor;
 import java.awt.Point;
-import java.awt.event.*;
-import java.util.*;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 
 public abstract class HyperlinkPage extends TextPage {
 

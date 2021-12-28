@@ -11,14 +11,16 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.service.extension.ExtensionService;
 import org.jd.gui.spi.TreeNodeFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TreeNodeFactoryService {
     protected static final TreeNodeFactoryService TREE_NODE_FACTORY_SERVICE = new TreeNodeFactoryService();
 
     public static TreeNodeFactoryService getInstance() { return TREE_NODE_FACTORY_SERVICE; }
 
-    protected Map<String, TreeNodeFactories> mapProviders = new HashMap<>();
+    private Map<String, TreeNodeFactories> mapProviders = new HashMap<>();
 
     protected TreeNodeFactoryService() {
         Collection<TreeNodeFactory> providers = ExtensionService.getInstance().load(TreeNodeFactory.class);
@@ -80,8 +82,8 @@ public class TreeNodeFactoryService {
     }
 
     protected static class TreeNodeFactories {
-        protected Map<String, TreeNodeFactory> factories = new HashMap<>();
-        protected TreeNodeFactory defaultFactory;
+        private Map<String, TreeNodeFactory> factories = new HashMap<>();
+        private TreeNodeFactory defaultFactory;
 
         public void add(TreeNodeFactory factory) {
             if (factory.getPathPattern() != null) {

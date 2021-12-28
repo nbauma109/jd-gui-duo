@@ -25,7 +25,14 @@ import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
-import jd.core.process.analyzer.classfile.visitor.*;
+import jd.core.process.analyzer.classfile.visitor.OuterGetFieldVisitor;
+import jd.core.process.analyzer.classfile.visitor.OuterGetStaticVisitor;
+import jd.core.process.analyzer.classfile.visitor.OuterInvokeMethodVisitor;
+import jd.core.process.analyzer.classfile.visitor.OuterPutFieldVisitor;
+import jd.core.process.analyzer.classfile.visitor.OuterPutStaticVisitor;
+import jd.core.process.analyzer.classfile.visitor.ReplaceMultipleOuterReferenceVisitor;
+import jd.core.process.analyzer.classfile.visitor.ReplaceOuterAccessorVisitor;
+import jd.core.process.analyzer.classfile.visitor.ReplaceOuterReferenceVisitor;
 import jd.core.util.SignatureUtil;
 
 /*

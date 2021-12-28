@@ -10,12 +10,14 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
-import org.jd.core.v1.model.javasyntax.statement.*;
+import org.jd.core.v1.model.javasyntax.statement.ReturnExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.Statement;
+import org.jd.core.v1.model.javasyntax.statement.Statements;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.LocalVariableMaker;
 
 public class RemoveBinaryOpReturnStatementsVisitor extends AbstractJavaSyntaxVisitor {
-    protected LocalVariableMaker localVariableMaker;
+    private LocalVariableMaker localVariableMaker;
 
     public RemoveBinaryOpReturnStatementsVisitor(LocalVariableMaker localVariableMaker) {
         this.localVariableMaker = localVariableMaker;

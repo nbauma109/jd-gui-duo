@@ -7,13 +7,17 @@
 
 package org.jd.core.v1;
 
-import org.jd.core.v1.model.fragment.*;
+import org.jd.core.v1.model.fragment.FlexibleFragment;
+import org.jd.core.v1.model.fragment.Fragment;
+import org.jd.core.v1.model.fragment.SpacerBetweenMovableBlocksFragment;
 import org.jd.core.v1.service.layouter.visitor.UpdateSpacerBetweenMovableBlocksVisitor;
 import org.jd.core.v1.util.DefaultList;
 import org.junit.Test;
 
 import static org.jd.core.v1.model.javafragment.EndMovableJavaBlockFragment.END_MOVABLE_BLOCK;
-import static org.jd.core.v1.model.javafragment.StartMovableJavaBlockFragment.*;
+import static org.jd.core.v1.model.javafragment.StartMovableJavaBlockFragment.START_MOVABLE_FIELD_BLOCK;
+import static org.jd.core.v1.model.javafragment.StartMovableJavaBlockFragment.START_MOVABLE_METHOD_BLOCK;
+import static org.jd.core.v1.model.javafragment.StartMovableJavaBlockFragment.START_MOVABLE_TYPE_BLOCK;
 
 import junit.framework.TestCase;
 

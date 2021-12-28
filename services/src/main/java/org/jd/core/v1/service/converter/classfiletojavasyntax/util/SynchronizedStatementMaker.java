@@ -8,7 +8,9 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
-import org.jd.core.v1.model.javasyntax.statement.*;
+import org.jd.core.v1.model.javasyntax.statement.Statement;
+import org.jd.core.v1.model.javasyntax.statement.Statements;
+import org.jd.core.v1.model.javasyntax.statement.SynchronizedStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
 
@@ -54,7 +56,7 @@ public class SynchronizedStatementMaker {
     }
 
     protected static class RemoveMonitorExitVisitor extends AbstractJavaSyntaxVisitor {
-        protected AbstractLocalVariable localVariable;
+        private AbstractLocalVariable localVariable;
 
         public RemoveMonitorExitVisitor(AbstractLocalVariable localVariable) {
             this.localVariable = localVariable;

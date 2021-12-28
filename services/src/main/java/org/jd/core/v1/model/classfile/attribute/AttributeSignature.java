@@ -8,7 +8,7 @@
 package org.jd.core.v1.model.classfile.attribute;
 
 public class AttributeSignature implements Attribute {
-    protected String signature;
+    private String signature;
 
     public AttributeSignature(String signature) {
         this.signature = signature;

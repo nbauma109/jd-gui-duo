@@ -22,22 +22,25 @@ import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.InvokeNew;
-import jd.core.model.layout.block.*;
+import jd.core.model.layout.block.FragmentLayoutBlock;
+import jd.core.model.layout.block.InstructionsLayoutBlock;
+import jd.core.model.layout.block.LayoutBlock;
+import jd.core.model.layout.block.LayoutBlockConstants;
 import jd.core.preferences.Preferences;
 import jd.core.process.layouter.ClassFileLayouter;
 
 public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
 {
-    protected Preferences preferences;
-    protected List<LayoutBlock> layoutBlockList;
-    protected Method method;
-    protected List<Instruction> list;
-    protected int firstLineNumber;
-    protected int maxLineNumber;
-    protected int initialIndex1;
-    protected int index1;
-    protected int index2;
-    protected int offset1;
+    private Preferences preferences;
+    private List<LayoutBlock> layoutBlockList;
+    private Method method;
+    private List<Instruction> list;
+    private int firstLineNumber;
+    private int maxLineNumber;
+    private int initialIndex1;
+    private int index1;
+    private int index2;
+    private int offset1;
 
     public void start(
         Preferences preferences,

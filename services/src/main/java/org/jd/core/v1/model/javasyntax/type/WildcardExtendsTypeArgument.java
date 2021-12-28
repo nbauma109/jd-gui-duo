@@ -10,7 +10,7 @@ package org.jd.core.v1.model.javasyntax.type;
 import java.util.Map;
 
 public class WildcardExtendsTypeArgument implements TypeArgument {
-    protected Type type;
+    private Type type;
 
     public WildcardExtendsTypeArgument(Type type) {
         this.type = type;

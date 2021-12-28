@@ -12,7 +12,13 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.service.extension.ExtensionService;
 import org.jd.gui.spi.ContextualActionsFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.Action;
 
@@ -29,7 +35,7 @@ public class ContextualActionsFactoryService {
 		return name;
 	}
 
-    protected final Collection<ContextualActionsFactory> providers = ExtensionService.getInstance().load(ContextualActionsFactory.class);
+    private final Collection<ContextualActionsFactory> providers = ExtensionService.getInstance().load(ContextualActionsFactory.class);
 
     public Collection<Action> get(API api, Container.Entry entry, String fragment) {
         Map<String, List<Action>> mapActions = new HashMap<>();

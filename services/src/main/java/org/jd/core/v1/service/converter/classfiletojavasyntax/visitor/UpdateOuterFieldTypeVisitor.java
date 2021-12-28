@@ -13,16 +13,31 @@ import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
-import org.jd.core.v1.model.javasyntax.declaration.*;
-import org.jd.core.v1.model.javasyntax.type.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
+import org.jd.core.v1.model.javasyntax.declaration.AnnotationDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ClassDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ConstructorDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.EnumDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
+import org.jd.core.v1.model.javasyntax.declaration.InterfaceDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.StaticInitializerDeclaration;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.TypeArguments;
+import org.jd.core.v1.model.javasyntax.type.TypeParameter;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileFieldDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
-import static org.apache.bcel.Const.*;
+import static org.apache.bcel.Const.ALOAD_0;
+import static org.apache.bcel.Const.ALOAD_1;
+import static org.apache.bcel.Const.PUTFIELD;
 
 public class UpdateOuterFieldTypeVisitor extends AbstractJavaSyntaxVisitor {
-    protected TypeMaker typeMaker;
-    protected SearchFieldVisitor searchFieldVisitor = new SearchFieldVisitor();
+    private TypeMaker typeMaker;
+    private SearchFieldVisitor searchFieldVisitor = new SearchFieldVisitor();
 
     public UpdateOuterFieldTypeVisitor(TypeMaker typeMaker) {
         this.typeMaker = typeMaker;
@@ -124,8 +139,8 @@ public class UpdateOuterFieldTypeVisitor extends AbstractJavaSyntaxVisitor {
     public void visit(EnumDeclaration declaration) {}
 
     protected static class SearchFieldVisitor extends AbstractJavaSyntaxVisitor {
-        protected String name;
-        protected boolean found;
+        private String name;
+        private boolean found;
 
         public void init(String name) {
             this.name = name;

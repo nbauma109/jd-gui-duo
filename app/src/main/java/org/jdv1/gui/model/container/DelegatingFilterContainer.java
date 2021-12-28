@@ -12,18 +12,23 @@ import org.jd.gui.model.container.entry.path.SimpleEntryPath;
 
 import java.io.InputStream;
 import java.net.URI;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class DelegatingFilterContainer implements Container {
     protected static final URI DEFAULT_ROOT_URI = URI.create("file:.");
 
-    protected Container container;
-    protected DelegatedEntry root;
+    private Container container;
+    private DelegatedEntry root;
 
-    protected Set<URI> validEntries = new HashSet<>();
-    protected Map<URI, DelegatedEntry> uriToDelegatedEntry = new HashMap<>();
-    protected Map<URI, DelegatedContainer> uriToDelegatedContainer = new HashMap<>();
+    private Set<URI> validEntries = new HashSet<>();
+    private Map<URI, DelegatedEntry> uriToDelegatedEntry = new HashMap<>();
+    private Map<URI, DelegatedContainer> uriToDelegatedContainer = new HashMap<>();
 
     public DelegatingFilterContainer(Container container, Collection<Entry> entries) {
         this.container = container;
@@ -57,8 +62,8 @@ public class DelegatingFilterContainer implements Container {
     }
 
     protected class DelegatedEntry implements Entry, Comparable<DelegatedEntry> {
-        protected Entry entry;
-        protected Map<Container.EntryPath, Container.Entry> children;
+        private Entry entry;
+        private Map<Container.EntryPath, Container.Entry> children;
 
         public DelegatedEntry(Entry entry) {
             this.entry = entry;
@@ -122,7 +127,7 @@ public class DelegatingFilterContainer implements Container {
     }
 
     protected class DelegatedContainer implements Container {
-        protected Container container;
+        private Container container;
 
         public DelegatedContainer(Container container) {
             this.container = container;

@@ -88,11 +88,6 @@ public class LocalVariable
         }
     }
 
-    public void updateSignatureIndex(int signatureIndex)
-    {
-        this.setSignatureIndex(signatureIndex);
-    }
-
     @Override
     public String toString()
     {

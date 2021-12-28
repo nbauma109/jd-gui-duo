@@ -12,9 +12,8 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class BooleanExpression extends AbstractLineNumberExpression {
     public static final BooleanExpression TRUE = new BooleanExpression(true);
-    public static final BooleanExpression FALSE = new BooleanExpression(false);
 
-    protected boolean value;
+    private boolean value;
 
     protected BooleanExpression(boolean value) {
         this.value = value;

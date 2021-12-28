@@ -10,7 +10,7 @@ package org.jd.gui.service.configuration;
 public class ConfigurationPersisterService {
     protected static final ConfigurationPersisterService CONFIGURATION_PERSISTER_SERVICE = new ConfigurationPersisterService();
 
-    protected ConfigurationPersister provider = new ConfigurationXmlPersisterProvider();
+    private ConfigurationPersister provider = new ConfigurationXmlPersisterProvider();
 
     public static ConfigurationPersisterService getInstance() { return CONFIGURATION_PERSISTER_SERVICE; }
 

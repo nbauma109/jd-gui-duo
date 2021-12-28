@@ -10,16 +10,9 @@ package org.jd.core.v1.model.javasyntax.expression;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class TernaryOperatorExpression extends AbstractLineNumberTypeExpression {
-    protected Expression condition;
-    protected Expression trueExpression;
-    protected Expression falseExpression;
-
-    public TernaryOperatorExpression(Type type, Expression condition, Expression trueExpression, Expression falseExpression) {
-        super(type);
-        this.condition = condition;
-        this.trueExpression = trueExpression;
-        this.falseExpression = falseExpression;
-    }
+    private Expression condition;
+    private Expression trueExpression;
+    private Expression falseExpression;
 
     public TernaryOperatorExpression(int lineNumber, Type type, Expression condition, Expression trueExpression, Expression falseExpression) {
         super(lineNumber, type);

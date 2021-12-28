@@ -13,20 +13,23 @@ import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.TypeArgument;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ClassFileBodyDeclaration extends BodyDeclaration implements ClassFileMemberDeclaration {
-    protected ClassFile classFile;
-    protected List<ClassFileFieldDeclaration> fieldDeclarations;
-    protected List<ClassFileConstructorOrMethodDeclaration> methodDeclarations;
-    protected List<ClassFileTypeDeclaration> innerTypeDeclarations;
-    protected Map<String, ClassFileTypeDeclaration> innerTypeMap = Collections.emptyMap();
-    protected int firstLineNumber;
-    protected String outerTypeFieldName;
-    protected DefaultList<String> syntheticInnerFieldNames;
-    protected ClassFileBodyDeclaration outerBodyDeclaration;
-    protected Map<String, TypeArgument> bindings;
-    protected Map<String, BaseType> typeBounds;
+    private ClassFile classFile;
+    private List<ClassFileFieldDeclaration> fieldDeclarations;
+    private List<ClassFileConstructorOrMethodDeclaration> methodDeclarations;
+    private List<ClassFileTypeDeclaration> innerTypeDeclarations;
+    private Map<String, ClassFileTypeDeclaration> innerTypeMap = Collections.emptyMap();
+    private int firstLineNumber;
+    private String outerTypeFieldName;
+    private DefaultList<String> syntheticInnerFieldNames;
+    private ClassFileBodyDeclaration outerBodyDeclaration;
+    private Map<String, TypeArgument> bindings;
+    private Map<String, BaseType> typeBounds;
 
     public ClassFileBodyDeclaration(ClassFile classFile, Map<String, TypeArgument> bindings, Map<String, BaseType> typeBounds, ClassFileBodyDeclaration outerBodyDeclaration) {
         super(classFile.getInternalTypeName(), null);

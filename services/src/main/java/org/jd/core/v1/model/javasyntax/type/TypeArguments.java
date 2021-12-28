@@ -8,7 +8,9 @@ package org.jd.core.v1.model.javasyntax.type;
 
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
 
 public class TypeArguments extends DefaultList<TypeArgument> implements BaseTypeArgument {
 

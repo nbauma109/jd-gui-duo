@@ -10,14 +10,18 @@ package org.jdv1.gui.service.treenode;
 import org.fife.ui.rsyntaxtextarea.Theme;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
-import org.jd.gui.api.feature.*;
+import org.jd.gui.api.feature.ContainerEntryGettable;
+import org.jd.gui.api.feature.PageCreator;
+import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.io.TextReader;
 import org.jd.gui.view.component.TextPage;
 import org.jd.gui.view.data.TreeNodeBean;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 
 import javax.swing.ImageIcon;
@@ -69,7 +73,7 @@ public class TextFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvider
 	protected static class Page extends TextPage implements UriGettable {
 
 		private static final long serialVersionUID = 1L;
-		protected transient Container.Entry entry;
+		private transient Container.Entry entry;
 
 		public Page(Container.Entry entry) {
 			this.entry = entry;

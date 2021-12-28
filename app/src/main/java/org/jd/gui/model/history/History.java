@@ -12,9 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class History {
-    protected URI            current = null;
-    protected List<URI> backward = new ArrayList<>();
-    protected List<URI> forward = new ArrayList<>();
+    private URI            current = null;
+    private List<URI> backward = new ArrayList<>();
+    private List<URI> forward = new ArrayList<>();
 
     public void add(URI uri) {
         if (current == null) {

@@ -8,7 +8,30 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
-import org.jd.core.v1.model.javasyntax.statement.*;
+import org.jd.core.v1.model.javasyntax.statement.AssertStatement;
+import org.jd.core.v1.model.javasyntax.statement.BreakStatement;
+import org.jd.core.v1.model.javasyntax.statement.ByteCodeStatement;
+import org.jd.core.v1.model.javasyntax.statement.CommentStatement;
+import org.jd.core.v1.model.javasyntax.statement.ContinueStatement;
+import org.jd.core.v1.model.javasyntax.statement.DoWhileStatement;
+import org.jd.core.v1.model.javasyntax.statement.ExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.ForEachStatement;
+import org.jd.core.v1.model.javasyntax.statement.ForStatement;
+import org.jd.core.v1.model.javasyntax.statement.IfElseStatement;
+import org.jd.core.v1.model.javasyntax.statement.IfStatement;
+import org.jd.core.v1.model.javasyntax.statement.LabelStatement;
+import org.jd.core.v1.model.javasyntax.statement.LambdaExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.LocalVariableDeclarationStatement;
+import org.jd.core.v1.model.javasyntax.statement.ReturnExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.ReturnStatement;
+import org.jd.core.v1.model.javasyntax.statement.Statement;
+import org.jd.core.v1.model.javasyntax.statement.Statements;
+import org.jd.core.v1.model.javasyntax.statement.SwitchStatement;
+import org.jd.core.v1.model.javasyntax.statement.SynchronizedStatement;
+import org.jd.core.v1.model.javasyntax.statement.ThrowStatement;
+import org.jd.core.v1.model.javasyntax.statement.TryStatement;
+import org.jd.core.v1.model.javasyntax.statement.TypeDeclarationStatement;
+import org.jd.core.v1.model.javasyntax.statement.WhileStatement;
 
 public class RemoveLastContinueStatementVisitor extends AbstractJavaSyntaxVisitor {
     @Override

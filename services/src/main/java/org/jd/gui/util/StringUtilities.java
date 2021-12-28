@@ -2,7 +2,11 @@ package org.jd.gui.util;
 
 import org.jd.util.Range;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class StringUtilities {
 

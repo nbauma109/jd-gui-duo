@@ -8,8 +8,8 @@
 package org.jd.core.v1.model.javasyntax.statement;
 
 public class LabelStatement implements Statement {
-    protected String label;
-    protected Statement statement;
+    private String label;
+    private Statement statement;
 
     public LabelStatement(String label, Statement statement) {
         this.label = label;

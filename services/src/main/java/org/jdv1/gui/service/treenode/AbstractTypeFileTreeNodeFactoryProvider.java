@@ -9,14 +9,21 @@ package org.jdv1.gui.service.treenode;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
-import org.jd.gui.api.feature.*;
+import org.jd.gui.api.feature.ContainerEntryGettable;
+import org.jd.gui.api.feature.PageCreator;
+import org.jd.gui.api.feature.TreeNodeExpandable;
+import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Type;
 import org.jd.gui.spi.TypeFactory;
 import org.jd.gui.view.data.TreeNodeBean;
+
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 
 import javax.swing.Icon;
 import javax.swing.JComponent;
@@ -29,7 +36,7 @@ public abstract class AbstractTypeFileTreeNodeFactoryProvider extends AbstractTr
 		private static final long serialVersionUID = 1L;
 		protected transient Container.Entry entry;
 		protected transient PageAndTipFactory factory;
-		protected transient URI uri;
+		private transient URI uri;
 
 		public BaseTreeNode(Container.Entry entry, String fragment, Object userObject, PageAndTipFactory factory) {
 			super(userObject);
@@ -109,8 +116,8 @@ public abstract class AbstractTypeFileTreeNodeFactoryProvider extends AbstractTr
 	protected static class TypeTreeNode extends BaseTreeNode implements TreeNodeExpandable {
 
 		private static final long serialVersionUID = 1L;
-		protected boolean initialized;
-		protected transient Type type;
+		private boolean initialized;
+		private transient Type type;
 
 		public TypeTreeNode(Container.Entry entry, Type type, Object userObject, PageAndTipFactory factory) {
 			super(entry, type.getName(), userObject, factory);

@@ -21,7 +21,18 @@ import org.apache.bcel.Const;
 import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
-import jd.core.model.instruction.bytecode.instruction.*;
+import jd.core.model.instruction.bytecode.instruction.ArrayLoadInstruction;
+import jd.core.model.instruction.bytecode.instruction.ArrayStoreInstruction;
+import jd.core.model.instruction.bytecode.instruction.AssignmentInstruction;
+import jd.core.model.instruction.bytecode.instruction.BinaryOperatorInstruction;
+import jd.core.model.instruction.bytecode.instruction.DupLoad;
+import jd.core.model.instruction.bytecode.instruction.GetField;
+import jd.core.model.instruction.bytecode.instruction.GetStatic;
+import jd.core.model.instruction.bytecode.instruction.Instruction;
+import jd.core.model.instruction.bytecode.instruction.LoadInstruction;
+import jd.core.model.instruction.bytecode.instruction.PutField;
+import jd.core.model.instruction.bytecode.instruction.PutStatic;
+import jd.core.model.instruction.bytecode.instruction.StoreInstruction;
 import jd.core.process.analyzer.classfile.visitor.CompareInstructionVisitor;
 
 /*

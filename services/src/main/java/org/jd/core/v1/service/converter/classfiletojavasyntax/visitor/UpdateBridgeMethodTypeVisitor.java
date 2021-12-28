@@ -13,16 +13,26 @@ import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
-import org.jd.core.v1.model.javasyntax.declaration.*;
+import org.jd.core.v1.model.javasyntax.declaration.AnnotationDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ClassDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ConstructorDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.EnumDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.InterfaceDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.StaticInitializerDeclaration;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
-import static org.apache.bcel.Const.*;
+import static org.apache.bcel.Const.GETSTATIC;
+import static org.apache.bcel.Const.INVOKEINTERFACE;
+import static org.apache.bcel.Const.INVOKEVIRTUAL;
+import static org.apache.bcel.Const.PUTFIELD;
 
 public class UpdateBridgeMethodTypeVisitor extends AbstractJavaSyntaxVisitor {
-	protected TypeMaker typeMaker;
+	private TypeMaker typeMaker;
 
 	public UpdateBridgeMethodTypeVisitor(TypeMaker typeMaker) {
 		this.typeMaker = typeMaker;

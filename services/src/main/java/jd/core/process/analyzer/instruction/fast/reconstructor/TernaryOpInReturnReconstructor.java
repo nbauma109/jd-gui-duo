@@ -21,7 +21,11 @@ import org.apache.bcel.Const;
 import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
-import jd.core.model.instruction.bytecode.instruction.*;
+import jd.core.model.instruction.bytecode.instruction.BranchInstruction;
+import jd.core.model.instruction.bytecode.instruction.Goto;
+import jd.core.model.instruction.bytecode.instruction.IConst;
+import jd.core.model.instruction.bytecode.instruction.Instruction;
+import jd.core.model.instruction.bytecode.instruction.ReturnInstruction;
 import jd.core.process.analyzer.instruction.bytecode.ComparisonInstructionAnalyzer;
 import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
 

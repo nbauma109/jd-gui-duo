@@ -18,10 +18,17 @@ package jd.core.process.analyzer.instruction.bytecode;
 
 import org.apache.bcel.Const;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
-import jd.core.model.instruction.bytecode.instruction.*;
+import jd.core.model.instruction.bytecode.instruction.BranchInstruction;
+import jd.core.model.instruction.bytecode.instruction.ComplexConditionalBranchInstruction;
+import jd.core.model.instruction.bytecode.instruction.ConditionalBranchInstruction;
+import jd.core.model.instruction.bytecode.instruction.Goto;
+import jd.core.model.instruction.bytecode.instruction.Instruction;
+import jd.core.model.instruction.bytecode.instruction.TernaryOperator;
 import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
 
 /**

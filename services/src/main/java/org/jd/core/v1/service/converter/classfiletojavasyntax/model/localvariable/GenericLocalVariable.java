@@ -7,12 +7,14 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable;
 
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.Type;
 
 import java.util.Map;
 
 public class GenericLocalVariable extends AbstractLocalVariable {
-    protected GenericType type;
+    private GenericType type;
 
     public GenericLocalVariable(int index, int offset, GenericType type) {
         super(index, offset, null);

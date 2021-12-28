@@ -8,8 +8,8 @@
 package org.jd.core.v1.util;
 
 public class DefaultStack<E> {
-    protected E[] elements;
-    protected int head;
+    private E[] elements;
+    private int head;
 
     @SuppressWarnings("unchecked")
     public DefaultStack() {
@@ -20,10 +20,6 @@ public class DefaultStack<E> {
     public DefaultStack(DefaultStack<E> other) {
         elements = other.elements.clone();
         head = other.head;
-    }
-
-    public void clear() {
-        head = 0;
     }
 
     public int size() {

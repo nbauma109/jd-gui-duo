@@ -7,7 +7,14 @@
 
 package org.jdv1.gui.view.component;
 
-import org.fife.ui.rsyntaxtextarea.*;
+import org.fife.ui.rsyntaxtextarea.AbstractTokenMaker;
+import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
+import org.fife.ui.rsyntaxtextarea.DocumentRange;
+import org.fife.ui.rsyntaxtextarea.RSyntaxUtilities;
+import org.fife.ui.rsyntaxtextarea.Token;
+import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
+import org.fife.ui.rsyntaxtextarea.TokenMap;
+import org.fife.ui.rsyntaxtextarea.TokenTypes;
 import org.fife.ui.rtextarea.Marker;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;
@@ -15,20 +22,30 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.util.decompiler.ContainerLoader;
-import org.jd.gui.util.parser.jdt.core.*;
+import org.jd.gui.util.parser.jdt.core.DeclarationData;
+import org.jd.gui.util.parser.jdt.core.HyperlinkData;
+import org.jd.gui.util.parser.jdt.core.HyperlinkReferenceData;
+import org.jd.gui.util.parser.jdt.core.ReferenceData;
 import org.jdv1.gui.util.decompiler.StringBuilderPrinter;
 import org.jdv1.gui.util.index.IndexesUtil;
 
 import java.awt.Point;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
 import javax.swing.text.Segment;
 
-import static org.jd.core.v1.api.printer.Printer.*;
+import static org.jd.core.v1.api.printer.Printer.MODULE;
+import static org.jd.core.v1.api.printer.Printer.PACKAGE;
+import static org.jd.core.v1.api.printer.Printer.TYPE;
 import static org.jd.gui.util.decompiler.GuiPreferences.ESCAPE_UNICODE_CHARACTERS;
 
 public class ModuleInfoFilePage extends ClassFilePage {

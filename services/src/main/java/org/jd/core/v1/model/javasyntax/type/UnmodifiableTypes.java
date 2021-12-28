@@ -24,13 +24,6 @@ public class UnmodifiableTypes extends Types {
         super(collection);
     }
 
-    public UnmodifiableTypes(Type type, Type... types) {
-        super(type, types);
-        if (types.length <= 0) {
-            throw new IllegalArgumentException("Use 'Type' implementation instead");
-        }
-    }
-
     @Override
     public Type removeFirst() {
         throw new UnsupportedOperationException();

@@ -8,7 +8,23 @@
 package org.jd.core.v1.service.writer.visitor;
 
 import org.jd.core.v1.api.printer.Printer;
-import org.jd.core.v1.model.token.*;
+import org.jd.core.v1.model.token.AbstractNopTokenVisitor;
+import org.jd.core.v1.model.token.BooleanConstantToken;
+import org.jd.core.v1.model.token.CharacterConstantToken;
+import org.jd.core.v1.model.token.DeclarationToken;
+import org.jd.core.v1.model.token.EndBlockToken;
+import org.jd.core.v1.model.token.EndMarkerToken;
+import org.jd.core.v1.model.token.KeywordToken;
+import org.jd.core.v1.model.token.LineNumberToken;
+import org.jd.core.v1.model.token.NewLineToken;
+import org.jd.core.v1.model.token.NumericConstantToken;
+import org.jd.core.v1.model.token.ReferenceToken;
+import org.jd.core.v1.model.token.StartBlockToken;
+import org.jd.core.v1.model.token.StartMarkerToken;
+import org.jd.core.v1.model.token.StringConstantToken;
+import org.jd.core.v1.model.token.TextToken;
+import org.jd.core.v1.model.token.Token;
+import org.jd.core.v1.model.token.TokenVisitor;
 
 import java.util.List;
 
@@ -16,12 +32,12 @@ import static org.jd.core.v1.api.printer.Printer.UNKNOWN_LINE_NUMBER;
 
 public class PrintTokenVisitor implements TokenVisitor {
 
-    protected SearchLineNumberVisitor searchLineNumberVisitor = new SearchLineNumberVisitor();
+    private SearchLineNumberVisitor searchLineNumberVisitor = new SearchLineNumberVisitor();
 
-    protected Printer printer;
-    protected List<Token> tokens;
-    protected int index;
-    protected int newLineCount;
+    private Printer printer;
+    private List<Token> tokens;
+    private int index;
+    private int newLineCount;
 
     public void start(Printer printer, List<Token> tokens) {
         this.printer = printer;

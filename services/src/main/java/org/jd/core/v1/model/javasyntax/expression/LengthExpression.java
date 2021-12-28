@@ -11,7 +11,7 @@ import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class LengthExpression extends AbstractLineNumberExpression {
-    protected Expression expression;
+    private Expression expression;
 
     public LengthExpression(Expression expression) {
         this.expression = expression;

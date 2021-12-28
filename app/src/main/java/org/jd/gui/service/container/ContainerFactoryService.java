@@ -19,7 +19,7 @@ public class ContainerFactoryService {
 
     public static ContainerFactoryService getInstance() { return CONTAINER_FACTORY_SERVICE; }
 
-    protected final Collection<ContainerFactory> providers = ExtensionService.getInstance().load(ContainerFactory.class);
+    private final Collection<ContainerFactory> providers = ExtensionService.getInstance().load(ContainerFactory.class);
 
     public ContainerFactory get(API api, Path rootPath) {
         for (ContainerFactory containerFactory : providers) {

@@ -10,7 +10,7 @@ package org.jd.core.v1.model.javasyntax.expression;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class ParenthesesExpression extends AbstractLineNumberExpression {
-    protected Expression expression;
+    private Expression expression;
 
     public ParenthesesExpression(Expression expression) {
         this(expression.getLineNumber(), expression);

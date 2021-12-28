@@ -9,7 +9,16 @@ package org.jd.gui.controller;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
-import org.jd.gui.api.feature.*;
+import org.jd.gui.api.feature.ContentCopyable;
+import org.jd.gui.api.feature.ContentIndexable;
+import org.jd.gui.api.feature.ContentSavable;
+import org.jd.gui.api.feature.ContentSearchable;
+import org.jd.gui.api.feature.ContentSelectable;
+import org.jd.gui.api.feature.FocusedTypeGettable;
+import org.jd.gui.api.feature.LineNumberNavigable;
+import org.jd.gui.api.feature.PreferencesChangeListener;
+import org.jd.gui.api.feature.SourcesSavable;
+import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.model.configuration.Configuration;
@@ -24,7 +33,15 @@ import org.jd.gui.service.sourcesaver.SourceSaverService;
 import org.jd.gui.service.treenode.TreeNodeFactoryService;
 import org.jd.gui.service.type.TypeFactoryService;
 import org.jd.gui.service.uriloader.UriLoaderService;
-import org.jd.gui.spi.*;
+import org.jd.gui.spi.ContainerFactory;
+import org.jd.gui.spi.FileLoader;
+import org.jd.gui.spi.Indexer;
+import org.jd.gui.spi.PanelFactory;
+import org.jd.gui.spi.PasteHandler;
+import org.jd.gui.spi.SourceSaver;
+import org.jd.gui.spi.TreeNodeFactory;
+import org.jd.gui.spi.TypeFactory;
+import org.jd.gui.spi.UriLoader;
 import org.jd.gui.util.net.UriUtil;
 import org.jd.gui.util.swing.SwingUtil;
 import org.jd.gui.view.MainView;
@@ -32,42 +49,61 @@ import org.jdv1.gui.api.feature.IndexesChangeListener;
 import org.jdv1.gui.service.fileloader.FileLoaderService;
 import org.jdv1.gui.service.sourceloader.SourceLoaderService;
 
-import java.awt.*;
+import java.awt.Desktop;
+import java.awt.Frame;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
-import javax.swing.*;
+import javax.swing.Action;
+import javax.swing.Icon;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLayer;
+import javax.swing.JOptionPane;
+import javax.swing.TransferHandler;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 
 public class MainController implements API {
     private static final String INDEXES = "indexes";
-    protected Configuration configuration;
+    private Configuration configuration;
     @SuppressWarnings("all")
-    protected MainView mainView;
+    private MainView mainView;
 
-    protected GoToController goToController;
-    protected OpenTypeController openTypeController;
-    protected OpenTypeHierarchyController openTypeHierarchyController;
-    protected PreferencesController preferencesController;
-    protected SearchInConstantPoolsController searchInConstantPoolsController;
-    protected SaveAllSourcesController saveAllSourcesController;
-    protected SelectLocationController selectLocationController;
-    protected AboutController aboutController;
-    protected SourceLoaderService sourceLoaderService;
+    private GoToController goToController;
+    private OpenTypeController openTypeController;
+    private OpenTypeHierarchyController openTypeHierarchyController;
+    private PreferencesController preferencesController;
+    private SearchInConstantPoolsController searchInConstantPoolsController;
+    private SaveAllSourcesController saveAllSourcesController;
+    private SelectLocationController selectLocationController;
+    private AboutController aboutController;
+    private SourceLoaderService sourceLoaderService;
 
-    protected History history = new History();
-    protected JComponent currentPage = null;
-    protected ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
-    protected List<IndexesChangeListener> containerChangeListeners = new ArrayList<>();
+    private History history = new History();
+    private JComponent currentPage = null;
+    private ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
+    private List<IndexesChangeListener> containerChangeListeners = new ArrayList<>();
 
     public MainController(Configuration configuration) {
         this.configuration = configuration;
@@ -494,7 +530,7 @@ public class MainController implements API {
 
     // --- ComponentListener --- //
     protected class MainFrameListener extends ComponentAdapter {
-        protected Configuration configuration;
+        private Configuration configuration;
 
         public MainFrameListener(Configuration configuration) {
             this.configuration = configuration;

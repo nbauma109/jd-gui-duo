@@ -30,12 +30,12 @@ import jd.core.process.layouter.ClassFileLayouter;
 
 public class InstructionSplitterVisitor extends BaseInstructionSplitterVisitor
 {
-    protected Preferences preferences;
-    protected List<LayoutBlock> layoutBlockList;
-    protected Method method;
-    protected Instruction instruction;
-    protected int firstLineNumber;
-    protected int offset1;
+    private Preferences preferences;
+    private List<LayoutBlock> layoutBlockList;
+    private Method method;
+    private Instruction instruction;
+    private int firstLineNumber;
+    private int offset1;
 
     public void start(
         Preferences preferences,

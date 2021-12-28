@@ -10,8 +10,8 @@ package org.jd.core.v1.model.javasyntax.expression;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class CastExpression extends AbstractLineNumberTypeExpression {
-    protected Expression expression;
-    protected boolean explicit;
+    private Expression expression;
+    private boolean explicit;
 
     public CastExpression(Type type, Expression expression) {
         super(type);

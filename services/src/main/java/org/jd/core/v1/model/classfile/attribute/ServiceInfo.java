@@ -10,8 +10,8 @@ package org.jd.core.v1.model.classfile.attribute;
 import java.util.Arrays;
 
 public class ServiceInfo {
-    protected String   interfaceTypeName;
-    protected String[] implementationTypeNames;
+    private String   interfaceTypeName;
+    private String[] implementationTypeNames;
 
     public ServiceInfo(String interfaceTypeName, String[] implementationTypeNames) {
         this.interfaceTypeName = interfaceTypeName;

@@ -7,14 +7,49 @@
 package org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.visitor;
 
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.model.javafragment.*;
+import org.jd.core.v1.model.javafragment.ImportsFragment;
+import org.jd.core.v1.model.javafragment.StartSingleStatementBlockFragment;
+import org.jd.core.v1.model.javafragment.StartStatementsBlockFragment;
+import org.jd.core.v1.model.javafragment.TokensFragment;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
-import org.jd.core.v1.model.javasyntax.statement.*;
+import org.jd.core.v1.model.javasyntax.statement.AssertStatement;
+import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
+import org.jd.core.v1.model.javasyntax.statement.BreakStatement;
+import org.jd.core.v1.model.javasyntax.statement.ByteCodeStatement;
+import org.jd.core.v1.model.javasyntax.statement.CommentStatement;
+import org.jd.core.v1.model.javasyntax.statement.ContinueStatement;
+import org.jd.core.v1.model.javasyntax.statement.DoWhileStatement;
+import org.jd.core.v1.model.javasyntax.statement.ExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.ForEachStatement;
+import org.jd.core.v1.model.javasyntax.statement.ForStatement;
+import org.jd.core.v1.model.javasyntax.statement.IfElseStatement;
+import org.jd.core.v1.model.javasyntax.statement.IfStatement;
+import org.jd.core.v1.model.javasyntax.statement.LabelStatement;
+import org.jd.core.v1.model.javasyntax.statement.LambdaExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.LocalVariableDeclarationStatement;
+import org.jd.core.v1.model.javasyntax.statement.ReturnExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.ReturnStatement;
+import org.jd.core.v1.model.javasyntax.statement.Statement;
+import org.jd.core.v1.model.javasyntax.statement.Statements;
+import org.jd.core.v1.model.javasyntax.statement.SwitchStatement;
+import org.jd.core.v1.model.javasyntax.statement.SynchronizedStatement;
+import org.jd.core.v1.model.javasyntax.statement.ThrowStatement;
+import org.jd.core.v1.model.javasyntax.statement.TryStatement;
+import org.jd.core.v1.model.javasyntax.statement.TypeDeclarationStatement;
+import org.jd.core.v1.model.javasyntax.statement.WhileStatement;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
-import org.jd.core.v1.model.token.*;
+import org.jd.core.v1.model.token.EndBlockToken;
+import org.jd.core.v1.model.token.EndMarkerToken;
+import org.jd.core.v1.model.token.KeywordToken;
+import org.jd.core.v1.model.token.NewLineToken;
+import org.jd.core.v1.model.token.StartBlockToken;
+import org.jd.core.v1.model.token.StartMarkerToken;
+import org.jd.core.v1.model.token.TextToken;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.JavaFragmentFactory;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.StringTokenizer;
 
 public class StatementVisitor extends ExpressionVisitor {
     public static final KeywordToken ASSERT = new KeywordToken("assert");
@@ -23,7 +58,6 @@ public class StatementVisitor extends ExpressionVisitor {
     public static final KeywordToken CATCH = new KeywordToken("catch");
     public static final KeywordToken CONTINUE = new KeywordToken("continue");
     public static final KeywordToken DEFAULT = new KeywordToken("default");
-    public static final KeywordToken DO = new KeywordToken("do");
     public static final KeywordToken ELSE = new KeywordToken("else");
     public static final KeywordToken FINAL = new KeywordToken("final");
     public static final KeywordToken FINALLY = new KeywordToken("finally");

@@ -7,12 +7,13 @@
 
 package org.jd.gui.util.swing;
 
-import java.awt.Image;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ImageIcon;
+import javax.swing.SwingUtilities;
 
 /**
  * See:
@@ -29,10 +30,6 @@ public class SwingUtil {
 		} else {
 			SwingUtilities.invokeLater(runnable);
 		}
-	}
-
-	public static Image getImage(String iconPath) {
-		return Toolkit.getDefaultToolkit().getImage(SwingUtil.class.getResource(iconPath));
 	}
 
 	public static Action newAction(String name, boolean enable, ActionListener listener) {

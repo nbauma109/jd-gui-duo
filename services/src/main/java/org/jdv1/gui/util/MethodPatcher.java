@@ -1,6 +1,8 @@
 package org.jdv1.gui.util;
 
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeWriter;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.util.StringUtilities;

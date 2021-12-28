@@ -27,7 +27,11 @@ import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.accessor.Accessor;
 import jd.core.model.classfile.accessor.AccessorConstants;
 import jd.core.model.classfile.accessor.InvokeMethodAccessor;
-import jd.core.model.instruction.bytecode.instruction.*;
+import jd.core.model.instruction.bytecode.instruction.Instruction;
+import jd.core.model.instruction.bytecode.instruction.Invokeinterface;
+import jd.core.model.instruction.bytecode.instruction.Invokespecial;
+import jd.core.model.instruction.bytecode.instruction.Invokestatic;
+import jd.core.model.instruction.bytecode.instruction.Invokevirtual;
 
 /*
  * Replace 'EntitlementFunctionLibrary.access$000()'

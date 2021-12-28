@@ -23,7 +23,7 @@ public class InitInstanceFieldsLineNumberTest extends AbstractJdTest {
         String source = decompileSuccess(new ClassPathLoader(), new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
-        assertTrue(source.matches(PatternMaker.make(": 6 */     System.out.println(\"Instance creation\")")));
+        assertTrue(source.matches(PatternMaker.make(": 6 */     System.out.println(\"Instance creation\" + this.fieldBottom)")));
         assertTrue(source.matches(PatternMaker.make(": 9 */   private String fieldBottom = \"fieldBottom\"")));
 
         // Recompile decompiled source code and check errors

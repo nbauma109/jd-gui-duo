@@ -17,18 +17,18 @@ public class PlainTextPrinter implements Printer {
     protected static final String TAB = "  ";
     protected static final String NEWLINE = System.lineSeparator();
 
-    protected GuiPreferences preferences;
-    protected PrintStream printStream;
-    protected int maxLineNumber;
-    protected int majorVersion;
-    protected int minorVersion;
-    protected int digitCount;
+    private GuiPreferences preferences;
+    private PrintStream printStream;
+    private int maxLineNumber;
+    private int majorVersion;
+    private int minorVersion;
+    private int digitCount;
 
-    protected String lineNumberBeginPrefix;
-    protected String lineNumberEndPrefix;
-    protected String unknownLineNumberPrefix;
-    protected int indentationCount;
-    protected boolean display;
+    private String lineNumberBeginPrefix;
+    private String lineNumberEndPrefix;
+    private String unknownLineNumberPrefix;
+    private int indentationCount;
+    private boolean display;
 
     public void setPreferences(GuiPreferences preferences) { this.preferences = preferences; }
     public void setPrintStream(PrintStream printStream) { this.printStream = printStream; }

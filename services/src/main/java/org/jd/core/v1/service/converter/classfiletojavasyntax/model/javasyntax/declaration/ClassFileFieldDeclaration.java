@@ -12,7 +12,7 @@ import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class ClassFileFieldDeclaration extends FieldDeclaration implements ClassFileMemberDeclaration {
-    protected int firstLineNumber;
+    private int firstLineNumber;
 
     public ClassFileFieldDeclaration(int flags, Type type, BaseFieldDeclarator fieldDeclarators) {
         super(null, flags, type, fieldDeclarators);
@@ -25,11 +25,6 @@ public class ClassFileFieldDeclaration extends FieldDeclaration implements Class
 
     public ClassFileFieldDeclaration(BaseAnnotationReference annotationReferences, int flags, Type type, BaseFieldDeclarator fieldDeclarators) {
         super(annotationReferences, flags, type, fieldDeclarators);
-    }
-
-    public ClassFileFieldDeclaration(BaseAnnotationReference annotationReferences, int flags, Type type, BaseFieldDeclarator fieldDeclarators, int firstLineNumber) {
-        super(annotationReferences, flags, type, fieldDeclarators);
-        this.firstLineNumber = firstLineNumber;
     }
 
     @Override

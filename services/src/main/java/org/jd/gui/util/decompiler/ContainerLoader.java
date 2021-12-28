@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class ContainerLoader implements Loader {
 
-    protected Container.Entry entry;
+    private Container.Entry entry;
 
     public ContainerLoader() {
         this.entry = null;

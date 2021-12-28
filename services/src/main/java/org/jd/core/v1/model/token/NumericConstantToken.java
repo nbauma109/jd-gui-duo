@@ -9,7 +9,7 @@ package org.jd.core.v1.model.token;
 
 public class NumericConstantToken implements Token {
 
-    protected String text;
+    private String text;
 
     public NumericConstantToken(String text) {
         this.text = text;

@@ -8,24 +8,67 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
-import org.jd.core.v1.model.javasyntax.declaration.*;
-import org.jd.core.v1.model.javasyntax.expression.*;
-import org.jd.core.v1.model.javasyntax.statement.*;
-import org.jd.core.v1.model.javasyntax.type.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.*;
+import org.jd.core.v1.model.javasyntax.declaration.AnnotationDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.BaseFormalParameter;
+import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ClassDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ConstructorDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.EnumDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
+import org.jd.core.v1.model.javasyntax.declaration.FormalParameter;
+import org.jd.core.v1.model.javasyntax.declaration.InterfaceDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclarator;
+import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.StaticInitializerDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.TypeDeclaration;
+import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
+import org.jd.core.v1.model.javasyntax.expression.ConstructorInvocationExpression;
+import org.jd.core.v1.model.javasyntax.expression.Expression;
+import org.jd.core.v1.model.javasyntax.expression.FieldReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.NewExpression;
+import org.jd.core.v1.model.javasyntax.expression.ObjectTypeReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.SuperConstructorInvocationExpression;
+import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
+import org.jd.core.v1.model.javasyntax.statement.LocalVariableDeclarationStatement;
+import org.jd.core.v1.model.javasyntax.statement.Statement;
+import org.jd.core.v1.model.javasyntax.statement.Statements;
+import org.jd.core.v1.model.javasyntax.statement.TypeDeclarationStatement;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileClassDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMemberDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMethodDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileStaticInitializerDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileTypeDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileConstructorInvocationExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileNewExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileSuperConstructorInvocationExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
 
-import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_SYNTHETIC;
+import static org.apache.bcel.Const.ACC_SYNTHETIC;
+import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_ANONYMOUS;
 
 public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
-    protected UpdateFieldDeclarationsAndReferencesVisitor updateFieldDeclarationsAndReferencesVisitor = new UpdateFieldDeclarationsAndReferencesVisitor();
-    protected DefaultList<String> syntheticInnerFieldNames = new DefaultList<>();
-    protected String outerTypeFieldName;
+    private UpdateFieldDeclarationsAndReferencesVisitor updateFieldDeclarationsAndReferencesVisitor = new UpdateFieldDeclarationsAndReferencesVisitor();
+    private DefaultList<String> syntheticInnerFieldNames = new DefaultList<>();
+    private String outerTypeFieldName;
 
     @Override
     public void visit(AnnotationDeclaration declaration) {
@@ -174,7 +217,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
 
                 if (anonymousFlag) {
                     // Mark anonymous class constructor
-                    cfcd.setFlags(cfcd.getFlags() | Declaration.FLAG_ANONYMOUS);
+                    cfcd.setFlags(cfcd.getFlags() | FLAG_ANONYMOUS);
                 }
             }
         }
@@ -186,8 +229,8 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
     public void visit(StaticInitializerDeclaration declaration) {}
 
     protected class UpdateFieldDeclarationsAndReferencesVisitor extends AbstractUpdateExpressionVisitor {
-        protected ClassFileBodyDeclaration bodyDeclaration;
-        protected boolean syntheticField;
+        private ClassFileBodyDeclaration bodyDeclaration;
+        private boolean syntheticField;
 
         @Override
         public void visit(BodyDeclaration declaration) {
@@ -202,7 +245,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
             declaration.getFieldDeclarators().accept(this);
 
             if (syntheticField) {
-                declaration.setFlags(declaration.getFlags()|FLAG_SYNTHETIC);
+                declaration.setFlags(declaration.getFlags()|ACC_SYNTHETIC);
             }
         }
 
@@ -279,13 +322,13 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     public static class UpdateNewExpressionVisitor extends AbstractJavaSyntaxVisitor {
-        protected TypeMaker typeMaker;
-        protected ClassFileBodyDeclaration bodyDeclaration;
-        protected ClassFile classFile;
-        protected Map<String, String> finalLocalVariableNameMap = new HashMap<>();
-        protected DefaultList<ClassFileClassDeclaration> localClassDeclarations = new DefaultList<>();
-        protected Set<NewExpression> newExpressions = new HashSet<>();
-        protected int lineNumber;
+        private TypeMaker typeMaker;
+        private ClassFileBodyDeclaration bodyDeclaration;
+        private ClassFile classFile;
+        private Map<String, String> finalLocalVariableNameMap = new HashMap<>();
+        private DefaultList<ClassFileClassDeclaration> localClassDeclarations = new DefaultList<>();
+        private Set<NewExpression> newExpressions = new HashSet<>();
+        private int lineNumber;
 
         public UpdateNewExpressionVisitor(TypeMaker typeMaker) {
             this.typeMaker = typeMaker;
@@ -408,7 +451,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
 
                         if (type.getQualifiedName() == null && type.getName() != null) {
                             // Local class
-                            cfcd.setFlags(cfcd.getFlags() & ~FLAG_SYNTHETIC);
+                            cfcd.setFlags(cfcd.getFlags() & ~ACC_SYNTHETIC);
                             localClassDeclarations.add(cfcd);
                             bodyDeclaration.removeInnerType(internalName);
                             lineNumber = ne.getLineNumber();
@@ -585,7 +628,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
         }
 
         protected class UpdateParametersAndLocalVariablesVisitor extends AbstractJavaSyntaxVisitor {
-            protected boolean fina1;
+            private boolean fina1;
 
             @Override
             public void visit(FormalParameter declaration) {
@@ -619,8 +662,8 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
         }
 
         protected class AddLocalClassDeclarationVisitor extends AbstractJavaSyntaxVisitor {
-            protected SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
-            protected int lineNumber = Expression.UNKNOWN_LINE_NUMBER;
+            private SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
+            private int lineNumber = Expression.UNKNOWN_LINE_NUMBER;
 
             @Override
             public void visit(ConstructorDeclaration declaration) {

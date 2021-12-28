@@ -15,12 +15,19 @@ import org.jd.gui.api.model.Type;
 import org.jd.gui.model.container.entry.path.FileEntryPath;
 import org.jd.gui.service.type.AbstractTypeFactoryProvider;
 import org.jd.util.LRUCache;
-import org.objectweb.asm.*;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import javax.swing.Icon;
 
@@ -327,9 +334,9 @@ public class ClassFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
     }
 
     protected static class InnerClassVisitor extends ClassVisitor {
-        protected String name;
-        protected String outerName;
-        protected String innerName;
+        private String name;
+        private String outerName;
+        private String innerName;
 
         public InnerClassVisitor(String name) {
             super(Opcodes.ASM7);

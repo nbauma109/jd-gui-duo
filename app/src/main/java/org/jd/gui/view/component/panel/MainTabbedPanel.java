@@ -8,24 +8,37 @@
 package org.jd.gui.view.component.panel;
 
 import org.jd.gui.api.API;
-import org.jd.gui.api.feature.*;
+import org.jd.gui.api.feature.PageChangeListener;
+import org.jd.gui.api.feature.PageChangeable;
+import org.jd.gui.api.feature.PreferencesChangeListener;
+import org.jd.gui.api.feature.UriGettable;
+import org.jd.gui.api.feature.UriOpenable;
 import org.jd.gui.service.platform.PlatformService;
 
-import java.awt.*;
+import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.Icon;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 @SuppressWarnings("unchecked")
 public class MainTabbedPanel<T extends JComponent & UriGettable> extends TabbedPanel<T> implements UriOpenable, PageChangeListener {
 
     private static final long serialVersionUID = 1L;
-    protected transient List<PageChangeListener> pageChangedListeners = new ArrayList<>();
+    private transient List<PageChangeListener> pageChangedListeners = new ArrayList<>();
     // Flag to prevent the event cascades
-    protected boolean pageChangedListenersEnabled = true;
+    private boolean pageChangedListenersEnabled = true;
 
     public MainTabbedPanel(API api) {
         super(api);

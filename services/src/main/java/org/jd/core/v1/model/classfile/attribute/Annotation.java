@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Map.Entry;
 
 public class Annotation {
-    protected String descriptor;
-    protected List<Entry<String, AttributeElementValue>> elementValuePairs;
+    private String descriptor;
+    private List<Entry<String, AttributeElementValue>> elementValuePairs;
 
     public Annotation(String descriptor, List<Entry<String,AttributeElementValue>> elementValuePairs) {
         this.descriptor = descriptor;

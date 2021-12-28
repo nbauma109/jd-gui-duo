@@ -8,8 +8,8 @@
 package org.jd.core.v1.model.javasyntax.reference;
 
 public class ElementValuePair implements BaseElementValuePair {
-    protected String name;
-    protected BaseElementValue elementValue;
+    private String name;
+    private BaseElementValue elementValue;
 
     public ElementValuePair(String name, BaseElementValue elementValue) {
         this.name = name;

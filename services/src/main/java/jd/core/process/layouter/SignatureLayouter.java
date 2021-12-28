@@ -22,7 +22,11 @@ import org.jd.core.v1.util.StringConstants;
 import java.util.List;
 
 import jd.core.model.classfile.ClassFile;
-import jd.core.model.layout.block.*;
+import jd.core.model.layout.block.GenericExtendsSuperInterfacesLayoutBlock;
+import jd.core.model.layout.block.GenericExtendsSuperTypeLayoutBlock;
+import jd.core.model.layout.block.GenericImplementsInterfacesLayoutBlock;
+import jd.core.model.layout.block.GenericTypeNameLayoutBlock;
+import jd.core.model.layout.block.LayoutBlock;
 import jd.core.util.CharArrayUtil;
 import jd.core.util.SignatureUtil;
 

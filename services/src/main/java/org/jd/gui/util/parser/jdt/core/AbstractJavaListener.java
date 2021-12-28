@@ -7,20 +7,40 @@
 
 package org.jd.gui.util.parser.jdt.core;
 
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
+import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NameQualifiedType;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.QualifiedType;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.model.Container;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static org.jd.gui.api.model.Type.*;
+import static org.apache.bcel.Const.ACC_ANNOTATION;
+import static org.apache.bcel.Const.ACC_ENUM;
+import static org.apache.bcel.Const.ACC_INTERFACE;
 
 public abstract class AbstractJavaListener extends ASTVisitor {
 	protected Container.Entry entry;
 	protected String packageName = "";
 	protected Map<String, String> nameToInternalTypeName = new HashMap<>();
-	protected StringBuilder sb = new StringBuilder();
-	protected Map<String, String> typeNameCache = new HashMap<>();
+	private Map<String, String> typeNameCache = new HashMap<>();
 
 	protected AbstractJavaListener(Container.Entry entry) {
 		this.entry = entry;
@@ -61,17 +81,17 @@ public abstract class AbstractJavaListener extends ASTVisitor {
 
 	@Override
 	public boolean visit(TypeDeclaration node) {
-		return enterTypeDeclaration(node, node.isInterface() ? FLAG_INTERFACE : 0);
+		return enterTypeDeclaration(node, node.isInterface() ? ACC_INTERFACE : 0);
 	}
 
 	@Override
 	public boolean visit(EnumDeclaration node) {
-		return enterTypeDeclaration(node, FLAG_ENUM);
+		return enterTypeDeclaration(node, ACC_ENUM);
 	}
 
 	@Override
 	public boolean visit(AnnotationTypeDeclaration node) {
-		return enterTypeDeclaration(node, FLAG_ANNOTATION);
+		return enterTypeDeclaration(node, ACC_ANNOTATION);
 	}
 
 	@Override

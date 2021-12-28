@@ -15,11 +15,11 @@ import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
 import static org.apache.bcel.Const.ACC_STATIC;
 
 public class ConstructorDeclaration implements MemberDeclaration {
-    protected BaseAnnotationReference annotationReferences;
-    protected int flags;
-    protected BaseTypeParameter typeParameters;
+    private BaseAnnotationReference annotationReferences;
+    private int flags;
+    private BaseTypeParameter typeParameters;
     protected BaseFormalParameter formalParameters;
-    protected BaseType exceptionTypes;
+    private BaseType exceptionTypes;
     protected String descriptor;
     protected BaseStatement statements;
 

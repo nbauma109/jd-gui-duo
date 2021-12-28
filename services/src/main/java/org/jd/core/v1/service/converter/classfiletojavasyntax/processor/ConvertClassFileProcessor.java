@@ -7,30 +7,67 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.processor;
 
 import org.apache.bcel.Const;
-import org.apache.bcel.classfile.*;
+import org.apache.bcel.classfile.Constant;
+import org.apache.bcel.classfile.ConstantDouble;
+import org.apache.bcel.classfile.ConstantFloat;
+import org.apache.bcel.classfile.ConstantInteger;
+import org.apache.bcel.classfile.ConstantLong;
+import org.apache.bcel.classfile.ConstantUtf8;
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.classfile.Field;
 import org.jd.core.v1.model.classfile.Method;
-import org.jd.core.v1.model.classfile.attribute.*;
 import org.jd.core.v1.model.classfile.attribute.Annotations;
+import org.jd.core.v1.model.classfile.attribute.AttributeAnnotationDefault;
+import org.jd.core.v1.model.classfile.attribute.AttributeCode;
+import org.jd.core.v1.model.classfile.attribute.AttributeConstantValue;
+import org.jd.core.v1.model.classfile.attribute.AttributeLineNumberTable;
+import org.jd.core.v1.model.classfile.attribute.AttributeModule;
+import org.jd.core.v1.model.classfile.attribute.ModuleInfo;
+import org.jd.core.v1.model.classfile.attribute.PackageInfo;
+import org.jd.core.v1.model.classfile.attribute.ServiceInfo;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
-import org.jd.core.v1.model.javasyntax.declaration.*;
-import org.jd.core.v1.model.javasyntax.expression.*;
+import org.jd.core.v1.model.javasyntax.declaration.Declaration;
+import org.jd.core.v1.model.javasyntax.declaration.ExpressionVariableInitializer;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
+import org.jd.core.v1.model.javasyntax.declaration.ModuleDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.TypeDeclaration;
+import org.jd.core.v1.model.javasyntax.expression.DoubleConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.Expression;
+import org.jd.core.v1.model.javasyntax.expression.FloatConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.IntegerConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.LongConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.StringConstantExpression;
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
 import org.jd.core.v1.model.javasyntax.reference.BaseElementValue;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.TypeArgument;
+import org.jd.core.v1.model.javasyntax.type.TypeParameter;
+import org.jd.core.v1.model.javasyntax.type.TypeParameterWithTypeBounds;
 import org.jd.core.v1.model.message.DecompileContext;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileAnnotationDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileClassDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileEnumDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileFieldDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileInterfaceDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMethodDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileStaticInitializerDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileTypeDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.AnnotationConverter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.PopulateBindingsWithTypeParameterVisitor;
 import org.jd.core.v1.util.DefaultList;
 import org.jd.core.v1.util.StringConstants;
 
-import java.util.*;
-
-import static org.apache.bcel.Const.ACC_PUBLIC;
-import static org.apache.bcel.Const.ACC_STATIC;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Convert ClassFile model to Java syntax model.<br><br>
@@ -39,7 +76,7 @@ import static org.apache.bcel.Const.ACC_STATIC;
  * Output: {@link org.jd.core.v1.model.javasyntax.CompilationUnit}<br>
  */
 public class ConvertClassFileProcessor {
-    protected PopulateBindingsWithTypeParameterVisitor populateBindingsWithTypeParameterVisitor = new PopulateBindingsWithTypeParameterVisitor() {
+    private PopulateBindingsWithTypeParameterVisitor populateBindingsWithTypeParameterVisitor = new PopulateBindingsWithTypeParameterVisitor() {
         @Override
         public void visit(TypeParameter parameter) {
             bindings.put(parameter.getIdentifier(), new GenericType(parameter.getIdentifier()));
@@ -195,7 +232,7 @@ public class ConvertClassFileProcessor {
             }
 
             methodTypes = parser.parseMethodSignature(classFile, method);
-            if ((method.getAccessFlags() & ACC_STATIC) == 0) {
+            if ((method.getAccessFlags() & Const.ACC_STATIC) == 0) {
                 bindings = bodyDeclaration.getBindings();
                 typeBounds = bodyDeclaration.getTypeBounds();
             } else {
@@ -231,9 +268,9 @@ public class ConvertClassFileProcessor {
                         bodyDeclaration, classFile, method, annotationReferences, name, methodTypes.getTypeParameters(),
                         methodTypes.getReturnedType(), methodTypes.getParameterTypes(), methodTypes.getExceptionTypes(), defaultAnnotationValue,
                         bindings, typeBounds, firstLineNumber);
-                if (classFile.isInterface() && methodDeclaration.getFlags() == ACC_PUBLIC) {
+                if (classFile.isInterface() && methodDeclaration.getFlags() == Const.ACC_PUBLIC) {
                     // For interfaces, add 'default' access flag on public methods
-                    methodDeclaration.setFlags(Declaration.FLAG_PUBLIC|Declaration.FLAG_DEFAULT);
+                    methodDeclaration.setFlags(Const.ACC_PUBLIC|Declaration.FLAG_DEFAULT);
                 }
                 list.add(methodDeclaration);
             }

@@ -10,9 +10,9 @@ import java.util.Iterator;
 import java.util.Set;
 
 public class Loop {
-    protected BasicBlock start;
-    protected final Set<BasicBlock> members;
-    protected BasicBlock end;
+    private BasicBlock start;
+    private final Set<BasicBlock> members;
+    private BasicBlock end;
 
     public Loop(BasicBlock start, Set<BasicBlock> members, BasicBlock end) {
         this.start = start;

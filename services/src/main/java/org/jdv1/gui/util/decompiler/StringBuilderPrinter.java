@@ -16,11 +16,11 @@ public class StringBuilderPrinter implements Printer {
 
     protected StringBuilder stringBuffer = new StringBuilder(10 * 1024);
 
-    protected boolean unicodeEscape = true;
+    private boolean unicodeEscape = true;
     protected boolean realignmentLineNumber = false;
 
-    protected int majorVersion = 0;
-    protected int minorVersion = 0;
+    private int majorVersion = 0;
+    private int minorVersion = 0;
     protected int indentationCount;
 
     public void setUnicodeEscape(boolean unicodeEscape) {

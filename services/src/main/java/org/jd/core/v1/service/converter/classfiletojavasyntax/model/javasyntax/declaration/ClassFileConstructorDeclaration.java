@@ -13,18 +13,21 @@ import org.jd.core.v1.model.javasyntax.declaration.BaseFormalParameter;
 import org.jd.core.v1.model.javasyntax.declaration.ConstructorDeclaration;
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
+import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.TypeArgument;
 
 import java.util.Map;
 
 public class ClassFileConstructorDeclaration extends ConstructorDeclaration implements ClassFileConstructorOrMethodDeclaration {
-    protected ClassFileBodyDeclaration bodyDeclaration;
-    protected ClassFile classFile;
-    protected Method method;
-    protected BaseType parameterTypes;
-    protected Map<String, TypeArgument> bindings;
-    protected Map<String, BaseType> typeBounds;
-    protected int firstLineNumber;
+    private ClassFileBodyDeclaration bodyDeclaration;
+    private ClassFile classFile;
+    private Method method;
+    private BaseType parameterTypes;
+    private Map<String, TypeArgument> bindings;
+    private Map<String, BaseType> typeBounds;
+    private int firstLineNumber;
 
     public ClassFileConstructorDeclaration(
             ClassFileBodyDeclaration bodyDeclaration, ClassFile classFile, Method method, BaseAnnotationReference annotationReferences,

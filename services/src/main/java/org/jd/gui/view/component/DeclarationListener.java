@@ -1,20 +1,33 @@
 package org.jd.gui.view.component;
 
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.model.Container;
-import org.jd.gui.util.parser.jdt.core.*;
+import org.jd.gui.util.parser.jdt.core.AbstractJavaListener;
+import org.jd.gui.util.parser.jdt.core.DeclarationData;
+import org.jd.gui.util.parser.jdt.core.TypeDeclarationData;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 
 import static org.jd.gui.util.Key.key;
 
 public class DeclarationListener extends AbstractJavaListener {
-    protected StringBuilder sbTypeDeclaration = new StringBuilder();
-    protected String currentInternalTypeName;
+    private StringBuilder sbTypeDeclaration = new StringBuilder();
+    private String currentInternalTypeName;
 
-    protected Map<String, DeclarationData> declarations = new HashMap<>();
-    protected NavigableMap<Integer, DeclarationData> typeDeclarations = new TreeMap<>();
+    private Map<String, DeclarationData> declarations = new HashMap<>();
+    private NavigableMap<Integer, DeclarationData> typeDeclarations = new TreeMap<>();
 
     public DeclarationListener(Container.Entry entry) {
         super(entry);
@@ -127,16 +140,8 @@ public class DeclarationListener extends AbstractJavaListener {
         return declarations;
     }
 
-    void setDeclarations(Map<String, DeclarationData> declarations) {
-        this.declarations = declarations;
-    }
-
     public NavigableMap<Integer, DeclarationData> getTypeDeclarations() {
         return typeDeclarations;
-    }
-
-    void setTypeDeclarations(NavigableMap<Integer, DeclarationData> typeDeclarations) {
-        this.typeDeclarations = typeDeclarations;
     }
 
     public void clearData() {

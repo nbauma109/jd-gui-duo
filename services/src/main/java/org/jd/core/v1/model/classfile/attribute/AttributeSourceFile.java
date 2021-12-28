@@ -8,7 +8,7 @@
 package org.jd.core.v1.model.classfile.attribute;
 
 public class AttributeSourceFile implements Attribute {
-    protected String sourceFile;
+    private String sourceFile;
 
     public AttributeSourceFile(String sourceFile) {
         this.sourceFile = sourceFile;

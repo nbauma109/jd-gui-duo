@@ -12,7 +12,10 @@ import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.cfg.ControlFlowGraphPlantUMLWriter;
 import org.jd.core.v1.cfg.MethodUtil;
 import org.jd.core.v1.model.classfile.Method;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphMaker;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphReducer;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.service.actions.InvalidFormatException;
@@ -25,7 +28,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ImageIcon;
 
 public class ShowControlFlowGraphContextualActionsFactory implements ContextualActionsFactory {
 

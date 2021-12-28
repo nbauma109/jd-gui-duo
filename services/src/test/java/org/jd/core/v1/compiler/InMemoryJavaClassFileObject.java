@@ -1,6 +1,8 @@
 package org.jd.core.v1.compiler;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URI;
 
 import javax.tools.SimpleJavaFileObject;

@@ -12,12 +12,14 @@ import org.jd.gui.spi.SourceSaver;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
 import java.util.regex.Pattern;
 
 public abstract class AbstractSourceSaverProvider implements SourceSaver {
-    protected List<String> externalSelectors;
-    protected Pattern externalPathPattern;
+    private List<String> externalSelectors;
+    private Pattern externalPathPattern;
 
     /**
      * Initialize "selectors" and "pathPattern" with optional external properties file

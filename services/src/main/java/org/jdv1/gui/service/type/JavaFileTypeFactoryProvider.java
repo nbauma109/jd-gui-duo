@@ -7,7 +7,12 @@
 
 package org.jdv1.gui.service.type;
 
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;
@@ -20,9 +25,17 @@ import org.jd.gui.util.parser.jdt.core.AbstractJavaListener;
 import org.jd.util.LRUCache;
 
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.Icon;
+
+import static org.apache.bcel.Const.ACC_INTERFACE;
+import static org.apache.bcel.Const.ACC_STATIC;
 
 public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
 
@@ -86,20 +99,20 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
     }
 
     protected static class JavaType implements Type {
-        protected int access;
-        protected String name;
-        protected String superName;
-        protected String outerName;
+        private int access;
+        private String name;
+        private String superName;
+        private String outerName;
 
-        protected String displayTypeName;
-        protected String displayInnerTypeName;
-        protected String displayPackageName;
+        private String displayTypeName;
+        private String displayInnerTypeName;
+        private String displayPackageName;
 
-        protected List<Type> innerTypes = new ArrayList<>();
-        protected List<Field> fields = new ArrayList<>();
-        protected List<Method> methods = new ArrayList<>();
+        private List<Type> innerTypes = new ArrayList<>();
+        private List<Field> fields = new ArrayList<>();
+        private List<Method> methods = new ArrayList<>();
 
-        protected JavaType outerType;
+        private JavaType outerType;
 
         public JavaType(int access, String name, String superName, String outerName, String displayTypeName,
                 String displayInnerTypeName, String displayPackageName, JavaType outerType) {
@@ -175,9 +188,9 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
     }
 
     protected static class JavaField implements Type.Field {
-        protected int access;
-        protected String name;
-        protected String descriptor;
+        private int access;
+        private String name;
+        private String descriptor;
 
         public JavaField(int access, String name, String descriptor) {
             this.access = access;
@@ -215,10 +228,10 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
     }
 
     protected static class JavaMethod implements Type.Method {
-        protected JavaType type;
-        protected int access;
-        protected String name;
-        protected String descriptor;
+        private JavaType type;
+        private int access;
+        private String name;
+        private String descriptor;
 
         public JavaMethod(JavaType type, int access, String name, String descriptor) {
             this.type = type;
@@ -264,12 +277,12 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
 
     protected static class Listener extends AbstractJavaListener {
 
-        protected String displayPackageName = "";
+        private String displayPackageName = "";
 
-        protected JavaType mainType = null;
-        protected JavaType currentType = null;
-        protected List<Type> rootTypes = new ArrayList<>();
-        protected Map<String, Type> types = new HashMap<>();
+        private JavaType mainType = null;
+        private JavaType currentType = null;
+        private List<Type> rootTypes = new ArrayList<>();
+        private Map<String, Type> types = new HashMap<>();
 
         public Listener(Container.Entry entry) {
             super(entry);
@@ -305,7 +318,7 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
             String superQualifiedTypeName;
 
             if (superType == null) {
-                superQualifiedTypeName = (access & Type.FLAG_INTERFACE) == 0 ? StringConstants.JAVA_LANG_OBJECT : "";
+                superQualifiedTypeName = (access & ACC_INTERFACE) == 0 ? StringConstants.JAVA_LANG_OBJECT : "";
             } else {
                 superQualifiedTypeName = resolveInternalTypeName(superType);
             }
@@ -359,7 +372,7 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
 
         @Override
         public boolean visit(Initializer node) {
-            currentType.getMethods().add(new JavaMethod(currentType, Type.FLAG_STATIC, "<clinit>", "()V"));
+            currentType.getMethods().add(new JavaMethod(currentType, ACC_STATIC, "<clinit>", "()V"));
             return true;
         }
 

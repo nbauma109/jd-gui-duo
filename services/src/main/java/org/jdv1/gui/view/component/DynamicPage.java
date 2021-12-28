@@ -8,14 +8,24 @@
 package org.jdv1.gui.view.component;
 
 import org.jd.gui.api.API;
-import org.jd.gui.api.feature.*;
+import org.jd.gui.api.feature.ContentCopyable;
+import org.jd.gui.api.feature.ContentSavable;
+import org.jd.gui.api.feature.ContentSearchable;
+import org.jd.gui.api.feature.ContentSelectable;
+import org.jd.gui.api.feature.FocusedTypeGettable;
+import org.jd.gui.api.feature.LineNumberNavigable;
+import org.jd.gui.api.feature.PreferencesChangeListener;
+import org.jd.gui.api.feature.UriGettable;
+import org.jd.gui.api.feature.UriOpenable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jdv1.gui.api.feature.IndexesChangeListener;
 
 import java.awt.BorderLayout;
 import java.awt.Point;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
@@ -33,11 +43,11 @@ public class DynamicPage
 
     private static final long serialVersionUID = 1L;
 
-    protected transient API api;
-    protected transient Container.Entry entry;
-    protected TypePage page;
-    protected URI lastOpenedUri;
-    protected transient Collection<Future<Indexes>> lastCollectionOfFutureIndexes;
+    private transient API api;
+    private transient Container.Entry entry;
+    private TypePage page;
+    private URI lastOpenedUri;
+    private transient Collection<Future<Indexes>> lastCollectionOfFutureIndexes;
 
     public DynamicPage(API api, Container.Entry entry) {
         super(new BorderLayout());
@@ -146,8 +156,8 @@ public class DynamicPage
     }
 
     protected static class DelegatedEntry implements Container.Entry {
-        protected Container.Entry entry;
-        protected String source;
+        private Container.Entry entry;
+        private String source;
 
         DelegatedEntry(Container.Entry entry, String source) {
             this.entry = entry;

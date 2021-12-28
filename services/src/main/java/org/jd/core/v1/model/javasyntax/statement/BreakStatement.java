@@ -12,7 +12,7 @@ import java.util.Objects;
 public class BreakStatement implements Statement {
     public static final BreakStatement BREAK = new BreakStatement();
 
-    protected String label;
+    private String label;
 
     protected BreakStatement() {
         this.label = null;

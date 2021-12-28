@@ -7,17 +7,47 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
-import org.jd.core.v1.model.javasyntax.expression.*;
-import org.jd.core.v1.model.javasyntax.statement.*;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.expression.ArrayExpression;
+import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
+import org.jd.core.v1.model.javasyntax.expression.BooleanExpression;
+import org.jd.core.v1.model.javasyntax.expression.CastExpression;
+import org.jd.core.v1.model.javasyntax.expression.Expression;
+import org.jd.core.v1.model.javasyntax.expression.Expressions;
+import org.jd.core.v1.model.javasyntax.expression.MethodInvocationExpression;
+import org.jd.core.v1.model.javasyntax.expression.PostOperatorExpression;
+import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
+import org.jd.core.v1.model.javasyntax.statement.BreakStatement;
+import org.jd.core.v1.model.javasyntax.statement.ContinueStatement;
+import org.jd.core.v1.model.javasyntax.statement.DoWhileStatement;
+import org.jd.core.v1.model.javasyntax.statement.LabelStatement;
+import org.jd.core.v1.model.javasyntax.statement.Statement;
+import org.jd.core.v1.model.javasyntax.statement.Statements;
+import org.jd.core.v1.model.javasyntax.statement.WhileStatement;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.DiamondTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileNewExpression;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileBreakContinueStatement;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForEachStatement;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForStatement;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.GenericLocalVariable;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.ObjectLocalVariable;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.ChangeFrameOfLocalVariablesVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.CreateTypeFromTypeArgumentVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.RemoveLastContinueStatementVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchFirstLineNumberVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchFromOffsetVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchLocalVariableReferenceVisitor;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.ListIterator;
+import java.util.Map;
 
 import static org.apache.bcel.Const.MAJOR_1_5;
 import static org.jd.core.v1.model.javasyntax.statement.ContinueStatement.CONTINUE;

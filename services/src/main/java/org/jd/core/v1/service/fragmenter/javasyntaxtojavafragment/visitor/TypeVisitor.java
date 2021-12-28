@@ -11,14 +11,43 @@ import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.model.javafragment.ImportsFragment;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
-import org.jd.core.v1.model.javasyntax.type.*;
-import org.jd.core.v1.model.token.*;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.DiamondTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
+import org.jd.core.v1.model.javasyntax.type.TypeArgumentVisitable;
+import org.jd.core.v1.model.javasyntax.type.TypeArguments;
+import org.jd.core.v1.model.javasyntax.type.TypeParameter;
+import org.jd.core.v1.model.javasyntax.type.TypeParameterWithTypeBounds;
+import org.jd.core.v1.model.javasyntax.type.TypeParameters;
+import org.jd.core.v1.model.javasyntax.type.Types;
+import org.jd.core.v1.model.javasyntax.type.WildcardExtendsTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.WildcardSuperTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.WildcardTypeArgument;
+import org.jd.core.v1.model.token.KeywordToken;
+import org.jd.core.v1.model.token.LineNumberToken;
+import org.jd.core.v1.model.token.ReferenceToken;
+import org.jd.core.v1.model.token.TextToken;
+import org.jd.core.v1.model.token.Token;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.apache.bcel.Const.MAJOR_1_5;
-import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_BOOLEAN;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_BYTE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_CHAR;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_DOUBLE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_FLOAT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_INT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_LONG;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_SHORT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_VOID;
 
 public class TypeVisitor extends AbstractJavaSyntaxVisitor {
     public static final KeywordToken BOOLEAN = new KeywordToken("boolean");
@@ -45,14 +74,14 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
 
     public static final int UNKNOWN_LINE_NUMBER = Printer.UNKNOWN_LINE_NUMBER;
 
-    protected Loader loader;
-    protected String internalPackageName;
-    protected boolean genericTypesSupported;
+    private Loader loader;
+    private String internalPackageName;
+    private boolean genericTypesSupported;
     protected ImportsFragment importsFragment;
     protected Tokens tokens;
-    protected int maxLineNumber;
+    private int maxLineNumber;
     protected String currentInternalTypeName;
-    protected Map<String, TextToken> textTokenCache = new HashMap<>();
+    private Map<String, TextToken> textTokenCache = new HashMap<>();
 
     public TypeVisitor(Loader loader, String mainInternalTypeName, int majorVersion, ImportsFragment importsFragment) {
         this.loader = loader;
@@ -287,7 +316,7 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
 
     public class Tokens extends DefaultList<Token> {
         private static final long serialVersionUID = 1L;
-        protected int currentLineNumber = UNKNOWN_LINE_NUMBER;
+        private int currentLineNumber = UNKNOWN_LINE_NUMBER;
 
         public int getCurrentLineNumber() {
             return currentLineNumber;

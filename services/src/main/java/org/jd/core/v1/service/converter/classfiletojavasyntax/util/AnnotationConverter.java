@@ -6,13 +6,38 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
-import org.apache.bcel.classfile.*;
-import org.jd.core.v1.model.classfile.attribute.*;
+import org.apache.bcel.classfile.ConstantDouble;
+import org.apache.bcel.classfile.ConstantFloat;
+import org.apache.bcel.classfile.ConstantInteger;
+import org.apache.bcel.classfile.ConstantLong;
+import org.apache.bcel.classfile.ConstantUtf8;
+import org.jd.core.v1.model.classfile.attribute.Annotation;
 import org.jd.core.v1.model.classfile.attribute.Annotations;
-import org.jd.core.v1.model.javasyntax.expression.*;
-import org.jd.core.v1.model.javasyntax.reference.*;
+import org.jd.core.v1.model.classfile.attribute.AttributeElementValue;
+import org.jd.core.v1.model.classfile.attribute.ElementValueAnnotationValue;
+import org.jd.core.v1.model.classfile.attribute.ElementValueArrayValue;
+import org.jd.core.v1.model.classfile.attribute.ElementValueClassInfo;
+import org.jd.core.v1.model.classfile.attribute.ElementValueEnumConstValue;
+import org.jd.core.v1.model.classfile.attribute.ElementValuePrimitiveType;
+import org.jd.core.v1.model.classfile.attribute.ElementValueVisitor;
+import org.jd.core.v1.model.javasyntax.expression.DoubleConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.FieldReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.FloatConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.IntegerConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.LongConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.ObjectTypeReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.StringConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.TypeReferenceDotClassExpression;
 import org.jd.core.v1.model.javasyntax.reference.AnnotationElementValue;
+import org.jd.core.v1.model.javasyntax.reference.AnnotationReference;
+import org.jd.core.v1.model.javasyntax.reference.AnnotationReferences;
+import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
+import org.jd.core.v1.model.javasyntax.reference.BaseElementValue;
+import org.jd.core.v1.model.javasyntax.reference.ElementValueArrayInitializerElementValue;
 import org.jd.core.v1.model.javasyntax.reference.ElementValuePair;
+import org.jd.core.v1.model.javasyntax.reference.ElementValuePairs;
+import org.jd.core.v1.model.javasyntax.reference.ElementValues;
+import org.jd.core.v1.model.javasyntax.reference.ExpressionElementValue;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 
@@ -20,8 +45,8 @@ import java.util.List;
 import java.util.Map.Entry;
 
 public class AnnotationConverter implements ElementValueVisitor {
-    protected TypeMaker typeMaker;
-    protected BaseElementValue elementValue;
+    private TypeMaker typeMaker;
+    private BaseElementValue elementValue;
 
     public AnnotationConverter(TypeMaker typeMaker) {
         this.typeMaker = typeMaker;

@@ -21,7 +21,42 @@ import org.apache.bcel.Const;
 import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
-import jd.core.model.instruction.bytecode.instruction.*;
+import jd.core.model.instruction.bytecode.instruction.ANewArray;
+import jd.core.model.instruction.bytecode.instruction.AThrow;
+import jd.core.model.instruction.bytecode.instruction.ArrayLength;
+import jd.core.model.instruction.bytecode.instruction.ArrayLoadInstruction;
+import jd.core.model.instruction.bytecode.instruction.ArrayStoreInstruction;
+import jd.core.model.instruction.bytecode.instruction.AssertInstruction;
+import jd.core.model.instruction.bytecode.instruction.AssignmentInstruction;
+import jd.core.model.instruction.bytecode.instruction.BinaryOperatorInstruction;
+import jd.core.model.instruction.bytecode.instruction.CheckCast;
+import jd.core.model.instruction.bytecode.instruction.ComplexConditionalBranchInstruction;
+import jd.core.model.instruction.bytecode.instruction.ConvertInstruction;
+import jd.core.model.instruction.bytecode.instruction.DupStore;
+import jd.core.model.instruction.bytecode.instruction.GetField;
+import jd.core.model.instruction.bytecode.instruction.GetStatic;
+import jd.core.model.instruction.bytecode.instruction.IfCmp;
+import jd.core.model.instruction.bytecode.instruction.IfInstruction;
+import jd.core.model.instruction.bytecode.instruction.IncInstruction;
+import jd.core.model.instruction.bytecode.instruction.InitArrayInstruction;
+import jd.core.model.instruction.bytecode.instruction.InstanceOf;
+import jd.core.model.instruction.bytecode.instruction.Instruction;
+import jd.core.model.instruction.bytecode.instruction.InvokeInstruction;
+import jd.core.model.instruction.bytecode.instruction.InvokeNoStaticInstruction;
+import jd.core.model.instruction.bytecode.instruction.LookupSwitch;
+import jd.core.model.instruction.bytecode.instruction.MonitorEnter;
+import jd.core.model.instruction.bytecode.instruction.MonitorExit;
+import jd.core.model.instruction.bytecode.instruction.MultiANewArray;
+import jd.core.model.instruction.bytecode.instruction.NewArray;
+import jd.core.model.instruction.bytecode.instruction.Pop;
+import jd.core.model.instruction.bytecode.instruction.PutField;
+import jd.core.model.instruction.bytecode.instruction.PutStatic;
+import jd.core.model.instruction.bytecode.instruction.ReturnInstruction;
+import jd.core.model.instruction.bytecode.instruction.StoreInstruction;
+import jd.core.model.instruction.bytecode.instruction.TableSwitch;
+import jd.core.model.instruction.bytecode.instruction.TernaryOpStore;
+import jd.core.model.instruction.bytecode.instruction.TernaryOperator;
+import jd.core.model.instruction.bytecode.instruction.UnaryOperatorInstruction;
 
 public class ReplaceGetStaticVisitor
 {

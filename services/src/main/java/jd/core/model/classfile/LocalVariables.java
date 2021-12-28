@@ -87,16 +87,6 @@ public class LocalVariables
         this.listOfLocalVariables.add(localVariable);
     }
 
-    public LocalVariable get(int i)
-    {
-        return this.listOfLocalVariables.get(i);
-    }
-
-    public void remove(int i)
-    {
-        this.listOfLocalVariables.remove(i);
-    }
-
     @Override
     public String toString()
     {

@@ -13,7 +13,9 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.model.container.WarContainer;
 import org.jd.gui.spi.ContainerFactory;
 
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 
 public class WarContainerFactoryProvider implements ContainerFactory {
     @Override

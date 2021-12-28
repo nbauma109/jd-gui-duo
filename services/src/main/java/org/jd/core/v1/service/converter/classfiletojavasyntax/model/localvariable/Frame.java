@@ -6,20 +6,64 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable;
 
-import org.jd.core.v1.model.javasyntax.declaration.*;
-import org.jd.core.v1.model.javasyntax.expression.*;
-import org.jd.core.v1.model.javasyntax.statement.*;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.declaration.ExpressionVariableInitializer;
+import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclarator;
+import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclarators;
+import org.jd.core.v1.model.javasyntax.declaration.VariableInitializer;
+import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
+import org.jd.core.v1.model.javasyntax.expression.BinaryOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.Expression;
+import org.jd.core.v1.model.javasyntax.expression.Expressions;
+import org.jd.core.v1.model.javasyntax.expression.NewExpression;
+import org.jd.core.v1.model.javasyntax.expression.NewInitializedArray;
+import org.jd.core.v1.model.javasyntax.statement.ExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.LocalVariableDeclarationStatement;
+import org.jd.core.v1.model.javasyntax.statement.Statement;
+import org.jd.core.v1.model.javasyntax.statement.Statements;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.DiamondTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
+import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.TypeArgumentVisitor;
+import org.jd.core.v1.model.javasyntax.type.TypeArguments;
+import org.jd.core.v1.model.javasyntax.type.WildcardExtendsTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.WildcardSuperTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.WildcardTypeArgument;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileLocalVariableDeclarator;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForStatement;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.LocalVariableMaker;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.CreateLocalVariableVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchLocalVariableVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchUndeclaredLocalVariableVisitor;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
 
-import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_BOOLEAN;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_BYTE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_CHAR;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_DOUBLE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_FLOAT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_INT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_LONG;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_SHORT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_INT;
 
 public class Frame {
     protected static final Set<String> CAPITALIZED_JAVA_LANGUAGE_KEYWORDS = new HashSet<>(Arrays.asList(
@@ -30,11 +74,11 @@ public class Frame {
         "Volatile", "Const", "Float", "Native", "Super", "While"));
 
     protected AbstractLocalVariable[] localVariableArray = new AbstractLocalVariable[10];
-    protected Map<NewExpression, AbstractLocalVariable> newExpressions;
+    private Map<NewExpression, AbstractLocalVariable> newExpressions;
     protected DefaultList<Frame> children;
-    protected Frame parent;
-    protected Statements statements;
-    protected AbstractLocalVariable exceptionLocalVariable;
+    private Frame parent;
+    private Statements statements;
+    private AbstractLocalVariable exceptionLocalVariable;
 
     public Frame(Frame parent, Statements statements) {
         this.parent = parent;
@@ -875,10 +919,10 @@ public class Frame {
     protected static class GenerateLocalVariableNameVisitor implements TypeArgumentVisitor {
         protected static final String[] INTEGER_NAMES = { "i", "j", "k", "m", "n" };
 
-        protected StringBuilder sb = new StringBuilder();
-        protected Set<String> blackListNames;
-        protected Map<Type, Boolean> types;
-        protected String name;
+        private StringBuilder sb = new StringBuilder();
+        private Set<String> blackListNames;
+        private Map<Type, Boolean> types;
+        private String name;
 
         public GenerateLocalVariableNameVisitor(Set<String> blackListNames, Map<Type, Boolean> types) {
             this.blackListNames = blackListNames;

@@ -12,9 +12,15 @@ import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 import java.io.File;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
-import javax.tools.*;
+import javax.tools.Diagnostic;
+import javax.tools.DiagnosticCollector;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
 
 public class CompilerUtil {
     protected static final File DESTINATION_DIRECTORY = new File("build/test-recompiled");
@@ -35,35 +41,35 @@ public class CompilerUtil {
         List<String> options = Arrays.asList("-source", javaVersion, "-target", javaVersion, "-d", DESTINATION_DIRECTORY_PATH, "-cp", System.getProperty("java.class.path"));
         List<InMemoryJavaSourceFileObject> compilationUnits = Arrays.asList(javaFileObjects);
         InMemoryClassLoader classLoader = new InMemoryClassLoader();
-        StandardJavaFileManager standardFileManager = compiler.getStandardFileManager(diagnostics, Locale.US, StandardCharsets.UTF_8);
-        try (InMemoryJavaFileManager fileManager = new InMemoryJavaFileManager(standardFileManager, compilationUnits, classLoader)) {
-            compilationSuccess = compiler.getTask(writer, fileManager, diagnostics, options, null, compilationUnits).call();
-
-            if (!diagnostics.getDiagnostics().isEmpty()) {
-                StringBuilder sb = new StringBuilder();
-
-                for (Diagnostic<? extends JavaFileObject> d : diagnostics.getDiagnostics()) {
-                    switch (d.getKind()) {
-                        case NOTE:
-                        case WARNING:
-                            break;
-                        default:
-                            if (d.getLineNumber() > 0) {
-                                sb.append(String.format("%-7s - line %-4d- %s%n", d.getKind(), d.getLineNumber(), d.getMessage(null)));
-                            } else {
-                                sb.append(String.format("%-7s -          - %s%n", d.getKind(), d.getMessage(null)));
-                            }
-                            break;
+        try (StandardJavaFileManager standardFileManager = compiler.getStandardFileManager(diagnostics, Locale.US, StandardCharsets.UTF_8)) {
+            try (InMemoryJavaFileManager fileManager = new InMemoryJavaFileManager(standardFileManager, compilationUnits, classLoader)) {
+                compilationSuccess = compiler.getTask(writer, fileManager, diagnostics, options, null, compilationUnits).call();
+    
+                if (!diagnostics.getDiagnostics().isEmpty()) {
+                    StringBuilder sb = new StringBuilder();
+    
+                    for (Diagnostic<? extends JavaFileObject> d : diagnostics.getDiagnostics()) {
+                        switch (d.getKind()) {
+                            case NOTE:
+                            case WARNING:
+                                break;
+                            default:
+                                if (d.getLineNumber() > 0) {
+                                    sb.append(String.format("%-7s - line %-4d- %s%n", d.getKind(), d.getLineNumber(), d.getMessage(null)));
+                                } else {
+                                    sb.append(String.format("%-7s -          - %s%n", d.getKind(), d.getMessage(null)));
+                                }
+                                break;
+                        }
                     }
-                }
-
-                if (sb.length() > 0) {
-                    System.err.println(compilationUnits.get(0).getName());
-                    System.err.print(sb.toString());
+    
+                    if (sb.length() > 0) {
+                        System.err.println(compilationUnits.get(0).getName());
+                        System.err.print(sb.toString());
+                    }
                 }
             }
         }
-
         return compilationSuccess;
     }
 

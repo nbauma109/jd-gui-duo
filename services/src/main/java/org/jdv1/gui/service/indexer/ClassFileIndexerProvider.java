@@ -13,16 +13,33 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.service.indexer.AbstractIndexerProvider;
-import org.objectweb.asm.*;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.TypePath;
 import org.objectweb.asm.signature.SignatureReader;
 import org.objectweb.asm.signature.SignatureVisitor;
 
 import java.io.InputStream;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
-import static org.apache.bcel.Const.*;
-import static org.objectweb.asm.ClassReader.*;
+import static org.apache.bcel.Const.CONSTANT_Class;
+import static org.apache.bcel.Const.CONSTANT_Fieldref;
+import static org.apache.bcel.Const.CONSTANT_InterfaceMethodref;
+import static org.apache.bcel.Const.CONSTANT_Methodref;
+import static org.apache.bcel.Const.CONSTANT_NameAndType;
+import static org.apache.bcel.Const.CONSTANT_String;
+import static org.objectweb.asm.ClassReader.SKIP_CODE;
+import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
+import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 
 /**
  * Unsafe thread implementation of class file indexer.
@@ -161,11 +178,11 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
 	}
 
 	protected class ClassIndexer extends ClassVisitor {
-		protected AnnotationIndexer annotationIndexer = new AnnotationIndexer();
-		protected FieldIndexer fieldIndexer = new FieldIndexer(annotationIndexer);
-		protected MethodIndexer methodIndexer = new MethodIndexer(annotationIndexer);
+		private AnnotationIndexer annotationIndexer = new AnnotationIndexer();
+		private FieldIndexer fieldIndexer = new FieldIndexer(annotationIndexer);
+		private MethodIndexer methodIndexer = new MethodIndexer(annotationIndexer);
 
-		protected String name;
+		private String name;
 
 		public ClassIndexer() {
 			super(Opcodes.ASM7);
@@ -250,7 +267,7 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
 	}
 
 	protected class FieldIndexer extends FieldVisitor {
-		protected AnnotationIndexer annotationIndexer;
+		private AnnotationIndexer annotationIndexer;
 
 		public FieldIndexer(AnnotationIndexer annotationIndexer) {
 			super(Opcodes.ASM7);
@@ -271,7 +288,7 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
 	}
 
 	protected class MethodIndexer extends MethodVisitor {
-		protected AnnotationIndexer annotationIndexer;
+		private AnnotationIndexer annotationIndexer;
 
 		public MethodIndexer(AnnotationIndexer annotationIndexer) {
 			super(Opcodes.ASM7);

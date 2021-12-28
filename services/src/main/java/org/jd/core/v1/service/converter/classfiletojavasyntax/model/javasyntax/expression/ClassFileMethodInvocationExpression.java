@@ -7,13 +7,17 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression;
 
-import org.jd.core.v1.model.javasyntax.expression.*;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
+import org.jd.core.v1.model.javasyntax.expression.Expression;
+import org.jd.core.v1.model.javasyntax.expression.MethodInvocationExpression;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
+import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class ClassFileMethodInvocationExpression extends MethodInvocationExpression {
-    protected BaseTypeParameter typeParameters;
-    protected BaseType parameterTypes;
-    protected boolean bound = false;
+    private BaseTypeParameter typeParameters;
+    private BaseType parameterTypes;
+    private boolean bound = false;
 
     public ClassFileMethodInvocationExpression(
             int lineNumber, BaseTypeParameter typeParameters, Type type, Expression expression,

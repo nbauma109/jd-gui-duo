@@ -10,7 +10,7 @@ package org.jd.core.v1.model.javasyntax.statement;
 import org.jd.core.v1.model.javasyntax.declaration.TypeDeclaration;
 
 public class TypeDeclarationStatement implements Statement {
-    protected TypeDeclaration typeDeclaration;
+    private TypeDeclaration typeDeclaration;
 
     public TypeDeclarationStatement(TypeDeclaration typeDeclaration) {
         this.typeDeclaration = typeDeclaration;

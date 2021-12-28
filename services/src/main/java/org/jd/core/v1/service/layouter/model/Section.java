@@ -13,19 +13,22 @@ import org.jd.core.v1.service.layouter.visitor.AbstractSearchMovableBlockFragmen
 import org.jd.core.v1.service.layouter.visitor.AbstractStoreMovableBlockFragmentIndexVisitorAbstract;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.NoSuchElementException;
 
 public class Section {
-    protected final DefaultList<FlexibleFragment> flexibleFragments;
-    protected final FixedFragment fixedFragment;
-    protected final Section previousSection;
-    protected       Section nextSection;
-    protected final int targetLineCount;
-    protected       int rate;
+    private final DefaultList<FlexibleFragment> flexibleFragments;
+    private final FixedFragment fixedFragment;
+    private final Section previousSection;
+    private       Section nextSection;
+    private final int targetLineCount;
+    private       int rate;
 
     /** Uses by "layout" method. */
-    protected int lastLineCount = -1;
-    protected int delta;
+    private int lastLineCount = -1;
+    private int delta;
 
     public Section(DefaultList<FlexibleFragment> flexibleFragments, FixedFragment fixedFragment, Section previousSection) {
         this.flexibleFragments = flexibleFragments;
@@ -393,8 +396,8 @@ public class Section {
 
     @SuppressWarnings("unchecked")
     protected class AutoGrowthList implements Iterable<DefaultList<FlexibleFragment>>, Iterator<DefaultList<FlexibleFragment>> {
-        protected DefaultList<FlexibleFragment>[] elements = new DefaultList[21];
-        protected int iteratorIndex;
+        private DefaultList<FlexibleFragment>[] elements = new DefaultList[21];
+        private int iteratorIndex;
 
         public DefaultList<FlexibleFragment> get(int index) {
             ensureCapacity(index);
@@ -406,15 +409,6 @@ public class Section {
             }
 
             return element;
-        }
-
-        public void reverse() {
-            DefaultList<FlexibleFragment> tmp;
-            for (int index1=0, index2=elements.length-1; index1<index2; index1++, index2--) {
-                tmp = elements[index1];
-                elements[index1] = elements[index2];
-                elements[index2] = tmp;
-            }
         }
 
         protected void ensureCapacity(int minCapacity) {

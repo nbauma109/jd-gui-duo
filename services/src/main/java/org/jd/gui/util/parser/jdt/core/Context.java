@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Context {
-    protected Context outerContext;
+    private Context outerContext;
 
-    protected Map<String, String> nameToDescriptor = new HashMap<>();
+    private Map<String, String> nameToDescriptor = new HashMap<>();
 
     public Context(Context outerContext) {
         this.outerContext = outerContext;

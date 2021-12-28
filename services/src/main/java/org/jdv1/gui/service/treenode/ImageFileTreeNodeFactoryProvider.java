@@ -9,17 +9,25 @@ package org.jdv1.gui.service.treenode;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
-import org.jd.gui.api.feature.*;
+import org.jd.gui.api.feature.ContainerEntryGettable;
+import org.jd.gui.api.feature.PageCreator;
+import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.util.ImageUtil;
 import org.jd.gui.view.data.TreeNodeBean;
 
 import java.awt.BorderLayout;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public class ImageFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvider {
@@ -59,7 +67,7 @@ public class ImageFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvide
 	protected static class ImagePage extends JPanel implements UriGettable {
 
 		private static final long serialVersionUID = 1L;
-		protected transient Container.Entry entry;
+		private transient Container.Entry entry;
 
 		public ImagePage(Container.Entry entry) {
 			super(new BorderLayout());

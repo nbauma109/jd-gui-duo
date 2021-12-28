@@ -11,9 +11,9 @@ import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class ObjectTypeReferenceExpression implements Expression {
-    protected int lineNumber;
-    protected ObjectType type;
-    protected boolean explicit;
+    private int lineNumber;
+    private ObjectType type;
+    private boolean explicit;
 
     public ObjectTypeReferenceExpression(ObjectType type) {
         this.type = type;
@@ -24,11 +24,6 @@ public class ObjectTypeReferenceExpression implements Expression {
         this.lineNumber = lineNumber;
         this.type = type;
         this.explicit = true;
-    }
-
-    public ObjectTypeReferenceExpression(ObjectType type, boolean explicit) {
-        this.type = type;
-        this.explicit = explicit;
     }
 
     public ObjectTypeReferenceExpression(int lineNumber, ObjectType type, boolean explicit) {

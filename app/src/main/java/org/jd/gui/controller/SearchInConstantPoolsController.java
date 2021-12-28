@@ -8,7 +8,9 @@ package org.jd.gui.controller;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
-import org.jd.gui.api.model.*;
+import org.jd.gui.api.model.Container;
+import org.jd.gui.api.model.Indexes;
+import org.jd.gui.api.model.Type;
 import org.jd.gui.service.type.TypeFactoryService;
 import org.jd.gui.spi.TypeFactory;
 import org.jd.gui.util.function.TriConsumer;
@@ -19,10 +21,16 @@ import org.jdv1.gui.model.container.DelegatingFilterContainer;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.function.*;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.ObjIntConsumer;
 import java.util.regex.Pattern;
 
 import javax.swing.JFrame;
@@ -30,24 +38,22 @@ import javax.swing.JFrame;
 public class SearchInConstantPoolsController implements IndexesChangeListener {
 	protected static final int CACHE_MAX_ENTRIES = 5 * 20 * 9;
 
-	protected API api;
-	protected ScheduledExecutorService executor;
+	private API api;
+	private ScheduledExecutorService executor;
 
-	protected JFrame mainFrame;
 	@SuppressWarnings("rawtypes")
-	protected SearchInConstantPoolsView searchInConstantPoolsView;
+	private SearchInConstantPoolsView searchInConstantPoolsView;
 	@SuppressWarnings("rawtypes")
-	protected Map<String, Map<String, Collection>> cache;
-	protected Set<DelegatingFilterContainer> delegatingFilterContainers = new HashSet<>();
-	protected Collection<Future<Indexes>> collectionOfFutureIndexes;
-	protected Consumer<URI> openCallback;
-	protected long indexesHashCode;
+	private Map<String, Map<String, Collection>> cache;
+	private Set<DelegatingFilterContainer> delegatingFilterContainers = new HashSet<>();
+	private Collection<Future<Indexes>> collectionOfFutureIndexes;
+	private Consumer<URI> openCallback;
+	private long indexesHashCode;
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public SearchInConstantPoolsController(API api, ScheduledExecutorService executor, JFrame mainFrame) {
 		this.api = api;
 		this.executor = executor;
-		this.mainFrame = mainFrame;
 		// Create UI
 		ObjIntConsumer<String> changedPatternCallback = this::updateTree;
 		TriConsumer<URI, String, Integer> selectedTypeCallback = this::onTypeSelected;

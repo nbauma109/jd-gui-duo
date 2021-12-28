@@ -13,22 +13,32 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.model.container.entry.path.SimpleEntryPath;
 import org.jd.gui.spi.ContainerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.*;
+import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
-import java.util.*;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class GenericContainer implements Container {
     protected static final long TIMESTAMP = System.currentTimeMillis();
 
-    protected static AtomicLong tmpFileCounter = new AtomicLong(0);
+    private static AtomicLong tmpFileCounter = new AtomicLong(0);
 
-    protected API api;
-    protected int rootNameCount;
-    protected Container.Entry root;
+    private API api;
+    private int rootNameCount;
+    private Container.Entry root;
 
     public GenericContainer(API api, Container.Entry parentEntry, Path rootPath) {
         try {
@@ -39,7 +49,7 @@ public class GenericContainer implements Container {
             this.root = new Entry(parentEntry, rootPath, new URI(uri.getScheme(), uri.getHost(), uri.getPath() + "!/", null)) {
                 @Override
                 public Entry newChildEntry(Path fsPath) {
-                    return new Entry(parent, fsPath, null);
+                    return new Entry(getParent(), fsPath, null);
                 }
             };
         } catch (URISyntaxException e) {
@@ -53,12 +63,12 @@ public class GenericContainer implements Container {
     public Container.Entry getRoot() { return root; }
 
     protected class Entry implements Container.Entry {
-        protected Container.Entry parent;
-        protected Path fsPath;
-        protected String strPath;
-        protected URI uri;
-        protected Boolean isDirectory;
-        protected Map<Container.EntryPath, Container.Entry> children;
+        private Container.Entry parent;
+        private Path fsPath;
+        private String strPath;
+        private URI uri;
+        private Boolean isDirectory;
+        private Map<Container.EntryPath, Container.Entry> children;
 
         public Entry(Container.Entry parent, Path fsPath, URI uri) {
             this.parent = parent;
@@ -90,6 +100,7 @@ public class GenericContainer implements Container {
         }
 
         @Override
+        @SuppressWarnings("resource")
         public String getPath() {
             if (strPath == null) {
                 int nameCount = fsPath.getNameCount();

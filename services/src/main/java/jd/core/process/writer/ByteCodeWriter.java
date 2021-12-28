@@ -17,7 +17,12 @@
 package jd.core.process.writer;
 
 import org.apache.bcel.Const;
-import org.apache.bcel.classfile.*;
+import org.apache.bcel.classfile.CodeException;
+import org.apache.bcel.classfile.Constant;
+import org.apache.bcel.classfile.ConstantClass;
+import org.apache.bcel.classfile.ConstantFieldref;
+import org.apache.bcel.classfile.ConstantNameAndType;
+import org.apache.bcel.classfile.LineNumber;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
 

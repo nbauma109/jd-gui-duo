@@ -29,8 +29,8 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class IBinaryOperatorFactory implements InstructionFactory
 {
-    protected int priority;
-    protected String operator;
+    private int priority;
+    private String operator;
 
     public IBinaryOperatorFactory(int priority, String operator)
     {

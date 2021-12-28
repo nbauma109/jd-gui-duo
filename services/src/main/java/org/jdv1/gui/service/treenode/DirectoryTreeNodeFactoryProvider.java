@@ -8,7 +8,9 @@
 package org.jdv1.gui.service.treenode;
 
 import org.jd.gui.api.API;
-import org.jd.gui.api.feature.*;
+import org.jd.gui.api.feature.ContainerEntryGettable;
+import org.jd.gui.api.feature.TreeNodeExpandable;
+import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Container.Entry;
 import org.jd.gui.spi.TreeNodeFactory;

@@ -14,7 +14,9 @@ import java.awt.Color;
 import java.awt.GridLayout;
 import java.util.Map;
 
-import javax.swing.*;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 
 /**
  * JTabbedPane.WRAP_TAB_LAYOUT is not supported by Aqua L&F.

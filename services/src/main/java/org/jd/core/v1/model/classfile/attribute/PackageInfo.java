@@ -10,9 +10,9 @@ package org.jd.core.v1.model.classfile.attribute;
 import java.util.Arrays;
 
 public class PackageInfo {
-    protected String   internalName;
-    protected int flags;
-    protected String[] moduleInfoNames;
+    private String   internalName;
+    private int flags;
+    private String[] moduleInfoNames;
 
     public PackageInfo(String internalName, int flags, String[] moduleInfoNames) {
         this.internalName = internalName;

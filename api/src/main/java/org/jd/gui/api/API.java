@@ -10,7 +10,14 @@ package org.jd.gui.api;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
-import org.jd.gui.spi.*;
+import org.jd.gui.spi.ContainerFactory;
+import org.jd.gui.spi.FileLoader;
+import org.jd.gui.spi.Indexer;
+import org.jd.gui.spi.PanelFactory;
+import org.jd.gui.spi.SourceSaver;
+import org.jd.gui.spi.TreeNodeFactory;
+import org.jd.gui.spi.TypeFactory;
+import org.jd.gui.spi.UriLoader;
 
 import java.io.File;
 import java.net.URI;
@@ -19,7 +26,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-import javax.swing.*;
+import javax.swing.Action;
+import javax.swing.Icon;
+import javax.swing.JComponent;
 
 public interface API {
     boolean openURI(URI uri);

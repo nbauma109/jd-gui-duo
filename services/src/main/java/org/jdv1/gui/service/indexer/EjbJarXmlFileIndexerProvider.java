@@ -16,7 +16,9 @@ import org.jd.gui.util.xml.AbstractXmlPathFinder;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 
 public class EjbJarXmlFileIndexerProvider extends XmlBasedFileIndexerProvider {
 
@@ -35,9 +37,9 @@ public class EjbJarXmlFileIndexerProvider extends XmlBasedFileIndexerProvider {
     }
 
     public static class EjbJarXmlPathFinder extends AbstractXmlPathFinder {
-        protected Container.Entry entry;
+        private Container.Entry entry;
         @SuppressWarnings("rawtypes")
-        protected Map<String, Collection> index;
+        private Map<String, Collection> index;
 
         public EjbJarXmlPathFinder(Container.Entry entry, Indexes indexes) {
             super(Arrays.asList(

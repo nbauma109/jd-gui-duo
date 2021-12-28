@@ -13,14 +13,8 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 import java.util.List;
 
 public class LambdaIdentifiersExpression extends AbstractLambdaExpression {
-    protected Type returnedType;
-    protected List<String> parameterNames;
-
-    public LambdaIdentifiersExpression(Type type, Type returnedType, List<String> parameterNames, BaseStatement statements) {
-        super(type, statements);
-        this.returnedType = returnedType;
-        this.parameterNames = parameterNames;
-    }
+    private Type returnedType;
+    private List<String> parameterNames;
 
     public LambdaIdentifiersExpression(int lineNumber, Type type, Type returnedType, List<String> parameterNames, BaseStatement statements) {
         super(lineNumber, type, statements);

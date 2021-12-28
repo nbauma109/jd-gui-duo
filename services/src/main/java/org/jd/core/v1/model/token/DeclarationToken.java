@@ -9,10 +9,10 @@ package org.jd.core.v1.model.token;
 
 public class DeclarationToken implements Token {
 
-    protected int type;
+    private int type;
     protected String internalTypeName;
     protected String name;
-    protected String descriptor;
+    private String descriptor;
 
     public DeclarationToken(int type, String internalTypeName, String name, String descriptor) {
         this.type = type;

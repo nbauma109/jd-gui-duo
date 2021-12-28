@@ -16,7 +16,7 @@ public class EndBlockToken implements Token {
     public static final EndBlockToken END_RESOURCES_BLOCK = new EndBlockToken(")");
     public static final EndBlockToken END_DECLARATION_OR_STATEMENT_BLOCK = new EndBlockToken("");
 
-    protected String text;
+    private String text;
 
     public EndBlockToken(String text) {
         this.text = text;

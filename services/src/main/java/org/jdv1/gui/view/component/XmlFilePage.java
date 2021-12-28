@@ -24,7 +24,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,9 +36,9 @@ public class XmlFilePage extends TypeReferencePage implements UriGettable, Index
 
     private static final long serialVersionUID = 1L;
 
-    protected transient API api;
-    protected transient Container.Entry entry;
-    protected transient Collection<Future<Indexes>> collectionOfFutureIndexes;
+    private transient API api;
+    private transient Container.Entry entry;
+    private transient Collection<Future<Indexes>> collectionOfFutureIndexes;
 
     public XmlFilePage(API api, Container.Entry entry) {
         this.api = api;

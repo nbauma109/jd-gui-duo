@@ -19,7 +19,15 @@ package jd.core.process.deserializer;
 import java.io.DataInput;
 import java.io.IOException;
 
-import jd.core.model.classfile.attribute.*;
+import jd.core.model.classfile.attribute.Annotation;
+import jd.core.model.classfile.attribute.ElementValue;
+import jd.core.model.classfile.attribute.ElementValueAnnotationValue;
+import jd.core.model.classfile.attribute.ElementValueArrayValue;
+import jd.core.model.classfile.attribute.ElementValueClassInfo;
+import jd.core.model.classfile.attribute.ElementValueContants;
+import jd.core.model.classfile.attribute.ElementValueEnumConstValue;
+import jd.core.model.classfile.attribute.ElementValuePair;
+import jd.core.model.classfile.attribute.ElementValuePrimitiveType;
 
 public class AnnotationDeserializer
 {

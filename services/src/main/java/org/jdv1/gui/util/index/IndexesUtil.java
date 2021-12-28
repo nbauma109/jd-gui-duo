@@ -11,7 +11,10 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 
 public class IndexesUtil {

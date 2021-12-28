@@ -20,7 +20,11 @@ import org.apache.bcel.Const;
 import org.apache.bcel.classfile.CodeException;
 import org.apache.bcel.classfile.LineNumber;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.List;
 import java.util.Map.Entry;
 
 import jd.core.model.classfile.ClassFile;

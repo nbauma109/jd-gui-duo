@@ -9,7 +9,7 @@ package org.jd.core.v1.model.javasyntax.declaration;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 
 public class ExpressionVariableInitializer implements VariableInitializer {
-    protected Expression expression;
+    private Expression expression;
 
     public ExpressionVariableInitializer(Expression expression) {
         this.expression = expression;

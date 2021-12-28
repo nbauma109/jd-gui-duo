@@ -8,7 +8,9 @@
 package org.jdv1.gui.view;
 
 import org.jd.gui.api.API;
-import org.jd.gui.api.feature.*;
+import org.jd.gui.api.feature.ContainerEntryGettable;
+import org.jd.gui.api.feature.TreeNodeExpandable;
+import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.spi.TreeNodeFactory;
 import org.jd.gui.util.swing.SwingUtil;
@@ -16,26 +18,51 @@ import org.jd.gui.view.component.Tree;
 import org.jd.gui.view.renderer.TreeNodeRenderer;
 import org.jdv1.gui.model.container.DelegatingFilterContainer;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
-import javax.swing.*;
-import javax.swing.tree.*;
+import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRootPane;
+import javax.swing.KeyStroke;
+import javax.swing.UIManager;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 
 public class SelectLocationView<T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> {
 
-    protected API api;
+    private API api;
 
-    protected JDialog selectLocationDialog;
-    protected JLabel selectLocationLabel;
-    protected Tree selectLocationTree;
+    private JDialog selectLocationDialog;
+    private JLabel selectLocationLabel;
+    private Tree selectLocationTree;
 
-    protected Consumer<URI> selectedEntryCallback;
-    protected Runnable closeCallback;
+    private Consumer<URI> selectedEntryCallback;
+    private Runnable closeCallback;
 
     public SelectLocationView(API api, JFrame mainFrame) {
         this.api = api;

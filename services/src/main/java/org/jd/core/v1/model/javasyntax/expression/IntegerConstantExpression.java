@@ -12,7 +12,7 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
 
 public class IntegerConstantExpression extends AbstractLineNumberTypeExpression {
-    protected int value;
+    private int value;
 
     public IntegerConstantExpression(Type type, int value) {
         super(type);

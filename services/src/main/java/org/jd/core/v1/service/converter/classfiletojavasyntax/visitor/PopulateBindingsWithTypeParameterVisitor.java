@@ -7,7 +7,12 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.TypeArgument;
+import org.jd.core.v1.model.javasyntax.type.TypeParameter;
+import org.jd.core.v1.model.javasyntax.type.TypeParameterVisitor;
+import org.jd.core.v1.model.javasyntax.type.TypeParameterWithTypeBounds;
+import org.jd.core.v1.model.javasyntax.type.TypeParameters;
 
 import java.util.Map;
 

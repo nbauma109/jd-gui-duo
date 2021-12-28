@@ -24,7 +24,15 @@ import org.apache.bcel.classfile.LineNumber;
 import java.util.List;
 import java.util.Map.Entry;
 
-import jd.core.model.classfile.attribute.*;
+import jd.core.model.classfile.attribute.Attribute;
+import jd.core.model.classfile.attribute.AttributeAnnotationDefault;
+import jd.core.model.classfile.attribute.AttributeCode;
+import jd.core.model.classfile.attribute.AttributeExceptions;
+import jd.core.model.classfile.attribute.AttributeLocalVariableTable;
+import jd.core.model.classfile.attribute.AttributeNumberTable;
+import jd.core.model.classfile.attribute.AttributeRuntimeParameterAnnotations;
+import jd.core.model.classfile.attribute.ElementValue;
+import jd.core.model.classfile.attribute.ParameterAnnotations;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
 

@@ -8,16 +8,33 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
-import org.jd.core.v1.model.javasyntax.expression.*;
-import org.jd.core.v1.model.javasyntax.reference.InnerObjectReference;
-import org.jd.core.v1.model.javasyntax.reference.ObjectReference;
-import org.jd.core.v1.model.javasyntax.statement.*;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.expression.ConstructorReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.DoubleConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.EnumConstantReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.FloatConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.IntegerConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.LocalVariableReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.LongConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.NullExpression;
+import org.jd.core.v1.model.javasyntax.expression.ObjectTypeReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.SuperExpression;
+import org.jd.core.v1.model.javasyntax.expression.ThisExpression;
+import org.jd.core.v1.model.javasyntax.expression.TypeReferenceDotClassExpression;
+import org.jd.core.v1.model.javasyntax.statement.BreakStatement;
+import org.jd.core.v1.model.javasyntax.statement.ByteCodeStatement;
+import org.jd.core.v1.model.javasyntax.statement.ContinueStatement;
+import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.TypeArguments;
+import org.jd.core.v1.model.javasyntax.type.TypeParameterWithTypeBounds;
+import org.jd.core.v1.model.javasyntax.type.Types;
+import org.jd.core.v1.model.javasyntax.type.WildcardExtendsTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.WildcardSuperTypeArgument;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.LocalVariableMaker;
 
 public class ChangeFrameOfLocalVariablesVisitor extends AbstractJavaSyntaxVisitor {
-    protected LocalVariableMaker localVariableMaker;
+    private LocalVariableMaker localVariableMaker;
 
     public ChangeFrameOfLocalVariablesVisitor(LocalVariableMaker localVariableMaker) {
         this.localVariableMaker = localVariableMaker;
@@ -42,8 +59,6 @@ public class ChangeFrameOfLocalVariablesVisitor extends AbstractJavaSyntaxVisito
     @Override public void visit(SuperExpression expression) {}
     @Override public void visit(ThisExpression expression) {}
     @Override public void visit(TypeReferenceDotClassExpression expression) {}
-    @Override public void visit(ObjectReference reference) {}
-    @Override public void visit(InnerObjectReference reference) {}
     @Override public void visit(TypeArguments type) {}
     @Override public void visit(WildcardExtendsTypeArgument type) {}
     @Override public void visit(ObjectType type) {}

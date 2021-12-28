@@ -13,7 +13,9 @@ import java.awt.Color;
 import java.awt.GridLayout;
 import java.util.Map;
 
-import javax.swing.*;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 
 import static org.jd.gui.util.decompiler.GuiPreferences.ESCAPE_UNICODE_CHARACTERS;
 import static org.jd.gui.util.decompiler.GuiPreferences.REALIGN_LINE_NUMBERS;

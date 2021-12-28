@@ -14,11 +14,9 @@ public class TextToken implements Token {
     public static final TextToken COLON = new TextToken(":");
     public static final TextToken COLON_COLON = new TextToken("::");
     public static final TextToken COMMA_SPACE = new TextToken(", ");
-    public static final TextToken DIAMOND = new TextToken("<>");
     public static final TextToken DOT = new TextToken(".");
     public static final TextToken DIMENSION_1 = new TextToken("[]");
     public static final TextToken DIMENSION_2 = new TextToken("[][]");
-    public static final TextToken INFINITE_FOR = new TextToken(" (;;)");
     public static final TextToken LEFTRIGHTCURLYBRACKETS = new TextToken("{}");
     public static final TextToken LEFTROUNDBRACKET = new TextToken("(");
     public static final TextToken RIGHTROUNDBRACKET = new TextToken(")");
@@ -40,7 +38,7 @@ public class TextToken implements Token {
     public static final TextToken VERTICALLINE = new TextToken("|");
     public static final TextToken EXCLAMATION = new TextToken("!");
 
-    protected final String text;
+    private final String text;
 
     public TextToken(String text) {
         this.text = text;

@@ -10,13 +10,20 @@ package org.jd.core.v1;
 import org.apache.commons.collections4.iterators.AbstractUntypedIteratorDecorator;
 import org.jd.core.v1.loader.ClassPathLoader;
 import org.jd.core.v1.loader.ZipLoader;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.TypeArguments;
+import org.jd.core.v1.model.javasyntax.type.WildcardExtendsTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.WildcardSuperTypeArgument;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.core.v1.util.StringConstants;
 import org.junit.Test;
 
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.PrimitiveIterator;
 
 import junit.framework.TestCase;
 

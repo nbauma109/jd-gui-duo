@@ -26,25 +26,15 @@ public class GuiPreferences extends Preferences {
     public static final String REALIGN_LINE_NUMBERS        = "ClassFileSaverPreferences.realignLineNumbers";
     public static final String USE_JD_CORE_V0              = "ClassFileSaverPreferences.useJDCoreV0";
 
-    protected boolean showPrefixThis;
-    protected boolean unicodeEscape;
-    protected boolean showLineNumbers;
+    private boolean showPrefixThis;
+    private boolean unicodeEscape;
+    private boolean showLineNumbers;
 
     public GuiPreferences()
     {
         this.showPrefixThis = true;
         this.unicodeEscape = false;
         this.showLineNumbers = true;
-    }
-
-    public GuiPreferences(
-            boolean showDefaultConstructor, boolean realignmentLineNumber,
-            boolean showPrefixThis, boolean unicodeEscape, boolean showLineNumbers)
-    {
-        super(showDefaultConstructor, realignmentLineNumber);
-        this.showPrefixThis = showPrefixThis;
-        this.unicodeEscape = unicodeEscape;
-        this.showLineNumbers = showLineNumbers;
     }
 
     public GuiPreferences(Map<String, String> preferences)

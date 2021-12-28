@@ -6,22 +6,38 @@
  */
 package org.jd.gui.view.component;
 
-import org.fife.ui.rsyntaxtextarea.*;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaEditorKit;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaUI;
+import org.fife.ui.rsyntaxtextarea.RSyntaxUtilities;
 import org.fife.ui.rsyntaxtextarea.folding.Fold;
 import org.fife.ui.rsyntaxtextarea.folding.FoldManager;
-import org.fife.ui.rtextarea.*;
+import org.fife.ui.rtextarea.Gutter;
+import org.fife.ui.rtextarea.LineNumberList;
+import org.fife.ui.rtextarea.RTextArea;
+import org.fife.ui.rtextarea.RTextAreaUI;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Insets;
+import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.Map;
 
 import javax.swing.JComponent;
-import javax.swing.text.*;
+import javax.swing.text.EditorKit;
+import javax.swing.text.Element;
+import javax.swing.text.JTextComponent;
+import javax.swing.text.View;
 
 public abstract class CustomLineNumbersPage extends HyperlinkPage {
     private static final long serialVersionUID = 1L;
-    protected Color errorForeground = Color.RED;
-    protected boolean showMisalignment = true;
+    private Color errorForeground = Color.RED;
+    private boolean showMisalignment = true;
 
     protected void setErrorForeground(Color color) {
         errorForeground = color;
@@ -32,8 +48,8 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
     }
 
     /** Map[textarea line number] = original line number. */
-    protected int[] lineNumberMap;
-    protected int maxLineNumber;
+    private int[] lineNumberMap;
+    private int maxLineNumber;
 
     protected void setMaxLineNumber(int maxLineNumber) {
         if (maxLineNumber > 0) {
@@ -133,11 +149,11 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
      */
     public class SourceLineNumberList extends LineNumberList {
         private static final long serialVersionUID = 1L;
-        protected RTextArea rTextArea;
-        protected transient Map<?,?> aaHints;
-        protected Rectangle visibleRect;
-        protected Insets textAreaInsets;
-        protected Dimension preferredSize;
+        private RTextArea rTextArea;
+        private transient Map<?,?> aaHints;
+        private Rectangle visibleRect;
+        private Insets textAreaInsets;
+        private Dimension preferredSize;
 
         public SourceLineNumberList(RTextArea textArea) {
             super(textArea, null);

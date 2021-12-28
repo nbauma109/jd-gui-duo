@@ -11,16 +11,30 @@ import org.jd.gui.Constants;
 import org.jd.gui.model.configuration.Configuration;
 import org.jd.gui.service.platform.PlatformService;
 
-import java.awt.*;
-import java.io.*;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.jar.Manifest;
 
 import javax.swing.UIManager;
 import javax.xml.XMLConstants;
-import javax.xml.stream.*;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 
 import static org.jd.gui.util.decompiler.GuiPreferences.ERROR_BACKGROUND_COLOR;
 import static org.jd.gui.util.decompiler.GuiPreferences.JD_CORE_VERSION;

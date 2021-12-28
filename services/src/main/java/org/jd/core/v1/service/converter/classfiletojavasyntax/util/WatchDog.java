@@ -32,8 +32,8 @@ public class WatchDog {
     }
 
     protected static class Link {
-        protected int parentIndex;
-        protected int childIndex;
+        private int parentIndex;
+        private int childIndex;
 
         public Link(BasicBlock parent, BasicBlock child) {
             this.parentIndex = parent.getIndex();

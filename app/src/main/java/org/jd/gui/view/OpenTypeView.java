@@ -16,13 +16,42 @@ import org.jd.gui.util.swing.SwingUtil;
 import org.jd.gui.view.bean.OpenTypeListCellBean;
 import org.jd.gui.view.renderer.OpenTypeListCellRenderer;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
+import java.awt.BorderLayout;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JRootPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
@@ -30,13 +59,13 @@ import javax.swing.text.BadLocationException;
 public class OpenTypeView {
     protected static final int MAX_LINE_COUNT = 80;
 
-    protected API api;
+    private API api;
 
-    protected JDialog openTypeDialog;
-    protected JTextField openTypeEnterTextField;
-    protected JLabel openTypeMatchLabel;
+    private JDialog openTypeDialog;
+    private JTextField openTypeEnterTextField;
+    private JLabel openTypeMatchLabel;
     @SuppressWarnings("all")
-    protected JList openTypeList;
+    private JList openTypeList;
 
     @SuppressWarnings("unchecked")
     public OpenTypeView(API api, JFrame mainFrame, Consumer<String> changedPatternCallback, TriConsumer<Point, Collection<Container.Entry>, String> selectedTypeCallback) {

@@ -9,23 +9,29 @@ package org.jd.gui.view.renderer;
 
 import org.jd.gui.api.model.TreeNodeData;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Insets;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTree;
+import javax.swing.UIManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeCellRenderer;
 
 public class TreeNodeRenderer implements TreeCellRenderer {
-    protected Color textSelectionColor;
-    protected Color backgroundSelectionColor;
-    protected Color textNonSelectionColor;
-    protected Color backgroundNonSelectionColor;
-    protected Color textDisabledColor;
-    protected Color backgroundDisabledColor;
+    private Color textSelectionColor;
+    private Color backgroundSelectionColor;
+    private Color textNonSelectionColor;
+    private Color textDisabledColor;
+    private Color backgroundDisabledColor;
 
-    protected JPanel panel;
-    protected JLabel icon = new JLabel();
-    protected JLabel label = new JLabel();
+    private JPanel panel;
+    private JLabel icon = new JLabel();
+    private JLabel label = new JLabel();
 
     public TreeNodeRenderer() {
         panel = new JPanel(new BorderLayout());
@@ -36,7 +42,6 @@ public class TreeNodeRenderer implements TreeCellRenderer {
         textSelectionColor = UIManager.getColor("Tree.selectionForeground");
         backgroundSelectionColor = UIManager.getColor("Tree.selectionBackground");
         textNonSelectionColor = UIManager.getColor("Tree.textForeground");
-        backgroundNonSelectionColor = UIManager.getColor("Tree.textBackground");
         textDisabledColor = UIManager.getColor("Tree.disabledText");
         backgroundDisabledColor = UIManager.getColor("Tree.disabled");
         Insets margins = UIManager.getInsets("Tree.rendererMargins");

@@ -7,17 +7,24 @@
 
 package org.jd.core.v1.service.layouter.visitor;
 
-import org.jd.core.v1.model.fragment.*;
+import org.jd.core.v1.model.fragment.EndFlexibleBlockFragment;
+import org.jd.core.v1.model.fragment.EndMovableBlockFragment;
+import org.jd.core.v1.model.fragment.FixedFragment;
+import org.jd.core.v1.model.fragment.FlexibleFragment;
+import org.jd.core.v1.model.fragment.FragmentVisitor;
+import org.jd.core.v1.model.fragment.SpacerBetweenMovableBlocksFragment;
+import org.jd.core.v1.model.fragment.StartFlexibleBlockFragment;
+import org.jd.core.v1.model.fragment.StartMovableBlockFragment;
 import org.jd.core.v1.util.DefaultList;
 
 
 public class UpdateSpacerBetweenMovableBlocksVisitor implements FragmentVisitor {
-    protected DefaultList<StartMovableBlockFragment> blocks = new DefaultList<>();
-    protected DefaultList<SpacerBetweenMovableBlocksFragment> spacers = new DefaultList<>();
+    private DefaultList<StartMovableBlockFragment> blocks = new DefaultList<>();
+    private DefaultList<SpacerBetweenMovableBlocksFragment> spacers = new DefaultList<>();
 
-    protected int lastStartMovableBlockFragmentType;
-    protected SpacerBetweenMovableBlocksFragment lastSpacer;
-    protected int depth;
+    private int lastStartMovableBlockFragmentType;
+    private SpacerBetweenMovableBlocksFragment lastSpacer;
+    private int depth;
 
     public void reset() {
         lastStartMovableBlockFragmentType = 0;

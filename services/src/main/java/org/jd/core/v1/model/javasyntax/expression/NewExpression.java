@@ -15,7 +15,7 @@ public class NewExpression extends AbstractLineNumberExpression {
     protected ObjectType type;
     protected String descriptor;
     protected BaseExpression parameters;
-    protected BodyDeclaration bodyDeclaration;
+    private BodyDeclaration bodyDeclaration;
 
     public NewExpression(int lineNumber, ObjectType type, String descriptor) {
         super(lineNumber);

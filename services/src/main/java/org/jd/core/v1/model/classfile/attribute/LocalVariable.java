@@ -8,11 +8,11 @@
 package org.jd.core.v1.model.classfile.attribute;
 
 public class LocalVariable {
-    protected int startPc;
-    protected int length;
-    protected String name;
-    protected String descriptor;
-    protected int index;
+    private int startPc;
+    private int length;
+    private String name;
+    private String descriptor;
+    private int index;
 
     public LocalVariable(int startPc, int length, String name, String descriptor, int index) {
         this.startPc = startPc;

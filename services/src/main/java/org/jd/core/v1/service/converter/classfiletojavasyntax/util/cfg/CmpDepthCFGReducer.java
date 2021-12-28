@@ -1,7 +1,8 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util.cfg;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphReducer;
 
 public class CmpDepthCFGReducer extends ControlFlowGraphReducer {
 

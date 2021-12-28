@@ -16,7 +16,13 @@ import org.jd.gui.util.decompiler.ContainerLoader;
 import org.jd.gui.util.decompiler.GuiPreferences;
 import org.jdv0.gui.util.decompiler.PlainTextPrinter;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -25,7 +31,12 @@ import java.util.Map;
 
 import static org.apache.bcel.Const.MAJOR_1_1;
 import static org.apache.bcel.Const.MAJOR_1_5;
-import static org.jd.gui.util.decompiler.GuiPreferences.*;
+import static org.jd.gui.util.decompiler.GuiPreferences.ESCAPE_UNICODE_CHARACTERS;
+import static org.jd.gui.util.decompiler.GuiPreferences.OMIT_THIS_PREFIX;
+import static org.jd.gui.util.decompiler.GuiPreferences.REALIGN_LINE_NUMBERS;
+import static org.jd.gui.util.decompiler.GuiPreferences.WRITE_DEFAULT_CONSTRUCTOR;
+import static org.jd.gui.util.decompiler.GuiPreferences.WRITE_LINE_NUMBERS;
+import static org.jd.gui.util.decompiler.GuiPreferences.WRITE_METADATA;
 
 import jd.core.CoreConstants;
 import jd.core.Decompiler;
@@ -35,10 +46,10 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
 
     protected static final Decompiler DECOMPILER = new DecompilerImpl();
 
-    protected GuiPreferences preferences = new GuiPreferences();
-    protected ContainerLoader loader = new ContainerLoader();
-    protected PlainTextPrinter printer = new PlainTextPrinter();
-    protected ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    private GuiPreferences preferences = new GuiPreferences();
+    private ContainerLoader loader = new ContainerLoader();
+    private PlainTextPrinter printer = new PlainTextPrinter();
+    private ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
     @Override
     public String[] getSelectors() { return appendSelectors("*:file:*.class"); }

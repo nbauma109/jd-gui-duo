@@ -9,8 +9,8 @@ package org.jd.core.v1.model.token;
 
 public class CharacterConstantToken implements Token {
 
-    protected String c;
-    protected String ownerInternalName;
+    private String c;
+    private String ownerInternalName;
 
     public CharacterConstantToken(String c, String ownerInternalName) {
         this.c = c;

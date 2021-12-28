@@ -11,19 +11,21 @@ import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class AbstractLocalVariable {
-    protected Frame frame;
+    private Frame frame;
     protected AbstractLocalVariable next;
     protected boolean declared;
     protected int index;
     protected int fromOffset;
-    protected int toOffset;
+    private int toOffset;
     protected String name;
-    protected DefaultList<LocalVariableReference> references = new DefaultList<>();
-    protected Set<AbstractLocalVariable> variablesOnRight = null;
-    protected Set<AbstractLocalVariable> variablesOnLeft = null;
+    private DefaultList<LocalVariableReference> references = new DefaultList<>();
+    private Set<AbstractLocalVariable> variablesOnRight = null;
+    private Set<AbstractLocalVariable> variablesOnLeft = null;
 
     protected AbstractLocalVariable(int index, int offset, String name) {
         this(index, offset, name, offset == 0);

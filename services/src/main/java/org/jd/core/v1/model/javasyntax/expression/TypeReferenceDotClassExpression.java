@@ -11,9 +11,9 @@ import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class TypeReferenceDotClassExpression implements Expression {
-    protected int lineNumber;
-    protected Type typeDotClass;
-    protected Type type;
+    private int lineNumber;
+    private Type typeDotClass;
+    private Type type;
 
     public TypeReferenceDotClassExpression(Type typeDotClass) {
         this.typeDotClass = typeDotClass;

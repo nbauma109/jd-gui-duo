@@ -12,16 +12,7 @@ import java.util.Collection;
 import javax.swing.Icon;
 
 public interface Type {
-    int FLAG_PUBLIC = 1;
-    int FLAG_PRIVATE = 2;
-    int FLAG_PROTECTED = 4;
-    int FLAG_STATIC = 8;
-    int FLAG_FINAL = 16;
-    int FLAG_VARARGS = 128;
     int FLAG_INTERFACE = 512;
-    int FLAG_ABSTRACT = 1024;
-    int FLAG_ANNOTATION = 8192;
-    int FLAG_ENUM = 16384;
 
     int getFlags();
 

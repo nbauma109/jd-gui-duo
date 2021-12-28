@@ -10,13 +10,21 @@ package org.jd.gui.service.extension;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 
 import java.io.File;
-import java.net.*;
-import java.util.*;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ServiceLoader;
 
 public class ExtensionService {
     protected static final ExtensionService EXTENSION_SERVICE = new ExtensionService();
 
-    protected ClassLoader extensionClassLoader;
+    private ClassLoader extensionClassLoader;
 
     public static ExtensionService getInstance() {
         return EXTENSION_SERVICE;

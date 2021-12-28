@@ -10,13 +10,8 @@ package org.jd.core.v1.model.javasyntax.expression;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class PostOperatorExpression extends AbstractLineNumberExpression {
-    protected String operator;
-    protected Expression expression;
-
-    public PostOperatorExpression(Expression expression, String operator) {
-        this.operator = operator;
-        this.expression = expression;
-    }
+    private String operator;
+    private Expression expression;
 
     public PostOperatorExpression(int lineNumber, Expression expression, String operator) {
         super(lineNumber);

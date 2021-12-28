@@ -7,7 +7,9 @@
 package org.jd.gui.view;
 
 import org.jd.gui.api.API;
-import org.jd.gui.api.feature.*;
+import org.jd.gui.api.feature.ContainerEntryGettable;
+import org.jd.gui.api.feature.TreeNodeExpandable;
+import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.spi.TreeNodeFactory;
 import org.jd.gui.util.function.TriConsumer;
@@ -16,16 +18,50 @@ import org.jd.gui.view.component.Tree;
 import org.jd.gui.view.renderer.TreeNodeRenderer;
 import org.jdv1.gui.model.container.DelegatingFilterContainer;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.ObjIntConsumer;
 
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.tree.*;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRootPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.TreeExpansionEvent;
+import javax.swing.event.TreeExpansionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 
 public class SearchInConstantPoolsView<T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> {
 
@@ -38,22 +74,22 @@ public class SearchInConstantPoolsView<T extends DefaultMutableTreeNode & Contai
     public static final int SEARCH_DECLARATION = 64;
     public static final int SEARCH_REFERENCE = 128;
 
-    protected API api;
-    protected Set<URI> accepted = new HashSet<>();
-    protected Set<URI> expanded = new HashSet<>();
+    private API api;
+    private Set<URI> accepted = new HashSet<>();
+    private Set<URI> expanded = new HashSet<>();
 
-    protected JDialog searchInConstantPoolsDialog;
-    protected JTextField searchInConstantPoolsEnterTextField;
-    protected JLabel searchInConstantPoolsLabel;
-    protected JCheckBox searchInConstantPoolsCheckBoxType;
-    protected JCheckBox searchInConstantPoolsCheckBoxField;
-    protected JCheckBox searchInConstantPoolsCheckBoxConstructor;
-    protected JCheckBox searchInConstantPoolsCheckBoxMethod;
-    protected JCheckBox searchInConstantPoolsCheckBoxString;
-    protected JCheckBox searchInConstantPoolsCheckBoxModule;
-    protected JCheckBox searchInConstantPoolsCheckBoxDeclarations;
-    protected JCheckBox searchInConstantPoolsCheckBoxReferences;
-    protected Tree searchInConstantPoolsTree;
+    private JDialog searchInConstantPoolsDialog;
+    private JTextField searchInConstantPoolsEnterTextField;
+    private JLabel searchInConstantPoolsLabel;
+    private JCheckBox searchInConstantPoolsCheckBoxType;
+    private JCheckBox searchInConstantPoolsCheckBoxField;
+    private JCheckBox searchInConstantPoolsCheckBoxConstructor;
+    private JCheckBox searchInConstantPoolsCheckBoxMethod;
+    private JCheckBox searchInConstantPoolsCheckBoxString;
+    private JCheckBox searchInConstantPoolsCheckBoxModule;
+    private JCheckBox searchInConstantPoolsCheckBoxDeclarations;
+    private JCheckBox searchInConstantPoolsCheckBoxReferences;
+    private Tree searchInConstantPoolsTree;
 
     @SuppressWarnings("unchecked")
     public SearchInConstantPoolsView(

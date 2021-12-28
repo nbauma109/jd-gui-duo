@@ -13,21 +13,35 @@ import org.jd.gui.util.decompiler.GuiPreferences;
 import org.jd.gui.util.swing.SwingUtil;
 
 import java.awt.Color;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.function.IntConsumer;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JRootPane;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 public class GoToView {
-    protected JDialog goToDialog;
-    protected JLabel goToEnterLineNumberLabel;
-    protected JTextField goToEnterLineNumberTextField;
-    protected JLabel goToEnterLineNumberErrorLabel;
+    private JDialog goToDialog;
+    private JLabel goToEnterLineNumberLabel;
+    private JTextField goToEnterLineNumberTextField;
+    private JLabel goToEnterLineNumberErrorLabel;
 
-    protected LineNumberNavigable navigator;
-    protected IntConsumer okCallback;
+    private LineNumberNavigable navigator;
+    private IntConsumer okCallback;
 
     public GoToView(Configuration configuration, JFrame mainFrame) {
         // Build GUI

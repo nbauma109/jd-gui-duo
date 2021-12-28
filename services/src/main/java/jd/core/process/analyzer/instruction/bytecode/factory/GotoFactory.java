@@ -21,13 +21,37 @@ import org.apache.bcel.Const;
 import java.util.Deque;
 import java.util.List;
 
-import static jd.core.model.instruction.bytecode.ByteCodeConstants.*;
-import static org.apache.bcel.Const.*;
+import static jd.core.model.instruction.bytecode.ByteCodeConstants.ARRAYLOAD;
+import static jd.core.model.instruction.bytecode.ByteCodeConstants.ASSIGNMENT;
+import static jd.core.model.instruction.bytecode.ByteCodeConstants.DCONST;
+import static jd.core.model.instruction.bytecode.ByteCodeConstants.DUPLOAD;
+import static jd.core.model.instruction.bytecode.ByteCodeConstants.EXCEPTIONLOAD;
+import static jd.core.model.instruction.bytecode.ByteCodeConstants.ICONST;
+import static jd.core.model.instruction.bytecode.ByteCodeConstants.INVOKENEW;
+import static jd.core.model.instruction.bytecode.ByteCodeConstants.LOAD;
+import static jd.core.model.instruction.bytecode.ByteCodeConstants.OUTERTHIS;
+import static jd.core.model.instruction.bytecode.ByteCodeConstants.POSTINC;
+import static org.apache.bcel.Const.ACONST_NULL;
+import static org.apache.bcel.Const.ARRAYLENGTH;
+import static org.apache.bcel.Const.CHECKCAST;
+import static org.apache.bcel.Const.DCMPG;
+import static org.apache.bcel.Const.DUP;
+import static org.apache.bcel.Const.GETFIELD;
+import static org.apache.bcel.Const.GETSTATIC;
+import static org.apache.bcel.Const.INSTANCEOF;
+import static org.apache.bcel.Const.INVOKEINTERFACE;
+import static org.apache.bcel.Const.INVOKEVIRTUAL;
+import static org.apache.bcel.Const.MULTIANEWARRAY;
+import static org.apache.bcel.Const.NEW;
+import static org.apache.bcel.Const.SALOAD;
+import static org.apache.bcel.Const.WIDE;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
-import jd.core.model.instruction.bytecode.instruction.*;
+import jd.core.model.instruction.bytecode.instruction.Goto;
+import jd.core.model.instruction.bytecode.instruction.Instruction;
+import jd.core.model.instruction.bytecode.instruction.TernaryOpStore;
 import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
 
 public class GotoFactory implements InstructionFactory

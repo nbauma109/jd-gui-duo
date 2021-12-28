@@ -8,7 +8,9 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg;
 
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 public class BasicBlock {
     public static final int TYPE_DELETED                         = 0;
@@ -450,10 +452,10 @@ public class BasicBlock {
     }
 
     public static class SwitchCase {
-        protected int value;
-        protected int offset;
-        protected BasicBlock basicBlock;
-        protected boolean defaultCase;
+        private int value;
+        private int offset;
+        private BasicBlock basicBlock;
+        private boolean defaultCase;
 
         public SwitchCase(BasicBlock basicBlock) {
             this.offset = basicBlock.getFromOffset();

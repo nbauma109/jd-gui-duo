@@ -9,7 +9,7 @@ package org.jd.core.v1.model.token;
 
 public class KeywordToken implements Token {
 
-    protected String keyword;
+    private String keyword;
 
     public KeywordToken(String keyword) {
         this.keyword = keyword;

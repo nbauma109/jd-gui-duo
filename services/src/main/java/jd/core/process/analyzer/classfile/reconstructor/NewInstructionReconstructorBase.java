@@ -19,7 +19,12 @@ package jd.core.process.analyzer.classfile.reconstructor;
 import org.apache.bcel.Const;
 import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
 
-import jd.core.model.classfile.*;
+import jd.core.model.classfile.ClassFile;
+import jd.core.model.classfile.ConstantPool;
+import jd.core.model.classfile.Field;
+import jd.core.model.classfile.LocalVariable;
+import jd.core.model.classfile.LocalVariables;
+import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.CheckCast;
 import jd.core.model.instruction.bytecode.instruction.IndexInstruction;

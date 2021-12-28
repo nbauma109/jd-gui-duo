@@ -13,7 +13,7 @@ import java.util.Objects;
 
 public class ArrayVariableInitializer extends DefaultList<VariableInitializer> implements VariableInitializer {
     private static final long serialVersionUID = 1L;
-    protected transient Type type;
+    private transient Type type;
 
     public ArrayVariableInitializer(Type type) {
         this.type = type;

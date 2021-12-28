@@ -7,25 +7,46 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
-import org.jd.core.v1.model.javasyntax.declaration.*;
-import org.jd.core.v1.model.javasyntax.expression.*;
+import org.jd.core.v1.model.javasyntax.declaration.AnnotationDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ClassDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ConstructorDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.EnumDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.InterfaceDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.StaticInitializerDeclaration;
+import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
+import org.jd.core.v1.model.javasyntax.expression.BinaryOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.Expression;
+import org.jd.core.v1.model.javasyntax.expression.Expressions;
+import org.jd.core.v1.model.javasyntax.expression.FieldReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.MethodInvocationExpression;
+import org.jd.core.v1.model.javasyntax.expression.ObjectTypeReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.PostOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.PreOperatorExpression;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.statement.Statement;
-import org.jd.core.v1.model.javasyntax.type.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
+import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileMethodInvocationExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_STATIC;
+import static org.apache.bcel.Const.ACC_STATIC;
 
 public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
-    protected BodyDeclarationsVisitor bodyDeclarationsVisitor = new BodyDeclarationsVisitor();
-    protected Map<String, Map<String, ClassFileMethodDeclaration>> bridgeMethodDeclarations = new HashMap<>();
-    protected TypeMaker typeMaker;
+    private BodyDeclarationsVisitor bodyDeclarationsVisitor = new BodyDeclarationsVisitor();
+    private Map<String, Map<String, ClassFileMethodDeclaration>> bridgeMethodDeclarations = new HashMap<>();
+    private TypeMaker typeMaker;
 
     public UpdateBridgeMethodVisitor(TypeMaker typeMaker) {
         this.typeMaker = typeMaker;
@@ -168,7 +189,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
     }
 
     protected class BodyDeclarationsVisitor extends AbstractJavaSyntaxVisitor {
-        protected Map<String, ClassFileMethodDeclaration> map;
+        private Map<String, ClassFileMethodDeclaration> map;
 
         @Override
         public void visit(ClassDeclaration declaration) { safeAccept(declaration.getBodyDeclaration()); }
@@ -208,7 +229,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
 
         @Override
         public void visit(MethodDeclaration declaration) {
-            if ((declaration.getFlags() & FLAG_STATIC) == 0) {
+            if ((declaration.getFlags() & ACC_STATIC) == 0) {
                 return;
             }
 

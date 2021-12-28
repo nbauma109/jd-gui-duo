@@ -20,7 +20,13 @@ import org.jd.core.v1.api.loader.Loader;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ConstantPool;
-import jd.core.model.classfile.attribute.*;
+import jd.core.model.classfile.attribute.ElementValue;
+import jd.core.model.classfile.attribute.ElementValueAnnotationValue;
+import jd.core.model.classfile.attribute.ElementValueArrayValue;
+import jd.core.model.classfile.attribute.ElementValueClassInfo;
+import jd.core.model.classfile.attribute.ElementValueContants;
+import jd.core.model.classfile.attribute.ElementValueEnumConstValue;
+import jd.core.model.classfile.attribute.ElementValuePrimitiveType;
 import jd.core.model.reference.ReferenceMap;
 import jd.core.printer.Printer;
 import jd.core.util.SignatureUtil;

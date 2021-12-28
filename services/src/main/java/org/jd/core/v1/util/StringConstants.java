@@ -32,7 +32,6 @@ public class StringConstants
     public static final char   INTERNAL_PACKAGE_SEPARATOR = '/';
     public static final char   INTERNAL_INNER_SEPARATOR = '$';
     public static final char   INTERNAL_BEGIN_TEMPLATE = '<';
-    public static final char   INTERNAL_END_TEMPLATE = '>';
 
     public static final char   PACKAGE_SEPARATOR = '.';
     public static final char   INNER_SEPARATOR = '.';
@@ -49,7 +48,6 @@ public class StringConstants
     public static final String OUTER_THIS_LOCAL_VARIABLE_NAME = "this$1";
     public static final String TMP_LOCAL_VARIABLE_NAME        = "tmp";
 
-    public static final String INDENT = "  ";
     public static final String START_OF_HEADING = "\u0001";
 
     public static final String ENUM_VALUES_ARRAY_NAME	= "$VALUES";

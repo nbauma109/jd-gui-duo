@@ -8,17 +8,31 @@ package org.jdv1.gui.service.mainpanel;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
-import org.jd.gui.api.feature.*;
+import org.jd.gui.api.feature.ContentIndexable;
+import org.jd.gui.api.feature.SourcesSavable;
+import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
-import org.jd.gui.spi.*;
+import org.jd.gui.spi.Indexer;
+import org.jd.gui.spi.PanelFactory;
+import org.jd.gui.spi.SourceSaver;
+import org.jd.gui.spi.TreeNodeFactory;
 import org.jd.gui.view.component.panel.TreeTabbedPanel;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.*;
-import java.util.*;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import javax.swing.JComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -39,7 +53,7 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
     @SuppressWarnings("rawtypes")
     protected class ContainerPanel extends TreeTabbedPanel implements ContentIndexable, SourcesSavable {
         private static final long serialVersionUID = 1L;
-        protected transient Container.Entry entry;
+        private transient Container.Entry entry;
 
         public ContainerPanel(API api, Container container) {
             super(api, container.getRoot().getParent().getUri());
@@ -126,7 +140,7 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
     }
 
     protected static class DelegatedMap<K, V> implements Map<K, V> {
-        protected Map<K, V> map;
+        private Map<K, V> map;
 
         public DelegatedMap(Map<K, V> map) { this.map = map; }
 
@@ -166,11 +180,11 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
 
         @Override
         public Collection get(Object o) {
-            Collection value = map.get(o);
+            Collection value = super.get(o);
             if (value == null) {
                 String key = o.toString();
                 value=new ArrayList();
-                map.put(key, value);
+                put(key, value);
             }
             return value;
         }
@@ -178,7 +192,7 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
 
     @SuppressWarnings("rawtypes")
     protected static class DelegatedMapMapWithDefault extends DelegatedMap<String, Map<String, Collection>> {
-        protected Map<String, Map<String, Collection>> wrappers = new HashMap<>();
+        private Map<String, Map<String, Collection>> wrappers = new HashMap<>();
 
         public DelegatedMapMapWithDefault(Map<String, Map<String, Collection>> map) { super(map); }
 
@@ -189,7 +203,7 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
             if (value == null) {
                 String key = o.toString();
                 Map<String, Collection> m = new HashMap<>();
-                map.put(key, m);
+                put(key, m);
                 value=new DelegatedMapWithDefault(m);
                 wrappers.put(key, value);
             }

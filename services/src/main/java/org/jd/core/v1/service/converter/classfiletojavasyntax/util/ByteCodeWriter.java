@@ -8,21 +8,99 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
 import org.apache.bcel.Const;
-import org.apache.bcel.classfile.*;
+import org.apache.bcel.classfile.CodeException;
+import org.apache.bcel.classfile.Constant;
+import org.apache.bcel.classfile.ConstantClass;
+import org.apache.bcel.classfile.ConstantDouble;
+import org.apache.bcel.classfile.ConstantFloat;
+import org.apache.bcel.classfile.ConstantInteger;
+import org.apache.bcel.classfile.ConstantLong;
+import org.apache.bcel.classfile.ConstantNameAndType;
+import org.apache.bcel.classfile.ConstantString;
+import org.apache.bcel.classfile.ConstantUtf8;
+import org.apache.bcel.classfile.LineNumber;
 import org.jd.core.v1.model.classfile.ConstantPool;
 import org.jd.core.v1.model.classfile.Method;
-import org.jd.core.v1.model.classfile.attribute.*;
+import org.jd.core.v1.model.classfile.attribute.AttributeCode;
+import org.jd.core.v1.model.classfile.attribute.AttributeLineNumberTable;
+import org.jd.core.v1.model.classfile.attribute.AttributeLocalVariableTable;
+import org.jd.core.v1.model.classfile.attribute.AttributeLocalVariableTypeTable;
 import org.jd.core.v1.model.classfile.attribute.LocalVariable;
+import org.jd.core.v1.model.classfile.attribute.LocalVariableType;
 import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
 import org.jd.core.v1.model.javasyntax.expression.BooleanExpression;
 import org.jd.core.v1.model.javasyntax.expression.StringConstantExpression;
 import org.jd.core.v1.model.javasyntax.statement.AssertStatement;
 import org.jd.core.v1.model.javasyntax.statement.Statement;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
-import static org.apache.bcel.Const.*;
+import static org.apache.bcel.Const.ALOAD;
+import static org.apache.bcel.Const.ANEWARRAY;
+import static org.apache.bcel.Const.ASTORE;
+import static org.apache.bcel.Const.BIPUSH;
+import static org.apache.bcel.Const.CHECKCAST;
+import static org.apache.bcel.Const.DLOAD;
+import static org.apache.bcel.Const.DSTORE;
+import static org.apache.bcel.Const.FLOAD;
+import static org.apache.bcel.Const.FSTORE;
+import static org.apache.bcel.Const.GETFIELD;
+import static org.apache.bcel.Const.GETSTATIC;
+import static org.apache.bcel.Const.GOTO;
+import static org.apache.bcel.Const.GOTO_W;
+import static org.apache.bcel.Const.IFEQ;
+import static org.apache.bcel.Const.IFGE;
+import static org.apache.bcel.Const.IFGT;
+import static org.apache.bcel.Const.IFLE;
+import static org.apache.bcel.Const.IFLT;
+import static org.apache.bcel.Const.IFNE;
+import static org.apache.bcel.Const.IFNONNULL;
+import static org.apache.bcel.Const.IFNULL;
+import static org.apache.bcel.Const.IF_ACMPEQ;
+import static org.apache.bcel.Const.IF_ACMPNE;
+import static org.apache.bcel.Const.IF_ICMPEQ;
+import static org.apache.bcel.Const.IF_ICMPGE;
+import static org.apache.bcel.Const.IF_ICMPGT;
+import static org.apache.bcel.Const.IF_ICMPLE;
+import static org.apache.bcel.Const.IF_ICMPLT;
+import static org.apache.bcel.Const.IF_ICMPNE;
+import static org.apache.bcel.Const.IINC;
+import static org.apache.bcel.Const.ILOAD;
+import static org.apache.bcel.Const.INSTANCEOF;
+import static org.apache.bcel.Const.INVOKEDYNAMIC;
+import static org.apache.bcel.Const.INVOKEINTERFACE;
+import static org.apache.bcel.Const.INVOKESPECIAL;
+import static org.apache.bcel.Const.INVOKESTATIC;
+import static org.apache.bcel.Const.INVOKEVIRTUAL;
+import static org.apache.bcel.Const.ISTORE;
+import static org.apache.bcel.Const.JSR;
+import static org.apache.bcel.Const.JSR_W;
+import static org.apache.bcel.Const.LDC;
+import static org.apache.bcel.Const.LDC2_W;
+import static org.apache.bcel.Const.LDC_W;
+import static org.apache.bcel.Const.LLOAD;
+import static org.apache.bcel.Const.LOOKUPSWITCH;
+import static org.apache.bcel.Const.LSTORE;
+import static org.apache.bcel.Const.MULTIANEWARRAY;
+import static org.apache.bcel.Const.NEW;
+import static org.apache.bcel.Const.NEWARRAY;
+import static org.apache.bcel.Const.PUTFIELD;
+import static org.apache.bcel.Const.PUTSTATIC;
+import static org.apache.bcel.Const.RET;
+import static org.apache.bcel.Const.SIPUSH;
+import static org.apache.bcel.Const.TABLESWITCH;
+import static org.apache.bcel.Const.T_BOOLEAN;
+import static org.apache.bcel.Const.T_BYTE;
+import static org.apache.bcel.Const.T_CHAR;
+import static org.apache.bcel.Const.T_DOUBLE;
+import static org.apache.bcel.Const.T_FLOAT;
+import static org.apache.bcel.Const.T_INT;
+import static org.apache.bcel.Const.T_LONG;
+import static org.apache.bcel.Const.T_SHORT;
+import static org.apache.bcel.Const.WIDE;
 
 /**
  * Example:
@@ -114,23 +192,6 @@ public class ByteCodeWriter {
 
     private ByteCodeWriter() {
         super();
-    }
-
-    public static String write(String linePrefix, Method method) {
-        AttributeCode attributeCode = method.getAttribute("Code");
-
-        if (attributeCode == null) {
-            return null;
-        }
-        ConstantPool constants = method.getConstants();
-        StringBuilder sb = new StringBuilder(5 * 1024);
-
-        writeByteCode(linePrefix, sb, constants, attributeCode);
-        writeLineNumberTable(linePrefix, sb, attributeCode);
-        writeLocalVariableTable(linePrefix, sb, attributeCode);
-        writeExceptionTable(linePrefix, sb, constants, attributeCode);
-
-        return sb.toString();
     }
 
     public static String write(String linePrefix, Method method, int fromOffset, int toOffset) {

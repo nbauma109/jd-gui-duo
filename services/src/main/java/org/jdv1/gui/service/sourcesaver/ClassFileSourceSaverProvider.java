@@ -18,7 +18,9 @@ import org.jd.gui.util.decompiler.ContainerLoader;
 import org.jdv1.gui.util.MethodPatcher;
 import org.jdv1.gui.util.decompiler.LineNumberStringBuilderPrinter;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,7 +29,12 @@ import java.util.Map;
 
 import static org.apache.bcel.Const.MAJOR_1_1;
 import static org.apache.bcel.Const.MAJOR_1_5;
-import static org.jd.gui.util.decompiler.GuiPreferences.*;
+import static org.jd.gui.util.decompiler.GuiPreferences.ESCAPE_UNICODE_CHARACTERS;
+import static org.jd.gui.util.decompiler.GuiPreferences.JD_CORE_VERSION;
+import static org.jd.gui.util.decompiler.GuiPreferences.REALIGN_LINE_NUMBERS;
+import static org.jd.gui.util.decompiler.GuiPreferences.USE_JD_CORE_V0;
+import static org.jd.gui.util.decompiler.GuiPreferences.WRITE_LINE_NUMBERS;
+import static org.jd.gui.util.decompiler.GuiPreferences.WRITE_METADATA;
 
 public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
 

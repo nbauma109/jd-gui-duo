@@ -105,15 +105,6 @@ public class ObjectType implements Type {
         }
     }
 
-    public ObjectType(ObjectType ot) {
-        this.internalName = ot.getInternalName();
-        this.qualifiedName = ot.getQualifiedName();
-        this.name = ot.getName();
-        this.typeArguments = ot.getTypeArguments();
-        this.dimension = ot.getDimension();
-        this.descriptor = ot.getDescriptor();
-    }
-
     @Override
     public String getInternalName() {
         return internalName;
@@ -257,17 +248,6 @@ public class ObjectType implements Type {
         }
 
         return false;
-    }
-
-    protected boolean isTypeArgumentAssignableFrom(Map<String, BaseType> typeBounds, ObjectType objectType) {
-        if (dimension != objectType.getDimension() || !internalName.equals(objectType.getInternalName())) {
-            return false;
-        }
-
-        if (objectType.getTypeArguments() == null) {
-            return typeArguments == null;
-        }
-        return typeArguments != null && typeArguments.isTypeArgumentAssignableFrom(typeBounds, objectType.getTypeArguments());
     }
 
     @Override

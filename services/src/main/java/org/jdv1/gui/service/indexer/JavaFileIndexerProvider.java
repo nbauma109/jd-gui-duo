@@ -6,7 +6,18 @@
  */
 package org.jdv1.gui.service.indexer;
 
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
@@ -16,7 +27,12 @@ import org.jd.gui.service.indexer.AbstractIndexerProvider;
 import org.jd.gui.util.parser.jdt.ASTParserFactory;
 import org.jd.gui.util.parser.jdt.core.AbstractJavaListener;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /** Unsafe thread implementation of java file indexer. */
 public class JavaFileIndexerProvider extends AbstractIndexerProvider {
@@ -61,18 +77,18 @@ public class JavaFileIndexerProvider extends AbstractIndexerProvider {
     }
 
     protected static class Listener extends AbstractJavaListener {
-        protected Set<String> typeDeclarationSet = new HashSet<>();
-        protected Set<String> constructorDeclarationSet = new HashSet<>();
-        protected Set<String> methodDeclarationSet = new HashSet<>();
-        protected Set<String> fieldDeclarationSet = new HashSet<>();
-        protected Set<String> typeReferenceSet = new HashSet<>();
-        protected Set<String> constructorReferenceSet = new HashSet<>();
-        protected Set<String> methodReferenceSet = new HashSet<>();
-        protected Set<String> fieldReferenceSet = new HashSet<>();
-        protected Set<String> stringSet = new HashSet<>();
-        protected Map<String, Set<String>> superTypeNamesMap = new HashMap<>();
+        private Set<String> typeDeclarationSet = new HashSet<>();
+        private Set<String> constructorDeclarationSet = new HashSet<>();
+        private Set<String> methodDeclarationSet = new HashSet<>();
+        private Set<String> fieldDeclarationSet = new HashSet<>();
+        private Set<String> typeReferenceSet = new HashSet<>();
+        private Set<String> constructorReferenceSet = new HashSet<>();
+        private Set<String> methodReferenceSet = new HashSet<>();
+        private Set<String> fieldReferenceSet = new HashSet<>();
+        private Set<String> stringSet = new HashSet<>();
+        private Map<String, Set<String>> superTypeNamesMap = new HashMap<>();
 
-        protected StringBuilder sbTypeDeclaration = new StringBuilder();
+        private StringBuilder sbTypeDeclaration = new StringBuilder();
 
         public Listener(Container.Entry entry) {
             super(entry);

@@ -11,8 +11,8 @@ import org.jd.core.v1.model.javasyntax.type.GenericType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 
 public class LocalVariableSet {
-    protected AbstractLocalVariable[] array = new AbstractLocalVariable[10];
-    protected int size = 0;
+    private AbstractLocalVariable[] array = new AbstractLocalVariable[10];
+    private int size = 0;
 
     public void add(int index, AbstractLocalVariable newLV) {
         if (index >= array.length) {

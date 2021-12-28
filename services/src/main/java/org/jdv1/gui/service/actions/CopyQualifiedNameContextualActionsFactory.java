@@ -22,7 +22,9 @@ import java.awt.event.ActionEvent;
 import java.util.Collection;
 import java.util.Collections;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ImageIcon;
 
 public class CopyQualifiedNameContextualActionsFactory implements ContextualActionsFactory {
 
@@ -37,9 +39,9 @@ public class CopyQualifiedNameContextualActionsFactory implements ContextualActi
 
         protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/cpyqual_menu.png"));
 
-        protected transient API api;
-        protected transient Container.Entry entry;
-        protected String fragment;
+        private transient API api;
+        private transient Container.Entry entry;
+        private String fragment;
 
         public CopyQualifiedNameAction(API api, Container.Entry entry, String fragment) {
             this.api = api;

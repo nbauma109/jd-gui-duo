@@ -12,14 +12,16 @@ import org.jd.gui.service.extension.ExtensionService;
 import org.jd.gui.spi.UriLoader;
 
 import java.net.URI;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class UriLoaderService {
     protected static final UriLoaderService URI_LOADER_SERVICE = new UriLoaderService();
 
     public static UriLoaderService getInstance() { return URI_LOADER_SERVICE; }
 
-    protected Map<String, UriLoader> mapProviders = new HashMap<>();
+    private Map<String, UriLoader> mapProviders = new HashMap<>();
 
     protected UriLoaderService() {
         Collection<UriLoader> providers = ExtensionService.getInstance().load(UriLoader.class);

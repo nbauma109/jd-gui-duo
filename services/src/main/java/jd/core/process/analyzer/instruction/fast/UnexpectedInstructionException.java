@@ -24,9 +24,4 @@ public class UnexpectedInstructionException extends RuntimeException
     {
         super();
     }
-
-    public UnexpectedInstructionException(String s)
-    {
-        super(s);
-    }
 }

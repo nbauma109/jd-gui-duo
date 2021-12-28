@@ -12,10 +12,10 @@ import org.jd.core.v1.model.classfile.attribute.Attribute;
 import java.util.Map;
 
 public class Field {
-    protected int accessFlags;
-    protected String name;
-    protected String descriptor;
-    protected Map<String, Attribute> attributes;
+    private int accessFlags;
+    private String name;
+    private String descriptor;
+    private Map<String, Attribute> attributes;
 
     public Field(int accessFlags, String name, String descriptor, Map<String, Attribute> attributes) {
         this.accessFlags = accessFlags;

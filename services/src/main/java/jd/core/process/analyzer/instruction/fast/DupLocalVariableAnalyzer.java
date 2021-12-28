@@ -20,12 +20,20 @@ import org.jd.core.v1.util.StringConstants;
 
 import java.util.List;
 
-import jd.core.model.classfile.*;
+import jd.core.model.classfile.ClassFile;
+import jd.core.model.classfile.ConstantPool;
+import jd.core.model.classfile.LocalVariable;
+import jd.core.model.classfile.LocalVariables;
+import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.DupStore;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.fast.FastConstants;
-import jd.core.model.instruction.fast.instruction.*;
+import jd.core.model.instruction.fast.instruction.FastDeclaration;
+import jd.core.model.instruction.fast.instruction.FastList;
+import jd.core.model.instruction.fast.instruction.FastSwitch;
+import jd.core.model.instruction.fast.instruction.FastTest2Lists;
+import jd.core.model.instruction.fast.instruction.FastTry;
 
 public class DupLocalVariableAnalyzer
 {

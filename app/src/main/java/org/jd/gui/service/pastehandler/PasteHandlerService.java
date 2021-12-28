@@ -17,7 +17,7 @@ public class PasteHandlerService {
 
     public static PasteHandlerService getInstance() { return PASTE_HANDLER_SERVICE; }
 
-    protected final Collection<PasteHandler> providers = ExtensionService.getInstance().load(PasteHandler.class);
+    private final Collection<PasteHandler> providers = ExtensionService.getInstance().load(PasteHandler.class);
 
     public PasteHandler get(Object obj) {
         for (PasteHandler provider : providers) {

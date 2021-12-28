@@ -6,22 +6,33 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
+import org.apache.bcel.Const;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
-import org.jd.core.v1.model.javasyntax.declaration.*;
+import org.jd.core.v1.model.javasyntax.declaration.AnnotationDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ClassDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ConstructorDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.Declaration;
+import org.jd.core.v1.model.javasyntax.declaration.EnumDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.InterfaceDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.StaticInitializerDeclaration;
 import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.model.javasyntax.statement.Statement;
 import org.jd.core.v1.model.javasyntax.statement.Statements;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMemberDeclaration;
 
 import java.util.Iterator;
 import java.util.List;
 
-import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_ANONYMOUS;
-
 public class RemoveDefaultConstructorVisitor extends AbstractJavaSyntaxVisitor {
-    protected int constructorCounter;
-    protected ClassFileMemberDeclaration constructor;
+    private int constructorCounter;
+    private ClassFileMemberDeclaration constructor;
 
     @Override
     public void visit(AnnotationDeclaration declaration) {
@@ -48,7 +59,7 @@ public class RemoveDefaultConstructorVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(ConstructorDeclaration declaration) {
-        if ((declaration.getFlags() & Declaration.FLAG_ABSTRACT) == 0) {
+        if ((declaration.getFlags() & Const.ACC_ABSTRACT) == 0) {
             ClassFileConstructorDeclaration cfcd = (ClassFileConstructorDeclaration)declaration;
 
             if (cfcd.getStatements() != null && cfcd.getStatements().isStatements()) {
@@ -62,7 +73,7 @@ public class RemoveDefaultConstructorVisitor extends AbstractJavaSyntaxVisitor {
                     es = iterator.next().getExpression();
 
                     if (es.isSuperConstructorInvocationExpression()) {
-                        if ((declaration.getFlags() & FLAG_ANONYMOUS) != 0) {
+                        if ((declaration.getFlags() & Declaration.FLAG_ANONYMOUS) != 0) {
                             // Remove anonymous class super constructor call
                             iterator.remove();
                             break;

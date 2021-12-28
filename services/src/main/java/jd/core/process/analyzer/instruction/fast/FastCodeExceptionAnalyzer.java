@@ -19,14 +19,37 @@ package jd.core.process.analyzer.instruction.fast;
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.CodeException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 import jd.core.model.classfile.LocalVariable;
 import jd.core.model.classfile.LocalVariables;
 import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
-import jd.core.model.instruction.bytecode.instruction.*;
+import jd.core.model.instruction.bytecode.instruction.ALoad;
+import jd.core.model.instruction.bytecode.instruction.AStore;
+import jd.core.model.instruction.bytecode.instruction.AThrow;
+import jd.core.model.instruction.bytecode.instruction.AssignmentInstruction;
+import jd.core.model.instruction.bytecode.instruction.BranchInstruction;
+import jd.core.model.instruction.bytecode.instruction.CheckCast;
+import jd.core.model.instruction.bytecode.instruction.ComplexConditionalBranchInstruction;
+import jd.core.model.instruction.bytecode.instruction.Goto;
+import jd.core.model.instruction.bytecode.instruction.IfCmp;
+import jd.core.model.instruction.bytecode.instruction.IfInstruction;
+import jd.core.model.instruction.bytecode.instruction.IndexInstruction;
+import jd.core.model.instruction.bytecode.instruction.Instruction;
+import jd.core.model.instruction.bytecode.instruction.Jsr;
+import jd.core.model.instruction.bytecode.instruction.MonitorEnter;
+import jd.core.model.instruction.bytecode.instruction.MonitorExit;
+import jd.core.model.instruction.bytecode.instruction.Pop;
+import jd.core.model.instruction.bytecode.instruction.ReturnInstruction;
+import jd.core.model.instruction.bytecode.instruction.StoreInstruction;
+import jd.core.model.instruction.bytecode.instruction.Switch;
 import jd.core.model.instruction.fast.FastConstants;
 import jd.core.model.instruction.fast.instruction.FastSynchronized;
 import jd.core.model.instruction.fast.instruction.FastTry;
@@ -1978,12 +2001,10 @@ public class FastCodeExceptionAnalyzer
 						if (jumpOffset == -1)
 						{
 							jumpOffset = tmpJumpOffset;
-							fce.getCatches().get(i).toOffset = instruction.getOffset();
 							catchInstructions.remove(lastIndex);
 						}
 						else if (jumpOffset == tmpJumpOffset)
 						{
-							fce.getCatches().get(i).toOffset = instruction.getOffset();
 							catchInstructions.remove(lastIndex);
 						}
 					}
@@ -2216,10 +2237,7 @@ public class FastCodeExceptionAnalyzer
 				catchInstructionsLength--;
 				catchLastOpCode = catchInstructions.get(catchInstructionsLength).getOpcode();
 				if (catchLastOpCode == Const.GOTO) {
-					// Remove 'goto' instruction in catch block
-					Instruction in =
 					catchInstructions.remove(catchInstructionsLength);
-					fce.getCatches().get(i).toOffset = in.getOffset();
 				} else if (catchLastOpCode == Const.RETURN || catchLastOpCode == ByteCodeConstants.XRETURN) {
 					catchInstructionsLength--;
 					// Remove 'jsr' instruction in catch block
@@ -2265,14 +2283,11 @@ public class FastCodeExceptionAnalyzer
 		int i = fastTry.getCatches().size();
 		List<Instruction> catchInstructions;
 		int catchInstructionsLength;
-		Instruction in;
 		while (i-- > 0)
 		{
 			catchInstructions = fastTry.getCatches().get(i).instructions();
 			catchInstructionsLength = catchInstructions.size();
-			// Remove 'goto' instruction in catch block
-			in = catchInstructions.remove(catchInstructionsLength - 1);
-			fce.getCatches().get(i).toOffset = in.getOffset();
+			catchInstructions.remove(catchInstructionsLength - 1);
 			// Remove first catch instruction in each catch block
 			catchInstructions.remove(0);
 		}
@@ -2357,8 +2372,7 @@ public class FastCodeExceptionAnalyzer
 				// Remove last 'goto' instruction
 				if (catchInstructions.get(--length).getOpcode() == Const.GOTO)
 				{
-					Goto g = (Goto)catchInstructions.remove(length);
-					fce.getCatches().get(i).toOffset = g.getOffset();
+					catchInstructions.remove(length);
 				}
 				// Remove last 'jsr' instruction
 				if (catchInstructions.get(--length).getOpcode() == Const.JSR) {
@@ -2394,8 +2408,7 @@ public class FastCodeExceptionAnalyzer
 				// Remove last 'goto' instruction
 				if (catchInstructions.get(--length).getOpcode() == Const.GOTO)
 				{
-					Goto g = (Goto)catchInstructions.remove(length);
-					fce.getCatches().get(i).toOffset = g.getOffset();
+					catchInstructions.remove(length);
 				}
 				// Remove last 'jsr' instruction
 				if (catchInstructions.get(--length).getOpcode() == Const.JSR) {
@@ -2489,7 +2502,6 @@ public class FastCodeExceptionAnalyzer
 						if (g.getBranch() > 0)
 						{
 							catchInstructions.remove(length);
-							fce.getCatches().get(i).toOffset = g.getOffset();
 						}
 					}
 
@@ -2743,8 +2755,7 @@ public class FastCodeExceptionAnalyzer
 			// Remove last 'goto' instruction in try block
 			if (catchInstructions.get(lastIndex).getOpcode() == Const.GOTO)
 			{
-				Goto g = (Goto)catchInstructions.remove(lastIndex);
-				fce.getCatches().get(i).toOffset = g.getOffset();
+				catchInstructions.remove(lastIndex);
 			}
 			// Remove Jsr instruction before return instructions
 			if (finallyInstructionsLineNumber != -1) {
@@ -3092,7 +3103,6 @@ public class FastCodeExceptionAnalyzer
 					index--;
 					// Remove last 'goto' instruction
 					Goto g = (Goto)catchInstructions.remove(index);
-					fce.getCatches().get(i).toOffset = g.getOffset();
 					int jumpOffset = g.getJumpOffset();
 
 					if (jumpOffset > fastTry.getOffset())
@@ -3236,7 +3246,6 @@ public class FastCodeExceptionAnalyzer
 		final int type;
 		final int[] otherTypes;
 		final int fromOffset;
-		int toOffset;
 
 		public FastCodeExceptionCatch(
 				int type, int[] otherCatchTypes, int fromOffset)
@@ -3244,7 +3253,6 @@ public class FastCodeExceptionAnalyzer
 			this.type = type;
 			this.otherTypes = otherCatchTypes;
 			this.fromOffset = fromOffset;
-			this.toOffset = UtilConstants.INVALID_OFFSET;
 		}
 
 		@Override

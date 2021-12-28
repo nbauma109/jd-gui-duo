@@ -10,13 +10,8 @@ package org.jd.core.v1.model.javasyntax.declaration;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 
 public class InstanceInitializerDeclaration implements MemberDeclaration {
-    protected String descriptor;
-    protected BaseStatement statements;
-
-    public InstanceInitializerDeclaration(String descriptor, BaseStatement statements) {
-        this.descriptor = descriptor;
-        this.statements = statements;
-    }
+    private String descriptor;
+    private BaseStatement statements;
 
     public String getDescriptor() {
         return descriptor;

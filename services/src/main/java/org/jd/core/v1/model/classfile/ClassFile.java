@@ -13,21 +13,25 @@ import org.jd.core.v1.model.classfile.attribute.Attribute;
 import java.util.List;
 import java.util.Map;
 
-import static org.apache.bcel.Const.*;
+import static org.apache.bcel.Const.ACC_ANNOTATION;
+import static org.apache.bcel.Const.ACC_ENUM;
+import static org.apache.bcel.Const.ACC_INTERFACE;
+import static org.apache.bcel.Const.ACC_MODULE;
+import static org.apache.bcel.Const.ACC_STATIC;
 
 public class ClassFile {
-    protected int majorVersion;
-    protected int minorVersion;
-    protected int accessFlags;
-    protected String internalTypeName;
-    protected String superTypeName;
-    protected String[] interfaceTypeNames;
-    protected Field[] fields;
-    protected Method[] methods;
-    protected Map<String, Attribute> attributes;
+    private int majorVersion;
+    private int minorVersion;
+    private int accessFlags;
+    private String internalTypeName;
+    private String superTypeName;
+    private String[] interfaceTypeNames;
+    private Field[] fields;
+    private Method[] methods;
+    private Map<String, Attribute> attributes;
 
-    protected ClassFile outerClassFile;
-    protected List<ClassFile> innerClassFiles;
+    private ClassFile outerClassFile;
+    private List<ClassFile> innerClassFiles;
 
     public ClassFile(int majorVersion, int minorVersion, int accessFlags, String internalTypeName, String superTypeName, String[] interfaceTypeNames, Field[] fields, Method[] methods, Map<String, Attribute> attributes) {
         this.majorVersion = majorVersion;

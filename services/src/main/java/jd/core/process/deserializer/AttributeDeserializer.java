@@ -31,7 +31,23 @@ import java.util.Map.Entry;
 
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.LocalVariable;
-import jd.core.model.classfile.attribute.*;
+import jd.core.model.classfile.attribute.Attribute;
+import jd.core.model.classfile.attribute.AttributeAnnotationDefault;
+import jd.core.model.classfile.attribute.AttributeCode;
+import jd.core.model.classfile.attribute.AttributeConstantValue;
+import jd.core.model.classfile.attribute.AttributeDeprecated;
+import jd.core.model.classfile.attribute.AttributeEnclosingMethod;
+import jd.core.model.classfile.attribute.AttributeExceptions;
+import jd.core.model.classfile.attribute.AttributeInnerClasses;
+import jd.core.model.classfile.attribute.AttributeLocalVariableTable;
+import jd.core.model.classfile.attribute.AttributeNumberTable;
+import jd.core.model.classfile.attribute.AttributeRuntimeAnnotations;
+import jd.core.model.classfile.attribute.AttributeRuntimeParameterAnnotations;
+import jd.core.model.classfile.attribute.AttributeSignature;
+import jd.core.model.classfile.attribute.AttributeSourceFile;
+import jd.core.model.classfile.attribute.AttributeSynthetic;
+import jd.core.model.classfile.attribute.ParameterAnnotations;
+import jd.core.model.classfile.attribute.UnknowAttribute;
 
 public class AttributeDeserializer
 {

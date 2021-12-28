@@ -9,13 +9,20 @@ package org.jdv1.gui.service.preferencespanel;
 
 import org.jd.gui.spi.PreferencesPanel;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -31,13 +38,13 @@ public class MavenOrgSourceLoaderPreferencesProvider extends JPanel implements P
 
     protected static final Pattern CONTROL_PATTERN = Pattern.compile("([+-][a-zA-Z0-9$_.]+(\\s+[+-][a-zA-Z0-9$_.]+)*+)?\\s*");
 
-    protected JCheckBox enableCheckBox;
-    protected JTextArea filtersTextArea;
-    protected JButton resetButton;
-    protected Color errorBackgroundColor = Color.RED;
-    protected Color defaultBackgroundColor;
+    private JCheckBox enableCheckBox;
+    private JTextArea filtersTextArea;
+    private JButton resetButton;
+    private Color errorBackgroundColor = Color.RED;
+    private Color defaultBackgroundColor;
 
-    protected transient PreferencesPanel.PreferencesPanelChangeListener listener;
+    private transient PreferencesPanel.PreferencesPanelChangeListener listener;
 
     public MavenOrgSourceLoaderPreferencesProvider() {
         super(new BorderLayout());

@@ -13,17 +13,21 @@ import org.jd.gui.api.feature.SourcesSavable;
 import org.jd.gui.view.SaveAllSourcesView;
 
 import java.io.File;
-import java.nio.file.*;
-import java.util.concurrent.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 
 import javax.swing.JFrame;
 
 public class SaveAllSourcesController implements SourcesSavable.Controller, SourcesSavable.Listener {
-    protected API api;
-    protected SaveAllSourcesView saveAllSourcesView;
-    protected boolean cancel;
-    protected int counter;
-    protected int mask;
+    private API api;
+    private SaveAllSourcesView saveAllSourcesView;
+    private boolean cancel;
+    private int counter;
+    private int mask;
 
     public SaveAllSourcesController(API api, JFrame mainFrame) {
         this.api = api;

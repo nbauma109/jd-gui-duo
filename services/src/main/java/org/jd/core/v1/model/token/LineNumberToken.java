@@ -7,16 +7,12 @@
 
 package org.jd.core.v1.model.token;
 
-import org.jd.core.v1.api.printer.Printer;
-
 /**
  * Must be create between StartStatementToken and EndStatementToken
  */
 public class LineNumberToken implements Token {
 
-    public static final LineNumberToken UNKNOWN_LINE_NUMBER = new LineNumberToken(Printer.UNKNOWN_LINE_NUMBER);
-
-    protected int lineNumber;
+    private int lineNumber;
 
     public LineNumberToken(int lineNumber) {
         this.lineNumber = lineNumber;

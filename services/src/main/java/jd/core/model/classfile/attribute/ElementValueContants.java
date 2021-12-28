@@ -22,7 +22,7 @@ public class ElementValueContants
         super();
     }
 
-    public static final byte EV_UNKNOWN= 0;
+    public static final byte EV_UNKNOWN= 0; // NO_UCD (unused code)
     public static final byte EV_PRIMITIVE_TYPE= 1;
     public static final byte EV_ENUM_CONST_VALUE= 2;
     public static final byte EV_CLASS_INFO= 3;

@@ -11,7 +11,7 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class MethodReferenceExpression extends AbstractLineNumberTypeExpression {
     protected Expression expression;
-    protected String internalTypeName;
+    private String internalTypeName;
     protected String name;
     protected String descriptor;
 

@@ -13,8 +13,8 @@ public class ElementValuePrimitiveType implements AttributeElementValue {
     /*
      * type = {'B', 'D', 'F', 'I', 'J', 'S', 'Z', 'C', 's'}
      */
-    protected int type;
-    protected Constant constValue;
+    private int type;
+    private Constant constValue;
 
     public ElementValuePrimitiveType(int type, Constant constValue) {
         this.type = type;

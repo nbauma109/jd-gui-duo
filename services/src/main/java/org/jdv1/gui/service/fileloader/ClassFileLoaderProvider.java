@@ -13,7 +13,10 @@ import org.jd.gui.api.API;
 import org.jd.gui.service.fileloader.AbstractTypeFileLoaderProvider;
 import org.objectweb.asm.ClassReader;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 public class ClassFileLoaderProvider extends AbstractTypeFileLoaderProvider {
     protected static final String[] EXTENSIONS = { "class" };

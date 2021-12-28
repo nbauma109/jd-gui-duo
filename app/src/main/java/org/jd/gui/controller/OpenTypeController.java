@@ -18,7 +18,11 @@ import org.jdv1.gui.api.feature.IndexesChangeListener;
 
 import java.awt.Point;
 import java.net.URI;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
@@ -29,23 +33,21 @@ import javax.swing.SwingUtilities;
 
 public class OpenTypeController implements IndexesChangeListener {
 
-	protected API api;
-	protected ScheduledExecutorService executor;
-	protected Collection<Future<Indexes>> collectionOfFutureIndexes;
-	protected Consumer<URI> openCallback;
+	private API api;
+	private ScheduledExecutorService executor;
+	private Collection<Future<Indexes>> collectionOfFutureIndexes;
+	private Consumer<URI> openCallback;
 
-	protected JFrame mainFrame;
-	protected OpenTypeView openTypeView;
-	protected SelectLocationController selectLocationController;
+	private OpenTypeView openTypeView;
+	private SelectLocationController selectLocationController;
 
-	protected long indexesHashCode = 0L;
+	private long indexesHashCode;
 	@SuppressWarnings("rawtypes")
-	protected Map<String, Map<String, Collection>> cache;
+	private Map<String, Map<String, Collection>> cache;
 
 	public OpenTypeController(API api, ScheduledExecutorService executor, JFrame mainFrame) {
 		this.api = api;
 		this.executor = executor;
-		this.mainFrame = mainFrame;
 		// Create UI
 		openTypeView = new OpenTypeView(api, mainFrame, this::updateList, this::onTypeSelected);
 		selectLocationController = new SelectLocationController(api, mainFrame);

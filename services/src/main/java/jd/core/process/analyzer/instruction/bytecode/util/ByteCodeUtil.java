@@ -20,8 +20,30 @@ import org.apache.bcel.Const;
 
 import java.util.Arrays;
 
-import static jd.core.model.instruction.bytecode.ByteCodeConstants.*;
-import static org.apache.bcel.Const.*;
+import static jd.core.model.instruction.bytecode.ByteCodeConstants.COMPLEXIF;
+import static jd.core.model.instruction.bytecode.ByteCodeConstants.ICONST;
+import static jd.core.model.instruction.bytecode.ByteCodeConstants.IF;
+import static jd.core.model.instruction.bytecode.ByteCodeConstants.IFXNULL;
+import static org.apache.bcel.Const.ACONST_NULL;
+import static org.apache.bcel.Const.ALOAD;
+import static org.apache.bcel.Const.ALOAD_0;
+import static org.apache.bcel.Const.ALOAD_1;
+import static org.apache.bcel.Const.ALOAD_2;
+import static org.apache.bcel.Const.ALOAD_3;
+import static org.apache.bcel.Const.ASTORE;
+import static org.apache.bcel.Const.ASTORE_0;
+import static org.apache.bcel.Const.ASTORE_1;
+import static org.apache.bcel.Const.ASTORE_2;
+import static org.apache.bcel.Const.ASTORE_3;
+import static org.apache.bcel.Const.BIPUSH;
+import static org.apache.bcel.Const.CHECKCAST;
+import static org.apache.bcel.Const.GETFIELD;
+import static org.apache.bcel.Const.GOTO;
+import static org.apache.bcel.Const.INVOKEINTERFACE;
+import static org.apache.bcel.Const.INVOKESPECIAL;
+import static org.apache.bcel.Const.INVOKESTATIC;
+import static org.apache.bcel.Const.INVOKEVIRTUAL;
+import static org.apache.bcel.Const.SIPUSH;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 

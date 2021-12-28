@@ -18,7 +18,9 @@ package jd.core.util;
 
 import org.apache.bcel.Const;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 
