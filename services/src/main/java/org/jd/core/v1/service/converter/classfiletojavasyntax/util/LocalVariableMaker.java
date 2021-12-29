@@ -139,7 +139,7 @@ public class LocalVariableMaker {
             }
         }
 
-        FormalParameters formalParameters = null;
+        FormalParameters fp = null;
         
         if (parameterTypes != null) {
             int lastParameterIndex = parameterTypes.size() - 1;
@@ -148,7 +148,7 @@ public class LocalVariableMaker {
             initLocalVariablesFromParameterTypes(classFile, parameterTypes, varargs, firstVariableIndex, lastParameterIndex);
 
             // Create list of parameterTypes
-            formalParameters = new FormalParameters();
+            fp = new FormalParameters();
 
             AttributeParameterAnnotations rvpa = method.getAttribute("RuntimeVisibleParameterAnnotations");
             AttributeParameterAnnotations ripa = method.getAttribute("RuntimeInvisibleParameterAnnotations");
@@ -158,7 +158,7 @@ public class LocalVariableMaker {
                 for (int parameterIndex=0, variableIndex=firstVariableIndex; parameterIndex<=lastParameterIndex; parameterIndex++, variableIndex++) {
                     lv = localVariableSet.root(variableIndex);
                     if (lv != null) {
-                        formalParameters.add(new ClassFileFormalParameter(lv, varargs && parameterIndex == lastParameterIndex));
+                        fp.add(new ClassFileFormalParameter(lv, varargs && parameterIndex == lastParameterIndex));
 
                         if (PrimitiveType.TYPE_LONG.equals(lv.getType()) || PrimitiveType.TYPE_DOUBLE.equals(lv.getType())) {
                             variableIndex++;
@@ -181,7 +181,7 @@ public class LocalVariableMaker {
                     invisibles = invisiblesArray == null || invisiblesArray.length <= parameterIndex ? null : invisiblesArray[parameterIndex];
                     annotationReferences = annotationConverter.convert(visibles, invisibles);
 
-                    formalParameters.add(new ClassFileFormalParameter(annotationReferences, lv, varargs && parameterIndex==lastParameterIndex));
+                    fp.add(new ClassFileFormalParameter(annotationReferences, lv, varargs && parameterIndex==lastParameterIndex));
 
                     if (PrimitiveType.TYPE_LONG.equals(lv.getType()) || PrimitiveType.TYPE_DOUBLE.equals(lv.getType())) {
                         variableIndex++;
@@ -190,7 +190,7 @@ public class LocalVariableMaker {
             }
         }
         
-        this.formalParameters = formalParameters;
+        this.formalParameters = fp;
 
         // Initialize root frame and cache
         localVariableCache = localVariableSet.initialize(currentFrame);
