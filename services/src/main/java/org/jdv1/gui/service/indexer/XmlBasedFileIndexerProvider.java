@@ -18,6 +18,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -38,7 +41,7 @@ public class XmlBasedFileIndexerProvider extends AbstractIndexerProvider {
 	}
 
 	@Override
-	public void index(API api, Container.Entry entry, Indexes indexes) {
+	public void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
 		Set<String> stringSet = new HashSet<>();
 		XMLStreamReader reader = null;
 

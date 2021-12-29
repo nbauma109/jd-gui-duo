@@ -10,3 +10,4 @@ org.jdv1.gui.service.indexer.WebXmlFileIndexerProvider
 org.jdv1.gui.service.indexer.ZipFileIndexerProvider
 org.jdv1.gui.service.indexer.XmlBasedFileIndexerProvider
 org.jdv1.gui.service.indexer.XmlFileIndexerProvider
+org.jdv1.gui.service.indexer.ImageFileIndexerProvider

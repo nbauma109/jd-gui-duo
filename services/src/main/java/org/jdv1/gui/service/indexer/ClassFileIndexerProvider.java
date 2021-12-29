@@ -29,6 +29,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 import java.util.regex.Pattern;
 
 import static org.apache.bcel.Const.CONSTANT_Class;
@@ -75,7 +78,7 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void index(API api, Container.Entry entry, Indexes indexes) {
+	public void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
 		// Cleaning sets...
 		typeDeclarationSet.clear();
 		constructorDeclarationSet.clear();
@@ -172,6 +175,9 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
 					index.get(superTypeName).add(typeName);
 				}
 			}
+			
+            updateProgress(entry, getProgressFunction, setProgressFunction);
+
 		} catch (Exception e) {
 			assert ExceptionUtil.printStackTrace(e);
 		}

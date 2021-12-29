@@ -32,9 +32,12 @@ public interface Container {
 
         long length();
 
+        long compressedLength();
+
         InputStream getInputStream();
 
         Map<EntryPath, Entry> getChildren();
+
     }
 
     interface EntryPath {

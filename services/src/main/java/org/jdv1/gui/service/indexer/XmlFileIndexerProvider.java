@@ -13,11 +13,15 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.service.indexer.AbstractIndexerProvider;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -38,7 +42,7 @@ public class XmlFileIndexerProvider extends AbstractIndexerProvider {
 	}
 
 	@Override
-	public void index(API api, Container.Entry entry, Indexes indexes) {
+	public void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
 		Set<String> stringSet = new HashSet<>();
 		Set<String> typeReferenceSet = new HashSet<>();
 		XMLStreamReader reader = null;
@@ -117,6 +121,12 @@ public class XmlFileIndexerProvider extends AbstractIndexerProvider {
 		}
 
 		indexAll(entry, indexes, stringSet, typeReferenceSet);
+		
+        try {
+            updateProgress(entry, getProgressFunction, setProgressFunction);
+        } catch (IOException e) {
+            assert ExceptionUtil.printStackTrace(e);
+        }
 	}
 
 	@SuppressWarnings("unchecked")

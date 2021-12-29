@@ -27,15 +27,20 @@ import org.jd.gui.service.indexer.AbstractIndexerProvider;
 import org.jd.gui.util.parser.jdt.ASTParserFactory;
 import org.jd.gui.util.parser.jdt.core.AbstractJavaListener;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 
 /** Unsafe thread implementation of java file indexer. */
 public class JavaFileIndexerProvider extends AbstractIndexerProvider {
+    
     @Override
     public String[] getSelectors() {
         return appendSelectors("*:file:*.java");
@@ -43,36 +48,36 @@ public class JavaFileIndexerProvider extends AbstractIndexerProvider {
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void index(API api, Container.Entry entry, Indexes indexes) {
-        Listener listener = new Listener(entry);
-
+    public void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
         try {
+            Listener listener = new Listener(entry);
             ASTParserFactory.getInstance().newASTParser(entry, listener);
-        } catch (LoaderException e) {
-            assert ExceptionUtil.printStackTrace(e);
-        }
 
-        // Append sets to indexes
-        addToIndexes(indexes, "typeDeclarations", listener.getTypeDeclarationSet(), entry);
-        addToIndexes(indexes, "constructorDeclarations", listener.getConstructorDeclarationSet(), entry);
-        addToIndexes(indexes, "methodDeclarations", listener.getMethodDeclarationSet(), entry);
-        addToIndexes(indexes, "fieldDeclarations", listener.getFieldDeclarationSet(), entry);
-        addToIndexes(indexes, "typeReferences", listener.getTypeReferenceSet(), entry);
-        addToIndexes(indexes, "constructorReferences", listener.getConstructorReferenceSet(), entry);
-        addToIndexes(indexes, "methodReferences", listener.getMethodReferenceSet(), entry);
-        addToIndexes(indexes, "fieldReferences", listener.getFieldReferenceSet(), entry);
-        addToIndexes(indexes, "strings", listener.getStringSet(), entry);
-
-        // Populate map [super type name : [sub type name]]
-        Map<String, Collection> index = indexes.getIndex("subTypeNames");
-
-        String typeName;
-        for (Map.Entry<String, Set<String>> e : listener.getSuperTypeNamesMap().entrySet()) {
-            typeName = e.getKey();
-
-            for (String superTypeName : e.getValue()) {
-                index.get(superTypeName).add(typeName);
+            // Append sets to indexes
+            addToIndexes(indexes, "typeDeclarations", listener.getTypeDeclarationSet(), entry);
+            addToIndexes(indexes, "constructorDeclarations", listener.getConstructorDeclarationSet(), entry);
+            addToIndexes(indexes, "methodDeclarations", listener.getMethodDeclarationSet(), entry);
+            addToIndexes(indexes, "fieldDeclarations", listener.getFieldDeclarationSet(), entry);
+            addToIndexes(indexes, "typeReferences", listener.getTypeReferenceSet(), entry);
+            addToIndexes(indexes, "constructorReferences", listener.getConstructorReferenceSet(), entry);
+            addToIndexes(indexes, "methodReferences", listener.getMethodReferenceSet(), entry);
+            addToIndexes(indexes, "fieldReferences", listener.getFieldReferenceSet(), entry);
+            addToIndexes(indexes, "strings", listener.getStringSet(), entry);
+    
+            // Populate map [super type name : [sub type name]]
+            Map<String, Collection> index = indexes.getIndex("subTypeNames");
+    
+            String typeName;
+            for (Map.Entry<String, Set<String>> e : listener.getSuperTypeNamesMap().entrySet()) {
+                typeName = e.getKey();
+    
+                for (String superTypeName : e.getValue()) {
+                    index.get(superTypeName).add(typeName);
+                }
             }
+            updateProgress(entry, getProgressFunction, setProgressFunction);
+        } catch (LoaderException | IOException e) {
+            assert ExceptionUtil.printStackTrace(e);
         }
     }
 

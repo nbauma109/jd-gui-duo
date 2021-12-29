@@ -19,6 +19,9 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 
 public class EjbJarXmlFileIndexerProvider extends XmlBasedFileIndexerProvider {
 
@@ -26,8 +29,8 @@ public class EjbJarXmlFileIndexerProvider extends XmlBasedFileIndexerProvider {
     public String[] getSelectors() { return appendSelectors("*:file:META-INF/ejb-jar.xml"); }
 
     @Override
-    public void index(API api, Container.Entry entry, Indexes indexes) {
-        super.index(api, entry, indexes);
+    public void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
+        super.index(api, entry, indexes, getProgressFunction, setProgressFunction, isCancelledFunction);
 
         try (InputStream inputStream = entry.getInputStream()) {
             new EjbJarXmlPathFinder(entry, indexes).find(TextReader.getText(inputStream));

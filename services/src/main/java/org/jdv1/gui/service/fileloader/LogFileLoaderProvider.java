@@ -28,7 +28,7 @@ public class LogFileLoaderProvider extends ZipFileLoaderProvider {
 
     @Override
     public boolean load(API api, File file) {
-        api.addPanel(file.getName(), null, "Location: " + file.getAbsolutePath(), new LogPage(api, file.toURI(), TextReader.getText(file)));
+        api.addPanel(file, file.getName(), null, "Location: " + file.getAbsolutePath(), new LogPage(api, file.toURI(), TextReader.getText(file)));
         return true;
     }
 }

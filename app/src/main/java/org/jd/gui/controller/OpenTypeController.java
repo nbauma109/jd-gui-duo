@@ -43,7 +43,7 @@ public class OpenTypeController implements IndexesChangeListener {
 
 	private long indexesHashCode;
 	@SuppressWarnings("rawtypes")
-	private final Map<String, Map<String, Collection>> cache;
+	private final LRUCache<String, Map<String, Collection>> cache;
 
 	public OpenTypeController(API api, ScheduledExecutorService executor, JFrame mainFrame) {
 		this.api = api;

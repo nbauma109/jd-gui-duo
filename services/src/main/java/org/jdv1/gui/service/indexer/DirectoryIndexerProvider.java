@@ -15,13 +15,17 @@ import org.jd.gui.service.indexer.AbstractIndexerProvider;
 import org.jd.gui.spi.Indexer;
 import org.jd.gui.util.decompiler.GuiPreferences;
 
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
+
 public class DirectoryIndexerProvider extends AbstractIndexerProvider {
 
     @Override
     public String[] getSelectors() { return appendSelectors("*:dir:*"); }
 
     @Override
-    public void index(API api, Container.Entry entry, Indexes indexes) {
+    public void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
         int depth = 15;
 
         try {
@@ -30,19 +34,19 @@ public class DirectoryIndexerProvider extends AbstractIndexerProvider {
             assert ExceptionUtil.printStackTrace(e);
         }
 
-        index(api, entry, indexes, depth);
+        index(api, entry, indexes, getProgressFunction, setProgressFunction, isCancelledFunction, depth);
     }
 
-    public void index(API api, Container.Entry entry, Indexes indexes, int depth) {
+    public void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction, int depth) {
         if (depth-- > 0) {
             for (Container.Entry e : entry.getChildren().values()) {
                 if (e.isDirectory()) {
-                    index(api, e, indexes, depth);
+                    index(api, e, indexes, getProgressFunction, setProgressFunction, isCancelledFunction, depth);
                 } else {
                     Indexer indexer = api.getIndexer(e);
 
                     if (indexer != null) {
-                        indexer.index(api, e, indexes);
+                        indexer.index(api, e, indexes, getProgressFunction, setProgressFunction, isCancelledFunction);
                     }
                 }
             }

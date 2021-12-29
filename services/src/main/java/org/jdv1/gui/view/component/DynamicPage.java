@@ -177,6 +177,8 @@ public class DynamicPage
         @Override
         public long length() { return entry.length(); }
         @Override
+        public long compressedLength() { return entry.compressedLength(); }
+        @Override
         public InputStream getInputStream() { return new ByteArrayInputStream(source.getBytes()); }
         @Override
         public Map<Container.EntryPath, Container.Entry> getChildren() { return entry.getChildren(); }

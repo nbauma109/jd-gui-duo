@@ -11,6 +11,9 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 import java.util.regex.Pattern;
 
 public interface Indexer {
@@ -18,5 +21,5 @@ public interface Indexer {
 
     Pattern getPathPattern();
 
-    void index(API api, Container.Entry entry, Indexes indexes);
+    void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction);
 }

@@ -33,6 +33,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 
 import javax.swing.JComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -75,7 +78,7 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
 
         /** --- ContentIndexable --- */
         @Override
-        public Indexes index(API api) {
+        public Indexes index(API api, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
             Map<String, Map<String, Collection>> map = new HashMap<>();
             DelegatedMapMapWithDefault mapWithDefault = new DelegatedMapMapWithDefault(map);
 
@@ -85,8 +88,8 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
             // Index entry
             Indexer indexer = api.getIndexer(entry);
 
-            if (indexer != null) {
-                indexer.index(api, entry, indexesWithDefault);
+            if (indexer != null && !isCancelledFunction.getAsBoolean()) {
+                indexer.index(api, entry, indexesWithDefault, getProgressFunction, setProgressFunction, isCancelledFunction);
             }
 
             // To prevent memory leaks, return an index without the 'populate' behaviour
@@ -140,6 +143,7 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
     }
 
     protected static class DelegatedMap<K, V> implements Map<K, V> {
+
         private Map<K, V> map;
 
         public DelegatedMap(Map<K, V> map) { this.map = map; }
@@ -176,6 +180,7 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
 
     @SuppressWarnings("rawtypes")
     protected static class DelegatedMapWithDefault extends DelegatedMap<String, Collection> {
+
         public DelegatedMapWithDefault(Map<String, Collection> map) { super(map); }
 
         @Override
@@ -183,7 +188,7 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
             Collection value = super.get(o);
             if (value == null) {
                 String key = o.toString();
-                value=new ArrayList();
+                value=new ArrayList<>();
                 put(key, value);
             }
             return value;
@@ -192,6 +197,7 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
 
     @SuppressWarnings("rawtypes")
     protected static class DelegatedMapMapWithDefault extends DelegatedMap<String, Map<String, Collection>> {
+
         private Map<String, Map<String, Collection>> wrappers = new HashMap<>();
 
         public DelegatedMapMapWithDefault(Map<String, Map<String, Collection>> map) { super(map); }

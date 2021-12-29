@@ -19,6 +19,9 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 
 public class WebXmlFileIndexerProvider extends XmlBasedFileIndexerProvider {
 
@@ -26,8 +29,8 @@ public class WebXmlFileIndexerProvider extends XmlBasedFileIndexerProvider {
     public String[] getSelectors() { return appendSelectors("*:file:WEB-INF/web.xml"); }
 
     @Override
-    public void index(API api, Container.Entry entry, Indexes indexes) {
-        super.index(api, entry, indexes);
+    public void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
+        super.index(api, entry, indexes, getProgressFunction, setProgressFunction, isCancelledFunction);
 
         try (InputStream inputStream = entry.getInputStream()) {
             new WebXmlPathFinder(entry, indexes).find(TextReader.getText(inputStream));

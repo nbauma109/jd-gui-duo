@@ -14,12 +14,16 @@ import org.jd.gui.spi.Indexer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 import java.util.regex.Pattern;
 
 public abstract class AbstractIndexerProvider implements Indexer {
@@ -89,6 +93,16 @@ public abstract class AbstractIndexerProvider implements Indexer {
             for (String key : set) {
                 index.get(key).add(entry);
             }
+        }
+    }
+
+    protected void updateProgress(Container.Entry entry, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction) throws IOException {
+        double totalSize = Files.size(Paths.get(entry.getContainer().getRoot().getParent().getUri()));
+        long entryLength = entry.compressedLength();
+        double progress = 100 * entryLength / totalSize;
+        double cumulativeProgress = getProgressFunction.getAsDouble() + progress;
+        if (cumulativeProgress <= 100) {
+            setProgressFunction.accept(cumulativeProgress);
         }
     }
 }

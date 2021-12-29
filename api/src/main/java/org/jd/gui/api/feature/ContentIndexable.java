@@ -10,6 +10,10 @@ package org.jd.gui.api.feature;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Indexes;
 
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
+
 public interface ContentIndexable {
-    Indexes index(API api);
+    Indexes index(API api, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction);
 }

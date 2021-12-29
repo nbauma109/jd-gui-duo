@@ -37,7 +37,7 @@ public interface API {
 
     void addURI(URI uri);
 
-    <T extends JComponent & UriGettable> void addPanel(String title, Icon icon, String tip, T component);
+    <T extends JComponent & UriGettable> void addPanel(File file, String title, Icon icon, String tip, T component);
 
     Collection<Action> getContextualActions(Container.Entry entry, String fragment);
 

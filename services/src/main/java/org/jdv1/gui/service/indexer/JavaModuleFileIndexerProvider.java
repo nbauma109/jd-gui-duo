@@ -16,6 +16,9 @@ import org.jd.gui.spi.Indexer;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 
 public class JavaModuleFileIndexerProvider extends AbstractIndexerProvider {
 
@@ -24,19 +27,19 @@ public class JavaModuleFileIndexerProvider extends AbstractIndexerProvider {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public void index(API api, Container.Entry entry, Indexes indexes) {
+    public void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
         DirectoryEntryPath classesDir = new DirectoryEntryPath("classes");
         Container.Entry e = entry.getChildren().get(classesDir);
         if (e != null) {
             Map<String, Collection> packageDeclarationIndex = indexes.getIndex("packageDeclarations");
 
             // Index module-info, packages and CLASS files
-            index(api, e, indexes, packageDeclarationIndex);
+            index(api, e, indexes, getProgressFunction, setProgressFunction, isCancelledFunction, packageDeclarationIndex);
         }
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected static void index(API api, Container.Entry entry, Indexes indexes, Map<String, Collection> packageDeclarationIndex) {
+    protected static void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction, Map<String, Collection> packageDeclarationIndex) {
         for (Container.Entry e : entry.getChildren().values()) {
             if (e.isDirectory()) {
                 String path = e.getPath();
@@ -45,12 +48,12 @@ public class JavaModuleFileIndexerProvider extends AbstractIndexerProvider {
                     packageDeclarationIndex.get(path.substring(8)).add(e); // 8 = "classes/".length()
                 }
 
-                index(api, e, indexes, packageDeclarationIndex);
+                index(api, e, indexes, getProgressFunction, setProgressFunction, isCancelledFunction, packageDeclarationIndex);
             } else {
                 Indexer indexer = api.getIndexer(e);
 
                 if (indexer != null) {
-                    indexer.index(api, e, indexes);
+                    indexer.index(api, e, indexes, getProgressFunction, setProgressFunction, isCancelledFunction);
                 }
             }
         }

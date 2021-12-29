@@ -82,6 +82,8 @@ public class DelegatingFilterContainer implements Container {
         @Override
         public long length() { return entry.length(); }
         @Override
+        public long compressedLength() { return entry.compressedLength(); }
+        @Override
         public InputStream getInputStream() { return entry.getInputStream(); }
 
         @Override

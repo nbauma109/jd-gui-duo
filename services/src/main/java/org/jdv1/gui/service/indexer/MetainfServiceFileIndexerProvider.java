@@ -18,6 +18,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 import java.util.regex.Pattern;
 
 public class MetainfServiceFileIndexerProvider extends AbstractIndexerProvider {
@@ -34,7 +37,7 @@ public class MetainfServiceFileIndexerProvider extends AbstractIndexerProvider {
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void index(API api, Container.Entry entry, Indexes indexes) {
+	public void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
 		Map<String, Collection> index = indexes.getIndex("typeReferences");
 
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(entry.getInputStream()))) {

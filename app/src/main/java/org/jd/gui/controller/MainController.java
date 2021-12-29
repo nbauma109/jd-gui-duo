@@ -80,7 +80,10 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLayer;
 import javax.swing.JOptionPane;
+import javax.swing.ProgressMonitor;
+import javax.swing.SwingWorker;
 import javax.swing.TransferHandler;
+import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 
@@ -503,6 +506,44 @@ public class MainController implements API {
         }
     }
 
+    private final class IndexerWorker extends SwingWorker<Indexes, Void> {
+        private final ContentIndexable ci;
+        private final ProgressMonitor progressMonitor;
+        private double progressPercentage;
+        
+        private IndexerWorker(ContentIndexable ci, ProgressMonitor progressMonitor) {
+            this.ci = ci;
+            this.progressMonitor = progressMonitor;
+        }
+
+        @Override
+        protected Indexes doInBackground() throws Exception {
+            return ci.index(MainController.this, this::getProgressPercentage, this::setProgressPercentage, this::isCancelled);
+        }
+
+        @Override
+        protected void done() {
+            progressMonitor.close();
+            // Fire 'indexesChanged' event
+            Collection<Future<Indexes>> collectionOfFutureIndexes = getCollectionOfFutureIndexes();
+            for (IndexesChangeListener listener : containerChangeListeners) {
+                listener.indexesChanged(collectionOfFutureIndexes);
+            }
+            if (currentPage instanceof IndexesChangeListener icl) {
+                icl.indexesChanged(collectionOfFutureIndexes);
+            }
+        }
+
+        public double getProgressPercentage() {
+            return progressPercentage;
+        }
+
+        public void setProgressPercentage(double progressPercentage) {
+            super.setProgress((int) Math.round(progressPercentage));
+            this.progressPercentage = progressPercentage;
+        }
+    }
+
     // --- Drop files transfer handler --- //
     protected class FilesTransferHandler extends TransferHandler {
 
@@ -626,29 +667,32 @@ public class MainController implements API {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends JComponent & UriGettable> void addPanel(String title, Icon icon, String tip, T component) {
+    public <T extends JComponent & UriGettable> void addPanel(File file, String title, Icon icon, String tip, T component) {
         mainView.addMainPanel(title, icon, tip, component);
 
-        if (component instanceof ContentIndexable ci) {
-            Future<Indexes> futureIndexes = executor.submit(() -> {
-                Indexes indexes = ci.index(this);
-
-                SwingUtil.invokeLater(() -> {
-                    // Fire 'indexesChanged' event
-                    Collection<Future<Indexes>> collectionOfFutureIndexes = getCollectionOfFutureIndexes();
-                    for (IndexesChangeListener listener : containerChangeListeners) {
-                        listener.indexesChanged(collectionOfFutureIndexes);
+        if (component instanceof ContentIndexable ci && file != null) {
+            UIManager.put("ProgressMonitor.progressText", title);
+            ProgressMonitor progressMonitor = new ProgressMonitor(component, "Indexing ...", getProgressMessage(0), 0, 100);
+            SwingWorker<Indexes, Void> worker = new IndexerWorker(ci, progressMonitor);
+            worker.addPropertyChangeListener(evt -> {
+                if ("progress".equals(evt.getPropertyName())) {
+                    int progress = (Integer) evt.getNewValue();
+                    progressMonitor.setProgress(progress);
+                    String message = getProgressMessage(progress);
+                    progressMonitor.setNote(message);
+                    if (progressMonitor.isCanceled()) {
+                        worker.cancel(true);
                     }
-                    if (currentPage instanceof IndexesChangeListener icl) {
-                        icl.indexesChanged(collectionOfFutureIndexes);
-                    }
-                });
-
-                return indexes;
+                }
             });
+            worker.execute();
 
-            component.putClientProperty(INDEXES, futureIndexes);
+            component.putClientProperty(INDEXES, worker);
         }
+    }
+
+    private static String getProgressMessage(int progress) {
+        return String.format("Completed %d%%.%n", progress);
     }
 
     @Override

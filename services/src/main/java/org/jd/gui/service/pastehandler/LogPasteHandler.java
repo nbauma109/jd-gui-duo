@@ -25,6 +25,6 @@ public class LogPasteHandler implements PasteHandler {
         String title = "clipboard-" + counter.incrementAndGet() + ".log";
         URI uri = URI.create("memory://" + title);
         String content = obj == null ? "" : obj.toString();
-        api.addPanel(title, null, null, new LogPage(api, uri, content));
+        api.addPanel(null, title, null, null, new LogPage(api, uri, content));
     }
 }

@@ -12,6 +12,7 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.model.container.entry.path.SimpleEntryPath;
 import org.jd.gui.spi.ContainerFactory;
+import org.jdv1.gui.util.index.IndexesUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +31,8 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public class GenericContainer implements Container {
     protected static final long TIMESTAMP = System.currentTimeMillis();
@@ -143,6 +146,17 @@ public class GenericContainer implements Container {
             }
         }
 
+        @Override
+        public long compressedLength() {
+            try (ZipFile zipFile = new ZipFile(new File(getRoot().getParent().getUri()))) {
+                ZipEntry zipEntry = zipFile.getEntry(strPath);
+                return IndexesUtil.entryImpactBytes(zipEntry);
+            } catch (IOException e) {
+                assert ExceptionUtil.printStackTrace(e);
+                return -1L;
+            }
+        }
+        
         @Override
         public InputStream getInputStream() {
             try {

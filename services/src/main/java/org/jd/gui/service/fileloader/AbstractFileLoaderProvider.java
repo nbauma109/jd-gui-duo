@@ -53,7 +53,7 @@ public abstract class AbstractFileLoaderProvider implements FileLoader {
                         Icon icon = data instanceof TreeNodeData tnd ? tnd.getIcon() : null;
                         String location = file.getPath();
 
-                        api.addPanel(file.getName(), icon, "Location: " + location, mainPanel);
+                        api.addPanel(file, file.getName(), icon, "Location: " + location, mainPanel);
                         return mainPanel;
                     }
                 }
@@ -98,6 +98,8 @@ public abstract class AbstractFileLoaderProvider implements FileLoader {
         public boolean isDirectory() { return file.isDirectory(); }
         @Override
         public long length() { return file.length(); }
+        @Override
+        public long compressedLength() { return length(); }
         @Override
         public Map<Container.EntryPath, Container.Entry> getChildren() { return children; }
 

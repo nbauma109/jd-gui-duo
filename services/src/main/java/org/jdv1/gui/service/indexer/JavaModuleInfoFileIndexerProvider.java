@@ -21,6 +21,9 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 
 import static org.objectweb.asm.ClassReader.SKIP_CODE;
 import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
@@ -40,7 +43,7 @@ public class JavaModuleInfoFileIndexerProvider extends AbstractIndexerProvider {
     public String[] getSelectors() { return appendSelectors("jmod:file:classes/module-info.class"); }
 
     @Override
-    public void index(API api, Container.Entry entry, Indexes indexes) {
+    public void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
         // Cleaning sets...
         javaModuleDeclarationSet.clear();
         javaModuleReferenceSet.clear();
