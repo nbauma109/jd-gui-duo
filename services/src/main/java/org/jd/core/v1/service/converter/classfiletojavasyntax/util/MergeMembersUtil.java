@@ -140,7 +140,12 @@ public class MergeMembersUtil {
         }
     }
 
-    protected static class MemberDeclarationComparator implements Comparator<ClassFileMemberDeclaration> {
+    protected static class MemberDeclarationComparator implements java.io.Serializable, Comparator<ClassFileMemberDeclaration> {
+        /**
+         * Comparators should be Serializable: A non-serializable Comparator can prevent an otherwise-Serializable ordered collection from being serializable.
+         */
+        private static final long serialVersionUID = 1L;
+
         @Override
         public int compare(ClassFileMemberDeclaration md1, ClassFileMemberDeclaration md2) {
             int lineNumber1 = md1.getFirstLineNumber();

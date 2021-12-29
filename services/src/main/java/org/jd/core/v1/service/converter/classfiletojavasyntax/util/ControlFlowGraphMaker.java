@@ -722,7 +722,12 @@ public class ControlFlowGraphMaker {
     }
     
     /** 1) Smaller 'startPc' first 2) Smaller 'endPc' first. */
-    public static class CodeExceptionComparator implements Comparator<CodeException> {
+    public static class CodeExceptionComparator implements java.io.Serializable, Comparator<CodeException> {
+        /**
+         * Comparators should be Serializable: A non-serializable Comparator can prevent an otherwise-Serializable ordered collection from being serializable.
+         */
+        private static final long serialVersionUID = 1L;
+
         @Override
         public int compare(CodeException ce1, CodeException ce2) {
             int comp = ce1.getStartPC() - ce2.getStartPC();

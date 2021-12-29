@@ -14,7 +14,12 @@ import java.util.Comparator;
 /**
  * Directories before files, sorted by path
  */
-public class ContainerEntryComparator implements Comparator<EntryPath> {
+public class ContainerEntryComparator implements java.io.Serializable, Comparator<EntryPath> {
+    /**
+     * Comparators should be Serializable: A non-serializable Comparator can prevent an otherwise-Serializable ordered collection from being serializable.
+     */
+    private static final long serialVersionUID = 1L;
+
     public static final ContainerEntryComparator COMPARATOR = new ContainerEntryComparator();
 
     @Override

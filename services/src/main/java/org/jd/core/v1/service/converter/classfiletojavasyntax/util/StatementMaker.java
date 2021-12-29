@@ -1087,7 +1087,12 @@ public class StatementMaker {
         }
     }
 
-    protected static class SwitchCaseComparator implements Comparator<SwitchCase> {
+    protected static class SwitchCaseComparator implements java.io.Serializable, Comparator<SwitchCase> {
+        /**
+         * Comparators should be Serializable: A non-serializable Comparator can prevent an otherwise-Serializable ordered collection from being serializable.
+         */
+        private static final long serialVersionUID = 1L;
+
         @Override
         public int compare(SwitchCase sc1, SwitchCase sc2) {
             int diff = sc1.getOffset() - sc2.getOffset();

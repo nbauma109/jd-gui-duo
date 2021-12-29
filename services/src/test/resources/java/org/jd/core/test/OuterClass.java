@@ -167,7 +167,10 @@ public class OuterClass {
         }
     }
 
-    public static class NumberComparator implements Comparator<Number> {
+    /**
+     * Comparators should be Serializable: A non-serializable Comparator can prevent an otherwise-Serializable ordered collection from being serializable.
+     */
+    public static class NumberComparator implements java.io.Serializable, Comparator<Number> {
         @Override
         public int compare(Number o1, Number o2) {
             return o2.intValue() - o1.intValue();

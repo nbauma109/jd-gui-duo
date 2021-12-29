@@ -24,8 +24,13 @@ import jd.core.model.layout.block.LayoutBlock;
 /*
  * Tri par ordre croissant, les blocs sans numéro de ligne sont places a la fin.
  */
-public class LayoutBlockComparator implements Comparator<LayoutBlock>
+public class LayoutBlockComparator implements java.io.Serializable, Comparator<LayoutBlock>
 {
+    /**
+     * Comparators should be Serializable: A non-serializable Comparator can prevent an otherwise-Serializable ordered collection from being serializable.
+     */
+    private static final long serialVersionUID = 1L;
+
     @Override
     public int compare(LayoutBlock lb1, LayoutBlock lb2) {
         if (lb1.getLastLineNumber() == Instruction.UNKNOWN_LINE_NUMBER)

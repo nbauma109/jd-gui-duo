@@ -361,9 +361,14 @@ public class InstructionListBuilder
 	}
 
 	private static class CodeExceptionComparator
-	implements Comparator<Entry<Integer, CodeException>>
+	implements java.io.Serializable, Comparator<Entry<Integer, CodeException>>
 	{
-		@Override
+		/**
+         * Comparators should be Serializable: A non-serializable Comparator can prevent an otherwise-Serializable ordered collection from being serializable.
+         */
+        private static final long serialVersionUID = 1L;
+
+        @Override
 		public int compare(Entry<Integer, CodeException> ice1, Entry<Integer, CodeException> ice2)
 		{
 			CodeException ce1 = ice1.getValue();
