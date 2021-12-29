@@ -20,6 +20,7 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.stream.Stream;
 
 import javax.swing.Action;
 import javax.swing.ImageIcon;
@@ -57,6 +58,7 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
             frame.getContentPane().add(sp);
             frame.setLocation(screenSize.width / 4, screenSize.height / 4);
             frame.setSize(screenSize.width / 2, screenSize.height / 2);
+            frame.setIconImages(Stream.of(32, 64, 128).map(size -> "/org/jd/gui/images/jd_icon_" + size + ".png").map(ImageUtil::getImage).toList());
             frame.setVisible(true);
         }
 
