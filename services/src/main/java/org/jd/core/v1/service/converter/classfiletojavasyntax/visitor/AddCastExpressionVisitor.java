@@ -72,8 +72,8 @@ import org.jd.core.v1.util.StringConstants;
 
 import java.util.Map;
 
-import static org.apache.bcel.Const.ACC_SYNTHETIC;
 import static org.apache.bcel.Const.ACC_BRIDGE;
+import static org.apache.bcel.Const.ACC_SYNTHETIC;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_BYTE;
 
 public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
