@@ -278,15 +278,7 @@ public class TypeMaker {
     }
 
     public Type makeFromSignature(String signature) {
-        Type type = signatureToType.get(signature);
-
-        if (type == null) {
-            SignatureReader reader = new SignatureReader(signature);
-            type = parseReferenceTypeSignature(reader);
-            signatureToType.put(signature, type);
-        }
-
-        return type;
+        return signatureToType.computeIfAbsent(signature, this::parseReferenceTypeSignature);
     }
 
     public static int countDimension(String descriptor) {
@@ -634,6 +626,10 @@ public class TypeMaker {
         return typeArguments;
     }
 
+    private Type parseReferenceTypeSignature(String signature) {
+        return parseReferenceTypeSignature(new SignatureReader(signature));
+    }
+    
     /**
      * Rules:
      *  ReferenceTypeSignature: ClassTypeSignature | ArrayTypeSignature | TypeVariableSignature
