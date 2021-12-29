@@ -191,7 +191,23 @@ public class ByteCodeWriter {
 	public static final String ILLEGAL_OPCODE = "<illegal opcode>";
 
     private ByteCodeWriter() {
-        super();
+    }
+
+    public static String write(String linePrefix, Method method) {
+        AttributeCode attributeCode = method.getAttribute("Code");
+
+        if (attributeCode == null) {
+            return null;
+        }
+        ConstantPool constants = method.getConstants();
+        StringBuilder sb = new StringBuilder(5 * 1024);
+
+        writeByteCode(linePrefix, sb, constants, attributeCode);
+        writeLineNumberTable(linePrefix, sb, attributeCode);
+        writeLocalVariableTable(linePrefix, sb, attributeCode);
+        writeExceptionTable(linePrefix, sb, constants, attributeCode);
+
+        return sb.toString();
     }
 
     public static String write(String linePrefix, Method method, int fromOffset, int toOffset) {

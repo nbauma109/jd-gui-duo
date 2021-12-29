@@ -29,8 +29,8 @@ import javax.swing.ImageIcon;
 public class CopyQualifiedNameContextualActionsFactory implements ContextualActionsFactory {
 
     @Override
-    public Collection<Action> make(org.jd.gui.api.API api, Container.Entry entry, String fragment) {
-        return Collections.<Action>singletonList(new CopyQualifiedNameAction(api, entry, fragment));
+    public Collection<Action> make(API api, Container.Entry entry, String fragment) {
+        return Collections.singletonList(new CopyQualifiedNameAction(api, entry, fragment));
     }
 
     public static class CopyQualifiedNameAction extends AbstractAction {
