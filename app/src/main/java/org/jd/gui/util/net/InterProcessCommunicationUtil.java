@@ -25,7 +25,7 @@ public class InterProcessCommunicationUtil {
     }
 
     /**
-     * When an additional instance of JD-GUI launched, for example when the user clicks on
+     * When an additional instance of JD-GUI is launched, for example when the user clicks on
      * another file, instead of opening the new file in the new JD-GUI instance, the arguments,
      * which hold the file to be opened, will be transmitted to the existing instance,
      * allowing the new instance to shutdown.
