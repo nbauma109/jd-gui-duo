@@ -172,6 +172,7 @@ public class ControlFlowGraphPlantUMLWriter {
                     break;
                 case TYPE_SWITCH:
                     search(set, basicBlock.getNext());
+                    // intended fall through
                 case TYPE_SWITCH_DECLARATION:
                     for (SwitchCase switchCase : basicBlock.getSwitchCases()) {
                         search(set, switchCase.getBasicBlock());
@@ -179,6 +180,7 @@ public class ControlFlowGraphPlantUMLWriter {
                     break;
                 case TYPE_TRY, TYPE_TRY_JSR, TYPE_TRY_ECLIPSE:
                     search(set, basicBlock.getSub1());
+                    // intended fall through
                 case TYPE_TRY_DECLARATION:
                     search(set, basicBlock.getNext());
                     for (BasicBlock.ExceptionHandler exceptionHandler : basicBlock.getExceptionHandlers()) {
@@ -192,8 +194,10 @@ public class ControlFlowGraphPlantUMLWriter {
                     break;
                 case TYPE_IF_ELSE, TYPE_TERNARY_OPERATOR:
                     search(set, basicBlock.getNext());
+                    // intended fall through
                 case TYPE_CONDITION_TERNARY_OPERATOR:
                     search(set, basicBlock.getCondition());
+                    // intended fall through
                 case TYPE_CONDITION, TYPE_CONDITION_OR, TYPE_CONDITION_AND:
                     search(set, basicBlock.getSub1());
                     search(set, basicBlock.getSub2());
@@ -222,6 +226,7 @@ public class ControlFlowGraphPlantUMLWriter {
                 if (basicBlock == RETURN) {
                     break;
                 }
+                // intended fall through
             case TYPE_THROW, TYPE_RETURN_VALUE, TYPE_RET, TYPE_SWITCH, TYPE_INFINITE_GOTO, TYPE_GOTO_IN_TERNARY_OPERATOR:
                 sb.append(STATE).append(basicBlock.getTypeName()).append(" : ").append(basicBlock.getIndex()).append(AS).append(id).append(REDUCED);
                 writeStateOffsets(sb, id, basicBlock);
@@ -269,12 +274,12 @@ public class ControlFlowGraphPlantUMLWriter {
 
                 set.remove(basicBlock);
 
-                for (BasicBlock bb : set)
+                for (BasicBlock bb : set) {
                     writeState(sb, method, bb);
-
-                for (BasicBlock bb : set)
+                }
+                for (BasicBlock bb : set) {
                     writeLink(sb, bb);
-
+                }
                 sb.append("}\n");
                 writeStateOffsets(sb, id, basicBlock);
                 writeStateEnd(sb, id, basicBlock.getNext(), "next");
@@ -357,12 +362,14 @@ public class ControlFlowGraphPlantUMLWriter {
             case TYPE_CONDITION:
                 writeLink(sb, id, basicBlock.getSub1(), "sub1");
                 writeLink(sb, id, basicBlock.getSub2(), "sub2");
+                // intended fall through
             case TYPE_CONDITIONAL_BRANCH:
                 writeLink(sb, id, basicBlock.getNext(), "next");
                 writeLink(sb, id, basicBlock.getBranch(), "branch");
                 break;
             case TYPE_SWITCH:
                 writeLink(sb, id, basicBlock.getNext(), "next");
+                // intended fall through
             case TYPE_SWITCH_DECLARATION:
                 BasicBlock next = basicBlock.getNext();
 
@@ -426,6 +433,7 @@ public class ControlFlowGraphPlantUMLWriter {
                 break;
             case TYPE_IF_ELSE, TYPE_TERNARY_OPERATOR:
                 writeLink(sb, id, basicBlock.getSub2(), "else");
+                // intended fall through
             case TYPE_IF:
                 writeLink(sb, id, basicBlock.getCondition(), "condition");
                 writeLink(sb, id, basicBlock.getNext(), "next");
@@ -433,6 +441,7 @@ public class ControlFlowGraphPlantUMLWriter {
                 break;
             case TYPE_CONDITION_TERNARY_OPERATOR:
                 writeLink(sb, id, basicBlock.getCondition(), "condition");
+                // intended fall through
             case TYPE_CONDITION_OR, TYPE_CONDITION_AND:
                 writeLink(sb, id, basicBlock.getSub1(), "left");
                 writeLink(sb, id, basicBlock.getSub2(), "right");
