@@ -7,7 +7,6 @@
 
 package org.jdv1.gui.service.treenode;
 
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.UriGettable;
@@ -30,15 +29,6 @@ public class ModuleInfoFileTreeNodeFactoryProvider extends ClassFileTreeNodeFact
 
 	protected static final ImageIcon MODULE_FILE_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/module_obj.png"));
 	protected static final Factory FACTORY = new Factory();
-
-	static {
-		// Early class loading
-		try {
-			Class.forName(ModuleInfoFilePage.class.getName());
-		} catch (Exception e) {
-			assert ExceptionUtil.printStackTrace(e);
-		}
-	}
 
 	@Override
 	public String[] getSelectors() {

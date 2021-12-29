@@ -33,15 +33,6 @@ import javax.swing.Icon;
 
 public class ClassFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
 
-    static {
-        // Early class loading
-        try {
-            Class.forName(JavaType.class.getName());
-        } catch (Exception e) {
-            assert ExceptionUtil.printStackTrace(e);
-        }
-    }
-
     // Create cache
     protected LRUCache<URI, JavaType> cache = new LRUCache<>();
 

@@ -38,15 +38,6 @@ public class ClassFileTreeNodeFactoryProvider extends AbstractTypeFileTreeNodeFa
 	protected static final ImageIcon CLASS_FILE_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/classf_obj.png"));
 	protected static final Factory FACTORY = new Factory();
 
-	static {
-		// Early class loading
-		try {
-			Class.forName(DynamicPage.class.getName());
-		} catch (Exception e) {
-			assert ExceptionUtil.printStackTrace(e);
-		}
-	}
-
 	@Override
 	public String[] getSelectors() {
 		return appendSelectors("*:file:*.class");
