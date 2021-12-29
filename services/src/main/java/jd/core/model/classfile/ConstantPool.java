@@ -33,9 +33,9 @@ import jd.core.util.StringToIndexMap;
 
 public class ConstantPool
 {
-    private List<Constant> listOfConstants;
-    private StringToIndexMap constantUtf8ToIndex;
-    private IndexToIndexMap constantClassToIndex;
+    private final List<Constant> listOfConstants;
+    private final StringToIndexMap constantUtf8ToIndex;
+    private final IndexToIndexMap constantClassToIndex;
 
     private final int instanceConstructorIndex;
     private final int classConstructorIndex;

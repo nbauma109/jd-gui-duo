@@ -32,7 +32,7 @@ import static org.apache.bcel.Const.INVOKEVIRTUAL;
 import static org.apache.bcel.Const.PUTFIELD;
 
 public class UpdateBridgeMethodTypeVisitor extends AbstractJavaSyntaxVisitor {
-	private TypeMaker typeMaker;
+	private final TypeMaker typeMaker;
 
 	public UpdateBridgeMethodTypeVisitor(TypeMaker typeMaker) {
 		this.typeMaker = typeMaker;

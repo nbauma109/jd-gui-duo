@@ -10,7 +10,7 @@ package org.jd.core.v1.model.javasyntax.expression;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 
 public class DoubleConstantExpression extends AbstractLineNumberTypeExpression {
-    private double value;
+    private final double value;
 
     public DoubleConstantExpression(double value) {
         super(PrimitiveType.TYPE_DOUBLE);

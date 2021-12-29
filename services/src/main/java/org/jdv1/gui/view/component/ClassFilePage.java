@@ -226,10 +226,10 @@ public class ClassFilePage extends TypePage {
     }
 
     public class Printer extends ClassFileSourcePrinter {
-        private StringBuilder sb = new StringBuilder();
-        private boolean realignmentLineNumber;
-        private boolean showPrefixThis;
-        private boolean unicodeEscape;
+        private final StringBuilder sb = new StringBuilder();
+        private final boolean realignmentLineNumber;
+        private final boolean showPrefixThis;
+        private final boolean unicodeEscape;
 
         public Printer(GuiPreferences preferences) {
             this.realignmentLineNumber = preferences.getRealignmentLineNumber();

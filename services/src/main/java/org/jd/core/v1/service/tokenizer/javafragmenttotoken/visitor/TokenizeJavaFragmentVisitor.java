@@ -62,9 +62,9 @@ public class TokenizeJavaFragmentVisitor implements JavaFragmentVisitor {
     protected static final List<Token> DO_TOKENS = Arrays.asList((Token)DO);
     protected static final List<Token> TRY_TOKENS = Arrays.asList((Token)TRY);
 
-    private KnownLineNumberTokenVisitor knownLineNumberTokenVisitor = new KnownLineNumberTokenVisitor();
-    private UnknownLineNumberTokenVisitor unknownLineNumberTokenVisitor = new UnknownLineNumberTokenVisitor();
-    protected DefaultList<Token> tokens;
+    private final KnownLineNumberTokenVisitor knownLineNumberTokenVisitor = new KnownLineNumberTokenVisitor();
+    private final UnknownLineNumberTokenVisitor unknownLineNumberTokenVisitor = new UnknownLineNumberTokenVisitor();
+    protected final DefaultList<Token> tokens;
 
     public TokenizeJavaFragmentVisitor(int initialCapacity) {
         this.tokens = new DefaultList<>(initialCapacity);

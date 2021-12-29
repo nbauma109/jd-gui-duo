@@ -39,7 +39,7 @@ import static org.apache.bcel.Const.ACC_SYNTHETIC;
 public class InitEnumVisitor extends AbstractJavaSyntaxVisitor {
 	private ClassFileBodyDeclaration bodyDeclaration;
 	private BodyDeclaration constantBodyDeclaration;
-	private DefaultList<ClassFileEnumDeclaration.ClassFileConstant> constants = new DefaultList<>();
+	private final DefaultList<ClassFileEnumDeclaration.ClassFileConstant> constants = new DefaultList<>();
 	private int lineNumber;
 	private int index;
 	private BaseExpression arguments;

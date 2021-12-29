@@ -10,7 +10,7 @@ package org.jd.core.v1.model.javasyntax;
 import org.jd.core.v1.model.javasyntax.declaration.BaseTypeDeclaration;
 
 public class CompilationUnit {
-    private BaseTypeDeclaration typeDeclarations;
+    private final BaseTypeDeclaration typeDeclarations;
 
     public CompilationUnit(BaseTypeDeclaration typeDeclarations) {
         this.typeDeclarations = typeDeclarations;

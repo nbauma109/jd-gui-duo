@@ -97,23 +97,23 @@ public class TypeMaker {
     /*
      * Internal type names for which we have already loaded fields and methods
      */
-    private static Map<String, Boolean> loaded = new HashMap<>();
+    private static final Map<String, Boolean> loaded = new HashMap<>();
 
-    private static Map<String, Type> signatureToType = new HashMap<>(1024);
-    private static Map<String, Type> internalTypeNameFieldNameToType = new HashMap<>(1024);
-    private static Map<String, ObjectType> descriptorToObjectType = new HashMap<>(1024);
-    private static Map<String, ObjectType> internalTypeNameToObjectType = new HashMap<>(1024);
-    private static Map<String, TypeTypes> internalTypeNameToTypeTypes = new HashMap<>(1024);
-    private static Map<String, Set<BaseType>> internalTypeNameMethodNameParameterCountToDeclaredParameterTypes = new HashMap<>(1024);
-    private static Map<String, Set<BaseType>> internalTypeNameMethodNameParameterCountToParameterTypes = new HashMap<>(1024);
-    private static Map<String, MethodTypes> internalTypeNameMethodNameDescriptorToMethodTypes = new HashMap<>(1024);
+    private static final Map<String, Type> signatureToType = new HashMap<>(1024);
+    private static final Map<String, Type> internalTypeNameFieldNameToType = new HashMap<>(1024);
+    private static final Map<String, ObjectType> descriptorToObjectType = new HashMap<>(1024);
+    private static final Map<String, ObjectType> internalTypeNameToObjectType = new HashMap<>(1024);
+    private static final Map<String, TypeTypes> internalTypeNameToTypeTypes = new HashMap<>(1024);
+    private static final Map<String, Set<BaseType>> internalTypeNameMethodNameParameterCountToDeclaredParameterTypes = new HashMap<>(1024);
+    private static final Map<String, Set<BaseType>> internalTypeNameMethodNameParameterCountToParameterTypes = new HashMap<>(1024);
+    private static final Map<String, MethodTypes> internalTypeNameMethodNameDescriptorToMethodTypes = new HashMap<>(1024);
     private final Map<String, MethodTypes> signatureToMethodTypes = new HashMap<>(1024);
 
     private final Map<Long, Boolean> assignableRawTypes = new HashMap<>(1024);
     private final Map<Long, ObjectType> superParameterizedObjectTypes = new HashMap<>(1024);
 
-    private static Map<String, String[]> hierarchy = new HashMap<>(1024);
-    private static ClassPathLoader classPathLoader = new ClassPathLoader();
+    private static final Map<String, String[]> hierarchy = new HashMap<>(1024);
+    private static final ClassPathLoader classPathLoader = new ClassPathLoader();
     private final Loader loader;
 
     public TypeMaker(Loader loader) {

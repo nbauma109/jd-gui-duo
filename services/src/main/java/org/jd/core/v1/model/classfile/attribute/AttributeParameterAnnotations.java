@@ -8,7 +8,7 @@
 package org.jd.core.v1.model.classfile.attribute;
 
 public class AttributeParameterAnnotations implements Attribute {
-    private Annotations[] parameterAnnotations;
+    private final Annotations[] parameterAnnotations;
 
     public AttributeParameterAnnotations(Annotations[] parameterAnnotations) {
         this.parameterAnnotations = parameterAnnotations;

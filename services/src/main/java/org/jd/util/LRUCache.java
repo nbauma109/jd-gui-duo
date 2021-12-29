@@ -9,7 +9,7 @@ public class LRUCache<K, V> extends LinkedHashMap<K, V> {
 
 	private static final int DEFAULT_MAX_ENTRIES = 100;
 
-	private int maxEntries;
+	private final int maxEntries;
 
 	public LRUCache(int maxEntries) {
 		super(maxEntries * 3 / 2, 0.7F, true);

@@ -23,11 +23,11 @@ import java.util.TreeMap;
 import static org.jd.gui.util.Key.key;
 
 public class DeclarationListener extends AbstractJavaListener {
-    private StringBuilder sbTypeDeclaration = new StringBuilder();
+    private final StringBuilder sbTypeDeclaration = new StringBuilder();
     private String currentInternalTypeName;
 
-    private Map<String, DeclarationData> declarations = new HashMap<>();
-    private NavigableMap<Integer, DeclarationData> typeDeclarations = new TreeMap<>();
+    private final Map<String, DeclarationData> declarations = new HashMap<>();
+    private final NavigableMap<Integer, DeclarationData> typeDeclarations = new TreeMap<>();
 
     public DeclarationListener(Container.Entry entry) {
         super(entry);

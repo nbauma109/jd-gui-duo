@@ -40,7 +40,7 @@ import static org.apache.bcel.Const.ACC_STATIC;
 import static org.apache.bcel.Const.ACC_SYNTHETIC;
 
 public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
-    private TypeMaker typeMaker;
+    private final TypeMaker typeMaker;
 
     public CreateInstructionsVisitor(TypeMaker typeMaker) {
         this.typeMaker = typeMaker;

@@ -22,7 +22,7 @@ public class FileLoaderService {
 
     private final Collection<FileLoader> providers = ExtensionService.getInstance().load(FileLoader.class);
 
-    private Map<String, FileLoader> mapProviders = new HashMap<>();
+    private final Map<String, FileLoader> mapProviders = new HashMap<>();
 
     protected FileLoaderService() {
         for (FileLoader provider : providers) {

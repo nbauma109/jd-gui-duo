@@ -42,10 +42,10 @@ import java.util.Set;
 import static org.jd.core.v1.api.printer.Printer.UNKNOWN_LINE_NUMBER;
 
 public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
-    private SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
-    private Map<String, FieldDeclarator> fieldDeclarators = new HashMap<>();
-    private DefaultList<Data> datas = new DefaultList<>();
-    private DefaultList<Expression> putFields = new DefaultList<>();
+    private final SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
+    private final Map<String, FieldDeclarator> fieldDeclarators = new HashMap<>();
+    private final DefaultList<Data> datas = new DefaultList<>();
+    private final DefaultList<Expression> putFields = new DefaultList<>();
     private int lineNumber = UNKNOWN_LINE_NUMBER;
     private boolean containsLocalVariableReference;
 
@@ -315,9 +315,9 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     protected static final class Data {
-        private ClassFileConstructorDeclaration declaration;
-        private Statements statements;
-        private int index;
+        private final ClassFileConstructorDeclaration declaration;
+        private final Statements statements;
+        private final int index;
 
         public Data(ClassFileConstructorDeclaration declaration, Statements statements, int index) {
             this.declaration = declaration;

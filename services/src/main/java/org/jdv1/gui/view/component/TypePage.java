@@ -46,11 +46,11 @@ public abstract class TypePage extends CustomLineNumbersPage
 
     private static final long serialVersionUID = 1L;
 
-    protected transient API api;
-    protected transient Container.Entry entry;
+    protected final transient API api;
+    protected final transient Container.Entry entry;
     protected transient Collection<Future<Indexes>> collectionOfFutureIndexes = Collections.emptyList();
 
-    protected transient ReferenceListener listener;
+    protected final transient ReferenceListener listener;
 
     protected TypePage(API api, Container.Entry entry) {
         // Init attributes

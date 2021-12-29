@@ -43,8 +43,8 @@ public class DynamicPage
 
     private static final long serialVersionUID = 1L;
 
-    private transient API api;
-    private transient Container.Entry entry;
+    private final transient API api;
+    private final transient Container.Entry entry;
     private TypePage page;
     private URI lastOpenedUri;
     private transient Collection<Future<Indexes>> lastCollectionOfFutureIndexes;
@@ -156,8 +156,8 @@ public class DynamicPage
     }
 
     protected static class DelegatedEntry implements Container.Entry {
-        private Container.Entry entry;
-        private String source;
+        private final Container.Entry entry;
+        private final String source;
 
         DelegatedEntry(Container.Entry entry, String source) {
             this.entry = entry;

@@ -15,17 +15,14 @@ public class TreeNodeBean implements TreeNodeData {
     private final String label;
     private String tip;
     private final Icon icon;
-    private Icon openIcon;
+    private final Icon openIcon;
 
     public TreeNodeBean(String label, Icon icon) {
-        this.label = label;
-        this.icon = icon;
+        this(label, label, icon);
     }
 
     public TreeNodeBean(String label, String tip, Icon icon) {
-        this.label = label;
-        this.tip = tip;
-        this.icon = icon;
+        this(label, tip, icon, icon);
     }
 
     public TreeNodeBean(String label, String tip, Icon icon, Icon openIcon) {

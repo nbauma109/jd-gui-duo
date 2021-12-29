@@ -55,7 +55,7 @@ import javax.swing.tree.TreePath;
 
 public class SelectLocationView<T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> {
 
-    private API api;
+    private final API api;
 
     private JDialog selectLocationDialog;
     private JLabel selectLocationLabel;

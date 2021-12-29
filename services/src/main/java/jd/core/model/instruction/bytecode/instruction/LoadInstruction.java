@@ -21,7 +21,7 @@ import jd.core.model.classfile.LocalVariables;
 
 public class LoadInstruction extends IndexInstruction
 {
-    private String signature;
+    private final String signature;
 
     public LoadInstruction(
         int opcode, int offset, int lineNumber, int index, String signature)

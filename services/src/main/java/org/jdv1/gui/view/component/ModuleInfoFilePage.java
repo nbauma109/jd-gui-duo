@@ -281,7 +281,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
     }
 
     protected static class ModuleInfoReferenceData extends ReferenceData {
-        private int type;
+        private final int type;
 
         public ModuleInfoReferenceData(int type, String typeName, String name, String descriptor, String owner) {
             super(typeName, name, descriptor, owner);
@@ -290,7 +290,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
     }
 
     public class ModuleInfoFilePrinter extends StringBuilderPrinter {
-        private Map<String, ReferenceData> referencesCache = new HashMap<>();
+        private final Map<String, ReferenceData> referencesCache = new HashMap<>();
 
         @Override
         public void start(int maxLineNumber, int majorVersion, int minorVersion) {}

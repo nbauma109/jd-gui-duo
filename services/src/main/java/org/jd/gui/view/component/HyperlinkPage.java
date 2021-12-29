@@ -26,7 +26,7 @@ public abstract class HyperlinkPage extends TextPage {
     protected static final Cursor DEFAULT_CURSOR = Cursor.getDefaultCursor();
     protected static final Cursor HAND_CURSOR = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
 
-    protected transient NavigableMap<Integer, HyperlinkData> hyperlinks = new TreeMap<>();
+    protected final transient NavigableMap<Integer, HyperlinkData> hyperlinks = new TreeMap<>();
 
     protected HyperlinkPage() {
         MouseAdapter listener = new MouseAdapter() {

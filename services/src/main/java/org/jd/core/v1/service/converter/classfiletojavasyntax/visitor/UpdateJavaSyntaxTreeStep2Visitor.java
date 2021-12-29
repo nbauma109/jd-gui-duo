@@ -24,14 +24,14 @@ public class UpdateJavaSyntaxTreeStep2Visitor extends AbstractJavaSyntaxVisitor 
     protected static final SortMembersVisitor SORT_MEMBERS_VISITOR = new SortMembersVisitor();
     protected static final AutoboxingVisitor AUTOBOXING_VISITOR = new AutoboxingVisitor();
 
-    private InitStaticFieldVisitor initStaticFieldVisitor = new InitStaticFieldVisitor();
-    private InitInstanceFieldVisitor initInstanceFieldVisitor = new InitInstanceFieldVisitor();
-    private InitEnumVisitor initEnumVisitor = new InitEnumVisitor();
-    private RemoveDefaultConstructorVisitor removeDefaultConstructorVisitor = new RemoveDefaultConstructorVisitor();
+    private final InitStaticFieldVisitor initStaticFieldVisitor = new InitStaticFieldVisitor();
+    private final InitInstanceFieldVisitor initInstanceFieldVisitor = new InitInstanceFieldVisitor();
+    private final InitEnumVisitor initEnumVisitor = new InitEnumVisitor();
+    private final RemoveDefaultConstructorVisitor removeDefaultConstructorVisitor = new RemoveDefaultConstructorVisitor();
 
-    private UpdateBridgeMethodVisitor replaceBridgeMethodVisitor;
-    private InitInnerClassVisitor.UpdateNewExpressionVisitor initInnerClassStep2Visitor;
-    private AddCastExpressionVisitor addCastExpressionVisitor;
+    private final UpdateBridgeMethodVisitor replaceBridgeMethodVisitor;
+    private final InitInnerClassVisitor.UpdateNewExpressionVisitor initInnerClassStep2Visitor;
+    private final AddCastExpressionVisitor addCastExpressionVisitor;
 
     private TypeDeclaration typeDeclaration;
 

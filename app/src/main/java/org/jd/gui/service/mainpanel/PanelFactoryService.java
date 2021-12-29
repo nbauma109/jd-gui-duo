@@ -20,7 +20,7 @@ public class PanelFactoryService {
 
     public static PanelFactoryService getInstance() { return PANEL_FACTORY_SERVICE; }
 
-    private Map<String, PanelFactory> mapProviders = new HashMap<>();
+    private final Map<String, PanelFactory> mapProviders = new HashMap<>();
 
     protected PanelFactoryService() {
         Collection<PanelFactory> providers = ExtensionService.getInstance().load(PanelFactory.class);

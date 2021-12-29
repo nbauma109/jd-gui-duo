@@ -20,16 +20,16 @@ import javax.swing.ListCellRenderer;
 import javax.swing.UIManager;
 
 public class OpenTypeListCellRenderer implements ListCellRenderer<OpenTypeListCellBean> {
-    private Color textSelectionColor;
-    private Color textNonSelectionColor;
-    private Color infoSelectionColor;
-    private Color infoNonSelectionColor;
-    private Color backgroundSelectionColor;
-    private Color backgroundNonSelectionColor;
+    private final Color textSelectionColor;
+    private final Color textNonSelectionColor;
+    private final Color infoSelectionColor;
+    private final Color infoNonSelectionColor;
+    private final Color backgroundSelectionColor;
+    private final Color backgroundNonSelectionColor;
 
-    private JPanel panel;
-    private JLabel label;
-    private JLabel info;
+    private final JPanel panel;
+    private final JLabel label;
+    private final JLabel info;
 
     public OpenTypeListCellRenderer() {
         textSelectionColor = UIManager.getColor("List.selectionForeground");

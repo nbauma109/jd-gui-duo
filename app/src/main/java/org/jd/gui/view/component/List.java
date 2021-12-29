@@ -14,6 +14,7 @@ import java.awt.Component;
 import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
+import java.util.Optional;
 
 import javax.swing.BorderFactory;
 import javax.swing.InputMap;
@@ -45,29 +46,22 @@ public class List extends JList {
 	}
 
 	protected class Renderer implements ListCellRenderer {
-		private Color textSelectionColor;
-		private Color backgroundSelectionColor;
-		private Color textNonSelectionColor;
-		private Color backgroundNonSelectionColor;
+		private final Color textSelectionColor;
+		private final Color backgroundSelectionColor;
+		private final Color textNonSelectionColor;
+		private final Color backgroundNonSelectionColor;
 
-		private JLabel label;
+		private final JLabel label;
 
 		public Renderer() {
 			label = new JLabel();
 			label.setOpaque(true);
 
-			textSelectionColor = UIManager.getColor("List.dropCellForeground");
-			backgroundSelectionColor = UIManager.getColor("List.dropCellBackground");
+			textSelectionColor = Optional.ofNullable(UIManager.getColor("List.dropCellForeground")).orElse(getSelectionForeground());
+			backgroundSelectionColor = Optional.ofNullable(UIManager.getColor("List.dropCellBackground")).orElse(getSelectionBackground());
 			textNonSelectionColor = UIManager.getColor("List.foreground");
 			backgroundNonSelectionColor = UIManager.getColor("List.background");
 			Insets margins = UIManager.getInsets("List.contentMargins");
-
-			if (textSelectionColor == null) {
-				textSelectionColor = List.this.getSelectionForeground();
-			}
-			if (backgroundSelectionColor == null) {
-				backgroundSelectionColor = List.this.getSelectionBackground();
-			}
 
 			if (margins != null) {
 				label.setBorder(BorderFactory.createEmptyBorder(margins.top, margins.left, margins.bottom, margins.right));

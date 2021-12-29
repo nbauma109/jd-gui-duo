@@ -17,39 +17,27 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 import static org.apache.bcel.Const.ACC_STATIC;
 
 public class MethodDeclaration implements MemberDeclaration {
-    private BaseAnnotationReference annotationReferences;
+    private final BaseAnnotationReference annotationReferences;
     protected int flags;
-    protected String name;
-    private BaseTypeParameter typeParameters;
-    private Type returnedType;
+    protected final String name;
+    private final BaseTypeParameter typeParameters;
+    private final Type returnedType;
     protected BaseFormalParameter formalParameters;
-    private BaseType exceptionTypes;
-    protected String descriptor;
+    private final BaseType exceptionTypes;
+    protected final String descriptor;
     protected BaseStatement statements;
-    private BaseElementValue defaultAnnotationValue;
+    private final BaseElementValue defaultAnnotationValue;
 
     public MethodDeclaration(int flags, String name, Type returnedType, String descriptor) {
-        this.flags = flags;
-        this.name = name;
-        this.returnedType = returnedType;
-        this.descriptor = descriptor;
+        this(flags, name, returnedType, descriptor, null);
     }
 
     public MethodDeclaration(int flags, String name, Type returnedType, String descriptor, BaseStatement statements) {
-        this.flags = flags;
-        this.name = name;
-        this.returnedType = returnedType;
-        this.descriptor = descriptor;
-        this.statements = statements;
+        this(flags, name, returnedType, null, descriptor, statements);
     }
 
     public MethodDeclaration(int flags, String name, Type returnedType, BaseFormalParameter formalParameters, String descriptor, BaseStatement statements) {
-        this.flags = flags;
-        this.name = name;
-        this.returnedType = returnedType;
-        this.formalParameters = formalParameters;
-        this.descriptor = descriptor;
-        this.statements = statements;
+        this(null, flags, name, null, returnedType, formalParameters, null, descriptor, statements, null);
     }
 
     public MethodDeclaration(BaseAnnotationReference annotationReferences, int flags, String name, BaseTypeParameter typeParameters, Type returnedType, BaseFormalParameter formalParameters, BaseType exceptionTypes, String descriptor, BaseStatement statements, BaseElementValue defaultAnnotationValue) {

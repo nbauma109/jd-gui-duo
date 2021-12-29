@@ -27,7 +27,7 @@ import java.util.Map;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 
 public class BindTypeArgumentsToTypeArgumentsVisitor extends AbstractTypeArgumentVisitor {
-    private TypeArgumentToTypeVisitor typeArgumentToTypeVisitor = new TypeArgumentToTypeVisitor();
+    private final TypeArgumentToTypeVisitor typeArgumentToTypeVisitor = new TypeArgumentToTypeVisitor();
     private Map<String, TypeArgument> bindings;
     private BaseTypeArgument result;
 

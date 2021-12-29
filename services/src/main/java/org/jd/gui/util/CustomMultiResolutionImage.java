@@ -10,7 +10,6 @@ import javax.imageio.ImageIO;
 public class CustomMultiResolutionImage extends BaseMultiResolutionImage {
 
 	private static final int DEFAULT_IMAGE_COUNT = 10;
-	private String iconPath;
 
 	public CustomMultiResolutionImage(Image baseImage, int imageCount) {
 		super(createLargerImages(baseImage, imageCount));
@@ -26,7 +25,6 @@ public class CustomMultiResolutionImage extends BaseMultiResolutionImage {
 
 	public CustomMultiResolutionImage(String iconPath, int imageCount) throws IOException {
 		this(ImageIO.read(CustomMultiResolutionImage.class.getResource(iconPath)), imageCount);
-		this.iconPath = iconPath;
 	}
 
 	private static Image[] createLargerImages(Image baseImage, int imageCount) {
@@ -44,10 +42,5 @@ public class CustomMultiResolutionImage extends BaseMultiResolutionImage {
 	@Override
 	public Image getResolutionVariant(double destImageWidth, double destImageHeight) {
 		return super.getResolutionVariant(Math.round(destImageWidth), Math.round(destImageHeight));
-	}
-
-	@Override
-	public String toString() {
-		return iconPath;
 	}
 }

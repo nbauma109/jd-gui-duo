@@ -149,7 +149,7 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
      */
     public class SourceLineNumberList extends LineNumberList {
         private static final long serialVersionUID = 1L;
-        private RTextArea rTextArea;
+        private final RTextArea rTextArea;
         private transient Map<?,?> aaHints;
         private Rectangle visibleRect;
         private Insets textAreaInsets;

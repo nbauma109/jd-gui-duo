@@ -8,7 +8,7 @@
 package org.jd.core.v1.model.classfile.attribute;
 
 public class AttributeLocalVariableTable implements Attribute {
-    private LocalVariable[] localVariableTable;
+    private final LocalVariable[] localVariableTable;
 
     public AttributeLocalVariableTable(LocalVariable[] localVariableTable) {
         this.localVariableTable = localVariableTable;

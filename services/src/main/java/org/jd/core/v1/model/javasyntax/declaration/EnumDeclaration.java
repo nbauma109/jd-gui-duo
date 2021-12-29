@@ -14,12 +14,11 @@ import org.jd.core.v1.model.javasyntax.type.BaseType;
 import java.util.List;
 
 public class EnumDeclaration extends TypeDeclaration {
-    private BaseType interfaces;
+    private final BaseType interfaces;
     protected List<Constant> constants;
 
     public EnumDeclaration(int flags, String internalName, String name, List<Constant> constants, BodyDeclaration bodyDeclaration) {
-        super(null, flags, internalName, name, bodyDeclaration);
-        this.constants = constants;
+        this(null, flags, internalName, name, null, constants, bodyDeclaration);
     }
 
     public EnumDeclaration(BaseAnnotationReference annotationReferences, int flags, String internalName, String name, BaseType interfaces, List<Constant> constants, BodyDeclaration bodyDeclaration) {
@@ -47,19 +46,17 @@ public class EnumDeclaration extends TypeDeclaration {
     }
 
     public static class Constant implements Declaration {
-        private int lineNumber;
-        private BaseAnnotationReference annotationReferences;
-        protected String name;
+        private final int lineNumber;
+        protected final String name;
         private BaseExpression arguments;
-        private BodyDeclaration bodyDeclaration;
+        private final BodyDeclaration bodyDeclaration;
 
         public Constant(String name) {
-            this.name = name;
+            this(name, null);
         }
 
         public Constant(String name, BaseExpression arguments) {
-            this.name = name;
-            this.arguments = arguments;
+            this(0, name, arguments, null);
         }
 
         public Constant(int lineNumber, String name, BaseExpression arguments, BodyDeclaration bodyDeclaration) {
@@ -71,10 +68,6 @@ public class EnumDeclaration extends TypeDeclaration {
 
         public int getLineNumber() {
             return lineNumber;
-        }
-
-        public BaseAnnotationReference getAnnotationReferences() {
-            return annotationReferences;
         }
 
         public String getName() {

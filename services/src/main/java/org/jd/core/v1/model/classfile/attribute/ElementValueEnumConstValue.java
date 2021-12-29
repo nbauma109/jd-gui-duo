@@ -8,8 +8,8 @@
 package org.jd.core.v1.model.classfile.attribute;
 
 public class ElementValueEnumConstValue implements AttributeElementValue {
-    private String descriptor;
-    private String constName;
+    private final String descriptor;
+    private final String constName;
 
     public ElementValueEnumConstValue(String descriptor, String constName) {
         this.descriptor = descriptor;

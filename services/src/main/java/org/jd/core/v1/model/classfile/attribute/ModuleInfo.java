@@ -8,9 +8,9 @@
 package org.jd.core.v1.model.classfile.attribute;
 
 public class ModuleInfo {
-    private String name;
-    private int flags;
-    private String version;
+    private final String name;
+    private final int flags;
+    private final String version;
 
     public ModuleInfo(String name, int flags, String version) {
         this.name = name;

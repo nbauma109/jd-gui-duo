@@ -20,7 +20,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariabl
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
 public class CreateLocalVariableVisitor extends AbstractNopTypeArgumentVisitor implements LocalVariableVisitor {
-    private TypeMaker typeMaker;
+    private final TypeMaker typeMaker;
     private int index;
     private int offset;
 

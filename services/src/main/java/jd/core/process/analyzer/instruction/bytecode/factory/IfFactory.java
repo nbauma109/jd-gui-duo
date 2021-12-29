@@ -29,7 +29,7 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class IfFactory implements InstructionFactory
 {
-    private int cmp;
+    private final int cmp;
 
     public IfFactory(int cmp)
     {

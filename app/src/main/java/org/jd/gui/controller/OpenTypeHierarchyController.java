@@ -25,11 +25,11 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 public class OpenTypeHierarchyController implements IndexesChangeListener {
-    private API api;
+    private final API api;
     private final ScheduledExecutorService executor;
 
-    private OpenTypeHierarchyView openTypeHierarchyView;
-    private SelectLocationController selectLocationController;
+    private final OpenTypeHierarchyView openTypeHierarchyView;
+    private final SelectLocationController selectLocationController;
 
     private Collection<Future<Indexes>> collectionOfFutureIndexes;
     private Consumer<URI> openCallback;

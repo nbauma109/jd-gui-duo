@@ -29,8 +29,8 @@ import static org.jd.gui.util.Key.key;
 public class LogPage extends HyperlinkPage implements UriGettable, IndexesChangeListener {
 
     private static final long serialVersionUID = 1L;
-    private transient API api;
-    private URI uri;
+    private final transient API api;
+    private final URI uri;
     private transient Collection<Future<Indexes>> collectionOfFutureIndexes = Collections.emptyList();
 
     public LogPage(API api, URI uri, String content) {

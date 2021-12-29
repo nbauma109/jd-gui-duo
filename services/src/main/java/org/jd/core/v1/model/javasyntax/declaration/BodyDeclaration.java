@@ -8,7 +8,7 @@
 package org.jd.core.v1.model.javasyntax.declaration;
 
 public class BodyDeclaration implements Declaration {
-    private String internalTypeName;
+    private final String internalTypeName;
     protected BaseMemberDeclaration memberDeclarations;
 
     public BodyDeclaration(String internalTypeName, BaseMemberDeclaration memberDeclarations) {

@@ -11,13 +11,12 @@ import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class TypeReferenceDotClassExpression implements Expression {
-    private int lineNumber;
-    private Type typeDotClass;
-    private Type type;
+    private final int lineNumber;
+    private final Type typeDotClass;
+    private final Type type;
 
     public TypeReferenceDotClassExpression(Type typeDotClass) {
-        this.typeDotClass = typeDotClass;
-        this.type = ObjectType.TYPE_CLASS.createType(typeDotClass);
+        this(0, typeDotClass);
     }
 
     public TypeReferenceDotClassExpression(int lineNumber, Type typeDotClass) {

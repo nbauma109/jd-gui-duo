@@ -20,7 +20,7 @@ public class TreeNodeFactoryService {
 
     public static TreeNodeFactoryService getInstance() { return TREE_NODE_FACTORY_SERVICE; }
 
-    private Map<String, TreeNodeFactories> mapProviders = new HashMap<>();
+    private final Map<String, TreeNodeFactories> mapProviders = new HashMap<>();
 
     protected TreeNodeFactoryService() {
         Collection<TreeNodeFactory> providers = ExtensionService.getInstance().load(TreeNodeFactory.class);
@@ -82,7 +82,7 @@ public class TreeNodeFactoryService {
     }
 
     protected static class TreeNodeFactories {
-        private Map<String, TreeNodeFactory> factories = new HashMap<>();
+        private final Map<String, TreeNodeFactory> factories = new HashMap<>();
         private TreeNodeFactory defaultFactory;
 
         public void add(TreeNodeFactory factory) {

@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 public class TypeFactoryService {
     protected static final TypeFactoryService TYPE_FACTORY_SERVICE = new TypeFactoryService();
 
-    private Map<String, TypeFactories> mapProviders;
+    private final Map<String, TypeFactories> mapProviders;
 
     public static TypeFactoryService getInstance() {
         return TYPE_FACTORY_SERVICE;
@@ -89,7 +89,7 @@ public class TypeFactoryService {
     }
 
     protected static class TypeFactories {
-        private Map<String, TypeFactory> factories = new HashMap<>();
+        private final Map<String, TypeFactory> factories = new HashMap<>();
         private TypeFactory defaultFactory;
 
         public void add(TypeFactory factory) {

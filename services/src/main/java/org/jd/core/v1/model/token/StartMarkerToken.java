@@ -15,7 +15,7 @@ public class StartMarkerToken implements Token {
     public static final StartMarkerToken JAVADOC = new StartMarkerToken(Printer.JAVADOC);
     public static final StartMarkerToken IMPORT_STATEMENTS = new StartMarkerToken(Printer.IMPORT_STATEMENTS);
 
-    private int type;
+    private final int type;
 
     protected StartMarkerToken(int type) {
         this.type = type;

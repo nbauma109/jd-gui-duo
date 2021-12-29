@@ -86,10 +86,10 @@ import static org.jd.gui.util.swing.SwingUtil.newAction;
 public class MainView<T extends JComponent & UriGettable> implements UriOpenable, PreferencesChangeListener {
 
 	private static final String JAVA_DECOMPILER = "Java Decompiler";
-	private History history;
-	private Consumer<File> openFilesCallback;
+	private final History history;
+	private final Consumer<File> openFilesCallback;
 	private JFrame mainFrame;
-	private JMenu recentFiles = new JMenu("Recent Files");
+	private final JMenu recentFiles = new JMenu("Recent Files");
 	private Action closeAction;
 	private Action openTypeAction;
 	private Action backwardAction;

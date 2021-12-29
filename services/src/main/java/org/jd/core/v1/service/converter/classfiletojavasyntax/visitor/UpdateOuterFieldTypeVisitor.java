@@ -36,8 +36,8 @@ import static org.apache.bcel.Const.ALOAD_1;
 import static org.apache.bcel.Const.PUTFIELD;
 
 public class UpdateOuterFieldTypeVisitor extends AbstractJavaSyntaxVisitor {
-    private TypeMaker typeMaker;
-    private SearchFieldVisitor searchFieldVisitor = new SearchFieldVisitor();
+    private final TypeMaker typeMaker;
+    private final SearchFieldVisitor searchFieldVisitor = new SearchFieldVisitor();
 
     public UpdateOuterFieldTypeVisitor(TypeMaker typeMaker) {
         this.typeMaker = typeMaker;

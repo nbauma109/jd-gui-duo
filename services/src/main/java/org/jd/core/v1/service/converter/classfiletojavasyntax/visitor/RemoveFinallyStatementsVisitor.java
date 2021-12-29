@@ -10,7 +10,6 @@ import org.jd.core.v1.model.javasyntax.expression.BooleanExpression;
 import org.jd.core.v1.model.javasyntax.statement.AssertStatement;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.statement.BreakStatement;
-import org.jd.core.v1.model.javasyntax.statement.ByteCodeStatement;
 import org.jd.core.v1.model.javasyntax.statement.CommentStatement;
 import org.jd.core.v1.model.javasyntax.statement.ContinueStatement;
 import org.jd.core.v1.model.javasyntax.statement.DoWhileStatement;
@@ -40,7 +39,7 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.List;
 
 public class RemoveFinallyStatementsVisitor implements StatementVisitor {
-    private DeclaredSyntheticLocalVariableVisitor declaredSyntheticLocalVariableVisitor = new DeclaredSyntheticLocalVariableVisitor();
+    private final DeclaredSyntheticLocalVariableVisitor declaredSyntheticLocalVariableVisitor = new DeclaredSyntheticLocalVariableVisitor();
     private int statementCountInFinally;
     private int statementCountToRemove;
     private boolean lastFinallyStatementIsATryStatement;
@@ -260,8 +259,6 @@ public class RemoveFinallyStatementsVisitor implements StatementVisitor {
     public void visit(AssertStatement statement) {}
     @Override
     public void visit(BreakStatement statement) {}
-    @Override
-    public void visit(ByteCodeStatement statement) {}
     @Override
     public void visit(CommentStatement statement) {}
     @Override

@@ -106,13 +106,13 @@ public class ExpressionVisitor extends TypeVisitor {
 
     protected static final int UNKNOWN_LINE_NUMBER = Printer.UNKNOWN_LINE_NUMBER;
 
-    protected LinkedList<Context> contextStack = new LinkedList<>();
+    protected final LinkedList<Context> contextStack = new LinkedList<>();
     protected Fragments fragments = new Fragments();
-    private boolean diamondOperatorSupported;
+    private final boolean diamondOperatorSupported;
     protected boolean inExpressionFlag;
     protected Set<String> currentMethodParamNames = new HashSet<>();
     protected String currentTypeName;
-    private HexaExpressionVisitor hexaExpressionVisitor = new HexaExpressionVisitor();
+    private final HexaExpressionVisitor hexaExpressionVisitor = new HexaExpressionVisitor();
 
     public ExpressionVisitor(Loader loader, String mainInternalTypeName, int majorVersion, ImportsFragment importsFragment) {
         super(loader, mainInternalTypeName, majorVersion, importsFragment);

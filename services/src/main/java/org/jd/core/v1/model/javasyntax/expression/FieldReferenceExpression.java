@@ -11,9 +11,9 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class FieldReferenceExpression extends AbstractLineNumberTypeExpression {
     private Expression expression;
-    private String internalTypeName;
+    private final String internalTypeName;
     private String name;
-    private String descriptor;
+    private final String descriptor;
 
     public FieldReferenceExpression(Type type, Expression expression, String internalTypeName, String name, String descriptor) {
         super(type);

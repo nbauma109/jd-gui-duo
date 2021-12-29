@@ -9,8 +9,8 @@ package org.jd.core.v1.model.javasyntax.type;
 import java.util.Map;
 
 public class GenericType implements Type {
-    private String name;
-    private int  dimension;
+    private final String name;
+    private final int  dimension;
 
     public GenericType(String name) {
         this.name = name;

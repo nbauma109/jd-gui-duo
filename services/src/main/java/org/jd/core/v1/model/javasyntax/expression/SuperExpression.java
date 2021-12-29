@@ -10,7 +10,7 @@ package org.jd.core.v1.model.javasyntax.expression;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class SuperExpression extends AbstractLineNumberExpression {
-    private Type type;
+    private final Type type;
 
     public SuperExpression(int lineNumber, Type type) {
         super(lineNumber);

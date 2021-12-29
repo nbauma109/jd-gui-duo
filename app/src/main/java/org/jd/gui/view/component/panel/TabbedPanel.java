@@ -53,7 +53,7 @@ public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel impl
 
 	protected static final String TAB_LAYOUT = "UITabsPreferencesProvider.singleLineTabs";
 
-	private transient API api;
+	private final transient API api;
 	protected CardLayout cardLayout;
 	protected JTabbedPane tabbedPane;
 	protected transient Map<String, String> preferences;
@@ -253,7 +253,7 @@ public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel impl
 	}
 
 	protected class SubMenuItemActionListener implements ActionListener {
-		private int index;
+		private final int index;
 
 		public SubMenuItemActionListener(int index) {
 			this.index = index;

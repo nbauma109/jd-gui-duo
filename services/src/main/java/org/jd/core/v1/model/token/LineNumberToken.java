@@ -12,7 +12,7 @@ package org.jd.core.v1.model.token;
  */
 public class LineNumberToken implements Token {
 
-    private int lineNumber;
+    private final int lineNumber;
 
     public LineNumberToken(int lineNumber) {
         this.lineNumber = lineNumber;

@@ -17,7 +17,7 @@ import java.util.Collection;
 
 public class SourceLoaderService {
 
-    private Collection<SourceLoader> providers = ExtensionService.getInstance().load(SourceLoader.class);
+    private final Collection<SourceLoader> providers = ExtensionService.getInstance().load(SourceLoader.class);
 
     public String getSource(API api, Container.Entry entry) {
         for (SourceLoader provider : providers) {

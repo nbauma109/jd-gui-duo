@@ -11,7 +11,7 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class LocalVariableDeclaration implements Declaration {
     private boolean fina1 = false;
-    protected Type type;
+    protected final Type type;
     protected final BaseLocalVariableDeclarator localVariableDeclarators;
 
     public LocalVariableDeclaration(Type type, BaseLocalVariableDeclarator localVariableDeclarators) {

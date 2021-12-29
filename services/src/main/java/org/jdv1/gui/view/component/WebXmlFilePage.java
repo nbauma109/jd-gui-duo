@@ -37,8 +37,8 @@ public class WebXmlFilePage extends TypeReferencePage implements UriGettable, In
 
     private static final long serialVersionUID = 1L;
 
-    private transient API api;
-    private transient Container.Entry entry;
+    private final transient API api;
+    private final transient Container.Entry entry;
     private transient Collection<Future<Indexes>> collectionOfFutureIndexes;
 
     public WebXmlFilePage(API api, Container.Entry entry) {
@@ -186,12 +186,12 @@ public class WebXmlFilePage extends TypeReferencePage implements UriGettable, In
         }
     }
 
-    private static List<String> typeHyperlinkPaths = Arrays.asList(
+    private static final List<String> typeHyperlinkPaths = Arrays.asList(
         "web-app/filter/filter-class",
         "web-app/listener/listener-class",
         "web-app/servlet/servlet-class");
 
-    private static List<String> pathHyperlinkPaths = Arrays.asList(
+    private static final List<String> pathHyperlinkPaths = Arrays.asList(
         "web-app/jsp-config/taglib/taglib-location",
         "web-app/welcome-file-list/welcome-file",
         "web-app/login-config/form-login-config/form-login-page",
@@ -199,7 +199,7 @@ public class WebXmlFilePage extends TypeReferencePage implements UriGettable, In
         "web-app/jsp-config/jsp-property-group/include-prelude",
         "web-app/jsp-config/jsp-property-group/include-coda");
 
-    private static List<String> hyperlinkPaths = new ArrayList<>(typeHyperlinkPaths.size() + pathHyperlinkPaths.size());
+    private static final List<String> hyperlinkPaths = new ArrayList<>(typeHyperlinkPaths.size() + pathHyperlinkPaths.size());
 
     static {
         hyperlinkPaths.addAll(typeHyperlinkPaths);

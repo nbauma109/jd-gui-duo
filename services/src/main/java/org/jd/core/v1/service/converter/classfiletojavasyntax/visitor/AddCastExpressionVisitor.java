@@ -45,7 +45,6 @@ import org.jd.core.v1.model.javasyntax.expression.ThisExpression;
 import org.jd.core.v1.model.javasyntax.expression.TypeReferenceDotClassExpression;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.statement.BreakStatement;
-import org.jd.core.v1.model.javasyntax.statement.ByteCodeStatement;
 import org.jd.core.v1.model.javasyntax.statement.ContinueStatement;
 import org.jd.core.v1.model.javasyntax.statement.ReturnExpressionStatement;
 import org.jd.core.v1.model.javasyntax.statement.ThrowStatement;
@@ -78,9 +77,9 @@ import static org.apache.bcel.Const.ACC_BRIDGE;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_BYTE;
 
 public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
-    private SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
+    private final SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
 
-    private TypeMaker typeMaker;
+    private final TypeMaker typeMaker;
     private Map<String, BaseType> typeBounds;
     private Type returnedType;
     private BaseType exceptionTypes;
@@ -119,17 +118,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         VariableInitializer variableInitializer = declarator.getVariableInitializer();
 
         if (variableInitializer != null) {
-            int extraDimension = declarator.getDimension();
-
-            if (extraDimension == 0) {
-                variableInitializer.accept(this);
-            } else {
-                Type t = type;
-
-                type = type.createType(type.getDimension() + extraDimension);
-                variableInitializer.accept(this);
-                type = t;
-            }
+            variableInitializer.accept(this);
         }
     }
 
@@ -509,8 +498,6 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
     public void visit(LongConstantExpression expression) {}
     @Override
     public void visit(BreakStatement statement) {}
-    @Override
-    public void visit(ByteCodeStatement statement) {}
     @Override
     public void visit(ContinueStatement statement) {}
     @Override

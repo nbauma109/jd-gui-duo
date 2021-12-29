@@ -29,9 +29,9 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class BinaryOperatorFactory implements InstructionFactory
 {
-    protected int priority;
-    protected String signature;
-    protected String operator;
+    protected final int priority;
+    protected final String signature;
+    protected final String operator;
 
     public BinaryOperatorFactory(
             int priority, String signature, String operator)

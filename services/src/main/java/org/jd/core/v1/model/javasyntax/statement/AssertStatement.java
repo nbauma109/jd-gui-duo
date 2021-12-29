@@ -11,7 +11,7 @@ import org.jd.core.v1.model.javasyntax.expression.Expression;
 
 public class AssertStatement implements Statement {
     private Expression condition;
-    private Expression message;
+    private final Expression message;
 
     public AssertStatement(Expression condition, Expression message) {
         this.condition = condition;

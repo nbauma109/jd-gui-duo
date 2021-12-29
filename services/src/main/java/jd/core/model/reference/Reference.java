@@ -18,7 +18,7 @@ package jd.core.model.reference;
 
 public class Reference
 {
-    private String internalName;
+    private final String internalName;
     private int counter;
 
     Reference(String internalName)

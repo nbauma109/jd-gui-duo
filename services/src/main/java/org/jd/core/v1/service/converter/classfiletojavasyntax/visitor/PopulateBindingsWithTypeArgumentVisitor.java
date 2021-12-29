@@ -29,8 +29,8 @@ import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_CLASS;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_CLASS_WILDCARD;
 
 public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisitor {
-    private TypeArgumentToTypeVisitor typeArgumentToTypeVisitor = new TypeArgumentToTypeVisitor();
-    private TypeMaker typeMaker;
+    private final TypeArgumentToTypeVisitor typeArgumentToTypeVisitor = new TypeArgumentToTypeVisitor();
+    private final TypeMaker typeMaker;
     private Map<String, BaseType> contextualTypeBounds;
     private Map<String, TypeArgument> bindings;
     private Map<String, BaseType> typeBounds;

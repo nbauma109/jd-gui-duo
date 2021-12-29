@@ -29,9 +29,9 @@ import jd.core.model.instruction.bytecode.instruction.UnaryOperatorInstruction;
 
 public class UnaryOperatorFactory implements InstructionFactory
 {
-    private int priority;
-    private String signature;
-    private String operator;
+    private final int priority;
+    private final String signature;
+    private final String operator;
 
     public UnaryOperatorFactory(
             int priority, String signature, String operator)

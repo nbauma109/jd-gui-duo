@@ -12,7 +12,7 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class InstanceOfExpression extends AbstractLineNumberExpression {
     private Expression expression;
-    private Type instanceOfType;
+    private final Type instanceOfType;
 
     public InstanceOfExpression(int lineNumber, Expression expression, Type instanceOfType) {
         super(lineNumber);

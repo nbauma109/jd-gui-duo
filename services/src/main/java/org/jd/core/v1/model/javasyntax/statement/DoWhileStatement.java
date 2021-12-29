@@ -11,7 +11,7 @@ import org.jd.core.v1.model.javasyntax.expression.Expression;
 
 public class DoWhileStatement implements Statement {
     private Expression condition;
-    private BaseStatement statements;
+    private final BaseStatement statements;
 
     public DoWhileStatement(Expression condition, BaseStatement statements) {
         this.condition = condition;

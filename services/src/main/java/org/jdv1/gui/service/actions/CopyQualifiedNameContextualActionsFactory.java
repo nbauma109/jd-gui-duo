@@ -39,9 +39,9 @@ public class CopyQualifiedNameContextualActionsFactory implements ContextualActi
 
         protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/cpyqual_menu.png"));
 
-        private transient API api;
-        private transient Container.Entry entry;
-        private String fragment;
+        private final transient API api;
+        private final transient Container.Entry entry;
+        private final String fragment;
 
         public CopyQualifiedNameAction(API api, Container.Entry entry, String fragment) {
             this.api = api;

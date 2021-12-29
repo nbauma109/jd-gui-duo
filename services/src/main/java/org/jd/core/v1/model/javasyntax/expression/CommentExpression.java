@@ -11,7 +11,7 @@ import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class CommentExpression implements Expression {
-    private String text;
+    private final String text;
 
     public CommentExpression(String text) {
         this.text = text;

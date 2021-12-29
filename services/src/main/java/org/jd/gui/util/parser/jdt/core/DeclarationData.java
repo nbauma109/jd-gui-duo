@@ -4,14 +4,14 @@ import org.jd.core.v1.util.StringConstants;
 
 public class DeclarationData {
 
-    private int startPosition;
-    private int endPosition;
-    private String typeName;
+    private final int startPosition;
+    private final int endPosition;
+    private final String typeName;
     /**
      * Field or method name or null for type
      */
-    private String name;
-    private String descriptor;
+    private final String name;
+    private final String descriptor;
 
     public DeclarationData(int startPosition, int length, String typeName, String name, String descriptor) {
         this.startPosition = startPosition;

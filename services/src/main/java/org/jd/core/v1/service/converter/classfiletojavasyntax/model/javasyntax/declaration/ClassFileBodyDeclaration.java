@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ClassFileBodyDeclaration extends BodyDeclaration implements ClassFileMemberDeclaration {
-    private ClassFile classFile;
+    private final ClassFile classFile;
     private List<ClassFileFieldDeclaration> fieldDeclarations;
     private List<ClassFileConstructorOrMethodDeclaration> methodDeclarations;
     private List<ClassFileTypeDeclaration> innerTypeDeclarations;
@@ -27,9 +27,9 @@ public class ClassFileBodyDeclaration extends BodyDeclaration implements ClassFi
     private int firstLineNumber;
     private String outerTypeFieldName;
     private DefaultList<String> syntheticInnerFieldNames;
-    private ClassFileBodyDeclaration outerBodyDeclaration;
-    private Map<String, TypeArgument> bindings;
-    private Map<String, BaseType> typeBounds;
+    private final ClassFileBodyDeclaration outerBodyDeclaration;
+    private final Map<String, TypeArgument> bindings;
+    private final Map<String, BaseType> typeBounds;
 
     public ClassFileBodyDeclaration(ClassFile classFile, Map<String, TypeArgument> bindings, Map<String, BaseType> typeBounds, ClassFileBodyDeclaration outerBodyDeclaration) {
         super(classFile.getInternalTypeName(), null);

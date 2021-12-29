@@ -20,15 +20,15 @@ import static org.apache.bcel.Const.ACC_MODULE;
 import static org.apache.bcel.Const.ACC_STATIC;
 
 public class ClassFile {
-    private int majorVersion;
-    private int minorVersion;
+    private final int majorVersion;
+    private final int minorVersion;
     private int accessFlags;
-    private String internalTypeName;
-    private String superTypeName;
-    private String[] interfaceTypeNames;
-    private Field[] fields;
-    private Method[] methods;
-    private Map<String, Attribute> attributes;
+    private final String internalTypeName;
+    private final String superTypeName;
+    private final String[] interfaceTypeNames;
+    private final Field[] fields;
+    private final Method[] methods;
+    private final Map<String, Attribute> attributes;
 
     private ClassFile outerClassFile;
     private List<ClassFile> innerClassFiles;

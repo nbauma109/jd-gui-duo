@@ -23,15 +23,15 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeCellRenderer;
 
 public class TreeNodeRenderer implements TreeCellRenderer {
-    private Color textSelectionColor;
-    private Color backgroundSelectionColor;
-    private Color textNonSelectionColor;
-    private Color textDisabledColor;
-    private Color backgroundDisabledColor;
+    private final Color textSelectionColor;
+    private final Color backgroundSelectionColor;
+    private final Color textNonSelectionColor;
+    private final Color textDisabledColor;
+    private final Color backgroundDisabledColor;
 
-    private JPanel panel;
-    private JLabel icon = new JLabel();
-    private JLabel label = new JLabel();
+    private final JPanel panel;
+    private final JLabel icon = new JLabel();
+    private final JLabel label = new JLabel();
 
     public TreeNodeRenderer() {
         panel = new JPanel(new BorderLayout());

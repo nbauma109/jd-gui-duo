@@ -28,7 +28,7 @@ public class TokensFragment extends FlexibleFragment implements JavaFragment {
     public static final TokensFragment END_DECLARATION_OR_STATEMENT_BLOCK_SEMICOLON = new TokensFragment(EndBlockToken.END_DECLARATION_OR_STATEMENT_BLOCK, TextToken.SEMICOLON);
     public static final TokensFragment RETURN_SEMICOLON = new TokensFragment(RETURN, TextToken.SEMICOLON);
 
-    private List<Token> tokens;
+    private final List<Token> tokens;
 
     public TokensFragment(Token... tokens) {
         this(Arrays.asList(tokens));

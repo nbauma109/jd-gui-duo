@@ -13,8 +13,8 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.Set;
 
 public class ControlFlowGraph {
-    private Method method;
-    private DefaultList<BasicBlock> list = new DefaultList<>() {
+    private final Method method;
+    private final DefaultList<BasicBlock> list = new DefaultList<>() {
 
         private static final long serialVersionUID = 1L;
 

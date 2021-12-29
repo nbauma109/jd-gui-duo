@@ -21,7 +21,7 @@ public class UriLoaderService {
 
     public static UriLoaderService getInstance() { return URI_LOADER_SERVICE; }
 
-    private Map<String, UriLoader> mapProviders = new HashMap<>();
+    private final Map<String, UriLoader> mapProviders = new HashMap<>();
 
     protected UriLoaderService() {
         Collection<UriLoader> providers = ExtensionService.getInstance().load(UriLoader.class);

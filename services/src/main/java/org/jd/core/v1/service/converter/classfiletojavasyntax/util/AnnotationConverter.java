@@ -45,7 +45,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 public class AnnotationConverter implements ElementValueVisitor {
-    private TypeMaker typeMaker;
+    private final TypeMaker typeMaker;
     private BaseElementValue elementValue;
 
     public AnnotationConverter(TypeMaker typeMaker) {

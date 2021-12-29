@@ -22,13 +22,13 @@ import org.jd.core.v1.model.javasyntax.type.TypeArgument;
 import java.util.Map;
 
 public class ClassFileMethodDeclaration extends MethodDeclaration implements ClassFileConstructorOrMethodDeclaration {
-    private ClassFileBodyDeclaration bodyDeclaration;
-    private ClassFile classFile;
-    private Method method;
-    private BaseType parameterTypes;
-    private Map<String, TypeArgument> bindings;
-    private Map<String, BaseType> typeBounds;
-    private int firstLineNumber;
+    private final ClassFileBodyDeclaration bodyDeclaration;
+    private final ClassFile classFile;
+    private final Method method;
+    private final BaseType parameterTypes;
+    private final Map<String, TypeArgument> bindings;
+    private final Map<String, BaseType> typeBounds;
+    private final int firstLineNumber;
 
     public ClassFileMethodDeclaration(
             ClassFileBodyDeclaration bodyDeclaration, ClassFile classFile, Method method, String name,

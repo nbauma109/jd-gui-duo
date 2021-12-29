@@ -84,20 +84,20 @@ import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJ
 public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParametersToTypeArgumentsBinder implements ExpressionVisitor {
     protected static final RemoveNonWildcardTypeArgumentsVisitor REMOVE_NON_WILDCARD_TYPE_ARGUMENTS_VISITOR = new RemoveNonWildcardTypeArgumentsVisitor();
 
-    private PopulateBindingsWithTypeParameterVisitor populateBindingsWithTypeParameterVisitor = new PopulateBindingsWithTypeParameterVisitor();
-    private BindTypesToTypesVisitor bindTypesToTypesVisitor = new BindTypesToTypesVisitor();
-    private SearchInTypeArgumentVisitor searchInTypeArgumentVisitor = new SearchInTypeArgumentVisitor();
-    private TypeArgumentToTypeVisitor typeArgumentToTypeVisitor = new TypeArgumentToTypeVisitor();
-    private BaseTypeToTypeArgumentVisitor baseTypeToTypeArgumentVisitor = new BaseTypeToTypeArgumentVisitor();
-    private GetTypeArgumentVisitor getTypeArgumentVisitor = new GetTypeArgumentVisitor();
-    private BindTypeParametersToNonWildcardTypeArgumentsVisitor bindTypeParametersToNonWildcardTypeArgumentsVisitor = new BindTypeParametersToNonWildcardTypeArgumentsVisitor();
+    private final PopulateBindingsWithTypeParameterVisitor populateBindingsWithTypeParameterVisitor = new PopulateBindingsWithTypeParameterVisitor();
+    private final BindTypesToTypesVisitor bindTypesToTypesVisitor = new BindTypesToTypesVisitor();
+    private final SearchInTypeArgumentVisitor searchInTypeArgumentVisitor = new SearchInTypeArgumentVisitor();
+    private final TypeArgumentToTypeVisitor typeArgumentToTypeVisitor = new TypeArgumentToTypeVisitor();
+    private final BaseTypeToTypeArgumentVisitor baseTypeToTypeArgumentVisitor = new BaseTypeToTypeArgumentVisitor();
+    private final GetTypeArgumentVisitor getTypeArgumentVisitor = new GetTypeArgumentVisitor();
+    private final BindTypeParametersToNonWildcardTypeArgumentsVisitor bindTypeParametersToNonWildcardTypeArgumentsVisitor = new BindTypeParametersToNonWildcardTypeArgumentsVisitor();
 
-    private TypeMaker typeMaker;
-    private String internalTypeName;
-    private boolean staticMethod;
-    private PopulateBindingsWithTypeArgumentVisitor populateBindingsWithTypeArgumentVisitor;
-    private Map<String, TypeArgument> contextualBindings;
-    private Map<String, BaseType> contextualTypeBounds;
+    private final TypeMaker typeMaker;
+    private final String internalTypeName;
+    private final boolean staticMethod;
+    private final PopulateBindingsWithTypeArgumentVisitor populateBindingsWithTypeArgumentVisitor;
+    private final Map<String, TypeArgument> contextualBindings;
+    private final Map<String, BaseType> contextualTypeBounds;
 
     public Java5TypeParametersToTypeArgumentsBinder(TypeMaker typeMaker, String internalTypeName, ClassFileConstructorOrMethodDeclaration comd) {
         this.typeMaker = typeMaker;

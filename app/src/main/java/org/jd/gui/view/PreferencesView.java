@@ -45,12 +45,12 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 
 public class PreferencesView implements PreferencesPanel.PreferencesPanelChangeListener {
-    private Map<String, String> preferences;
-    private Collection<PreferencesPanel> panels;
-    private Map<PreferencesPanel, Boolean> valids = new HashMap<>();
+    private final Map<String, String> preferences;
+    private final Collection<PreferencesPanel> panels;
+    private final Map<PreferencesPanel, Boolean> valids = new HashMap<>();
 
     private JDialog preferencesDialog;
-    private JButton preferencesOkButton = new JButton();
+    private final JButton preferencesOkButton = new JButton();
 
     private Runnable okCallback;
 

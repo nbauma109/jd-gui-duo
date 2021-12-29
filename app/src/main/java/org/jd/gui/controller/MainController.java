@@ -86,7 +86,7 @@ import javax.swing.filechooser.FileSystemView;
 
 public class MainController implements API {
     private static final String INDEXES = "indexes";
-    private Configuration configuration;
+    private final Configuration configuration;
     @SuppressWarnings("all")
     private MainView mainView;
 
@@ -100,10 +100,10 @@ public class MainController implements API {
     private AboutController aboutController;
     private SourceLoaderService sourceLoaderService;
 
-    private History history = new History();
+    private final History history = new History();
     private JComponent currentPage = null;
-    private ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
-    private List<IndexesChangeListener> containerChangeListeners = new ArrayList<>();
+    private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
+    private final List<IndexesChangeListener> containerChangeListeners = new ArrayList<>();
 
     public MainController(Configuration configuration) {
         this.configuration = configuration;
@@ -530,7 +530,7 @@ public class MainController implements API {
 
     // --- ComponentListener --- //
     protected class MainFrameListener extends ComponentAdapter {
-        private Configuration configuration;
+        private final Configuration configuration;
 
         public MainFrameListener(Configuration configuration) {
             this.configuration = configuration;

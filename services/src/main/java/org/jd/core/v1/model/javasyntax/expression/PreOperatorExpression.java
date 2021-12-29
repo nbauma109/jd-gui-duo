@@ -10,7 +10,7 @@ package org.jd.core.v1.model.javasyntax.expression;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class PreOperatorExpression extends AbstractLineNumberExpression {
-    private String operator;
+    private final String operator;
     private Expression expression;
 
     public PreOperatorExpression(int lineNumber, String operator, Expression expression) {

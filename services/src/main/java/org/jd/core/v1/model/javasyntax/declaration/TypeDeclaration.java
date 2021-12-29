@@ -10,11 +10,11 @@ package org.jd.core.v1.model.javasyntax.declaration;
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
 
 public abstract class TypeDeclaration implements BaseTypeDeclaration, MemberDeclaration {
-    private BaseAnnotationReference annotationReferences;
+    private final BaseAnnotationReference annotationReferences;
     protected int flags;
-    protected String internalTypeName;
-    private String name;
-    private BodyDeclaration bodyDeclaration;
+    protected final String internalTypeName;
+    private final String name;
+    private final BodyDeclaration bodyDeclaration;
 
     protected TypeDeclaration(BaseAnnotationReference annotationReferences, int flags, String internalTypeName, String name, BodyDeclaration bodyDeclaration) {
         this.annotationReferences = annotationReferences;

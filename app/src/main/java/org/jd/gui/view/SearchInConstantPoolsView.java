@@ -74,9 +74,9 @@ public class SearchInConstantPoolsView<T extends DefaultMutableTreeNode & Contai
     public static final int SEARCH_DECLARATION = 64;
     public static final int SEARCH_REFERENCE = 128;
 
-    private API api;
-    private Set<URI> accepted = new HashSet<>();
-    private Set<URI> expanded = new HashSet<>();
+    private final API api;
+    private final Set<URI> accepted = new HashSet<>();
+    private final Set<URI> expanded = new HashSet<>();
 
     private JDialog searchInConstantPoolsDialog;
     private JTextField searchInConstantPoolsEnterTextField;

@@ -17,7 +17,6 @@ import org.jd.core.v1.model.javasyntax.declaration.EnumDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.ExpressionVariableInitializer;
 import org.jd.core.v1.model.javasyntax.declaration.FieldDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
-import org.jd.core.v1.model.javasyntax.declaration.InstanceInitializerDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.InterfaceDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.StaticInitializerDeclaration;
@@ -38,10 +37,10 @@ import java.util.List;
 import java.util.Map;
 
 public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
-    private SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
-    private SearchLocalVariableReferenceVisitor searchLocalVariableReferenceVisitor = new SearchLocalVariableReferenceVisitor();
+    private final SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
+    private final SearchLocalVariableReferenceVisitor searchLocalVariableReferenceVisitor = new SearchLocalVariableReferenceVisitor();
     private String internalTypeName;
-    private Map<String, FieldDeclarator> fields = new HashMap<>();
+    private final Map<String, FieldDeclarator> fields = new HashMap<>();
     private List<ClassFileConstructorOrMethodDeclaration> methods;
     private Boolean deleteStaticDeclaration;
 
@@ -113,9 +112,6 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(MethodDeclaration declaration) {}
-
-    @Override
-    public void visit(InstanceInitializerDeclaration declaration) {}
 
     @Override
     public void visit(StaticInitializerDeclaration declaration) {

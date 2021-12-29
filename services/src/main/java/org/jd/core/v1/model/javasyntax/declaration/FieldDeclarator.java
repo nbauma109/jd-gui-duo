@@ -8,8 +8,7 @@ package org.jd.core.v1.model.javasyntax.declaration;
 
 public class FieldDeclarator implements BaseFieldDeclarator {
     private FieldDeclaration fieldDeclaration;
-    private String name;
-    private int dimension;
+    private final String name;
     private VariableInitializer variableInitializer;
 
     public FieldDeclarator(String name) {
@@ -34,10 +33,6 @@ public class FieldDeclarator implements BaseFieldDeclarator {
         return name;
     }
 
-    public int getDimension() {
-        return dimension;
-    }
-
     public VariableInitializer getVariableInitializer() {
         return variableInitializer;
     }
@@ -55,13 +50,12 @@ public class FieldDeclarator implements BaseFieldDeclarator {
 			return false;
 		}
 
-        return dimension == that.dimension && name.equals(that.name) && (variableInitializer != null ? variableInitializer.equals(that.variableInitializer) : that.variableInitializer == null);
+        return name.equals(that.name) && (variableInitializer != null ? variableInitializer.equals(that.variableInitializer) : that.variableInitializer == null);
     }
 
     @Override
     public int hashCode() {
         int result = 544278669 + name.hashCode();
-        result = 31 * result + dimension;
         return 31 * result + (variableInitializer != null ? variableInitializer.hashCode() : 0);
     }
 

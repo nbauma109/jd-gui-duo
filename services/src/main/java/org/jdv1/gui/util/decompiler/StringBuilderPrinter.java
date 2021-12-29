@@ -14,7 +14,7 @@ public class StringBuilderPrinter implements Printer {
     protected static final String TAB = "  ";
     protected static final String NEWLINE = "\n";
 
-    protected StringBuilder stringBuffer = new StringBuilder(10 * 1024);
+    protected final StringBuilder stringBuffer = new StringBuilder(10 * 1024);
 
     private boolean unicodeEscape = true;
     protected boolean realignmentLineNumber = false;

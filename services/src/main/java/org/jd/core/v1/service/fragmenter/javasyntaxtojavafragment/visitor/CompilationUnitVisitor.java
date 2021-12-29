@@ -30,7 +30,6 @@ import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
 import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarators;
 import org.jd.core.v1.model.javasyntax.declaration.FormalParameter;
 import org.jd.core.v1.model.javasyntax.declaration.FormalParameters;
-import org.jd.core.v1.model.javasyntax.declaration.InstanceInitializerDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.InterfaceDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclarator;
@@ -112,9 +111,9 @@ public class CompilationUnitVisitor extends StatementVisitor {
     public static final TextToken COMMENT_BRIDGE = new TextToken("/* bridge */");
     public static final TextToken COMMENT_SYNTHETIC = new TextToken("/* synthetic */");
 
-    private AnnotationVisitor annotationVisitor = new AnnotationVisitor();
-    private SingleLineStatementVisitor singleLineStatementVisitor = new SingleLineStatementVisitor();
-    private String mainInternalName;
+    private final AnnotationVisitor annotationVisitor = new AnnotationVisitor();
+    private final SingleLineStatementVisitor singleLineStatementVisitor = new SingleLineStatementVisitor();
+    private final String mainInternalName;
 
     public CompilationUnitVisitor(Loader loader, String mainInternalTypeName, int majorVersion, ImportsFragment importsFragment) {
         super(loader, mainInternalTypeName, majorVersion, importsFragment);
@@ -642,16 +641,6 @@ public class CompilationUnitVisitor extends StatementVisitor {
     public void visit(EnumDeclaration.Constant declaration) {
         tokens = new Tokens();
 
-        // Build fragments for annotations
-        BaseAnnotationReference annotationReferences = declaration.getAnnotationReferences();
-
-        if (annotationReferences != null) {
-            annotationReferences.accept(annotationVisitor);
-            fragments.addTokensFragment(tokens);
-            JavaFragmentFactory.addSpacerAfterMemberAnnotations(fragments);
-            tokens = new Tokens();
-        }
-
         // Build token for type declaration
         tokens.addLineNumberToken(declaration.getLineNumber());
         tokens.add(new DeclarationToken(Printer.FIELD, currentInternalTypeName, declaration.getName(), 'L' + currentInternalTypeName + ';'));
@@ -722,25 +711,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
         tokens = new Tokens();
         tokens.add(TextToken.SPACE);
-
-        switch (fieldDeclarator.getDimension()) {
-            case 0:
-                tokens.add(new DeclarationToken(Printer.FIELD, currentInternalTypeName, fieldDeclarator.getName(), descriptor));
-                break;
-            case 1:
-                tokens.add(new DeclarationToken(Printer.FIELD, currentInternalTypeName, fieldDeclarator.getName(), "[" + descriptor));
-                tokens.add(TextToken.DIMENSION_1);
-                break;
-            case 2:
-                tokens.add(new DeclarationToken(Printer.FIELD, currentInternalTypeName, fieldDeclarator.getName(), "[[" + descriptor));
-                tokens.add(TextToken.DIMENSION_2);
-                break;
-            default:
-                descriptor = new String(new char[fieldDeclarator.getDimension()]).replace('\0', '[') + descriptor;
-                tokens.add(new DeclarationToken(Printer.FIELD, currentInternalTypeName, fieldDeclarator.getName(), descriptor));
-                tokens.add(newTextToken(new String(new char[fieldDeclarator.getDimension()]).replace("\0", "[]")));
-                break;
-        }
+        tokens.add(new DeclarationToken(Printer.FIELD, currentInternalTypeName, fieldDeclarator.getName(), descriptor));
 
         if ((variableInitializer != null)) {
             tokens.add(TextToken.SPACE_EQUAL_SPACE);
@@ -808,26 +779,6 @@ public class CompilationUnitVisitor extends StatementVisitor {
                 tokens.add(TextToken.COMMA_SPACE);
                 iterator.next().accept(this);
             }
-        }
-    }
-
-    @Override
-    public void visit(InstanceInitializerDeclaration declaration) {
-        BaseStatement statements = declaration.getStatements();
-
-        if (statements != null) {
-            fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_METHOD_BLOCK);
-
-            storeContext();
-            currentMethodParamNames.clear();
-
-            StartBodyFragment start = JavaFragmentFactory.addStartMethodBody(fragments);
-            statements.accept(this);
-            JavaFragmentFactory.addEndMethodBody(fragments, start);
-
-            fragments.add(EndMovableJavaBlockFragment.END_MOVABLE_BLOCK);
-
-            restoreContext();
         }
     }
 

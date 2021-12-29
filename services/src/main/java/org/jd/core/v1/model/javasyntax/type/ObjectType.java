@@ -48,13 +48,13 @@ public class ObjectType implements Type {
         public String toString() { return "UndefinedObjectType"; }
     };
 
-    protected String internalName;
-    protected String qualifiedName;
-    protected String name;
+    protected final String internalName;
+    protected final String qualifiedName;
+    protected final String name;
 
-    protected BaseTypeArgument typeArguments;
-    protected int dimension;
-    protected String descriptor;
+    protected final BaseTypeArgument typeArguments;
+    protected final int dimension;
+    protected final String descriptor;
 
     public ObjectType(String internalName, String qualifiedName, String name) {
         this(internalName, qualifiedName, name, null, 0);
@@ -90,6 +90,7 @@ public class ObjectType implements Type {
         this.qualifiedName = this.name = PrimitiveType.getPrimitiveType(primitiveDescriptor.charAt(0)).getName();
         this.dimension = dimension;
         this.descriptor = createDescriptor(primitiveDescriptor, dimension);
+        this.typeArguments = null;
     }
 
     protected static String createDescriptor(String descriptor, int dimension) {

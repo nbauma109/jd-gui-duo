@@ -19,8 +19,8 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import static org.apache.bcel.Const.MAJOR_1_5;
 
 public class UpdateJavaSyntaxTreeStep0Visitor extends AbstractJavaSyntaxVisitor {
-    private UpdateOuterFieldTypeVisitor updateOuterFieldTypeVisitor;
-    private UpdateBridgeMethodTypeVisitor updateBridgeMethodTypeVisitor;
+    private final UpdateOuterFieldTypeVisitor updateOuterFieldTypeVisitor;
+    private final UpdateBridgeMethodTypeVisitor updateBridgeMethodTypeVisitor;
 
     public UpdateJavaSyntaxTreeStep0Visitor(TypeMaker typeMaker) {
         this.updateOuterFieldTypeVisitor = new UpdateOuterFieldTypeVisitor(typeMaker);

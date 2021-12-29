@@ -76,7 +76,7 @@ import java.util.Map;
  * Output: {@link org.jd.core.v1.model.javasyntax.CompilationUnit}<br>
  */
 public class ConvertClassFileProcessor {
-    private PopulateBindingsWithTypeParameterVisitor populateBindingsWithTypeParameterVisitor = new PopulateBindingsWithTypeParameterVisitor() {
+    private final PopulateBindingsWithTypeParameterVisitor populateBindingsWithTypeParameterVisitor = new PopulateBindingsWithTypeParameterVisitor() {
         @Override
         public void visit(TypeParameter parameter) {
             bindings.put(parameter.getIdentifier(), new GenericType(parameter.getIdentifier()));

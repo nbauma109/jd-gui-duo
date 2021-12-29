@@ -16,7 +16,7 @@ import java.util.Collection;
 import javax.swing.JFrame;
 
 public class PreferencesController {
-    private PreferencesView preferencesView;
+    private final PreferencesView preferencesView;
 
     public PreferencesController(Configuration configuration, JFrame mainFrame, Collection<PreferencesPanel> panels) {
         // Create UI

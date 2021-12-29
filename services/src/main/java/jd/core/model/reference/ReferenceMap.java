@@ -22,7 +22,7 @@ import java.util.Map;
 
 public class ReferenceMap
 {
-    private Map<String, Reference> references;
+    private final Map<String, Reference> references;
 
     public ReferenceMap()
     {

@@ -12,7 +12,7 @@ import org.jd.gui.view.AboutView;
 import javax.swing.JFrame;
 
 public class AboutController {
-    private AboutView aboutView;
+    private final AboutView aboutView;
 
     public AboutController(JFrame mainFrame) {
         // Create UI

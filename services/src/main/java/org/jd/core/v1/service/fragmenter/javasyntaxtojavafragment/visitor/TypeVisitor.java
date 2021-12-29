@@ -74,14 +74,14 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
 
     public static final int UNKNOWN_LINE_NUMBER = Printer.UNKNOWN_LINE_NUMBER;
 
-    private Loader loader;
-    private String internalPackageName;
-    private boolean genericTypesSupported;
-    protected ImportsFragment importsFragment;
+    private final Loader loader;
+    private final String internalPackageName;
+    private final boolean genericTypesSupported;
+    protected final ImportsFragment importsFragment;
     protected Tokens tokens;
     private int maxLineNumber;
     protected String currentInternalTypeName;
-    private Map<String, TextToken> textTokenCache = new HashMap<>();
+    private final Map<String, TextToken> textTokenCache = new HashMap<>();
 
     public TypeVisitor(Loader loader, String mainInternalTypeName, int majorVersion, ImportsFragment importsFragment) {
         this.loader = loader;

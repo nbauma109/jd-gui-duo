@@ -21,7 +21,6 @@ import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
 import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarators;
 import org.jd.core.v1.model.javasyntax.declaration.FormalParameter;
 import org.jd.core.v1.model.javasyntax.declaration.FormalParameters;
-import org.jd.core.v1.model.javasyntax.declaration.InstanceInitializerDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.InterfaceDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclarator;
@@ -84,7 +83,6 @@ import org.jd.core.v1.model.javasyntax.reference.ReferenceVisitor;
 import org.jd.core.v1.model.javasyntax.statement.AssertStatement;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.statement.BreakStatement;
-import org.jd.core.v1.model.javasyntax.statement.ByteCodeStatement;
 import org.jd.core.v1.model.javasyntax.statement.CommentStatement;
 import org.jd.core.v1.model.javasyntax.statement.ContinueStatement;
 import org.jd.core.v1.model.javasyntax.statement.DoWhileStatement;
@@ -190,7 +188,6 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
 
     @Override
     public void visit(EnumDeclaration.Constant declaration) {
-        safeAccept(declaration.getAnnotationReferences());
         safeAccept(declaration.getArguments());
         safeAccept(declaration.getBodyDeclaration());
     }
@@ -235,11 +232,6 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
     @Override
     public void visit(FormalParameters list) {
         acceptListDeclaration(list);
-    }
-
-    @Override
-    public void visit(InstanceInitializerDeclaration declaration) {
-        safeAccept(declaration.getStatements());
     }
 
     @Override
@@ -557,8 +549,6 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
     @Override
     public void visit(BreakStatement statement) {}
 
-    @Override
-    public void visit(ByteCodeStatement statement) {}
 
     @Override
     public void visit(ContinueStatement statement) {}

@@ -98,10 +98,10 @@ public class SourceWriterVisitor
 			"==", "<", ">", "", "!", "<=", ">=", "!=" };
     private static final char[] BIN_OPS = {'&', '^', '|'};
 
-    private Loader loader;
-    private InstructionPrinter printer;
-    private ReferenceMap referenceMap;
-    private Set<String> keywordSet;
+    private final Loader loader;
+    private final InstructionPrinter printer;
+    private final ReferenceMap referenceMap;
+    private final Set<String> keywordSet;
     private ConstantPool constants;
     private LocalVariables localVariables;
 

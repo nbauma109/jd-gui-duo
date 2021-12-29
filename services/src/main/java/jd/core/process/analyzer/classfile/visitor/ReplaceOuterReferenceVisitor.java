@@ -65,9 +65,9 @@ import jd.core.model.instruction.bytecode.instruction.UnaryOperatorInstruction;
  */
 public class ReplaceOuterReferenceVisitor
 {
-    private int opcode;
-    private int index;
-    private int outerThisInstructionIndex;
+    private final int opcode;
+    private final int index;
+    private final int outerThisInstructionIndex;
 
     public ReplaceOuterReferenceVisitor(
         int opcode, int index, int outerThisInstructionIndex)

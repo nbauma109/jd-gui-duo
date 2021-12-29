@@ -44,9 +44,9 @@ import java.util.Map;
 import static org.apache.bcel.Const.ACC_STATIC;
 
 public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
-    private BodyDeclarationsVisitor bodyDeclarationsVisitor = new BodyDeclarationsVisitor();
-    private Map<String, Map<String, ClassFileMethodDeclaration>> bridgeMethodDeclarations = new HashMap<>();
-    private TypeMaker typeMaker;
+    private final BodyDeclarationsVisitor bodyDeclarationsVisitor = new BodyDeclarationsVisitor();
+    private final Map<String, Map<String, ClassFileMethodDeclaration>> bridgeMethodDeclarations = new HashMap<>();
+    private final TypeMaker typeMaker;
 
     public UpdateBridgeMethodVisitor(TypeMaker typeMaker) {
         this.typeMaker = typeMaker;

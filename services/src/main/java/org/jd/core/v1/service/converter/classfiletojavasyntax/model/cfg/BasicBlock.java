@@ -69,7 +69,7 @@ public class BasicBlock {
     public static final BasicBlock END = new ImmutableBasicBlock(TYPE_END);
     public static final BasicBlock RETURN = new ImmutableBasicBlock(TYPE_RETURN);
 
-    private ControlFlowGraph controlFlowGraph;
+    private final ControlFlowGraph controlFlowGraph;
 
     private final int index;
     private int type;
@@ -85,7 +85,7 @@ public class BasicBlock {
     private BasicBlock sub2;
     private DefaultList<ExceptionHandler> exceptionHandlers = EMPTY_EXCEPTION_HANDLERS;
     private DefaultList<SwitchCase> switchCases = EMPTY_SWITCH_CASES;
-    private Set<BasicBlock> predecessors;
+    private final Set<BasicBlock> predecessors;
     private Loop enclosingLoop;
 
     public BasicBlock(ControlFlowGraph controlFlowGraph, int index, BasicBlock original) {
@@ -452,24 +452,26 @@ public class BasicBlock {
     }
 
     public static class SwitchCase {
-        private int value;
-        private int offset;
+        private final int value;
+        private final int offset;
         private BasicBlock basicBlock;
-        private boolean defaultCase;
+        private final boolean defaultCase;
 
         public SwitchCase(BasicBlock basicBlock) {
-            this.offset = basicBlock.getFromOffset();
-            this.basicBlock = basicBlock;
-            this.defaultCase = true;
+            this(0, basicBlock, true);
         }
 
         public SwitchCase(int value, BasicBlock basicBlock) {
+            this(value, basicBlock, false);
+        }
+
+        public SwitchCase(int value, BasicBlock basicBlock, boolean defaultCase) {
             this.value = value;
             this.offset = basicBlock.getFromOffset();
             this.basicBlock = basicBlock;
-            this.defaultCase = false;
+            this.defaultCase = defaultCase;
         }
-
+        
         public int getValue() {
             return value;
         }

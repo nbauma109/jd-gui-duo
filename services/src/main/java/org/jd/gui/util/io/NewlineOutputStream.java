@@ -13,7 +13,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 public class NewlineOutputStream extends FilterOutputStream {
-    private static byte[] lineSeparator = System.lineSeparator().getBytes(StandardCharsets.UTF_8);
+    private static final byte[] lineSeparator = System.lineSeparator().getBytes(StandardCharsets.UTF_8);
 
     public NewlineOutputStream(OutputStream os) {
         super(os);

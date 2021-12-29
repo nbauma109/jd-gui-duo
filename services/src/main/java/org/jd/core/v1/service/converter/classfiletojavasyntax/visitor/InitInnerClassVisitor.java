@@ -66,8 +66,8 @@ import static org.apache.bcel.Const.ACC_SYNTHETIC;
 import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_ANONYMOUS;
 
 public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
-    private UpdateFieldDeclarationsAndReferencesVisitor updateFieldDeclarationsAndReferencesVisitor = new UpdateFieldDeclarationsAndReferencesVisitor();
-    private DefaultList<String> syntheticInnerFieldNames = new DefaultList<>();
+    private final UpdateFieldDeclarationsAndReferencesVisitor updateFieldDeclarationsAndReferencesVisitor = new UpdateFieldDeclarationsAndReferencesVisitor();
+    private final DefaultList<String> syntheticInnerFieldNames = new DefaultList<>();
     private String outerTypeFieldName;
 
     @Override
@@ -322,12 +322,12 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     public static class UpdateNewExpressionVisitor extends AbstractJavaSyntaxVisitor {
-        private TypeMaker typeMaker;
+        private final TypeMaker typeMaker;
         private ClassFileBodyDeclaration bodyDeclaration;
         private ClassFile classFile;
-        private Map<String, String> finalLocalVariableNameMap = new HashMap<>();
-        private DefaultList<ClassFileClassDeclaration> localClassDeclarations = new DefaultList<>();
-        private Set<NewExpression> newExpressions = new HashSet<>();
+        private final Map<String, String> finalLocalVariableNameMap = new HashMap<>();
+        private final DefaultList<ClassFileClassDeclaration> localClassDeclarations = new DefaultList<>();
+        private final Set<NewExpression> newExpressions = new HashSet<>();
         private int lineNumber;
 
         public UpdateNewExpressionVisitor(TypeMaker typeMaker) {
@@ -662,7 +662,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
         }
 
         protected class AddLocalClassDeclarationVisitor extends AbstractJavaSyntaxVisitor {
-            private SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
+            private final SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
             private int lineNumber = Expression.UNKNOWN_LINE_NUMBER;
 
             @Override

@@ -16,8 +16,8 @@ import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.LocalVariableSet;
 
 public class UpdateTypeVisitor extends AbstractNopTypeArgumentVisitor {
-    private UpdateClassTypeArgumentsVisitor updateClassTypeArgumentsVisitor = new UpdateClassTypeArgumentsVisitor();
-    private LocalVariableSet localVariableSet;
+    private final UpdateClassTypeArgumentsVisitor updateClassTypeArgumentsVisitor = new UpdateClassTypeArgumentsVisitor();
+    private final LocalVariableSet localVariableSet;
     private LocalVariableType localVariableType;
 
     public UpdateTypeVisitor(LocalVariableSet localVariableSet) {

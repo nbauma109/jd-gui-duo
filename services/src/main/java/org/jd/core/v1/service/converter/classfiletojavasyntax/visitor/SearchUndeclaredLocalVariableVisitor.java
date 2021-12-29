@@ -26,7 +26,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class SearchUndeclaredLocalVariableVisitor extends AbstractJavaSyntaxVisitor {
-    private Set<AbstractLocalVariable> variables = new HashSet<>();
+    private final Set<AbstractLocalVariable> variables = new HashSet<>();
 
     public void init() {
         variables.clear();

@@ -27,12 +27,12 @@ import java.io.IOException;
 import java.util.Map;
 
 public class ClassFileToJavaSourceDecompiler implements Decompiler {
-    private ClassFileDeserializer deserializer = new ClassFileDeserializer();
-    private ClassFileToJavaSyntaxProcessor converter = new ClassFileToJavaSyntaxProcessor();
-    private JavaSyntaxToJavaFragmentProcessor fragmenter = new JavaSyntaxToJavaFragmentProcessor();
-    private LayoutFragmentProcessor layouter = new LayoutFragmentProcessor();
-    private JavaFragmentToTokenProcessor tokenizer = new JavaFragmentToTokenProcessor();
-    private WriteTokenProcessor writer = new WriteTokenProcessor();
+    private final ClassFileDeserializer deserializer = new ClassFileDeserializer();
+    private final ClassFileToJavaSyntaxProcessor converter = new ClassFileToJavaSyntaxProcessor();
+    private final JavaSyntaxToJavaFragmentProcessor fragmenter = new JavaSyntaxToJavaFragmentProcessor();
+    private final LayoutFragmentProcessor layouter = new LayoutFragmentProcessor();
+    private final JavaFragmentToTokenProcessor tokenizer = new JavaFragmentToTokenProcessor();
+    private final WriteTokenProcessor writer = new WriteTokenProcessor();
 
     @Override
     public void decompile(Loader loader, Printer printer, String internalName) throws LoaderException, IOException {

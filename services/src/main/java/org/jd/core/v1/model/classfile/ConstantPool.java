@@ -13,7 +13,7 @@ import org.apache.bcel.classfile.ConstantString;
 import org.apache.bcel.classfile.ConstantUtf8;
 
 public class ConstantPool {
-    private Constant[] constants;
+    private final Constant[] constants;
 
     public ConstantPool(Constant[] constants) {
         this.constants = constants;

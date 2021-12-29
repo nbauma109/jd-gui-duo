@@ -12,11 +12,11 @@ import org.apache.bcel.classfile.CodeException;
 import java.util.Map;
 
 public class AttributeCode implements Attribute {
-    private int maxStack;
-    private int maxLocals;
-    private byte[] code;
-    private CodeException[] exceptionTable;
-    private Map<String, Attribute> attributes;
+    private final int maxStack;
+    private final int maxLocals;
+    private final byte[] code;
+    private final CodeException[] exceptionTable;
+    private final Map<String, Attribute> attributes;
 
     public AttributeCode(int maxStack, int maxLocals, byte[] code, CodeException[] exceptionTable, Map<String, Attribute> attributes) {
         this.maxStack = maxStack;

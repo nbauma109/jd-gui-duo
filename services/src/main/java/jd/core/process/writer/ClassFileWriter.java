@@ -115,7 +115,7 @@ public class ClassFileWriter
 
     private static final String PUBLIC = "public";
 
-    private static Set<String> keywords;
+    private static final Set<String> keywords;
 
     private static final String[] ACCESS_FIELD_NAMES = {
         PUBLIC, PRIVATE, PROTECTED, STATIC, FINAL, null, VOLATILE,

@@ -11,7 +11,7 @@ import org.jd.core.v1.model.javasyntax.expression.Expression;
 
 public class SynchronizedStatement implements Statement {
     private Expression monitor;
-    private BaseStatement statements;
+    private final BaseStatement statements;
 
     public SynchronizedStatement(Expression monitor, BaseStatement statements) {
         this.monitor = monitor;

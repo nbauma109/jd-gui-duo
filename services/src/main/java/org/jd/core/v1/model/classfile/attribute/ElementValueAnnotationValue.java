@@ -8,7 +8,7 @@
 package org.jd.core.v1.model.classfile.attribute;
 
 public class ElementValueAnnotationValue implements AttributeElementValue {
-    private Annotation annotationValue;
+    private final Annotation annotationValue;
 
     public ElementValueAnnotationValue(Annotation annotationValue) {
         this.annotationValue = annotationValue;

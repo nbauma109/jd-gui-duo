@@ -23,8 +23,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import javax.swing.JFrame;
 
 public class SaveAllSourcesController implements SourcesSavable.Controller, SourcesSavable.Listener {
-    private API api;
-    private SaveAllSourcesView saveAllSourcesView;
+    private final API api;
+    private final SaveAllSourcesView saveAllSourcesView;
     private boolean cancel;
     private int counter;
     private int mask;

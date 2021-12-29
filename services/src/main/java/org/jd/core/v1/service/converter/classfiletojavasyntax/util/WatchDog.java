@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class WatchDog {
-    protected Set<Link> links = new HashSet<>();
+    protected final Set<Link> links = new HashSet<>();
 
     public void clear() {
         links.clear();
@@ -32,8 +32,8 @@ public class WatchDog {
     }
 
     protected static class Link {
-        private int parentIndex;
-        private int childIndex;
+        private final int parentIndex;
+        private final int childIndex;
 
         public Link(BasicBlock parent, BasicBlock child) {
             this.parentIndex = parent.getIndex();

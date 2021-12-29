@@ -45,12 +45,12 @@ import java.util.TreeMap;
 import static org.jd.gui.util.Key.key;
 
 public class ReferenceListener extends AbstractJavaListener {
-    private StringBuilder sbTypeDeclaration = new StringBuilder();
-    private Map<String, ReferenceData> referencesCache = new HashMap<>();
+    private final StringBuilder sbTypeDeclaration = new StringBuilder();
+    private final Map<String, ReferenceData> referencesCache = new HashMap<>();
     private String currentInternalTypeName;
     private Context currentContext;
 
-    private DeclarationListener declarationListener;
+    private final DeclarationListener declarationListener;
 
     private final List<ReferenceData> references = new ArrayList<>();
     private final List<StringData> strings = new ArrayList<>();

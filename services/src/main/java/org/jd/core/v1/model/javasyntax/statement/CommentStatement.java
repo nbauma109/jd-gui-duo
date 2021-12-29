@@ -8,7 +8,7 @@
 package org.jd.core.v1.model.javasyntax.statement;
 
 public class CommentStatement implements Statement {
-    private String text;
+    private final String text;
 
     public CommentStatement(String text) {
         this.text = text;

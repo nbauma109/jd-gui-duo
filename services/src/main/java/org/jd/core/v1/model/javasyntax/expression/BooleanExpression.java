@@ -13,7 +13,7 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 public class BooleanExpression extends AbstractLineNumberExpression {
     public static final BooleanExpression TRUE = new BooleanExpression(true);
 
-    private boolean value;
+    private final boolean value;
 
     protected BooleanExpression(boolean value) {
         this.value = value;

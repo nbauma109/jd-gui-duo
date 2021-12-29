@@ -69,7 +69,7 @@ import jd.core.model.instruction.bytecode.instruction.UnaryOperatorInstruction;
  */
 public class SetConstantTypeInStringIndexOfMethodsVisitor
 {
-    private ConstantPool constants;
+    private final ConstantPool constants;
 
     public SetConstantTypeInStringIndexOfMethodsVisitor(ConstantPool constants)
     {

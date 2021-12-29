@@ -21,7 +21,7 @@ import java.util.List;
 
 public class LocalVariables
 {
-    private List<LocalVariable> listOfLocalVariables;
+    private final List<LocalVariable> listOfLocalVariables;
 
     private int indexOfFirstLocalVariable = 0;
 

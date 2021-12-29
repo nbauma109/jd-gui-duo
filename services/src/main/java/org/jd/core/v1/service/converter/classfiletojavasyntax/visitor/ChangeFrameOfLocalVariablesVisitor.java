@@ -21,7 +21,6 @@ import org.jd.core.v1.model.javasyntax.expression.SuperExpression;
 import org.jd.core.v1.model.javasyntax.expression.ThisExpression;
 import org.jd.core.v1.model.javasyntax.expression.TypeReferenceDotClassExpression;
 import org.jd.core.v1.model.javasyntax.statement.BreakStatement;
-import org.jd.core.v1.model.javasyntax.statement.ByteCodeStatement;
 import org.jd.core.v1.model.javasyntax.statement.ContinueStatement;
 import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
@@ -34,7 +33,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.e
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.LocalVariableMaker;
 
 public class ChangeFrameOfLocalVariablesVisitor extends AbstractJavaSyntaxVisitor {
-    private LocalVariableMaker localVariableMaker;
+    private final LocalVariableMaker localVariableMaker;
 
     public ChangeFrameOfLocalVariablesVisitor(LocalVariableMaker localVariableMaker) {
         this.localVariableMaker = localVariableMaker;
@@ -52,7 +51,6 @@ public class ChangeFrameOfLocalVariablesVisitor extends AbstractJavaSyntaxVisito
     @Override public void visit(EnumConstantReferenceExpression expression) {}
     @Override public void visit(LongConstantExpression expression) {}
     @Override public void visit(BreakStatement statement) {}
-    @Override public void visit(ByteCodeStatement statement) {}
     @Override public void visit(ContinueStatement statement) {}
     @Override public void visit(NullExpression expression) {}
     @Override public void visit(ObjectTypeReferenceExpression expression) {}

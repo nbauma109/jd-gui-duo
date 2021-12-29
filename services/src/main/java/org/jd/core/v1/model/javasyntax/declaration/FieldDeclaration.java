@@ -10,16 +10,13 @@ import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class FieldDeclaration implements MemberDeclaration {
-    private BaseAnnotationReference annotationReferences;
+    private final BaseAnnotationReference annotationReferences;
     private int flags;
     protected final Type type;
     protected BaseFieldDeclarator fieldDeclarators;
 
     public FieldDeclaration(int flags, Type type, BaseFieldDeclarator fieldDeclarators) {
-        this.flags = flags;
-        this.type = type;
-        this.fieldDeclarators = fieldDeclarators;
-        fieldDeclarators.setFieldDeclaration(this);
+        this(null, flags, type, fieldDeclarators);
     }
 
     public FieldDeclaration(BaseAnnotationReference annotationReferences, int flags, Type type, BaseFieldDeclarator fieldDeclarators) {

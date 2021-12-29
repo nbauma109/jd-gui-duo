@@ -131,19 +131,19 @@ public class StatementMaker {
     protected static final NullExpression FINALLY_EXCEPTION_EXPRESSION = new NullExpression(new ObjectType(StringConstants.JAVA_LANG_EXCEPTION, "java.lang.Exception", "Exception"));
     protected static final MergeTryWithResourcesStatementVisitor MERGE_TRY_WITH_RESOURCES_STATEMENT_VISITOR = new MergeTryWithResourcesStatementVisitor();
 
-    private TypeMaker typeMaker;
-    private Map<String, BaseType> typeBounds;
-    private LocalVariableMaker localVariableMaker;
-    private ByteCodeParser byteCodeParser;
-    private int majorVersion;
-    private String internalTypeName;
-    private ClassFileBodyDeclaration bodyDeclaration;
-    private DefaultStack<Expression> stack = new DefaultStack<>();
-    private RemoveFinallyStatementsVisitor removeFinallyStatementsVisitor;
-    private RemoveBinaryOpReturnStatementsVisitor removeBinaryOpReturnStatementsVisitor;
-    private UpdateIntegerConstantTypeVisitor updateIntegerConstantTypeVisitor;
-    private SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
-    private MemberVisitor memberVisitor = new MemberVisitor();
+    private final TypeMaker typeMaker;
+    private final Map<String, BaseType> typeBounds;
+    private final LocalVariableMaker localVariableMaker;
+    private final ByteCodeParser byteCodeParser;
+    private final int majorVersion;
+    private final String internalTypeName;
+    private final ClassFileBodyDeclaration bodyDeclaration;
+    private final DefaultStack<Expression> stack = new DefaultStack<>();
+    private final RemoveFinallyStatementsVisitor removeFinallyStatementsVisitor;
+    private final RemoveBinaryOpReturnStatementsVisitor removeBinaryOpReturnStatementsVisitor;
+    private final UpdateIntegerConstantTypeVisitor updateIntegerConstantTypeVisitor;
+    private final SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
+    private final MemberVisitor memberVisitor = new MemberVisitor();
     private boolean removeFinallyStatementsFlag;
     private boolean mergeTryWithResourcesStatementFlag;
 

@@ -32,7 +32,7 @@ import static org.jd.core.v1.api.printer.Printer.UNKNOWN_LINE_NUMBER;
 
 public class PrintTokenVisitor implements TokenVisitor {
 
-    private SearchLineNumberVisitor searchLineNumberVisitor = new SearchLineNumberVisitor();
+    private final SearchLineNumberVisitor searchLineNumberVisitor = new SearchLineNumberVisitor();
 
     private Printer printer;
     private List<Token> tokens;

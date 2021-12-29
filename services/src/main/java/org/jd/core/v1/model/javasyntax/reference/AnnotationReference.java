@@ -10,22 +10,20 @@ package org.jd.core.v1.model.javasyntax.reference;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 
 public class AnnotationReference implements BaseAnnotationReference {
-    protected ObjectType type;
-    protected BaseElementValue elementValue;
-    protected BaseElementValuePair elementValuePairs;
+    protected final ObjectType type;
+    protected final BaseElementValue elementValue;
+    protected final BaseElementValuePair elementValuePairs;
 
     public AnnotationReference(ObjectType type) {
-        this.type = type;
+        this(type, null, null);
     }
 
     public AnnotationReference(ObjectType type, BaseElementValue elementValue) {
-        this.type = type;
-        this.elementValue = elementValue;
+        this(type, elementValue, null);
     }
 
     public AnnotationReference(ObjectType type, BaseElementValuePair elementValuePairs) {
-        this.type = type;
-        this.elementValuePairs = elementValuePairs;
+        this(type, null, elementValuePairs);
     }
 
     protected AnnotationReference(ObjectType type, BaseElementValue elementValue, BaseElementValuePair elementValuePairs) {

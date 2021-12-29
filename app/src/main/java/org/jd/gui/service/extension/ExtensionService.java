@@ -24,13 +24,17 @@ import java.util.ServiceLoader;
 public class ExtensionService {
     protected static final ExtensionService EXTENSION_SERVICE = new ExtensionService();
 
-    private ClassLoader extensionClassLoader;
+    private final ClassLoader extensionClassLoader;
 
     public static ExtensionService getInstance() {
         return EXTENSION_SERVICE;
     }
 
     protected ExtensionService() {
+        extensionClassLoader = makeExtensionClassLoader();
+    }
+
+    private ClassLoader makeExtensionClassLoader() {
         try {
             URI jarUri = ExtensionService.class.getProtectionDomain().getCodeSource().getLocation().toURI();
             File baseDirectory = new File(jarUri).getParentFile();
@@ -44,16 +48,16 @@ public class ExtensionService {
                 if (!urls.isEmpty()) {
                     URL[] array = urls.toArray(new URL[urls.size()]);
                     Arrays.sort(array, Comparator.comparing(URL::getPath));
-                    extensionClassLoader = new URLClassLoader(array, ExtensionService.class.getClassLoader());
+                    return new URLClassLoader(array, ExtensionService.class.getClassLoader());
                 }
             }
         } catch (Exception e) {
             assert ExceptionUtil.printStackTrace(e);
         }
 
-        extensionClassLoader = ExtensionService.class.getClassLoader();
+        return ExtensionService.class.getClassLoader();
     }
-
+    
     protected void searchJarAndMetaInf(List<URL> urls, File directory) throws Exception {
         File metaInf = new File(directory, "META-INF");
 

@@ -51,7 +51,7 @@ public class ClassFile extends Base
     private Field outerThisField;
     private List<ClassFile> innerClassFiles;
 
-    private Method staticMethod;
+    private final Method staticMethod;
     private List<Instruction> enumValues;
     private String internalAnonymousClassName;
     private final Map<String, Map<String, Accessor>> accessors;
@@ -99,21 +99,7 @@ public class ClassFile extends Base
             index == -1 ? "" : this.thisClassName.substring(0, index);
 
         // staticMethod
-        if (this.methods != null)
-        {
-            Method method;
-            for (int i=this.methods.length-1; i>=0; --i)
-            {
-                method = this.methods[i];
-
-                if ((method.getAccessFlags() & Const.ACC_STATIC) != 0 &&
-                    method.getNameIndex() == this.constants.getClassConstructorIndex())
-                {
-                    this.staticMethod = method;
-                    break;
-                }
-            }
-        }
+        this.staticMethod = findStaticMethod();
 
         // internalAnonymousClassName
         this.internalAnonymousClassName = null;
@@ -123,6 +109,21 @@ public class ClassFile extends Base
         this.switchMaps = new HashMap<>();
     }
 
+    private Method findStaticMethod() {
+        if (this.methods != null)
+        {
+            for (Method method : methods)
+            {
+                if ((method.getAccessFlags() & Const.ACC_STATIC) != 0 &&
+                    method.getNameIndex() == this.constants.getClassConstructorIndex())
+                {
+                    return method;
+                }
+            }
+        }
+        return null;
+    }
+    
     public ConstantPool getConstantPool()
     {
         return this.constants;

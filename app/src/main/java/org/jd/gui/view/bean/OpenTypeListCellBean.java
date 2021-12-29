@@ -15,15 +15,13 @@ import javax.swing.Icon;
 
 public class OpenTypeListCellBean {
     private final String label;
-    private String packag;
-    private Icon icon;
+    private final String packag;
+    private final Icon icon;
     private final Collection<Container.Entry> entries;
     private final String typeName;
 
     public OpenTypeListCellBean(String label, Collection<Container.Entry> entries, String typeName) {
-        this.label = label;
-        this.entries = entries;
-        this.typeName = typeName;
+        this(label, null, null, entries, typeName);
     }
 
     public OpenTypeListCellBean(String label, String packag, Icon icon, Collection<Container.Entry> entries, String typeName) {

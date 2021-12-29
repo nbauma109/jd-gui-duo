@@ -29,7 +29,7 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class ArrayLoadInstructionFactory implements InstructionFactory
 {
-    private String signature;
+    private final String signature;
 
     public ArrayLoadInstructionFactory(String signature)
     {

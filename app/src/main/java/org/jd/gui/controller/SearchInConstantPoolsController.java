@@ -38,14 +38,14 @@ import javax.swing.JFrame;
 public class SearchInConstantPoolsController implements IndexesChangeListener {
 	protected static final int CACHE_MAX_ENTRIES = 5 * 20 * 9;
 
-	private API api;
-	private ScheduledExecutorService executor;
+	private final API api;
+	private final ScheduledExecutorService executor;
 
 	@SuppressWarnings("rawtypes")
-	private SearchInConstantPoolsView searchInConstantPoolsView;
+	private final SearchInConstantPoolsView searchInConstantPoolsView;
 	@SuppressWarnings("rawtypes")
-	private Map<String, Map<String, Collection>> cache;
-	private Set<DelegatingFilterContainer> delegatingFilterContainers = new HashSet<>();
+	private final Map<String, Map<String, Collection>> cache;
+	private final Set<DelegatingFilterContainer> delegatingFilterContainers = new HashSet<>();
 	private Collection<Future<Indexes>> collectionOfFutureIndexes;
 	private Consumer<URI> openCallback;
 	private long indexesHashCode;

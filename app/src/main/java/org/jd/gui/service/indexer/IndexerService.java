@@ -20,7 +20,7 @@ public class IndexerService {
 
     public static IndexerService getInstance() { return INDEXER_SERVICE; }
 
-    private Map<String, Indexers> mapProviders = new HashMap<>();
+    private final Map<String, Indexers> mapProviders = new HashMap<>();
 
     protected IndexerService() {
         Collection<Indexer> providers = ExtensionService.getInstance().load(Indexer.class);
@@ -82,7 +82,7 @@ public class IndexerService {
     }
 
     protected static class Indexers {
-        private Map<String, Indexer> indexerMap = new HashMap<>();
+        private final Map<String, Indexer> indexerMap = new HashMap<>();
         private Indexer defaultIndexer;
 
         public void add(Indexer indexer) {

@@ -73,8 +73,8 @@ import jd.core.model.instruction.bytecode.instruction.UnaryOperatorInstruction;
  */
 public class OuterGetStaticVisitor
 {
-    protected Map<String, ClassFile> innerClassesMap;
-    protected ConstantPool constants;
+    protected final Map<String, ClassFile> innerClassesMap;
+    protected final ConstantPool constants;
 
     public OuterGetStaticVisitor(
         Map<String, ClassFile> innerClassesMap, ConstantPool constants)

@@ -15,7 +15,7 @@ public class SwitchStatement implements Statement {
     public static final DefaultLabel DEFAULT_LABEL = new DefaultLabel();
 
     private Expression condition;
-    private List<Block> blocks;
+    private final List<Block> blocks;
 
     public SwitchStatement(Expression condition, List<Block> blocks) {
         this.condition = condition;
@@ -89,7 +89,7 @@ public class SwitchStatement implements Statement {
 
     // --- Block --- //
     public abstract static class Block implements Statement {
-        private BaseStatement statements;
+        private final BaseStatement statements;
 
         protected Block(BaseStatement statements) {
             this.statements = statements;
@@ -102,7 +102,7 @@ public class SwitchStatement implements Statement {
     }
 
     public static class LabelBlock extends Block {
-        private Label label;
+        private final Label label;
 
         public LabelBlock(Label label, BaseStatement statements) {
             super(statements);
@@ -128,7 +128,7 @@ public class SwitchStatement implements Statement {
     }
 
     public static class MultiLabelsBlock extends Block {
-        private List<Label> labels;
+        private final List<Label> labels;
 
         public MultiLabelsBlock(List<Label> labels, BaseStatement statements) {
             super(statements);

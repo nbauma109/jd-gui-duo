@@ -17,7 +17,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.e
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.LocalVariableMaker;
 
 public class RemoveBinaryOpReturnStatementsVisitor extends AbstractJavaSyntaxVisitor {
-    private LocalVariableMaker localVariableMaker;
+    private final LocalVariableMaker localVariableMaker;
 
     public RemoveBinaryOpReturnStatementsVisitor(LocalVariableMaker localVariableMaker) {
         this.localVariableMaker = localVariableMaker;

@@ -71,8 +71,8 @@ public class DescriptorMatcher {
     }
 
     protected static class CharBuffer {
-        private char[] buffer;
-        private int length;
+        private final char[] buffer;
+        private final int length;
         private int offset;
 
         public CharBuffer(String s) {

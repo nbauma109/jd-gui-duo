@@ -10,7 +10,7 @@ package org.jd.core.v1.model.javasyntax.expression;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class LocalVariableReferenceExpression extends AbstractLineNumberTypeExpression {
-    private String name;
+    private final String name;
 
     public LocalVariableReferenceExpression(Type type, String name) {
         super(type);

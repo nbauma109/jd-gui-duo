@@ -9,7 +9,7 @@ package org.jd.core.v1.model.token;
 
 public class BooleanConstantToken implements Token {
 
-    private boolean value;
+    private final boolean value;
 
     public BooleanConstantToken(boolean value) {
         this.value = value;

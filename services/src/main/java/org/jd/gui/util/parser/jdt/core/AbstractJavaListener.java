@@ -37,10 +37,10 @@ import static org.apache.bcel.Const.ACC_ENUM;
 import static org.apache.bcel.Const.ACC_INTERFACE;
 
 public abstract class AbstractJavaListener extends ASTVisitor {
-	protected Container.Entry entry;
+	protected final Container.Entry entry;
 	protected String packageName = "";
-	protected Map<String, String> nameToInternalTypeName = new HashMap<>();
-	private Map<String, String> typeNameCache = new HashMap<>();
+	protected final Map<String, String> nameToInternalTypeName = new HashMap<>();
+	private final Map<String, String> typeNameCache = new HashMap<>();
 
 	protected AbstractJavaListener(Container.Entry entry) {
 		this.entry = entry;

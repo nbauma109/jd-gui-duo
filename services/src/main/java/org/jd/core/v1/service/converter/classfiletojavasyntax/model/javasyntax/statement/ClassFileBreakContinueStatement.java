@@ -11,8 +11,8 @@ import org.jd.core.v1.model.javasyntax.statement.Statement;
 import org.jd.core.v1.model.javasyntax.statement.StatementVisitor;
 
 public class ClassFileBreakContinueStatement implements Statement {
-    private int offset;
-    private int targetOffset;
+    private final int offset;
+    private final int targetOffset;
     private boolean continueLabel;
     private Statement statement;
 

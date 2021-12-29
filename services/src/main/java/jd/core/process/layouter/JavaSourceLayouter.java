@@ -72,8 +72,8 @@ import jd.core.process.layouter.visitor.MaxLineNumberVisitor;
 
 public class JavaSourceLayouter
 {
-	private InstructionSplitterVisitor instructionSplitterVisitor;
-	private InstructionsSplitterVisitor instructionsSplitterVisitor;
+	private final InstructionSplitterVisitor instructionSplitterVisitor;
+	private final InstructionsSplitterVisitor instructionsSplitterVisitor;
 
 	public JavaSourceLayouter()
 	{

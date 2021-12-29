@@ -36,8 +36,8 @@ public class XmlFilePage extends TypeReferencePage implements UriGettable, Index
 
     private static final long serialVersionUID = 1L;
 
-    private transient API api;
-    private transient Container.Entry entry;
+    private final transient API api;
+    private final transient Container.Entry entry;
     private transient Collection<Future<Indexes>> collectionOfFutureIndexes;
 
     public XmlFilePage(API api, Container.Entry entry) {

@@ -8,7 +8,7 @@
 package org.jd.core.v1.model.classfile.attribute;
 
 public class ElementValueArrayValue implements AttributeElementValue {
-    private AttributeElementValue[] values;
+    private final AttributeElementValue[] values;
 
     public ElementValueArrayValue(AttributeElementValue[] values) {
         this.values = values;

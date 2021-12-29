@@ -11,7 +11,7 @@ import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public abstract class AbstractLambdaExpression extends AbstractLineNumberTypeExpression {
-    protected BaseStatement statements;
+    protected final BaseStatement statements;
 
     protected AbstractLambdaExpression(int lineNumber, Type type, BaseStatement statements) {
         super(lineNumber, type);

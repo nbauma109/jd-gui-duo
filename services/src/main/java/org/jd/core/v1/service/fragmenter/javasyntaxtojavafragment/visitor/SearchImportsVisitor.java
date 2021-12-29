@@ -60,13 +60,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
-    private Loader loader;
-    private String internalPackagePrefix;
-    private ImportsFragment importsFragment = JavaFragmentFactory.newImportsFragment();
+    private final Loader loader;
+    private final String internalPackagePrefix;
+    private final ImportsFragment importsFragment = JavaFragmentFactory.newImportsFragment();
     private int maxLineNumber = 0;
-    private Set<String> localTypeNames = new HashSet<>();
-    private Set<String> internalTypeNames = new HashSet<>();
-    private Set<String> importTypeNames = new HashSet<>();
+    private final Set<String> localTypeNames = new HashSet<>();
+    private final Set<String> internalTypeNames = new HashSet<>();
+    private final Set<String> importTypeNames = new HashSet<>();
 
     public SearchImportsVisitor(Loader loader, String mainInternalName) {
         this.loader = loader;
@@ -406,7 +406,7 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     protected static class TypeVisitor extends AbstractJavaSyntaxVisitor {
-        private Set<String> mainTypeNames;
+        private final Set<String> mainTypeNames;
 
         public TypeVisitor(Set<String> mainTypeNames) {
             this.mainTypeNames = mainTypeNames;

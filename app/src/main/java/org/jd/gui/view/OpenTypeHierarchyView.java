@@ -62,13 +62,13 @@ public class OpenTypeHierarchyView {
 	protected static final ImageIcon ROOT_CLASS_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/generate_class.png"));
 	protected static final ImageIcon ROOT_INTERFACE_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/generate_int.png"));
 
-	private API api;
+	private final API api;
 	private Collection<Future<Indexes>> collectionOfFutureIndexes;
 
 	private JDialog openTypeHierarchyDialog;
 	private Tree openTypeHierarchyTree;
 
-	private TriConsumer<Point, Collection<Container.Entry>, String> selectedTypeCallback;
+	private final TriConsumer<Point, Collection<Container.Entry>, String> selectedTypeCallback;
 
 	public OpenTypeHierarchyView(API api, JFrame mainFrame, TriConsumer<Point, Collection<Container.Entry>, String> selectedTypeCallback) {
 		this.api = api;
@@ -469,9 +469,9 @@ public class OpenTypeHierarchyView {
 	protected static class TreeNode extends DefaultMutableTreeNode {
 
 		private static final long serialVersionUID = 1L;
-		private transient Container.Entry entry;
-		private String typeName;
-		private transient List<Container.Entry> entries;
+		private final transient Container.Entry entry;
+		private final String typeName;
+		private final transient List<Container.Entry> entries;
 
 		TreeNode(Container.Entry entry, String typeName, List<Container.Entry> entries, Object userObject) {
 			super(userObject);
@@ -487,10 +487,8 @@ public class OpenTypeHierarchyView {
 
 	// Graphic data for renderer
 	protected static class TreeNodeBean implements TreeNodeData {
-		private String label;
-		private String tip;
-		private Icon icon;
-		private Icon openIcon;
+		private final String label;
+		private final Icon icon;
 
 		TreeNodeBean(Type type) {
 			this.label = type.getDisplayPackageName() != null ? type.getDisplayTypeName() + " - " + type.getDisplayPackageName() : type.getDisplayTypeName();
@@ -509,7 +507,7 @@ public class OpenTypeHierarchyView {
 
 		@Override
 		public String getTip() {
-			return tip;
+			return label;
 		}
 
 		@Override
@@ -519,7 +517,7 @@ public class OpenTypeHierarchyView {
 
 		@Override
 		public Icon getOpenIcon() {
-			return openIcon;
+			return icon;
 		}
 	}
 

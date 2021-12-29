@@ -60,8 +60,8 @@ import jd.core.model.instruction.bytecode.instruction.UnaryOperatorInstruction;
 
 public class ReplaceGetStaticVisitor
 {
-    private int index;
-    private Instruction newInstruction;
+    private final int index;
+    private final Instruction newInstruction;
     private Instruction parentFound;
 
     public ReplaceGetStaticVisitor(int index, Instruction newInstruction)

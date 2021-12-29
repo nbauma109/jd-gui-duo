@@ -19,8 +19,8 @@ import org.jd.core.v1.util.DefaultList;
 
 
 public class UpdateSpacerBetweenMovableBlocksVisitor implements FragmentVisitor {
-    private DefaultList<StartMovableBlockFragment> blocks = new DefaultList<>();
-    private DefaultList<SpacerBetweenMovableBlocksFragment> spacers = new DefaultList<>();
+    private final DefaultList<StartMovableBlockFragment> blocks = new DefaultList<>();
+    private final DefaultList<SpacerBetweenMovableBlocksFragment> spacers = new DefaultList<>();
 
     private int lastStartMovableBlockFragmentType;
     private SpacerBetweenMovableBlocksFragment lastSpacer;

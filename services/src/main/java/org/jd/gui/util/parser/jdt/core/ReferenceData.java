@@ -8,16 +8,16 @@ public class ReferenceData {
     /**
      * Field or method name or null for type
      */
-    private String name;
+    private final String name;
     /**
      * Field or method descriptor or null for type
      */
-    private String descriptor;
+    private final String descriptor;
     /**
      * Internal type name containing reference or null for "import" statement.
      * Used to high light items matching with URI like "file://dir1/dir2/file?highlightPattern=hello&highlightFlags=drtcmfs&highlightScope=type".
      */
-    private String owner;
+    private final String owner;
     /**
      * "Enabled" flag for link of reference
      */

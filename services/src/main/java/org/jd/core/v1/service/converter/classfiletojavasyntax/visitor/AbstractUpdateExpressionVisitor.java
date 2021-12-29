@@ -59,7 +59,6 @@ import org.jd.core.v1.model.javasyntax.reference.ElementValueArrayInitializerEle
 import org.jd.core.v1.model.javasyntax.reference.ExpressionElementValue;
 import org.jd.core.v1.model.javasyntax.statement.AssertStatement;
 import org.jd.core.v1.model.javasyntax.statement.BreakStatement;
-import org.jd.core.v1.model.javasyntax.statement.ByteCodeStatement;
 import org.jd.core.v1.model.javasyntax.statement.ContinueStatement;
 import org.jd.core.v1.model.javasyntax.statement.DoWhileStatement;
 import org.jd.core.v1.model.javasyntax.statement.ExpressionStatement;
@@ -445,7 +444,6 @@ public abstract class AbstractUpdateExpressionVisitor extends AbstractJavaSyntax
     @Override public void visit(ElementValueArrayInitializerElementValue reference) {}
     @Override public void visit(AnnotationElementValue reference) {}
     @Override public void visit(BreakStatement statement) {}
-    @Override public void visit(ByteCodeStatement statement) {}
     @Override public void visit(ContinueStatement statement) {}
     @Override public void visit(ReturnStatement statement) {}
     @Override public void visit(SwitchStatement.DefaultLabel statement) {}

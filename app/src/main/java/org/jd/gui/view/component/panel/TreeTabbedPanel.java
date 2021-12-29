@@ -53,12 +53,12 @@ import javax.swing.tree.TreePath;
 public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> extends JPanel implements UriGettable, UriOpenable, PageChangeable, PageClosable, PreferencesChangeListener {
 
     private static final long serialVersionUID = 1L;
-    protected transient API api;
-    private URI uri;
-    protected Tree tree;
+    protected final transient API api;
+    private final URI uri;
+    protected final Tree tree;
     @SuppressWarnings("rawtypes")
-    private TabbedPanel tabbedPanel;
-    private transient List<PageChangeListener> pageChangedListeners = new ArrayList<>();
+    private final TabbedPanel tabbedPanel;
+    private final transient List<PageChangeListener> pageChangedListeners = new ArrayList<>();
     // Flags to prevent the event cascades
     private boolean updateTreeMenuEnabled = true;
     private boolean openUriEnabled = true;

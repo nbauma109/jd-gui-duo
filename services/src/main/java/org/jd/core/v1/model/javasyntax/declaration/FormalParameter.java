@@ -11,21 +11,18 @@ import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class FormalParameter implements BaseFormalParameter {
-    protected BaseAnnotationReference annotationReferences;
+    protected final BaseAnnotationReference annotationReferences;
     private boolean fina1;
-    private Type type;
-    protected boolean varargs;
+    private final Type type;
+    protected final boolean varargs;
     private String name;
 
     public FormalParameter(Type type, String name) {
-        this.type = type;
-        this.name = name;
+        this(type, false, name);
     }
 
     public FormalParameter(Type type, boolean varargs, String name) {
-        this.type = type;
-        this.varargs = varargs;
-        this.name = name;
+        this(null, type, varargs, name);
     }
 
     public FormalParameter(BaseAnnotationReference annotationReferences, Type type, boolean varargs, String name) {

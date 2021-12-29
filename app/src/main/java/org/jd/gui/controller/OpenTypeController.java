@@ -33,17 +33,17 @@ import javax.swing.SwingUtilities;
 
 public class OpenTypeController implements IndexesChangeListener {
 
-	private API api;
-	private ScheduledExecutorService executor;
+	private final API api;
+	private final ScheduledExecutorService executor;
 	private Collection<Future<Indexes>> collectionOfFutureIndexes;
 	private Consumer<URI> openCallback;
 
-	private OpenTypeView openTypeView;
-	private SelectLocationController selectLocationController;
+	private final OpenTypeView openTypeView;
+	private final SelectLocationController selectLocationController;
 
 	private long indexesHashCode;
 	@SuppressWarnings("rawtypes")
-	private Map<String, Map<String, Collection>> cache;
+	private final Map<String, Map<String, Collection>> cache;
 
 	public OpenTypeController(API api, ScheduledExecutorService executor, JFrame mainFrame) {
 		this.api = api;

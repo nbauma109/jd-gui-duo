@@ -15,7 +15,6 @@ import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.model.javasyntax.statement.AssertStatement;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.statement.BreakStatement;
-import org.jd.core.v1.model.javasyntax.statement.ByteCodeStatement;
 import org.jd.core.v1.model.javasyntax.statement.CommentStatement;
 import org.jd.core.v1.model.javasyntax.statement.ContinueStatement;
 import org.jd.core.v1.model.javasyntax.statement.DoWhileStatement;
@@ -110,11 +109,6 @@ public class StatementVisitor extends ExpressionVisitor {
 
         tokens.add(TextToken.SEMICOLON);
         fragments.addTokensFragment(tokens);
-    }
-
-    @Override
-    public void visit(ByteCodeStatement statement) {
-        visitComment(statement.getText());
     }
 
     @Override

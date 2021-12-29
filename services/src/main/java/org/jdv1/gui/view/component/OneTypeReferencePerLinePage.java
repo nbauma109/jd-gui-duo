@@ -34,8 +34,8 @@ public class OneTypeReferencePerLinePage extends TypeReferencePage implements Ur
 
     private static final long serialVersionUID = 1L;
 
-    private transient API api;
-    private transient Container.Entry entry;
+    private final transient API api;
+    private final transient Container.Entry entry;
     private transient Collection<Future<Indexes>> collectionOfFutureIndexes = Collections.emptyList();
 
     public OneTypeReferencePerLinePage(API api, Container.Entry entry) {

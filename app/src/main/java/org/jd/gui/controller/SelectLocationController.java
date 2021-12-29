@@ -32,9 +32,9 @@ import javax.swing.JFrame;
 
 public class SelectLocationController {
 
-    private API api;
+    private final API api;
     @SuppressWarnings("all")
-    private SelectLocationView selectLocationView;
+    private final SelectLocationView selectLocationView;
 
     public SelectLocationController(API api, JFrame mainFrame) {
         this.api = api;

@@ -10,7 +10,7 @@ package org.jd.core.v1.model.javasyntax.type;
 import java.util.Map;
 
 public class WildcardExtendsTypeArgument implements TypeArgument {
-    private Type type;
+    private final Type type;
 
     public WildcardExtendsTypeArgument(Type type) {
         this.type = type;

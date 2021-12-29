@@ -59,7 +59,7 @@ import javax.swing.text.BadLocationException;
 public class OpenTypeView {
     protected static final int MAX_LINE_COUNT = 80;
 
-    private API api;
+    private final API api;
 
     private JDialog openTypeDialog;
     private JTextField openTypeEnterTextField;

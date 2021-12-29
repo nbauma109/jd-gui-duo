@@ -12,7 +12,7 @@ import java.util.Objects;
 public class ContinueStatement implements Statement {
     public static final ContinueStatement CONTINUE = new ContinueStatement();
 
-    private String label;
+    private final String label;
 
     protected ContinueStatement() {
         this.label = null;

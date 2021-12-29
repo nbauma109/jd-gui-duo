@@ -24,8 +24,8 @@ import java.util.Map;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 
 public class BindTypesToTypesVisitor extends AbstractNopTypeVisitor {
-    private TypeArgumentToTypeVisitor typeArgumentToTypeVisitor = new TypeArgumentToTypeVisitor();
-    private BindTypeArgumentsToTypeArgumentsVisitor bindTypeArgumentsToTypeArgumentsVisitor = new BindTypeArgumentsToTypeArgumentsVisitor();
+    private final TypeArgumentToTypeVisitor typeArgumentToTypeVisitor = new TypeArgumentToTypeVisitor();
+    private final BindTypeArgumentsToTypeArgumentsVisitor bindTypeArgumentsToTypeArgumentsVisitor = new BindTypeArgumentsToTypeArgumentsVisitor();
 
     private Map<String, TypeArgument> bindings;
     private BaseType result;

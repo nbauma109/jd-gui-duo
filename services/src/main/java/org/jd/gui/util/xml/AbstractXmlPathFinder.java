@@ -23,8 +23,8 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 public abstract class AbstractXmlPathFinder {
-    private Map<String, Set<String>> tagNameToPaths = new HashMap<>();
-    private StringBuilder sb = new StringBuilder(200);
+    private final Map<String, Set<String>> tagNameToPaths = new HashMap<>();
+    private final StringBuilder sb = new StringBuilder(200);
 
     protected AbstractXmlPathFinder(Collection<String> paths) {
         for (String path : paths) {

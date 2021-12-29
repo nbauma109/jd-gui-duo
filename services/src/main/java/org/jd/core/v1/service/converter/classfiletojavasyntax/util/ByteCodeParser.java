@@ -132,9 +132,9 @@ public class ByteCodeParser {
 
     private final TypeMaker typeMaker;
     private final LocalVariableMaker localVariableMaker;
-    private boolean genericTypesSupported;
+    private final boolean genericTypesSupported;
     private final String internalTypeName;
-    private AbstractTypeParametersToTypeArgumentsBinder typeParametersToTypeArgumentsBinder;
+    private final AbstractTypeParametersToTypeArgumentsBinder typeParametersToTypeArgumentsBinder;
     private final AttributeBootstrapMethods attributeBootstrapMethods;
     private final ClassFileBodyDeclaration bodyDeclaration;
     private final Map<String, BaseType> typeBounds;

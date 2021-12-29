@@ -19,7 +19,7 @@ import org.jd.core.v1.service.layouter.model.Section;
 import org.jd.core.v1.util.DefaultList;
 
 public class BuildSectionsVisitor implements FragmentVisitor {
-    private DefaultList<Section> sections = new DefaultList<>();
+    private final DefaultList<Section> sections = new DefaultList<>();
     private DefaultList<FlexibleFragment> flexibleFragments = new DefaultList<>();
     private Section previousSection = null;
 

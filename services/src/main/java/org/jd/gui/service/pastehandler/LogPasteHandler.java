@@ -15,7 +15,7 @@ import java.net.URI;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class LogPasteHandler implements PasteHandler {
-    protected static AtomicInteger counter = new AtomicInteger(0);
+    protected static final AtomicInteger counter = new AtomicInteger(0);
 
     @Override
     public boolean accept(Object obj) { return obj instanceof String; }

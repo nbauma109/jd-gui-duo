@@ -15,7 +15,6 @@ import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
 import org.jd.core.v1.model.javasyntax.expression.BinaryOperatorExpression;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.model.javasyntax.expression.Expressions;
-import org.jd.core.v1.model.javasyntax.expression.NewExpression;
 import org.jd.core.v1.model.javasyntax.expression.NewInitializedArray;
 import org.jd.core.v1.model.javasyntax.statement.ExpressionStatement;
 import org.jd.core.v1.model.javasyntax.statement.LocalVariableDeclarationStatement;
@@ -74,10 +73,9 @@ public class Frame {
         "Volatile", "Const", "Float", "Native", "Super", "While"));
 
     protected AbstractLocalVariable[] localVariableArray = new AbstractLocalVariable[10];
-    private Map<NewExpression, AbstractLocalVariable> newExpressions;
     protected DefaultList<Frame> children;
-    private Frame parent;
-    private Statements statements;
+    private final Frame parent;
+    private final Statements statements;
     private AbstractLocalVariable exceptionLocalVariable;
 
     public Frame(Frame parent, Statements statements) {
@@ -227,22 +225,6 @@ public class Frame {
             children = new DefaultList<>();
         }
         children.add(child);
-    }
-
-    public void close() {
-        // Update type for 'new' expression
-        if (newExpressions != null) {
-            ObjectType ot1;
-            ObjectType ot2;
-            for (Map.Entry<NewExpression, AbstractLocalVariable> entry : newExpressions.entrySet()) {
-                ot1 = entry.getKey().getObjectType();
-                ot2 = (ObjectType) entry.getValue().getType();
-
-                if (ot1.getTypeArguments() == null && ot2.getTypeArguments() != null) {
-                    entry.getKey().setObjectType(ot1.createType(ot2.getTypeArguments()));
-                }
-            }
-        }
     }
 
     public void createNames(Set<String> parentNames) {
@@ -919,9 +901,9 @@ public class Frame {
     protected static class GenerateLocalVariableNameVisitor implements TypeArgumentVisitor {
         protected static final String[] INTEGER_NAMES = { "i", "j", "k", "m", "n" };
 
-        private StringBuilder sb = new StringBuilder();
-        private Set<String> blackListNames;
-        private Map<Type, Boolean> types;
+        private final StringBuilder sb = new StringBuilder();
+        private final Set<String> blackListNames;
+        private final Map<Type, Boolean> types;
         private String name;
 
         public GenerateLocalVariableNameVisitor(Set<String> blackListNames, Map<Type, Boolean> types) {

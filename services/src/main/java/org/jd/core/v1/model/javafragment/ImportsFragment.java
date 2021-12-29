@@ -82,8 +82,8 @@ public class ImportsFragment extends FlexibleFragment implements JavaFragment {
     }
 
     public static class Import {
-        private String internalName;
-        private String qualifiedName;
+        private final String internalName;
+        private final String qualifiedName;
         private int counter;
 
         public Import(String internalName, String qualifiedName) {

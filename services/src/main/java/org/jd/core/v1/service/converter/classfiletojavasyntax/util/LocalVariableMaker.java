@@ -50,20 +50,20 @@ import java.util.Set;
 import static org.apache.bcel.Const.ACC_STATIC;
 
 public class LocalVariableMaker {
-    private LocalVariableSet localVariableSet = new LocalVariableSet();
-    private Set<String> names = new HashSet<>();
-    private Set<String> blackListNames = new HashSet<>();
+    private final LocalVariableSet localVariableSet = new LocalVariableSet();
+    private final Set<String> names = new HashSet<>();
+    private final Set<String> blackListNames = new HashSet<>();
     private Frame currentFrame = new RootFrame();
     private AbstractLocalVariable[] localVariableCache;
 
-    private TypeMaker typeMaker;
-    private Map<String, BaseType> typeBounds;
-    private FormalParameters formalParameters;
+    private final TypeMaker typeMaker;
+    private final Map<String, BaseType> typeBounds;
+    private final FormalParameters formalParameters;
 
-    private PopulateBlackListNamesVisitor populateBlackListNamesVisitor = new PopulateBlackListNamesVisitor(blackListNames);
-    private SearchInTypeArgumentVisitor searchInTypeArgumentVisitor = new SearchInTypeArgumentVisitor();
-    private CreateParameterVisitor createParameterVisitor;
-    private CreateLocalVariableVisitor createLocalVariableVisitor;
+    private final PopulateBlackListNamesVisitor populateBlackListNamesVisitor = new PopulateBlackListNamesVisitor(blackListNames);
+    private final SearchInTypeArgumentVisitor searchInTypeArgumentVisitor = new SearchInTypeArgumentVisitor();
+    private final CreateParameterVisitor createParameterVisitor;
+    private final CreateLocalVariableVisitor createLocalVariableVisitor;
 
     public LocalVariableMaker(TypeMaker typeMaker, ClassFileConstructorOrMethodDeclaration comd, boolean constructor) {
         ClassFile classFile = comd.getClassFile();
@@ -139,6 +139,8 @@ public class LocalVariableMaker {
             }
         }
 
+        FormalParameters formalParameters = null;
+        
         if (parameterTypes != null) {
             int lastParameterIndex = parameterTypes.size() - 1;
             boolean varargs = (method.getAccessFlags() & Const.ACC_VARARGS) != 0;
@@ -187,6 +189,8 @@ public class LocalVariableMaker {
                 }
             }
         }
+        
+        this.formalParameters = formalParameters;
 
         // Initialize root frame and cache
         localVariableCache = localVariableSet.initialize(currentFrame);
@@ -529,7 +533,6 @@ public class LocalVariableMaker {
     }
 
     public void popFrame() {
-        currentFrame.close();
         currentFrame = currentFrame.getParent();
     }
 

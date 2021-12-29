@@ -21,7 +21,7 @@ import java.util.List;
 
 public class InstructionPrinter implements Printer
 {
-    private Printer printer;
+    private final Printer printer;
     private int previousLineNumber;
     private boolean newInstruction;
     private boolean multiLineInstruction;

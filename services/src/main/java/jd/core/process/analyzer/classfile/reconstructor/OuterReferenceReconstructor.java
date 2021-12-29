@@ -41,17 +41,17 @@ import jd.core.util.SignatureUtil;
  */
 public class OuterReferenceReconstructor
 {
-    private ClassFile classFile;
+    private final ClassFile classFile;
 
-    private ReplaceOuterReferenceVisitor outerReferenceVisitor;
-    private ReplaceMultipleOuterReferenceVisitor multipleOuterReference;
-    private ReplaceOuterAccessorVisitor outerAccessorVisitor;
+    private final ReplaceOuterReferenceVisitor outerReferenceVisitor;
+    private final ReplaceMultipleOuterReferenceVisitor multipleOuterReference;
+    private final ReplaceOuterAccessorVisitor outerAccessorVisitor;
 
-    private OuterGetStaticVisitor outerGetStaticVisitor;
-    private OuterPutStaticVisitor outerPutStaticVisitor;
-    private OuterGetFieldVisitor outerGetFieldVisitor;
-    private OuterPutFieldVisitor outerPutFieldVisitor;
-    private OuterInvokeMethodVisitor outerMethodVisitor;
+    private final OuterGetStaticVisitor outerGetStaticVisitor;
+    private final OuterPutStaticVisitor outerPutStaticVisitor;
+    private final OuterGetFieldVisitor outerGetFieldVisitor;
+    private final OuterPutFieldVisitor outerPutFieldVisitor;
+    private final OuterInvokeMethodVisitor outerMethodVisitor;
 
     public OuterReferenceReconstructor(
         Map<String, ClassFile> innerClassesMap, ClassFile classFile)

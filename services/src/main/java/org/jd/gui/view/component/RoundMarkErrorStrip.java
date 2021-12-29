@@ -94,10 +94,10 @@ public class RoundMarkErrorStrip extends JComponent {
     private static final long serialVersionUID = 1L;
 
     /** The text area. */
-    private RSyntaxTextArea textArea;
+    private final RSyntaxTextArea textArea;
 
     /** Listens for events in this component. */
-    private transient Listener listener;
+    private final transient Listener listener;
 
     /**
      * Whether "marked occurrences" in the text area should be shown in this

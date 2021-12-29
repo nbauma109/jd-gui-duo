@@ -8,10 +8,10 @@
 package org.jd.core.v1.model.classfile.attribute;
 
 public class InnerClass {
-    private String innerTypeName;
-    private String outerTypeName;
-    private String innerName;
-    private int innerAccessFlags;
+    private final String innerTypeName;
+    private final String outerTypeName;
+    private final String innerName;
+    private final int innerAccessFlags;
 
     public InnerClass(String innerTypeName, String outerTypeName, String innerName, int innerAccessFlags) {
         this.innerTypeName = innerTypeName;

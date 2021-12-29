@@ -7,7 +7,7 @@
 package org.jd.core.v1.model.javasyntax.type;
 
 public class InnerObjectType extends ObjectType {
-    private ObjectType outerType;
+    private final ObjectType outerType;
 
     public InnerObjectType(String internalName, String qualifiedName, String name, ObjectType outerType) {
         super(internalName, qualifiedName, name);

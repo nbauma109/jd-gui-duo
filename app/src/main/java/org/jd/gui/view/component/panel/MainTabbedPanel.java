@@ -36,7 +36,7 @@ import javax.swing.JPanel;
 public class MainTabbedPanel<T extends JComponent & UriGettable> extends TabbedPanel<T> implements UriOpenable, PageChangeListener {
 
     private static final long serialVersionUID = 1L;
-    private transient List<PageChangeListener> pageChangedListeners = new ArrayList<>();
+    private final transient List<PageChangeListener> pageChangedListeners = new ArrayList<>();
     // Flag to prevent the event cascades
     private boolean pageChangedListenersEnabled = true;
 

@@ -67,8 +67,8 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
 	protected static final RSyntaxTextAreaEditorKit.DecreaseFontSizeAction DECREASE_FONT_SIZE_ACTION = new RSyntaxTextAreaEditorKit.DecreaseFontSizeAction();
 	protected static final RSyntaxTextAreaEditorKit.IncreaseFontSizeAction INCREASE_FONT_SIZE_ACTION = new RSyntaxTextAreaEditorKit.IncreaseFontSizeAction();
 
-	protected RSyntaxTextArea textArea;
-	protected RTextScrollPane scrollPane;
+	protected final RSyntaxTextArea textArea;
+	protected final RTextScrollPane scrollPane;
 
 	private Map<String, String> preferences;
 

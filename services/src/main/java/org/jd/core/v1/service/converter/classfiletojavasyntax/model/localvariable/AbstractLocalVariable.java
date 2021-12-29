@@ -19,11 +19,11 @@ public abstract class AbstractLocalVariable {
     private Frame frame;
     protected AbstractLocalVariable next;
     protected boolean declared;
-    protected int index;
+    protected final int index;
     protected int fromOffset;
     private int toOffset;
     protected String name;
-    private DefaultList<LocalVariableReference> references = new DefaultList<>();
+    private final DefaultList<LocalVariableReference> references = new DefaultList<>();
     private Set<AbstractLocalVariable> variablesOnRight = null;
     private Set<AbstractLocalVariable> variablesOnLeft = null;
 

@@ -52,9 +52,9 @@ public class ShowControlFlowGraphContextualActionsFactory implements ContextualA
 
         protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/net/sourceforge/plantuml/version/favicon.png"));
 
-        private transient Container.Entry entry;
-        private String fragment;
-        private transient ControlFlowGraphReducer controlFlowGraphReducer;
+        private final transient Container.Entry entry;
+        private final String fragment;
+        private final transient ControlFlowGraphReducer controlFlowGraphReducer;
 
         public ShowControlFlowGraphAction(Container.Entry entry, String fragment, ControlFlowGraphReducer controlFlowGraphReducer) {
             this.entry = entry;

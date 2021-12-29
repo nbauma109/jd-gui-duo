@@ -11,8 +11,8 @@ import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class ConstructorReferenceExpression extends AbstractLineNumberTypeExpression {
-    private ObjectType objectType;
-    protected String descriptor;
+    private final ObjectType objectType;
+    protected final String descriptor;
 
     public ConstructorReferenceExpression(int lineNumber, Type type, ObjectType objectType, String descriptor) {
         super(lineNumber, type);

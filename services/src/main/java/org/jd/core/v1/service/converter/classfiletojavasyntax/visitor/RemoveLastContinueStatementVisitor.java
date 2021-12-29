@@ -10,7 +10,6 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.statement.AssertStatement;
 import org.jd.core.v1.model.javasyntax.statement.BreakStatement;
-import org.jd.core.v1.model.javasyntax.statement.ByteCodeStatement;
 import org.jd.core.v1.model.javasyntax.statement.CommentStatement;
 import org.jd.core.v1.model.javasyntax.statement.ContinueStatement;
 import org.jd.core.v1.model.javasyntax.statement.DoWhileStatement;
@@ -86,8 +85,6 @@ public class RemoveLastContinueStatementVisitor extends AbstractJavaSyntaxVisito
     public void visit(AssertStatement statement) {}
     @Override
     public void visit(BreakStatement statement) {}
-    @Override
-    public void visit(ByteCodeStatement statement) {}
     @Override
     public void visit(CommentStatement statement) {}
     @Override

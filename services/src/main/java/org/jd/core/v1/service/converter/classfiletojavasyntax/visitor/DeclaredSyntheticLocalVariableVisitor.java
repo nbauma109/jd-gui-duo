@@ -38,7 +38,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariabl
 import org.jd.core.v1.util.DefaultList;
 
 public class DeclaredSyntheticLocalVariableVisitor extends AbstractJavaSyntaxVisitor {
-    private DefaultList<LocalVariableReferenceExpression> localVariableReferenceExpressions = new DefaultList<>();
+    private final DefaultList<LocalVariableReferenceExpression> localVariableReferenceExpressions = new DefaultList<>();
 
     public void init() {
         localVariableReferenceExpressions.clear();

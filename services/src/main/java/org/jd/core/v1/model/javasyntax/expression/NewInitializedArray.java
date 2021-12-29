@@ -11,7 +11,7 @@ import org.jd.core.v1.model.javasyntax.declaration.ArrayVariableInitializer;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class NewInitializedArray extends AbstractLineNumberTypeExpression {
-    private ArrayVariableInitializer arrayInitializer;
+    private final ArrayVariableInitializer arrayInitializer;
 
     public NewInitializedArray(int lineNumber, Type type, ArrayVariableInitializer arrayInitializer) {
         super(lineNumber, type);

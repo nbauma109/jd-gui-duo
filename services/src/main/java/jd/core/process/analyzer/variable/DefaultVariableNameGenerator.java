@@ -26,8 +26,8 @@ import jd.core.model.classfile.Field;
 
 public class DefaultVariableNameGenerator implements VariableNameGenerator
 {
-    private Set<String> fieldNames;
-    private Set<String> localNames;
+    private final Set<String> fieldNames;
+    private final Set<String> localNames;
 
     public DefaultVariableNameGenerator(ClassFile classFile)
     {

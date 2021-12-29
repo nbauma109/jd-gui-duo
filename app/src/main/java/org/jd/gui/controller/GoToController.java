@@ -16,7 +16,7 @@ import java.util.function.IntConsumer;
 import javax.swing.JFrame;
 
 public class GoToController {
-    private GoToView goToView;
+    private final GoToView goToView;
 
     public GoToController(Configuration configuration, JFrame mainFrame) {
         // Create UI

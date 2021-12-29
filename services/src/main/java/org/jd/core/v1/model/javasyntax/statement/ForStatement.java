@@ -16,7 +16,7 @@ public class ForStatement implements Statement {
     protected BaseExpression init;
     protected Expression condition;
     protected BaseExpression update;
-    private BaseStatement statements;
+    private final BaseStatement statements;
 
     public ForStatement(BaseExpression init, Expression condition, BaseExpression update, BaseStatement statements) {
         this.init = init;

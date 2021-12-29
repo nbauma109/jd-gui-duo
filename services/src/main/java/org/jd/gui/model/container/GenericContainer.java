@@ -34,19 +34,22 @@ import java.util.concurrent.atomic.AtomicLong;
 public class GenericContainer implements Container {
     protected static final long TIMESTAMP = System.currentTimeMillis();
 
-    private static AtomicLong tmpFileCounter = new AtomicLong(0);
+    private static final AtomicLong tmpFileCounter = new AtomicLong(0);
 
-    private API api;
-    private int rootNameCount;
-    private Container.Entry root;
+    private final API api;
+    private final int rootNameCount;
+    private final Container.Entry root;
 
     public GenericContainer(API api, Container.Entry parentEntry, Path rootPath) {
+        this.api = api;
+        this.rootNameCount = rootPath.getNameCount();
+        this.root = makeRootEntry(parentEntry, rootPath);
+    }
+
+    private Entry makeRootEntry(Container.Entry parentEntry, Path rootPath) {
         try {
             URI uri = parentEntry.getUri();
-
-            this.api = api;
-            this.rootNameCount = rootPath.getNameCount();
-            this.root = new Entry(parentEntry, rootPath, new URI(uri.getScheme(), uri.getHost(), uri.getPath() + "!/", null)) {
+            return new Entry(parentEntry, rootPath, new URI(uri.getScheme(), uri.getHost(), uri.getPath() + "!/", null)) {
                 @Override
                 public Entry newChildEntry(Path fsPath) {
                     return new Entry(getParent(), fsPath, null);
@@ -55,16 +58,17 @@ public class GenericContainer implements Container {
         } catch (URISyntaxException e) {
             assert ExceptionUtil.printStackTrace(e);
         }
+        return null;
     }
-
+    
     @Override
     public String getType() { return "generic"; }
     @Override
     public Container.Entry getRoot() { return root; }
 
     protected class Entry implements Container.Entry {
-        private Container.Entry parent;
-        private Path fsPath;
+        private final Container.Entry parent;
+        private final Path fsPath;
         private String strPath;
         private URI uri;
         private Boolean isDirectory;

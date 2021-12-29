@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class LineNumberTokensFragment extends FixedFragment implements JavaFragment {
-    private List<Token> tokens;
+    private final List<Token> tokens;
 
     public LineNumberTokensFragment(Token... tokens) {
         this(Arrays.asList(tokens));

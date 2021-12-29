@@ -20,7 +20,7 @@ public class SourceSaverService {
 
     public static SourceSaverService getInstance() { return SOURCE_SAVER_SERVICE; }
 
-    private Map<String, SourceSavers> mapProviders = new HashMap<>();
+    private final Map<String, SourceSavers> mapProviders = new HashMap<>();
 
     protected SourceSaverService() {
         Collection<SourceSaver> providers = ExtensionService.getInstance().load(SourceSaver.class);
@@ -82,7 +82,7 @@ public class SourceSaverService {
     }
 
     protected static class SourceSavers {
-        private Map<String, SourceSaver> savers = new HashMap<>();
+        private final Map<String, SourceSaver> savers = new HashMap<>();
         private SourceSaver defaultSaver;
 
         void add(SourceSaver saver) {

@@ -70,7 +70,7 @@ import jd.core.model.instruction.bytecode.instruction.UnaryOperatorInstruction;
  */
 public class ReplaceOuterAccessorVisitor
 {
-    protected ClassFile classFile;
+    protected final ClassFile classFile;
 
     public ReplaceOuterAccessorVisitor(ClassFile classFile)
     {

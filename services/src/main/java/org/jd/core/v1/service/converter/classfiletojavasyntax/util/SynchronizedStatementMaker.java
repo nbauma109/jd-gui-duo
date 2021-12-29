@@ -56,7 +56,7 @@ public class SynchronizedStatementMaker {
     }
 
     protected static class RemoveMonitorExitVisitor extends AbstractJavaSyntaxVisitor {
-        private AbstractLocalVariable localVariable;
+        private final AbstractLocalVariable localVariable;
 
         public RemoveMonitorExitVisitor(AbstractLocalVariable localVariable) {
             this.localVariable = localVariable;

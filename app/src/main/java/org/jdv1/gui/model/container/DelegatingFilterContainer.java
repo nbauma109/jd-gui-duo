@@ -23,12 +23,12 @@ import java.util.stream.Collectors;
 public class DelegatingFilterContainer implements Container {
     protected static final URI DEFAULT_ROOT_URI = URI.create("file:.");
 
-    private Container container;
-    private DelegatedEntry root;
+    private final Container container;
+    private final DelegatedEntry root;
 
-    private Set<URI> validEntries = new HashSet<>();
-    private Map<URI, DelegatedEntry> uriToDelegatedEntry = new HashMap<>();
-    private Map<URI, DelegatedContainer> uriToDelegatedContainer = new HashMap<>();
+    private final Set<URI> validEntries = new HashSet<>();
+    private final Map<URI, DelegatedEntry> uriToDelegatedEntry = new HashMap<>();
+    private final Map<URI, DelegatedContainer> uriToDelegatedContainer = new HashMap<>();
 
     public DelegatingFilterContainer(Container container, Collection<Entry> entries) {
         this.container = container;
@@ -62,7 +62,7 @@ public class DelegatingFilterContainer implements Container {
     }
 
     protected class DelegatedEntry implements Entry, Comparable<DelegatedEntry> {
-        private Entry entry;
+        private final Entry entry;
         private Map<Container.EntryPath, Container.Entry> children;
 
         public DelegatedEntry(Entry entry) {
@@ -127,7 +127,7 @@ public class DelegatingFilterContainer implements Container {
     }
 
     protected class DelegatedContainer implements Container {
-        private Container container;
+        private final Container container;
 
         public DelegatedContainer(Container container) {
             this.container = container;
