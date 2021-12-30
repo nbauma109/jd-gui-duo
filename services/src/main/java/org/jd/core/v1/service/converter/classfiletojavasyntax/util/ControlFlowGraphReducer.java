@@ -1031,7 +1031,7 @@ public abstract class ControlFlowGraphReducer {
         return null;
     }
 
-    private BasicBlock searchEndBlock(BasicBlock basicBlock, int maxOffset) {
+    private static BasicBlock searchEndBlock(BasicBlock basicBlock, int maxOffset) {
         BasicBlock end = null;
         BasicBlock last = splitSequence(basicBlock.getNext(), maxOffset);
 
@@ -1099,7 +1099,7 @@ public abstract class ControlFlowGraphReducer {
         return END;
     }
 
-    private BasicBlock splitSequence(BasicBlock basicBlock, int maxOffset) {
+    private static BasicBlock splitSequence(BasicBlock basicBlock, int maxOffset) {
         BasicBlock next = basicBlock.getNext();
         WatchDog watchdog = new WatchDog();
 
@@ -1308,7 +1308,7 @@ public abstract class ControlFlowGraphReducer {
         }
     }
 
-    private BasicBlock getLastConditionalBranch(BitSet visited, BasicBlock basicBlock) {
+    private static BasicBlock getLastConditionalBranch(BitSet visited, BasicBlock basicBlock) {
         if (!basicBlock.matchType(GROUP_END) && !visited.get(basicBlock.getIndex())) {
             visited.set(basicBlock.getIndex());
 
@@ -1350,7 +1350,7 @@ public abstract class ControlFlowGraphReducer {
         return null;
     }
 
-    private void visit(BitSet visited, BasicBlock basicBlock, int maxOffset, Set<BasicBlock> ends) {
+    private static void visit(BitSet visited, BasicBlock basicBlock, int maxOffset, Set<BasicBlock> ends) {
         if (basicBlock.getFromOffset() >= maxOffset) {
             ends.add(basicBlock);
         } else if (basicBlock.getIndex() >= 0 && !visited.get(basicBlock.getIndex())) {
@@ -1395,7 +1395,7 @@ public abstract class ControlFlowGraphReducer {
         }
     }
 
-    private void replaceLoopStartWithSwitchBreak(BitSet visited, BasicBlock basicBlock) {
+    private static void replaceLoopStartWithSwitchBreak(BitSet visited, BasicBlock basicBlock) {
         if (!basicBlock.matchType(GROUP_END) && !visited.get(basicBlock.getIndex())) {
             visited.set(basicBlock.getIndex());
             basicBlock.replace(LOOP_START, SWITCH_BREAK);
@@ -1542,7 +1542,7 @@ public abstract class ControlFlowGraphReducer {
         predecessors.clear();
     }
 
-    private void changeEndLoopToJump(BitSet visited, BasicBlock target, BasicBlock basicBlock) {
+    private static void changeEndLoopToJump(BitSet visited, BasicBlock target, BasicBlock basicBlock) {
         if (!basicBlock.matchType(GROUP_END) && !visited.get(basicBlock.getIndex())) {
             visited.set(basicBlock.getIndex());
 

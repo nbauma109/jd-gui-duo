@@ -63,7 +63,7 @@ import jd.core.util.IntSet;
 import jd.core.util.UtilConstants;
 
 /** Aglomeration des informations 'CodeException'. */
-public class FastCodeExceptionAnalyzer
+public final class FastCodeExceptionAnalyzer
 {
     private FastCodeExceptionAnalyzer() {
     }
@@ -574,7 +574,7 @@ public class FastCodeExceptionAnalyzer
         case 1:
             // 1.1.8, 1.3.1, 1.4.2 or eclipse 677
             // Yes, contains catch ?
-            if (fastCodeException.getCatches() == null	||
+            if (fastCodeException.getCatches() == null    ||
             fastCodeException.getCatches().isEmpty())
             {
                 // No
@@ -673,7 +673,7 @@ public class FastCodeExceptionAnalyzer
             {
                 // Yes, contains catch(s) & finally
                 int index = InstructionUtil.getIndexForOffset(
-                        list, fastCodeException.getCatches().get(0).fromOffset);
+                        list, fastCodeException.getCatches().get(0).getFromOffset());
                 if (index < 0) {
                     return;
                 }
@@ -733,7 +733,7 @@ public class FastCodeExceptionAnalyzer
         default:
             // 1.3.1, 1.4.2, 1.5.0, jikes 1.2.2 or eclipse 677
             // Yes, contains catch ?
-            if (fastCodeException.getCatches() == null	||
+            if (fastCodeException.getCatches() == null    ||
             fastCodeException.getCatches().isEmpty())
             {
                 // No, 1.4.2 or jikes 1.2.2 ?
@@ -809,7 +809,7 @@ public class FastCodeExceptionAnalyzer
                     {
                         fcec = fastCodeException.getCatches().get(i);
                         index = InstructionUtil.getIndexForOffset(
-                                list, fcec.fromOffset);
+                                list, fcec.getFromOffset());
                         if (index != -1)
                         {
                             Instruction instruction = list.get(index-1);
@@ -1111,14 +1111,14 @@ public class FastCodeExceptionAnalyzer
             // Le traitement suivant etait faux pour reconstruire la méthode
             // "basic.data.TestTryCatchFinally .methodTryFinally1()" compile
             // par "Eclipse Java Compiler v_677_R32x, 3.2.1 release".
-            //			{
-            //				int index = InstructionUtil.getIndexForOffset(
-            //						list, fastCodeException.afterOffset);
-            //				if ((index < 0) || (index >= list.size()))
-            //					return;
-            //				Instruction i = list.get(++index);
-            //				fastCodeException.afterOffset = i.offset;
-            //			}
+            //            {
+            //                int index = InstructionUtil.getIndexForOffset(
+            //                        list, fastCodeException.afterOffset);
+            //                if ((index < 0) || (index >= list.size()))
+            //                    return;
+            //                Instruction i = list.get(++index);
+            //                fastCodeException.afterOffset = i.offset;
+            //            }
             break;
         case FastConstants.TYPE_ECLIPSE_677_FINALLY:
         {
@@ -1882,12 +1882,12 @@ public class FastCodeExceptionAnalyzer
                     fcec = fastCodeException.getCatches().get(j);
 
                     if (toOffset != -1 &&
-                            fcec.fromOffset <= fromOffset &&
+                            fcec.getFromOffset() <= fromOffset &&
                             maxOffset < toOffset && (afterOffset == -1 || afterOffset > toOffset)) {
                         afterOffset = toOffset;
                     }
 
-                    toOffset = fcec.fromOffset;
+                    toOffset = fcec.getFromOffset();
                 }
             }
 
@@ -3243,9 +3243,9 @@ public class FastCodeExceptionAnalyzer
     public static class FastCodeExceptionCatch
     implements Comparable<FastCodeExceptionCatch>
     {
-        final int type;
-        final int[] otherTypes;
-        final int fromOffset;
+        private final int type;
+        private final int[] otherTypes;
+        private final int fromOffset;
 
         public FastCodeExceptionCatch(
                 int type, int[] otherCatchTypes, int fromOffset)
@@ -3258,17 +3258,29 @@ public class FastCodeExceptionAnalyzer
         @Override
         public int compareTo(FastCodeExceptionCatch other)
         {
-            return this.fromOffset - other.fromOffset;
+            return this.getFromOffset() - other.getFromOffset();
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(fromOffset);
+            return Objects.hash(getFromOffset());
         }
 
         @Override
         public boolean equals(Object obj) {
             return this == obj || obj instanceof FastCodeExceptionCatch fcec && getClass() == obj.getClass() && compareTo(fcec) == 0;
+        }
+
+        public int getFromOffset() {
+            return fromOffset;
+        }
+
+        public int getType() {
+            return type;
+        }
+
+        public int[] getOtherTypes() {
+            return otherTypes;
         }
     }
 
@@ -3329,7 +3341,7 @@ public class FastCodeExceptionAnalyzer
             {
                 if (instruction.getOffset() >= beforeMaxOffset) {
                     return index;
-                }	// Inclus au bloc 'try'
+                }    // Inclus au bloc 'try'
             }
             break;
             case Const.GOTO:
@@ -3348,11 +3360,11 @@ public class FastCodeExceptionAnalyzer
                     } else // Saut au-delà  des limites
                         if (instruction.getOffset() >= beforeMaxOffset) {
                             return index;
-                        }	// Inclus au bloc 'try'
+                        }    // Inclus au bloc 'try'
                 } else // Saut au-delà  des limites
                     if (jumpOffset < fce.getTryFromOffset() && instruction.getOffset() >= beforeMaxOffset) {
                         return index;
-                    }	// Inclus au bloc 'try'
+                    }    // Inclus au bloc 'try'
             }
             break;
             case ByteCodeConstants.IFCMP,
@@ -3373,11 +3385,11 @@ public class FastCodeExceptionAnalyzer
                 }
                 // else
                 // {
-                // 	// Saut au-delà  des limites, 'break' ?
+                //     // Saut au-delà  des limites, 'break' ?
                 // }
                 // else
                 // {
-                // 	// Saut négatif, 'continue' ?
+                //     // Saut négatif, 'continue' ?
                 //}
             }
             break;
@@ -3405,11 +3417,11 @@ public class FastCodeExceptionAnalyzer
                 }
                 // else
                 // {
-                // 	// Saut au-delà  des limites, 'break' ?
+                //     // Saut au-delà  des limites, 'break' ?
                 // }
                 // else
                 // {
-                // 	// Saut négatif, 'continue' ?
+                //     // Saut négatif, 'continue' ?
                 //}
                 break;
             }

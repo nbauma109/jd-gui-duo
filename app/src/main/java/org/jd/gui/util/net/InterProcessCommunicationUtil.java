@@ -17,9 +17,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.function.Consumer;
 
-public class InterProcessCommunicationUtil {
+public final class InterProcessCommunicationUtil {
 
-    protected static final int PORT = 20156;
+    private static final int PORT = 20156;
 
     private InterProcessCommunicationUtil() {
     }

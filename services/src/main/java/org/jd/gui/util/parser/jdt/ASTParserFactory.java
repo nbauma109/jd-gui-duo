@@ -20,7 +20,7 @@ import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
-public class ASTParserFactory {
+public final class ASTParserFactory {
 
     private static final String DEFAULT_JDK_VERSION = JavaCore.VERSION_1_8;
 
@@ -76,7 +76,7 @@ public class ASTParserFactory {
         }
 
         Map<String, String> options = getDefaultOptions();
-        String majorVersion = jarTojdkVersion.computeIfAbsent(jarURI, this::resolveJDKVersion);
+        String majorVersion = jarTojdkVersion.computeIfAbsent(jarURI, ASTParserFactory::resolveJDKVersion);
         options.put(JavaCore.COMPILER_COMPLIANCE, majorVersion);
         options.put(JavaCore.COMPILER_SOURCE, majorVersion);
         parser.setCompilerOptions(options);
@@ -85,7 +85,7 @@ public class ASTParserFactory {
         return parser;
     }
 
-    private String resolveJDKVersion(URI jarURI) {
+    private static String resolveJDKVersion(URI jarURI) {
         File file = new File(jarURI);
         String majorVersion = DEFAULT_JDK_VERSION;
         if (file.isFile() && file.getName().endsWith(".jar")) {
@@ -107,7 +107,7 @@ public class ASTParserFactory {
         return majorVersion;
     }
 
-    protected Map<String, String> getDefaultOptions() {
+    private static Map<String, String> getDefaultOptions() {
         Map<String, String> options = JavaCore.getOptions();
         options.put(JavaCore.CORE_ENCODING, StandardCharsets.UTF_8.name());
         options.put(JavaCore.COMPILER_COMPLIANCE, DEFAULT_JDK_VERSION);
@@ -115,7 +115,7 @@ public class ASTParserFactory {
         return options;
     }
 
-    private static final String resolveJDKVersion(String longVersion) {
+    private static String resolveJDKVersion(String longVersion) {
         if (longVersion.startsWith(JavaCore.VERSION_17)) {
             return JavaCore.VERSION_17;
         }

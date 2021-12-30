@@ -884,7 +884,7 @@ public class TypeMaker {
         return ot;
     }
 
-    private ObjectType create(String internalTypeName) {
+    private static ObjectType create(String internalTypeName) {
         int lastSlash = internalTypeName.lastIndexOf('/');
         int lastDollar = internalTypeName.lastIndexOf('$');
         ObjectType ot;

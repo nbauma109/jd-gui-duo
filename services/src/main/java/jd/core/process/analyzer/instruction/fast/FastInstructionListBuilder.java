@@ -125,7 +125,7 @@ import jd.core.util.SignatureUtil;
  *    v                                                                 |
  *   AnalyzeXXXXSwitch -------------------------------------------------+
  */
-public class FastInstructionListBuilder {
+public final class FastInstructionListBuilder {
     private FastInstructionListBuilder() {
     }
     /** Declaration constants. */
@@ -892,7 +892,7 @@ public class FastInstructionListBuilder {
             int minimalJumpOffset;
             while (i-- > 0) {
                 fcec = fce.getCatches().get(i);
-                fromOffset = fcec.fromOffset;
+                fromOffset = fcec.getFromOffset();
                 instructions = new ArrayList<>();
 
                 while (list.get(index).getOffset() >= fromOffset) {
@@ -921,7 +921,7 @@ public class FastInstructionListBuilder {
                     throw new UnexpectedInstructionException();
                 }
                 offset = lastInstruction.getOffset();
-                catches.add(0, new FastCatch(el.getOffset(), fcec.type, fcec.otherTypes,
+                catches.add(0, new FastCatch(el.getOffset(), fcec.getType(), fcec.getOtherTypes(),
                     el.getIndex(), instructions));
                 // Calcul de l'offset le plus haut pour le block 'try'
                 firstOffset = instructions.get(0).getOffset();
@@ -1471,7 +1471,7 @@ public class FastInstructionListBuilder {
         }
     }
 
-    protected static ReturnInstruction findReturnInstructionForStore(List<Instruction> list, int length, int i, StoreInstruction si) {
+    private static ReturnInstruction findReturnInstructionForStore(List<Instruction> list, int length, int i, StoreInstruction si) {
         if (i + 1 < length) {
             Instruction next = list.get(i + 1);
             if (next instanceof ReturnInstruction returnInstruction
@@ -3606,7 +3606,7 @@ public class FastInstructionListBuilder {
 
         if (test.getBranch() < 0 &&
             beforeLoopEntryOffset < elseOffset &&
-            elseOffset <= loopEntryOffset	&&
+            elseOffset <= loopEntryOffset    &&
             afterBodyLoopOffset == afterListOffset)
         {
             // L'instruction saute sur un début de boucle et la liste termine
