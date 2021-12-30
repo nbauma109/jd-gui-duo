@@ -1505,11 +1505,11 @@ public class ByteCodeParser {
     }
 
     private static boolean isPositiveOne(Expression expression) {
-        return expression.isIntegerConstantExpression() && expression.getIntegerValue() == 1 || expression.isLongConstantExpression() && expression.getLongValue() == 1L || expression.isFloatConstantExpression() && expression.getFloatValue() == 1.0F || expression.isDoubleConstantExpression() && Double.compare(expression.getDoubleValue(), 1.0D) == 0;
+        return expression.isIntegerConstantExpression() && expression.getIntegerValue() == 1 || expression.isLongConstantExpression() && expression.getLongValue() == 1L || expression.isFloatConstantExpression() && Float.compare(expression.getFloatValue(), 1.0F) == 0 || expression.isDoubleConstantExpression() && Double.compare(expression.getDoubleValue(), 1.0D) == 0;
     }
 
     private static boolean isNegativeOne(Expression expression) {
-        return expression.isIntegerConstantExpression() && expression.getIntegerValue() == -1 || expression.isLongConstantExpression() && expression.getLongValue() == -1L || expression.isFloatConstantExpression() && expression.getFloatValue() == -1.0F || expression.isDoubleConstantExpression() && Double.compare(expression.getDoubleValue(), -1.0D) == 0;
+        return expression.isIntegerConstantExpression() && expression.getIntegerValue() == -1 || expression.isLongConstantExpression() && expression.getLongValue() == -1L || expression.isFloatConstantExpression() && Float.compare(expression.getFloatValue(), -1.0F) == 0 || expression.isDoubleConstantExpression() && Double.compare(expression.getDoubleValue(), -1.0D) == 0;
     }
 
     private void parseASTORE(Statements statements, DefaultStack<Expression> stack, int lineNumber, int offset, AbstractLocalVariable localVariable, Expression valueRef) {
