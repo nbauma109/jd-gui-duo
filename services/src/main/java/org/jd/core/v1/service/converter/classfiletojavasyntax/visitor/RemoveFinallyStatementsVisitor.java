@@ -173,11 +173,16 @@ public class RemoveFinallyStatementsVisitor implements StatementVisitor {
 
         if (finallyStatements != null) {
             switch (finallyStatements.size()) {
-                case 0: break;
-                case 1: finallyStatements.getFirst().accept(this); break;
-                default: for (Statement stmt : finallyStatements) {
-                    stmt.accept(this);
-                } break;
+                case 0:
+                    break;
+                case 1:
+                    finallyStatements.getFirst().accept(this);
+                    break;
+                default:
+                    for (Statement stmt : finallyStatements) {
+                        stmt.accept(this);
+                    }
+                    break;
             }
 
             if (statementCountInFinally == 0 && !finallyStatements.isEmpty()) {

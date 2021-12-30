@@ -1162,23 +1162,43 @@ public class ByteCodeParser {
         typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(vre.getType(), valueRef);
 
         if (valueRef.getLineNumber() == lineNumber && valueRef.isBinaryOperatorExpression() && valueRef.getLeftExpression().isLocalVariableReferenceExpression()) {
-            ClassFileLocalVariableReferenceExpression lvr = (ClassFileLocalVariableReferenceExpression)valueRef.getLeftExpression();
+            ClassFileLocalVariableReferenceExpression lvr = (ClassFileLocalVariableReferenceExpression) valueRef.getLeftExpression();
 
             if (lvr.getLocalVariable() == localVariable) {
-                BinaryOperatorExpression boe = (BinaryOperatorExpression)valueRef;
+                BinaryOperatorExpression boe = (BinaryOperatorExpression) valueRef;
                 Expression expression;
 
                 switch (boe.getOperator()) {
-                    case "*": expression = createAssignment(boe, "*="); break;
-                    case "/": expression = createAssignment(boe, "/="); break;
-                    case "%": expression = createAssignment(boe, "%="); break;
-                    case "<<": expression = createAssignment(boe, "<<="); break;
-                    case ">>": expression = createAssignment(boe, ">>="); break;
-                    case ">>>": expression = createAssignment(boe, ">>>="); break;
-                    case "&": expression = createAssignment(boe, "&="); break;
-                    case "^": expression = createAssignment(boe, "^="); break;
-                    case "|": expression = createAssignment(boe, "|="); break;
-                    case "=": expression = boe; break;
+                    case "*":
+                        expression = createAssignment(boe, "*=");
+                        break;
+                    case "/":
+                        expression = createAssignment(boe, "/=");
+                        break;
+                    case "%":
+                        expression = createAssignment(boe, "%=");
+                        break;
+                    case "<<":
+                        expression = createAssignment(boe, "<<=");
+                        break;
+                    case ">>":
+                        expression = createAssignment(boe, ">>=");
+                        break;
+                    case ">>>":
+                        expression = createAssignment(boe, ">>>=");
+                        break;
+                    case "&":
+                        expression = createAssignment(boe, "&=");
+                        break;
+                    case "^":
+                        expression = createAssignment(boe, "^=");
+                        break;
+                    case "|":
+                        expression = createAssignment(boe, "|=");
+                        break;
+                    case "=":
+                        expression = boe;
+                        break;
                     case "+":
                         if (isPositiveOne(boe.getRightExpression())) {
                             if (stackContainsLocalVariableReference(stack, localVariable)) {
@@ -1221,7 +1241,8 @@ public class ByteCodeParser {
                             expression = createAssignment(boe, "-=");
                         }
                         break;
-                    default: throw new IllegalStateException("Unexpected value expression");
+                    default:
+                        throw new IllegalStateException("Unexpected value expression");
                 }
 
                 if (!stack.isEmpty() && stack.peek() == valueRef) {
@@ -1268,16 +1289,36 @@ public class ByteCodeParser {
                 Expression expression;
 
                 switch (boe.getOperator()) {
-                    case "*": expression = createAssignment(boe, "*="); break;
-                    case "/": expression = createAssignment(boe, "/="); break;
-                    case "%": expression = createAssignment(boe, "%="); break;
-                    case "<<": expression = createAssignment(boe, "<<="); break;
-                    case ">>": expression = createAssignment(boe, ">>="); break;
-                    case ">>>": expression = createAssignment(boe, ">>>="); break;
-                    case "&": expression = createAssignment(boe, "&="); break;
-                    case "^": expression = createAssignment(boe, "^="); break;
-                    case "|": expression = createAssignment(boe, "|="); break;
-                    case "=": expression = boe; break;
+                    case "*":
+                        expression = createAssignment(boe, "*=");
+                        break;
+                    case "/":
+                        expression = createAssignment(boe, "/=");
+                        break;
+                    case "%":
+                        expression = createAssignment(boe, "%=");
+                        break;
+                    case "<<":
+                        expression = createAssignment(boe, "<<=");
+                        break;
+                    case ">>":
+                        expression = createAssignment(boe, ">>=");
+                        break;
+                    case ">>>":
+                        expression = createAssignment(boe, ">>>=");
+                        break;
+                    case "&":
+                        expression = createAssignment(boe, "&=");
+                        break;
+                    case "^":
+                        expression = createAssignment(boe, "^=");
+                        break;
+                    case "|":
+                        expression = createAssignment(boe, "|=");
+                        break;
+                    case "=":
+                        expression = boe;
+                        break;
                     case "+":
                         if (isPositiveOne(boe.getRightExpression())) {
                             if (stackContainsFieldReference(stack, fr)) {
@@ -1320,7 +1361,8 @@ public class ByteCodeParser {
                             expression = createAssignment(boe, "-=");
                         }
                         break;
-                    default: throw new IllegalStateException("Unexpected value expression");
+                    default:
+                        throw new IllegalStateException("Unexpected value expression");
                 }
 
                 if (!stack.isEmpty() && stack.peek() == valueRef) {
@@ -1732,15 +1774,33 @@ public class ByteCodeParser {
 
         if ("TYPE".equals(name) && typeName.startsWith("java/lang/")) {
             switch (typeName) {
-                case StringConstants.JAVA_LANG_BOOLEAN:   stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_BOOLEAN)); return;
-                case StringConstants.JAVA_LANG_CHARACTER: stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_CHAR));    return;
-                case StringConstants.JAVA_LANG_FLOAT:     stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_FLOAT));   return;
-                case StringConstants.JAVA_LANG_DOUBLE:    stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_DOUBLE));  return;
-                case StringConstants.JAVA_LANG_BYTE:      stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_BYTE));    return;
-                case StringConstants.JAVA_LANG_SHORT:     stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_SHORT));   return;
-                case StringConstants.JAVA_LANG_INTEGER:   stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_INT));     return;
-                case StringConstants.JAVA_LANG_LONG:      stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_LONG));    return;
-                case StringConstants.JAVA_LANG_VOID:      stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_VOID));    return;
+                case StringConstants.JAVA_LANG_BOOLEAN:
+                    stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_BOOLEAN));
+                    return;
+                case StringConstants.JAVA_LANG_CHARACTER:
+                    stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_CHAR));
+                    return;
+                case StringConstants.JAVA_LANG_FLOAT:
+                    stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_FLOAT));
+                    return;
+                case StringConstants.JAVA_LANG_DOUBLE:
+                    stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_DOUBLE));
+                    return;
+                case StringConstants.JAVA_LANG_BYTE:
+                    stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_BYTE));
+                    return;
+                case StringConstants.JAVA_LANG_SHORT:
+                    stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_SHORT));
+                    return;
+                case StringConstants.JAVA_LANG_INTEGER:
+                    stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_INT));
+                    return;
+                case StringConstants.JAVA_LANG_LONG:
+                    stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_LONG));
+                    return;
+                case StringConstants.JAVA_LANG_VOID:
+                    stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_VOID));
+                    return;
             }
         }
 

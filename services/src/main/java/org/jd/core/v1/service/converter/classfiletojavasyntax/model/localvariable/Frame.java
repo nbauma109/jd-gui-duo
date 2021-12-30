@@ -920,11 +920,19 @@ public class Frame {
             sb.setLength(0);
 
             switch (type.getJavaPrimitiveFlags()) {
-                case FLAG_BYTE : sb.append("b"); break;
-                case FLAG_CHAR : sb.append("c"); break;
-                case FLAG_DOUBLE : sb.append("d"); break;
-                case FLAG_FLOAT : sb.append("f"); break;
-                case FLAG_INT :
+                case FLAG_BYTE:
+                    sb.append("b");
+                    break;
+                case FLAG_CHAR:
+                    sb.append("c");
+                    break;
+                case FLAG_DOUBLE:
+                    sb.append("d");
+                    break;
+                case FLAG_FLOAT:
+                    sb.append("f");
+                    break;
+                case FLAG_INT:
                     for (String in : INTEGER_NAMES) {
                         if (!blackListNames.contains(in)) {
                             name = in;
@@ -934,9 +942,15 @@ public class Frame {
                     }
                     sb.append("i");
                     break;
-                case FLAG_LONG : sb.append("l"); break;
-                case FLAG_SHORT : sb.append("s"); break;
-                case FLAG_BOOLEAN : sb.append("bool"); break;
+                case FLAG_LONG:
+                    sb.append("l");
+                    break;
+                case FLAG_SHORT:
+                    sb.append("s");
+                    break;
+                case FLAG_BOOLEAN:
+                    sb.append("bool");
+                    break;
             }
 
             generate(type);

@@ -328,14 +328,30 @@ public class ByteCodeWriter {
                     break;
                 case NEWARRAY:
                     switch (code[++offset] & 255) {
-                        case T_BOOLEAN: sb.append(" boolean"); break;
-                        case T_CHAR:    sb.append(" char"); break;
-                        case T_FLOAT:   sb.append(" float"); break;
-                        case T_DOUBLE:  sb.append(" double"); break;
-                        case T_BYTE:    sb.append(" byte"); break;
-                        case T_SHORT:   sb.append(" short"); break;
-                        case T_INT:     sb.append(" int"); break;
-                        case T_LONG:    sb.append(" long"); break;
+                        case T_BOOLEAN:
+                            sb.append(" boolean");
+                            break;
+                        case T_CHAR:
+                            sb.append(" char");
+                            break;
+                        case T_FLOAT:
+                            sb.append(" float");
+                            break;
+                        case T_DOUBLE:
+                            sb.append(" double");
+                            break;
+                        case T_BYTE:
+                            sb.append(" byte");
+                            break;
+                        case T_SHORT:
+                            sb.append(" short");
+                            break;
+                        case T_INT:
+                            sb.append(" int");
+                            break;
+                        case T_LONG:
+                            sb.append(" long");
+                            break;
                     }
                     break;
                 case WIDE:
@@ -346,17 +362,39 @@ public class ByteCodeWriter {
                         sb.append(" iinc #").append(i).append(' ').append((short)((code[++offset] & 255) << 8 | code[++offset] & 255));
                     } else {
                         switch (opcode) {
-                            case ILOAD : sb.append(" iload #").append(i); break;
-                            case LLOAD : sb.append(" lload #").append(i); break;
-                            case FLOAD : sb.append(" fload #").append(i); break;
-                            case DLOAD : sb.append(" dload #").append(i); break;
-                            case ALOAD : sb.append(" aload #").append(i); break;
-                            case ISTORE: sb.append(" istore #").append(i); break;
-                            case LSTORE: sb.append(" lstore #").append(i); break;
-                            case FSTORE: sb.append(" fstore #").append(i); break;
-                            case DSTORE: sb.append(" dstore #").append(i); break;
-                            case ASTORE: sb.append(" astore #").append(i); break;
-                            case RET   : sb.append(" ret #").append(i); break;
+                            case ILOAD:
+                                sb.append(" iload #").append(i);
+                                break;
+                            case LLOAD:
+                                sb.append(" lload #").append(i);
+                                break;
+                            case FLOAD:
+                                sb.append(" fload #").append(i);
+                                break;
+                            case DLOAD:
+                                sb.append(" dload #").append(i);
+                                break;
+                            case ALOAD:
+                                sb.append(" aload #").append(i);
+                                break;
+                            case ISTORE:
+                                sb.append(" istore #").append(i);
+                                break;
+                            case LSTORE:
+                                sb.append(" lstore #").append(i);
+                                break;
+                            case FSTORE:
+                                sb.append(" fstore #").append(i);
+                                break;
+                            case DSTORE:
+                                sb.append(" dstore #").append(i);
+                                break;
+                            case ASTORE:
+                                sb.append(" astore #").append(i);
+                                break;
+                            case RET:
+                                sb.append(" ret #").append(i);
+                                break;
                         }
                     }
                     break;
@@ -401,12 +439,24 @@ public class ByteCodeWriter {
 
                 for (char c : str.toCharArray()) {
                     switch (c) {
-                        case '\b': sb.append("\\\\b"); break;
-                        case '\f': sb.append("\\\\f"); break;
-                        case '\n': sb.append("\\\\n"); break;
-                        case '\r': sb.append("\\\\r"); break;
-                        case '\t': sb.append("\\\\t"); break;
-                        default: sb.append(c); break;
+                        case '\b':
+                            sb.append("\\\\b");
+                            break;
+                        case '\f':
+                            sb.append("\\\\f");
+                            break;
+                        case '\n':
+                            sb.append("\\\\n");
+                            break;
+                        case '\r':
+                            sb.append("\\\\r");
+                            break;
+                        case '\t':
+                            sb.append("\\\\t");
+                            break;
+                        default:
+                            sb.append(c);
+                            break;
                     }
                 }
 

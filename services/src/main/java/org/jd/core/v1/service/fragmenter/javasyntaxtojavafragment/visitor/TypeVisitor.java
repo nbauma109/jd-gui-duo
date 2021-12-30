@@ -114,15 +114,33 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
     @Override
     public void visit(PrimitiveType type) {
         switch (type.getJavaPrimitiveFlags()) {
-            case FLAG_BOOLEAN: tokens.add(BOOLEAN); break;
-            case FLAG_CHAR:    tokens.add(CHAR);    break;
-            case FLAG_FLOAT:   tokens.add(FLOAT);   break;
-            case FLAG_DOUBLE:  tokens.add(DOUBLE);  break;
-            case FLAG_BYTE:    tokens.add(BYTE);    break;
-            case FLAG_SHORT:   tokens.add(SHORT);   break;
-            case FLAG_INT:     tokens.add(INT);     break;
-            case FLAG_LONG:    tokens.add(LONG);    break;
-            case FLAG_VOID:    tokens.add(VOID);    break;
+            case FLAG_BOOLEAN:
+                tokens.add(BOOLEAN);
+                break;
+            case FLAG_CHAR:
+                tokens.add(CHAR);
+                break;
+            case FLAG_FLOAT:
+                tokens.add(FLOAT);
+                break;
+            case FLAG_DOUBLE:
+                tokens.add(DOUBLE);
+                break;
+            case FLAG_BYTE:
+                tokens.add(BYTE);
+                break;
+            case FLAG_SHORT:
+                tokens.add(SHORT);
+                break;
+            case FLAG_INT:
+                tokens.add(INT);
+                break;
+            case FLAG_LONG:
+                tokens.add(LONG);
+                break;
+            case FLAG_VOID:
+                tokens.add(VOID);
+                break;
         }
 
         // Build token for dimension
@@ -182,10 +200,17 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
 
     protected void visitDimension(int dimension) {
         switch (dimension) {
-            case 0: break;
-            case 1: tokens.add(TextToken.DIMENSION_1); break;
-            case 2: tokens.add(TextToken.DIMENSION_2); break;
-            default: tokens.add(newTextToken(new String(new char[dimension]).replace("\0", "[]"))); break;
+            case 0:
+                break;
+            case 1:
+                tokens.add(TextToken.DIMENSION_1);
+                break;
+            case 2:
+                tokens.add(TextToken.DIMENSION_2);
+                break;
+            default:
+                tokens.add(newTextToken(new String(new char[dimension]).replace("\0", "[]")));
+                break;
         }
     }
 
