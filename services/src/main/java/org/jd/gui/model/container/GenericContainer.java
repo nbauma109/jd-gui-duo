@@ -7,6 +7,7 @@
 
 package org.jd.gui.model.container;
 
+import org.apache.commons.io.IOUtils;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
@@ -14,6 +15,7 @@ import org.jd.gui.model.container.entry.path.SimpleEntryPath;
 import org.jd.gui.spi.ContainerFactory;
 import org.jdv1.gui.util.index.IndexesUtil;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,7 +36,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-public class GenericContainer implements Container {
+public class GenericContainer implements Container, Closeable {
     protected static final long TIMESTAMP = System.currentTimeMillis();
 
     private static final AtomicLong tmpFileCounter = new AtomicLong(0);
@@ -42,11 +44,22 @@ public class GenericContainer implements Container {
     private final API api;
     private final int rootNameCount;
     private final Container.Entry root;
+    private ZipFile zipFile;
 
     public GenericContainer(API api, Container.Entry parentEntry, Path rootPath) {
         this.api = api;
         this.rootNameCount = rootPath.getNameCount();
         this.root = makeRootEntry(parentEntry, rootPath);
+        this.zipFile = makeZipFile(parentEntry);
+    }
+
+    private static ZipFile makeZipFile(Container.Entry parentEntry) {
+        try {
+            return new ZipFile(new File(parentEntry.getPath()));
+        } catch (IOException e) {
+            assert ExceptionUtil.printStackTrace(e);
+        }
+        return null;
     }
 
     private Entry makeRootEntry(Container.Entry parentEntry, Path rootPath) {
@@ -148,13 +161,11 @@ public class GenericContainer implements Container {
 
         @Override
         public long compressedLength() {
-            try (ZipFile zipFile = new ZipFile(new File(getRoot().getParent().getUri()))) {
-                ZipEntry zipEntry = zipFile.getEntry(strPath);
-                return IndexesUtil.entryImpactBytes(zipEntry);
-            } catch (IOException e) {
-                assert ExceptionUtil.printStackTrace(e);
-                return -1L;
+            if (zipFile == null) {
+                return length();
             }
+            ZipEntry zipEntry = zipFile.getEntry(strPath);
+            return IndexesUtil.entryImpactBytes(zipEntry);
         }
         
         @Override
@@ -232,5 +243,11 @@ public class GenericContainer implements Container {
             Files.delete(tmpFile.toPath());
             return Collections.emptyMap();
         }
+    }
+
+    @Override
+    public void close() {
+        IOUtils.closeQuietly(zipFile);
+        zipFile = null;
     }
 }

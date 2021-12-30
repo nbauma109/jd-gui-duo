@@ -7,6 +7,7 @@
 
 package org.jd.gui.view.component.panel;
 
+import org.apache.commons.io.IOUtils;
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.PreferencesChangeListener;
@@ -24,6 +25,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.Closeable;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
@@ -139,6 +141,9 @@ public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel impl
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				removeComponent(page);
+				if (page instanceof Closeable closeablePage) {
+                    IOUtils.closeQuietly(closeablePage);
+                }
 			}
 		});
 

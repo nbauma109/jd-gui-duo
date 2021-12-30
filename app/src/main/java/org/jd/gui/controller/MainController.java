@@ -7,6 +7,7 @@
 
 package org.jd.gui.controller;
 
+import org.apache.commons.io.IOUtils;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContentCopyable;
@@ -57,6 +58,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -524,6 +526,9 @@ public class MainController implements API {
         @Override
         protected void done() {
             progressMonitor.close();
+            if (ci instanceof Closeable c) {
+                IOUtils.closeQuietly(c);
+            }
             // Fire 'indexesChanged' event
             Collection<Future<Indexes>> collectionOfFutureIndexes = getCollectionOfFutureIndexes();
             for (IndexesChangeListener listener : containerChangeListeners) {

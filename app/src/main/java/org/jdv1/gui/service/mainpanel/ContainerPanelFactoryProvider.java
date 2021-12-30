@@ -6,6 +6,7 @@
  */
 package org.jdv1.gui.service.mainpanel;
 
+import org.apache.commons.io.IOUtils;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContentIndexable;
@@ -19,6 +20,7 @@ import org.jd.gui.spi.SourceSaver;
 import org.jd.gui.spi.TreeNodeFactory;
 import org.jd.gui.view.component.panel.TreeTabbedPanel;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -54,13 +56,15 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
     }
 
     @SuppressWarnings("rawtypes")
-    protected static class ContainerPanel extends TreeTabbedPanel implements ContentIndexable, SourcesSavable {
+    protected static class ContainerPanel extends TreeTabbedPanel implements ContentIndexable, SourcesSavable, Closeable {
         private static final long serialVersionUID = 1L;
         private transient Container.Entry entry;
+        private transient Container container;
 
         public ContainerPanel(API api, Container container) {
             super(api, container.getRoot().getParent().getUri());
 
+            this.container = container;
             this.entry = container.getRoot().getParent();
 
             DefaultMutableTreeNode root = new DefaultMutableTreeNode();
@@ -138,6 +142,13 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
                 }
             } catch (URISyntaxException|IOException e) {
                 assert ExceptionUtil.printStackTrace(e);
+            }
+        }
+
+        @Override
+        public void close() throws IOException {
+            if (container instanceof Closeable c) {
+                IOUtils.closeQuietly(c);
             }
         }
     }
