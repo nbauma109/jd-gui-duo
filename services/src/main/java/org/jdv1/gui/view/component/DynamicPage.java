@@ -27,6 +27,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -81,7 +82,7 @@ public class DynamicPage
     @Override
     public String getFileName() { return page.getFileName(); }
     @Override
-    public void save(org.jd.gui.api.API api, OutputStream outputStream) { page.save(api, outputStream); }
+    public void save(API api, OutputStream outputStream) { page.save(api, outputStream); }
 
     // --- ContentSearchable --- //
     @Override
@@ -179,7 +180,7 @@ public class DynamicPage
         @Override
         public long compressedLength() { return entry.compressedLength(); }
         @Override
-        public InputStream getInputStream() { return new ByteArrayInputStream(source.getBytes()); }
+        public InputStream getInputStream() { return new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8)); }
         @Override
         public Map<Container.EntryPath, Container.Entry> getChildren() { return entry.getChildren(); }
     }

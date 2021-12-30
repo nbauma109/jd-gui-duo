@@ -16,6 +16,7 @@ import org.jd.gui.service.indexer.AbstractIndexerProvider;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
@@ -40,7 +41,7 @@ public class MetainfServiceFileIndexerProvider extends AbstractIndexerProvider {
     public void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
         Map<String, Collection> index = indexes.getIndex("typeReferences");
 
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(entry.getInputStream()))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(entry.getInputStream(), StandardCharsets.UTF_8))) {
             String line;
 
             while ((line = br.readLine()) != null) {

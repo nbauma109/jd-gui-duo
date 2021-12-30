@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 public final class TextReader {
 
@@ -36,7 +37,7 @@ public final class TextReader {
         char[] charBuffer = new char[8192];
         int nbCharRead;
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
             while ((nbCharRead = reader.read(charBuffer)) != -1) {
                 // appends buffer
                 sb.append(charBuffer, 0, nbCharRead);

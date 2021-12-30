@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -45,7 +46,7 @@ public class OneTypeReferencePerLinePage extends TypeReferencePage implements Ur
         StringBuilder sb = new StringBuilder();
         int offset = 0;
 
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(entry.getInputStream()))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(entry.getInputStream(), StandardCharsets.UTF_8))) {
             String line;
 
             while ((line = br.readLine()) != null) {

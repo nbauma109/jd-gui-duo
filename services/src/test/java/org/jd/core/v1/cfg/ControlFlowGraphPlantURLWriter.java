@@ -7,6 +7,7 @@
 
 package org.jd.core.v1.cfg;
 
+import java.nio.charset.StandardCharsets;
 import java.util.zip.Deflater;
 
 /**
@@ -23,7 +24,7 @@ public class ControlFlowGraphPlantURLWriter {
     protected static final char[] PLANTUML_ENCODE_6_BIT = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_".toCharArray();
 
     public static String writePlantUMLUrl(String plantuml) throws Exception {
-        byte[] input = plantuml.getBytes("UTF-8");
+        byte[] input = plantuml.getBytes(StandardCharsets.UTF_8);
 
         // Compress
         Deflater deflater = new Deflater(Deflater.BEST_COMPRESSION, true);
