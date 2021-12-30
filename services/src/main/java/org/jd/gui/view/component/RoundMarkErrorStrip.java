@@ -294,7 +294,7 @@ public class RoundMarkErrorStrip extends JComponent {
      */
     private static int possiblyBrighter(int i) {
         if (i<255) {
-            i += (int)((255-i)*0.6F);
+            i += (int)((255-i)*0.6D);
         }
         return i;
     }
@@ -306,7 +306,7 @@ public class RoundMarkErrorStrip extends JComponent {
      * @return A possibly brighter value for the component.
      */
     private static int possiblyDarker(int i) {
-        return i - (int)(i*0.4F);
+        return i - (int)(i*0.4D);
     }
 
     /** Refreshes the markers displayed in this error strip. */
@@ -489,8 +489,8 @@ public class RoundMarkErrorStrip extends JComponent {
         int line = -1;
         int h = textArea.getVisibleRect().height;
         if (y<h) {
-            float at = y/(float)h;
-            line = Math.round((textArea.getLineCount()-1)*at);
+            double at = y/(double)h;
+            line = (int) Math.round((textArea.getLineCount()-1)*at);
         }
         return line;
     }
@@ -504,7 +504,7 @@ public class RoundMarkErrorStrip extends JComponent {
         public void caretUpdate(CaretEvent e) {
             if (getFollowCaret()) {
                 int line = textArea.getCaretLineNumber();
-                float percent = line / (float)(textArea.getLineCount()-1);
+                double percent = line / (double)(textArea.getLineCount()-1);
                 textArea.computeVisibleRect(visibleRect);
                 caretLineY = (int)(visibleRect.height*percent);
                 if (caretLineY!=lastLineY) {
@@ -858,7 +858,7 @@ public class RoundMarkErrorStrip extends JComponent {
          */
         private int lineToY(int line) {
             int h = textArea.getVisibleRect().height;
-            float lineCount = textArea.getLineCount();
+            double lineCount = textArea.getLineCount();
             return (int)((line-1)/(lineCount-1) * h) - 2;
         }
     }

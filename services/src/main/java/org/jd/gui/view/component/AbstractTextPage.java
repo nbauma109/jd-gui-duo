@@ -139,7 +139,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
 
                 try {
                     Rectangle2D newRectangle = textArea.modelToView2D(offset);
-                    int newY = (int) Math.round(newRectangle.getY() + newRectangle.getHeight() / 2d);
+                    int newY = (int) Math.round(newRectangle.getY() + newRectangle.getHeight() / 2D);
 
                     // Scroll
                     Point viewPosition = scrollPane.getViewport().getViewPosition();
