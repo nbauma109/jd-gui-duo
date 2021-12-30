@@ -18,7 +18,7 @@ public class ImageUtil {
 		try {
 			return new CustomMultiResolutionImage(iconPath);
 		} catch (IOException e) {
-			throw new IllegalArgumentException("Invalid icon path : " + iconPath);
+			throw new IllegalArgumentException("Invalid icon path : " + iconPath, e);
 		}
 	}
 }

@@ -12,6 +12,7 @@ import org.fife.ui.rsyntaxtextarea.parser.Parser;
 import org.fife.ui.rsyntaxtextarea.parser.ParserNotice;
 import org.fife.ui.rsyntaxtextarea.parser.TaskTagParser.TaskNotice;
 import org.fife.ui.rtextarea.RTextArea;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -364,6 +365,7 @@ public class RoundMarkErrorStrip extends JComponent {
             try {
                 line = textArea.getLineOfOffset(range.getStartOffset());
             } catch (BadLocationException ble) { // Never happens
+                assert ExceptionUtil.printStackTrace(ble);
                 continue;
             }
             notice = new MarkedOccurrenceNotice(range, color);
@@ -527,6 +529,7 @@ public class RoundMarkErrorStrip extends JComponent {
                     int offs = textArea.getLineStartOffset(line);
                     textArea.setCaretPosition(offs);
                 } catch (BadLocationException ble) { // Never happens
+                    assert ExceptionUtil.printStackTrace(ble);
                     UIManager.getLookAndFeel().provideErrorFeedback(textArea);
                 }
             }
@@ -620,6 +623,7 @@ public class RoundMarkErrorStrip extends JComponent {
             try {
                 return textArea.getLineOfOffset(range.getStartOffset())+1;
             } catch (BadLocationException ble) {
+                assert ExceptionUtil.printStackTrace(ble);
                 return 0;
             }
         }
@@ -633,6 +637,7 @@ public class RoundMarkErrorStrip extends JComponent {
                 text = msg.getString("OccurrenceOf");
                 text = MessageFormat.format(text, word);
             } catch (BadLocationException ble) {
+                assert ExceptionUtil.printStackTrace(ble);
                 UIManager.getLookAndFeel().provideErrorFeedback(textArea);
             }
             return text;
@@ -749,6 +754,7 @@ public class RoundMarkErrorStrip extends JComponent {
                     offs = textArea.getLineStartOffset(line);
                     textArea.setCaretPosition(offs);
                 } catch (BadLocationException ble) { // Never happens
+                    assert ExceptionUtil.printStackTrace(ble);
                     UIManager.getLookAndFeel().provideErrorFeedback(textArea);
                 }
             }

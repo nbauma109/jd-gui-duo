@@ -40,6 +40,7 @@ public class App {
                 try {
                     InterProcessCommunicationUtil.listen(receivedArgs -> controller.openFiles(newList(receivedArgs)));
                 } catch (Exception notTheFirstInstanceException) {
+                    assert ExceptionUtil.printStackTrace(notTheFirstInstanceException);
                     // Send args to main windows and exit
                     InterProcessCommunicationUtil.send(args);
                     System.exit(0);
@@ -50,6 +51,7 @@ public class App {
             try {
                 UIManager.setLookAndFeel(configuration.getLookAndFeel());
             } catch (Exception e) {
+                assert ExceptionUtil.printStackTrace(e);
                 configuration.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                 try {
                     UIManager.setLookAndFeel(configuration.getLookAndFeel());
