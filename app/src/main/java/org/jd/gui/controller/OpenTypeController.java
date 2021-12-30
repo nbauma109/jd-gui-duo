@@ -251,7 +251,7 @@ public class OpenTypeController implements IndexesChangeListener {
             // Multiple entries -> Open a "Select location" popup
             selectLocationController.show(new Point(leftBottom.x + 16 + 2, leftBottom.y + 2), entries,
                     entry -> openCallback.accept(UriUtil.createURI(api, collectionOfFutureIndexes, entry, null, typeName)), // entry selected callback
-                    () -> openTypeView.focus()); // popup close callback
+                    openTypeView::focus); // popup close callback
         }
     }
 
