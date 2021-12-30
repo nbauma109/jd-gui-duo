@@ -1075,13 +1075,13 @@ public class ByteCodeParser {
             case CONSTANT_Float:
                 float f = ((ConstantFloat)constant).getBytes();
 
-                if (f == Float.MIN_VALUE) {
+                if (Float.compare(f, Float.MIN_VALUE) == 0) {
                     stack.push(new FieldReferenceExpression(lineNumber, TYPE_FLOAT, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_FLOAT), StringConstants.JAVA_LANG_FLOAT, StringConstants.MIN_VALUE, "F"));
-                } else if (f == Float.MAX_VALUE) {
+                } else if (Float.compare(f, Float.MAX_VALUE) == 0) {
                     stack.push(new FieldReferenceExpression(lineNumber, TYPE_FLOAT, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_FLOAT), StringConstants.JAVA_LANG_FLOAT, StringConstants.MAX_VALUE, "F"));
-                } else if (f == Float.NEGATIVE_INFINITY) {
+                } else if (Float.compare(f, Float.NEGATIVE_INFINITY) == 0) {
                     stack.push(new FieldReferenceExpression(lineNumber, TYPE_FLOAT, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_FLOAT), StringConstants.JAVA_LANG_FLOAT, "NEGATIVE_INFINITY", "F"));
-                } else if (f == Float.POSITIVE_INFINITY) {
+                } else if (Float.compare(f, Float.POSITIVE_INFINITY) == 0) {
                     stack.push(new FieldReferenceExpression(lineNumber, TYPE_FLOAT, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_FLOAT), StringConstants.JAVA_LANG_FLOAT, "POSITIVE_INFINITY", "F"));
                 } else if (Float.isNaN(f)) {
                     stack.push(new FieldReferenceExpression(lineNumber, TYPE_FLOAT, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_FLOAT), StringConstants.JAVA_LANG_FLOAT, "NaN", "F"));

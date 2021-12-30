@@ -57,13 +57,13 @@ public class ConstantValueWriter
             {
                 double d = ((ConstantDouble)cv).getBytes();
 
-                if (d == Double.POSITIVE_INFINITY)
+                if (Double.compare(d, Double.POSITIVE_INFINITY) == 0)
                 {
                     write(
                         loader, printer, referenceMap, classFile,
                         StringConstants.JAVA_LANG_DOUBLE, "POSITIVE_INFINITY", "D");
                 }
-                else if (d == Double.NEGATIVE_INFINITY)
+                else if (Double.compare(d, Double.NEGATIVE_INFINITY) == 0)
                 {
                     write(
                         loader, printer, referenceMap, classFile,
@@ -75,19 +75,19 @@ public class ConstantValueWriter
                         loader, printer, referenceMap, classFile,
                         StringConstants.JAVA_LANG_DOUBLE, "NaN", "D");
                 }
-                else if (d == Double.MAX_VALUE)
+                else if (Double.compare(d, Double.MAX_VALUE) == 0)
                 {
                     write(
                         loader, printer, referenceMap, classFile,
                         StringConstants.JAVA_LANG_DOUBLE, StringConstants.MAX_VALUE, "D");
                 }
-                /* else if (d == Double.MIN_NORMAL)
+                /* else if (Double.compare(d, Double.MIN_NORMAL) == 0)
                 {
                     Write(
                         loader, printer, referenceMap, classFile,
                         StringConstants.JAVA_LANG_DOUBLE, "MIN_NORMAL", "D");
                 } */
-                else if (d == Double.MIN_VALUE)
+                else if (Double.compare(d, Double.MIN_VALUE) == 0)
                 {
                     write(
                         loader, printer, referenceMap, classFile,
@@ -108,13 +108,13 @@ public class ConstantValueWriter
             {
                 float value = ((ConstantFloat)cv).getBytes();
 
-                if (value == Float.POSITIVE_INFINITY)
+                if (Float.compare(value, Float.POSITIVE_INFINITY) == 0)
                 {
                     write(
                         loader, printer, referenceMap, classFile,
                         StringConstants.JAVA_LANG_FLOAT, "POSITIVE_INFINITY", "F");
                 }
-                else if (value == Float.NEGATIVE_INFINITY)
+                else if (Float.compare(value, Float.NEGATIVE_INFINITY) == 0)
                 {
                     write(
                         loader, printer, referenceMap, classFile,
@@ -126,19 +126,19 @@ public class ConstantValueWriter
                         loader, printer, referenceMap, classFile,
                         StringConstants.JAVA_LANG_FLOAT, "NaN", "F");
                 }
-                else if (value == Float.MAX_VALUE)
+                else if (Float.compare(value, Float.MAX_VALUE) == 0)
                 {
                     write(
                         loader, printer, referenceMap, classFile,
                         StringConstants.JAVA_LANG_FLOAT, StringConstants.MAX_VALUE, "F");
                 }
-                /* else if (value == Float.MIN_NORMAL)
+                /* else if (Float.compare(value, Float.MIN_NORMAL) == 0)
                 {
                     Write(
                         loader, printer, referenceMap, classFile,
                         StringConstants.JAVA_LANG_FLOAT, "MIN_NORMAL", "F");
                 } */
-                else if (value == Float.MIN_VALUE)
+                else if (Float.compare(value, Float.MIN_VALUE) == 0)
                 {
                     write(
                         loader, printer, referenceMap, classFile,
