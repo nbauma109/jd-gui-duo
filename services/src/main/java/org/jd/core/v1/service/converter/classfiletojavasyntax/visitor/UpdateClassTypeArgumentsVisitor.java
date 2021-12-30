@@ -37,7 +37,7 @@ public class UpdateClassTypeArgumentsVisitor extends AbstractTypeArgumentVisitor
 
     @Override
     public void visit(WildcardExtendsTypeArgument argument) {
-        Type type = argument.getType();
+        Type type = argument.type();
 
         type.accept(this);
 
@@ -46,7 +46,7 @@ public class UpdateClassTypeArgumentsVisitor extends AbstractTypeArgumentVisitor
 
     @Override
     public void visit(WildcardSuperTypeArgument argument) {
-        Type type = argument.getType();
+        Type type = argument.type();
 
         type.accept(this);
 

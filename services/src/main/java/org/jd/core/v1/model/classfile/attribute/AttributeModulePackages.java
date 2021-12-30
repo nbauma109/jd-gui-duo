@@ -7,14 +7,5 @@
 
 package org.jd.core.v1.model.classfile.attribute;
 
-public class AttributeModulePackages implements Attribute {
-    private final String[] packageNames;
-
-    public AttributeModulePackages(String[] packageNames) {
-        this.packageNames = packageNames;
-    }
-
-    public String[] getPackageNames() {
-        return packageNames;
-    }
+public record AttributeModulePackages(String[] packageNames) implements Attribute {
 }

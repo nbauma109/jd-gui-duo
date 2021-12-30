@@ -110,22 +110,12 @@ public abstract class TypeReferencePage extends HyperlinkPage {
     }
 
     public static class TypeHyperlinkData extends HyperlinkData {
-    	private boolean enabled;
     	private final String internalTypeName;
 
         public TypeHyperlinkData(int startPosition, int endPosition, String internalTypeName) {
             super(startPosition, endPosition);
-            this.setEnabled(false);
             this.internalTypeName = internalTypeName;
         }
-
-		public boolean isEnabled() {
-			return enabled;
-		}
-
-		public void setEnabled(boolean enabled) {
-			this.enabled = enabled;
-		}
 
 		public String getInternalTypeName() {
 			return internalTypeName;

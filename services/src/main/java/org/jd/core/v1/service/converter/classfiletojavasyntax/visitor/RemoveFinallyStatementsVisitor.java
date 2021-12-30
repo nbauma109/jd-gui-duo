@@ -135,7 +135,7 @@ public class RemoveFinallyStatementsVisitor implements StatementVisitor {
 
     private static WhileStatement getInfiniteWhileStatement(Statement statement) {
         if (statement.isLabelStatement()) {
-            statement = ((LabelStatement)statement).getStatement();
+            statement = ((LabelStatement)statement).statement();
         }
 
         if (statement == null || !statement.isWhileStatement() || !statement.getCondition().isBooleanExpression()) {

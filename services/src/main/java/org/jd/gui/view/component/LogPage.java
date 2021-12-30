@@ -64,13 +64,13 @@ public class LogPage extends HyperlinkPage implements UriGettable, IndexesChange
     }
 
     @Override
-    protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return ((LogHyperlinkData)hyperlinkData).enabled; }
+    protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return ((LogHyperlinkData)hyperlinkData).isEnabled(); }
 
     @Override
     protected void openHyperlink(int x, int y, HyperlinkData hyperlinkData) {
         LogHyperlinkData logHyperlinkData = (LogHyperlinkData)hyperlinkData;
 
-        if (logHyperlinkData.enabled) {
+        if (logHyperlinkData.isEnabled()) {
             try {
                 // Save current position in history
                 Point location = textArea.getLocationOnScreen();
@@ -133,8 +133,8 @@ public class LogPage extends HyperlinkPage implements UriGettable, IndexesChange
             String internalTypeName = typeAndMethodNames.substring(0, lastDotIndex).replace('.', '/');
             boolean enabled = IndexesUtil.containsInternalTypeName(collectionOfFutureIndexes, internalTypeName);
 
-            if (entryData.enabled != enabled) {
-                entryData.enabled = enabled;
+            if (entryData.isEnabled() != enabled) {
+                entryData.setEnabled(enabled);
                 refresh = true;
             }
         }
@@ -145,7 +145,6 @@ public class LogPage extends HyperlinkPage implements UriGettable, IndexesChange
     }
 
     public static class LogHyperlinkData extends HyperlinkData {
-    	private boolean enabled = false;
 
         public LogHyperlinkData(int startPosition, int endPosition) {
             super(startPosition, endPosition);

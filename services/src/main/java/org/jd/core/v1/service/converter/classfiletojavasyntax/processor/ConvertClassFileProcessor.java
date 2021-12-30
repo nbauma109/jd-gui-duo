@@ -228,7 +228,7 @@ public class ConvertClassFileProcessor {
             defaultAnnotationValue = null;
 
             if (annotationDefault != null) {
-                defaultAnnotationValue = converter.convert(annotationDefault.getDefaultValue());
+                defaultAnnotationValue = converter.convert(annotationDefault.defaultValue());
             }
 
             methodTypes = parser.parseMethodSignature(classFile, method);
@@ -328,7 +328,7 @@ public class ConvertClassFileProcessor {
         if (acv == null) {
             return null;
         }
-        Constant constantValue = acv.getConstantValue();
+        Constant constantValue = acv.constantValue();
         Expression expression = switch (constantValue.getTag()) {
 			case Const.CONSTANT_Integer -> new IntegerConstantExpression(typeField, ((ConstantInteger)constantValue).getBytes());
 			case Const.CONSTANT_Float -> new FloatConstantExpression(((ConstantFloat)constantValue).getBytes());
@@ -342,15 +342,15 @@ public class ConvertClassFileProcessor {
 
     protected ModuleDeclaration convertModuleDeclaration(ClassFile classFile) {
         AttributeModule attributeModule = classFile.getAttribute("Module");
-        List<ModuleDeclaration.ModuleInfo> requires = convertModuleDeclarationModuleInfo(attributeModule.getRequires());
-        List<ModuleDeclaration.PackageInfo> exports = convertModuleDeclarationPackageInfo(attributeModule.getExports());
-        List<ModuleDeclaration.PackageInfo> opens = convertModuleDeclarationPackageInfo(attributeModule.getOpens());
-        DefaultList<String> uses = new DefaultList<>(attributeModule.getUses());
-        List<ModuleDeclaration.ServiceInfo> provides = convertModuleDeclarationServiceInfo(attributeModule.getProvides());
+        List<ModuleDeclaration.ModuleInfo> requires = convertModuleDeclarationModuleInfo(attributeModule.requires());
+        List<ModuleDeclaration.PackageInfo> exports = convertModuleDeclarationPackageInfo(attributeModule.exports());
+        List<ModuleDeclaration.PackageInfo> opens = convertModuleDeclarationPackageInfo(attributeModule.opens());
+        DefaultList<String> uses = new DefaultList<>(attributeModule.uses());
+        List<ModuleDeclaration.ServiceInfo> provides = convertModuleDeclarationServiceInfo(attributeModule.provides());
 
         return new ModuleDeclaration(
-                attributeModule.getFlags(), classFile.getInternalTypeName(), attributeModule.getName(),
-                attributeModule.getVersion(), requires, exports, opens, uses, provides);
+                attributeModule.flags(), classFile.getInternalTypeName(), attributeModule.name(),
+                attributeModule.version(), requires, exports, opens, uses, provides);
     }
 
     protected List<ModuleDeclaration.ModuleInfo> convertModuleDeclarationModuleInfo(ModuleInfo[] moduleInfos) {
@@ -359,7 +359,7 @@ public class ConvertClassFileProcessor {
         }
         DefaultList<ModuleDeclaration.ModuleInfo> list = new DefaultList<>(moduleInfos.length);
         for (ModuleInfo moduleInfo : moduleInfos) {
-            list.add(new ModuleDeclaration.ModuleInfo(moduleInfo.getName(), moduleInfo.getFlags(), moduleInfo.getVersion()));
+            list.add(new ModuleDeclaration.ModuleInfo(moduleInfo.name(), moduleInfo.flags(), moduleInfo.version()));
         }
         return list;
     }
@@ -371,9 +371,9 @@ public class ConvertClassFileProcessor {
         DefaultList<ModuleDeclaration.PackageInfo> list = new DefaultList<>(packageInfos.length);
         DefaultList<String> moduleInfoNames;
         for (PackageInfo packageInfo : packageInfos) {
-            moduleInfoNames = packageInfo.getModuleInfoNames() == null ?
-                    null : new DefaultList<>(packageInfo.getModuleInfoNames());
-            list.add(new ModuleDeclaration.PackageInfo(packageInfo.getInternalName(), packageInfo.getFlags(), moduleInfoNames));
+            moduleInfoNames = packageInfo.moduleInfoNames() == null ?
+                    null : new DefaultList<>(packageInfo.moduleInfoNames());
+            list.add(new ModuleDeclaration.PackageInfo(packageInfo.internalName(), packageInfo.flags(), moduleInfoNames));
         }
         return list;
     }
@@ -385,9 +385,9 @@ public class ConvertClassFileProcessor {
         DefaultList<ModuleDeclaration.ServiceInfo> list = new DefaultList<>(serviceInfos.length);
         DefaultList<String> implementationTypeNames;
         for (ServiceInfo serviceInfo : serviceInfos) {
-            implementationTypeNames = serviceInfo.getImplementationTypeNames() == null ?
-                    null : new DefaultList<>(serviceInfo.getImplementationTypeNames());
-            list.add(new ModuleDeclaration.ServiceInfo(serviceInfo.getInterfaceTypeName(), implementationTypeNames));
+            implementationTypeNames = serviceInfo.implementationTypeNames() == null ?
+                    null : new DefaultList<>(serviceInfo.implementationTypeNames());
+            list.add(new ModuleDeclaration.ServiceInfo(serviceInfo.interfaceTypeName(), implementationTypeNames));
         }
         return list;
     }

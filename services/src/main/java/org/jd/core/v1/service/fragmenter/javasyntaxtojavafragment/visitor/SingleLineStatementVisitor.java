@@ -161,7 +161,7 @@ public class SingleLineStatementVisitor extends AbstractJavaSyntaxVisitor {
     @Override
     public void visit(LabelStatement statement) {
         minLineNumber = maxLineNumber = 0;
-        safeAccept(statement.getStatement());
+        safeAccept(statement.statement());
         statementCount = 1;
     }
 

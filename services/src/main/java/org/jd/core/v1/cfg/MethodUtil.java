@@ -40,7 +40,7 @@ public class MethodUtil {
 
         CompilationUnit compilationUnit = converter.process(classFile, typeMaker, decompileContext);
 
-        BaseTypeDeclaration typeDeclarations = compilationUnit.getTypeDeclarations();
+        BaseTypeDeclaration typeDeclarations = compilationUnit.typeDeclarations();
         BodyDeclaration bodyDeclaration = null;
 
         if (typeDeclarations instanceof EnumDeclaration ed) {

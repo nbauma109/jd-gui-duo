@@ -7,28 +7,7 @@
 
 package org.jd.core.v1.model.classfile.attribute;
 
-public class ModuleInfo {
-    private final String name;
-    private final int flags;
-    private final String version;
-
-    public ModuleInfo(String name, int flags, String version) {
-        this.name = name;
-        this.flags = flags;
-        this.version = version;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public int getFlags() {
-        return flags;
-    }
-
-    public String getVersion() {
-        return version;
-    }
+public record ModuleInfo(String name, int flags, String version) {
 
     @Override
     public String toString() {

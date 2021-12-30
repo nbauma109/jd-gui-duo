@@ -10,20 +10,5 @@ package org.jd.core.v1.model.classfile.attribute;
 import java.util.List;
 import java.util.Map.Entry;
 
-public class Annotation {
-    private final String descriptor;
-    private final List<Entry<String, AttributeElementValue>> elementValuePairs;
-
-    public Annotation(String descriptor, List<Entry<String,AttributeElementValue>> elementValuePairs) {
-        this.descriptor = descriptor;
-        this.elementValuePairs = elementValuePairs;
-    }
-
-    public String getDescriptor() {
-        return descriptor;
-    }
-
-    public List<Entry<String, AttributeElementValue>> getElementValuePairs() {
-        return elementValuePairs;
-    }
+public record Annotation(String descriptor, List<Entry<String,AttributeElementValue>> elementValuePairs) {
 }

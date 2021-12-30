@@ -4,6 +4,7 @@ public class HyperlinkData {
 
     private final int startPosition;
     private final int endPosition;
+    private boolean enabled;
 
     public HyperlinkData(int startPosition, int endPosition) {
         this.startPosition = startPosition;
@@ -16,5 +17,13 @@ public class HyperlinkData {
 
     public int getEndPosition() {
         return endPosition;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }

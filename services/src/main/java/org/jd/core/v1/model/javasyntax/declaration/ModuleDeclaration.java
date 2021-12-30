@@ -44,20 +44,7 @@ public class ModuleDeclaration extends TypeDeclaration {
         return "ModuleDeclaration{" + internalTypeName + "}";
     }
 
-    public static class ModuleInfo {
-        private final String name;
-        private final int flags;
-        private final String version;
-
-        public ModuleInfo(String name, int flags, String version) {
-            this.name = name;
-            this.flags = flags;
-            this.version = version;
-        }
-
-        public String getName() { return name; }
-        public int getFlags() { return flags; }
-        public String getVersion() { return version; }
+    public static record ModuleInfo(String name, int flags, String version) {
 
         @Override
         public String toString() {
@@ -74,20 +61,7 @@ public class ModuleDeclaration extends TypeDeclaration {
         }
     }
 
-    public static class PackageInfo {
-        private final String       internalName;
-        private final int flags;
-        private final List<String> moduleInfoNames;
-
-        public PackageInfo(String internalName, int flags, List<String> moduleInfoNames) {
-            this.internalName = internalName;
-            this.flags = flags;
-            this.moduleInfoNames = moduleInfoNames;
-        }
-
-        public String getInternalName() { return internalName; }
-        public int getFlags() { return flags; }
-        public List<String> getModuleInfoNames() { return moduleInfoNames; }
+    public static record PackageInfo(String internalName, int flags, List<String> moduleInfoNames) {
 
         @Override
         public String toString() {
@@ -104,17 +78,7 @@ public class ModuleDeclaration extends TypeDeclaration {
         }
     }
 
-    public static class ServiceInfo {
-        private final String       interfaceTypeName;
-        private final List<String> implementationTypeNames;
-
-        public ServiceInfo(String interfaceTypeName, List<String> implementationTypeNames) {
-            this.interfaceTypeName = interfaceTypeName;
-            this.implementationTypeNames = implementationTypeNames;
-        }
-
-        public String getInterfaceTypeName() { return interfaceTypeName; }
-        public List<String> getImplementationTypeNames() { return implementationTypeNames; }
+    public static record ServiceInfo(String interfaceTypeName, List<String> implementationTypeNames) {
 
         @Override
         public String toString() {

@@ -77,8 +77,8 @@ public class BindTypeParametersToNonWildcardTypeArgumentsVisitor implements Type
     }
 
     // --- TypeArgumentVisitor --- //
-    @Override public void visit(WildcardExtendsTypeArgument argument) { result = argument.getType(); }
-    @Override public void visit(WildcardSuperTypeArgument argument) { result = argument.getType(); }
+    @Override public void visit(WildcardExtendsTypeArgument argument) { result = argument.type(); }
+    @Override public void visit(WildcardSuperTypeArgument argument) { result = argument.type(); }
 
     @Override public void visit(DiamondTypeArgument argument) { result = null; }
     @Override public void visit(WildcardTypeArgument argument) { result = null; }

@@ -54,7 +54,7 @@ public class PrintTokenVisitor implements TokenVisitor {
     @Override
     public void visit(BooleanConstantToken token) {
         prepareNewLine();
-        printer.printKeyword(token.getValue() ? "true" : "false");
+        printer.printKeyword(token.value() ? "true" : "false");
         index++;
     }
 
@@ -75,7 +75,7 @@ public class PrintTokenVisitor implements TokenVisitor {
     @Override
     public void visit(StartBlockToken token) {
         prepareNewLine();
-        printer.printText(token.getText());
+        printer.printText(token.text());
         printer.indent();
         if (token == StartBlockToken.START_RESOURCES_BLOCK) {
             printer.indent();
@@ -90,34 +90,34 @@ public class PrintTokenVisitor implements TokenVisitor {
             printer.unindent();
         }
         prepareNewLine();
-        printer.printText(token.getText());
+        printer.printText(token.text());
         index++;
     }
 
     @Override
     public void visit(StartMarkerToken token) {
         prepareNewLine();
-        printer.startMarker(token.getType());
+        printer.startMarker(token.type());
         index++;
     }
 
     @Override
     public void visit(EndMarkerToken token) {
         prepareNewLine();
-        printer.endMarker(token.getType());
+        printer.endMarker(token.type());
         index++;
     }
 
     @Override
     public void visit(NewLineToken token) {
-        newLineCount += token.getCount();
+        newLineCount += token.count();
         index++;
     }
 
     @Override
     public void visit(KeywordToken token) {
         prepareNewLine();
-        printer.printKeyword(token.getKeyword());
+        printer.printKeyword(token.keyword());
         index++;
     }
 
@@ -129,7 +129,7 @@ public class PrintTokenVisitor implements TokenVisitor {
     @Override
     public void visit(NumericConstantToken token) {
         prepareNewLine();
-        printer.printNumericConstant(token.getText());
+        printer.printNumericConstant(token.text());
         index++;
     }
 
@@ -143,14 +143,14 @@ public class PrintTokenVisitor implements TokenVisitor {
     @Override
     public void visit(StringConstantToken token) {
         prepareNewLine();
-        printer.printStringConstant('"' + token.getText() + '"', token.getOwnerInternalName());
+        printer.printStringConstant('"' + token.text() + '"', token.getOwnerInternalName());
         index++;
     }
 
     @Override
     public void visit(TextToken token) {
         prepareNewLine();
-        printer.printText(token.getText());
+        printer.printText(token.text());
         index++;
     }
 
@@ -218,7 +218,7 @@ public class PrintTokenVisitor implements TokenVisitor {
 
         @Override
         public void visit(LineNumberToken token) {
-            lineNumber = token.getLineNumber();
+            lineNumber = token.lineNumber();
         }
 
         @Override

@@ -166,8 +166,8 @@ public class LocalVariableMaker {
                     }
                 }
             } else {
-                Annotations[] visiblesArray = rvpa == null ? null : rvpa.getParameterAnnotations();
-                Annotations[] invisiblesArray = ripa == null ? null : ripa.getParameterAnnotations();
+                Annotations[] visiblesArray = rvpa == null ? null : rvpa.parameterAnnotations();
+                Annotations[] invisiblesArray = ripa == null ? null : ripa.parameterAnnotations();
                 AnnotationConverter annotationConverter = new AnnotationConverter(typeMaker);
 
                 AbstractLocalVariable lv;
@@ -211,11 +211,11 @@ public class LocalVariableMaker {
                 String descriptor;
                 String name;
                 AbstractLocalVariable lv;
-                for (org.jd.core.v1.model.classfile.attribute.LocalVariable localVariable : localVariableTable.getLocalVariableTable()) {
-                    index = localVariable.getIndex();
-                    startPc = !staticFlag && index==0 ? 0 : localVariable.getStartPc();
-                    descriptor = localVariable.getDescriptor();
-                    name = localVariable.getName();
+                for (org.jd.core.v1.model.classfile.attribute.LocalVariable localVariable : localVariableTable.localVariableTable()) {
+                    index = localVariable.index();
+                    startPc = !staticFlag && index==0 ? 0 : localVariable.startPc();
+                    descriptor = localVariable.descriptor();
+                    name = localVariable.name();
                     if (descriptor.charAt(descriptor.length() - 1) == ';') {
                         lv = new ObjectLocalVariable(typeMaker, index, startPc, typeMaker.makeFromDescriptor(descriptor), name);
                     } else {
@@ -238,9 +238,9 @@ public class LocalVariableMaker {
             if (localVariableTypeTable != null) {
                 UpdateTypeVisitor updateTypeVisitor = new UpdateTypeVisitor(localVariableSet);
 
-                for (LocalVariableType lv : localVariableTypeTable.getLocalVariableTypeTable()) {
+                for (LocalVariableType lv : localVariableTypeTable.localVariableTypeTable()) {
                     updateTypeVisitor.setLocalVariableType(lv);
-                    typeMaker.makeFromSignature(lv.getSignature()).accept(updateTypeVisitor);
+                    typeMaker.makeFromSignature(lv.signature()).accept(updateTypeVisitor);
                 }
             }
         }

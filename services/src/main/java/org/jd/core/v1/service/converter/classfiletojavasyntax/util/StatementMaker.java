@@ -1082,8 +1082,9 @@ public class StatementMaker {
 
         while (iterator.hasNext()) {
             ClassFileBreakContinueStatement statement = (ClassFileBreakContinueStatement)iterator.next();
-
-            statement.setStatement(new CommentStatement("// goto line number " + cfg.getLineNumber(statement.getTargetOffset())));
+            CommentStatement commentStatement = new CommentStatement();
+            commentStatement.setText("// goto line number " + cfg.getLineNumber(statement.getTargetOffset()));
+            statement.setStatement(commentStatement);
         }
     }
 

@@ -89,11 +89,11 @@ public class BindTypeArgumentsToTypeArgumentsVisitor extends AbstractTypeArgumen
 
     @Override
     public void visit(WildcardExtendsTypeArgument argument) {
-        argument.getType().accept(this);
+        argument.type().accept(this);
 
         if (result == WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT) {
             result = WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT;
-        } else if (result == argument.getType()) {
+        } else if (result == argument.type()) {
             result = argument;
         } else if (TYPE_OBJECT.equals(result)) {
             result = WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT;
@@ -164,11 +164,11 @@ public class BindTypeArgumentsToTypeArgumentsVisitor extends AbstractTypeArgumen
 
     @Override
     public void visit(WildcardSuperTypeArgument argument) {
-        argument.getType().accept(this);
+        argument.type().accept(this);
 
         if (result == WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT) {
             result = WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT;
-        } else if (result == argument.getType()) {
+        } else if (result == argument.type()) {
             result = argument;
         } else if (result != null) {
             typeArgumentToTypeVisitor.init();

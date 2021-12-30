@@ -30,17 +30,17 @@ public class UpdateTypeVisitor extends AbstractNopTypeArgumentVisitor {
 
     @Override
     public void visit(ObjectType type) {
-        localVariableSet.update(localVariableType.getIndex(), localVariableType.getStartPc(), updateType(type));
+        localVariableSet.update(localVariableType.index(), localVariableType.startPc(), updateType(type));
     }
 
     @Override
     public void visit(InnerObjectType type) {
-        localVariableSet.update(localVariableType.getIndex(), localVariableType.getStartPc(), updateType(type));
+        localVariableSet.update(localVariableType.index(), localVariableType.startPc(), updateType(type));
     }
 
     @Override
     public void visit(GenericType type) {
-        localVariableSet.update(localVariableType.getIndex(), localVariableType.getStartPc(), type);
+        localVariableSet.update(localVariableType.index(), localVariableType.startPc(), type);
     }
 
     protected ObjectType updateType(ObjectType type) {

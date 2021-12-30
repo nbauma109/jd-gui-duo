@@ -137,11 +137,11 @@ public class ClassFileDeserializer {
 
 	            String innerTypeName;
 	            for (InnerClass ic : aic.getInnerClasses()) {
-	                innerTypeName = ic.getInnerTypeName();
+	                innerTypeName = ic.innerTypeName();
 
-	                if (!internalTypeName.equals(innerTypeName) && (internalTypeName.equals(ic.getOuterTypeName()) || innerTypeName.startsWith(innerTypePrefix))) {
+	                if (!internalTypeName.equals(innerTypeName) && (internalTypeName.equals(ic.outerTypeName()) || innerTypeName.startsWith(innerTypePrefix))) {
 	                    ClassFile innerClassFile = innerLoadClassFile(loader, innerTypeName);
-	                    int flags = ic.getInnerAccessFlags();
+	                    int flags = ic.innerAccessFlags();
 	                    int length;
 
 	                    if (innerTypeName.startsWith(innerTypePrefix)) {

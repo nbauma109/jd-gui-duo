@@ -7,40 +7,7 @@
 
 package org.jd.core.v1.model.classfile.attribute;
 
-public class LocalVariableType {
-    private final int startPc;
-    private final int length;
-    private final String name;
-    private final String signature;
-    private final int index;
-
-    public LocalVariableType(int startPc, int length, String name, String signature, int index) {
-        this.startPc = startPc;
-        this.length = length;
-        this.name = name;
-        this.signature = signature;
-        this.index = index;
-    }
-
-    public int getStartPc() {
-        return startPc;
-    }
-
-    public int getLength() {
-        return length;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getSignature() {
-        return signature;
-    }
-
-    public int getIndex() {
-        return index;
-    }
+public record LocalVariableType(int startPc, int length, String name, String signature, int index) {
 
     @Override
     public String toString() {

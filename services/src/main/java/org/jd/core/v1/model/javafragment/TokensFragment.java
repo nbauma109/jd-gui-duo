@@ -63,7 +63,7 @@ public class TokensFragment extends FlexibleFragment implements JavaFragment {
         @Override
         public void visit(LineNumberToken token) {
             lineCount++;
-            if (token.getLineNumber() != Printer.UNKNOWN_LINE_NUMBER) {
+            if (token.lineNumber() != Printer.UNKNOWN_LINE_NUMBER) {
                 throw new IllegalArgumentException("LineNumberToken cannot have a known line number. Uses 'LineNumberTokensFragment' instead");
             }
         }

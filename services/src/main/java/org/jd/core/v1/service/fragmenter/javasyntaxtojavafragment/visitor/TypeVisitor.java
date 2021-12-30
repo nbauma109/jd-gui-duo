@@ -106,7 +106,7 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
         tokens.add(EXTENDS);
         tokens.add(TextToken.SPACE);
 
-        BaseType type = argument.getType();
+        BaseType type = argument.type();
 
         type.accept(this);
     }
@@ -195,7 +195,7 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
         tokens.add(SUPER);
         tokens.add(TextToken.SPACE);
 
-        BaseType type = argument.getType();
+        BaseType type = argument.type();
 
         type.accept(this);
     }

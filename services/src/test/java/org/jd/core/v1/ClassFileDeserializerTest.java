@@ -72,16 +72,16 @@ public class ClassFileDeserializerTest extends TestCase {
             Annotations invAttr = classFile.getAttribute(StringConstants.RUNTIMEINVISIBLEANNOTATIONS_ATTRIBUTE_NAME);
             assertNotNull(invAttr.getAnnotations());
             assertEquals(2, invAttr.getAnnotations().length);
-            assertNotNull(invAttr.getAnnotations()[0].getElementValuePairs());
-            assertEquals(1, invAttr.getAnnotations()[0].getElementValuePairs().size());
+            assertNotNull(invAttr.getAnnotations()[0].elementValuePairs());
+            assertEquals(1, invAttr.getAnnotations()[0].elementValuePairs().size());
 
-            ElementValueAnnotationValue annotationValue = (ElementValueAnnotationValue) invAttr.getAnnotations()[1].getElementValuePairs().get(0).getValue();
-            assertEquals("Lorg/jd/core/test/annotation/Name;", annotationValue.getAnnotationValue().getDescriptor());
-            assertNotNull(annotationValue.getAnnotationValue().getElementValuePairs());
-            assertEquals(3, annotationValue.getAnnotationValue().getElementValuePairs().size());
-            assertEquals("salutation", annotationValue.getAnnotationValue().getElementValuePairs().get(0).getKey());
+            ElementValueAnnotationValue annotationValue = (ElementValueAnnotationValue) invAttr.getAnnotations()[1].elementValuePairs().get(0).getValue();
+            assertEquals("Lorg/jd/core/test/annotation/Name;", annotationValue.annotationValue().descriptor());
+            assertNotNull(annotationValue.annotationValue().elementValuePairs());
+            assertEquals(3, annotationValue.annotationValue().elementValuePairs().size());
+            assertEquals("salutation", annotationValue.annotationValue().elementValuePairs().get(0).getKey());
 
-            ElementValuePrimitiveType primitiveType = (ElementValuePrimitiveType) annotationValue.getAnnotationValue().getElementValuePairs().get(1).getValue();
+            ElementValuePrimitiveType primitiveType = (ElementValuePrimitiveType) annotationValue.annotationValue().elementValuePairs().get(1).getValue();
             ConstantUtf8 cu = primitiveType.getConstValue();
             assertEquals("Donald", cu.getBytes());
 
@@ -97,11 +97,11 @@ public class ClassFileDeserializerTest extends TestCase {
             Annotations attr = field.getAttribute(StringConstants.RUNTIMEVISIBLEANNOTATIONS_ATTRIBUTE_NAME);
             assertNotNull(attr.getAnnotations());
             assertEquals(1, attr.getAnnotations().length);
-            assertNotNull(attr.getAnnotations()[0].getElementValuePairs());
-            assertEquals(1, attr.getAnnotations()[0].getElementValuePairs().size());
-            assertEquals("b", attr.getAnnotations()[0].getElementValuePairs().get(0).getKey());
+            assertNotNull(attr.getAnnotations()[0].elementValuePairs());
+            assertEquals(1, attr.getAnnotations()[0].elementValuePairs().size());
+            assertEquals("b", attr.getAnnotations()[0].elementValuePairs().get(0).getKey());
 
-            primitiveType = (ElementValuePrimitiveType) attr.getAnnotations()[0].getElementValuePairs().get(0).getValue();
+            primitiveType = (ElementValuePrimitiveType) attr.getAnnotations()[0].elementValuePairs().get(0).getValue();
             ConstantInteger ci = primitiveType.getConstValue();
             assertEquals(-15, ci.getBytes());
 
@@ -113,11 +113,11 @@ public class ClassFileDeserializerTest extends TestCase {
             attr = field.getAttribute(StringConstants.RUNTIMEVISIBLEANNOTATIONS_ATTRIBUTE_NAME);
             assertNotNull(attr.getAnnotations());
             assertEquals(1, attr.getAnnotations().length);
-            assertNotNull(attr.getAnnotations()[0].getElementValuePairs());
-            assertEquals(1, attr.getAnnotations()[0].getElementValuePairs().size());
-            assertEquals("str", attr.getAnnotations()[0].getElementValuePairs().get(0).getKey());
+            assertNotNull(attr.getAnnotations()[0].elementValuePairs());
+            assertEquals(1, attr.getAnnotations()[0].elementValuePairs().size());
+            assertEquals("str", attr.getAnnotations()[0].elementValuePairs().get(0).getKey());
 
-            primitiveType = (ElementValuePrimitiveType) attr.getAnnotations()[0].getElementValuePairs().get(0).getValue();
+            primitiveType = (ElementValuePrimitiveType) attr.getAnnotations()[0].elementValuePairs().get(0).getValue();
             cu = primitiveType.getConstValue();
             assertEquals("str \u0083 \u0909 \u1109", cu.getBytes());
 

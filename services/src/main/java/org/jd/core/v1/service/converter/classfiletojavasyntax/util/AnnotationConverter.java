@@ -90,12 +90,12 @@ public class AnnotationConverter implements ElementValueVisitor {
     }
 
     protected AnnotationReference convert(Annotation annotation) {
-        String descriptor = annotation.getDescriptor();
+        String descriptor = annotation.descriptor();
 
         assert descriptor != null && descriptor.length() > 2 && descriptor.charAt(0) == 'L' && descriptor.charAt(descriptor.length()-1) == ';';
 
         ObjectType ot = typeMaker.makeFromDescriptor(descriptor);
-        List<Entry<String, AttributeElementValue>> elementValuePairs = annotation.getElementValuePairs();
+        List<Entry<String, AttributeElementValue>> elementValuePairs = annotation.elementValuePairs();
 
         if (elementValuePairs == null) {
             return new AnnotationReference(ot);
@@ -164,35 +164,35 @@ public class AnnotationConverter implements ElementValueVisitor {
 
     @Override
     public void visit(ElementValueClassInfo elementValueClassInfo) {
-        String classInfo = elementValueClassInfo.getClassInfo();
+        String classInfo = elementValueClassInfo.classInfo();
         ObjectType ot = typeMaker.makeFromDescriptor(classInfo);
         elementValue = new ExpressionElementValue(new TypeReferenceDotClassExpression(ot));
     }
 
     @Override
     public void visit(ElementValueAnnotationValue elementValueAnnotationValue) {
-        Annotation annotationValue = elementValueAnnotationValue.getAnnotationValue();
+        Annotation annotationValue = elementValueAnnotationValue.annotationValue();
         AnnotationReference annotationReference = convert(annotationValue);
         elementValue = new AnnotationElementValue(annotationReference);
     }
 
     @Override
     public void visit(ElementValueEnumConstValue elementValueEnumConstValue) {
-        String descriptor = elementValueEnumConstValue.getDescriptor();
+        String descriptor = elementValueEnumConstValue.descriptor();
 
         if (descriptor == null || descriptor.length() <= 2 || descriptor.charAt(0) != 'L' || descriptor.charAt(descriptor.length()-1) != ';') {
             throw new IllegalArgumentException("AnnotationConverter.visit(elementValueEnumConstValue)");
         }
 
         ObjectType ot = typeMaker.makeFromDescriptor(descriptor);
-        String constName = elementValueEnumConstValue.getConstName();
+        String constName = elementValueEnumConstValue.constName();
         String internalTypeName = descriptor.substring(1, descriptor.length()-1);
         elementValue = new ExpressionElementValue(new FieldReferenceExpression(ot, new ObjectTypeReferenceExpression(ot), internalTypeName, constName, descriptor));
     }
 
     @Override
     public void visit(ElementValueArrayValue elementValueArrayValue) {
-        AttributeElementValue[] values = elementValueArrayValue.getValues();
+        AttributeElementValue[] values = elementValueArrayValue.values();
 
         if (values == null) {
             elementValue = new ElementValueArrayInitializerElementValue();

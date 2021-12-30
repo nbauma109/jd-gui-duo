@@ -471,7 +471,7 @@ public class ControlFlowGraphMaker {
         AttributeLineNumberTable attributeLineNumberTable = attributeCode.getAttribute("LineNumberTable");
         if (attributeLineNumberTable != null) {
             // Parse line numbers
-            LineNumber[] lineNumberTable = attributeLineNumberTable.getLineNumberTable();
+            LineNumber[] lineNumberTable = attributeLineNumberTable.lineNumberTable();
 
             int[] offsetToLineNumbers = new int[length];
             int offset = 0;

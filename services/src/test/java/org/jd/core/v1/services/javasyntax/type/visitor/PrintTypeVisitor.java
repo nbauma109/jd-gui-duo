@@ -77,7 +77,7 @@ public class PrintTypeVisitor implements TypeVisitor, TypeArgumentVisitor, TypeP
     public void visit(WildcardExtendsTypeArgument argument) {
         sb.append("? extends ");
 
-        BaseType type = argument.getType();
+        BaseType type = argument.type();
 
         type.accept(this);
     }
@@ -131,7 +131,7 @@ public class PrintTypeVisitor implements TypeVisitor, TypeArgumentVisitor, TypeP
     public void visit(WildcardSuperTypeArgument argument) {
         sb.append("? super ");
 
-        BaseType type = argument.getType();
+        BaseType type = argument.type();
 
         type.accept(this);
     }

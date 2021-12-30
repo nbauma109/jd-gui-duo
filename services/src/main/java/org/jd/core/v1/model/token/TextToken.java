@@ -7,7 +7,7 @@
 
 package org.jd.core.v1.model.token;
 
-public class TextToken implements Token {
+public record TextToken(String text) implements Token {
 
     public static final TextToken AT = new TextToken("@");
     public static final TextToken COMMA = new TextToken(",");
@@ -37,16 +37,6 @@ public class TextToken implements Token {
     public static final TextToken VARARGS = new TextToken("... ");
     public static final TextToken VERTICALLINE = new TextToken("|");
     public static final TextToken EXCLAMATION = new TextToken("!");
-
-    private final String text;
-
-    public TextToken(String text) {
-        this.text = text;
-    }
-
-    public String getText() {
-        return text;
-    }
 
     @Override
     public String toString() {

@@ -123,13 +123,13 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
     }
 
     @Override
-    protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return ((ManifestHyperlinkData)hyperlinkData).enabled; }
+    protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return ((ManifestHyperlinkData)hyperlinkData).isEnabled(); }
 
     @Override
     protected void openHyperlink(int x, int y, HyperlinkData hyperlinkData) {
         ManifestHyperlinkData data = (ManifestHyperlinkData)hyperlinkData;
 
-        if (data.enabled) {
+        if (data.isEnabled()) {
             try {
                 // Save current position in history
                 Point location = textArea.getLocationOnScreen();
@@ -188,8 +188,8 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
             String internalTypeName = textLink.replace('.', '/');
             boolean enabled = IndexesUtil.containsInternalTypeName(collectionOfFutureIndexes, internalTypeName);
 
-            if (entryData.enabled != enabled) {
-                entryData.enabled = enabled;
+            if (entryData.isEnabled() != enabled) {
+                entryData.setEnabled(enabled);
                 refresh = true;
             }
         }
@@ -210,12 +210,10 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
     }
 
     public static class ManifestHyperlinkData extends HyperlinkData {
-    	private boolean enabled;
     	private final String fragment;
 
         ManifestHyperlinkData(int startPosition, int endPosition, String fragment) {
             super(startPosition, endPosition);
-            this.enabled = false;
             this.fragment = fragment;
         }
     }

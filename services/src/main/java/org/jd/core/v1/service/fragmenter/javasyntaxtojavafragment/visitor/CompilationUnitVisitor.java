@@ -542,9 +542,9 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
     @Override
     public void visit(ElementValuePair reference) {
-        tokens.add(newTextToken(reference.getName()));
+        tokens.add(newTextToken(reference.name()));
         tokens.add(TextToken.SPACE_EQUAL_SPACE);
-        reference.getElementValue().accept(this);
+        reference.elementValue().accept(this);
     }
 
     @Override
@@ -932,38 +932,38 @@ public class CompilationUnitVisitor extends StatementVisitor {
     protected void visitModuleDeclaration(ModuleDeclaration.ModuleInfo moduleInfo) {
         tokens.add(REQUIRES);
 
-        if ((moduleInfo.getFlags() & ACC_STATIC) != 0) {
+        if ((moduleInfo.flags() & ACC_STATIC) != 0) {
             tokens.add(TextToken.SPACE);
             tokens.add(STATIC);
         }
-        if ((moduleInfo.getFlags() & ACC_TRANSITIVE) != 0) {
+        if ((moduleInfo.flags() & ACC_TRANSITIVE) != 0) {
             tokens.add(TextToken.SPACE);
             tokens.add(TRANSITIVE);
         }
 
         tokens.add(TextToken.SPACE);
-        tokens.add(new ReferenceToken(Printer.MODULE, MODULE_INFO, moduleInfo.getName(), null, null));
+        tokens.add(new ReferenceToken(Printer.MODULE, MODULE_INFO, moduleInfo.name(), null, null));
         tokens.add(TextToken.SEMICOLON);
     }
 
     protected void visitModuleDeclaration(ModuleDeclaration.PackageInfo packageInfo, KeywordToken keywordToken) {
         tokens.add(keywordToken);
         tokens.add(TextToken.SPACE);
-        tokens.add(new ReferenceToken(Printer.PACKAGE, packageInfo.getInternalName(), packageInfo.getInternalName().replace('/', '.'), null, null));
+        tokens.add(new ReferenceToken(Printer.PACKAGE, packageInfo.internalName(), packageInfo.internalName().replace('/', '.'), null, null));
 
-        if (packageInfo.getModuleInfoNames() != null && !packageInfo.getModuleInfoNames().isEmpty()) {
+        if (packageInfo.moduleInfoNames() != null && !packageInfo.moduleInfoNames().isEmpty()) {
             tokens.add(TextToken.SPACE);
             tokens.add(TO);
 
-            if (packageInfo.getModuleInfoNames().size() == 1) {
+            if (packageInfo.moduleInfoNames().size() == 1) {
                 tokens.add(TextToken.SPACE);
-                String moduleInfoName = packageInfo.getModuleInfoNames().get(0);
+                String moduleInfoName = packageInfo.moduleInfoNames().get(0);
                 tokens.add(new ReferenceToken(Printer.MODULE, MODULE_INFO, moduleInfoName, null, null));
             } else {
                 tokens.add(StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK);
                 tokens.add(NewLineToken.NEWLINE_1);
 
-                Iterator<String> iterator = packageInfo.getModuleInfoNames().iterator();
+                Iterator<String> iterator = packageInfo.moduleInfoNames().iterator();
 
                 String moduleInfoName = iterator.next();
                 tokens.add(new ReferenceToken(Printer.MODULE, MODULE_INFO, moduleInfoName, null, null));
@@ -992,20 +992,20 @@ public class CompilationUnitVisitor extends StatementVisitor {
     protected void visitModuleDeclaration(ModuleDeclaration.ServiceInfo serviceInfo) {
         tokens.add(PROVIDES);
         tokens.add(TextToken.SPACE);
-        String internalTypeName = serviceInfo.getInterfaceTypeName();
+        String internalTypeName = serviceInfo.interfaceTypeName();
         tokens.add(new ReferenceToken(Printer.TYPE, internalTypeName, internalTypeName.replace('/', '.'), null, null));
         tokens.add(TextToken.SPACE);
         tokens.add(WITH);
 
-        if (serviceInfo.getImplementationTypeNames().size() == 1) {
+        if (serviceInfo.implementationTypeNames().size() == 1) {
             tokens.add(TextToken.SPACE);
-            internalTypeName = serviceInfo.getImplementationTypeNames().get(0);
+            internalTypeName = serviceInfo.implementationTypeNames().get(0);
             tokens.add(new ReferenceToken(Printer.TYPE, internalTypeName, internalTypeName.replace('/', '.'), null, null));
         } else {
             tokens.add(StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK);
             tokens.add(NewLineToken.NEWLINE_1);
 
-            Iterator<String> iterator = serviceInfo.getImplementationTypeNames().iterator();
+            Iterator<String> iterator = serviceInfo.implementationTypeNames().iterator();
 
             internalTypeName = iterator.next();
             tokens.add(new ReferenceToken(Printer.TYPE, internalTypeName, internalTypeName.replace('/', '.'), null, null));

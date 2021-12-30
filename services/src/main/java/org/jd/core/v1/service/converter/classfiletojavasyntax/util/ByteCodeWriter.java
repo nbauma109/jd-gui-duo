@@ -422,7 +422,7 @@ public class ByteCodeWriter {
             sb.append(linePrefix).append("Line number table:\n");
             sb.append(linePrefix).append("  Java source line number -> byte code offset\n");
 
-            for (LineNumber lineNumber : lineNumberTable.getLineNumberTable()) {
+            for (LineNumber lineNumber : lineNumberTable.lineNumberTable()) {
                 sb.append(linePrefix).append("  #");
                 sb.append(lineNumber.getLineNumber()).append("\t-> ");
                 sb.append(lineNumber.getStartPC()).append('\n');
@@ -446,7 +446,7 @@ public class ByteCodeWriter {
 
     	if (lineNumberTable != null) {
 
-    		for (LineNumber lineNumber : lineNumberTable.getLineNumberTable()) {
+    		for (LineNumber lineNumber : lineNumberTable.lineNumberTable()) {
     			lineNumberToOffsets.computeIfAbsent(lineNumber.getLineNumber(), k -> new ArrayList<>()).add(lineNumber.getStartPC());
     		}
     		for (Entry<Integer, List<Integer>> entry : lineNumberToOffsets.entrySet()) {
@@ -467,13 +467,13 @@ public class ByteCodeWriter {
             sb.append(linePrefix).append("Local variable table:\n");
             sb.append(linePrefix).append("  start\tlength\tslot\tname\tdescriptor\n");
 
-            for (LocalVariable localVariable : localVariableTable.getLocalVariableTable()) {
+            for (LocalVariable localVariable : localVariableTable.localVariableTable()) {
                 sb.append(linePrefix).append("  ");
-                sb.append(localVariable.getStartPc()).append('\t');
-                sb.append(localVariable.getLength()).append('\t');
-                sb.append(localVariable.getIndex()).append('\t');
-                sb.append(localVariable.getName()).append('\t');
-                sb.append(localVariable.getDescriptor()).append('\n');
+                sb.append(localVariable.startPc()).append('\t');
+                sb.append(localVariable.length()).append('\t');
+                sb.append(localVariable.index()).append('\t');
+                sb.append(localVariable.name()).append('\t');
+                sb.append(localVariable.descriptor()).append('\n');
             }
         }
 
@@ -483,13 +483,13 @@ public class ByteCodeWriter {
             sb.append(linePrefix).append("Local variable type table:\n");
             sb.append(linePrefix).append("  start\tlength\tslot\tname\tsignature\n");
 
-            for (LocalVariableType localVariable : localVariableTypeTable.getLocalVariableTypeTable()) {
+            for (LocalVariableType localVariable : localVariableTypeTable.localVariableTypeTable()) {
                 sb.append(linePrefix).append("  ");
-                sb.append(localVariable.getStartPc()).append('\t');
-                sb.append(localVariable.getLength()).append('\t');
-                sb.append(localVariable.getIndex()).append('\t');
-                sb.append(localVariable.getName()).append('\t');
-                sb.append(localVariable.getSignature()).append('\n');
+                sb.append(localVariable.startPc()).append('\t');
+                sb.append(localVariable.length()).append('\t');
+                sb.append(localVariable.index()).append('\t');
+                sb.append(localVariable.name()).append('\t');
+                sb.append(localVariable.signature()).append('\n');
             }
         }
     }

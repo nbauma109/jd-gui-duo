@@ -201,7 +201,7 @@ public class TypeMaker {
             }
         } else {
             // Parse 'signature' attribute
-            SignatureReader signatureReader = new SignatureReader(attributeSignature.getSignature());
+            SignatureReader signatureReader = new SignatureReader(attributeSignature.signature());
 
             typeTypes.setTypeParameters(parseTypeParameters(signatureReader));
             typeTypes.setSuperType(parseClassTypeSignature(signatureReader, 0));
@@ -246,7 +246,7 @@ public class TypeMaker {
         if (attributeSignature == null) {
             methodTypes = parseMethodSignature(method.getDescriptor(), exceptionTypeNames);
         } else {
-            methodTypes = parseMethodSignature(method.getDescriptor(), attributeSignature.getSignature(), exceptionTypeNames);
+            methodTypes = parseMethodSignature(method.getDescriptor(), attributeSignature.signature(), exceptionTypeNames);
         }
 
         internalTypeNameMethodNameDescriptorToMethodTypes.put(key, methodTypes);
@@ -259,7 +259,7 @@ public class TypeMaker {
             AttributeExceptions attributeExceptions = method.getAttribute("Exceptions");
 
             if (attributeExceptions != null) {
-                return attributeExceptions.getExceptionTypeNames();
+                return attributeExceptions.exceptionTypeNames();
             }
         }
 
@@ -269,7 +269,7 @@ public class TypeMaker {
     public Type parseFieldSignature(ClassFile classFile, Field field) {
         String key = classFile.getInternalTypeName() + ':' + field.getName();
         AttributeSignature attributeSignature = field.getAttribute(StringConstants.SIGNATURE_ATTRIBUTE_NAME);
-        String signature = attributeSignature == null ? field.getDescriptor() : attributeSignature.getSignature();
+        String signature = attributeSignature == null ? field.getDescriptor() : attributeSignature.signature();
         Type type = makeFromSignature(signature);
 
         internalTypeNameFieldNameToType.put(key, type);

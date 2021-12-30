@@ -129,9 +129,9 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
     public void visit(WildcardExtendsTypeArgument type) {
         if (current != null) {
             if (current.isWildcardExtendsTypeArgument()) {
-                current = current.getType();
+                current = current.type();
             }
-            type.getType().accept(this);
+            type.type().accept(this);
         }
     }
 
@@ -139,9 +139,9 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
     public void visit(WildcardSuperTypeArgument type) {
         if (current != null) {
             if (current.isWildcardSuperTypeArgument()) {
-                current = current.getType();
+                current = current.type();
             }
-            type.getType().accept(this);
+            type.type().accept(this);
         }
     }
 

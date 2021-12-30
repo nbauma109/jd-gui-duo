@@ -70,7 +70,7 @@ public class LineNumberTokensFragment extends FixedFragment implements JavaFragm
 
         @Override
         public void visit(LineNumberToken token) {
-            lineNumber = token.getLineNumber();
+            lineNumber = token.lineNumber();
         }
 
         @Override

@@ -9,16 +9,7 @@ package org.jd.core.v1.model.classfile.attribute;
 
 import org.apache.bcel.classfile.LineNumber;
 
-public class AttributeLineNumberTable implements Attribute {
-    private final LineNumber[] lineNumberTable;
-
-    public AttributeLineNumberTable(LineNumber[] lineNumberTable) {
-        this.lineNumberTable = lineNumberTable;
-    }
-
-    public LineNumber[] getLineNumberTable() {
-        return lineNumberTable;
-    }
+public record AttributeLineNumberTable(LineNumber[] lineNumberTable) implements Attribute {
 
     public LineNumber getLineNumberTable(int i) {
     	return lineNumberTable[i];

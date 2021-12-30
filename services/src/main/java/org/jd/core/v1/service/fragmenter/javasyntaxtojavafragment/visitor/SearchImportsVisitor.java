@@ -85,8 +85,8 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(CompilationUnit compilationUnit) {
-        compilationUnit.getTypeDeclarations().accept(new TypeVisitor(localTypeNames));
-        compilationUnit.getTypeDeclarations().accept(this);
+        compilationUnit.typeDeclarations().accept(new TypeVisitor(localTypeNames));
+        compilationUnit.typeDeclarations().accept(this);
     }
 
     @Override

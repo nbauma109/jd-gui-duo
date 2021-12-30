@@ -14,7 +14,7 @@ public class ClassFileMonitorEnterStatement extends CommentStatement {
     private final Expression monitor;
 
     public ClassFileMonitorEnterStatement(Expression monitor) {
-        super("/* monitor enter " + monitor + " */");
+        this.setText("/* monitor enter " + monitor + " */");
         this.monitor = monitor;
     }
 

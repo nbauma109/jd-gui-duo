@@ -33,8 +33,8 @@ public class CreateTypeFromTypeArgumentVisitor implements TypeArgumentVisitor {
     @Override public void visit(TypeArguments arguments) { this.type = null; }
     @Override public void visit(DiamondTypeArgument argument) { this.type = null; }
     @Override public void visit(WildcardTypeArgument type) { this.type = null; }
-    @Override public void visit(WildcardExtendsTypeArgument type) { this.type = type.getType(); }
-    @Override public void visit(WildcardSuperTypeArgument type) { this.type = type.getType(); }
+    @Override public void visit(WildcardExtendsTypeArgument type) { this.type = type.type(); }
+    @Override public void visit(WildcardSuperTypeArgument type) { this.type = type.type(); }
     @Override public void visit(PrimitiveType type) { this.type = type; }
     @Override public void visit(ObjectType type) { this.type = type; }
     @Override public void visit(InnerObjectType type) { this.type = type; }

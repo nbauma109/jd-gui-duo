@@ -371,15 +371,15 @@ public class StatementVisitor extends ExpressionVisitor {
     @Override
     public void visit(LabelStatement statement) {
         tokens = new Tokens();
-        tokens.add(newTextToken(statement.getLabel()));
+        tokens.add(newTextToken(statement.label()));
         tokens.add(TextToken.COLON);
 
-        if (statement.getStatement() == null) {
+        if (statement.statement() == null) {
             fragments.addTokensFragment(tokens);
         } else {
             tokens.add(TextToken.SPACE);
             fragments.addTokensFragment(tokens);
-            statement.getStatement().accept(this);
+            statement.statement().accept(this);
         }
     }
 
@@ -677,7 +677,7 @@ public class StatementVisitor extends ExpressionVisitor {
 
     @Override
     public void visit(TypeDeclarationStatement statement) {
-        statement.getTypeDeclaration().accept(this);
+        statement.typeDeclaration().accept(this);
         fragments.add(TokensFragment.SEMICOLON);
     }
 

@@ -14,7 +14,7 @@ public class ClassFileMonitorExitStatement extends CommentStatement {
     private final Expression monitor;
 
     public ClassFileMonitorExitStatement(Expression monitor) {
-        super("/* monitor exit " + monitor + " */");
+        this.setText("/* monitor exit " + monitor + " */");
         this.monitor = monitor;
     }
 

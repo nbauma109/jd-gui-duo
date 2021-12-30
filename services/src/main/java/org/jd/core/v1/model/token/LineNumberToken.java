@@ -10,17 +10,7 @@ package org.jd.core.v1.model.token;
 /**
  * Must be create between StartStatementToken and EndStatementToken
  */
-public class LineNumberToken implements Token {
-
-    private final int lineNumber;
-
-    public LineNumberToken(int lineNumber) {
-        this.lineNumber = lineNumber;
-    }
-
-    public int getLineNumber() {
-        return lineNumber;
-    }
+public record LineNumberToken(int lineNumber) implements Token {
 
     @Override
     public String toString() {

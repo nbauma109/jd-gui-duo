@@ -176,7 +176,7 @@ public class ExpressionVisitor extends TypeVisitor {
     @Override
     public void visit(CommentExpression expression) {
         tokens.add(StartMarkerToken.COMMENT);
-        tokens.add(newTextToken(expression.getText()));
+        tokens.add(newTextToken(expression.text()));
         tokens.add(EndMarkerToken.COMMENT);
     }
 

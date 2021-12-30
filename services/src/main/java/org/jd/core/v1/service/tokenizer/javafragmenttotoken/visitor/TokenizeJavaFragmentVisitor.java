@@ -537,7 +537,7 @@ public class TokenizeJavaFragmentVisitor implements JavaFragmentVisitor {
 
         @Override
         public void visit(LineNumberToken token) {
-            int lineNumber = token.getLineNumber();
+            int lineNumber = token.lineNumber();
 
             if (lineNumber != Printer.UNKNOWN_LINE_NUMBER) {
                 if (currentLineNumber != Printer.UNKNOWN_LINE_NUMBER) {
@@ -556,7 +556,7 @@ public class TokenizeJavaFragmentVisitor implements JavaFragmentVisitor {
                     }
                 }
 
-                currentLineNumber = token.getLineNumber();
+                currentLineNumber = token.lineNumber();
                 tokens.add(token);
             }
         }
@@ -602,7 +602,7 @@ public class TokenizeJavaFragmentVisitor implements JavaFragmentVisitor {
 
         @Override
         public void visit(LineNumberToken token) {
-            if (token.getLineNumber() != Printer.UNKNOWN_LINE_NUMBER) {
+            if (token.lineNumber() != Printer.UNKNOWN_LINE_NUMBER) {
                 throw new IllegalArgumentException("LineNumberToken cannot have a known line number. Uses 'LineNumberTokensFragment' instead");
             }
         }

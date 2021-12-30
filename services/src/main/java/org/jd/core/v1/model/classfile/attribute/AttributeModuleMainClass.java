@@ -9,14 +9,5 @@ package org.jd.core.v1.model.classfile.attribute;
 
 import org.apache.bcel.classfile.ConstantClass;
 
-public class AttributeModuleMainClass implements Attribute {
-    private final ConstantClass mainClass;
-
-    public AttributeModuleMainClass(ConstantClass mainClass) {
-        this.mainClass = mainClass;
-    }
-
-    public ConstantClass getMainClass() {
-        return mainClass;
-    }
+public record AttributeModuleMainClass(ConstantClass mainClass) implements Attribute {
 }

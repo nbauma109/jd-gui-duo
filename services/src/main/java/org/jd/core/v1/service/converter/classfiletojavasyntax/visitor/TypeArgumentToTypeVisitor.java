@@ -42,8 +42,8 @@ public class TypeArgumentToTypeVisitor extends AbstractTypeArgumentVisitor {
     @Override public void visit(InnerObjectType type) { this.type = type; }
     @Override public void visit(GenericType type) { this.type = type; }
 
-    @Override public void visit(WildcardExtendsTypeArgument argument) { argument.getType().accept(this); }
-    @Override public void visit(WildcardSuperTypeArgument argument) { argument.getType().accept(this); }
+    @Override public void visit(WildcardExtendsTypeArgument argument) { argument.type().accept(this); }
+    @Override public void visit(WildcardSuperTypeArgument argument) { argument.type().accept(this); }
     @Override public void visit(TypeArguments arguments) {
         if (arguments.isEmpty()) {
             type = TYPE_UNDEFINED_OBJECT;

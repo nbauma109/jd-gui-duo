@@ -122,7 +122,7 @@ import java.util.List;
 
 public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisitor implements DeclarationVisitor, ExpressionVisitor, ReferenceVisitor, StatementVisitor, TypeVisitor, TypeParameterVisitor {
     public void visit(CompilationUnit compilationUnit) {
-        compilationUnit.getTypeDeclarations().accept(this);
+        compilationUnit.typeDeclarations().accept(this);
     }
 
     @Override
@@ -532,7 +532,7 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
 
     @Override
     public void visit(ElementValuePair reference) {
-        reference.getElementValue().accept(this);
+        reference.elementValue().accept(this);
     }
 
     @Override
@@ -597,7 +597,7 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
 
     @Override
     public void visit(LabelStatement statement) {
-        safeAccept(statement.getStatement());
+        safeAccept(statement.statement());
     }
 
     @Override
@@ -694,7 +694,7 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
 
     @Override
     public void visit(TypeDeclarationStatement statement) {
-        statement.getTypeDeclaration().accept(this);
+        statement.typeDeclaration().accept(this);
     }
 
     @Override
