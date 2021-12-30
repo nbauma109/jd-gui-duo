@@ -40,8 +40,8 @@ public class DoubleConstantExpression extends AbstractLineNumberTypeExpression {
         return "DoubleConstantExpression{" + value + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new DoubleConstantExpression(lineNumber, value);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new DoubleConstantExpression(lineNumber, value);
+    }
 }

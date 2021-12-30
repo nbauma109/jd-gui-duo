@@ -110,8 +110,8 @@ public class MaxLineNumberVisitor
             {
                 FastDeclaration fd = (FastDeclaration)instruction;
                 if (fd.getInstruction() != null) {
-					maxLineNumber = visit(fd.getInstruction());
-				}
+                    maxLineNumber = visit(fd.getInstruction());
+                }
             }
             break;
         case ByteCodeConstants.IFCMP:
@@ -153,8 +153,8 @@ public class MaxLineNumberVisitor
                     {
                         int lineNumber = visit(list.get(i));
                         if (maxLineNumber < lineNumber) {
-							maxLineNumber = lineNumber;
-						}
+                            maxLineNumber = lineNumber;
+                        }
                     }
                 }
             }
@@ -179,8 +179,8 @@ public class MaxLineNumberVisitor
                     {
                         int lineNumber = visit(list.get(i));
                         if (maxLineNumber < lineNumber) {
-							maxLineNumber = lineNumber;
-						}
+                            maxLineNumber = lineNumber;
+                        }
                     }
                 }
             }
@@ -199,8 +199,8 @@ public class MaxLineNumberVisitor
                 Instruction[] dimensions = ((MultiANewArray)instruction).getDimensions();
                 int length = dimensions.length;
                 if (length > 0) {
-					maxLineNumber = visit(dimensions[length-1]);
-				}
+                    maxLineNumber = visit(dimensions[length-1]);
+                }
             }
             break;
         case Const.NEWARRAY:
@@ -238,8 +238,8 @@ public class MaxLineNumberVisitor
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
                 int length = iai.getValues().size();
                 if (length > 0) {
-					maxLineNumber = visit(iai.getValues().get(length-1));
-				}
+                    maxLineNumber = visit(iai.getValues().get(length-1));
+                }
             }
             break;
         case ByteCodeConstants.TERNARYOP:

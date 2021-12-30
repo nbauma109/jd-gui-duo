@@ -36,8 +36,8 @@ public class FastCompareInstructionVisitor extends CompareInstructionVisitor
             while (length-- > 0)
             {
                 if (!visit(list1.get(index1++), list2.get(index2++))) {
-					return false;
-				}
+                    return false;
+                }
             }
         }
 
@@ -48,8 +48,8 @@ public class FastCompareInstructionVisitor extends CompareInstructionVisitor
     public boolean visit(Instruction i1, Instruction i2)
     {
         if (i1.getOpcode() != i2.getOpcode()) {
-			return false;
-		}
+            return false;
+        }
         switch (i1.getOpcode())
         {
         case FastConstants.TRY:
@@ -60,25 +60,25 @@ public class FastCompareInstructionVisitor extends CompareInstructionVisitor
                 int i = ft1.getCatches().size();
 
                 if (i != ft2.getCatches().size()) {
-					return false;
-				}
+                    return false;
+                }
 
                 if (ft1.getFinallyInstructions() == null)
                 {
                     if (ft2.getFinallyInstructions() != null) {
-						return false;
-					}
+                        return false;
+                    }
                 }
                 else if (ft2.getFinallyInstructions() == null)
                 {
                     if (ft1.getFinallyInstructions() != null) {
-						return false;
-					}
+                        return false;
+                    }
                 } else if (! visit(
-				        ft1.getFinallyInstructions(),
-				        ft2.getFinallyInstructions())) {
-					return false;
-				}
+                        ft1.getFinallyInstructions(),
+                        ft2.getFinallyInstructions())) {
+                    return false;
+                }
 
                 while (i-- > 0)
                 {
@@ -89,8 +89,8 @@ public class FastCompareInstructionVisitor extends CompareInstructionVisitor
                         ! visit(fc1.instructions(), fc2.instructions()) ||
                         ! compareExceptionTypeIndexes(
                             fc1.otherExceptionTypeIndexes(), fc2.otherExceptionTypeIndexes())) {
-						return false;
-					}
+                        return false;
+                    }
                 }
 
                 return visit(ft1.getInstructions(), ft2.getInstructions());
@@ -101,8 +101,8 @@ public class FastCompareInstructionVisitor extends CompareInstructionVisitor
                 FastSynchronized fs2 = (FastSynchronized)i2;
 
                 if (! visit(fs1.getMonitor(), fs2.getMonitor())) {
-					return false;
-				}
+                    return false;
+                }
 
                 return visit(fs1.getInstructions(), fs2.getInstructions());
             }
@@ -119,20 +119,20 @@ public class FastCompareInstructionVisitor extends CompareInstructionVisitor
             return otherExceptionTypeIndexes2 == null;
         }
         if (otherExceptionTypeIndexes2 == null) {
-			return false;
-		}
+            return false;
+        }
 
         int i = otherExceptionTypeIndexes1.length;
 
         if (i != otherExceptionTypeIndexes2.length) {
-			return false;
-		}
+            return false;
+        }
 
         while (i-- > 0)
         {
             if (otherExceptionTypeIndexes1[i] != otherExceptionTypeIndexes2[i]) {
-				return false;
-			}
+                return false;
+            }
         }
 
         return true;

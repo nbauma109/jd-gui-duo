@@ -105,8 +105,8 @@ public class FieldNameGenerator
                 {
                     c = caSignature[index];
                     if (c == ';' || c == '<') {
-						break;
-					}
+                        break;
+                    }
                     index++;
                 }
 
@@ -134,8 +134,8 @@ public class FieldNameGenerator
 
                 // pass ';'
                 if (caSignature[index] == ';') {
-					index++;
-				}
+                    index++;
+                }
                 break;
             case 'S' :
                 sbName.append("Short");
@@ -181,8 +181,8 @@ public class FieldNameGenerator
             }
 
             if (index >= length || caSignature[index] != '.') {
-				break;
-			}
+                break;
+            }
 
             sbName.append("_");
         }

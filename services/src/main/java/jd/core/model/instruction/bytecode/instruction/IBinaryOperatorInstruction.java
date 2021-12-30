@@ -40,13 +40,13 @@ public class IBinaryOperatorInstruction extends BinaryOperatorInstruction
         {
             signature = this.getValue2().getReturnedSignature(constants, localVariables);
             if (signature == null) {
-				signature = this.getValue1().getReturnedSignature(constants, localVariables);
-			}
+                signature = this.getValue1().getReturnedSignature(constants, localVariables);
+            }
         } else {
-	        signature = this.getValue1().getReturnedSignature(constants, localVariables);
-	        if (signature == null) {
-				signature = this.getValue2().getReturnedSignature(constants, localVariables);
-			}
+            signature = this.getValue1().getReturnedSignature(constants, localVariables);
+            if (signature == null) {
+                signature = this.getValue2().getReturnedSignature(constants, localVariables);
+            }
         }
         return signature;
     }

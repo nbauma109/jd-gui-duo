@@ -73,8 +73,8 @@ public class DotClass14Reconstructor
         int i = list.size();
 
         if  (i < 6) {
-			return;
-		}
+            return;
+        }
 
         i -= 5;
         ConstantPool constants = classFile.getConstantPool();
@@ -84,91 +84,91 @@ public class DotClass14Reconstructor
             Instruction instruction = list.get(i);
 
             if (instruction.getOpcode() != ByteCodeConstants.IFXNULL) {
-				continue;
-			}
+                continue;
+            }
 
             IfInstruction ii = (IfInstruction)instruction;
 
             if (ii.getValue().getOpcode() != Const.GETSTATIC) {
-				continue;
-			}
+                continue;
+            }
 
             int jumpOffset = ii.getJumpOffset();
 
             instruction = list.get(i+1);
 
             if (instruction.getOpcode() != ByteCodeConstants.DUPSTORE) {
-				continue;
-			}
+                continue;
+            }
 
             DupStore ds = (DupStore)instruction;
 
             if (ds.getObjectref().getOpcode() != Const.INVOKESTATIC) {
-				continue;
-			}
+                continue;
+            }
 
             Invokestatic is = (Invokestatic)ds.getObjectref();
 
             if (is.getArgs().size() != 1) {
-				continue;
-			}
+                continue;
+            }
 
             instruction = is.getArgs().get(0);
 
             if (instruction.getOpcode() != Const.LDC) {
-				continue;
-			}
+                continue;
+            }
 
             instruction = list.get(i+2);
 
             if (instruction.getOpcode() != Const.PUTSTATIC) {
-				continue;
-			}
+                continue;
+            }
 
             PutStatic ps = (PutStatic)instruction;
 
             if (ps.getValueref().getOpcode() != ByteCodeConstants.DUPLOAD ||
                 ds.getOffset() != ps.getValueref().getOffset()) {
-				continue;
-			}
+                continue;
+            }
 
             instruction = list.get(i+3);
 
             if (instruction.getOpcode() != ByteCodeConstants.TERNARYOPSTORE) {
-				continue;
-			}
+                continue;
+            }
 
             TernaryOpStore tos = (TernaryOpStore)instruction;
 
             if (tos.getObjectref().getOpcode() != ByteCodeConstants.DUPLOAD ||
                 ds.getOffset() != tos.getObjectref().getOffset()) {
-				continue;
-			}
+                continue;
+            }
 
             instruction = list.get(i+4);
 
             if (instruction.getOpcode() != Const.GOTO) {
-				continue;
-			}
+                continue;
+            }
 
             Goto g = (Goto)instruction;
             instruction = list.get(i+5);
 
             if (g.getOffset() >= jumpOffset || jumpOffset > instruction.getOffset()) {
-				continue;
-			}
+                continue;
+            }
 
             GetStatic gs = (GetStatic)ii.getValue();
 
             if (ps.getIndex() != gs.getIndex()) {
-				continue;
-			}
+                continue;
+            }
 
             ConstantFieldref cfr = constants.getConstantFieldref(gs.getIndex());
 
             if (searchMatchingClassFile(cfr.getClassIndex(), classFile) == null) {
-				continue;
-			}
+                continue;
+            }
 
             ConstantNameAndType cnatField = constants.getConstantNameAndType(
                     cfr.getNameAndTypeIndex());
@@ -177,23 +177,23 @@ public class DotClass14Reconstructor
                 constants.getConstantUtf8(cnatField.getSignatureIndex());
 
             if (! StringConstants.INTERNAL_CLASS_SIGNATURE.equals(descriptorField)) {
-				continue;
-			}
+                continue;
+            }
 
             String nameField = constants.getConstantUtf8(cnatField.getNameIndex());
 
             if (!nameField.startsWith(StringConstants.CLASS_DOLLAR) &&
                 !nameField.startsWith(StringConstants.ARRAY_DOLLAR)) {
-				continue;
-			}
+                continue;
+            }
 
             ConstantMethodref cmr = constants.getConstantMethodref(is.getIndex());
 
             ClassFile matchingClassFile =
                 searchMatchingClassFile(cmr.getClassIndex(), classFile);
             if (matchingClassFile == null) {
-				continue;
-			}
+                continue;
+            }
 
             ConstantNameAndType cnatMethod =
                 constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
@@ -201,15 +201,15 @@ public class DotClass14Reconstructor
                 constants.getConstantUtf8(cnatMethod.getNameIndex());
 
             if (! StringConstants.CLASS_DOLLAR.equals(nameMethod)) {
-				continue;
-			}
+                continue;
+            }
 
             Ldc ldc = (Ldc)is.getArgs().get(0);
             Constant cv = constants.getConstantValue(ldc.getIndex());
 
             if (!(cv instanceof ConstantString cs)) {
-				continue;
-			}
+                continue;
+            }
 
             String signature = constants.getConstantUtf8(cs.getStringIndex());
 
@@ -384,8 +384,8 @@ public class DotClass14Reconstructor
         int classIndex, ClassFile classFile)
     {
         if (classIndex == classFile.getThisClassIndex()) {
-			return classFile;
-		}
+            return classFile;
+        }
 
         String className =
             classFile.getConstantPool().getConstantClassName(classIndex);
@@ -395,12 +395,12 @@ public class DotClass14Reconstructor
             classFile = classFile.getOuterClass();
 
             if (classFile == null) {
-				return null;
-			}
+                return null;
+            }
 
             if (classFile.getThisClassName().equals(className)) {
-				return classFile;
-			}
+                return classFile;
+            }
         }
     }
 }

@@ -48,9 +48,9 @@ public class DecompilerImpl implements Decompiler
         ClassFile classFile =
             ClassFileDeserializer.deserialize(loader, internalClassPath);
         if (classFile == null) {
-			throw new LoaderException(
+            throw new LoaderException(
                 "Can not deserialize '" + internalClassPath + "'.");
-		}
+        }
 
         // 2) Analyse du byte code
         ReferenceMap referenceMap = new ReferenceMap();

@@ -47,8 +47,8 @@ public class OuterPutFieldVisitor extends OuterGetStaticVisitor
     protected Accessor match(Instruction i)
     {
         if (i.getOpcode() != Const.INVOKESTATIC) {
-			return null;
-		}
+            return null;
+        }
 
         Invokestatic is = (Invokestatic)i;
         ConstantMethodref cmr = constants.getConstantMethodref(is.getIndex());
@@ -59,14 +59,14 @@ public class OuterPutFieldVisitor extends OuterGetStaticVisitor
 
         // Two parameters ?
         if (cmr.getNbrOfParameters() != 2) {
-			return null;
-		}
+            return null;
+        }
 
         String className = constants.getConstantClassName(cmr.getClassIndex());
         ClassFile classFile = this.innerClassesMap.get(className);
         if (classFile == null) {
-			return null;
-		}
+            return null;
+        }
 
         String name =
             constants.getConstantUtf8(cnat.getNameIndex());
@@ -75,8 +75,8 @@ public class OuterPutFieldVisitor extends OuterGetStaticVisitor
 
         if (accessor == null ||
             accessor.tag() != AccessorConstants.ACCESSOR_PUTFIELD) {
-			return null;
-		}
+            return null;
+        }
 
         return accessor;
     }

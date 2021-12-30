@@ -38,11 +38,11 @@ public class FastLabel extends Instruction
         return this.getInstruction().getReturnedSignature(constants, localVariables);
     }
 
-	public Instruction getInstruction() {
-		return instruction;
-	}
+    public Instruction getInstruction() {
+        return instruction;
+    }
 
-	public void setInstruction(Instruction instruction) {
-		this.instruction = instruction;
-	}
+    public void setInstruction(Instruction instruction) {
+        this.instruction = instruction;
+    }
 }

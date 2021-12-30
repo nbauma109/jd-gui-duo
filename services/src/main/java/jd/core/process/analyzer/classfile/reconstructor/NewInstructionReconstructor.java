@@ -54,14 +54,14 @@ public class NewInstructionReconstructor extends NewInstructionReconstructorBase
         for (int dupStoreIndex=0; dupStoreIndex<list.size(); dupStoreIndex++)
         {
             if (list.get(dupStoreIndex).getOpcode() != ByteCodeConstants.DUPSTORE) {
-				continue;
-			}
+                continue;
+            }
 
             DupStore ds = (DupStore)list.get(dupStoreIndex);
 
             if (ds.getObjectref().getOpcode() != Const.NEW) {
-				continue;
-			}
+                continue;
+            }
 
             int invokespecialIndex = dupStoreIndex;
             final int length = list.size();
@@ -71,20 +71,20 @@ public class NewInstructionReconstructor extends NewInstructionReconstructorBase
                 Instruction instruction = list.get(invokespecialIndex);
 
                 if (instruction.getOpcode() != Const.INVOKESPECIAL) {
-					continue;
-				}
+                    continue;
+                }
 
                 Invokespecial is = (Invokespecial)instruction;
 
                 if (is.getObjectref().getOpcode() != ByteCodeConstants.DUPLOAD) {
-					continue;
-				}
+                    continue;
+                }
 
                 DupLoad dl = (DupLoad)is.getObjectref();
 
                 if (dl.getOffset() != ds.getOffset()) {
-					continue;
-				}
+                    continue;
+                }
 
                 ConstantPool constants = classFile.getConstantPool();
                 ConstantMethodref cmr = constants.getConstantMethodref(is.getIndex());
@@ -103,10 +103,10 @@ public class NewInstructionReconstructor extends NewInstructionReconstructorBase
 
                     list.remove(invokespecialIndex);
                     if (parentFound == null) {
-						list.set(dupStoreIndex, invokeNew);
-					} else {
-						list.remove(dupStoreIndex--);
-					}
+                        list.set(dupStoreIndex, invokeNew);
+                    } else {
+                        list.remove(dupStoreIndex--);
+                    }
 
                     initAnonymousClassConstructorParameterName(
                         classFile, method, invokeNew);

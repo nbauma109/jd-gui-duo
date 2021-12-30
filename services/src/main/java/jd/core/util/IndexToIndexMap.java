@@ -53,8 +53,8 @@ public class IndexToIndexMap
          while (entry != null)
          {
              if (entry.key == key) {
-				return entry.value;
-			}
+                return entry.value;
+            }
             entry = entry.next;
          }
 

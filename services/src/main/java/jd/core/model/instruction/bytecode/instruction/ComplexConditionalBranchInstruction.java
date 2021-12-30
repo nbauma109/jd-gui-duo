@@ -47,7 +47,7 @@ public class ComplexConditionalBranchInstruction extends ConditionalBranchInstru
         return this.getCmp() == ByteCodeConstants.CMP_AND ? 12 : 13;
     }
 
-	public List<Instruction> getInstructions() {
-		return instructions;
-	}
+    public List<Instruction> getInstructions() {
+        return instructions;
+    }
 }

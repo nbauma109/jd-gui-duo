@@ -125,51 +125,51 @@ public class ClassFileDeserializer {
 
         try (DataInputStream reader = new DataInputStream(new ByteArrayInputStream(data))) {
 
-	        // Load main type
-	        ClassFile classFile = loadClassFile(reader);
+            // Load main type
+            ClassFile classFile = loadClassFile(reader);
 
-	        // Load inner types
-	        AttributeInnerClasses aic = classFile.getAttribute("InnerClasses");
+            // Load inner types
+            AttributeInnerClasses aic = classFile.getAttribute("InnerClasses");
 
-	        if (aic != null) {
-	            DefaultList<ClassFile> innerClassFiles = new DefaultList<>();
-	            String innerTypePrefix = internalTypeName + '$';
+            if (aic != null) {
+                DefaultList<ClassFile> innerClassFiles = new DefaultList<>();
+                String innerTypePrefix = internalTypeName + '$';
 
-	            String innerTypeName;
-	            for (InnerClass ic : aic.getInnerClasses()) {
-	                innerTypeName = ic.innerTypeName();
+                String innerTypeName;
+                for (InnerClass ic : aic.getInnerClasses()) {
+                    innerTypeName = ic.innerTypeName();
 
-	                if (!internalTypeName.equals(innerTypeName) && (internalTypeName.equals(ic.outerTypeName()) || innerTypeName.startsWith(innerTypePrefix))) {
-	                    ClassFile innerClassFile = innerLoadClassFile(loader, innerTypeName);
-	                    int flags = ic.innerAccessFlags();
-	                    int length;
+                    if (!internalTypeName.equals(innerTypeName) && (internalTypeName.equals(ic.outerTypeName()) || innerTypeName.startsWith(innerTypePrefix))) {
+                        ClassFile innerClassFile = innerLoadClassFile(loader, innerTypeName);
+                        int flags = ic.innerAccessFlags();
+                        int length;
 
-	                    if (innerTypeName.startsWith(innerTypePrefix)) {
-	                        length = internalTypeName.length() + 1;
-	                    } else {
-	                        length = innerTypeName.indexOf('$') + 1;
-	                    }
+                        if (innerTypeName.startsWith(innerTypePrefix)) {
+                            length = internalTypeName.length() + 1;
+                        } else {
+                            length = innerTypeName.indexOf('$') + 1;
+                        }
 
-	                    if (Character.isDigit(innerTypeName.charAt(length))) {
-	                        flags |= ACC_SYNTHETIC;
-	                    }
+                        if (Character.isDigit(innerTypeName.charAt(length))) {
+                            flags |= ACC_SYNTHETIC;
+                        }
 
-	                    if (innerClassFile == null) {
-	                        // Inner class not found. Create an empty one.
-	                        innerClassFile = new ClassFile(classFile.getMajorVersion(), classFile.getMinorVersion(), 0, innerTypeName, StringConstants.JAVA_LANG_OBJECT, null, null, null, null);
-	                    }
+                        if (innerClassFile == null) {
+                            // Inner class not found. Create an empty one.
+                            innerClassFile = new ClassFile(classFile.getMajorVersion(), classFile.getMinorVersion(), 0, innerTypeName, StringConstants.JAVA_LANG_OBJECT, null, null, null, null);
+                        }
 
-	                    innerClassFile.setOuterClassFile(classFile);
-	                    innerClassFile.setAccessFlags(flags);
-	                    innerClassFiles.add(innerClassFile);
-	                }
-	            }
+                        innerClassFile.setOuterClassFile(classFile);
+                        innerClassFile.setAccessFlags(flags);
+                        innerClassFiles.add(innerClassFile);
+                    }
+                }
 
-	            if (!innerClassFiles.isEmpty()) {
-	                classFile.setInnerClassFiles(innerClassFiles);
-	            }
-	        }
-	        return classFile;
+                if (!innerClassFiles.isEmpty()) {
+                    classFile.setInnerClassFiles(innerClassFiles);
+                }
+            }
+            return classFile;
         }
     }
 

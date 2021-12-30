@@ -21,15 +21,15 @@ public class WarContainerFactoryProvider implements ContainerFactory {
     @Override
     public String getType() { return "war"; }
 
-	@Override
-	@SuppressWarnings("resource")
+    @Override
+    @SuppressWarnings("resource")
     public boolean accept(API api, Path rootPath) {
         if (rootPath.toUri().toString().toLowerCase().endsWith(".war!/")) {
             return true;
         }
         // Extension: accept uncompressed WAR file containing a folder 'WEB-INF'
         try {
-        	// do not try to close file system due to UnsupportedOperationException
+            // do not try to close file system due to UnsupportedOperationException
             return "file".equals(rootPath.getFileSystem().provider().getScheme()) && Files.exists(rootPath.resolve("WEB-INF"));
         } catch (InvalidPathException e) {
             assert ExceptionUtil.printStackTrace(e);

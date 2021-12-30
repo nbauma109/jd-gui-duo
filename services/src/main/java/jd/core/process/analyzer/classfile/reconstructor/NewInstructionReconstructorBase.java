@@ -64,8 +64,8 @@ public class NewInstructionReconstructorBase
                 LocalVariables localVariables = method.getLocalVariables();
 
                 Field innerField;
-				int index;
-				while (i-- > 0)
+                int index;
+                while (i-- > 0)
                 {
                     innerField = innerFields[i];
                     index = innerField.getAnonymousClassConstructorParameterIndex();
@@ -79,14 +79,14 @@ public class NewInstructionReconstructorBase
                             Instruction arg = invokeNew.getArgs().get(index);
 
                             if (arg.getOpcode() == Const.CHECKCAST) {
-								arg = ((CheckCast)arg).getObjectref();
-							}
+                                arg = ((CheckCast)arg).getObjectref();
+                            }
 
                             int argOpCode = arg.getOpcode();
-							if (argOpCode == ByteCodeConstants.LOAD
+                            if (argOpCode == ByteCodeConstants.LOAD
                              || argOpCode == Const.ALOAD
                              || argOpCode == Const.ILOAD) {
-								LocalVariable lv =
+                                LocalVariable lv =
                                     localVariables
                                         .getLocalVariableWithIndexAndOffset(
                                             ((IndexInstruction)arg).getIndex(),
@@ -104,7 +104,7 @@ public class NewInstructionReconstructorBase
                                     // l'instruction "new"
                                     lv.setFinalFlag(true);
                                 }
-							}
+                            }
                         }
                     }
                 }

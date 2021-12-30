@@ -32,18 +32,18 @@ public class InstructionUtil
             List<Instruction> list, int offset)
     {
         if (list == null || list.isEmpty()) {
-			return null;
-		}
+            return null;
+        }
 
         if (list.get(0).getOffset() >= offset) {
-			return list.get(0);
-		}
+            return list.get(0);
+        }
 
         int length = list.size();
 
         if (length == 1 || list.get(length-1).getOffset() < offset) {
-			return null;
-		}
+            return null;
+        }
 
         int firstIndex = 0;
         int lastIndex = length-1;
@@ -54,12 +54,12 @@ public class InstructionUtil
             Instruction i = list.get(medIndex);
 
             if (i.getOffset() < offset) {
-				firstIndex = medIndex+1;
-			} else if (list.get(medIndex-1).getOffset() >= offset) {
-				lastIndex = medIndex-1;
-			} else {
-				return i;
-			}
+                firstIndex = medIndex+1;
+            } else if (list.get(medIndex-1).getOffset() >= offset) {
+                lastIndex = medIndex-1;
+            } else {
+                return i;
+            }
         }
     }
 
@@ -67,22 +67,22 @@ public class InstructionUtil
             List<Instruction> list, int offset)
     {
         if (offset < 0) {
-			throw new IllegalStateException("offset=" + offset);
-		}
+            throw new IllegalStateException("offset=" + offset);
+        }
 
         if (list == null || list.isEmpty()) {
-			return -1;
-		}
+            return -1;
+        }
 
         if (list.get(0).getOffset() >= offset) {
-			return 0;
-		}
+            return 0;
+        }
 
         int length = list.size();
 
         if (length == 1 || list.get(length-1).getOffset() < offset) {
-			return -1;
-		}
+            return -1;
+        }
 
         int firstIndex = 0;
         int lastIndex = length-1;
@@ -93,12 +93,12 @@ public class InstructionUtil
             Instruction i = list.get(medIndex);
 
             if (i.getOffset() < offset) {
-				firstIndex = medIndex+1;
-			} else if (list.get(medIndex-1).getOffset() >= offset) {
-				lastIndex = medIndex-1;
-			} else {
-				return medIndex;
-			}
+                firstIndex = medIndex+1;
+            } else if (list.get(medIndex-1).getOffset() >= offset) {
+                lastIndex = medIndex-1;
+            } else {
+                return medIndex;
+            }
         }
     }
 
@@ -114,8 +114,8 @@ public class InstructionUtil
                 {
                     int jumpOffset = ((BranchInstruction)i).getJumpOffset();
                     if (firstOffset < jumpOffset && jumpOffset <= lastOffset) {
-						return false;
-					}
+                        return false;
+                    }
                 }
             }
 

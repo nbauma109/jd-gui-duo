@@ -32,23 +32,23 @@ public class OpenTypeListCellBean {
         this.typeName = typeName;
     }
 
-	public Collection<Container.Entry> getEntries() {
-		return entries;
-	}
+    public Collection<Container.Entry> getEntries() {
+        return entries;
+    }
 
-	public String getTypeName() {
-		return typeName;
-	}
+    public String getTypeName() {
+        return typeName;
+    }
 
-	public String getLabel() {
-		return label;
-	}
+    public String getLabel() {
+        return label;
+    }
 
-	public String getPackag() {
-		return packag;
-	}
+    public String getPackag() {
+        return packag;
+    }
 
-	public Icon getIcon() {
-		return icon;
-	}
+    public Icon getIcon() {
+        return icon;
+    }
 }

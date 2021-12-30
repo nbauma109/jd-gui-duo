@@ -241,19 +241,19 @@ public class ModuleInfoFilePage extends ClassFilePage {
                         @SuppressWarnings("rawtypes")
                         Map<String, Collection> index;
                         String key = switch (moduleInfoReferenceData.type) {
-						case TYPE -> {
-							index = futureIndexes.get().getIndex("typeDeclarations");
-							yield reference.getTypeName();
-						}
-						case PACKAGE -> {
-							index = futureIndexes.get().getIndex("packageDeclarations");
-							yield reference.getTypeName();
-						}
-						default -> {
-							index = futureIndexes.get().getIndex("javaModuleDeclarations");
-							yield reference.getName();
-						}
-						};
+                        case TYPE -> {
+                            index = futureIndexes.get().getIndex("typeDeclarations");
+                            yield reference.getTypeName();
+                        }
+                        case PACKAGE -> {
+                            index = futureIndexes.get().getIndex("packageDeclarations");
+                            yield reference.getTypeName();
+                        }
+                        default -> {
+                            index = futureIndexes.get().getIndex("javaModuleDeclarations");
+                            yield reference.getName();
+                        }
+                        };
 
                         if (index != null && index.get(key) != null) {
                             enabled = true;
@@ -399,7 +399,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
             if ((currentTokenType != TokenTypes.NULL)) {
                 addToken(text, currentTokenStart,end-1, currentTokenType, newStartOffset+currentTokenStart);
             }
-			addNullToken();
+            addNullToken();
 
             return firstToken;
         }

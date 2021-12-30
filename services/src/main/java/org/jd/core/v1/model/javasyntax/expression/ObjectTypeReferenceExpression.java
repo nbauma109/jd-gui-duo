@@ -70,8 +70,8 @@ public class ObjectTypeReferenceExpression implements Expression {
         return "ObjectTypeReferenceExpression{" + type + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new ObjectTypeReferenceExpression(lineNumber, type, explicit);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new ObjectTypeReferenceExpression(lineNumber, type, explicit);
+    }
 }

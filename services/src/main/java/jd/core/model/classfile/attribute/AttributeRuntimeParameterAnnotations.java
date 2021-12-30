@@ -27,7 +27,7 @@ public class AttributeRuntimeParameterAnnotations  extends Attribute
         this.parameterAnnotations = parameterAnnotations;
     }
 
-	public ParameterAnnotations[] getParameterAnnotations() {
-		return parameterAnnotations;
-	}
+    public ParameterAnnotations[] getParameterAnnotations() {
+        return parameterAnnotations;
+    }
 }

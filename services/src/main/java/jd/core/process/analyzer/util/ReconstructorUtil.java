@@ -40,8 +40,8 @@ public class ReconstructorUtil
         {
             visitor.visit(list.get(i));
             if (visitor.getParentFound() != null) {
-				break;
-			}
+                break;
+            }
         }
 
         return visitor.getParentFound();

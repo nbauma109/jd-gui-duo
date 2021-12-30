@@ -62,8 +62,8 @@ public class CompareInstructionVisitor
     public boolean visit(Instruction i1, Instruction i2)
     {
         if (i1.getOpcode() != i2.getOpcode()) {
-			return false;
-		}
+            return false;
+        }
 
         switch (i1.getOpcode())
         {
@@ -79,8 +79,8 @@ public class CompareInstructionVisitor
                         ((ArrayStoreInstruction)i2).getArrayref()) || ! visit(
                         ((ArrayStoreInstruction)i1).getIndexref(),
                         ((ArrayStoreInstruction)i2).getIndexref())) {
-					return false;
-				}
+                    return false;
+                }
 
                 return visit(
                         ((ArrayStoreInstruction)i1).getValueref(),
@@ -91,18 +91,18 @@ public class CompareInstructionVisitor
                 if (! visit(
                         ((AssertInstruction)i1).getTest(),
                         ((AssertInstruction)i2).getTest())) {
-					return false;
-				}
+                    return false;
+                }
 
                 Instruction msg1 = ((AssertInstruction)i1).getMsg();
                 Instruction msg2 = ((AssertInstruction)i2).getMsg();
 
                 if (msg1 == msg2) {
-					return true;
-				}
+                    return true;
+                }
                 if (msg1 == null || msg2 == null) {
-					return false;
-				}
+                    return false;
+                }
                 return visit(msg1, msg2);
             }
         case Const.ATHROW:
@@ -113,8 +113,8 @@ public class CompareInstructionVisitor
                     ((UnaryOperatorInstruction)i2).getPriority() || ((UnaryOperatorInstruction)i1).getSignature().compareTo(
                         ((UnaryOperatorInstruction)i2).getSignature()) != 0 || ((UnaryOperatorInstruction)i1).getOperator().compareTo(
                         ((UnaryOperatorInstruction)i2).getOperator()) != 0) {
-					return false;
-				}
+                    return false;
+                }
 
                 return visit(
                     ((UnaryOperatorInstruction)i1).getValue(),
@@ -128,8 +128,8 @@ public class CompareInstructionVisitor
                         ((BinaryOperatorInstruction)i2).getOperator()) != 0 || ! visit(
                         ((BinaryOperatorInstruction)i1).getValue1(),
                         ((BinaryOperatorInstruction)i2).getValue1())) {
-					return false;
-				}
+                    return false;
+                }
 
                 return visit(
                     ((BinaryOperatorInstruction)i1).getValue2(),
@@ -138,8 +138,8 @@ public class CompareInstructionVisitor
         case Const.CHECKCAST:
             {
                 if (((CheckCast)i1).getIndex() != ((CheckCast)i2).getIndex()) {
-					return false;
-				}
+                    return false;
+                }
 
                 return visit(
                     ((CheckCast)i1).getObjectref(), ((CheckCast)i2).getObjectref());
@@ -151,8 +151,8 @@ public class CompareInstructionVisitor
                 String rs1 = ((StoreInstruction)i1).getReturnedSignature(null, null);
                 String rs2 = ((StoreInstruction)i2).getReturnedSignature(null, null);
                 if (rs1 == null ? rs2 != null : rs1.compareTo(rs2) != 0) {
-					return false;
-				}
+                    return false;
+                }
 
                 return visit(
                     ((StoreInstruction)i1).getValueref(),
@@ -166,8 +166,8 @@ public class CompareInstructionVisitor
             {
                 if (((ConvertInstruction)i1).getSignature().compareTo(
                         ((ConvertInstruction)i2).getSignature()) != 0) {
-					return false;
-				}
+                    return false;
+                }
 
                 return visit(
                     ((ConvertInstruction)i1).getValue(),
@@ -183,8 +183,8 @@ public class CompareInstructionVisitor
                 //	  return false;
 
                 if (((IfCmp)i1).getCmp() != ((IfCmp)i2).getCmp() || ! visit(((IfCmp)i1).getValue1(), ((IfCmp)i2).getValue1())) {
-					return false;
-				}
+                    return false;
+                }
 
                 return visit(((IfCmp)i1).getValue2(), ((IfCmp)i2).getValue2());
             }
@@ -192,8 +192,8 @@ public class CompareInstructionVisitor
              ByteCodeConstants.IFXNULL:
             {
                 if (((IfInstruction)i1).getCmp() != ((IfInstruction)i2).getCmp()) {
-					return false;
-				}
+                    return false;
+                }
 
                 return visit(
                     ((IfInstruction)i1).getValue(), ((IfInstruction)i2).getValue());
@@ -201,8 +201,8 @@ public class CompareInstructionVisitor
         case ByteCodeConstants.COMPLEXIF:
             {
                 if (((ComplexConditionalBranchInstruction)i1).getCmp() != ((ComplexConditionalBranchInstruction)i2).getCmp() || ((ComplexConditionalBranchInstruction)i1).getBranch() != ((ComplexConditionalBranchInstruction)i2).getBranch()) {
-					return false;
-				}
+                    return false;
+                }
 
                 return visit(
                         ((ComplexConditionalBranchInstruction)i1).getInstructions(),
@@ -211,8 +211,8 @@ public class CompareInstructionVisitor
         case Const.INSTANCEOF:
             {
                 if (((InstanceOf)i1).getIndex() != ((InstanceOf)i2).getIndex()) {
-					return false;
-				}
+                    return false;
+                }
 
                 return visit(
                     ((InstanceOf)i1).getObjectref(), ((InstanceOf)i2).getObjectref());
@@ -224,8 +224,8 @@ public class CompareInstructionVisitor
                 if (! visit(
                         ((InvokeNoStaticInstruction)i1).getObjectref(),
                         ((InvokeNoStaticInstruction)i2).getObjectref())) {
-					return false;
-				}
+                    return false;
+                }
             }
             // intended fall through
         case Const.INVOKESTATIC:
@@ -234,8 +234,8 @@ public class CompareInstructionVisitor
         case ByteCodeConstants.INVOKENEW:
             {
                 if (((InvokeNew)i1).getIndex() != ((InvokeNew)i2).getIndex()) {
-					return false;
-				}
+                    return false;
+                }
 
                 return visit(
                     ((InvokeNew)i1).getArgs(), ((InvokeNew)i2).getArgs());
@@ -243,21 +243,21 @@ public class CompareInstructionVisitor
         case Const.MULTIANEWARRAY:
             {
                 if (((MultiANewArray)i1).getIndex() != ((MultiANewArray)i2).getIndex()) {
-					return false;
-				}
+                    return false;
+                }
 
                 Instruction[] dimensions1 = ((MultiANewArray)i1).getDimensions();
                 Instruction[] dimensions2 = ((MultiANewArray)i2).getDimensions();
 
                 if (dimensions1.length != dimensions2.length) {
-					return false;
-				}
+                    return false;
+                }
 
                 for (int i=dimensions1.length-1; i>=0; --i)
                 {
                     if (! visit(dimensions1[i], dimensions2[i])) {
-						return false;
-					}
+                        return false;
+                    }
                 }
 
                 return true;
@@ -265,8 +265,8 @@ public class CompareInstructionVisitor
         case Const.NEWARRAY:
             {
                 if (((NewArray)i1).getType() != ((NewArray)i2).getType()) {
-					return false;
-				}
+                    return false;
+                }
 
                 return visit(
                     ((NewArray)i1).getDimension(), ((NewArray)i2).getDimension());
@@ -274,8 +274,8 @@ public class CompareInstructionVisitor
         case Const.ANEWARRAY:
             {
                 if (((ANewArray)i1).getIndex() != ((ANewArray)i2).getIndex()) {
-					return false;
-				}
+                    return false;
+                }
 
                 return visit(
                     ((ANewArray)i1).getDimension(), ((ANewArray)i2).getDimension());
@@ -285,8 +285,8 @@ public class CompareInstructionVisitor
                 if (! visit(
                         ((PutField)i1).getObjectref(),
                         ((PutField)i2).getObjectref())) {
-					return false;
-				}
+                    return false;
+                }
 
                 return visit(
                         ((PutField)i1).getValueref(), ((PutField)i2).getValueref());
@@ -295,8 +295,8 @@ public class CompareInstructionVisitor
             {
                 if (((TernaryOpStore)i1).getTernaryOp2ndValueOffset()-i1.getOffset() !=
                     ((TernaryOpStore)i2).getTernaryOp2ndValueOffset()-i2.getOffset()) {
-					return false;
-				}
+                    return false;
+                }
 
                 return visit(
                     ((TernaryOpStore)i1).getObjectref(),
@@ -309,8 +309,8 @@ public class CompareInstructionVisitor
                         ((TernaryOperator)i2).getTest()) || ! visit(
                         ((TernaryOperator)i1).getValue1(),
                         ((TernaryOperator)i2).getValue1())) {
-					return false;
-				}
+                    return false;
+                }
 
                 return visit(
                         ((TernaryOperator)i1).getValue2(),
@@ -323,8 +323,8 @@ public class CompareInstructionVisitor
                         ((AssignmentInstruction)i2).getOperator()) != 0 || ! visit(
                         ((AssignmentInstruction)i1).getValue1(),
                         ((AssignmentInstruction)i2).getValue1())) {
-					return false;
-				}
+                    return false;
+                }
 
                 return visit(
                     ((AssignmentInstruction)i1).getValue2(),
@@ -338,17 +338,17 @@ public class CompareInstructionVisitor
                 if (s1 == null)
                 {
                     if (s2 != null) {
-						return false;
-					}
+                        return false;
+                    }
                 } else if (s1.compareTo(s2) != 0) {
-					return false;
-				}
+                    return false;
+                }
 
                 if (! visit(
                         ((ArrayLoadInstruction)i1).getArrayref(),
                         ((ArrayLoadInstruction)i2).getArrayref())) {
-					return false;
-				}
+                    return false;
+                }
 
                 return visit(
                     ((ArrayLoadInstruction)i1).getIndexref(),
@@ -358,8 +358,8 @@ public class CompareInstructionVisitor
              ByteCodeConstants.POSTINC:
             {
                 if (((IncInstruction)i1).getCount() != ((IncInstruction)i2).getCount()) {
-					return false;
-				}
+                    return false;
+                }
 
                 return visit(
                         ((IncInstruction)i1).getValue(),
@@ -368,8 +368,8 @@ public class CompareInstructionVisitor
         case Const.GETFIELD:
             {
                 if (((GetField)i1).getIndex() != ((GetField)i2).getIndex()) {
-					return false;
-				}
+                    return false;
+                }
 
                 return visit(
                     ((GetField)i1).getObjectref(), ((GetField)i2).getObjectref());
@@ -380,8 +380,8 @@ public class CompareInstructionVisitor
                 if (! visit(
                         ((InitArrayInstruction)i1).getNewArray(),
                         ((InitArrayInstruction)i2).getNewArray())) {
-					return false;
-				}
+                    return false;
+                }
 
                 return visit(((InitArrayInstruction)i1).getValues(),
                         ((InitArrayInstruction)i2).getValues());
@@ -398,8 +398,8 @@ public class CompareInstructionVisitor
              Const.SIPUSH:
             {
                 if (((IConst)i1).getValue() != ((IConst)i2).getValue()) {
-					return false;
-				}
+                    return false;
+                }
 
                 return
                     ((IConst)i1).getSignature().compareTo(
@@ -448,14 +448,14 @@ public class CompareInstructionVisitor
         int i = l1.size();
 
         if (i != l2.size()) {
-			return false;
-		}
+            return false;
+        }
 
         while (i-- > 0)
         {
             if (! visit(l1.get(i), l2.get(i))) {
-				return false;
-			}
+                return false;
+            }
         }
 
         return true;

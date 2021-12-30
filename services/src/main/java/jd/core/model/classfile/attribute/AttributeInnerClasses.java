@@ -29,7 +29,7 @@ public class AttributeInnerClasses extends Attribute
         this.classes = classes;
     }
 
-	public InnerClass[] getClasses() {
-		return classes;
-	}
+    public InnerClass[] getClasses() {
+        return classes;
+    }
 }

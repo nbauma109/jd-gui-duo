@@ -45,34 +45,34 @@ public class FastDeclaration extends Instruction
         return null;
     }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(getLv().getIndex(), getLv().getNameIndex(), getLv().getSignatureIndex());
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(getLv().getIndex(), getLv().getNameIndex(), getLv().getSignatureIndex());
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null || getClass() != obj.getClass()) {
-			return false;
-		}
-		FastDeclaration other = (FastDeclaration) obj;
-		return getLv().getIndex() == other.getLv().getIndex()
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        FastDeclaration other = (FastDeclaration) obj;
+        return getLv().getIndex() == other.getLv().getIndex()
             && getLv().getNameIndex() == other.getLv().getNameIndex()
             && getLv().getSignatureIndex() == other.getLv().getSignatureIndex();
-	}
+    }
 
-	public LocalVariable getLv() {
-		return lv;
-	}
+    public LocalVariable getLv() {
+        return lv;
+    }
 
-	public Instruction getInstruction() {
-		return instruction;
-	}
+    public Instruction getInstruction() {
+        return instruction;
+    }
 
-	public void setInstruction(Instruction instruction) {
-		this.instruction = instruction;
-	}
+    public void setInstruction(Instruction instruction) {
+        this.instruction = instruction;
+    }
 }

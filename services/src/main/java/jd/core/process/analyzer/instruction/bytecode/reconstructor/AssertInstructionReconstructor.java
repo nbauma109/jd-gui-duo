@@ -52,27 +52,27 @@ public class AssertInstructionReconstructor
     {
         int index = list.size();
         if (index-- == 0) {
-			return;
-		}
+            return;
+        }
 
         while (index-- > 1)
         {
             Instruction instruction = list.get(index);
 
             if (instruction.getOpcode() != Const.ATHROW) {
-				continue;
-			}
+                continue;
+            }
 
             // AThrow trouve
             AThrow athrow = (AThrow)instruction;
             if (athrow.getValue().getOpcode() != ByteCodeConstants.INVOKENEW) {
-				continue;
-			}
+                continue;
+            }
 
             instruction = list.get(index-1);
             if (instruction.getOpcode() != ByteCodeConstants.COMPLEXIF) {
-				continue;
-			}
+                continue;
+            }
 
             // ComplexConditionalBranchInstruction trouve
             ComplexConditionalBranchInstruction cbl =
@@ -81,38 +81,38 @@ public class AssertInstructionReconstructor
             int lastOffset = list.get(index+1).getOffset();
 
             if (athrow.getOffset() >= jumpOffset || jumpOffset > lastOffset) {
-				continue;
-			}
+                continue;
+            }
 
             if (cbl.getCmp() != 2 || cbl.getInstructions().isEmpty()) {
-				continue;
-			}
+                continue;
+            }
 
             instruction = cbl.getInstructions().get(0);
             if (instruction.getOpcode() != ByteCodeConstants.IF) {
-				continue;
-			}
+                continue;
+            }
 
             IfInstruction if1 = (IfInstruction)instruction;
             if (if1.getCmp() != 7 || if1.getValue().getOpcode() != Const.GETSTATIC) {
-				continue;
-			}
+                continue;
+            }
 
             GetStatic gs = (GetStatic)if1.getValue();
             ConstantPool constants = classFile.getConstantPool();
             ConstantFieldref cfr = constants.getConstantFieldref(gs.getIndex());
 
             if (cfr.getClassIndex() != classFile.getThisClassIndex()) {
-				continue;
-			}
+                continue;
+            }
 
             ConstantNameAndType cnat =
                 constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
             String fieldName = constants.getConstantUtf8(cnat.getNameIndex());
 
             if (! "$assertionsDisabled".equals(fieldName)) {
-				continue;
-			}
+                continue;
+            }
 
             InvokeNew in = (InvokeNew)athrow.getValue();
             ConstantMethodref cmr =
@@ -120,8 +120,8 @@ public class AssertInstructionReconstructor
             String className = constants.getConstantClassName(cmr.getClassIndex());
 
             if (! StringConstants.JAVA_LANG_ASSERTION_ERROR.equals(className)) {
-				continue;
-			}
+                continue;
+            }
 
             // Remove first condition "!($assertionsDisabled)"
             cbl.getInstructions().remove(0);

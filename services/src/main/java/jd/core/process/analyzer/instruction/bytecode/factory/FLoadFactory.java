@@ -40,10 +40,10 @@ public class FLoadFactory implements InstructionFactory
         int index;
 
         if (opcode == Const.FLOAD) {
-			index = code[offset+1] & 255;
-		} else {
-			index = opcode - Const.FLOAD_0;
-		}
+            index = code[offset+1] & 255;
+        } else {
+            index = opcode - Const.FLOAD_0;
+        }
 
         final Instruction instruction = new LoadInstruction(
             ByteCodeConstants.LOAD, offset, lineNumber, index, "F");

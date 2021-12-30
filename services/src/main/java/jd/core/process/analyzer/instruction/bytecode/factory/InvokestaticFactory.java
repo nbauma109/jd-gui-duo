@@ -44,16 +44,16 @@ public class InvokestaticFactory implements InstructionFactory
         ConstantMethodref cmr =
             classFile.getConstantPool().getConstantMethodref(index);
         if (cmr == null) {
-			throw new IllegalArgumentException(
+            throw new IllegalArgumentException(
                     "Invalid ConstantMethodref index");
-		}
+        }
 
         int nbrOfParameters = cmr.getNbrOfParameters();
         List<Instruction> args = new ArrayList<>(nbrOfParameters);
 
         for (int i=nbrOfParameters; i>0; --i) {
-			args.add(stack.pop());
-		}
+            args.add(stack.pop());
+        }
 
         Collections.reverse(args);
 
@@ -61,10 +61,10 @@ public class InvokestaticFactory implements InstructionFactory
                 opcode, offset, lineNumber, index, args);
 
         if (cmr.returnAResult()) {
-			stack.push(instruction);
-		} else {
-			list.add(instruction);
-		}
+            stack.push(instruction);
+        } else {
+            list.add(instruction);
+        }
 
         listForAnalyze.add(instruction);
 

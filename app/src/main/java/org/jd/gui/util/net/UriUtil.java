@@ -59,7 +59,7 @@ public class UriUtil {
                 for (Future<Indexes> futureIndexes : collectionOfFutureIndexes) {
                     if (futureIndexes.isDone()) {
                         @SuppressWarnings("unchecked")
-						Collection<Container.Entry> outerEntries = futureIndexes.get().getIndex("typeDeclarations").get(outerName);
+                        Collection<Container.Entry> outerEntries = futureIndexes.get().getIndex("typeDeclarations").get(outerName);
 
                         if (outerEntries != null) {
                             for (Container.Entry outerEntry : outerEntries) {

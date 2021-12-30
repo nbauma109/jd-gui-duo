@@ -107,8 +107,8 @@ public class WebXmlFilePage extends TypeReferencePage implements UriGettable, In
 
     public static Container.Entry searchEntry(Container.Entry parent, String path) {
         if (path.charAt(0) == '/') {
-			path = path.substring(1);
-		}
+            path = path.substring(1);
+        }
         return recursiveSearchEntry(parent, path);
     }
 
@@ -178,7 +178,7 @@ public class WebXmlFilePage extends TypeReferencePage implements UriGettable, In
     }
 
     public static class PathHyperlinkData extends TypeHyperlinkData {
-    	private final String path;
+        private final String path;
 
         PathHyperlinkData(int startPosition, int endPosition, String path) {
             super(startPosition, endPosition, null);

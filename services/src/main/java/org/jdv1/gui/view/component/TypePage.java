@@ -150,7 +150,7 @@ public abstract class TypePage extends CustomLineNumbersPage
                     return false;
                 }
             }
-			if (parameters.containsKey("position")) {
+            if (parameters.containsKey("position")) {
                 String position = parameters.get("position");
 
                 try {
@@ -438,7 +438,7 @@ public abstract class TypePage extends CustomLineNumbersPage
                     Map<String, Collection> index = futureIndexes.get().getIndex("typeDeclarations");
                     if (index != null) {
                         @SuppressWarnings("unchecked")
-						Collection<Container.Entry> collection = index.get(typeName);
+                        Collection<Container.Entry> collection = index.get(typeName);
                         if (collection != null) {
                             entries.addAll(collection);
                         }

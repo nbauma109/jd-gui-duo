@@ -349,8 +349,8 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
     }
 
     // --- PreferencesChangeListener --- //
-	@Override
-	@SuppressWarnings("unchecked")
+    @Override
+    @SuppressWarnings("unchecked")
     public void preferencesChanged(Map<String, String> preferences) {
         tabbedPanel.preferencesChanged(preferences);
     }

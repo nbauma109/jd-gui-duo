@@ -42,12 +42,12 @@ public class AttributeCode extends Attribute
     public AttributeNumberTable getAttributeLineNumberTable()
     {
         if (this.attributes != null) {
-			for (int i=this.attributes.length-1; i>=0; --i) {
-				if (this.attributes[i].getTag() == Const.ATTR_LINE_NUMBER_TABLE) {
-					return (AttributeNumberTable)this.attributes[i];
-				}
-			}
-		}
+            for (int i=this.attributes.length-1; i>=0; --i) {
+                if (this.attributes[i].getTag() == Const.ATTR_LINE_NUMBER_TABLE) {
+                    return (AttributeNumberTable)this.attributes[i];
+                }
+            }
+        }
 
         return null;
     }
@@ -55,12 +55,12 @@ public class AttributeCode extends Attribute
     public AttributeLocalVariableTable getAttributeLocalVariableTable()
     {
         if (this.attributes != null) {
-			for (int i=this.attributes.length-1; i>=0; --i) {
-				if (this.attributes[i].getTag() == Const.ATTR_LOCAL_VARIABLE_TABLE) {
-					return (AttributeLocalVariableTable)this.attributes[i];
-				}
-			}
-		}
+            for (int i=this.attributes.length-1; i>=0; --i) {
+                if (this.attributes[i].getTag() == Const.ATTR_LOCAL_VARIABLE_TABLE) {
+                    return (AttributeLocalVariableTable)this.attributes[i];
+                }
+            }
+        }
 
         return null;
     }
@@ -68,21 +68,21 @@ public class AttributeCode extends Attribute
     public AttributeLocalVariableTable getAttributeLocalVariableTypeTable()
     {
         if (this.attributes != null) {
-			for (int i=this.attributes.length-1; i>=0; --i) {
-				if (this.attributes[i].getTag() == Const.ATTR_LOCAL_VARIABLE_TYPE_TABLE) {
-					return (AttributeLocalVariableTable)this.attributes[i];
-				}
-			}
-		}
+            for (int i=this.attributes.length-1; i>=0; --i) {
+                if (this.attributes[i].getTag() == Const.ATTR_LOCAL_VARIABLE_TYPE_TABLE) {
+                    return (AttributeLocalVariableTable)this.attributes[i];
+                }
+            }
+        }
 
         return null;
     }
 
-	public byte[] getCode() {
-		return code;
-	}
+    public byte[] getCode() {
+        return code;
+    }
 
-	public List<Entry<Integer, CodeException>> getExceptionTable() {
-		return exceptionTable;
-	}
+    public List<Entry<Integer, CodeException>> getExceptionTable() {
+        return exceptionTable;
+    }
 }

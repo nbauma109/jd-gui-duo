@@ -70,60 +70,60 @@ public class LayoutBlock {
         this.setSection(null);
     }
 
-	public int getLastLineNumber() {
-		return lastLineNumber;
-	}
+    public int getLastLineNumber() {
+        return lastLineNumber;
+    }
 
-	public int getMaximalLineCount() {
-		return maximalLineCount;
-	}
+    public int getMaximalLineCount() {
+        return maximalLineCount;
+    }
 
-	public int getMinimalLineCount() {
-		return minimalLineCount;
-	}
+    public int getMinimalLineCount() {
+        return minimalLineCount;
+    }
 
-	public int getFirstLineNumber() {
-		return firstLineNumber;
-	}
+    public int getFirstLineNumber() {
+        return firstLineNumber;
+    }
 
-	public byte getTag() {
-		return tag;
-	}
+    public byte getTag() {
+        return tag;
+    }
 
-	protected void setTag(byte tag) {
-		this.tag = tag;
-	}
+    protected void setTag(byte tag) {
+        this.tag = tag;
+    }
 
-	public int getLineCount() {
-		return lineCount;
-	}
+    public int getLineCount() {
+        return lineCount;
+    }
 
-	public int setLineCount(int lineCount) {
-		this.lineCount = lineCount;
-		return lineCount;
-	}
+    public int setLineCount(int lineCount) {
+        this.lineCount = lineCount;
+        return lineCount;
+    }
 
-	public int getIndex() {
-		return index;
-	}
+    public int getIndex() {
+        return index;
+    }
 
-	public void setIndex(int index) {
-		this.index = index;
-	}
+    public void setIndex(int index) {
+        this.index = index;
+    }
 
-	public LayoutSection getSection() {
-		return section;
-	}
+    public LayoutSection getSection() {
+        return section;
+    }
 
-	public void setSection(LayoutSection section) {
-		this.section = section;
-	}
+    public void setSection(LayoutSection section) {
+        this.section = section;
+    }
 
-	public int getPreferedLineCount() {
-		return preferedLineCount;
-	}
+    public int getPreferedLineCount() {
+        return preferedLineCount;
+    }
 
-	public void setPreferedLineCount(int preferedLineCount) {
-		this.preferedLineCount = preferedLineCount;
-	}
+    public void setPreferedLineCount(int preferedLineCount) {
+        this.preferedLineCount = preferedLineCount;
+    }
 }

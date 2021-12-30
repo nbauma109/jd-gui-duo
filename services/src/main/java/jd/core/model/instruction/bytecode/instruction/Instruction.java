@@ -43,23 +43,23 @@ public abstract class Instruction
         return ZERO_PRIORITY;
     }
 
-	public int getOffset() {
-		return offset;
-	}
+    public int getOffset() {
+        return offset;
+    }
 
-	public int getLineNumber() {
-		return lineNumber;
-	}
+    public int getLineNumber() {
+        return lineNumber;
+    }
 
-	public void setLineNumber(int lineNumber) {
-		this.lineNumber = lineNumber;
-	}
+    public void setLineNumber(int lineNumber) {
+        this.lineNumber = lineNumber;
+    }
 
-	public int getOpcode() {
-		return opcode;
-	}
+    public int getOpcode() {
+        return opcode;
+    }
 
-	public void setOpcode(int opcode) {
-		this.opcode = opcode;
-	}
+    public void setOpcode(int opcode) {
+        this.opcode = opcode;
+    }
 }

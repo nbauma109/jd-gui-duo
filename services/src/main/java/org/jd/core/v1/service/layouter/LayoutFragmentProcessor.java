@@ -107,7 +107,7 @@ public class LayoutFragmentProcessor {
                     // The sum of the constraints does not decrease -> Quit loop
                     break;
                 }
-				sumOfRates = newSumOfRates;
+                sumOfRates = newSumOfRates;
 
                 if (! mostConstrainedSection.releaseConstraints(holder)) {
                     break;

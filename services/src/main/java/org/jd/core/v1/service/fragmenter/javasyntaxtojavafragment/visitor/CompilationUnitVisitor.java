@@ -304,8 +304,8 @@ public class CompilationUnitVisitor extends StatementVisitor {
             BaseType interfaces = declaration.getInterfaces();
             if (interfaces != null) {
                 if (!tokens.isEmpty()) {
-					fragments.addTokensFragment(tokens);
-				}
+                    fragments.addTokensFragment(tokens);
+                }
 
                 JavaFragmentFactory.addSpacerBeforeImplements(fragments);
 
@@ -717,7 +717,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             tokens.add(TextToken.SPACE_EQUAL_SPACE);
             variableInitializer.accept(this);
         }
-		fragments.addTokensFragment(tokens);
+        fragments.addTokensFragment(tokens);
     }
 
     @Override
@@ -1174,8 +1174,8 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
                     tokens = new Tokens();
                 }
-				tokens.add(TextToken.SEMICOLON);
-				fragments.addTokensFragment(tokens);
+                tokens.add(TextToken.SEMICOLON);
+                fragments.addTokensFragment(tokens);
             } else {
                 fragments.addTokensFragment(tokens);
                 singleLineStatementVisitor.init();

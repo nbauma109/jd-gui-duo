@@ -97,7 +97,7 @@ public class OpenTypeView {
                 @Override
                 public void keyTyped(KeyEvent e) {
                     if ("=(){}[]".indexOf(e.getKeyChar()) != -1 || Character.isDigit(e.getKeyChar()) && openTypeEnterTextField.getText().isEmpty()) {
-                    	// Characters =(){}[] are ignored and 1st character and digit cannot be typed on an empty search field
+                        // Characters =(){}[] are ignored and 1st character and digit cannot be typed on an empty search field
                         e.consume();
                     }
                 }
@@ -292,5 +292,5 @@ public class OpenTypeView {
 
     private static String getSimpleTypeName(String typeName) {
         return typeName.substring(typeName.lastIndexOf('/') + 1);
-	}
+    }
 }

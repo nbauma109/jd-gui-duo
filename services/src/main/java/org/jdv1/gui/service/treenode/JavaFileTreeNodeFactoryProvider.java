@@ -23,40 +23,40 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 public class JavaFileTreeNodeFactoryProvider extends AbstractTypeFileTreeNodeFactoryProvider {
 
-	protected static final ImageIcon JAVA_FILE_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/jcu_obj.png"));
-	protected static final Factory FACTORY = new Factory();
+    protected static final ImageIcon JAVA_FILE_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/jcu_obj.png"));
+    protected static final Factory FACTORY = new Factory();
 
-	@Override
-	public String[] getSelectors() {
-		return appendSelectors("*:file:*.java");
-	}
+    @Override
+    public String[] getSelectors() {
+        return appendSelectors("*:file:*.java");
+    }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
-		int lastSlashIndex = entry.getPath().lastIndexOf('/');
-		String label = entry.getPath().substring(lastSlashIndex + 1);
-		String location = new File(entry.getUri()).getPath();
-		return (T) new FileTreeNode(entry, new TreeNodeBean(label, "Location: " + location, JAVA_FILE_ICON), FACTORY);
-	}
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
+        int lastSlashIndex = entry.getPath().lastIndexOf('/');
+        String label = entry.getPath().substring(lastSlashIndex + 1);
+        String location = new File(entry.getUri()).getPath();
+        return (T) new FileTreeNode(entry, new TreeNodeBean(label, "Location: " + location, JAVA_FILE_ICON), FACTORY);
+    }
 
-	protected static class Factory implements AbstractTypeFileTreeNodeFactoryProvider.PageAndTipFactory {
-		// --- PageAndTipFactory --- //
-		@Override
-		@SuppressWarnings("unchecked")
-		public <T extends JComponent & UriGettable> T makePage(API a, Container.Entry e) {
-			return (T) new JavaFilePage(a, e);
-		}
+    protected static class Factory implements AbstractTypeFileTreeNodeFactoryProvider.PageAndTipFactory {
+        // --- PageAndTipFactory --- //
+        @Override
+        @SuppressWarnings("unchecked")
+        public <T extends JComponent & UriGettable> T makePage(API a, Container.Entry e) {
+            return (T) new JavaFilePage(a, e);
+        }
 
-		@Override
-		public String makeTip(API api, Container.Entry entry) {
-			String location = new File(entry.getUri()).getPath();
-			StringBuilder tip = new StringBuilder("<html>Location: ");
+        @Override
+        public String makeTip(API api, Container.Entry entry) {
+            String location = new File(entry.getUri()).getPath();
+            StringBuilder tip = new StringBuilder("<html>Location: ");
 
-			tip.append(location);
-			tip.append("</html>");
+            tip.append(location);
+            tip.append("</html>");
 
-			return tip.toString();
-		}
-	}
+            return tip.toString();
+        }
+    }
 }

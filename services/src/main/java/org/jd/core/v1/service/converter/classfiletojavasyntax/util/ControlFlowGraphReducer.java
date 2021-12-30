@@ -1313,7 +1313,7 @@ public abstract class ControlFlowGraphReducer {
             visited.set(basicBlock.getIndex());
 
             int basicBlockType = basicBlock.getType();
-			if (basicBlockType == TYPE_START
+            if (basicBlockType == TYPE_START
              || basicBlockType == TYPE_STATEMENTS
              || basicBlockType == TYPE_SWITCH_DECLARATION
              || basicBlockType == TYPE_TRY_DECLARATION
@@ -1324,27 +1324,27 @@ public abstract class ControlFlowGraphReducer {
              || basicBlockType == TYPE_TRY
              || basicBlockType == TYPE_TRY_JSR
              || basicBlockType == TYPE_TRY_ECLIPSE) {
-				return getLastConditionalBranch(visited, basicBlock.getNext());
-			}
-			if (basicBlockType == TYPE_IF
+                return getLastConditionalBranch(visited, basicBlock.getNext());
+            }
+            if (basicBlockType == TYPE_IF
              || basicBlockType == TYPE_CONDITIONAL_BRANCH
              || basicBlockType == TYPE_CONDITION
              || basicBlockType == TYPE_CONDITION_OR
              || basicBlockType == TYPE_CONDITION_AND) {
-				BasicBlock bb = getLastConditionalBranch(visited, basicBlock.getBranch());
+                BasicBlock bb = getLastConditionalBranch(visited, basicBlock.getBranch());
 
-				if (bb != null) {
-				    return bb;
-				}
+                if (bb != null) {
+                    return bb;
+                }
 
-				bb = getLastConditionalBranch(visited, basicBlock.getNext());
+                bb = getLastConditionalBranch(visited, basicBlock.getNext());
 
-				if (bb != null) {
-				    return bb;
-				}
+                if (bb != null) {
+                    return bb;
+                }
 
-				return basicBlock;
-			}
+                return basicBlock;
+            }
         }
 
         return null;

@@ -39,10 +39,10 @@ public class IStoreFactory implements InstructionFactory
         int index;
 
         if (code[offset] == Const.ISTORE) {
-			index = code[offset+1] & 255;
-		} else {
-			index = (code[offset] & 255) - Const.ISTORE_0;
-		}
+            index = code[offset+1] & 255;
+        } else {
+            index = (code[offset] & 255) - Const.ISTORE_0;
+        }
 
         final Instruction instruction = new IStore(
             Const.ISTORE, offset, lineNumber, index, stack.pop());

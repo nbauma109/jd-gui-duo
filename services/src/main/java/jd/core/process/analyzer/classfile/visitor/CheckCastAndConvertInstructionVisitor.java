@@ -84,8 +84,8 @@ public class CheckCastAndConvertInstructionVisitor
                 AssertInstruction ai = (AssertInstruction)instruction;
                 visit(constants, ai.getTest());
                 if (ai.getMsg() != null) {
-					visit(constants, ai.getMsg());
-				}
+                    visit(constants, ai.getMsg());
+                }
             }
             break;
         case Const.ATHROW:
@@ -197,18 +197,18 @@ public class CheckCastAndConvertInstructionVisitor
                                         arg, parameterSignature));
                                 }
                             } else if (SignatureUtil.isByteOrShortSignature(parameterSignature))
-							{
-							    // Ajout d'une instruction cast pour les
-							    // parametres numeriques de type byte ou short
-							    args.set(j, new ConvertInstruction(
-							        ByteCodeConstants.CONVERT,
-							        arg.getOffset()-1, arg.getLineNumber(),
-							        arg, parameterSignature));
-							}
-							else
-							{
-							    visit(constants, arg);
-							}
+                            {
+                                // Ajout d'une instruction cast pour les
+                                // parametres numeriques de type byte ou short
+                                args.set(j, new ConvertInstruction(
+                                    ByteCodeConstants.CONVERT,
+                                    arg.getOffset()-1, arg.getLineNumber(),
+                                    arg, parameterSignature));
+                            }
+                            else
+                            {
+                                visit(constants, arg);
+                            }
                         }
                         else
                         {
@@ -277,8 +277,8 @@ public class CheckCastAndConvertInstructionVisitor
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
                 visit(constants, iai.getNewArray());
                 if (iai.getValues() != null) {
-					visit(constants, iai.getValues());
-				}
+                    visit(constants, iai.getValues());
+                }
             }
             break;
         case Const.ACONST_NULL,

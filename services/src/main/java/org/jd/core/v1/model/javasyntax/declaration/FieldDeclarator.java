@@ -44,11 +44,11 @@ public class FieldDeclarator implements BaseFieldDeclarator {
     @Override
     public boolean equals(Object o) {
         if (this == o) {
-			return true;
-		}
+            return true;
+        }
         if (!(o instanceof FieldDeclarator that)) {
-			return false;
-		}
+            return false;
+        }
 
         return name.equals(that.name) && (variableInitializer != null ? variableInitializer.equals(that.variableInitializer) : that.variableInitializer == null);
     }

@@ -41,8 +41,8 @@ public class CheckCast extends IndexInstruction
             ConstantPool constants, LocalVariables localVariables)
     {
         if (constants == null) {
-			return null;
-		}
+            return null;
+        }
 
         Constant c = constants.get(this.getIndex());
 
@@ -53,8 +53,8 @@ public class CheckCast extends IndexInstruction
         ConstantClass cc = (ConstantClass)c;
         String signature = constants.getConstantUtf8(cc.getNameIndex());
         if (signature.charAt(0) != '[') {
-			signature = SignatureUtil.createTypeName(signature);
-		}
+            signature = SignatureUtil.createTypeName(signature);
+        }
         return signature;
     }
 
@@ -64,11 +64,11 @@ public class CheckCast extends IndexInstruction
         return 2;
     }
 
-	public Instruction getObjectref() {
-		return objectref;
-	}
+    public Instruction getObjectref() {
+        return objectref;
+    }
 
-	public void setObjectref(Instruction objectref) {
-		this.objectref = objectref;
-	}
+    public void setObjectref(Instruction objectref) {
+        this.objectref = objectref;
+    }
 }

@@ -106,25 +106,25 @@ public class DelegatingFilterContainer implements Container {
                     return -1;
                 }
             } else if (other.isDirectory()) {
-			    return 1;
-			}
+                return 1;
+            }
             return entry.getPath().compareTo(other.getPath());
         }
 
         @Override
         public boolean equals(Object obj) {
-        	if (this == obj) {
-        		return true;
-        	}
-        	if (obj == null || obj.getClass() != this.getClass()) {
-        		return false;
-        	}
-        	return obj instanceof DelegatedEntry de && compareTo(de) == 0;
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null || obj.getClass() != this.getClass()) {
+                return false;
+            }
+            return obj instanceof DelegatedEntry de && compareTo(de) == 0;
         }
 
         @Override
         public int hashCode() {
-        	return Objects.hash(entry.isDirectory(), entry.getPath());
+            return Objects.hash(entry.isDirectory(), entry.getPath());
         }
     }
 

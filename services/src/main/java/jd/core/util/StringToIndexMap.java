@@ -56,8 +56,8 @@ public class StringToIndexMap
          while (entry != null)
          {
              if (entry.hash == hashCode && key.equals(entry.key)) {
-				return entry.value;
-			}
+                return entry.value;
+            }
             entry = entry.next;
          }
 

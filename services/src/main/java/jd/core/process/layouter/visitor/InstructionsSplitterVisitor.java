@@ -79,11 +79,11 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
                 }
             }
             if (lastOffset == 0) {
-            	addInstructionsLayoutBlock(lastLineNumber, 1);
-            	layoutBlockList.add(new FragmentLayoutBlock(
+                addInstructionsLayoutBlock(lastLineNumber, 1);
+                layoutBlockList.add(new FragmentLayoutBlock(
                         LayoutBlockConstants.FRAGMENT_SEMICOLON));
             } else {
-            	addInstructionsLayoutBlock(lastLineNumber, lastOffset);
+                addInstructionsLayoutBlock(lastLineNumber, lastOffset);
             }
         }
     }

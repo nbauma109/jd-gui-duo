@@ -17,7 +17,7 @@ public interface Container {
     Entry getRoot();
 
     default URI getRootUri() {
-    	return getRoot().getUri();
+        return getRoot().getUri();
     }
     
     /**

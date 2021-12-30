@@ -32,8 +32,8 @@ public class New extends IndexInstruction
             ConstantPool constants, LocalVariables localVariables)
     {
         if (constants == null) {
-			return null;
-		}
+            return null;
+        }
 
         return SignatureUtil.createTypeName(
             constants.getConstantClassName(this.getIndex()));

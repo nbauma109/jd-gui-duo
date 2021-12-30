@@ -55,23 +55,23 @@ public class CaseLayoutBlock extends LayoutBlock
         this.lastIndex = lastIndex;
     }
 
-	public ClassFile getClassFile() {
-		return classFile;
-	}
+    public ClassFile getClassFile() {
+        return classFile;
+    }
 
-	public FastSwitch getFs() {
-		return fs;
-	}
+    public FastSwitch getFs() {
+        return fs;
+    }
 
-	public int getFirstIndex() {
-		return firstIndex;
-	}
+    public int getFirstIndex() {
+        return firstIndex;
+    }
 
-	public int getLastIndex() {
-		return lastIndex;
-	}
+    public int getLastIndex() {
+        return lastIndex;
+    }
 
-	public Method getMethod() {
-		return method;
-	}
+    public Method getMethod() {
+        return method;
+    }
 }

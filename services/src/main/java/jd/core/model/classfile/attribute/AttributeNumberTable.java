@@ -28,7 +28,7 @@ public class AttributeNumberTable extends Attribute
         this.lineNumberTable = lineNumberTable;
     }
 
-	public LineNumber[] getLineNumberTable() {
-		return lineNumberTable;
-	}
+    public LineNumber[] getLineNumberTable() {
+        return lineNumberTable;
+    }
 }

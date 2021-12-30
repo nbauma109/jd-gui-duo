@@ -38,11 +38,11 @@ public class FastInstruction extends Instruction
         return null;
     }
 
-	public Instruction getInstruction() {
-		return instruction;
-	}
+    public Instruction getInstruction() {
+        return instruction;
+    }
 
-	public void setInstruction(Instruction instruction) {
-		this.instruction = instruction;
-	}
+    public void setInstruction(Instruction instruction) {
+        this.instruction = instruction;
+    }
 }

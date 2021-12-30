@@ -21,52 +21,52 @@ import javax.swing.SwingUtilities;
  */
 public class SwingUtil {
 
-	private SwingUtil() {
-	}
+    private SwingUtil() {
+    }
 
-	public static void invokeLater(Runnable runnable) {
-		if (SwingUtilities.isEventDispatchThread()) {
-			runnable.run();
-		} else {
-			SwingUtilities.invokeLater(runnable);
-		}
-	}
+    public static void invokeLater(Runnable runnable) {
+        if (SwingUtilities.isEventDispatchThread()) {
+            runnable.run();
+        } else {
+            SwingUtilities.invokeLater(runnable);
+        }
+    }
 
-	public static Action newAction(String name, boolean enable, ActionListener listener) {
-		Action action = new AbstractAction(name) {
+    public static Action newAction(String name, boolean enable, ActionListener listener) {
+        Action action = new AbstractAction(name) {
 
-			private static final long serialVersionUID = 1L;
+            private static final long serialVersionUID = 1L;
 
-			@Override
-			public void actionPerformed(ActionEvent actionEvent) {
-				listener.actionPerformed(actionEvent);
-			}
-		};
-		action.setEnabled(enable);
-		return action;
-	}
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                listener.actionPerformed(actionEvent);
+            }
+        };
+        action.setEnabled(enable);
+        return action;
+    }
 
-	public static Action newAction(String name, ImageIcon icon, boolean enable, ActionListener listener) {
-		Action action = newAction(name, enable, listener);
-		action.putValue(Action.SMALL_ICON, icon);
-		return action;
-	}
+    public static Action newAction(String name, ImageIcon icon, boolean enable, ActionListener listener) {
+        Action action = newAction(name, enable, listener);
+        action.putValue(Action.SMALL_ICON, icon);
+        return action;
+    }
 
-	public static Action newAction(ImageIcon icon, boolean enable, ActionListener listener) {
-		Action action = newAction(null, icon, enable, listener);
-		action.putValue(Action.SMALL_ICON, icon);
-		return action;
-	}
+    public static Action newAction(ImageIcon icon, boolean enable, ActionListener listener) {
+        Action action = newAction(null, icon, enable, listener);
+        action.putValue(Action.SMALL_ICON, icon);
+        return action;
+    }
 
-	public static Action newAction(String name, ImageIcon icon, boolean enable, String shortDescription, ActionListener listener) {
-		Action action = newAction(name, icon, enable, listener);
-		action.putValue(Action.SHORT_DESCRIPTION, shortDescription);
-		return action;
-	}
+    public static Action newAction(String name, ImageIcon icon, boolean enable, String shortDescription, ActionListener listener) {
+        Action action = newAction(name, icon, enable, listener);
+        action.putValue(Action.SHORT_DESCRIPTION, shortDescription);
+        return action;
+    }
 
-	public static Action newAction(String name, boolean enable, String shortDescription, ActionListener listener) {
-		Action action = newAction(name, enable, listener);
-		action.putValue(Action.SHORT_DESCRIPTION, shortDescription);
-		return action;
-	}
+    public static Action newAction(String name, boolean enable, String shortDescription, ActionListener listener) {
+        Action action = newAction(name, enable, listener);
+        action.putValue(Action.SHORT_DESCRIPTION, shortDescription);
+        return action;
+    }
 }

@@ -54,12 +54,12 @@ public class DupStore extends Instruction
         return dupLoad2;
     }
 
-	public Instruction getObjectref() {
-		return objectref;
-	}
+    public Instruction getObjectref() {
+        return objectref;
+    }
 
-	public void setObjectref(Instruction objectref) {
-		this.objectref = objectref;
-	}
+    public void setObjectref(Instruction objectref) {
+        this.objectref = objectref;
+    }
 
 }

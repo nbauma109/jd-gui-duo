@@ -70,14 +70,14 @@ public class FormalParameter implements BaseFormalParameter {
         StringBuilder s = new StringBuilder("FormalParameter{");
 
         if (annotationReferences != null) {
-			s.append(annotationReferences).append(" ");
-		}
+            s.append(annotationReferences).append(" ");
+        }
 
         if (varargs) {
-			s.append(type.createType(type.getDimension()-1)).append("... ");
-		} else {
-			s.append(type).append(" ");
-		}
+            s.append(type.createType(type.getDimension()-1)).append("... ");
+        } else {
+            s.append(type).append(" ");
+        }
 
         return s.append(name).append("}").toString();
     }

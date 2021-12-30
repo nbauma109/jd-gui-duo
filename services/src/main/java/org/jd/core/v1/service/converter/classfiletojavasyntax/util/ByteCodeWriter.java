@@ -188,7 +188,7 @@ public class ByteCodeWriter {
 
     public static final String DECOMPILATION_FAILED_AT_LINE = "Decompilation failed at line #";
 
-	public static final String ILLEGAL_OPCODE = "<illegal opcode>";
+    public static final String ILLEGAL_OPCODE = "<illegal opcode>";
 
     private ByteCodeWriter() {
     }
@@ -482,7 +482,7 @@ public class ByteCodeWriter {
 
     public static List<Statement> getLineNumberTableAsStatements(Method method) {
 
-    	List<Statement> comments = new ArrayList<>();
+        List<Statement> comments = new ArrayList<>();
 
         AttributeCode attributeCode = method.getAttribute("Code");
 
@@ -490,24 +490,24 @@ public class ByteCodeWriter {
             return null;
         }
 
-    	TreeMap<Integer, List<Integer>> lineNumberToOffsets = new TreeMap<>();
+        TreeMap<Integer, List<Integer>> lineNumberToOffsets = new TreeMap<>();
 
-    	AttributeLineNumberTable lineNumberTable = attributeCode.getAttribute("LineNumberTable");
+        AttributeLineNumberTable lineNumberTable = attributeCode.getAttribute("LineNumberTable");
 
-    	if (lineNumberTable != null) {
+        if (lineNumberTable != null) {
 
-    		for (LineNumber lineNumber : lineNumberTable.lineNumberTable()) {
-    			lineNumberToOffsets.computeIfAbsent(lineNumber.getLineNumber(), k -> new ArrayList<>()).add(lineNumber.getStartPC());
-    		}
-    		for (Entry<Integer, List<Integer>> entry : lineNumberToOffsets.entrySet()) {
-    			int lineNumber = entry.getKey();
-				List<Integer> offsets = entry.getValue();
-				BooleanExpression condition = new BooleanExpression(entry.getKey(), false);
-				StringConstantExpression message = new StringConstantExpression(lineNumber, DECOMPILATION_FAILED_AT_LINE + lineNumber + " -> offsets " + offsets);
-				comments.add(new AssertStatement(condition, message));
-			}
-    	}
-		return comments;
+            for (LineNumber lineNumber : lineNumberTable.lineNumberTable()) {
+                lineNumberToOffsets.computeIfAbsent(lineNumber.getLineNumber(), k -> new ArrayList<>()).add(lineNumber.getStartPC());
+            }
+            for (Entry<Integer, List<Integer>> entry : lineNumberToOffsets.entrySet()) {
+                int lineNumber = entry.getKey();
+                List<Integer> offsets = entry.getValue();
+                BooleanExpression condition = new BooleanExpression(entry.getKey(), false);
+                StringConstantExpression message = new StringConstantExpression(lineNumber, DECOMPILATION_FAILED_AT_LINE + lineNumber + " -> offsets " + offsets);
+                comments.add(new AssertStatement(condition, message));
+            }
+        }
+        return comments;
     }
 
     protected static void writeLocalVariableTable(String linePrefix, StringBuilder sb, AttributeCode attributeCode) {

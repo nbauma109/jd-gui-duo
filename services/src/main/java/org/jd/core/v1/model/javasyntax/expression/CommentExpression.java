@@ -37,8 +37,8 @@ public record CommentExpression(String text) implements Expression {
         return "CommentExpression{" + text + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new CommentExpression(text);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new CommentExpression(text);
+    }
 }

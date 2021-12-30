@@ -92,36 +92,36 @@ public class InstructionPrinter implements Printer
                 }
             }
         } else if (this.previousLineNumber == UNKNOWN_LINE_NUMBER)
-		{
-		    this.previousLineNumber = lineNumber;
-		} else if (this.previousLineNumber < lineNumber)
-		{
-		    int lineCount = lineNumber - this.previousLineNumber;
+        {
+            this.previousLineNumber = lineNumber;
+        } else if (this.previousLineNumber < lineNumber)
+        {
+            int lineCount = lineNumber - this.previousLineNumber;
 
-		    this.printer.endOfLine();
+            this.printer.endOfLine();
 
-		    if (lineCount > 1)
-		    {
-		        this.printer.startOfLine(Printer.UNKNOWN_LINE_NUMBER);
-		        this.printer.endOfLine();
+            if (lineCount > 1)
+            {
+                this.printer.startOfLine(Printer.UNKNOWN_LINE_NUMBER);
+                this.printer.endOfLine();
 
-		        if (lineCount > 2)
-		        {
-		            this.printer.extraLine(lineCount-2);
-		        }
-		    }
+                if (lineCount > 2)
+                {
+                    this.printer.extraLine(lineCount-2);
+                }
+            }
 
-		    if (!this.newInstruction &&
-		        !this.multiLineInstruction)
-		    {
-		        this.printer.indent();
-		        this.multiLineInstruction = true;
-		    }
+            if (!this.newInstruction &&
+                !this.multiLineInstruction)
+            {
+                this.printer.indent();
+                this.multiLineInstruction = true;
+            }
 
-		    this.printer.startOfLine(lineNumber);
+            this.printer.startOfLine(lineNumber);
 
-		    this.previousLineNumber = lineNumber;
-		}
+            this.previousLineNumber = lineNumber;
+        }
 
         this.newInstruction = false;
     }

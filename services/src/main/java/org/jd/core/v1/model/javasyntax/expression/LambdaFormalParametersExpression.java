@@ -33,8 +33,8 @@ public class LambdaFormalParametersExpression extends AbstractLambdaExpression {
         return "LambdaFormalParametersExpression{" + formalParameters + " -> " + statements + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new LambdaFormalParametersExpression(lineNumber, type, formalParameters, statements);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new LambdaFormalParametersExpression(lineNumber, type, formalParameters, statements);
+    }
 }

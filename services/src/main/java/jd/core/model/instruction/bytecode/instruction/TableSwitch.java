@@ -28,7 +28,7 @@ public class TableSwitch extends Switch
         this.low = low;
     }
 
-	public int getLow() {
-		return low;
-	}
+    public int getLow() {
+        return low;
+    }
 }

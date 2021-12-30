@@ -78,8 +78,8 @@ public class DotClass118BReconstructor
         int i = list.size();
 
         if  (i < 5) {
-			return;
-		}
+            return;
+        }
 
         i -= 4;
         ConstantPool constants = classFile.getConstantPool();
@@ -89,100 +89,100 @@ public class DotClass118BReconstructor
             Instruction instruction = list.get(i);
 
             if (instruction.getOpcode() != ByteCodeConstants.DUPSTORE) {
-				continue;
-			}
+                continue;
+            }
 
             DupStore ds = (DupStore)instruction;
 
             if (ds.getObjectref().getOpcode() != Const.GETSTATIC) {
-				continue;
-			}
+                continue;
+            }
 
             GetStatic gs = (GetStatic)ds.getObjectref();
 
             ConstantFieldref cfr = constants.getConstantFieldref(gs.getIndex());
 
             if (cfr.getClassIndex() != classFile.getThisClassIndex()) {
-				continue;
-			}
+                continue;
+            }
 
             instruction = list.get(i+1);
 
             if (instruction.getOpcode() != ByteCodeConstants.IFXNULL) {
-				continue;
-			}
+                continue;
+            }
 
             IfInstruction ii = (IfInstruction)instruction;
 
             if (ii.getValue().getOpcode() != ByteCodeConstants.DUPLOAD ||
                 ds.getOffset() != ii.getValue().getOffset()) {
-				continue;
-			}
+                continue;
+            }
 
             instruction = list.get(i+2);
 
             if (instruction.getOpcode() != Const.POP) {
-				continue;
-			}
+                continue;
+            }
 
             Pop pop = (Pop)instruction;
 
             if (pop.getObjectref().getOpcode() != ByteCodeConstants.DUPLOAD ||
                 ds.getOffset() != pop.getObjectref().getOffset()) {
-				continue;
-			}
+                continue;
+            }
 
             instruction = list.get(i+3);
 
             if (instruction.getOpcode() != FastConstants.TRY) {
-				continue;
-			}
+                continue;
+            }
 
             FastTry ft = (FastTry)instruction;
 
             if (ft.getFinallyInstructions() != null ||
                 ft.getInstructions().size() != 1 ||
                 ft.getCatches().size() != 1) {
-				continue;
-			}
+                continue;
+            }
 
             List<Instruction> catchInstructions =
                 ft.getCatches().get(0).instructions();
 
             if (catchInstructions.size() != 1 ||
                 catchInstructions.get(0).getOpcode() != Const.ATHROW) {
-				continue;
-			}
+                continue;
+            }
 
             instruction = ft.getInstructions().get(0);
 
             if (instruction.getOpcode() != ByteCodeConstants.TERNARYOPSTORE) {
-				continue;
-			}
+                continue;
+            }
 
             TernaryOpStore tos = (TernaryOpStore)instruction;
 
             if (tos.getObjectref().getOpcode() != ByteCodeConstants.ASSIGNMENT) {
-				continue;
-			}
+                continue;
+            }
 
             AssignmentInstruction ai = (AssignmentInstruction)tos.getObjectref();
 
             if (ai.getValue2().getOpcode() != Const.INVOKESTATIC) {
-				continue;
-			}
+                continue;
+            }
 
             Invokestatic is = (Invokestatic)ai.getValue2();
 
             if (is.getArgs().size() != 1) {
-				continue;
-			}
+                continue;
+            }
 
             instruction = is.getArgs().get(0);
 
             if (instruction.getOpcode() != Const.LDC) {
-				continue;
-			}
+                continue;
+            }
 
             ConstantNameAndType cnatField = constants.getConstantNameAndType(
                 cfr.getNameAndTypeIndex());
@@ -191,14 +191,14 @@ public class DotClass118BReconstructor
                 constants.getConstantUtf8(cnatField.getSignatureIndex());
 
             if (! StringConstants.INTERNAL_CLASS_SIGNATURE.equals(signature)) {
-				continue;
-			}
+                continue;
+            }
 
             String nameField = constants.getConstantUtf8(cnatField.getNameIndex());
 
             if (! nameField.startsWith(StringConstants.CLASS_DOLLAR)) {
-				continue;
-			}
+                continue;
+            }
 
             ConstantMethodref cmr = constants.getConstantMethodref(is.getIndex());
 
@@ -206,8 +206,8 @@ public class DotClass118BReconstructor
                 constants.getConstantClassName(cmr.getClassIndex());
 
             if (! StringConstants.JAVA_LANG_CLASS.equals(className)) {
-				continue;
-			}
+                continue;
+            }
 
             ConstantNameAndType cnatMethod =
                 constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
@@ -215,15 +215,15 @@ public class DotClass118BReconstructor
                 constants.getConstantUtf8(cnatMethod.getNameIndex());
 
             if (! StringConstants.FORNAME_METHOD_NAME.equals(nameMethod)) {
-				continue;
-			}
+                continue;
+            }
 
             Ldc ldc = (Ldc)instruction;
             Constant cv = constants.getConstantValue(ldc.getIndex());
 
             if (!(cv instanceof ConstantString cs)) {
-				continue;
-			}
+                continue;
+            }
 
             String dotClassName = constants.getConstantUtf8(cs.getStringIndex());
             String internalName = dotClassName.replace(

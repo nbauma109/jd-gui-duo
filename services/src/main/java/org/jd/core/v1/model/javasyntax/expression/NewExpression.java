@@ -82,8 +82,8 @@ public class NewExpression extends AbstractLineNumberExpression {
         return "NewExpression{new " + type + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new NewExpression(lineNumber, type, descriptor, bodyDeclaration);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new NewExpression(lineNumber, type, descriptor, bodyDeclaration);
+    }
 }

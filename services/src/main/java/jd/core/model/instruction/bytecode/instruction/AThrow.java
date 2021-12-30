@@ -37,11 +37,11 @@ public class AThrow extends Instruction
         return this.getValue().getReturnedSignature(constants, localVariables);
     }
 
-	public Instruction getValue() {
-		return value;
-	}
+    public Instruction getValue() {
+        return value;
+    }
 
-	public void setValue(Instruction value) {
-		this.value = value;
-	}
+    public void setValue(Instruction value) {
+        this.value = value;
+    }
 }

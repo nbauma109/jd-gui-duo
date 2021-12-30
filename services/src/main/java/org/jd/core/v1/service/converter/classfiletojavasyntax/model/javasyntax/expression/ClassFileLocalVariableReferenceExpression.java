@@ -55,6 +55,6 @@ public class ClassFileLocalVariableReferenceExpression extends LocalVariableRefe
 
     @Override
     public Expression copyTo(int lineNumber) {
-    	return new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable);
+        return new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable);
     }
 }

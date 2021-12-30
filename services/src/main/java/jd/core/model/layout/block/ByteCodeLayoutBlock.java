@@ -35,11 +35,11 @@ public class ByteCodeLayoutBlock extends LayoutBlock
         this.method = method;
     }
 
-	public ClassFile getClassFile() {
-		return classFile;
-	}
+    public ClassFile getClassFile() {
+        return classFile;
+    }
 
-	public Method getMethod() {
-		return method;
-	}
+    public Method getMethod() {
+        return method;
+    }
 }

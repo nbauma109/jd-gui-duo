@@ -40,7 +40,7 @@ public class AALoadFactory implements InstructionFactory
         final Instruction index = stack.pop();
         final Instruction arrayref = stack.pop();
         final Instruction instruction = new AALoad(
-        		ByteCodeConstants.ARRAYLOAD, offset, lineNumber, arrayref, index);
+                ByteCodeConstants.ARRAYLOAD, offset, lineNumber, arrayref, index);
 
         stack.push(instruction);
         listForAnalyze.add(instruction);

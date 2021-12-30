@@ -44,11 +44,11 @@ public class AnnotationsLayoutBlock extends LayoutBlock
         this.annotations = annotations;
     }
 
-	public List<Annotation> getAnnotations() {
-		return annotations;
-	}
+    public List<Annotation> getAnnotations() {
+        return annotations;
+    }
 
-	public ClassFile getClassFile() {
-		return classFile;
-	}
+    public ClassFile getClassFile() {
+        return classFile;
+    }
 }

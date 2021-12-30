@@ -43,14 +43,14 @@ public class SimpleNewInstructionReconstructor
              invokespecialIndex++)
         {
             if (list.get(invokespecialIndex).getOpcode() != Const.INVOKESPECIAL) {
-				continue;
-			}
+                continue;
+            }
 
             Invokespecial is = (Invokespecial)list.get(invokespecialIndex);
 
             if (is.getObjectref().getOpcode() != Const.NEW) {
-				continue;
-			}
+                continue;
+            }
 
             New nw = (New)is.getObjectref();
             InvokeNew invokeNew = new InvokeNew(

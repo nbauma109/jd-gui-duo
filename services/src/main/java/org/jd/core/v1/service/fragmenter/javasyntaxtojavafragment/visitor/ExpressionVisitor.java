@@ -90,10 +90,10 @@ import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_CHAR;
 
 public class ExpressionVisitor extends TypeVisitor {
 
-	/*
-	 * Binary operators in order for binary search
-	 */
-	private static final String[] BIN_OPS = {"&", "&=", "^", "^=", "|", "|="};
+    /*
+     * Binary operators in order for binary search
+     */
+    private static final String[] BIN_OPS = {"&", "&=", "^", "^=", "|", "|="};
 
     public static final KeywordToken CLASS = new KeywordToken("class");
     public static final KeywordToken FALSE = new KeywordToken("false");
@@ -145,7 +145,7 @@ public class ExpressionVisitor extends TypeVisitor {
             tokens.add(newTextToken(expression.getOperator()));
             tokens.add(TextToken.SPACE);
             visit(expression, expression.getRightExpression());
-		}
+        }
     }
 
     @Override
@@ -423,28 +423,28 @@ public class ExpressionVisitor extends TypeVisitor {
         boolean dot = false;
 
         if (!exp.isThisExpression()) {
-			if (exp.isObjectTypeReferenceExpression()) {
-			    ObjectType ot = exp.getObjectType();
+            if (exp.isObjectTypeReferenceExpression()) {
+                ObjectType ot = exp.getObjectType();
 
-			    if (! ot.getInternalName().equals(currentInternalTypeName)) {
-			        visit(expression, exp);
-			        tokens.addLineNumberToken(expression);
-			        tokens.add(TextToken.DOT);
-			        dot = true;
-			    }
-			} else {
-			    if (exp.isFieldReferenceExpression() || exp.isLocalVariableReferenceExpression()) {
-			        tokens.addLineNumberToken(expression);
-			        visit(expression, exp);
-			    } else {
-			        visit(expression, exp);
-			        tokens.addLineNumberToken(expression);
-			    }
+                if (! ot.getInternalName().equals(currentInternalTypeName)) {
+                    visit(expression, exp);
+                    tokens.addLineNumberToken(expression);
+                    tokens.add(TextToken.DOT);
+                    dot = true;
+                }
+            } else {
+                if (exp.isFieldReferenceExpression() || exp.isLocalVariableReferenceExpression()) {
+                    tokens.addLineNumberToken(expression);
+                    visit(expression, exp);
+                } else {
+                    visit(expression, exp);
+                    tokens.addLineNumberToken(expression);
+                }
 
-			    tokens.add(TextToken.DOT);
-			    dot = true;
-			}
-		}
+                tokens.add(TextToken.DOT);
+                dot = true;
+            }
+        }
 
         tokens.addLineNumberToken(expression);
 
@@ -764,10 +764,10 @@ public class ExpressionVisitor extends TypeVisitor {
             PrimitiveType pt = (PrimitiveType)expression.getType();
 
             if (pt.getJavaPrimitiveFlags() == FLAG_BOOLEAN) {
-				tokens.add(new BooleanConstantToken(expression.getIntegerValue() == 1));
-			} else {
-				tokens.add(new NumericConstantToken("0x" + Integer.toHexString(expression.getIntegerValue()).toUpperCase()));
-			}
+                tokens.add(new BooleanConstantToken(expression.getIntegerValue() == 1));
+            } else {
+                tokens.add(new NumericConstantToken("0x" + Integer.toHexString(expression.getIntegerValue()).toUpperCase()));
+            }
         }
 
         @Override

@@ -366,28 +366,28 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
             }
         }
 
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = super.hashCode();
-			result = prime * result + getEnclosingInstance().hashCode();
-			return prime * result + currentLineNumber;
-		}
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = super.hashCode();
+            result = prime * result + getEnclosingInstance().hashCode();
+            return prime * result + currentLineNumber;
+        }
 
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (!super.equals(obj) || getClass() != obj.getClass()) {
-				return false;
-			}
-			Tokens other = (Tokens) obj;
-			return getEnclosingInstance().equals(other.getEnclosingInstance()) && currentLineNumber == other.currentLineNumber;
-		}
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!super.equals(obj) || getClass() != obj.getClass()) {
+                return false;
+            }
+            Tokens other = (Tokens) obj;
+            return getEnclosingInstance().equals(other.getEnclosingInstance()) && currentLineNumber == other.currentLineNumber;
+        }
 
-		private TypeVisitor getEnclosingInstance() {
-			return TypeVisitor.this;
-		}
+        private TypeVisitor getEnclosingInstance() {
+            return TypeVisitor.this;
+        }
     }
 }

@@ -47,7 +47,7 @@ public class ArrayLoadInstructionFactory implements InstructionFactory
         final Instruction index = stack.pop();
         final Instruction arrayref = stack.pop();
         final Instruction instruction = new ArrayLoadInstruction(
-        		ByteCodeConstants.ARRAYLOAD, offset, lineNumber, arrayref,
+                ByteCodeConstants.ARRAYLOAD, offset, lineNumber, arrayref,
                 index, this.signature);
 
         stack.push(instruction);

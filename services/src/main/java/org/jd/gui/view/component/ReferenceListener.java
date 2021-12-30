@@ -154,7 +154,7 @@ public class ReferenceListener extends AbstractJavaListener {
     @Override
     public boolean visit(VariableDeclarationStatement node) {
         @SuppressWarnings("unchecked")
-		List<VariableDeclarationFragment> fragments = node.fragments();
+        List<VariableDeclarationFragment> fragments = node.fragments();
         int dimensionOnVariable;
         String descriptor;
         String name;
@@ -185,7 +185,7 @@ public class ReferenceListener extends AbstractJavaListener {
         int position = node.getStartPosition();
         // Constructor call -> Add a link to the constructor declaration
         @SuppressWarnings("unchecked")
-		List<Expression> expressionList = node.arguments();
+        List<Expression> expressionList = node.arguments();
         String descriptor = expressionList != null ? getParametersDescriptor(expressionList.size()).append('V').toString()
                 : "()V";
 
@@ -237,7 +237,7 @@ public class ReferenceListener extends AbstractJavaListener {
     @Override
     public boolean visit(ConstructorInvocation node) {
         @SuppressWarnings("unchecked")
-		List<Expression> args = node.arguments();
+        List<Expression> args = node.arguments();
         String methodDescriptor = args != null ? getParametersDescriptor(args.size()).append('?').toString() : "()?";
         ReferenceData refData = newReferenceData(currentInternalTypeName, StringConstants.INSTANCE_CONSTRUCTOR, methodDescriptor);
         int position = node.getStartPosition();
@@ -248,7 +248,7 @@ public class ReferenceListener extends AbstractJavaListener {
     @Override
     public boolean visit(SuperConstructorInvocation node) {
         @SuppressWarnings("unchecked")
-		List<Expression> args = node.arguments();
+        List<Expression> args = node.arguments();
         String methodDescriptor = args != null ? getParametersDescriptor(args.size()).append('?').toString() : "()?";
         DeclarationData data = getDeclarations().get(currentInternalTypeName);
 

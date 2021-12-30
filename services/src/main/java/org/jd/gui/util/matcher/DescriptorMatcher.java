@@ -42,8 +42,8 @@ public class DescriptorMatcher {
         CharBuffer cb2 = new CharBuffer(d2);
 
         if (cb1.read() != '(' || cb2.read() != '(') {
-			return false;
-		}
+            return false;
+        }
 
         if (cb1.read() == '*') {
             return true;
@@ -58,13 +58,13 @@ public class DescriptorMatcher {
         // Check parameter descriptors
         while (cb2.get() != ')') {
             if (!matchDescriptors(cb1, cb2)) {
-				return false;
-			}
+                return false;
+            }
         }
 
         if (cb1.read() != ')' || cb2.read() != ')') {
-			return false;
-		}
+            return false;
+        }
 
         // Check return descriptor
         return matchDescriptors(cb1, cb2);
@@ -83,8 +83,8 @@ public class DescriptorMatcher {
 
         public char read() {
             if (offset < length) {
-				return buffer[offset++];
-			}
+                return buffer[offset++];
+            }
             return (char)0;
         }
 
@@ -98,8 +98,8 @@ public class DescriptorMatcher {
 
         public char get() {
             if (offset < length) {
-				return buffer[offset];
-			}
+                return buffer[offset];
+            }
             return (char)0;
         }
 
@@ -114,8 +114,8 @@ public class DescriptorMatcher {
                 if (c == 'L') {
                     while (offset < length) {
                         if (buffer[offset++] == ';') {
-							return true;
-						}
+                            return true;
+                        }
                     }
                 } else if (c != '[') {
                     return true;
@@ -126,19 +126,19 @@ public class DescriptorMatcher {
 
         public boolean compareTypeWith(CharBuffer other) {
             if (offset >= length) {
-				return false;
-			}
+                return false;
+            }
 
             char c = buffer[offset++];
 
             if (c != other.read()) {
-				return false;
-			}
+                return false;
+            }
 
             if (c == 'L') {
                 if (offset >= length || other.offset >= other.length) {
-					return false;
-				}
+                    return false;
+                }
 
                 char[] otherBuffer = other.buffer;
 
@@ -147,40 +147,40 @@ public class DescriptorMatcher {
                     while (offset < length) {
                         c = buffer[offset++];
                         if (c != other.read()) {
-							return false;
-						}
+                            return false;
+                        }
                         if (c == ';') {
-							return true;
-						}
+                            return true;
+                        }
                     }
                     return false;
                 }
-				int start = offset;
-				int otherStart = other.offset;
+                int start = offset;
+                int otherStart = other.offset;
 
-				// Search ';'
-				if (!searchEndOfType() || !other.searchEndOfType()) {
-					return false;
-				}
+                // Search ';'
+                if (!searchEndOfType() || !other.searchEndOfType()) {
+                    return false;
+                }
 
-				int current = offset - 1;
-				int otherCurrent = other.offset - 1;
+                int current = offset - 1;
+                int otherCurrent = other.offset - 1;
 
-				// Backward comparison
-				while (start < current && otherStart < otherCurrent) {
-				    c = buffer[--current];
-				    if (c == '*') {
-						return true;
-					}
+                // Backward comparison
+                while (start < current && otherStart < otherCurrent) {
+                    c = buffer[--current];
+                    if (c == '*') {
+                        return true;
+                    }
 
-				    char otherC = otherBuffer[--otherCurrent];
-				    if (otherC == '*') {
-						return true;
-					}
-				    if (c != otherC) {
-						return false;
-					}
-				}
+                    char otherC = otherBuffer[--otherCurrent];
+                    if (otherC == '*') {
+                        return true;
+                    }
+                    if (c != otherC) {
+                        return false;
+                    }
+                }
             }
 
             return true;
@@ -189,8 +189,8 @@ public class DescriptorMatcher {
         protected boolean searchEndOfType() {
             while (offset < length) {
                 if (buffer[offset++] == ';') {
-					return true;
-				}
+                    return true;
+                }
             }
             return false;
         }

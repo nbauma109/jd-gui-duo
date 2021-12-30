@@ -45,8 +45,8 @@ public class RemoveDupConstantsAttributes
         for (int dupStoreIndex=0; dupStoreIndex<list.size(); dupStoreIndex++)
         {
             if (list.get(dupStoreIndex).getOpcode() != ByteCodeConstants.DUPSTORE) {
-				continue;
-			}
+                continue;
+            }
 
             // DupStore trouvé
             DupStore dupstore = (DupStore)list.get(dupStoreIndex);
@@ -59,8 +59,8 @@ public class RemoveDupConstantsAttributes
                 opcode != Const.SIPUSH /*&&
                 (opcode != Const.ALOAD) &&
                 (opcode != Const.ILOAD)*/) {
-				continue;
-			}
+                continue;
+            }
 
             Instruction i = dupstore.getObjectref();
             int dupLoadIndex = dupStoreIndex+1;
@@ -73,8 +73,8 @@ public class RemoveDupConstantsAttributes
             {
                 visitor.visit(list.get(dupLoadIndex));
                 if (visitor.getParentFound() != null) {
-					break;
-				}
+                    break;
+                }
                 dupLoadIndex++;
             }
 
@@ -85,8 +85,8 @@ public class RemoveDupConstantsAttributes
             {
                 visitor.visit(list.get(dupLoadIndex));
                 if (visitor.getParentFound() != null) {
-					break;
-				}
+                    break;
+                }
                 dupLoadIndex++;
             }
 

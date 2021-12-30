@@ -32,6 +32,6 @@ public class InvokeDynamicFactory implements InstructionFactory
             Deque<Instruction> stack, byte[] code, int offset,
             int lineNumber, boolean[] jumps)
     {
-    	throw new UnsupportedOperationException("Invoke dynamic not supported");
+        throw new UnsupportedOperationException("Invoke dynamic not supported");
     }
 }

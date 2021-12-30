@@ -37,8 +37,8 @@ public class AAStore extends ArrayStoreInstruction
 
         if (signature == null || signature.isEmpty() ||
             signature.charAt(0) != '[') {
-			return null;
-		}
+            return null;
+        }
 
         return signature.substring(1);
     }

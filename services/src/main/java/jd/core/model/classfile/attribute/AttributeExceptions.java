@@ -27,7 +27,7 @@ public class AttributeExceptions extends Attribute
         this.exceptionIndexTable = exceptionIndexTable;
     }
 
-	public int[] getExceptionIndexTable() {
-		return exceptionIndexTable;
-	}
+    public int[] getExceptionIndexTable() {
+        return exceptionIndexTable;
+    }
 }

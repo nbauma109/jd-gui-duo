@@ -42,15 +42,15 @@ public class InitArrayInstruction extends Instruction
         return this.getNewArray().getReturnedSignature(constants, localVariables);
     }
 
-	public List<Instruction> getValues() {
-		return values;
-	}
+    public List<Instruction> getValues() {
+        return values;
+    }
 
-	public Instruction getNewArray() {
-		return newArray;
-	}
+    public Instruction getNewArray() {
+        return newArray;
+    }
 
-	public void setNewArray(Instruction newArray) {
-		this.newArray = newArray;
-	}
+    public void setNewArray(Instruction newArray) {
+        this.newArray = newArray;
+    }
 }

@@ -24,33 +24,33 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 public class ManifestFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvider {
 
-	protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/manifest_obj.png"));
+    protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/manifest_obj.png"));
 
-	@Override
-	public String[] getSelectors() {
-		return appendSelectors("*:file:META-INF/MANIFEST.MF");
-	}
+    @Override
+    public String[] getSelectors() {
+        return appendSelectors("*:file:META-INF/MANIFEST.MF");
+    }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
-		String location = new File(entry.getUri()).getPath();
-		return (T) new TreeNode(entry, new TreeNodeBean("MANIFEST.MF", "Location: " + location, ICON));
-	}
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
+        String location = new File(entry.getUri()).getPath();
+        return (T) new TreeNode(entry, new TreeNodeBean("MANIFEST.MF", "Location: " + location, ICON));
+    }
 
-	protected static class TreeNode extends FileTreeNodeFactoryProvider.TreeNode implements PageCreator {
+    protected static class TreeNode extends FileTreeNodeFactoryProvider.TreeNode implements PageCreator {
 
-		private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-		public TreeNode(Container.Entry entry, Object userObject) {
-			super(entry, userObject);
-		}
+        public TreeNode(Container.Entry entry, Object userObject) {
+            super(entry, userObject);
+        }
 
-		// --- PageCreator --- //
-		@Override
-		@SuppressWarnings("unchecked")
-		public <T extends JComponent & UriGettable> T createPage(API api) {
-			return (T) new ManifestFilePage(api, entry);
-		}
-	}
+        // --- PageCreator --- //
+        @Override
+        @SuppressWarnings("unchecked")
+        public <T extends JComponent & UriGettable> T createPage(API api) {
+            return (T) new ManifestFilePage(api, entry);
+        }
+    }
 }

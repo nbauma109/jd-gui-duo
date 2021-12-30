@@ -34,13 +34,13 @@ public class DupLoad extends Instruction
             ConstantPool constants, LocalVariables localVariables)
     {
         if (getDupStore() == null) {
-			throw new IllegalStateException("DupLoad without DupStore");
-		}
+            throw new IllegalStateException("DupLoad without DupStore");
+        }
 
         return getDupStore().getReturnedSignature(constants, localVariables);
     }
 
-	public DupStore getDupStore() {
-		return dupStore;
-	}
+    public DupStore getDupStore() {
+        return dupStore;
+    }
 }

@@ -31,7 +31,7 @@ public class OffsetLayoutBlock extends LayoutBlock
         this.offset = offset;
     }
 
-	public int getOffset() {
-		return offset;
-	}
+    public int getOffset() {
+        return offset;
+    }
 }

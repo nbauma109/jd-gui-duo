@@ -521,7 +521,7 @@ public class TokenizeJavaFragmentVisitor implements JavaFragmentVisitor {
     }
 
     protected class KnownLineNumberTokenVisitor extends AbstractNopTokenVisitor {
-    	private int currentLineNumber;
+        private int currentLineNumber;
 
         public void reset(int firstLineNumber) {
             this.currentLineNumber = firstLineNumber;

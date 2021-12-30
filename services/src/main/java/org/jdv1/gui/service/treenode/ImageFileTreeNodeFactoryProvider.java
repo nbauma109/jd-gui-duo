@@ -32,64 +32,64 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 public class ImageFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvider {
 
-	protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/file-image.gif"));
+    protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/file-image.gif"));
 
-	@Override
-	public String[] getSelectors() {
-		return appendSelectors("*:file:*.gif", "*:file:*.jpg", "*:file:*.png");
-	}
+    @Override
+    public String[] getSelectors() {
+        return appendSelectors("*:file:*.gif", "*:file:*.jpg", "*:file:*.png");
+    }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
-		int lastSlashIndex = entry.getPath().lastIndexOf("/");
-		String label = entry.getPath().substring(lastSlashIndex + 1);
-		String location = new File(entry.getUri()).getPath();
-		return (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
-	}
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
+        int lastSlashIndex = entry.getPath().lastIndexOf("/");
+        String label = entry.getPath().substring(lastSlashIndex + 1);
+        String location = new File(entry.getUri()).getPath();
+        return (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
+    }
 
-	protected static class TreeNode extends FileTreeNodeFactoryProvider.TreeNode implements PageCreator {
+    protected static class TreeNode extends FileTreeNodeFactoryProvider.TreeNode implements PageCreator {
 
-		private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-		public TreeNode(Container.Entry entry, Object userObject) {
-			super(entry, userObject);
-		}
+        public TreeNode(Container.Entry entry, Object userObject) {
+            super(entry, userObject);
+        }
 
-		// --- PageCreator --- //
-		@Override
-		@SuppressWarnings("unchecked")
-		public <T extends JComponent & UriGettable> T createPage(API api) {
-			return (T) new ImagePage(entry);
-		}
-	}
+        // --- PageCreator --- //
+        @Override
+        @SuppressWarnings("unchecked")
+        public <T extends JComponent & UriGettable> T createPage(API api) {
+            return (T) new ImagePage(entry);
+        }
+    }
 
-	protected static class ImagePage extends JPanel implements UriGettable {
+    protected static class ImagePage extends JPanel implements UriGettable {
 
-		private static final long serialVersionUID = 1L;
-		private transient Container.Entry entry;
+        private static final long serialVersionUID = 1L;
+        private transient Container.Entry entry;
 
-		public ImagePage(Container.Entry entry) {
-			super(new BorderLayout());
+        public ImagePage(Container.Entry entry) {
+            super(new BorderLayout());
 
-			this.entry = entry;
+            this.entry = entry;
 
-			try (InputStream is = entry.getInputStream()) {
-				JScrollPane scrollPane = new JScrollPane(new JLabel(new ImageIcon(ImageIO.read(is))));
+            try (InputStream is = entry.getInputStream()) {
+                JScrollPane scrollPane = new JScrollPane(new JLabel(new ImageIcon(ImageIO.read(is))));
 
-				scrollPane.getHorizontalScrollBar().setUnitIncrement(16);
-				scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+                scrollPane.getHorizontalScrollBar().setUnitIncrement(16);
+                scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
-				add(scrollPane, BorderLayout.CENTER);
-			} catch (IOException e) {
-				assert ExceptionUtil.printStackTrace(e);
-			}
-		}
+                add(scrollPane, BorderLayout.CENTER);
+            } catch (IOException e) {
+                assert ExceptionUtil.printStackTrace(e);
+            }
+        }
 
-		// --- UriGettable --- //
-		@Override
-		public URI getUri() {
-			return entry.getUri();
-		}
-	}
+        // --- UriGettable --- //
+        @Override
+        public URI getUri() {
+            return entry.getUri();
+        }
+    }
 }

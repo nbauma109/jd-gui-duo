@@ -56,8 +56,8 @@ public class PreOperatorExpression extends AbstractLineNumberExpression {
         return "PreOperatorExpression{" + operator + " " + expression + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new PreOperatorExpression(lineNumber, operator, expression);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new PreOperatorExpression(lineNumber, operator, expression);
+    }
 }

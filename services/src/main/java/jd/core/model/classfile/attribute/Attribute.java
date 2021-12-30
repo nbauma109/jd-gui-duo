@@ -25,7 +25,7 @@ public abstract class Attribute
         this.tag = tag;
     }
 
-	public byte getTag() {
-		return tag;
-	}
+    public byte getTag() {
+        return tag;
+    }
 }

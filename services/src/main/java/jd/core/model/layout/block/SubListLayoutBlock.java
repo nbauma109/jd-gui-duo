@@ -32,7 +32,7 @@ public class SubListLayoutBlock extends LayoutBlock
         this.subList = subList;
     }
 
-	public List<LayoutBlock> getSubList() {
-		return subList;
-	}
+    public List<LayoutBlock> getSubList() {
+        return subList;
+    }
 }

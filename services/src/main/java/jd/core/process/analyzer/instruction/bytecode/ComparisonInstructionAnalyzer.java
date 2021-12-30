@@ -115,8 +115,8 @@ public class ComparisonInstructionAnalyzer
 
             branchInstructions.add(lastBi);
             while (index > firstIndex) {
-				branchInstructions.add(list.remove(--index));
-			}
+                branchInstructions.add(list.remove(--index));
+            }
 
             Collections.reverse(branchInstructions);
             list.set(index, createIfInstructions(
@@ -144,8 +144,8 @@ public class ComparisonInstructionAnalyzer
             {
                 int jumpOffset = ((BranchInstruction)i).getJumpOffset();
                 if (newFirstOffset < jumpOffset && jumpOffset <= lastOffset) {
-					newFirstOffset = jumpOffset;
-				}
+                    newFirstOffset = jumpOffset;
+                }
             }
         }
 
@@ -159,8 +159,8 @@ public class ComparisonInstructionAnalyzer
             {
                 int jumpOffset = ((BranchInstruction)i).getJumpOffset();
                 if (newFirstOffset < jumpOffset && jumpOffset <= lastOffset) {
-					newFirstOffset = jumpOffset;
-				}
+                    newFirstOffset = jumpOffset;
+                }
             }
         }
 
@@ -262,31 +262,31 @@ public class ComparisonInstructionAnalyzer
                 if (jumpOffset != lastBiJumpOffset &&
                     (jumpOffset <= nextInstruction.getOffset() ||
                      jumpOffset > afterOffest))
-				 {
-					break; // Non
-				}
+                 {
+                    break; // Non
+                }
 
                 // Recherche de l'offset de l'instruction avant le 'goto'
                 if (index <= 0)
                 {
-					break; // Non
+                    break; // Non
                 }
                 Instruction lastInstructionValue1 = list.get(index-1);
                 opcode = lastInstructionValue1.getOpcode();
 
                 if (!ByteCodeUtil.isIfInstruction(opcode, false))
-				{
-					break; // Non
-				}
+                {
+                    break; // Non
+                }
 
                 int jumpOffsetValue1 =
                     ((BranchInstruction)lastInstructionValue1).getJumpOffset();
 
                 if (g.getOffset() < jumpOffsetValue1 &&
                     jumpOffsetValue1 <= lastBi.getOffset())
-				{
-					break; // Non
-				}
+                {
+                    break; // Non
+                }
 
                 // offset de l'instruction avant le saut du goto
                 Instruction lastInstructionValue2 = list.get(lastIndex);
@@ -304,9 +304,9 @@ public class ComparisonInstructionAnalyzer
                 opcode = lastInstructionValue2.getOpcode();
 
                 if (!ByteCodeUtil.isIfInstruction(opcode, false))
-				 {
-					break; // Non
-				}
+                 {
+                    break; // Non
+                }
 
                 int jumpOffsetValue2 =
                     ((BranchInstruction)lastInstructionValue2).getJumpOffset();
@@ -316,8 +316,8 @@ public class ComparisonInstructionAnalyzer
                     // Oui ! séquence dans le bon sens
                     int nextOffset = nextInstruction.getOffset();
                     for (int j=g.getOffset()+1; j<nextOffset; j++) {
-						offsetToPreviousGotoFlag[j] = true;
-					}
+                        offsetToPreviousGotoFlag[j] = true;
+                    }
                 }
                 else if (jumpOffset == jumpOffsetValue2)
                 {
@@ -325,8 +325,8 @@ public class ComparisonInstructionAnalyzer
                     // sous-test sont inversés => il FAUT inverser le 1er test
                     int nextOffset = nextInstruction.getOffset();
                     for (int j=g.getOffset()+1; j<nextOffset; j++) {
-						offsetToPreviousGotoFlag[j] = true;
-					}
+                        offsetToPreviousGotoFlag[j] = true;
+                    }
 
                     inversedTernaryOpLogic[g.getOffset()] = true;
                 }
@@ -376,8 +376,8 @@ public class ComparisonInstructionAnalyzer
             BranchInstruction lastBi)
     {
         if (branchInstructions.size() <= 1) {
-			return;
-		}
+            return;
+        }
 
         // Recherche des instructions 'if' sautant vers des instructions 'goto'
         // en commencant par la derniere instruction
@@ -398,168 +398,168 @@ public class ComparisonInstructionAnalyzer
                     lastBi.getOffset() >= lastTernaryOpTestBiJumpOffset &&
                     offsetToPreviousGotoFlag[lastTernaryOpTestBiJumpOffset])
                 {
-	                // Extraction de la sous liste d'instructions constituant
-	                // le test de l'operateur ternaire
-	                List<Instruction> ternaryOpTestInstructions =
-	                    new ArrayList<>();
-	                ternaryOpTestInstructions.add(lastTernaryOpTestBi);
+                    // Extraction de la sous liste d'instructions constituant
+                    // le test de l'operateur ternaire
+                    List<Instruction> ternaryOpTestInstructions =
+                        new ArrayList<>();
+                    ternaryOpTestInstructions.add(lastTernaryOpTestBi);
 
-	                while (index > 0)
-	                {
-	                    Instruction ternaryOpTestInstruction =
-	                        branchInstructions.get(--index);
+                    while (index > 0)
+                    {
+                        Instruction ternaryOpTestInstruction =
+                            branchInstructions.get(--index);
 
-	                    int opcode = ternaryOpTestInstruction.getOpcode();
+                        int opcode = ternaryOpTestInstruction.getOpcode();
 
-	                    if (!ByteCodeUtil.isIfOrGotoInstruction(opcode, false))
-	                    {
-	                        index++;
-	                        break;
-	                    }
+                        if (!ByteCodeUtil.isIfOrGotoInstruction(opcode, false))
+                        {
+                            index++;
+                            break;
+                        }
 
-	                    BranchInstruction bi =
-	                        (BranchInstruction)ternaryOpTestInstruction;
-	                    int branchOffset = bi.getBranch();
-	                    int jumpOffset = bi.getOffset() + branchOffset;
+                        BranchInstruction bi =
+                            (BranchInstruction)ternaryOpTestInstruction;
+                        int branchOffset = bi.getBranch();
+                        int jumpOffset = bi.getOffset() + branchOffset;
 
-	                    // L'instruction if courante appartient-elle au même bloc que le 1er ?
-	                    if (jumpOffset != lastTernaryOpTestBiJumpOffset &&
-	                        (branchOffset <= 0 || jumpOffset > nextOffest))
-	                    {
-	                        // Non
-	                        index++;
-	                        break;
-	                    }
+                        // L'instruction if courante appartient-elle au même bloc que le 1er ?
+                        if (jumpOffset != lastTernaryOpTestBiJumpOffset &&
+                            (branchOffset <= 0 || jumpOffset > nextOffest))
+                        {
+                            // Non
+                            index++;
+                            break;
+                        }
 
-	                    branchInstructions.remove(index);
-	                    ternaryOpTestInstructions.add(ternaryOpTestInstruction);
-	                }
+                        branchInstructions.remove(index);
+                        ternaryOpTestInstructions.add(ternaryOpTestInstruction);
+                    }
 
-	                Instruction test;
+                    Instruction test;
 
-	                if (ternaryOpTestInstructions.size() > 1)
-	                {
-	                    Collections.reverse(ternaryOpTestInstructions);
-	                    test = createIfInstructions(
-	                        offsetToPreviousGotoFlag, inversedTernaryOpLogic,
-	                        ternaryOpTestInstructions, lastTernaryOpTestBi);
-	                }
-	                else
-	                {
-	                    test = lastTernaryOpTestBi;
-	                }
-	                inverseComparison(test);
+                    if (ternaryOpTestInstructions.size() > 1)
+                    {
+                        Collections.reverse(ternaryOpTestInstructions);
+                        test = createIfInstructions(
+                            offsetToPreviousGotoFlag, inversedTernaryOpLogic,
+                            ternaryOpTestInstructions, lastTernaryOpTestBi);
+                    }
+                    else
+                    {
+                        test = lastTernaryOpTestBi;
+                    }
+                    inverseComparison(test);
 
-	                // Extraction de la sous liste d'instructions constituant
-	                // la premiere valeur de l'operateur ternaire (instructions
-	                // entre le test et l'instruction 'goto')
-	                List<Instruction> ternaryOpValue1Instructions =
-	                    new ArrayList<>();
+                    // Extraction de la sous liste d'instructions constituant
+                    // la premiere valeur de l'operateur ternaire (instructions
+                    // entre le test et l'instruction 'goto')
+                    List<Instruction> ternaryOpValue1Instructions =
+                        new ArrayList<>();
 
-	                index++;
+                    index++;
 
-	                while (index < branchInstructions.size())
-	                {
-	                    Instruction instruction =
-	                        branchInstructions.get(index);
+                    while (index < branchInstructions.size())
+                    {
+                        Instruction instruction =
+                            branchInstructions.get(index);
 
-	                    if (instruction.getOffset() >= lastTernaryOpTestBiJumpOffset) {
-							break;
-						}
+                        if (instruction.getOffset() >= lastTernaryOpTestBiJumpOffset) {
+                            break;
+                        }
 
-	                    ternaryOpValue1Instructions.add(instruction);
-	                    branchInstructions.remove(index);
-	                }
+                        ternaryOpValue1Instructions.add(instruction);
+                        branchInstructions.remove(index);
+                    }
 
-	                // Remove last 'goto' instruction
-	                Goto g = (Goto)ternaryOpValue1Instructions.remove(
-	                    ternaryOpValue1Instructions.size()-1);
+                    // Remove last 'goto' instruction
+                    Goto g = (Goto)ternaryOpValue1Instructions.remove(
+                        ternaryOpValue1Instructions.size()-1);
 
-	                BranchInstruction value1;
+                    BranchInstruction value1;
 
-	                if (ternaryOpValue1Instructions.size() > 1)
-	                {
-	                    BranchInstruction lastTernaryOpValueBi =
-	                        (BranchInstruction)ternaryOpValue1Instructions.get(
-	                            ternaryOpValue1Instructions.size()-1);
-	                    // Creation de l'instruction ComplexBranchList
-	                    value1 = assembleAndCreateIfInstructions(
-	                        ternaryOpValue1Instructions, lastTernaryOpValueBi);
-	                }
-	                else
-	                {
-	                    value1 = (BranchInstruction)ternaryOpValue1Instructions.get(
-	                        ternaryOpValue1Instructions.size()-1);
-	                }
+                    if (ternaryOpValue1Instructions.size() > 1)
+                    {
+                        BranchInstruction lastTernaryOpValueBi =
+                            (BranchInstruction)ternaryOpValue1Instructions.get(
+                                ternaryOpValue1Instructions.size()-1);
+                        // Creation de l'instruction ComplexBranchList
+                        value1 = assembleAndCreateIfInstructions(
+                            ternaryOpValue1Instructions, lastTernaryOpValueBi);
+                    }
+                    else
+                    {
+                        value1 = (BranchInstruction)ternaryOpValue1Instructions.get(
+                            ternaryOpValue1Instructions.size()-1);
+                    }
 
-	                int gotoJumpOffset;
+                    int gotoJumpOffset;
 
-	                if (inversedTernaryOpLogic[g.getOffset()])
-	                {
-	                    gotoJumpOffset = value1.getJumpOffset();
-	                    inverseComparison(value1);
-	                }
-	                else
-	                {
-	                    gotoJumpOffset = g.getJumpOffset();
-	                }
+                    if (inversedTernaryOpLogic[g.getOffset()])
+                    {
+                        gotoJumpOffset = value1.getJumpOffset();
+                        inverseComparison(value1);
+                    }
+                    else
+                    {
+                        gotoJumpOffset = g.getJumpOffset();
+                    }
 
-	                // Extraction de la sous liste d'instructions constituant
-	                // la seconde valeur de l'operateur ternaire (instructions entre
-	                // l'instruction 'goto' et la prochaine instruction 'goto' ou
-	                // jusqu'au saut du test)
-	                List<Instruction> ternaryOpValue2Instructions =
-	                    new ArrayList<>();
+                    // Extraction de la sous liste d'instructions constituant
+                    // la seconde valeur de l'operateur ternaire (instructions entre
+                    // l'instruction 'goto' et la prochaine instruction 'goto' ou
+                    // jusqu'au saut du test)
+                    List<Instruction> ternaryOpValue2Instructions =
+                        new ArrayList<>();
 
-	                while (index < branchInstructions.size())
-	                {
-	                    Instruction instruction =
-	                        branchInstructions.get(index);
+                    while (index < branchInstructions.size())
+                    {
+                        Instruction instruction =
+                            branchInstructions.get(index);
 
-	                    if (instruction.getOpcode() == Const.GOTO ||
-	                        instruction.getOffset() >= gotoJumpOffset) {
-							break;
-						}
+                        if (instruction.getOpcode() == Const.GOTO ||
+                            instruction.getOffset() >= gotoJumpOffset) {
+                            break;
+                        }
 
-	                    ternaryOpValue2Instructions.add(instruction);
-	                    branchInstructions.remove(index);
-	                }
+                        ternaryOpValue2Instructions.add(instruction);
+                        branchInstructions.remove(index);
+                    }
 
-	                BranchInstruction value2;
+                    BranchInstruction value2;
 
-	                if (ternaryOpValue2Instructions.size() > 1)
-	                {
-	                    BranchInstruction lastTernaryOpValueBi =
-	                        (BranchInstruction)ternaryOpValue2Instructions.get(
-	                            ternaryOpValue2Instructions.size()-1);
-	                    // Creation de l'instruction ComplexBranchList
-	                    value2 = assembleAndCreateIfInstructions(
-	                        ternaryOpValue2Instructions, lastTernaryOpValueBi);
-	                }
-	                else
-	                {
-	                    value2 = (BranchInstruction)ternaryOpValue2Instructions.get(
-	                        ternaryOpValue2Instructions.size()-1);
-	                }
+                    if (ternaryOpValue2Instructions.size() > 1)
+                    {
+                        BranchInstruction lastTernaryOpValueBi =
+                            (BranchInstruction)ternaryOpValue2Instructions.get(
+                                ternaryOpValue2Instructions.size()-1);
+                        // Creation de l'instruction ComplexBranchList
+                        value2 = assembleAndCreateIfInstructions(
+                            ternaryOpValue2Instructions, lastTernaryOpValueBi);
+                    }
+                    else
+                    {
+                        value2 = (BranchInstruction)ternaryOpValue2Instructions.get(
+                            ternaryOpValue2Instructions.size()-1);
+                    }
 
-	                index--;
+                    index--;
 
-	                // Create ternary operator
-	                TernaryOperator to = new TernaryOperator(
-	                    ByteCodeConstants.TERNARYOP, value2.getOffset(),
-	                    test.getLineNumber(), test, value1, value2);
+                    // Create ternary operator
+                    TernaryOperator to = new TernaryOperator(
+                        ByteCodeConstants.TERNARYOP, value2.getOffset(),
+                        test.getLineNumber(), test, value1, value2);
 
-	                List<Instruction> instructions =
-	                    new ArrayList<>(1);
-	                instructions.add(to);
+                    List<Instruction> instructions =
+                        new ArrayList<>(1);
+                    instructions.add(to);
 
-	                // Create complex if instruction
-	                ComplexConditionalBranchInstruction cbl = new ComplexConditionalBranchInstruction(
-	                    ByteCodeConstants.COMPLEXIF, value2.getOffset(), test.getLineNumber(),
-	                    ByteCodeConstants.CMP_NONE, instructions,
-	                    value2.getBranch());
+                    // Create complex if instruction
+                    ComplexConditionalBranchInstruction cbl = new ComplexConditionalBranchInstruction(
+                        ByteCodeConstants.COMPLEXIF, value2.getOffset(), test.getLineNumber(),
+                        ByteCodeConstants.CMP_NONE, instructions,
+                        value2.getBranch());
 
-	                branchInstructions.set(index, cbl);
+                    branchInstructions.set(index, cbl);
                 }
             }
 
@@ -598,8 +598,8 @@ public class ComparisonInstructionAnalyzer
                         (BranchInstruction)branchInstructions.get(i);
 
                     if (branchInstruction.getOffset() >= jumpOffset) {
-						break;
-					}
+                        break;
+                    }
 
                     subBranchInstructions.add(branchInstruction);
                     subLastBi = branchInstruction;
@@ -696,8 +696,8 @@ public class ComparisonInstructionAnalyzer
                 ByteCodeConstants.CMP_AND : ByteCodeConstants.CMP_OR);
 
             for (int i=0; i<=lastIndex; ++i) {
-				setOperator(instructions.get(i), inverse);
-			}
+                setOperator(instructions.get(i), inverse);
+            }
         }
         else
         {
@@ -709,8 +709,8 @@ public class ComparisonInstructionAnalyzer
             int i = 0;
 
             while (i < lastIndex) {
-				setOperator(instructions.get(i++), tmpInverse);
-			}
+                setOperator(instructions.get(i++), tmpInverse);
+            }
 
             setOperator(instructions.get(i), inverse);
         }
@@ -774,8 +774,8 @@ public class ComparisonInstructionAnalyzer
                 (ComplexConditionalBranchInstruction)instruction;
             ccbi.setCmp(ByteCodeConstants.CMP_OR - ccbi.getCmp());
             for (int i=ccbi.getInstructions().size()-1; i>=0; --i) {
-				inverseComparison(ccbi.getInstructions().get(i));
-			}
+                inverseComparison(ccbi.getInstructions().get(i));
+            }
             break;
         case ByteCodeConstants.TERNARYOP:
             TernaryOperator to = (TernaryOperator)instruction;
@@ -801,12 +801,12 @@ public class ComparisonInstructionAnalyzer
             if (!ByteCodeUtil.isIfOrGotoInstruction(opcode, false)) {
                 break;
             }
-			index++;
+            index++;
         }
 
         if (index-1 == firstIndex) {
-			return firstIndex;
-		}
+            return firstIndex;
+        }
 
         boolean[] dummy = new boolean[list.get(length-1).getOffset()];
 

@@ -78,8 +78,8 @@ public class ReturnLineNumberAnalyzer
                     List<Instruction> instructions =
                             ((FastList)instruction).getInstructions();
                     if (instructions != null) {
-						recursiveCheck(instructions, afterListLineNumber);
-					}
+                        recursiveCheck(instructions, afterListLineNumber);
+                    }
                 }
                 break;
             case FastConstants.IF_ELSE:
@@ -95,7 +95,7 @@ public class ReturnLineNumberAnalyzer
                 {
                     FastSwitch.Pair[] pairs = ((FastSwitch)instruction).getPairs();
                     if (pairs != null) {
-						for (int i=pairs.length-1; i>=0; --i)
+                        for (int i=pairs.length-1; i>=0; --i)
                         {
                             List<Instruction> instructions = pairs[i].getInstructions();
                             if (instructions != null)
@@ -108,7 +108,7 @@ public class ReturnLineNumberAnalyzer
                                 }
                             }
                         }
-					}
+                    }
                 }
                 break;
             case FastConstants.TRY:
@@ -148,8 +148,8 @@ public class ReturnLineNumberAnalyzer
                 {
                     Return r = (Return)instruction;
                     if (r.getLineNumber() > afterListLineNumber) {
-						r.setLineNumber(Instruction.UNKNOWN_LINE_NUMBER);
-					}
+                        r.setLineNumber(Instruction.UNKNOWN_LINE_NUMBER);
+                    }
                 }
                 break;
             }

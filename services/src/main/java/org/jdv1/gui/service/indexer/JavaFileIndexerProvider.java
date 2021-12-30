@@ -177,7 +177,7 @@ public class JavaFileIndexerProvider extends AbstractIndexerProvider {
             }
             if (node instanceof TypeDeclaration typeDeclaration) {
                 @SuppressWarnings("unchecked")
-				List<Type> superInterfaces = typeDeclaration.superInterfaceTypes();
+                List<Type> superInterfaces = typeDeclaration.superInterfaceTypes();
                 String superQualifiedInterfaceName;
                 for (Type superInteface : superInterfaces) {
                     superQualifiedInterfaceName = resolveInternalTypeName(superInteface);
@@ -221,7 +221,7 @@ public class JavaFileIndexerProvider extends AbstractIndexerProvider {
         @Override
         public boolean visit(FieldDeclaration node) {
             @SuppressWarnings("unchecked")
-			List<VariableDeclarationFragment> fragments = node.fragments();
+            List<VariableDeclarationFragment> fragments = node.fragments();
             for (VariableDeclarationFragment fragment : fragments) {
                 fieldDeclarationSet.add(fragment.getName().getIdentifier());
             }

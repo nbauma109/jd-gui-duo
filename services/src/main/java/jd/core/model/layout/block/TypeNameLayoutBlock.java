@@ -42,7 +42,7 @@ public class TypeNameLayoutBlock extends LayoutBlock
         this.classFile = classFile;
     }
 
-	public ClassFile getClassFile() {
-		return classFile;
-	}
+    public ClassFile getClassFile() {
+        return classFile;
+    }
 }

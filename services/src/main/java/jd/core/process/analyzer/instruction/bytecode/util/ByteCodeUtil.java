@@ -129,8 +129,8 @@ public class ByteCodeUtil
                     return true;
                 }
                 if (offset >= codeLength) {
-					break;
-				}
+                    break;
+                }
 
                 int opcode = code[offset] & 255;
 
@@ -150,218 +150,218 @@ public class ByteCodeUtil
     }
 
 
-	public static byte[] cleanUpByteCode(byte[] code) {
-		/*
-		 * Matching a bytecode pattern that is probably the result of bytecode
-		 * manipulation and preventing the decompiler from structuring the source code
-		 * properly. Getting rid of all that local variable clutter confusing the decompiler.
-		 */
-		for (int i = 0; i < code.length; i++) {
-			int offset = i;
-			// check if opCode is ALOAD or in ALOAD_0..3 which is the beginning of the pattern
-			if (!opCodeIn(code, offset, ALOAD, ALOAD_0, ALOAD_1, ALOAD_2, ALOAD_3)) {
-				continue;
-			}
-			if (getOpCode(code, offset) == ALOAD) {
-				// skip ALOAD
-				offset++;
-				if (opCodeIn(code, offset, ALOAD_0, ALOAD_1, ALOAD_2, ALOAD_3)) {
-					// false start, this is the actual beginning, not the local variable index of an ALOAD
-					continue;
-				}
-			}
-			// skip ALOAD local variable index parameter or skip ALOAD_0..3
-			offset++;
-			if (offset >= code.length) {
-				continue;
-			}
-			while (offset < code.length && opCodeIn(code, offset, GETFIELD, INVOKEVIRTUAL, INVOKESPECIAL, INVOKESTATIC, INVOKEINTERFACE, CHECKCAST)) {
-				// skip GETFIELD, INVOKEVIRTUAL, INVOKESPECIAL, INVOKESTATIC, INVOKEINTERFACE, CHECKCAST and parameters
-				offset += 1 + Const.getNoOfOperands(getOpCode(code, offset));
-			}
-			if (offset >= code.length || !opCodeIn(code, offset, ASTORE, ASTORE_0, ASTORE_1, ASTORE_2, ASTORE_3)) {
-				continue;
-			}
-			final int paramEndIdx = offset;
-			final int astore1stIdxParam;
-			if (getOpCode(code, offset) == ASTORE) {
-				// skip ASTORE
-				offset++;
-				// store ASTORE parameter
-				astore1stIdxParam = code[offset];
-			} else {
-				// store ASTORE_0..3 parameter
-				astore1stIdxParam = code[offset] - ASTORE_0;
-			}
-			// skip ASTORE parameter or skip ALOAD_0..3
-			offset++;
-			if (offset >= code.length || getOpCode(code, offset) != ACONST_NULL) {
-				continue;
-			}
-			offset++;
-			if (offset >= code.length || !opCodeIn(code, offset, ASTORE, ASTORE_0, ASTORE_1, ASTORE_2, ASTORE_3)) {
-				continue;
-			}
-			offset += 1 + Const.getNoOfOperands(getOpCode(code, offset));
-			if (offset >= code.length || !opCodeIn(code, offset, ALOAD, ALOAD_0, ALOAD_1, ALOAD_2, ALOAD_3)) {
-				continue;
-			}
-			if (getOpCode(code, offset) == ALOAD) {
-				// skip ALOAD
-				offset++;
-				// check ALOAD local variable index parameter matches that of ASTORE
-				if (astore1stIdxParam != code[offset]) {
-					continue;
-				}
-			} else // check ALOAD local variable index parameter matches that of ASTORE
-			if (astore1stIdxParam != code[offset] - ALOAD_0) {
-				continue;
-			}
-			// skip ALOAD parameter or skip ALOAD_0..3
-			offset++;
-			if (offset >= code.length || getOpCode(code, offset) != INVOKEVIRTUAL) {
-				continue;
-			}
-			final int invokeVirtualIdx = offset;
-			// skip INVOKEVIRTUAL and parameters
-			offset += 3;
-			if (!opCodeIn(code, offset, ASTORE, ASTORE_0, ASTORE_1, ASTORE_2, ASTORE_3)) {
-				continue;
-			}
-			offset += 1 + Const.getNoOfOperands(getOpCode(code, offset));
-			if (offset >= code.length || !opCodeIn(code, offset, ALOAD, ALOAD_0, ALOAD_1, ALOAD_2, ALOAD_3)) {
-				continue;
-			}
-			if (getOpCode(code, offset) == ALOAD) {
-				// skip ALOAD
-				offset++;
-				// check ALOAD local variable index parameter matches that of ASTORE
-				if (astore1stIdxParam != code[offset]) {
-					continue;
-				}
-			} else // check ALOAD local variable index parameter matches that of ASTORE
-			if (astore1stIdxParam != code[offset] - ALOAD_0) {
-				continue;
-			}
-			// skip ALOAD parameter or skip ALOAD_0..3
-			offset++;
-			if (offset >= code.length) {
-				continue;
-			}
-			if (!opCodeIn(code, offset, ALOAD, ALOAD_0, ALOAD_1, ALOAD_2, ALOAD_3)) {
-				continue;
-			}
-			if (getOpCode(code, offset) == ALOAD) {
-				// skip ALOAD
-				offset++;
-				// check ALOAD local variable index parameter matches that of ASTORE
-				if (astore1stIdxParam + 2 != code[offset]) {
-					continue;
-				}
-			} else // check ALOAD local variable index parameter matches that of ASTORE
-			if (astore1stIdxParam + 2 != code[offset] - ALOAD_0) {
-				continue;
-			}
-			// skip ALOAD parameter or skip ALOAD_0..3
-			offset++;
-			if (offset >= code.length) {
-				continue;
-			}
-			if (getOpCode(code, offset) != INVOKESTATIC) {
-				continue;
-			}
-			final int invokeStaticIdx = offset;
-			// skip INVOKESTATIC and parameters
-			offset += 3;
-			if (!opCodeIn(code, offset, ASTORE, ASTORE_0, ASTORE_1, ASTORE_2, ASTORE_3)) {
-				continue;
-			}
-			offset += 1 + Const.getNoOfOperands(getOpCode(code, offset));
-			if (offset >= code.length) {
-				continue;
-			}
-			if (!opCodeIn(code, offset, ALOAD, ALOAD_0, ALOAD_1, ALOAD_2, ALOAD_3)) {
-				continue;
-			}
-			if (getOpCode(code, offset) == ALOAD) {
-				// skip ALOAD
-				offset++;
-				// check ALOAD local variable index parameter matches that of ASTORE
-				if (astore1stIdxParam + 1 != code[offset]) {
-					continue;
-				}
-			} else // check ALOAD local variable index parameter matches that of ASTORE
-			if (astore1stIdxParam + 1 != code[offset] - ALOAD_0) {
-				continue;
-			}
-			// skip ALOAD parameter or skip ALOAD_0..3
-			offset++;
-			// at this point, pattern is fully matched
-			int paramLength = paramEndIdx - i;
-			int newParamEndIdx = paramEndIdx + paramLength;
-			int newInvokeVirtualIdx = offset - 6;
-			int newInvokeStaticIdx = offset - 3;
-			// check available space before applying changes
-			boolean canCopy = newInvokeVirtualIdx >= newParamEndIdx;
-			int clearFromIdx;
-			if (canCopy) {
-				clearFromIdx = newParamEndIdx;
-			} else {
-				int astoreIdx = paramEndIdx;
-				// subtract 33 for ASTORE to ALOAD conversion
-				byte aloadCode = (byte) (code[astoreIdx] - 33);
-				if (getOpCode(code, astoreIdx) == ASTORE) {
-					// rarest case
-					// skip ASTORE and parameter
-					// copy ALOAD and parameter twice
-					// for following invocations
-					code[astoreIdx + 2] = aloadCode;
-					code[astoreIdx + 3] = code[astoreIdx + 1];
-					code[astoreIdx + 4] = code[astoreIdx + 2];
-					code[astoreIdx + 5] = code[astoreIdx + 3];
-					clearFromIdx = astoreIdx + 6;
-				} else {
-					// copy ALOAD code twice for following invocations
-					code[astoreIdx + 1] = aloadCode;
-					code[astoreIdx + 2] = code[astoreIdx + 1];
-					clearFromIdx = astoreIdx + 3;
-				}
-			}
-			// move invoke virtual/static down to make space to copy parameters
-			System.arraycopy(code, invokeStaticIdx, code, newInvokeStaticIdx, 3);
-			System.arraycopy(code, invokeVirtualIdx, code, newInvokeVirtualIdx, 3);
-			// copy parameters
-			if (canCopy) {
-				System.arraycopy(code, i, code, paramEndIdx, paramLength);
-			}
-			// clear what's left in the middle
-			Arrays.fill(code, clearFromIdx, newInvokeVirtualIdx, (byte)Const.NOP);
-		}
+    public static byte[] cleanUpByteCode(byte[] code) {
+        /*
+         * Matching a bytecode pattern that is probably the result of bytecode
+         * manipulation and preventing the decompiler from structuring the source code
+         * properly. Getting rid of all that local variable clutter confusing the decompiler.
+         */
+        for (int i = 0; i < code.length; i++) {
+            int offset = i;
+            // check if opCode is ALOAD or in ALOAD_0..3 which is the beginning of the pattern
+            if (!opCodeIn(code, offset, ALOAD, ALOAD_0, ALOAD_1, ALOAD_2, ALOAD_3)) {
+                continue;
+            }
+            if (getOpCode(code, offset) == ALOAD) {
+                // skip ALOAD
+                offset++;
+                if (opCodeIn(code, offset, ALOAD_0, ALOAD_1, ALOAD_2, ALOAD_3)) {
+                    // false start, this is the actual beginning, not the local variable index of an ALOAD
+                    continue;
+                }
+            }
+            // skip ALOAD local variable index parameter or skip ALOAD_0..3
+            offset++;
+            if (offset >= code.length) {
+                continue;
+            }
+            while (offset < code.length && opCodeIn(code, offset, GETFIELD, INVOKEVIRTUAL, INVOKESPECIAL, INVOKESTATIC, INVOKEINTERFACE, CHECKCAST)) {
+                // skip GETFIELD, INVOKEVIRTUAL, INVOKESPECIAL, INVOKESTATIC, INVOKEINTERFACE, CHECKCAST and parameters
+                offset += 1 + Const.getNoOfOperands(getOpCode(code, offset));
+            }
+            if (offset >= code.length || !opCodeIn(code, offset, ASTORE, ASTORE_0, ASTORE_1, ASTORE_2, ASTORE_3)) {
+                continue;
+            }
+            final int paramEndIdx = offset;
+            final int astore1stIdxParam;
+            if (getOpCode(code, offset) == ASTORE) {
+                // skip ASTORE
+                offset++;
+                // store ASTORE parameter
+                astore1stIdxParam = code[offset];
+            } else {
+                // store ASTORE_0..3 parameter
+                astore1stIdxParam = code[offset] - ASTORE_0;
+            }
+            // skip ASTORE parameter or skip ALOAD_0..3
+            offset++;
+            if (offset >= code.length || getOpCode(code, offset) != ACONST_NULL) {
+                continue;
+            }
+            offset++;
+            if (offset >= code.length || !opCodeIn(code, offset, ASTORE, ASTORE_0, ASTORE_1, ASTORE_2, ASTORE_3)) {
+                continue;
+            }
+            offset += 1 + Const.getNoOfOperands(getOpCode(code, offset));
+            if (offset >= code.length || !opCodeIn(code, offset, ALOAD, ALOAD_0, ALOAD_1, ALOAD_2, ALOAD_3)) {
+                continue;
+            }
+            if (getOpCode(code, offset) == ALOAD) {
+                // skip ALOAD
+                offset++;
+                // check ALOAD local variable index parameter matches that of ASTORE
+                if (astore1stIdxParam != code[offset]) {
+                    continue;
+                }
+            } else // check ALOAD local variable index parameter matches that of ASTORE
+            if (astore1stIdxParam != code[offset] - ALOAD_0) {
+                continue;
+            }
+            // skip ALOAD parameter or skip ALOAD_0..3
+            offset++;
+            if (offset >= code.length || getOpCode(code, offset) != INVOKEVIRTUAL) {
+                continue;
+            }
+            final int invokeVirtualIdx = offset;
+            // skip INVOKEVIRTUAL and parameters
+            offset += 3;
+            if (!opCodeIn(code, offset, ASTORE, ASTORE_0, ASTORE_1, ASTORE_2, ASTORE_3)) {
+                continue;
+            }
+            offset += 1 + Const.getNoOfOperands(getOpCode(code, offset));
+            if (offset >= code.length || !opCodeIn(code, offset, ALOAD, ALOAD_0, ALOAD_1, ALOAD_2, ALOAD_3)) {
+                continue;
+            }
+            if (getOpCode(code, offset) == ALOAD) {
+                // skip ALOAD
+                offset++;
+                // check ALOAD local variable index parameter matches that of ASTORE
+                if (astore1stIdxParam != code[offset]) {
+                    continue;
+                }
+            } else // check ALOAD local variable index parameter matches that of ASTORE
+            if (astore1stIdxParam != code[offset] - ALOAD_0) {
+                continue;
+            }
+            // skip ALOAD parameter or skip ALOAD_0..3
+            offset++;
+            if (offset >= code.length) {
+                continue;
+            }
+            if (!opCodeIn(code, offset, ALOAD, ALOAD_0, ALOAD_1, ALOAD_2, ALOAD_3)) {
+                continue;
+            }
+            if (getOpCode(code, offset) == ALOAD) {
+                // skip ALOAD
+                offset++;
+                // check ALOAD local variable index parameter matches that of ASTORE
+                if (astore1stIdxParam + 2 != code[offset]) {
+                    continue;
+                }
+            } else // check ALOAD local variable index parameter matches that of ASTORE
+            if (astore1stIdxParam + 2 != code[offset] - ALOAD_0) {
+                continue;
+            }
+            // skip ALOAD parameter or skip ALOAD_0..3
+            offset++;
+            if (offset >= code.length) {
+                continue;
+            }
+            if (getOpCode(code, offset) != INVOKESTATIC) {
+                continue;
+            }
+            final int invokeStaticIdx = offset;
+            // skip INVOKESTATIC and parameters
+            offset += 3;
+            if (!opCodeIn(code, offset, ASTORE, ASTORE_0, ASTORE_1, ASTORE_2, ASTORE_3)) {
+                continue;
+            }
+            offset += 1 + Const.getNoOfOperands(getOpCode(code, offset));
+            if (offset >= code.length) {
+                continue;
+            }
+            if (!opCodeIn(code, offset, ALOAD, ALOAD_0, ALOAD_1, ALOAD_2, ALOAD_3)) {
+                continue;
+            }
+            if (getOpCode(code, offset) == ALOAD) {
+                // skip ALOAD
+                offset++;
+                // check ALOAD local variable index parameter matches that of ASTORE
+                if (astore1stIdxParam + 1 != code[offset]) {
+                    continue;
+                }
+            } else // check ALOAD local variable index parameter matches that of ASTORE
+            if (astore1stIdxParam + 1 != code[offset] - ALOAD_0) {
+                continue;
+            }
+            // skip ALOAD parameter or skip ALOAD_0..3
+            offset++;
+            // at this point, pattern is fully matched
+            int paramLength = paramEndIdx - i;
+            int newParamEndIdx = paramEndIdx + paramLength;
+            int newInvokeVirtualIdx = offset - 6;
+            int newInvokeStaticIdx = offset - 3;
+            // check available space before applying changes
+            boolean canCopy = newInvokeVirtualIdx >= newParamEndIdx;
+            int clearFromIdx;
+            if (canCopy) {
+                clearFromIdx = newParamEndIdx;
+            } else {
+                int astoreIdx = paramEndIdx;
+                // subtract 33 for ASTORE to ALOAD conversion
+                byte aloadCode = (byte) (code[astoreIdx] - 33);
+                if (getOpCode(code, astoreIdx) == ASTORE) {
+                    // rarest case
+                    // skip ASTORE and parameter
+                    // copy ALOAD and parameter twice
+                    // for following invocations
+                    code[astoreIdx + 2] = aloadCode;
+                    code[astoreIdx + 3] = code[astoreIdx + 1];
+                    code[astoreIdx + 4] = code[astoreIdx + 2];
+                    code[astoreIdx + 5] = code[astoreIdx + 3];
+                    clearFromIdx = astoreIdx + 6;
+                } else {
+                    // copy ALOAD code twice for following invocations
+                    code[astoreIdx + 1] = aloadCode;
+                    code[astoreIdx + 2] = code[astoreIdx + 1];
+                    clearFromIdx = astoreIdx + 3;
+                }
+            }
+            // move invoke virtual/static down to make space to copy parameters
+            System.arraycopy(code, invokeStaticIdx, code, newInvokeStaticIdx, 3);
+            System.arraycopy(code, invokeVirtualIdx, code, newInvokeVirtualIdx, 3);
+            // copy parameters
+            if (canCopy) {
+                System.arraycopy(code, i, code, paramEndIdx, paramLength);
+            }
+            // clear what's left in the middle
+            Arrays.fill(code, clearFromIdx, newInvokeVirtualIdx, (byte)Const.NOP);
+        }
 
-		return code;
-	}
+        return code;
+    }
 
-	public static boolean opCodeIn(byte[] code, int index, int... values) {
-		return Arrays.binarySearch(values, getOpCode(code, index)) >= 0;
-	}
+    public static boolean opCodeIn(byte[] code, int index, int... values) {
+        return Arrays.binarySearch(values, getOpCode(code, index)) >= 0;
+    }
 
-	public static int getOpCode(byte[] code, int index) {
-		return code[index] & 255;
-	}
+    public static int getOpCode(byte[] code, int index) {
+        return code[index] & 255;
+    }
 
-	public static boolean isLoadIntValue(int opcode) {
+    public static boolean isLoadIntValue(int opcode) {
         return opcode == ICONST || opcode == BIPUSH || opcode == SIPUSH;
-	}
+    }
 
-	public static boolean isIfInstruction(int opcode, boolean includeComplex) {
-		return opcode >= IF && opcode <= IFXNULL || includeComplex && opcode == COMPLEXIF;
-	}
+    public static boolean isIfInstruction(int opcode, boolean includeComplex) {
+        return opcode >= IF && opcode <= IFXNULL || includeComplex && opcode == COMPLEXIF;
+    }
 
-	public static boolean isIfOrGotoInstruction(int opcode, boolean includeComplex) {
-		return isIfInstruction(opcode, includeComplex) || opcode == GOTO;
-	}
+    public static boolean isIfOrGotoInstruction(int opcode, boolean includeComplex) {
+        return isIfInstruction(opcode, includeComplex) || opcode == GOTO;
+    }
 
-	public static int getCmpPriority(int cmp) {
-		return cmp == ByteCodeConstants.CMP_EQ || cmp == ByteCodeConstants.CMP_NE ? 7 : 6;
-	}
+    public static int getCmpPriority(int cmp) {
+        return cmp == ByteCodeConstants.CMP_EQ || cmp == ByteCodeConstants.CMP_NE ? 7 : 6;
+    }
 }

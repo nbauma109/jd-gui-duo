@@ -21,15 +21,15 @@ public class JavaModuleContainerFactoryProvider implements ContainerFactory {
     @Override
     public String getType() { return "jmod"; }
 
-	@Override
-	@SuppressWarnings("resource")
+    @Override
+    @SuppressWarnings("resource")
     public boolean accept(API api, Path rootPath) {
         if (rootPath.toUri().toString().toLowerCase().endsWith(".jmod!/")) {
             return true;
         }
         // Extension: accept uncompressed JMOD file containing a folder 'classes'
         try {
-        	// do not try to close file system due to UnsupportedOperationException
+            // do not try to close file system due to UnsupportedOperationException
             return "file".equals(rootPath.getFileSystem().provider().getScheme()) && Files.exists(rootPath.resolve("classes"));
         } catch (InvalidPathException e) {
             assert ExceptionUtil.printStackTrace(e);

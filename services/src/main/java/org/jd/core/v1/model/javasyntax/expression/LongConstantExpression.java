@@ -40,8 +40,8 @@ public class LongConstantExpression extends AbstractLineNumberTypeExpression {
         return "LongConstantExpression{" + value + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new LongConstantExpression(lineNumber, value);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new LongConstantExpression(lineNumber, value);
+    }
 }

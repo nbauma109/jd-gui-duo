@@ -66,7 +66,7 @@ public class IndexesUtil {
                     Map<String, Collection> index = futureIndexes.get().getIndex(indexName);
                     if (index != null) {
                         @SuppressWarnings("unchecked")
-						Collection<Container.Entry> collection = index.get(key);
+                        Collection<Container.Entry> collection = index.get(key);
                         if (collection != null) {
                             entries.addAll(collection);
                         }

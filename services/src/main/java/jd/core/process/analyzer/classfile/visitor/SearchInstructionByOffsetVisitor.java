@@ -66,8 +66,8 @@ public class SearchInstructionByOffsetVisitor
     public static Instruction visit(Instruction instruction, int offset)
     {
         if (instruction.getOffset() == offset) {
-			return instruction;
-		}
+            return instruction;
+        }
 
         switch (instruction.getOpcode())
         {
@@ -81,11 +81,11 @@ public class SearchInstructionByOffsetVisitor
                 AssertInstruction ai = (AssertInstruction)instruction;
                 instruction = visit(ai.getTest(), offset);
                 if (instruction != null) {
-					return instruction;
-				}
+                    return instruction;
+                }
                 if (ai.getMsg() == null) {
-					return null;
-				}
+                    return null;
+                }
                 return visit(ai.getMsg(), offset);
             }
         case Const.ATHROW:
@@ -99,8 +99,8 @@ public class SearchInstructionByOffsetVisitor
                     (BinaryOperatorInstruction)instruction;
                 instruction = visit(boi.getValue1(), offset);
                 if (instruction != null) {
-					return instruction;
-				}
+                    return instruction;
+                }
                 return visit(boi.getValue2(), offset);
             }
         case Const.CHECKCAST:
@@ -119,8 +119,8 @@ public class SearchInstructionByOffsetVisitor
                 IfCmp ifCmp = (IfCmp)instruction;
                 instruction = visit(ifCmp.getValue1(), offset);
                 if (instruction != null) {
-					return instruction;
-				}
+                    return instruction;
+                }
                 return visit(ifCmp.getValue2(), offset);
             }
         case ByteCodeConstants.IF,
@@ -134,8 +134,8 @@ public class SearchInstructionByOffsetVisitor
                 {
                     instruction = visit(branchList.get(i), offset);
                     if (instruction != null) {
-						return instruction;
-					}
+                        return instruction;
+                    }
                 }
             }
             break;
@@ -148,8 +148,8 @@ public class SearchInstructionByOffsetVisitor
                 Instruction result = visit(
                     ((InvokeNoStaticInstruction)instruction).getObjectref(), offset);
                 if (result != null) {
-					return result;
-				}
+                    return result;
+                }
             }
             // intended fall through
         case Const.INVOKESTATIC,
@@ -160,8 +160,8 @@ public class SearchInstructionByOffsetVisitor
                 {
                     instruction = visit(list.get(i), offset);
                     if (instruction != null) {
-						return instruction;
-					}
+                        return instruction;
+                    }
                 }
             }
             break;
@@ -178,8 +178,8 @@ public class SearchInstructionByOffsetVisitor
                 {
                     instruction = visit(dimensions[i], offset);
                     if (instruction != null) {
-						return instruction;
-					}
+                        return instruction;
+                    }
                 }
             }
             break;
@@ -194,8 +194,8 @@ public class SearchInstructionByOffsetVisitor
                 PutField putField = (PutField)instruction;
                 instruction = visit(putField.getObjectref(), offset);
                 if (instruction != null) {
-					return instruction;
-				}
+                    return instruction;
+                }
                 return visit(putField.getValueref(), offset);
             }
         case Const.PUTSTATIC:
@@ -217,11 +217,11 @@ public class SearchInstructionByOffsetVisitor
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
                 instruction = visit(iai.getNewArray(), offset);
                 if (instruction != null) {
-					return instruction;
-				}
+                    return instruction;
+                }
                 if (iai.getValues() != null) {
-					return visit(iai.getValues(), offset);
-				}
+                    return visit(iai.getValues(), offset);
+                }
             }
             break;
         case Const.ACONST_NULL,
@@ -266,8 +266,8 @@ public class SearchInstructionByOffsetVisitor
         {
             Instruction instruction = visit(instructions.get(i), offset);
             if (instruction != null) {
-				return instruction;
-			}
+                return instruction;
+            }
         }
 
         return null;

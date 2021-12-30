@@ -54,8 +54,8 @@ public class WebXmlFileIndexerProvider extends XmlBasedFileIndexerProvider {
             this.index = indexes.getIndex("typeReferences");
         }
 
-		@Override
-		@SuppressWarnings("unchecked")
+        @Override
+        @SuppressWarnings("unchecked")
         public void handle(String path, String text, int position) {
             index.get(text.replace('.', '/')).add(entry);
         }

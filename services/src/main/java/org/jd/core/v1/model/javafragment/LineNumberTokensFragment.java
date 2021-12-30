@@ -65,8 +65,8 @@ public class LineNumberTokensFragment extends FixedFragment implements JavaFragm
     }
 
     protected static class SearchLineNumberVisitor extends AbstractNopTokenVisitor {
-    	private int lineNumber;
-    	private int newLineCounter;
+        private int lineNumber;
+        private int newLineCounter;
 
         @Override
         public void visit(LineNumberToken token) {

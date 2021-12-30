@@ -27,11 +27,11 @@ public abstract class ArrayInstruction extends Instruction
         this.setArrayref(arrayref);
     }
 
-	public Instruction getArrayref() {
-		return arrayref;
-	}
+    public Instruction getArrayref() {
+        return arrayref;
+    }
 
-	public void setArrayref(Instruction arrayref) {
-		this.arrayref = arrayref;
-	}
+    public void setArrayref(Instruction arrayref) {
+        this.arrayref = arrayref;
+    }
 }

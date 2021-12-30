@@ -42,10 +42,10 @@ public class ILoadFactory implements InstructionFactory
         int index;
 
         if (opcode == Const.ILOAD) {
-			index = code[offset+1] & 255;
-		} else {
-			index = opcode - Const.ILOAD_0;
-		}
+            index = code[offset+1] & 255;
+        } else {
+            index = opcode - Const.ILOAD_0;
+        }
 
         Instruction instruction =
             new ILoad(Const.ILOAD, offset, lineNumber, index);
@@ -79,7 +79,7 @@ public class ILoadFactory implements InstructionFactory
                     list.add(last);
                     listForAnalyze.add(last);
                 }
-				stack.push(instruction);
+                stack.push(instruction);
             }
             else
             {

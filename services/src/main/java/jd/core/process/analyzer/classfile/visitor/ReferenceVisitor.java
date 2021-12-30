@@ -91,8 +91,8 @@ public class ReferenceVisitor
     public void visit(Instruction instruction)
     {
         if (instruction == null) {
-			return;
-		}
+            return;
+        }
 
         String internalName;
 
@@ -190,8 +190,8 @@ public class ReferenceVisitor
                 List<Instruction> branchList =
                     ((ComplexConditionalBranchInstruction)instruction).getInstructions();
                 for (int i=branchList.size()-1; i>=0; --i) {
-					visit(branchList.get(i));
-				}
+                    visit(branchList.get(i));
+                }
             }
             break;
         case Const.INSTANCEOF:
@@ -242,8 +242,8 @@ public class ReferenceVisitor
                 visitCheckCastAndMultiANewArray(multiANewArray.getIndex());
                 Instruction[] dimensions = multiANewArray.getDimensions();
                 for (int i=dimensions.length-1; i>=0; --i) {
-					visit(dimensions[i]);
-				}
+                    visit(dimensions[i]);
+                }
             }
             break;
         case Const.NEWARRAY:
@@ -330,8 +330,8 @@ public class ReferenceVisitor
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
                 visit(iai.getNewArray());
                 for (int index=iai.getValues().size()-1; index>=0; --index) {
-					visit(iai.getValues().get(index));
-				}
+                    visit(iai.getValues().get(index));
+                }
             }
             break;
         case FastConstants.FOR:
@@ -405,8 +405,8 @@ public class ReferenceVisitor
                 visit(ft.getInstructions());
                 List<FastCatch> catches = ft.getCatches();
                 for (int i=catches.size()-1; i>=0; --i) {
-					visit(catches.get(i).instructions());
-				}
+                    visit(catches.get(i).instructions());
+                }
                 visit(ft.getFinallyInstructions());
             }
             break;
@@ -471,8 +471,8 @@ public class ReferenceVisitor
         if (instructions != null)
         {
             for (int i=instructions.size()-1; i>=0; --i) {
-				visit(instructions.get(i));
-			}
+                visit(instructions.get(i));
+            }
         }
     }
 
@@ -493,8 +493,8 @@ public class ReferenceVisitor
             signature = SignatureUtil.cutArrayDimensionPrefix(signature);
 
             if (signature.charAt(0) == 'L') {
-				referenceMap.add(SignatureUtil.getInnerName(signature));
-			}
+                referenceMap.add(SignatureUtil.getInnerName(signature));
+            }
         }
         else
         {

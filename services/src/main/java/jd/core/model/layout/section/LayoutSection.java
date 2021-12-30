@@ -34,7 +34,7 @@ public class LayoutSection implements Comparable<LayoutSection>
         int firstLineNumber, int lastLineNumber,
         boolean containsError)
     {
-    	this.index = index;
+        this.index = index;
         this.setFirstBlockIndex(firstBlockIndex);
         this.setLastBlockIndex(lastBlockIndex);
         this.originalLineCount = lastLineNumber - firstLineNumber;
@@ -51,61 +51,61 @@ public class LayoutSection implements Comparable<LayoutSection>
 
     @Override
     public int hashCode() {
-    	return score;
+        return score;
     }
 
     @Override
     public boolean equals(Object obj) {
-    	if (this == obj) {
-    		return true;
-    	}
-    	if (obj == null || getClass() != obj.getClass()) {
-    		return false;
-    	}
-    	return obj instanceof LayoutSection ls && compareTo(ls) == 0;
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        return obj instanceof LayoutSection ls && compareTo(ls) == 0;
     }
 
-	public int getOriginalLineCount() {
-		return originalLineCount;
-	}
+    public int getOriginalLineCount() {
+        return originalLineCount;
+    }
 
-	public int getScore() {
-		return score;
-	}
+    public int getScore() {
+        return score;
+    }
 
-	public void setScore(int score) {
-		this.score = score;
-	}
+    public void setScore(int score) {
+        this.score = score;
+    }
 
-	public boolean isRelayout() {
-		return relayout;
-	}
+    public boolean isRelayout() {
+        return relayout;
+    }
 
-	public void setRelayout(boolean relayout) {
-		this.relayout = relayout;
-	}
+    public void setRelayout(boolean relayout) {
+        this.relayout = relayout;
+    }
 
-	public int getFirstBlockIndex() {
-		return firstBlockIndex;
-	}
+    public int getFirstBlockIndex() {
+        return firstBlockIndex;
+    }
 
-	public void setFirstBlockIndex(int firstBlockIndex) {
-		this.firstBlockIndex = firstBlockIndex;
-	}
+    public void setFirstBlockIndex(int firstBlockIndex) {
+        this.firstBlockIndex = firstBlockIndex;
+    }
 
-	public int getLastBlockIndex() {
-		return lastBlockIndex;
-	}
+    public int getLastBlockIndex() {
+        return lastBlockIndex;
+    }
 
-	public void setLastBlockIndex(int lastBlockIndex) {
-		this.lastBlockIndex = lastBlockIndex;
-	}
+    public void setLastBlockIndex(int lastBlockIndex) {
+        this.lastBlockIndex = lastBlockIndex;
+    }
 
-	public boolean containsError() {
-		return containsError;
-	}
+    public boolean containsError() {
+        return containsError;
+    }
 
-	public int getIndex() {
-		return index;
-	}
+    public int getIndex() {
+        return index;
+    }
 }

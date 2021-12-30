@@ -26,7 +26,7 @@ public class AttributeSignature extends Attribute
         this.signatureIndex = signatureIndex;
     }
 
-	public int getSignatureIndex() {
-		return signatureIndex;
-	}
+    public int getSignatureIndex() {
+        return signatureIndex;
+    }
 }

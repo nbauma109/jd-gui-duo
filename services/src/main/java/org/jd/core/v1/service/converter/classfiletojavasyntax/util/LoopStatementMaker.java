@@ -125,7 +125,7 @@ public class LoopStatementMaker {
                             return newClassFileForStatement(
                                 localVariableMaker, loopBasicBlock.getFromOffset(), loopBasicBlock.getToOffset(), init, condition, subExpression, null);
                         }
-						if (init != null) {
+                        if (init != null) {
                             return newClassFileForStatement(
                                 localVariableMaker, loopBasicBlock.getFromOffset(), loopBasicBlock.getToOffset(), init, condition, null, subStatement);
                         }
@@ -143,21 +143,21 @@ public class LoopStatementMaker {
                     // Unknown line numbers => Just try to find 'for (expression;;expression)'
                     return createForStatementWithoutLineNumber(localVariableMaker, loopBasicBlock, statements, condition, subStatements);
                 }
-			// Known line numbers
-			SearchFirstLineNumberVisitor visitor = new SearchFirstLineNumberVisitor();
+            // Known line numbers
+            SearchFirstLineNumberVisitor visitor = new SearchFirstLineNumberVisitor();
 
-			subStatements.getFirst().accept(visitor);
+            subStatements.getFirst().accept(visitor);
 
-			int firstLineNumber = visitor.getLineNumber();
+            int firstLineNumber = visitor.getLineNumber();
 
-			// Populates 'update'
-			Expressions update = extractUpdate(subStatements, firstLineNumber);
-			BaseExpression init = extractInit(statements, lineNumber);
+            // Populates 'update'
+            Expressions update = extractUpdate(subStatements, firstLineNumber);
+            BaseExpression init = extractInit(statements, lineNumber);
 
-			if (init != null || !update.isEmpty()) {
-			    return newClassFileForStatement(
-			        localVariableMaker, loopBasicBlock.getFromOffset(), loopBasicBlock.getToOffset(), init, condition, update, subStatements);
-			}
+            if (init != null || !update.isEmpty()) {
+                return newClassFileForStatement(
+                    localVariableMaker, loopBasicBlock.getFromOffset(), loopBasicBlock.getToOffset(), init, condition, update, subStatements);
+            }
                 break;
         }
 
@@ -217,15 +217,15 @@ public class LoopStatementMaker {
                     // Unknown line numbers => Just try to find 'for (expression;;expression)'
                     return createForStatementWithoutLineNumber(localVariableMaker, loopBasicBlock, statements, BooleanExpression.TRUE, subStatements);
                 }
-			// Populates 'update'
-			Expressions update = extractUpdate(subStatements, firstLineNumber);
+            // Populates 'update'
+            Expressions update = extractUpdate(subStatements, firstLineNumber);
 
-			if (!update.isEmpty()) {
-			    // Populates 'init'
-			    BaseExpression init = extractInit(statements, update.getFirst().getLineNumber());
+            if (!update.isEmpty()) {
+                // Populates 'init'
+                BaseExpression init = extractInit(statements, update.getFirst().getLineNumber());
 
-			    return newClassFileForStatement(localVariableMaker, loopBasicBlock.getFromOffset(), loopBasicBlock.getToOffset(), init, null, update, subStatements);
-			}
+                return newClassFileForStatement(localVariableMaker, loopBasicBlock.getFromOffset(), loopBasicBlock.getToOffset(), init, null, update, subStatements);
+            }
         }
 
         return new WhileStatement(BooleanExpression.TRUE, subStatements);
@@ -292,8 +292,8 @@ public class LoopStatementMaker {
 
                     if (!init.isEmpty()) {
                         if (init.size() > 1) {
-							Collections.reverse(init);
-						}
+                            Collections.reverse(init);
+                        }
                         return init;
                     }
                     break;

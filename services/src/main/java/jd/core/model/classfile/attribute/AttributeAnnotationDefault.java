@@ -27,7 +27,7 @@ public class AttributeAnnotationDefault extends Attribute
         this.defaultValue = defaultValue;
     }
 
-	public ElementValue getDefaultValue() {
-		return defaultValue;
-	}
+    public ElementValue getDefaultValue() {
+        return defaultValue;
+    }
 }

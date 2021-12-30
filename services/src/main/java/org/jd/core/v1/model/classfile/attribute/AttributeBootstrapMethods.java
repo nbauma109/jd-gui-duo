@@ -11,7 +11,7 @@ import org.apache.bcel.classfile.BootstrapMethod;
 
 public record AttributeBootstrapMethods(BootstrapMethod[] bootstrapMethods) implements Attribute {
 
-	public BootstrapMethod getBootstrapMethod(int i) {
-		return bootstrapMethods[i];
-	}
+    public BootstrapMethod getBootstrapMethod(int i) {
+        return bootstrapMethods[i];
+    }
 }

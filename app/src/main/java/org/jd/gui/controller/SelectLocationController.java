@@ -122,7 +122,7 @@ public class SelectLocationController {
                                     if (typeName == null) {
                                         break;
                                     }
-									outerTypeName = typeName;
+                                    outerTypeName = typeName;
                                 }
 
                                 outerTypeEntry = typeNameToEntry.get(outerTypeName);

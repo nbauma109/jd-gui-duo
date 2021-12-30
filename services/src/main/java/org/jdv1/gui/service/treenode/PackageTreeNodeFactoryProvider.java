@@ -24,70 +24,70 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 public class PackageTreeNodeFactoryProvider extends DirectoryTreeNodeFactoryProvider {
 
-	protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/package_obj.png"));
+    protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/package_obj.png"));
 
-	@Override
-	public String[] getSelectors() {
-		return appendSelectors("jar:dir:*");
-	}
+    @Override
+    public String[] getSelectors() {
+        return appendSelectors("jar:dir:*");
+    }
 
-	@Override
-	public Pattern getPathPattern() {
-		if (externalPathPattern == null) {
-			return Pattern.compile("(META-INF\\/versions\\/.*)|(?!META-INF)..*");
-		}
-		return externalPathPattern;
-	}
+    @Override
+    public Pattern getPathPattern() {
+        if (externalPathPattern == null) {
+            return Pattern.compile("(META-INF\\/versions\\/.*)|(?!META-INF)..*");
+        }
+        return externalPathPattern;
+    }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
-		int lastSlashIndex = entry.getPath().lastIndexOf("/");
-		Collection<Container.Entry> entries = entry.getChildren().values();
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
+        int lastSlashIndex = entry.getPath().lastIndexOf("/");
+        Collection<Container.Entry> entries = entry.getChildren().values();
 
-		// Aggregate directory names
-		while (entries.size() == 1) {
-			Container.Entry child = entries.iterator().next();
-			if (!child.isDirectory() || api.getTreeNodeFactory(child) != this || entry.getContainer() != child.getContainer()) {
-				break;
-			}
-			entry = child;
-			entries = entry.getChildren().values();
-		}
+        // Aggregate directory names
+        while (entries.size() == 1) {
+            Container.Entry child = entries.iterator().next();
+            if (!child.isDirectory() || api.getTreeNodeFactory(child) != this || entry.getContainer() != child.getContainer()) {
+                break;
+            }
+            entry = child;
+            entries = entry.getChildren().values();
+        }
 
-		String label = entry.getPath().substring(lastSlashIndex + 1).replace('/', '.');
-		String location = new File(entry.getUri()).getPath();
-		T node = (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, getIcon(), getOpenIcon()));
+        String label = entry.getPath().substring(lastSlashIndex + 1).replace('/', '.');
+        String location = new File(entry.getUri()).getPath();
+        T node = (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, getIcon(), getOpenIcon()));
 
-		if (!entries.isEmpty()) {
-			// Add dummy node
-			node.add(new DefaultMutableTreeNode());
-		}
+        if (!entries.isEmpty()) {
+            // Add dummy node
+            node.add(new DefaultMutableTreeNode());
+        }
 
-		return node;
-	}
+        return node;
+    }
 
-	@Override
-	public ImageIcon getIcon() {
-		return ICON;
-	}
+    @Override
+    public ImageIcon getIcon() {
+        return ICON;
+    }
 
-	@Override
-	public ImageIcon getOpenIcon() {
-		return null;
-	}
+    @Override
+    public ImageIcon getOpenIcon() {
+        return null;
+    }
 
-	protected class TreeNode extends DirectoryTreeNodeFactoryProvider.TreeNode {
+    protected class TreeNode extends DirectoryTreeNodeFactoryProvider.TreeNode {
 
-		private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-		public TreeNode(Container.Entry entry, Object userObject) {
-			super(entry, userObject);
-		}
+        public TreeNode(Container.Entry entry, Object userObject) {
+            super(entry, userObject);
+        }
 
-		@Override
-		public Collection<Container.Entry> getChildren() {
-			return JarContainerEntryUtil.removeInnerTypeEntries(entry.getChildren());
-		}
-	}
+        @Override
+        public Collection<Container.Entry> getChildren() {
+            return JarContainerEntryUtil.removeInnerTypeEntries(entry.getChildren());
+        }
+    }
 }

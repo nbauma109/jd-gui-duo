@@ -39,28 +39,28 @@ public class GetField extends IndexInstruction
             ConstantPool constants, LocalVariables localVariables)
     {
         if (constants == null) {
-			return null;
-		}
+            return null;
+        }
 
         ConstantFieldref cfr = constants.getConstantFieldref(this.getIndex());
         if (cfr == null) {
-			return null;
-		}
+            return null;
+        }
 
         ConstantNameAndType cnat =
             constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
         if (cnat == null) {
-			return null;
-		}
+            return null;
+        }
 
         return constants.getConstantUtf8(cnat.getSignatureIndex());
     }
 
-	public Instruction getObjectref() {
-		return objectref;
-	}
+    public Instruction getObjectref() {
+        return objectref;
+    }
 
-	public void setObjectref(Instruction objectref) {
-		this.objectref = objectref;
-	}
+    public void setObjectref(Instruction objectref) {
+        this.objectref = objectref;
+    }
 }

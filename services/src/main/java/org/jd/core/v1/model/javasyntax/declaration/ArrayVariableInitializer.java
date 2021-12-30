@@ -33,22 +33,22 @@ public class ArrayVariableInitializer extends DefaultList<VariableInitializer> i
         visitor.visit(this);
     }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		return prime * result + (type == null ? 0 : type.hashCode());
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        return prime * result + (type == null ? 0 : type.hashCode());
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!super.equals(obj) || getClass() != obj.getClass()) {
-			return false;
-		}
-		ArrayVariableInitializer other = (ArrayVariableInitializer) obj;
-		return Objects.equals(type, other.type);
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj) || getClass() != obj.getClass()) {
+            return false;
+        }
+        ArrayVariableInitializer other = (ArrayVariableInitializer) obj;
+        return Objects.equals(type, other.type);
+    }
 }

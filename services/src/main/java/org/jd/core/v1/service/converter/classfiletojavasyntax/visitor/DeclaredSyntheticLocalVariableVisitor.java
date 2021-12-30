@@ -88,8 +88,8 @@ public class DeclaredSyntheticLocalVariableVisitor extends AbstractJavaSyntaxVis
         expression.getExpression().accept(this);
     }
 
-	@Override
-	@SuppressWarnings("unlikely-arg-type")
+    @Override
+    @SuppressWarnings("unlikely-arg-type")
     public void visit(LocalVariableReferenceExpression expression) {
         AbstractLocalVariable localVariable = ((ClassFileLocalVariableReferenceExpression)expression).getLocalVariable();
 

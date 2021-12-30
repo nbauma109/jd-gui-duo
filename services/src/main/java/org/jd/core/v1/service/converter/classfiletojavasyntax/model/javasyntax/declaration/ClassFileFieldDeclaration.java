@@ -39,11 +39,11 @@ public class ClassFileFieldDeclaration extends FieldDeclaration implements Class
     @Override
     public boolean equals(Object o) {
         if (this == o) {
-			return true;
-		}
+            return true;
+        }
         if (!(o instanceof ClassFileFieldDeclaration that) || !super.equals(o)) {
-			return false;
-		}
+            return false;
+        }
 
         return firstLineNumber == that.firstLineNumber;
     }

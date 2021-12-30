@@ -28,11 +28,11 @@ public class LookupSwitch extends Switch
         this.keys = keys;
     }
 
-	public int[] getKeys() {
-		return keys;
-	}
+    public int[] getKeys() {
+        return keys;
+    }
 
-	public int getKey(int i) {
-		return keys[i];
-	}
+    public int getKey(int i) {
+        return keys[i];
+    }
 }

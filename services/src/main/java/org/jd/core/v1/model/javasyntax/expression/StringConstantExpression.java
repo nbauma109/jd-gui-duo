@@ -47,8 +47,8 @@ public class StringConstantExpression extends AbstractLineNumberExpression {
         return "StringConstantExpression{\"" + string + "\"}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new StringConstantExpression(lineNumber, string);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new StringConstantExpression(lineNumber, string);
+    }
 }

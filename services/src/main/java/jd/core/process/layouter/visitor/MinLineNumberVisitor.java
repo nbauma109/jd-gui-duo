@@ -56,7 +56,7 @@ public class MinLineNumberVisitor
 
                 if (ii.isSingleStep())
                 {
-        			// Operator '++' or '--'
+                    // Operator '++' or '--'
                     return instruction.getLineNumber();
                 }
                 return visit(ii.getValue());
@@ -67,7 +67,7 @@ public class MinLineNumberVisitor
 
                 if (ii.isSingleStep())
                 {
-                	// Operator '++' or '--'
+                    // Operator '++' or '--'
                     return visit(ii.getValue());
                 }
                 return instruction.getLineNumber();

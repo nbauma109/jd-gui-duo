@@ -68,9 +68,9 @@ public class GotoFactory implements InstructionFactory
             (short)((code[offset+1] & 255) << 8 | code[offset+2] & 255);
 
         if (!stack.isEmpty() && !list.isEmpty()) {
-			generateTernaryOpStore(
+            generateTernaryOpStore(
                 list, listForAnalyze, stack, code, offset, value);
-		}
+        }
 
         list.add(new Goto(opcode, offset, lineNumber, value));
 

@@ -25,80 +25,80 @@ import jd.core.model.classfile.attribute.AttributeSignature;
 
 public class Base
 {
-	private int accessFlags;
-	private final Attribute[] attributes;
+    private int accessFlags;
+    private final Attribute[] attributes;
 
-	public Base(int accessFlags, Attribute[] attributes)
-	{
-		this.setAccessFlags(accessFlags);
-		this.attributes = attributes;
-	}
+    public Base(int accessFlags, Attribute[] attributes)
+    {
+        this.setAccessFlags(accessFlags);
+        this.attributes = attributes;
+    }
 
-	public AttributeSignature getAttributeSignature()
-	{
-		if (this.attributes != null)
-		{
-			for (int i=this.attributes.length-1; i>=0; --i) {
-				if (this.attributes[i].getTag() == Const.ATTR_SIGNATURE) {
-					return (AttributeSignature)this.attributes[i];
-				}
-			}
-		}
+    public AttributeSignature getAttributeSignature()
+    {
+        if (this.attributes != null)
+        {
+            for (int i=this.attributes.length-1; i>=0; --i) {
+                if (this.attributes[i].getTag() == Const.ATTR_SIGNATURE) {
+                    return (AttributeSignature)this.attributes[i];
+                }
+            }
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	public boolean containsAttributeDeprecated()
-	{
-		if (this.attributes != null)
-		{
-			for (int i=this.attributes.length-1; i>=0; --i) {
-				if (this.attributes[i].getTag() == Const.ATTR_DEPRECATED) {
-					return true;
-				}
-			}
-		}
+    public boolean containsAttributeDeprecated()
+    {
+        if (this.attributes != null)
+        {
+            for (int i=this.attributes.length-1; i>=0; --i) {
+                if (this.attributes[i].getTag() == Const.ATTR_DEPRECATED) {
+                    return true;
+                }
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	public boolean containsAnnotationDeprecated(ClassFile classFile)
-	{
-		if (this.attributes != null)
-		{
-			for (int i=this.attributes.length-1; i>=0; --i)
-			{
-				if (this.attributes[i].getTag() == Const.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS
+    public boolean containsAnnotationDeprecated(ClassFile classFile)
+    {
+        if (this.attributes != null)
+        {
+            for (int i=this.attributes.length-1; i>=0; --i)
+            {
+                if (this.attributes[i].getTag() == Const.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS
                  || this.attributes[i].getTag() == Const.ATTR_RUNTIME_VISIBLE_ANNOTATIONS) {
-					Annotation[]annotations =
-							((AttributeRuntimeAnnotations)attributes[i]).getAnnotations();
-					if (containsAnnotationDeprecated(classFile, annotations)) {
-						return true;
-					}
-				}
-			}
-		}
+                    Annotation[]annotations =
+                            ((AttributeRuntimeAnnotations)attributes[i]).getAnnotations();
+                    if (containsAnnotationDeprecated(classFile, annotations)) {
+                        return true;
+                    }
+                }
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	private static boolean containsAnnotationDeprecated(
-			ClassFile classFile, Annotation[] annotations)
-	{
-		if (annotations != null)
-		{
-			int idsIndex =
-					classFile.getConstantPool().getInternalDeprecatedSignatureIndex();
+    private static boolean containsAnnotationDeprecated(
+            ClassFile classFile, Annotation[] annotations)
+    {
+        if (annotations != null)
+        {
+            int idsIndex =
+                    classFile.getConstantPool().getInternalDeprecatedSignatureIndex();
 
-			for (int i=annotations.length-1; i>=0; --i) {
-				if (idsIndex == annotations[i].typeIndex()) {
-					return true;
-				}
-			}
-		}
+            for (int i=annotations.length-1; i>=0; --i) {
+                if (idsIndex == annotations[i].typeIndex()) {
+                    return true;
+                }
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 
     public Attribute[] getAttributes()
     {
@@ -107,14 +107,14 @@ public class Base
 
     public Attribute getAttribute(int i)
     {
-    	return this.attributes[i];
+        return this.attributes[i];
     }
 
-	public int getAccessFlags() {
-		return accessFlags;
-	}
+    public int getAccessFlags() {
+        return accessFlags;
+    }
 
-	public void setAccessFlags(int accessFlags) {
-		this.accessFlags = accessFlags;
-	}
+    public void setAccessFlags(int accessFlags) {
+        this.accessFlags = accessFlags;
+    }
 }

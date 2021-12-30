@@ -47,179 +47,179 @@ import jd.core.process.analyzer.util.ReconstructorUtil;
  */
 public class InitArrayInstructionReconstructor
 {
-	private InitArrayInstructionReconstructor() {
-	}
+    private InitArrayInstructionReconstructor() {
+    }
 
-	public static void reconstruct(List<Instruction> list)
-	{
-		Instruction i;
-		DupStore dupStore;
-		int opcode;
-		for (int index=list.size()-1; index>=0; --index)
-		{
-			i = list.get(index);
+    public static void reconstruct(List<Instruction> list)
+    {
+        Instruction i;
+        DupStore dupStore;
+        int opcode;
+        for (int index=list.size()-1; index>=0; --index)
+        {
+            i = list.get(index);
 
-			if (i.getOpcode() != ByteCodeConstants.DUPSTORE) {
-				continue;
-			}
+            if (i.getOpcode() != ByteCodeConstants.DUPSTORE) {
+                continue;
+            }
 
-			dupStore = (DupStore)i;
-			opcode = dupStore.getObjectref().getOpcode();
+            dupStore = (DupStore)i;
+            opcode = dupStore.getObjectref().getOpcode();
 
-			if (opcode != Const.NEWARRAY &&
-					opcode != Const.ANEWARRAY) {
-				continue;
-			}
+            if (opcode != Const.NEWARRAY &&
+                    opcode != Const.ANEWARRAY) {
+                continue;
+            }
 
-			reconstructAInstruction(list, index, dupStore);
-		}
-	}
+            reconstructAInstruction(list, index, dupStore);
+        }
+    }
 
-	private static void reconstructAInstruction(
-			List<Instruction> list, int index, DupStore dupStore)
-	{
-		// 1er DupStore trouvé
-		final int length = list.size();
-		int firstDupStoreIndex = index;
-		DupStore lastDupStore = dupStore;
-		ArrayStoreInstruction lastAsi = null;
-		int arrayIndex = 0;
-		List<Instruction> values = new ArrayList<>();
+    private static void reconstructAInstruction(
+            List<Instruction> list, int index, DupStore dupStore)
+    {
+        // 1er DupStore trouvé
+        final int length = list.size();
+        int firstDupStoreIndex = index;
+        DupStore lastDupStore = dupStore;
+        ArrayStoreInstruction lastAsi = null;
+        int arrayIndex = 0;
+        List<Instruction> values = new ArrayList<>();
 
-		Instruction i;
-		ArrayStoreInstruction asi;
-		int indexOfArrayStoreInstruction;
-		DupStore nextDupStore;
-		while (++index < length)
-		{
-			i = list.get(index);
+        Instruction i;
+        ArrayStoreInstruction asi;
+        int indexOfArrayStoreInstruction;
+        DupStore nextDupStore;
+        while (++index < length)
+        {
+            i = list.get(index);
 
-			// Recherche de ?AStore ( DupLoad, index, value )
-			if (i.getOpcode() != Const.AASTORE &&
-					i.getOpcode() != ByteCodeConstants.ARRAYSTORE) {
-				break;
-			}
+            // Recherche de ?AStore ( DupLoad, index, value )
+            if (i.getOpcode() != Const.AASTORE &&
+                    i.getOpcode() != ByteCodeConstants.ARRAYSTORE) {
+                break;
+            }
 
-			asi = (ArrayStoreInstruction)i;
+            asi = (ArrayStoreInstruction)i;
 
-			if (asi.getArrayref().getOpcode() != ByteCodeConstants.DUPLOAD ||
-					asi.getArrayref().getOffset() != lastDupStore.getOffset()) {
-				break;
-			}
+            if (asi.getArrayref().getOpcode() != ByteCodeConstants.DUPLOAD ||
+                    asi.getArrayref().getOffset() != lastDupStore.getOffset()) {
+                break;
+            }
 
-			lastAsi = asi;
+            lastAsi = asi;
 
-			// Si les premieres cases d'un tableau ont pour valeur 0, elles
-			// ne sont pas initialisee ! La boucle suivante reconstruit
-			// l'initialisation des valeurs 0.
-			indexOfArrayStoreInstruction = getArrayIndex(asi.getIndexref());
-			while (indexOfArrayStoreInstruction > arrayIndex)
-			{
-				values.add(new IConst(
-						ByteCodeConstants.ICONST, asi.getOffset(), asi.getLineNumber(), 0));
-				arrayIndex++;
-			}
+            // Si les premieres cases d'un tableau ont pour valeur 0, elles
+            // ne sont pas initialisee ! La boucle suivante reconstruit
+            // l'initialisation des valeurs 0.
+            indexOfArrayStoreInstruction = getArrayIndex(asi.getIndexref());
+            while (indexOfArrayStoreInstruction > arrayIndex)
+            {
+                values.add(new IConst(
+                        ByteCodeConstants.ICONST, asi.getOffset(), asi.getLineNumber(), 0));
+                arrayIndex++;
+            }
 
-			values.add(asi.getValueref());
-			arrayIndex++;
+            values.add(asi.getValueref());
+            arrayIndex++;
 
-			index++;
-			// Recherche de DupStoreM( DupLoadN )
-			if (index >= length) {
-				break;
-			}
+            index++;
+            // Recherche de DupStoreM( DupLoadN )
+            if (index >= length) {
+                break;
+            }
 
-			i = list.get(index);
+            i = list.get(index);
 
-			if (i.getOpcode() != ByteCodeConstants.DUPSTORE) {
-				break;
-			}
+            if (i.getOpcode() != ByteCodeConstants.DUPSTORE) {
+                break;
+            }
 
-			nextDupStore = (DupStore)i;
+            nextDupStore = (DupStore)i;
 
-			if (nextDupStore.getObjectref().getOpcode() != ByteCodeConstants.DUPLOAD ||
-					nextDupStore.getObjectref().getOffset() != lastDupStore.getOffset()) {
-				break;
-			}
+            if (nextDupStore.getObjectref().getOpcode() != ByteCodeConstants.DUPLOAD ||
+                    nextDupStore.getObjectref().getOffset() != lastDupStore.getOffset()) {
+                break;
+            }
 
-			lastDupStore = nextDupStore;
-		}
+            lastDupStore = nextDupStore;
+        }
 
-		if (lastAsi != null)
-		{
-			// Instanciation d'une instruction InitArrayInstruction
-			InitArrayInstruction iai = new InitArrayInstruction(
-					ByteCodeConstants.NEWANDINITARRAY, lastAsi.getOffset(),
-					dupStore.getLineNumber(), dupStore.getObjectref(), values);
+        if (lastAsi != null)
+        {
+            // Instanciation d'une instruction InitArrayInstruction
+            InitArrayInstruction iai = new InitArrayInstruction(
+                    ByteCodeConstants.NEWANDINITARRAY, lastAsi.getOffset(),
+                    dupStore.getLineNumber(), dupStore.getObjectref(), values);
 
-			// Recherche de l'instruction 'DupLoad' suivante
-			Instruction parent = ReconstructorUtil.replaceDupLoad(
-					list, index, lastDupStore, iai);
+            // Recherche de l'instruction 'DupLoad' suivante
+            Instruction parent = ReconstructorUtil.replaceDupLoad(
+                    list, index, lastDupStore, iai);
 
-			if (parent != null && parent.getOpcode() == Const.AASTORE) {
-				iai.setOpcode(ByteCodeConstants.INITARRAY);
-			}
-			// Retrait des instructions de la liste
-			while (firstDupStoreIndex < index) {
-				index--;
-				list.remove(index);
-			}
+            if (parent != null && parent.getOpcode() == Const.AASTORE) {
+                iai.setOpcode(ByteCodeConstants.INITARRAY);
+            }
+            // Retrait des instructions de la liste
+            while (firstDupStoreIndex < index) {
+                index--;
+                list.remove(index);
+            }
 
-			// Initialisation des types de constantes entieres
-			if (iai.getNewArray().getOpcode() == Const.NEWARRAY)
-			{
-				NewArray na = (NewArray)iai.getNewArray();
-				switch (na.getType())
-				{
-				case Const.T_BOOLEAN:
-					setContantTypes("Z", iai.getValues());
-					break;
-				case Const.T_CHAR:
-					setContantTypes("C", iai.getValues());
-					break;
-				case Const.T_BYTE:
-					setContantTypes("B", iai.getValues());
-					break;
-				case Const.T_SHORT:
-					setContantTypes("S", iai.getValues());
-					break;
-				case Const.T_INT:
-					setContantTypes("I", iai.getValues());
-					break;
-				}
-			}
-		}
-	}
+            // Initialisation des types de constantes entieres
+            if (iai.getNewArray().getOpcode() == Const.NEWARRAY)
+            {
+                NewArray na = (NewArray)iai.getNewArray();
+                switch (na.getType())
+                {
+                case Const.T_BOOLEAN:
+                    setContantTypes("Z", iai.getValues());
+                    break;
+                case Const.T_CHAR:
+                    setContantTypes("C", iai.getValues());
+                    break;
+                case Const.T_BYTE:
+                    setContantTypes("B", iai.getValues());
+                    break;
+                case Const.T_SHORT:
+                    setContantTypes("S", iai.getValues());
+                    break;
+                case Const.T_INT:
+                    setContantTypes("I", iai.getValues());
+                    break;
+                }
+            }
+        }
+    }
 
-	private static void setContantTypes(
-			String signature, List<Instruction> values)
-	{
-		final int length = values.size();
+    private static void setContantTypes(
+            String signature, List<Instruction> values)
+    {
+        final int length = values.size();
 
-		Instruction value;
-		for (int i=0; i<length; i++)
-		{
-			value = values.get(i);
-			if (value.getOpcode() == Const.BIPUSH
+        Instruction value;
+        for (int i=0; i<length; i++)
+        {
+            value = values.get(i);
+            if (value.getOpcode() == Const.BIPUSH
              || value.getOpcode() == ByteCodeConstants.ICONST
              || value.getOpcode() == Const.SIPUSH) {
-				((IConst)value).setReturnedSignature(signature);
-			}
-		}
-	}
+                ((IConst)value).setReturnedSignature(signature);
+            }
+        }
+    }
 
-	private static int getArrayIndex(Instruction i)
-	{
-		switch (i.getOpcode())
-		{
-		case ByteCodeConstants.ICONST:
-			return ((IConst)i).getValue();
-		case Const.BIPUSH:
-			return ((BIPush)i).getValue();
-		case Const.SIPUSH:
-			return ((SIPush)i).getValue();
-		default:
-			return -1;
-		}
-	}
+    private static int getArrayIndex(Instruction i)
+    {
+        switch (i.getOpcode())
+        {
+        case ByteCodeConstants.ICONST:
+            return ((IConst)i).getValue();
+        case Const.BIPUSH:
+            return ((BIPush)i).getValue();
+        case Const.SIPUSH:
+            return ((SIPush)i).getValue();
+        default:
+            return -1;
+        }
+    }
 }

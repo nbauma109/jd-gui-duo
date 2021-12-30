@@ -73,8 +73,8 @@ public class DotClass118AReconstructor
         int i = list.size();
 
         if  (i < 6) {
-			return;
-		}
+            return;
+        }
 
         i -= 5;
         ConstantPool constants = classFile.getConstantPool();
@@ -84,14 +84,14 @@ public class DotClass118AReconstructor
             Instruction instruction = list.get(i);
 
             if (instruction.getOpcode() != ByteCodeConstants.IFXNULL) {
-				continue;
-			}
+                continue;
+            }
 
             IfInstruction ii = (IfInstruction)instruction;
 
             if (ii.getValue().getOpcode() != Const.GETSTATIC) {
-				continue;
-			}
+                continue;
+            }
 
             GetStatic gs = (GetStatic)ii.getValue();
 
@@ -100,51 +100,51 @@ public class DotClass118AReconstructor
             instruction = list.get(i+1);
 
             if (instruction.getOpcode() != ByteCodeConstants.TERNARYOPSTORE) {
-				continue;
-			}
+                continue;
+            }
 
             TernaryOpStore tos = (TernaryOpStore)instruction;
 
             if (tos.getObjectref().getOpcode() != Const.GETSTATIC ||
                 gs.getIndex() != ((GetStatic)tos.getObjectref()).getIndex()) {
-				continue;
-			}
+                continue;
+            }
 
             instruction = list.get(i+2);
 
             if (instruction.getOpcode() != Const.GOTO) {
-				continue;
-			}
+                continue;
+            }
 
             Goto g = (Goto)instruction;
 
             instruction = list.get(i+3);
 
             if (instruction.getOpcode() != ByteCodeConstants.DUPSTORE) {
-				continue;
-			}
+                continue;
+            }
 
             if (g.getOffset() >= jumpOffset || jumpOffset > instruction.getOffset()) {
-				continue;
-			}
+                continue;
+            }
 
             DupStore ds = (DupStore)instruction;
 
             if (ds.getObjectref().getOpcode() != Const.INVOKESTATIC) {
-				continue;
-			}
+                continue;
+            }
 
             Invokestatic is = (Invokestatic)ds.getObjectref();
 
             if (is.getArgs().size() != 1) {
-				continue;
-			}
+                continue;
+            }
 
             instruction = is.getArgs().get(0);
 
             if (instruction.getOpcode() != Const.LDC) {
-				continue;
-			}
+                continue;
+            }
 
             ConstantMethodref cmr =
                 constants.getConstantMethodref(is.getIndex());
@@ -153,28 +153,28 @@ public class DotClass118AReconstructor
             String nameMethod = constants.getConstantUtf8(cnatMethod.getNameIndex());
 
             if (! StringConstants.CLASS_DOLLAR.equals(nameMethod)) {
-				continue;
-			}
+                continue;
+            }
 
             Ldc ldc = (Ldc)instruction;
             Constant cv = constants.getConstantValue(ldc.getIndex());
 
             if (!(cv instanceof ConstantString)) {
-				continue;
-			}
+                continue;
+            }
 
             instruction = list.get(i+4);
 
             if (instruction.getOpcode() != Const.PUTSTATIC) {
-				continue;
-			}
+                continue;
+            }
 
             PutStatic ps = (PutStatic)instruction;
 
             if (ps.getValueref().getOpcode() != ByteCodeConstants.DUPLOAD ||
                 ds.getOffset() != ps.getValueref().getOffset()) {
-				continue;
-			}
+                continue;
+            }
 
             ConstantFieldref cfr = constants.getConstantFieldref(gs.getIndex());
             ConstantNameAndType cnatField = constants.getConstantNameAndType(
@@ -183,8 +183,8 @@ public class DotClass118AReconstructor
                 constants.getConstantUtf8(cnatField.getSignatureIndex());
 
             if (! StringConstants.INTERNAL_CLASS_SIGNATURE.equals(signatureField)) {
-				continue;
-			}
+                continue;
+            }
 
             String nameField = constants.getConstantUtf8(cnatField.getNameIndex());
 
@@ -215,8 +215,8 @@ public class DotClass118AReconstructor
                 {
                     visitor.visit(list.get(j));
                     if (visitor.getParentFound() != null) {
-						break;
-					}
+                        break;
+                    }
                 }
             }
             else if (nameField.startsWith(StringConstants.ARRAY_DOLLAR))
@@ -286,8 +286,8 @@ public class DotClass118AReconstructor
                 {
                     visitor.visit(list.get(j));
                     if (visitor.getParentFound() != null) {
-						break;
-					}
+                        break;
+                    }
                 }
             }
             else

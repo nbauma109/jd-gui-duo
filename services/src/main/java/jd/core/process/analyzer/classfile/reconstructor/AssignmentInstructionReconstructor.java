@@ -68,8 +68,8 @@ public class AssignmentInstructionReconstructor
         for (int dupStoreIndex=0; dupStoreIndex<list.size(); dupStoreIndex++)
         {
             if (list.get(dupStoreIndex).getOpcode() != ByteCodeConstants.DUPSTORE) {
-				continue;
-			}
+                continue;
+            }
 
             // DupStore trouvé
             DupStore dupStore = (DupStore)list.get(dupStoreIndex);
@@ -91,8 +91,8 @@ public class AssignmentInstructionReconstructor
                     i = ((ArrayStoreInstruction)i).getArrayref();
                     if (i.getOpcode() == ByteCodeConstants.DUPLOAD &&
                         ((DupLoad)i).getDupStore() == dupStore) {
-						continue;
-					}
+                        continue;
+                    }
                 }
             }
 
@@ -117,13 +117,13 @@ public class AssignmentInstructionReconstructor
                         || xstorePutfieldPutstatic.getOpcode() == Const.FSTORE
                         || xstorePutfieldPutstatic.getOpcode() == Const.LSTORE)
                 {
-                	new RuntimeException("Unexpected instruction")
+                    new RuntimeException("Unexpected instruction")
                                 .printStackTrace();
                 }
 
                 if (dupload1 == null) {
-					continue;
-				}
+                    continue;
+                }
 
                 // Recherche du 2eme DupLoad
                 Instruction dupload2 = null;
@@ -134,13 +134,13 @@ public class AssignmentInstructionReconstructor
                     dupload2 = SearchDupLoadInstructionVisitor.visit(
                         list.get(dupload2Index), dupStore);
                     if (dupload2 != null) {
-						break;
-					}
+                        break;
+                    }
                 }
 
                 if (dupload2 == null) {
-					continue;
-				}
+                    continue;
+                }
 
                 if (dupload1.getLineNumber() == dupload2.getLineNumber())
                 {
@@ -287,25 +287,25 @@ public class AssignmentInstructionReconstructor
                     if (value1.getOpcode() == Const.ALOAD &&
                         ((StoreInstruction)xstorePutfieldPutstatic).getIndex() ==
                             ((LoadInstruction)value1).getIndex()) {
-						return createBinaryOperatorAssignmentInstruction(
+                        return createBinaryOperatorAssignmentInstruction(
                             xstorePutfieldPutstatic, dupStore);
-					}
+                    }
                     break;
                 case Const.ISTORE:
                     if (value1.getOpcode() == Const.ILOAD &&
                         ((StoreInstruction)xstorePutfieldPutstatic).getIndex() ==
                             ((LoadInstruction)value1).getIndex()) {
-						return createBinaryOperatorAssignmentInstruction(
+                        return createBinaryOperatorAssignmentInstruction(
                             xstorePutfieldPutstatic, dupStore);
-					}
+                    }
                     break;
                 case ByteCodeConstants.STORE:
                     if (value1.getOpcode() == ByteCodeConstants.LOAD &&
                         ((StoreInstruction)xstorePutfieldPutstatic).getIndex() ==
                             ((LoadInstruction)value1).getIndex()) {
-						return createBinaryOperatorAssignmentInstruction(
+                        return createBinaryOperatorAssignmentInstruction(
                             xstorePutfieldPutstatic, dupStore);
-					}
+                    }
                     break;
                 case Const.PUTFIELD:
                     if (value1.getOpcode() == Const.GETFIELD &&
@@ -318,18 +318,18 @@ public class AssignmentInstructionReconstructor
                         if (visitor.visit(
                                 ((PutField)xstorePutfieldPutstatic).getObjectref(),
                                 ((GetField)value1).getObjectref())) {
-							return createBinaryOperatorAssignmentInstruction(
+                            return createBinaryOperatorAssignmentInstruction(
                                 xstorePutfieldPutstatic, dupStore);
-						}
+                        }
                     }
                     break;
                 case Const.PUTSTATIC:
                     if (value1.getOpcode() == Const.GETFIELD &&
                         ((PutStatic)xstorePutfieldPutstatic).getIndex() ==
                             ((GetStatic)value1).getIndex()) {
-						return createBinaryOperatorAssignmentInstruction(
+                        return createBinaryOperatorAssignmentInstruction(
                             xstorePutfieldPutstatic, dupStore);
-					}
+                    }
                     break;
                 case Const.AASTORE:
                     if (value1.getOpcode() == Const.AALOAD)
@@ -345,9 +345,9 @@ public class AssignmentInstructionReconstructor
                                 aas.getArrayref(), aal.getArrayref()) &&
                             visitor.visit(
                                 aas.getIndexref(), aal.getIndexref())) {
-							return createBinaryOperatorAssignmentInstruction(
+                            return createBinaryOperatorAssignmentInstruction(
                                     xstorePutfieldPutstatic, dupStore);
-						}
+                        }
                     }
                     break;
                 case ByteCodeConstants.ARRAYSTORE:
@@ -364,9 +364,9 @@ public class AssignmentInstructionReconstructor
                                 aas.getArrayref(), aal.getArrayref()) &&
                             visitor.visit(
                                 aas.getIndexref(), aal.getIndexref())) {
-							return createBinaryOperatorAssignmentInstruction(
+                            return createBinaryOperatorAssignmentInstruction(
                                     xstorePutfieldPutstatic, dupStore);
-						}
+                        }
                     }
                     break;
                 case Const.DSTORE,

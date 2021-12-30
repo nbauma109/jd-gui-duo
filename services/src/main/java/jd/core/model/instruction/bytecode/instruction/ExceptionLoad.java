@@ -36,13 +36,13 @@ public class ExceptionLoad extends IndexInstruction
             ConstantPool constants, LocalVariables localVariables)
     {
         if (constants == null || this.getExceptionNameIndex() == 0) {
-			return null;
-		}
+            return null;
+        }
 
         return constants.getConstantUtf8(this.getExceptionNameIndex());
     }
 
-	public int getExceptionNameIndex() {
-		return exceptionNameIndex;
-	}
+    public int getExceptionNameIndex() {
+        return exceptionNameIndex;
+    }
 }

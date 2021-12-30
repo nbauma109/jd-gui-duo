@@ -54,14 +54,14 @@ public class Field extends FieldOrMethod
     public Constant getConstantValue(ConstantPool constants)
     {
         if (this.getAttributes() != null) {
-			for (Attribute attribute : this.getAttributes()) {
-				if (attribute.getTag() == Const.ATTR_CONSTANT_VALUE)
+            for (Attribute attribute : this.getAttributes()) {
+                if (attribute.getTag() == Const.ATTR_CONSTANT_VALUE)
                 {
                     AttributeConstantValue acv = (AttributeConstantValue)attribute;
                     return constants.getConstantValue(acv.getConstantvalueIndex());
                 }
-			}
-		}
+            }
+        }
 
         return null;
     }
@@ -77,21 +77,21 @@ public class Field extends FieldOrMethod
     }
 
     public int getAnonymousClassConstructorParameterIndex() {
-		return anonymousClassConstructorParameterIndex;
-	}
+        return anonymousClassConstructorParameterIndex;
+    }
 
-	public void setAnonymousClassConstructorParameterIndex(int anonymousClassConstructorParameterIndex) {
-		this.anonymousClassConstructorParameterIndex = anonymousClassConstructorParameterIndex;
-	}
+    public void setAnonymousClassConstructorParameterIndex(int anonymousClassConstructorParameterIndex) {
+        this.anonymousClassConstructorParameterIndex = anonymousClassConstructorParameterIndex;
+    }
 
-	public int getOuterMethodLocalVariableNameIndex() {
-		return outerMethodLocalVariableNameIndex;
-	}
+    public int getOuterMethodLocalVariableNameIndex() {
+        return outerMethodLocalVariableNameIndex;
+    }
 
-	public void setOuterMethodLocalVariableNameIndex(int outerMethodLocalVariableNameIndex) {
-		this.outerMethodLocalVariableNameIndex = outerMethodLocalVariableNameIndex;
-	}
+    public void setOuterMethodLocalVariableNameIndex(int outerMethodLocalVariableNameIndex) {
+        this.outerMethodLocalVariableNameIndex = outerMethodLocalVariableNameIndex;
+    }
 
-	public record ValueAndMethod(Instruction value, Method method) {
-	}
+    public record ValueAndMethod(Instruction value, Method method) {
+    }
 }

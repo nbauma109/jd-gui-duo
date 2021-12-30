@@ -21,15 +21,15 @@ public class EarContainerFactoryProvider implements ContainerFactory {
     @Override
     public String getType() { return "ear"; }
 
-	@Override
-	@SuppressWarnings("resource")
+    @Override
+    @SuppressWarnings("resource")
     public boolean accept(API api, Path rootPath) {
         if (rootPath.toUri().toString().toLowerCase().endsWith(".ear!/")) {
             return true;
         }
         // Extension: accept uncompressed EAR file containing a folder 'META-INF/application.xml'
         try {
-        	// do not try to close file system due to UnsupportedOperationException
+            // do not try to close file system due to UnsupportedOperationException
             return "file".equals(rootPath.getFileSystem().provider().getScheme()) && Files.exists(rootPath.resolve("META-INF/application.xml"));
         } catch (InvalidPathException e) {
             assert ExceptionUtil.printStackTrace(e);

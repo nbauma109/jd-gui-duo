@@ -32,16 +32,16 @@ public class FieldOrMethod extends Base
         this.descriptorIndex = descriptorIndex;
     }
 
-	public int getNameIndex() {
-		return nameIndex;
-	}
+    public int getNameIndex() {
+        return nameIndex;
+    }
 
-	public void setNameIndex(int nameIndex) {
-		this.nameIndex = nameIndex;
-	}
+    public void setNameIndex(int nameIndex) {
+        this.nameIndex = nameIndex;
+    }
 
-	public int getDescriptorIndex() {
-		return descriptorIndex;
-	}
+    public int getDescriptorIndex() {
+        return descriptorIndex;
+    }
 
 }

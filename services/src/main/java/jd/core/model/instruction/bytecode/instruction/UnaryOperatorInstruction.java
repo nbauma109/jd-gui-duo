@@ -50,19 +50,19 @@ public class UnaryOperatorInstruction extends Instruction
         return this.priority;
     }
 
-	public String getOperator() {
-		return operator;
-	}
+    public String getOperator() {
+        return operator;
+    }
 
-	public String getSignature() {
-		return signature;
-	}
+    public String getSignature() {
+        return signature;
+    }
 
-	public Instruction getValue() {
-		return value;
-	}
+    public Instruction getValue() {
+        return value;
+    }
 
-	public void setValue(Instruction value) {
-		this.value = value;
-	}
+    public void setValue(Instruction value) {
+        this.value = value;
+    }
 }

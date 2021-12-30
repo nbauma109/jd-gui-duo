@@ -42,23 +42,23 @@ public class Switch extends Instruction
         return null;
     }
 
-	public int getDefaultOffset() {
-		return defaultOffset;
-	}
+    public int getDefaultOffset() {
+        return defaultOffset;
+    }
 
-	public int[] getOffsets() {
-		return offsets;
-	}
+    public int[] getOffsets() {
+        return offsets;
+    }
 
-	public int getOffset(int i) {
-		return offsets[i];
-	}
+    public int getOffset(int i) {
+        return offsets[i];
+    }
 
-	public Instruction getKey() {
-		return key;
-	}
+    public Instruction getKey() {
+        return key;
+    }
 
-	public void setKey(Instruction key) {
-		this.key = key;
-	}
+    public void setKey(Instruction key) {
+        this.key = key;
+    }
 }

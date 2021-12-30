@@ -18,5 +18,5 @@ package jd.core.model.classfile.accessor;
 
 public interface Accessor
 {
-	byte tag();
+    byte tag();
 }

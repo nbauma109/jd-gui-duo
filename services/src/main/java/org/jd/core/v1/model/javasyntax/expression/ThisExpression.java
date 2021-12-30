@@ -46,8 +46,8 @@ public class ThisExpression extends AbstractLineNumberExpression {
         return "ThisExpression{" + type + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new ThisExpression(lineNumber, type);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new ThisExpression(lineNumber, type);
+    }
 }

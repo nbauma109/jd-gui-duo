@@ -44,19 +44,19 @@ public class TernaryOpStore extends Instruction
         return this.getObjectref().getReturnedSignature(constants, localVariables);
     }
 
-	public Instruction getObjectref() {
-		return objectref;
-	}
+    public Instruction getObjectref() {
+        return objectref;
+    }
 
-	public void setObjectref(Instruction objectref) {
-		this.objectref = objectref;
-	}
+    public void setObjectref(Instruction objectref) {
+        this.objectref = objectref;
+    }
 
-	public int getTernaryOp2ndValueOffset() {
-		return ternaryOp2ndValueOffset;
-	}
+    public int getTernaryOp2ndValueOffset() {
+        return ternaryOp2ndValueOffset;
+    }
 
-	public void setTernaryOp2ndValueOffset(int ternaryOp2ndValueOffset) {
-		this.ternaryOp2ndValueOffset = ternaryOp2ndValueOffset;
-	}
+    public void setTernaryOp2ndValueOffset(int ternaryOp2ndValueOffset) {
+        this.ternaryOp2ndValueOffset = ternaryOp2ndValueOffset;
+    }
 }

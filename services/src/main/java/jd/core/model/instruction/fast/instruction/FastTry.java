@@ -39,14 +39,14 @@ public class FastTry extends FastList
     }
 
     public List<FastCatch> getCatches() {
-		return catches;
-	}
+        return catches;
+    }
 
-	public List<Instruction> getFinallyInstructions() {
-		return finallyInstructions;
-	}
+    public List<Instruction> getFinallyInstructions() {
+        return finallyInstructions;
+    }
 
-	public record FastCatch(int exceptionOffset, int exceptionTypeIndex,
+    public record FastCatch(int exceptionOffset, int exceptionTypeIndex,
                 int[] otherExceptionTypeIndexes, int localVarIndex,
                 List<Instruction> instructions)
     {

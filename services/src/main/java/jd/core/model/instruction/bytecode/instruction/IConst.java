@@ -42,23 +42,23 @@ public class IConst extends ConstInstruction
         if (value < 0)
         {
             if (value >= Byte.MIN_VALUE) {
-				this.setSignature("B");
-			} else if (value >= Short.MIN_VALUE) {
-				this.setSignature("S");
-			} else {
-				this.setSignature("I");
-			}
+                this.setSignature("B");
+            } else if (value >= Short.MIN_VALUE) {
+                this.setSignature("S");
+            } else {
+                this.setSignature("I");
+            }
         } else if (value <= 1) {
-			this.setSignature("X");
-		} else if (value <= Byte.MAX_VALUE) {
-			this.setSignature("Y");
-		} else if (value <= Short.MAX_VALUE) {
-			this.setSignature("S");
-		} else if (value <= Character.MAX_VALUE) {
-			this.setSignature("C");
-		} else {
-			this.setSignature("I");
-		}
+            this.setSignature("X");
+        } else if (value <= Byte.MAX_VALUE) {
+            this.setSignature("Y");
+        } else if (value <= Short.MAX_VALUE) {
+            this.setSignature("S");
+        } else if (value <= Character.MAX_VALUE) {
+            this.setSignature("C");
+        } else {
+            this.setSignature("I");
+        }
     }
 
     public String getSignature()
@@ -78,7 +78,7 @@ public class IConst extends ConstInstruction
         this.setSignature(signature);
     }
 
-	public void setSignature(String signature) {
-		this.signature = signature;
-	}
+    public void setSignature(String signature) {
+        this.signature = signature;
+    }
 }

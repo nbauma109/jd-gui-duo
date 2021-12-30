@@ -41,18 +41,18 @@ public class InitStaticFieldsReconstructor
     {
         Method method = classFile.getStaticMethod();
         if (method == null) {
-			return;
-		}
+            return;
+        }
 
         Field[] fields = classFile.getFields();
         if (fields == null) {
-			return;
-		}
+            return;
+        }
 
         List<Instruction> list = method.getFastNodes();
         if (list == null) {
-			return;
-		}
+            return;
+        }
 
         ConstantPool constants = classFile.getConstantPool();
 
@@ -66,15 +66,15 @@ public class InitStaticFieldsReconstructor
             Instruction instruction = list.get(indexInstruction);
 
             if (instruction.getOpcode() != Const.PUTSTATIC) {
-				break;
-			}
+                break;
+            }
 
             PutStatic putStatic = (PutStatic)instruction;
             ConstantFieldref cfr = constants.getConstantFieldref(putStatic.getIndex());
 
             if (cfr.getClassIndex() != classFile.getThisClassIndex()) {
-				break;
-			}
+                break;
+            }
 
             ConstantNameAndType cnat =
                 constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
@@ -93,21 +93,21 @@ public class InitStaticFieldsReconstructor
 
                     if (SearchInstructionByOpcodeVisitor.visit(
                             valueref, Const.ALOAD) != null) {
-						break;
-					}
+                        break;
+                    }
                     if (SearchInstructionByOpcodeVisitor.visit(
                             valueref, ByteCodeConstants.LOAD) != null) {
-						break;
-					}
+                        break;
+                    }
                     if (SearchInstructionByOpcodeVisitor.visit(
                             valueref, Const.ILOAD) != null) {
-						break;
-					}
+                        break;
+                    }
 
                     field.setValueAndMethod(valueref, method);
                     if (valueref.getOpcode() == ByteCodeConstants.NEWANDINITARRAY) {
-						valueref.setOpcode(ByteCodeConstants.INITARRAY);
-					}
+                        valueref.setOpcode(ByteCodeConstants.INITARRAY);
+                    }
                     list.remove(indexInstruction--);
                     break;
                 }
@@ -137,15 +137,15 @@ public class InitStaticFieldsReconstructor
                 Instruction instruction = list.get(indexInstruction);
 
                 if (instruction.getOpcode() != Const.PUTSTATIC) {
-					break;
-				}
+                    break;
+                }
 
                 PutStatic putStatic = (PutStatic)instruction;
                 ConstantFieldref cfr = constants.getConstantFieldref(putStatic.getIndex());
 
                 if (cfr.getClassIndex() != classFile.getThisClassIndex()) {
-					break;
-				}
+                    break;
+                }
 
                 ConstantNameAndType cnat =
                     constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
@@ -164,21 +164,21 @@ public class InitStaticFieldsReconstructor
 
                         if (SearchInstructionByOpcodeVisitor.visit(
                                 valueref, Const.ALOAD) != null) {
-							break;
-						}
+                            break;
+                        }
                         if (SearchInstructionByOpcodeVisitor.visit(
                                 valueref, ByteCodeConstants.LOAD) != null) {
-							break;
-						}
+                            break;
+                        }
                         if (SearchInstructionByOpcodeVisitor.visit(
                                 valueref, Const.ILOAD) != null) {
-							break;
-						}
+                            break;
+                        }
 
                         field.setValueAndMethod(valueref, method);
                         if (valueref.getOpcode() == ByteCodeConstants.NEWANDINITARRAY) {
-							valueref.setOpcode(ByteCodeConstants.INITARRAY);
-						}
+                            valueref.setOpcode(ByteCodeConstants.INITARRAY);
+                        }
                         list.remove(indexInstruction);
                         break;
                     }

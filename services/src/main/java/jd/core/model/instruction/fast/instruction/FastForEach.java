@@ -35,19 +35,19 @@ public class FastForEach extends FastList
         this.setValues(values);
     }
 
-	public Instruction getVariable() {
-		return variable;
-	}
+    public Instruction getVariable() {
+        return variable;
+    }
 
-	public void setVariable(Instruction variable) {
-		this.variable = variable;
-	}
+    public void setVariable(Instruction variable) {
+        this.variable = variable;
+    }
 
-	public Instruction getValues() {
-		return values;
-	}
+    public Instruction getValues() {
+        return values;
+    }
 
-	public void setValues(Instruction values) {
-		this.values = values;
-	}
+    public void setValues(Instruction values) {
+        this.values = values;
+    }
 }

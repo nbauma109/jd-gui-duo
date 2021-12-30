@@ -77,8 +77,8 @@ public class TernaryOpReconstructor
                 }
 
                 if (test == null) {
-					continue;
-				}
+                    continue;
+                }
 
                 TernaryOpStore value1 = (TernaryOpStore)i;
 
@@ -95,8 +95,8 @@ public class TernaryOpReconstructor
 
                 int indexVisitor = index+2;
                 while (indexVisitor<length && visitor.getOldInstruction()==null) {
-					visitor.visit(list.get(indexVisitor++));
-				}
+                    visitor.visit(list.get(indexVisitor++));
+                }
 
                 fto.setValue2(visitor.getOldInstruction());
 
@@ -104,15 +104,15 @@ public class TernaryOpReconstructor
                     isBooleanConstant(fto.getValue2()))
                 {
                     if (((IConst)fto.getValue1()).getValue() == 0) {
-						ComparisonInstructionAnalyzer.inverseComparison(fto.getTest());
-					}
+                        ComparisonInstructionAnalyzer.inverseComparison(fto.getTest());
+                    }
 
                     visitor.init(fto.getOffset(), fto.getTest());
 
                     indexVisitor = index+2;
                     while (indexVisitor<length && visitor.getOldInstruction()==null) {
-						visitor.visit(list.get(indexVisitor++));
-					}
+                        visitor.visit(list.get(indexVisitor++));
+                    }
                 }
 
                 // Remove Goto

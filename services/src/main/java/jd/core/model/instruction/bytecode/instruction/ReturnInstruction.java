@@ -37,11 +37,11 @@ public class ReturnInstruction extends Instruction
         return null;
     }
 
-	public Instruction getValueref() {
-		return valueref;
-	}
+    public Instruction getValueref() {
+        return valueref;
+    }
 
-	public void setValueref(Instruction valueref) {
-		this.valueref = valueref;
-	}
+    public void setValueref(Instruction valueref) {
+        this.valueref = valueref;
+    }
 }

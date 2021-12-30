@@ -716,8 +716,8 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
         Iterator<TypeParameter> iterator = parameters.iterator();
 
         while (iterator.hasNext()) {
-			iterator.next().accept(this);
-		}
+            iterator.next().accept(this);
+        }
     }
 
     public void visit(TypeDeclaration declaration) {
@@ -737,77 +737,77 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
 
     public void acceptListDeclaration(List<? extends Declaration> list) {
         for (Declaration declaration : list) {
-			declaration.accept(this);
-		}
+            declaration.accept(this);
+        }
     }
 
     public void acceptListExpression(List<? extends Expression> list) {
         for (Expression expression : list) {
-			expression.accept(this);
-		}
+            expression.accept(this);
+        }
     }
 
     public void acceptListReference(List<? extends Reference> list) {
         for (Reference reference : list) {
-			reference.accept(this);
-		}
+            reference.accept(this);
+        }
     }
 
     public void acceptListStatement(List<? extends Statement> list) {
         for (Statement statement : list) {
-			statement.accept(this);
-		}
+            statement.accept(this);
+        }
     }
 
     public void safeAccept(Declaration declaration) {
         if (declaration != null) {
-			declaration.accept(this);
-		}
+            declaration.accept(this);
+        }
     }
 
     public void safeAccept(BaseExpression expression) {
         if (expression != null) {
-			expression.accept(this);
-		}
+            expression.accept(this);
+        }
     }
 
     public void safeAccept(Reference reference) {
         if (reference != null) {
-			reference.accept(this);
-		}
+            reference.accept(this);
+        }
     }
 
     public void safeAccept(BaseStatement list) {
         if (list != null) {
-			list.accept(this);
-		}
+            list.accept(this);
+        }
     }
 
     public void safeAccept(BaseType list) {
         if (list != null) {
-			list.accept(this);
-		}
+            list.accept(this);
+        }
     }
 
     public void safeAccept(BaseTypeParameter list) {
         if (list != null) {
-			list.accept(this);
-		}
+            list.accept(this);
+        }
     }
 
     public void safeAcceptListDeclaration(List<? extends Declaration> list) {
         if (list != null) {
             for (Declaration declaration : list) {
-				declaration.accept(this);
-			}
+                declaration.accept(this);
+            }
         }
     }
 
     public void safeAcceptListStatement(List<? extends Statement> list) {
         if (list != null) {
             for (Statement statement : list) {
-				statement.accept(this);
-			}
+                statement.accept(this);
+            }
         }
     }
 }

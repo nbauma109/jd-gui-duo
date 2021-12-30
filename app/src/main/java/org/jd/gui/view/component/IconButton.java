@@ -12,16 +12,16 @@ import javax.swing.JButton;
 
 public class IconButton extends JButton {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public IconButton(String text, Action action) {
-		super(action);
-		setText(text);
-		setFocusPainted(false);
-	}
+    public IconButton(String text, Action action) {
+        super(action);
+        setText(text);
+        setFocusPainted(false);
+    }
 
-	public IconButton(Action action) {
-		super(action);
-		setFocusPainted(false);
-	}
+    public IconButton(Action action) {
+        super(action);
+        setFocusPainted(false);
+    }
 }

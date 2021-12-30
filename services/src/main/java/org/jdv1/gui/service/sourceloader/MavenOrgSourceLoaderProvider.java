@@ -161,27 +161,27 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
                     String name = "";
 
                     int next;
-					while (reader.hasNext()) {
+                    while (reader.hasNext()) {
                         next = reader.next();
-						if (next == XMLStreamConstants.START_ELEMENT) {
-							if ("str".equals(reader.getLocalName())) {
-							    if ("id".equals(reader.getAttributeValue(null, "name"))) {
-							        name = "id";
-							    } else {
-							        name = "str";
-							    }
-							} else if ("result".equals(reader.getLocalName())) {
-							    numFound = reader.getAttributeValue(null, "numFound");
-							} else {
-							    name = "";
-							}
-						} else if (next == XMLStreamConstants.CHARACTERS) {
-							if ("id".equals(name)) {
-								id = reader.getText().trim();
-							} else if ("str".equals(name)) {
-								sourceAvailable |= MAVENORG_LOAD_URL_SUFFIX.equals(reader.getText().trim());
-							}
-						}
+                        if (next == XMLStreamConstants.START_ELEMENT) {
+                            if ("str".equals(reader.getLocalName())) {
+                                if ("id".equals(reader.getAttributeValue(null, "name"))) {
+                                    name = "id";
+                                } else {
+                                    name = "str";
+                                }
+                            } else if ("result".equals(reader.getLocalName())) {
+                                numFound = reader.getAttributeValue(null, "numFound");
+                            } else {
+                                name = "";
+                            }
+                        } else if (next == XMLStreamConstants.CHARACTERS) {
+                            if ("id".equals(name)) {
+                                id = reader.getText().trim();
+                            } else if ("str".equals(name)) {
+                                sourceAvailable |= MAVENORG_LOAD_URL_SUFFIX.equals(reader.getText().trim());
+                            }
+                        }
                     }
 
                     reader.close();
@@ -273,7 +273,7 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
         StringTokenizer tokenizer = new StringTokenizer(filters);
 
         String filter;
-		while (tokenizer.hasMoreTokens()) {
+        while (tokenizer.hasMoreTokens()) {
             filter = tokenizer.nextToken();
 
             if (filter.length() > 1) {

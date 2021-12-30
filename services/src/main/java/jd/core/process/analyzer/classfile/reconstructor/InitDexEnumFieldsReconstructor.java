@@ -80,18 +80,18 @@ public class InitDexEnumFieldsReconstructor
     {
         Method method = classFile.getStaticMethod();
         if (method == null) {
-			return;
-		}
+            return;
+        }
 
         Field[] fields = classFile.getFields();
         if (fields == null) {
-			return;
-		}
+            return;
+        }
 
         List<Instruction> list = method.getFastNodes();
         if (list == null) {
-			return;
-		}
+            return;
+        }
 
         ConstantPool constants = classFile.getConstantPool();
 
@@ -109,26 +109,26 @@ public class InitDexEnumFieldsReconstructor
             {
                 Instruction instruction = list.get(indexInstruction);
                 if (instruction.getOpcode() != Const.PUTSTATIC) {
-					break;
-				}
+                    break;
+                }
 
                 PutStatic putStatic = (PutStatic)instruction;
                 if (putStatic.getValueref().getOpcode() != Const.ALOAD) {
-					break;
-				}
+                    break;
+                }
 
                 ConstantFieldref cfr = constants.getConstantFieldref(putStatic.getIndex());
                 if (cfr.getClassIndex() != classFile.getThisClassIndex()) {
-					break;
-				}
+                    break;
+                }
 
                 ConstantNameAndType cnat =
                     constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
 
                 String name = constants.getConstantUtf8(cnat.getNameIndex());
                 if (! StringConstants.ENUM_VALUES_ARRAY_NAME_ECLIPSE.equals(name)) {
-					break;
-				}
+                    break;
+                }
 
                 int indexField = fields.length;
 
@@ -153,29 +153,29 @@ public class InitDexEnumFieldsReconstructor
                         {
                             instruction = list.get(index);
                             if (instruction.getOpcode() != Const.AASTORE) {
-								break;
-							}
+                                break;
+                            }
                             AAStore aastore = (AAStore)instruction;
                             if (aastore.getArrayref().getOpcode() != Const.ALOAD ||
                                 aastore.getValueref().getOpcode() != Const.GETSTATIC ||
                                 ((ALoad)aastore.getArrayref()).getIndex() != localEnumArrayIndex) {
-								break;
-							}
+                                break;
+                            }
                             values.add(aastore.getValueref());
                         }
 
                         // FastDeclaration(AStore(...))
                         if (instruction.getOpcode() != FastConstants.DECLARE) {
-							break;
-						}
+                            break;
+                        }
                         FastDeclaration declaration = (FastDeclaration)instruction;
                         if (declaration.getInstruction().getOpcode() != Const.ASTORE) {
-							break;
-						}
+                            break;
+                        }
                         AStore astore = (AStore)declaration.getInstruction();
                         if (astore.getIndex() != localEnumArrayIndex) {
-							break;
-						}
+                            break;
+                        }
 
                         int valuesLength = values.size();
 
@@ -206,8 +206,8 @@ public class InitDexEnumFieldsReconstructor
                             list.remove(indexInstruction);
                             // Remove AAStores
                             while (--indexInstruction > index) {
-								list.remove(indexInstruction);
-							}
+                                list.remove(indexInstruction);
+                            }
                             // Remove FastDeclaration
                             list.remove(indexInstruction);
                         }

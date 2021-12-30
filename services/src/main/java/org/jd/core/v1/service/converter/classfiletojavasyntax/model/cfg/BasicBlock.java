@@ -230,19 +230,19 @@ public class BasicBlock {
 
     public boolean contains(BasicBlock basicBlock) {
         if (next == basicBlock || branch == basicBlock) {
-			return true;
-		}
+            return true;
+        }
 
         for (ExceptionHandler exceptionHandler : exceptionHandlers) {
             if (exceptionHandler.getBasicBlock() == basicBlock) {
-				return true;
-			}
+                return true;
+            }
         }
 
         for (SwitchCase switchCase : switchCases) {
             if (switchCase.getBasicBlock() == basicBlock) {
-				return true;
-			}
+                return true;
+            }
         }
 
         return sub1 == basicBlock || sub2 == basicBlock;
@@ -250,12 +250,12 @@ public class BasicBlock {
 
     public void replace(BasicBlock old, BasicBlock nevv) {
         if (next == old) {
-			setNext(nevv);
-		}
+            setNext(nevv);
+        }
 
         if (branch == old) {
-			branch = nevv;
-		}
+            branch = nevv;
+        }
 
         for (ExceptionHandler exceptionHandler : exceptionHandlers) {
             exceptionHandler.replace(old, nevv);
@@ -266,26 +266,26 @@ public class BasicBlock {
         }
 
         if (sub1 == old) {
-			sub1 = nevv;
-		}
+            sub1 = nevv;
+        }
 
         if (sub2 == old) {
-			sub2 = nevv;
-		}
+            sub2 = nevv;
+        }
 
         if (predecessors.remove(old) && nevv != END) {
-			predecessors.add(nevv);
-		}
+            predecessors.add(nevv);
+        }
     }
 
     public void replace(Set<BasicBlock> olds, BasicBlock nevv) {
         if (olds.contains(next)) {
-			setNext(nevv);
-		}
+            setNext(nevv);
+        }
 
         if (olds.contains(branch)) {
-			branch = nevv;
-		}
+            branch = nevv;
+        }
 
         for (ExceptionHandler exceptionHandler : exceptionHandlers) {
             exceptionHandler.replace(olds, nevv);
@@ -296,12 +296,12 @@ public class BasicBlock {
         }
 
         if (olds.contains(sub1)) {
-			sub1 = nevv;
-		}
+            sub1 = nevv;
+        }
 
         if (olds.contains(sub2)) {
-			sub2 = nevv;
-		}
+            sub2 = nevv;
+        }
 
         predecessors.removeAll(olds);
         predecessors.add(nevv);
@@ -320,7 +320,7 @@ public class BasicBlock {
                 }
             }
         }
-		exceptionHandlers.add(new ExceptionHandler(internalThrowableName, basicBlock));
+        exceptionHandlers.add(new ExceptionHandler(internalThrowableName, basicBlock));
     }
 
     public void inverseCondition() {
@@ -367,7 +367,7 @@ public class BasicBlock {
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder("BasicBlock{index=").append(index).append(", from=").append(fromOffset).append(", to=").append(toOffset).append(", type=")
-				.append(getTypeName()).append(", inverseCondition=").append(inverseCondition);
+                .append(getTypeName()).append(", inverseCondition=").append(inverseCondition);
 
         if (!predecessors.isEmpty()) {
             s.append(", predecessors=[");
@@ -425,28 +425,28 @@ public class BasicBlock {
 
         public void addInternalThrowableName(String internalThrowableName) {
             if (otherInternalThrowableNames == null) {
-				otherInternalThrowableNames = new DefaultList<>();
-			}
+                otherInternalThrowableNames = new DefaultList<>();
+            }
             otherInternalThrowableNames.add(internalThrowableName);
         }
 
         public void replace(BasicBlock old, BasicBlock nevv) {
             if (basicBlock == old) {
-				basicBlock = nevv;
-			}
+                basicBlock = nevv;
+            }
         }
 
         public void replace(Set<BasicBlock> olds, BasicBlock nevv) {
             if (olds.contains(basicBlock)) {
-				basicBlock = nevv;
-			}
+                basicBlock = nevv;
+            }
         }
 
         @Override
         public String toString() {
             if (otherInternalThrowableNames == null) {
-				return "BasicBlock.Handler{" + internalThrowableName + " -> " + basicBlock + "}";
-			}
+                return "BasicBlock.Handler{" + internalThrowableName + " -> " + basicBlock + "}";
+            }
             return "BasicBlock.Handler{" + internalThrowableName + ", " + otherInternalThrowableNames + " -> " + basicBlock + "}";
         }
     }
@@ -494,21 +494,21 @@ public class BasicBlock {
 
         public void replace(BasicBlock old, BasicBlock nevv) {
             if (basicBlock == old) {
-				basicBlock = nevv;
-			}
+                basicBlock = nevv;
+            }
         }
 
         public void replace(Set<BasicBlock> olds, BasicBlock nevv) {
             if (olds.contains(basicBlock)) {
-				basicBlock = nevv;
-			}
+                basicBlock = nevv;
+            }
         }
 
         @Override
         public String toString() {
             if (defaultCase) {
-				return "BasicBlock.SwitchCase{default: " + basicBlock + "}";
-			}
+                return "BasicBlock.SwitchCase{default: " + basicBlock + "}";
+            }
             return "BasicBlock.SwitchCase{'" + value + "': " + basicBlock + "}";
         }
     }

@@ -28,12 +28,12 @@ public class ContextualActionsFactoryService {
     public static ContextualActionsFactoryService getInstance() { return CONTEXTUAL_ACTIONS_FACTORY_SERVICE; }
 
     private static String getActionName(Action a) {
-		String name = (String)a.getValue(Action.NAME);
-		if (name == null) {
-		    name = "";
-		}
-		return name;
-	}
+        String name = (String)a.getValue(Action.NAME);
+        if (name == null) {
+            name = "";
+        }
+        return name;
+    }
 
     private final Collection<ContextualActionsFactory> providers = ExtensionService.getInstance().load(ContextualActionsFactory.class);
 

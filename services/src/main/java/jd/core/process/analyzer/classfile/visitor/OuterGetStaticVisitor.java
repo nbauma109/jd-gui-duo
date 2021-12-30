@@ -92,10 +92,10 @@ public class OuterGetStaticVisitor
                 ArrayLength al = (ArrayLength)instruction;
                 Accessor a = match(al.getArrayref());
                 if (a != null) {
-					al.setArrayref(newInstruction(al.getArrayref(), a));
-				} else {
-					visit(al.getArrayref());
-				}
+                    al.setArrayref(newInstruction(al.getArrayref(), a));
+                } else {
+                    visit(al.getArrayref());
+                }
             }
             break;
         case Const.AASTORE,
@@ -104,22 +104,22 @@ public class OuterGetStaticVisitor
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
                 Accessor a = match(asi.getArrayref());
                 if (a != null) {
-					asi.setArrayref(newInstruction(asi.getArrayref(), a));
-				} else {
-					visit(asi.getArrayref());
-				}
+                    asi.setArrayref(newInstruction(asi.getArrayref(), a));
+                } else {
+                    visit(asi.getArrayref());
+                }
                 a = match(asi.getIndexref());
                 if (a != null) {
-					asi.setIndexref(newInstruction(asi.getIndexref(), a));
-				} else {
-					visit(asi.getIndexref());
-				}
+                    asi.setIndexref(newInstruction(asi.getIndexref(), a));
+                } else {
+                    visit(asi.getIndexref());
+                }
                 a = match(asi.getValueref());
                 if (a != null) {
-					asi.setValueref(newInstruction(asi.getValueref(), a));
-				} else {
-					visit(asi.getValueref());
-				}
+                    asi.setValueref(newInstruction(asi.getValueref(), a));
+                } else {
+                    visit(asi.getValueref());
+                }
             }
             break;
         case ByteCodeConstants.ASSERT:
@@ -127,18 +127,18 @@ public class OuterGetStaticVisitor
                 AssertInstruction ai = (AssertInstruction)instruction;
                 Accessor a = match(ai.getTest());
                 if (a != null) {
-					ai.setTest(newInstruction(ai.getTest(), a));
-				} else {
-					visit(ai.getTest());
-				}
+                    ai.setTest(newInstruction(ai.getTest(), a));
+                } else {
+                    visit(ai.getTest());
+                }
                 if (ai.getMsg() != null)
                 {
                     a = match(ai.getMsg());
                     if (a != null) {
-						ai.setMsg(newInstruction(ai.getMsg(), a));
-					} else {
-						visit(ai.getMsg());
-					}
+                        ai.setMsg(newInstruction(ai.getMsg(), a));
+                    } else {
+                        visit(ai.getMsg());
+                    }
                 }
             }
             break;
@@ -147,10 +147,10 @@ public class OuterGetStaticVisitor
                 AThrow aThrow = (AThrow)instruction;
                 Accessor a = match(aThrow.getValue());
                 if (a != null) {
-					aThrow.setValue(newInstruction(aThrow.getValue(), a));
-				} else {
-					visit(aThrow.getValue());
-				}
+                    aThrow.setValue(newInstruction(aThrow.getValue(), a));
+                } else {
+                    visit(aThrow.getValue());
+                }
             }
             break;
         case ByteCodeConstants.UNARYOP:
@@ -158,10 +158,10 @@ public class OuterGetStaticVisitor
                 UnaryOperatorInstruction uoi = (UnaryOperatorInstruction)instruction;
                 Accessor a = match(uoi.getValue());
                 if (a != null) {
-					uoi.setValue(newInstruction(uoi.getValue(), a));
-				} else {
-					visit(uoi.getValue());
-				}
+                    uoi.setValue(newInstruction(uoi.getValue(), a));
+                } else {
+                    visit(uoi.getValue());
+                }
             }
             break;
         case ByteCodeConstants.BINARYOP:
@@ -169,16 +169,16 @@ public class OuterGetStaticVisitor
                 BinaryOperatorInstruction boi = (BinaryOperatorInstruction)instruction;
                 Accessor a = match(boi.getValue1());
                 if (a != null) {
-					boi.setValue1(newInstruction(boi.getValue1(), a));
-				} else {
-					visit(boi.getValue1());
-				}
+                    boi.setValue1(newInstruction(boi.getValue1(), a));
+                } else {
+                    visit(boi.getValue1());
+                }
                 a = match(boi.getValue2());
                 if (a != null) {
-					boi.setValue2(newInstruction(boi.getValue2(), a));
-				} else {
-					visit(boi.getValue2());
-				}
+                    boi.setValue2(newInstruction(boi.getValue2(), a));
+                } else {
+                    visit(boi.getValue2());
+                }
             }
             break;
         case Const.CHECKCAST:
@@ -186,10 +186,10 @@ public class OuterGetStaticVisitor
                 CheckCast checkCast = (CheckCast)instruction;
                 Accessor a = match(checkCast.getObjectref());
                 if (a != null) {
-					checkCast.setObjectref(newInstruction(checkCast.getObjectref(), a));
-				} else {
-					visit(checkCast.getObjectref());
-				}
+                    checkCast.setObjectref(newInstruction(checkCast.getObjectref(), a));
+                } else {
+                    visit(checkCast.getObjectref());
+                }
             }
             break;
         case ByteCodeConstants.STORE,
@@ -199,10 +199,10 @@ public class OuterGetStaticVisitor
                 StoreInstruction storeInstruction = (StoreInstruction)instruction;
                 Accessor a = match(storeInstruction.getValueref());
                 if (a != null) {
-					storeInstruction.setValueref(newInstruction(storeInstruction.getValueref(), a));
-				} else {
-					visit(storeInstruction.getValueref());
-				}
+                    storeInstruction.setValueref(newInstruction(storeInstruction.getValueref(), a));
+                } else {
+                    visit(storeInstruction.getValueref());
+                }
             }
             break;
         case ByteCodeConstants.DUPSTORE:
@@ -210,10 +210,10 @@ public class OuterGetStaticVisitor
                 DupStore dupStore = (DupStore)instruction;
                 Accessor a = match(dupStore.getObjectref());
                 if (a != null) {
-					dupStore.setObjectref(newInstruction(dupStore.getObjectref(), a));
-				} else {
-					visit(dupStore.getObjectref());
-				}
+                    dupStore.setObjectref(newInstruction(dupStore.getObjectref(), a));
+                } else {
+                    visit(dupStore.getObjectref());
+                }
             }
             break;
         case ByteCodeConstants.CONVERT,
@@ -222,10 +222,10 @@ public class OuterGetStaticVisitor
                 ConvertInstruction ci = (ConvertInstruction)instruction;
                 Accessor a = match(ci.getValue());
                 if (a != null) {
-					ci.setValue(newInstruction(ci.getValue(), a));
-				} else {
-					visit(ci.getValue());
-				}
+                    ci.setValue(newInstruction(ci.getValue(), a));
+                } else {
+                    visit(ci.getValue());
+                }
             }
             break;
         case ByteCodeConstants.IFCMP:
@@ -233,16 +233,16 @@ public class OuterGetStaticVisitor
                 IfCmp ifCmp = (IfCmp)instruction;
                 Accessor a = match(ifCmp.getValue1());
                 if (a != null) {
-					ifCmp.setValue1(newInstruction(ifCmp.getValue1(), a));
-				} else {
-					visit(ifCmp.getValue1());
-				}
+                    ifCmp.setValue1(newInstruction(ifCmp.getValue1(), a));
+                } else {
+                    visit(ifCmp.getValue1());
+                }
                 a = match(ifCmp.getValue2());
                 if (a != null) {
-					ifCmp.setValue2(newInstruction(ifCmp.getValue2(), a));
-				} else {
-					visit(ifCmp.getValue2());
-				}
+                    ifCmp.setValue2(newInstruction(ifCmp.getValue2(), a));
+                } else {
+                    visit(ifCmp.getValue2());
+                }
             }
             break;
         case ByteCodeConstants.IF,
@@ -251,10 +251,10 @@ public class OuterGetStaticVisitor
                 IfInstruction iff = (IfInstruction)instruction;
                 Accessor a = match(iff.getValue());
                 if (a != null) {
-					iff.setValue(newInstruction(iff.getValue(), a));
-				} else {
-					visit(iff.getValue());
-				}
+                    iff.setValue(newInstruction(iff.getValue(), a));
+                } else {
+                    visit(iff.getValue());
+                }
             }
             break;
         case ByteCodeConstants.COMPLEXIF:
@@ -262,8 +262,8 @@ public class OuterGetStaticVisitor
                 List<Instruction> branchList =
                     ((ComplexConditionalBranchInstruction)instruction).getInstructions();
                 for (int i=branchList.size()-1; i>=0; --i) {
-					visit(branchList.get(i));
-				}
+                    visit(branchList.get(i));
+                }
             }
             break;
         case Const.INSTANCEOF:
@@ -271,10 +271,10 @@ public class OuterGetStaticVisitor
                 InstanceOf instanceOf = (InstanceOf)instruction;
                 Accessor a = match(instanceOf.getObjectref());
                 if (a != null) {
-					instanceOf.setObjectref(newInstruction(instanceOf.getObjectref(), a));
-				} else {
-					visit(instanceOf.getObjectref());
-				}
+                    instanceOf.setObjectref(newInstruction(instanceOf.getObjectref(), a));
+                } else {
+                    visit(instanceOf.getObjectref());
+                }
             }
             break;
         case Const.INVOKEINTERFACE,
@@ -285,10 +285,10 @@ public class OuterGetStaticVisitor
                     (InvokeNoStaticInstruction)instruction;
                 Accessor a = match(insi.getObjectref());
                 if (a != null) {
-					insi.setObjectref(newInstruction(insi.getObjectref(), a));
-				} else {
-					visit(insi.getObjectref());
-				}
+                    insi.setObjectref(newInstruction(insi.getObjectref(), a));
+                } else {
+                    visit(insi.getObjectref());
+                }
             }
             // intended fall through
         case Const.INVOKESTATIC,
@@ -299,10 +299,10 @@ public class OuterGetStaticVisitor
                 {
                     Accessor a = match(list.get(i));
                     if (a != null) {
-						list.set(i, newInstruction(list.get(i), a));
-					} else {
-						visit(list.get(i));
-					}
+                        list.set(i, newInstruction(list.get(i), a));
+                    } else {
+                        visit(list.get(i));
+                    }
                 }
             }
             break;
@@ -311,10 +311,10 @@ public class OuterGetStaticVisitor
                 LookupSwitch ls = (LookupSwitch)instruction;
                 Accessor a = match(ls.getKey());
                 if (a != null) {
-					ls.setKey(newInstruction(ls.getKey(), a));
-				} else {
-					visit(ls.getKey());
-				}
+                    ls.setKey(newInstruction(ls.getKey(), a));
+                } else {
+                    visit(ls.getKey());
+                }
             }
             break;
         case Const.MONITORENTER:
@@ -322,10 +322,10 @@ public class OuterGetStaticVisitor
                 MonitorEnter monitorEnter = (MonitorEnter)instruction;
                 Accessor a = match(monitorEnter.getObjectref());
                 if (a != null) {
-					monitorEnter.setObjectref(newInstruction(monitorEnter.getObjectref(), a));
-				} else {
-					visit(monitorEnter.getObjectref());
-				}
+                    monitorEnter.setObjectref(newInstruction(monitorEnter.getObjectref(), a));
+                } else {
+                    visit(monitorEnter.getObjectref());
+                }
             }
             break;
         case Const.MONITOREXIT:
@@ -333,10 +333,10 @@ public class OuterGetStaticVisitor
                 MonitorExit monitorExit = (MonitorExit)instruction;
                 Accessor a = match(monitorExit.getObjectref());
                 if (a != null) {
-					monitorExit.setObjectref(newInstruction(monitorExit.getObjectref(), a));
-				} else {
-					visit(monitorExit.getObjectref());
-				}
+                    monitorExit.setObjectref(newInstruction(monitorExit.getObjectref(), a));
+                } else {
+                    visit(monitorExit.getObjectref());
+                }
             }
             break;
         case Const.MULTIANEWARRAY:
@@ -346,10 +346,10 @@ public class OuterGetStaticVisitor
                 {
                     Accessor a = match(dimensions[i]);
                     if (a != null) {
-						dimensions[i] = newInstruction(dimensions[i], a);
-					} else {
-						visit(dimensions[i]);
-					}
+                        dimensions[i] = newInstruction(dimensions[i], a);
+                    } else {
+                        visit(dimensions[i]);
+                    }
                 }
             }
             break;
@@ -358,10 +358,10 @@ public class OuterGetStaticVisitor
                 NewArray newArray = (NewArray)instruction;
                 Accessor a = match(newArray.getDimension());
                 if (a != null) {
-					newArray.setDimension(newInstruction(newArray.getDimension(), a));
-				} else {
-					visit(newArray.getDimension());
-				}
+                    newArray.setDimension(newInstruction(newArray.getDimension(), a));
+                } else {
+                    visit(newArray.getDimension());
+                }
             }
             break;
         case Const.ANEWARRAY:
@@ -369,10 +369,10 @@ public class OuterGetStaticVisitor
                 ANewArray aNewArray = (ANewArray)instruction;
                 Accessor a = match(aNewArray.getDimension());
                 if (a != null) {
-					aNewArray.setDimension(newInstruction(aNewArray.getDimension(), a));
-				} else {
-					visit(aNewArray.getDimension());
-				}
+                    aNewArray.setDimension(newInstruction(aNewArray.getDimension(), a));
+                } else {
+                    visit(aNewArray.getDimension());
+                }
             }
             break;
         case Const.POP:
@@ -380,10 +380,10 @@ public class OuterGetStaticVisitor
                 Pop pop = (Pop)instruction;
                 Accessor a = match(pop.getObjectref());
                 if (a != null) {
-					pop.setObjectref(newInstruction(pop.getObjectref(), a));
-				} else {
-					visit(pop.getObjectref());
-				}
+                    pop.setObjectref(newInstruction(pop.getObjectref(), a));
+                } else {
+                    visit(pop.getObjectref());
+                }
             }
             break;
         case Const.PUTFIELD:
@@ -391,16 +391,16 @@ public class OuterGetStaticVisitor
                 PutField putField = (PutField)instruction;
                 Accessor a = match(putField.getObjectref());
                 if (a != null) {
-					putField.setObjectref(newInstruction(putField.getObjectref(), a));
-				} else {
-					visit(putField.getObjectref());
-				}
+                    putField.setObjectref(newInstruction(putField.getObjectref(), a));
+                } else {
+                    visit(putField.getObjectref());
+                }
                 a = match(putField.getValueref());
                 if (a != null) {
-					putField.setValueref(newInstruction(putField.getValueref(), a));
-				} else {
-					visit(putField.getValueref());
-				}
+                    putField.setValueref(newInstruction(putField.getValueref(), a));
+                } else {
+                    visit(putField.getValueref());
+                }
             }
             break;
         case Const.PUTSTATIC:
@@ -408,10 +408,10 @@ public class OuterGetStaticVisitor
                 PutStatic putStatic = (PutStatic)instruction;
                 Accessor a = match(putStatic.getValueref());
                 if (a != null) {
-					putStatic.setValueref(newInstruction(putStatic.getValueref(), a));
-				} else {
-					visit(putStatic.getValueref());
-				}
+                    putStatic.setValueref(newInstruction(putStatic.getValueref(), a));
+                } else {
+                    visit(putStatic.getValueref());
+                }
             }
             break;
         case ByteCodeConstants.XRETURN:
@@ -419,10 +419,10 @@ public class OuterGetStaticVisitor
                 ReturnInstruction ri = (ReturnInstruction)instruction;
                 Accessor a = match(ri.getValueref());
                 if (a != null) {
-					ri.setValueref(newInstruction(ri.getValueref(), a));
-				} else {
-					visit(ri.getValueref());
-				}
+                    ri.setValueref(newInstruction(ri.getValueref(), a));
+                } else {
+                    visit(ri.getValueref());
+                }
             }
             break;
         case Const.TABLESWITCH:
@@ -430,10 +430,10 @@ public class OuterGetStaticVisitor
                 TableSwitch ts = (TableSwitch)instruction;
                 Accessor a = match(ts.getKey());
                 if (a != null) {
-					ts.setKey(newInstruction(ts.getKey(), a));
-				} else {
-					visit(ts.getKey());
-				}
+                    ts.setKey(newInstruction(ts.getKey(), a));
+                } else {
+                    visit(ts.getKey());
+                }
             }
             break;
         case ByteCodeConstants.TERNARYOPSTORE:
@@ -441,10 +441,10 @@ public class OuterGetStaticVisitor
                 TernaryOpStore tos = (TernaryOpStore)instruction;
                 Accessor a = match(tos.getObjectref());
                 if (a != null) {
-					tos.setObjectref(newInstruction(tos.getObjectref(), a));
-				} else {
-					visit(tos.getObjectref());
-				}
+                    tos.setObjectref(newInstruction(tos.getObjectref(), a));
+                } else {
+                    visit(tos.getObjectref());
+                }
             }
             break;
         case ByteCodeConstants.TERNARYOP:
@@ -452,22 +452,22 @@ public class OuterGetStaticVisitor
                 TernaryOperator to = (TernaryOperator)instruction;
                 Accessor a = match(to.getTest());
                 if (a != null) {
-					to.setTest(newInstruction(to.getTest(), a));
-				} else {
-					visit(to.getTest());
-				}
+                    to.setTest(newInstruction(to.getTest(), a));
+                } else {
+                    visit(to.getTest());
+                }
                 a = match(to.getValue1());
                 if (a != null) {
-					to.setValue1(newInstruction(to.getValue1(), a));
-				} else {
-					visit(to.getValue1());
-				}
+                    to.setValue1(newInstruction(to.getValue1(), a));
+                } else {
+                    visit(to.getValue1());
+                }
                 a = match(to.getValue2());
                 if (a != null) {
-					to.setValue2(newInstruction(to.getValue2(), a));
-				} else {
-					visit(to.getValue2());
-				}
+                    to.setValue2(newInstruction(to.getValue2(), a));
+                } else {
+                    visit(to.getValue2());
+                }
             }
             break;
         case ByteCodeConstants.ASSIGNMENT:
@@ -475,16 +475,16 @@ public class OuterGetStaticVisitor
                 AssignmentInstruction ai = (AssignmentInstruction)instruction;
                 Accessor a = match(ai.getValue1());
                 if (a != null) {
-					ai.setValue1(newInstruction(ai.getValue1(), a));
-				} else {
-					visit(ai.getValue1());
-				}
+                    ai.setValue1(newInstruction(ai.getValue1(), a));
+                } else {
+                    visit(ai.getValue1());
+                }
                 a = match(ai.getValue2());
                 if (a != null) {
-					ai.setValue2(newInstruction(ai.getValue2(), a));
-				} else {
-					visit(ai.getValue2());
-				}
+                    ai.setValue2(newInstruction(ai.getValue2(), a));
+                } else {
+                    visit(ai.getValue2());
+                }
             }
             break;
         case ByteCodeConstants.ARRAYLOAD:
@@ -492,16 +492,16 @@ public class OuterGetStaticVisitor
                 ArrayLoadInstruction ali = (ArrayLoadInstruction)instruction;
                 Accessor a = match(ali.getArrayref());
                 if (a != null) {
-					ali.setArrayref(newInstruction(ali.getArrayref(), a));
-				} else {
-					visit(ali.getArrayref());
-				}
+                    ali.setArrayref(newInstruction(ali.getArrayref(), a));
+                } else {
+                    visit(ali.getArrayref());
+                }
                 a = match(ali.getIndexref());
                 if (a != null) {
-					ali.setIndexref(newInstruction(ali.getIndexref(), a));
-				} else {
-					visit(ali.getIndexref());
-				}
+                    ali.setIndexref(newInstruction(ali.getIndexref(), a));
+                } else {
+                    visit(ali.getIndexref());
+                }
             }
             break;
         case ByteCodeConstants.PREINC,
@@ -510,10 +510,10 @@ public class OuterGetStaticVisitor
                 IncInstruction ii = (IncInstruction)instruction;
                 Accessor a = match(ii.getValue());
                 if (a != null) {
-					ii.setValue(newInstruction(ii.getValue(), a));
-				} else {
-					visit(ii.getValue());
-				}
+                    ii.setValue(newInstruction(ii.getValue(), a));
+                } else {
+                    visit(ii.getValue());
+                }
             }
             break;
         case Const.GETFIELD:
@@ -521,10 +521,10 @@ public class OuterGetStaticVisitor
                 GetField gf = (GetField)instruction;
                 Accessor a = match(gf.getObjectref());
                 if (a != null) {
-					gf.setObjectref(newInstruction(gf.getObjectref(), a));
-				} else {
-					visit(gf.getObjectref());
-				}
+                    gf.setObjectref(newInstruction(gf.getObjectref(), a));
+                } else {
+                    visit(gf.getObjectref());
+                }
             }
             break;
         case ByteCodeConstants.INITARRAY,
@@ -533,13 +533,13 @@ public class OuterGetStaticVisitor
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
                 Accessor a = match(iai.getNewArray());
                 if (a != null) {
-					iai.setNewArray(newInstruction(iai.getNewArray(), a));
-				} else {
-					visit(iai.getNewArray());
-				}
+                    iai.setNewArray(newInstruction(iai.getNewArray(), a));
+                } else {
+                    visit(iai.getNewArray());
+                }
                 if (iai.getValues() != null) {
-					visit(iai.getValues());
-				}
+                    visit(iai.getValues());
+                }
             }
             break;
         case Const.ACONST_NULL,
@@ -583,18 +583,18 @@ public class OuterGetStaticVisitor
             Accessor a = match(i);
 
             if (a != null) {
-				instructions.set(index, newInstruction(i, a));
-			} else {
-				visit(i);
-			}
+                instructions.set(index, newInstruction(i, a));
+            } else {
+                visit(i);
+            }
         }
     }
 
     protected Accessor match(Instruction i)
     {
         if (i.getOpcode() != Const.INVOKESTATIC) {
-			return null;
-		}
+            return null;
+        }
 
         Invokestatic is = (Invokestatic)i;
         ConstantMethodref cmr = constants.getConstantMethodref(is.getIndex());
@@ -605,14 +605,14 @@ public class OuterGetStaticVisitor
 
         // Zero parameter ?
         if (descriptor.charAt(1) != ')') {
-			return null;
-		}
+            return null;
+        }
 
         String className = constants.getConstantClassName(cmr.getClassIndex());
         ClassFile classFile = this.innerClassesMap.get(className);
         if (classFile == null) {
-			return null;
-		}
+            return null;
+        }
 
         String name =
             constants.getConstantUtf8(cnat.getNameIndex());
@@ -621,8 +621,8 @@ public class OuterGetStaticVisitor
 
         if (accessor == null ||
             accessor.tag() != AccessorConstants.ACCESSOR_GETSTATIC) {
-			return null;
-		}
+            return null;
+        }
 
         return accessor;
     }

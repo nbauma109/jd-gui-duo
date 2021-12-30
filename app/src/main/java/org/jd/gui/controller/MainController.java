@@ -760,13 +760,13 @@ public class MainController implements API {
 
             @Override
             public boolean equals(Object o) {
-            	if (this == o) {
-            		return true;
-            	}
-            	if (o == null || o.getClass() != this.getClass()) {
-            		return false;
-            	}
-            	return super.equals(o);
+                if (this == o) {
+                    return true;
+                }
+                if (o == null || o.getClass() != this.getClass()) {
+                    return false;
+                }
+                return super.equals(o);
             }
         };
         for (JComponent panel : mainPanels) {
@@ -781,7 +781,7 @@ public class MainController implements API {
     @Override
     public Collection<Indexes> getCollectionOfIndexes() {
         @SuppressWarnings("unchecked")
-		List<JComponent> mainPanels = mainView.getMainPanels();
+        List<JComponent> mainPanels = mainView.getMainPanels();
         List<Indexes> list = new ArrayList<>(mainPanels.size());
         for (JComponent panel : mainPanels) {
             @SuppressWarnings("unchecked")

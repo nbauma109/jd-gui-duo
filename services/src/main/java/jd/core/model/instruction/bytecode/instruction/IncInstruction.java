@@ -44,26 +44,26 @@ public class IncInstruction extends Instruction
     public int getPriority()
     {
         if (isSingleStep()) {
-			// Operator '++' or '--'
+            // Operator '++' or '--'
             return 2;
-		}
+        }
         // Operator '+=' or '-='
         return 14;
     }
 
-	public boolean isSingleStep() {
-		return this.getCount() == 1 || this.getCount() == -1;
-	}
+    public boolean isSingleStep() {
+        return this.getCount() == 1 || this.getCount() == -1;
+    }
 
-	public int getCount() {
-		return count;
-	}
+    public int getCount() {
+        return count;
+    }
 
-	public Instruction getValue() {
-		return value;
-	}
+    public Instruction getValue() {
+        return value;
+    }
 
-	public void setValue(Instruction value) {
-		this.value = value;
-	}
+    public void setValue(Instruction value) {
+        this.value = value;
+    }
 }

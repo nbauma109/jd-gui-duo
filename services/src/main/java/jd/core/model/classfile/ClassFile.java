@@ -206,7 +206,7 @@ public class ClassFile extends Base
 
     public Method getMethod(int i)
     {
-    	return this.methods[i];
+        return this.methods[i];
     }
 
     public AttributeInnerClasses getAttributeInnerClasses()

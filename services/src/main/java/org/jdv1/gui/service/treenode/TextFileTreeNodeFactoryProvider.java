@@ -30,72 +30,72 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 public class TextFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvider {
 
-	protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/ascii_obj.png"));
+    protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/ascii_obj.png"));
 
-	static {
-		try (InputStream inputStream = TextFileTreeNodeFactoryProvider.class.getClassLoader().getResourceAsStream("rsyntaxtextarea/themes/eclipse.xml")) {
-			Theme.load(inputStream);
-		} catch (IOException e) {
-			assert ExceptionUtil.printStackTrace(e);
-		}
-	}
+    static {
+        try (InputStream inputStream = TextFileTreeNodeFactoryProvider.class.getClassLoader().getResourceAsStream("rsyntaxtextarea/themes/eclipse.xml")) {
+            Theme.load(inputStream);
+        } catch (IOException e) {
+            assert ExceptionUtil.printStackTrace(e);
+        }
+    }
 
-	@Override
-	public String[] getSelectors() {
-		return appendSelectors("*:file:*.txt", "*:file:*.md", "*:file:*.SF", "*:file:*.policy", "*:file:*.yaml", "*:file:*.yml", "*:file:*/COPYRIGHT", "*:file:*/LICENSE");
-	}
+    @Override
+    public String[] getSelectors() {
+        return appendSelectors("*:file:*.txt", "*:file:*.md", "*:file:*.SF", "*:file:*.policy", "*:file:*.yaml", "*:file:*.yml", "*:file:*/COPYRIGHT", "*:file:*/LICENSE");
+    }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
-		int lastSlashIndex = entry.getPath().lastIndexOf("/");
-		String label = entry.getPath().substring(lastSlashIndex + 1);
-		String location = new File(entry.getUri()).getPath();
-		return (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
-	}
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
+        int lastSlashIndex = entry.getPath().lastIndexOf("/");
+        String label = entry.getPath().substring(lastSlashIndex + 1);
+        String location = new File(entry.getUri()).getPath();
+        return (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
+    }
 
-	protected static class TreeNode extends FileTreeNodeFactoryProvider.TreeNode implements PageCreator {
+    protected static class TreeNode extends FileTreeNodeFactoryProvider.TreeNode implements PageCreator {
 
-		private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-		public TreeNode(Container.Entry entry, Object userObject) {
-			super(entry, userObject);
-		}
+        public TreeNode(Container.Entry entry, Object userObject) {
+            super(entry, userObject);
+        }
 
-		// --- PageCreator --- //
-		@Override
-		@SuppressWarnings("unchecked")
-		public <T extends JComponent & UriGettable> T createPage(API api) {
-			return (T) new Page(entry);
-		}
-	}
+        // --- PageCreator --- //
+        @Override
+        @SuppressWarnings("unchecked")
+        public <T extends JComponent & UriGettable> T createPage(API api) {
+            return (T) new Page(entry);
+        }
+    }
 
-	protected static class Page extends TextPage implements UriGettable {
+    protected static class Page extends TextPage implements UriGettable {
 
-		private static final long serialVersionUID = 1L;
-		private transient Container.Entry entry;
+        private static final long serialVersionUID = 1L;
+        private transient Container.Entry entry;
 
-		public Page(Container.Entry entry) {
-			this.entry = entry;
-			try (InputStream inputStream = entry.getInputStream()) {
-				setText(TextReader.getText(inputStream));
-			} catch (IOException e) {
-				assert ExceptionUtil.printStackTrace(e);
-			}
-		}
+        public Page(Container.Entry entry) {
+            this.entry = entry;
+            try (InputStream inputStream = entry.getInputStream()) {
+                setText(TextReader.getText(inputStream));
+            } catch (IOException e) {
+                assert ExceptionUtil.printStackTrace(e);
+            }
+        }
 
-		// --- UriGettable --- //
-		@Override
-		public URI getUri() {
-			return entry.getUri();
-		}
+        // --- UriGettable --- //
+        @Override
+        public URI getUri() {
+            return entry.getUri();
+        }
 
-		// --- ContentSavable --- //
-		@Override
-		public String getFileName() {
-			String path = entry.getPath();
-			int index = path.lastIndexOf("/");
-			return path.substring(index + 1);
-		}
-	}
+        // --- ContentSavable --- //
+        @Override
+        public String getFileName() {
+            String path = entry.getPath();
+            int index = path.lastIndexOf("/");
+            return path.substring(index + 1);
+        }
+    }
 }

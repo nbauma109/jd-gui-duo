@@ -45,8 +45,8 @@ public class ReplaceMultipleOuterReferenceVisitor
     protected ClassFile match(Instruction instruction)
     {
         if (instruction.getOpcode() != Const.GETFIELD) {
-			return null;
-		}
+            return null;
+        }
 
         GetField gf = (GetField)instruction;
 
@@ -56,23 +56,23 @@ public class ReplaceMultipleOuterReferenceVisitor
             {
                 ALoad aload = (ALoad)gf.getObjectref();
                 if (aload.getIndex() != 0) {
-					return null;
-				}
+                    return null;
+                }
                 Field field = this.classFile.getOuterThisField();
                 if (field == null) {
-					return null;
-				}
+                    return null;
+                }
                 ConstantPool constants = classFile.getConstantPool();
                 ConstantFieldref cfr = constants.getConstantFieldref(gf.getIndex());
                 if (cfr.getClassIndex() != classFile.getThisClassIndex()) {
-					return null;
-				}
+                    return null;
+                }
                 ConstantNameAndType cnat =
                     constants.getConstantNameAndType(cfr.getNameAndTypeIndex());
                 if (field.getNameIndex() != cnat.getNameIndex() ||
                     field.getDescriptorIndex() != cnat.getSignatureIndex()) {
-					return null;
-				}
+                    return null;
+                }
                 return this.classFile.getOuterClass();
             }
         case ByteCodeConstants.OUTERTHIS:
@@ -91,8 +91,8 @@ public class ReplaceMultipleOuterReferenceVisitor
                         Field outerField = outerClass.getOuterThisField();
 
                         if (outerField == null) {
-							return null;
-						}
+                            return null;
+                        }
 
                         cfr = constants.getConstantFieldref(gf.getIndex());
                         ConstantNameAndType cnat =
@@ -106,8 +106,8 @@ public class ReplaceMultipleOuterReferenceVisitor
                             outerConstants.getConstantUtf8(outerField.getNameIndex());
 
                         if (!fieldName.equals(outerFieldName)) {
-							return null;
-						}
+                            return null;
+                        }
 
                         String fieldDescriptor =
                             constants.getConstantUtf8(cnat.getSignatureIndex());
@@ -115,8 +115,8 @@ public class ReplaceMultipleOuterReferenceVisitor
                             outerConstants.getConstantUtf8(outerField.getDescriptorIndex());
 
                         if (!fieldDescriptor.equals(outerFieldDescriptor)) {
-							return null;
-						}
+                            return null;
+                        }
 
                         return outerClass.getOuterClass();
                     }
@@ -135,26 +135,26 @@ public class ReplaceMultipleOuterReferenceVisitor
                 String descriptorName =
                     constants.getConstantUtf8(cnat.getSignatureIndex());
                 if (!SignatureUtil.isObjectSignature(descriptorName)) {
-					return null;
-				}
+                    return null;
+                }
 
                 ClassFile matchedClassFile = match(gf.getObjectref());
                 if (matchedClassFile == null ||
                     !matchedClassFile.isAInnerClass()) {
-					return null;
-				}
+                    return null;
+                }
 
                 Field matchedField = matchedClassFile.getOuterThisField();
                 if (matchedField == null) {
-					return null;
-				}
+                    return null;
+                }
 
                 String className =
                     constants.getConstantClassName(cfr.getClassIndex());
 
                 if (!className.equals(matchedClassFile.getThisClassName())) {
-					return null;
-				}
+                    return null;
+                }
 
                 String fieldName = constants.getConstantUtf8(cnat.getNameIndex());
 
@@ -163,15 +163,15 @@ public class ReplaceMultipleOuterReferenceVisitor
                     matchedConstants.getConstantUtf8(matchedField.getNameIndex());
 
                 if (! fieldName.equals(matchedFieldName)) {
-					return null;
-				}
+                    return null;
+                }
 
                 String matchedDescriptorName =
                     matchedConstants.getConstantUtf8(matchedField.getDescriptorIndex());
 
                 if (! descriptorName.equals(matchedDescriptorName)) {
-					return null;
-				}
+                    return null;
+                }
 
                 return matchedClassFile.getOuterClass();
             }

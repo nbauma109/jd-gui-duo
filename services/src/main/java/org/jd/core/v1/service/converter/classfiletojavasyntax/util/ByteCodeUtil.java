@@ -65,73 +65,73 @@ public class ByteCodeUtil {
         return code[lastOffset] & 255;
     }
 
-	protected static int computeNextOffset(byte[] code, int offset, int opcode) {
-		switch (opcode) {
-		    case BIPUSH, LDC,
-		         ILOAD, LLOAD, FLOAD, DLOAD, ALOAD,
-		         ISTORE, LSTORE, FSTORE, DSTORE, ASTORE,
-		         RET,
-		         NEWARRAY:
-		        offset++;
-		        break;
-		    case SIPUSH, LDC_W, LDC2_W, IINC, GETSTATIC, PUTSTATIC, NEW, GETFIELD, PUTFIELD, INVOKEVIRTUAL, INVOKESPECIAL, INVOKESTATIC, ANEWARRAY, CHECKCAST, INSTANCEOF:
-		        offset += 2;
-		        break;
-		    case IFEQ, IFNE, IFLT, IFGE, IFGT, IFLE, IF_ICMPEQ, IF_ICMPNE, IF_ICMPLT, IF_ICMPGE, IF_ICMPGT, IF_ICMPLE, IF_ACMPEQ, IF_ACMPNE, GOTO, IFNULL, IFNONNULL:
-		        int deltaOffset = (short)((code[++offset] & 255) << 8 | code[++offset] & 255);
+    protected static int computeNextOffset(byte[] code, int offset, int opcode) {
+        switch (opcode) {
+            case BIPUSH, LDC,
+                 ILOAD, LLOAD, FLOAD, DLOAD, ALOAD,
+                 ISTORE, LSTORE, FSTORE, DSTORE, ASTORE,
+                 RET,
+                 NEWARRAY:
+                offset++;
+                break;
+            case SIPUSH, LDC_W, LDC2_W, IINC, GETSTATIC, PUTSTATIC, NEW, GETFIELD, PUTFIELD, INVOKEVIRTUAL, INVOKESPECIAL, INVOKESTATIC, ANEWARRAY, CHECKCAST, INSTANCEOF:
+                offset += 2;
+                break;
+            case IFEQ, IFNE, IFLT, IFGE, IFGT, IFLE, IF_ICMPEQ, IF_ICMPNE, IF_ICMPLT, IF_ICMPGE, IF_ICMPGT, IF_ICMPLE, IF_ACMPEQ, IF_ACMPNE, GOTO, IFNULL, IFNONNULL:
+                int deltaOffset = (short)((code[++offset] & 255) << 8 | code[++offset] & 255);
 
-		        if (deltaOffset > 0) {
-		            offset += deltaOffset - 2 - 1;
-		        }
-		        break;
-		    case GOTO_W:
-		        deltaOffset = (code[++offset] & 255) << 24 | (code[++offset] & 255) << 16 | (code[++offset] & 255) << 8 | code[++offset] & 255;
+                if (deltaOffset > 0) {
+                    offset += deltaOffset - 2 - 1;
+                }
+                break;
+            case GOTO_W:
+                deltaOffset = (code[++offset] & 255) << 24 | (code[++offset] & 255) << 16 | (code[++offset] & 255) << 8 | code[++offset] & 255;
 
-		        if (deltaOffset > 0) {
-		            offset += deltaOffset - 4 - 1;
-		        }
-		        break;
-		    case JSR:
-		        offset += 2;
-		        break;
-		    case MULTIANEWARRAY:
-		        offset += 3;
-		        break;
-		    case INVOKEINTERFACE, INVOKEDYNAMIC:
-		        offset += 4;
-		        break;
-		    case JSR_W:
-		        offset += 4;
-		        break;
-		    case TABLESWITCH:
-		        offset = offset + 4 & 0xFFFC; // Skip padding
-		        offset += 4; // Skip default offset
+                if (deltaOffset > 0) {
+                    offset += deltaOffset - 4 - 1;
+                }
+                break;
+            case JSR:
+                offset += 2;
+                break;
+            case MULTIANEWARRAY:
+                offset += 3;
+                break;
+            case INVOKEINTERFACE, INVOKEDYNAMIC:
+                offset += 4;
+                break;
+            case JSR_W:
+                offset += 4;
+                break;
+            case TABLESWITCH:
+                offset = offset + 4 & 0xFFFC; // Skip padding
+                offset += 4; // Skip default offset
 
-		        int low = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
-		        int high = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
+                int low = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
+                int high = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
 
-		        offset += 4 * (high - low + 1) - 1;
-		        break;
-		    case LOOKUPSWITCH:
-		        offset = offset + 4 & 0xFFFC; // Skip padding
-		        offset += 4; // Skip default offset
+                offset += 4 * (high - low + 1) - 1;
+                break;
+            case LOOKUPSWITCH:
+                offset = offset + 4 & 0xFFFC; // Skip padding
+                offset += 4; // Skip default offset
 
-		        int count = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
+                int count = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
 
-		        offset += 8 * count - 1;
-		        break;
-		    case WIDE:
-		        opcode = code[++offset] & 255;
+                offset += 8 * count - 1;
+                break;
+            case WIDE:
+                opcode = code[++offset] & 255;
 
-		        if (opcode == IINC) {
-		            offset += 4;
-		        } else {
-		            offset += 2;
-		        }
-		        break;
-		}
-		return offset;
-	}
+                if (opcode == IINC) {
+                    offset += 4;
+                } else {
+                    offset += 2;
+                }
+                break;
+        }
+        return offset;
+    }
 
     public static int evalStackDepth(BasicBlock bb) {
         Method method = bb.getControlFlowGraph().getMethod();
@@ -364,22 +364,22 @@ public class ByteCodeUtil {
                 case DUP:
                     depth--;
                     if (minDepth > depth) {
-						minDepth = depth;
-					}
+                        minDepth = depth;
+                    }
                     depth += 2;
                     break;
                 case DUP_X1:
                     depth -= 2;
                     if (minDepth > depth) {
-						minDepth = depth;
-					}
+                        minDepth = depth;
+                    }
                     depth += 3;
                     break;
                 case DUP_X2:
                     depth -= 3;
                     if (minDepth > depth) {
-						minDepth = depth;
-					}
+                        minDepth = depth;
+                    }
                     depth += 4;
                     break;
                 case BIPUSH, LDC,
@@ -410,8 +410,8 @@ public class ByteCodeUtil {
                      LCMP, FCMPL, FCMPG, DCMPL, DCMPG:
                     depth -= 2;
                     if (minDepth > depth) {
-						minDepth = depth;
-					}
+                        minDepth = depth;
+                    }
                     depth++;
                     break;
                 case ISTORE_0, ISTORE_1, ISTORE_2, ISTORE_3,
@@ -424,8 +424,8 @@ public class ByteCodeUtil {
                      MONITORENTER, MONITOREXIT:
                     depth--;
                     if (minDepth > depth) {
-						minDepth = depth;
-					}
+                        minDepth = depth;
+                    }
                     break;
                 case IFEQ, IFNE, IFLT, IFGE, IFGT, IFLE,
                      PUTSTATIC,
@@ -433,41 +433,41 @@ public class ByteCodeUtil {
                     offset += 2;
                     depth--;
                     if (minDepth > depth) {
-						minDepth = depth;
-					}
+                        minDepth = depth;
+                    }
                     break;
                 case ISTORE, LSTORE, FSTORE, DSTORE, ASTORE:
                     offset++;
                     depth--;
                     if (minDepth > depth) {
-						minDepth = depth;
-					}
+                        minDepth = depth;
+                    }
                     break;
                 case IASTORE, LASTORE, FASTORE, DASTORE, AASTORE, BASTORE, CASTORE, SASTORE:
                     depth -= 3;
                     if (minDepth > depth) {
-						minDepth = depth;
-					}
+                        minDepth = depth;
+                    }
                     break;
                 case DUP2:
                     depth -= 2;
                     if (minDepth > depth) {
-						minDepth = depth;
-					}
+                        minDepth = depth;
+                    }
                     depth += 4;
                     break;
                 case DUP2_X1:
                     depth -= 3;
                     if (minDepth > depth) {
-						minDepth = depth;
-					}
+                        minDepth = depth;
+                    }
                     depth += 5;
                     break;
                 case DUP2_X2:
                     depth -= 4;
                     if (minDepth > depth) {
-						minDepth = depth;
-					}
+                        minDepth = depth;
+                    }
                     depth += 6;
                     break;
                 case IINC,
@@ -481,8 +481,8 @@ public class ByteCodeUtil {
                     offset += 2;
                     depth--;
                     if (minDepth > depth) {
-						minDepth = depth;
-					}
+                        minDepth = depth;
+                    }
                     depth++;
                     break;
                 case IF_ICMPEQ, IF_ICMPNE, IF_ICMPLT, IF_ICMPGE, IF_ICMPGT, IF_ICMPLE, IF_ACMPEQ, IF_ACMPNE,
@@ -490,14 +490,14 @@ public class ByteCodeUtil {
                     offset += 2;
                     depth -= 2;
                     if (minDepth > depth) {
-						minDepth = depth;
-					}
+                        minDepth = depth;
+                    }
                     break;
                 case POP2:
                     depth -= 2;
                     if (minDepth > depth) {
-						minDepth = depth;
-					}
+                        minDepth = depth;
+                    }
                     break;
                 case RET:
                     offset++;
@@ -506,8 +506,8 @@ public class ByteCodeUtil {
                     offset++;
                     depth--;
                     if (minDepth > depth) {
-						minDepth = depth;
-					}
+                        minDepth = depth;
+                    }
                     depth++;
                     break;
                 case TABLESWITCH:
@@ -520,8 +520,8 @@ public class ByteCodeUtil {
                     offset += 4 * (high - low + 1) - 1;
                     depth--;
                     if (minDepth > depth) {
-						minDepth = depth;
-					}
+                        minDepth = depth;
+                    }
                     break;
                 case LOOKUPSWITCH:
                     offset = offset + 4 & 0xFFFC; // Skip padding
@@ -532,8 +532,8 @@ public class ByteCodeUtil {
                     offset += 8 * count - 1;
                     depth--;
                     if (minDepth > depth) {
-						minDepth = depth;
-					}
+                        minDepth = depth;
+                    }
                     break;
                 case INVOKEVIRTUAL, INVOKESPECIAL:
                     constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
@@ -541,8 +541,8 @@ public class ByteCodeUtil {
                     descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     depth -= 1 + countMethodParameters(descriptor);
                     if (minDepth > depth) {
-						minDepth = depth;
-					}
+                        minDepth = depth;
+                    }
 
                     if (descriptor.charAt(descriptor.length()-1) != 'V') {
                         depth++;
@@ -554,8 +554,8 @@ public class ByteCodeUtil {
                     descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     depth -= countMethodParameters(descriptor);
                     if (minDepth > depth) {
-						minDepth = depth;
-					}
+                        minDepth = depth;
+                    }
 
                     if (descriptor.charAt(descriptor.length()-1) != 'V') {
                         depth++;
@@ -567,8 +567,8 @@ public class ByteCodeUtil {
                     descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     depth -= 1 + countMethodParameters(descriptor);
                     if (minDepth > depth) {
-						minDepth = depth;
-					}
+                        minDepth = depth;
+                    }
                     offset += 2; // Skip 'count' and one byte
 
                     if (descriptor.charAt(descriptor.length()-1) != 'V') {
@@ -581,8 +581,8 @@ public class ByteCodeUtil {
                     descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     depth -= countMethodParameters(descriptor);
                     if (minDepth > depth) {
-						minDepth = depth;
-					}
+                        minDepth = depth;
+                    }
                     offset += 2; // Skip 2 bytes
 
                     if (descriptor.charAt(descriptor.length()-1) != 'V') {
@@ -604,8 +604,8 @@ public class ByteCodeUtil {
                             case ISTORE, LSTORE, FSTORE, DSTORE, ASTORE:
                                 depth--;
                                 if (minDepth > depth) {
-									minDepth = depth;
-								}
+                                    minDepth = depth;
+                                }
                                 break;
                             case RET:
                                 break;
@@ -616,8 +616,8 @@ public class ByteCodeUtil {
                     offset += 3;
                     depth -= code[offset] & 255;
                     if (minDepth > depth) {
-						minDepth = depth;
-					}
+                        minDepth = depth;
+                    }
                     depth++;
                     break;
                 case JSR_W:
@@ -657,16 +657,16 @@ public class ByteCodeUtil {
     }
 
     public static boolean isStaticAccess(byte[] code, int offset) {
-    	int opCode = code[offset] & 255;
-    	return opCode == GETSTATIC
-    	    || opCode == INVOKESTATIC
-    	    || opCode == LDC
-    	    || opCode == LDC_W
-    	    || opCode == LDC2_W;
+        int opCode = code[offset] & 255;
+        return opCode == GETSTATIC
+            || opCode == INVOKESTATIC
+            || opCode == LDC
+            || opCode == LDC_W
+            || opCode == LDC2_W;
     }
 
-	public static boolean isLoad(byte[] code, int offset) {
-    	int opCode = code[offset] & 255;
-		return opCode >= 18 && opCode <= 53;
-	}
+    public static boolean isLoad(byte[] code, int offset) {
+        int opCode = code[offset] & 255;
+        return opCode >= 18 && opCode <= 53;
+    }
 }

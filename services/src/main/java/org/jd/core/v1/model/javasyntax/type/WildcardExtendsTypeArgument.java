@@ -16,7 +16,7 @@ public record WildcardExtendsTypeArgument(Type type) implements TypeArgument {
         if (typeArgument.isWildcardExtendsTypeArgument()) {
             return type.isTypeArgumentAssignableFrom(typeBounds, typeArgument.type());
         }
-		if (typeArgument instanceof Type) {
+        if (typeArgument instanceof Type) {
             return type.isTypeArgumentAssignableFrom(typeBounds, typeArgument);
         }
 
@@ -26,11 +26,11 @@ public record WildcardExtendsTypeArgument(Type type) implements TypeArgument {
     @Override
     public boolean equals(Object o) {
         if (this == o) {
-			return true;
-		}
+            return true;
+        }
         if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
+            return false;
+        }
 
         WildcardExtendsTypeArgument that = (WildcardExtendsTypeArgument) o;
 

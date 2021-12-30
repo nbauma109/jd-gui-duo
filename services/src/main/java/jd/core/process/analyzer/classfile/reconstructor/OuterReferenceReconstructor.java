@@ -92,8 +92,8 @@ public class OuterReferenceReconstructor
             // Replace outer reference parameter of constructors
             ConstantPool constants = classFile.getConstantPool();
             if (method.getNameIndex() == constants.getInstanceConstructorIndex()) {
-				this.outerReferenceVisitor.visit(list);
-			}
+                this.outerReferenceVisitor.visit(list);
+            }
             // Replace multiple outer references
             this.multipleOuterReference.visit(list);
             // Replace static call to "OuterClass access$0(InnerClass)" methods.
@@ -115,8 +115,8 @@ public class OuterReferenceReconstructor
     private static int createOuterThisInstructionIndex(ClassFile classFile)
     {
         if (classFile.getOuterClass() == null) {
-			return 0;
-		}
+            return 0;
+        }
 
         String internalOuterClassName =
             classFile.getOuterClass().getInternalClassName();

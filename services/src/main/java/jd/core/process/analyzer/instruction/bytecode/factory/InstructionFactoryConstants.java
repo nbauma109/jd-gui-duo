@@ -29,7 +29,7 @@ public class InstructionFactoryConstants
     private static final InstructionFactory[] FACTORIES;
 
     public static InstructionFactory getInstructionFactory(int opcode) {
-    	return FACTORIES[opcode];
+        return FACTORIES[opcode];
     }
 
     static

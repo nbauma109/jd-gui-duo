@@ -36,11 +36,11 @@ public class GenericExtendsSuperInterfacesLayoutBlock
         this.signatureIndex = signatureIndex;
     }
 
-	public char[] getCaSignature() {
-		return caSignature;
-	}
+    public char[] getCaSignature() {
+        return caSignature;
+    }
 
-	public int getSignatureIndex() {
-		return signatureIndex;
-	}
+    public int getSignatureIndex() {
+        return signatureIndex;
+    }
 }

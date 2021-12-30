@@ -54,31 +54,31 @@ public class InstructionsLayoutBlock extends LayoutBlock
         this.lastOffset = lastOffset;
     }
 
-	public ClassFile getClassFile() {
-		return classFile;
-	}
+    public ClassFile getClassFile() {
+        return classFile;
+    }
 
-	public Method getMethod() {
-		return method;
-	}
+    public Method getMethod() {
+        return method;
+    }
 
-	public int getFirstOffset() {
-		return firstOffset;
-	}
+    public int getFirstOffset() {
+        return firstOffset;
+    }
 
-	public int getLastOffset() {
-		return lastOffset;
-	}
+    public int getLastOffset() {
+        return lastOffset;
+    }
 
-	public int getFirstIndex() {
-		return firstIndex;
-	}
+    public int getFirstIndex() {
+        return firstIndex;
+    }
 
-	public int getLastIndex() {
-		return lastIndex;
-	}
+    public int getLastIndex() {
+        return lastIndex;
+    }
 
-	public List<Instruction> getInstructions() {
-		return instructions;
-	}
+    public List<Instruction> getInstructions() {
+        return instructions;
+    }
 }

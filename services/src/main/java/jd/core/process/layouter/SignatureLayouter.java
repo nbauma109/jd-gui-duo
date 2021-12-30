@@ -108,7 +108,7 @@ public class SignatureLayouter
                         index++;
                         break;
                     }
-					depth--;
+                    depth--;
                 }
             }
         }

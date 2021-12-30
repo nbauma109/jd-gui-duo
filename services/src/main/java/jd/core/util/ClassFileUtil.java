@@ -48,15 +48,15 @@ public class ClassFileUtil
 
             if ((method.getAccessFlags() &
                  (Const.ACC_SYNTHETIC|Const.ACC_BRIDGE)) != 0) {
-				continue;
-			}
+                continue;
+            }
 
             if (method.getNameIndex() == constants.getInstanceConstructorIndex())
             {
                 if (flag) {
-					// A other constructor has been found
+                    // A other constructor has been found
                     return true;
-				}
+                }
                 // A first constructor has been found
                 flag = true;
             }

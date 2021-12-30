@@ -27,7 +27,7 @@ public class AttributeConstantValue extends Attribute
         this.constantvalueIndex = constantvalueIndex;
     }
 
-	public int getConstantvalueIndex() {
-		return constantvalueIndex;
-	}
+    public int getConstantvalueIndex() {
+        return constantvalueIndex;
+    }
 }

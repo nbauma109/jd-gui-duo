@@ -34,15 +34,15 @@ public class MarkerLayoutBlock extends LayoutBlock
         this.setOther(null);
     }
 
-	public ClassFile getClassFile() {
-		return classFile;
-	}
+    public ClassFile getClassFile() {
+        return classFile;
+    }
 
-	public MarkerLayoutBlock getOther() {
-		return other;
-	}
+    public MarkerLayoutBlock getOther() {
+        return other;
+    }
 
-	public void setOther(MarkerLayoutBlock other) {
-		this.other = other;
-	}
+    public void setOther(MarkerLayoutBlock other) {
+        this.other = other;
+    }
 }

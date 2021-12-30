@@ -75,9 +75,9 @@ public class DupLocalVariableAnalyzer
                     List<Instruction> instructions =
                         ((FastList)instruction).getInstructions();
                     if (instructions != null) {
-						recursiveDeclare(
+                        recursiveDeclare(
                             constants, localVariables, codeLength, instructions);
-					}
+                    }
                 }
                 break;
 
@@ -97,15 +97,15 @@ public class DupLocalVariableAnalyzer
                 {
                     FastSwitch.Pair[] pairs = ((FastSwitch)instruction).getPairs();
                     if (pairs != null) {
-						for (int i=pairs.length-1; i>=0; --i)
+                        for (int i=pairs.length-1; i>=0; --i)
                         {
                             List<Instruction> instructions = pairs[i].getInstructions();
                             if (instructions != null) {
-								recursiveDeclare(
+                                recursiveDeclare(
                                     constants, localVariables, codeLength, instructions);
-							}
+                            }
                         }
-					}
+                    }
                 }
                 break;
 
@@ -116,18 +116,18 @@ public class DupLocalVariableAnalyzer
                         constants, localVariables, codeLength, ft.getInstructions());
 
                     if (ft.getCatches() != null) {
-						for (int i=ft.getCatches().size()-1; i>=0; --i) {
-							recursiveDeclare(
+                        for (int i=ft.getCatches().size()-1; i>=0; --i) {
+                            recursiveDeclare(
                                 constants, localVariables,
                                 codeLength, ft.getCatches().get(i).instructions());
-						}
-					}
+                        }
+                    }
 
                     if (ft.getFinallyInstructions() != null) {
-						recursiveDeclare(
+                        recursiveDeclare(
                             constants, localVariables,
                             codeLength, ft.getFinallyInstructions());
-					}
+                    }
                 }
             }
         }
@@ -138,8 +138,8 @@ public class DupLocalVariableAnalyzer
             Instruction instruction = list.get(i);
 
             if (instruction.getOpcode() != ByteCodeConstants.DUPSTORE) {
-				continue;
-			}
+                continue;
+            }
 
             DupStore dupStore = (DupStore)instruction;
 

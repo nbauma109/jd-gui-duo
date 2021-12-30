@@ -30,47 +30,47 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 
 public class IfXNullFactory implements InstructionFactory
 {
-	private final int cmp;
+    private final int cmp;
 
-	public IfXNullFactory(int cmp)
-	{
-		this.cmp = cmp;
-	}
+    public IfXNullFactory(int cmp)
+    {
+        this.cmp = cmp;
+    }
 
-	@Override
-	public int create(
-			ClassFile classFile, Method method, List<Instruction> list,
-			List<Instruction> listForAnalyze,
-			Deque<Instruction> stack, byte[] code, int offset,
-			int lineNumber, boolean[] jumps)
-	{
-		final int opcode = code[offset] & 255;
-		final int branch =
+    @Override
+    public int create(
+            ClassFile classFile, Method method, List<Instruction> list,
+            List<Instruction> listForAnalyze,
+            Deque<Instruction> stack, byte[] code, int offset,
+            int lineNumber, boolean[] jumps)
+    {
+        final int opcode = code[offset] & 255;
+        final int branch =
             (short)((code[offset+1] & 255) << 8 | code[offset+2] & 255);
 
-		list.add(new IfInstruction(
-				ByteCodeConstants.IFXNULL, offset, lineNumber,
-				this.cmp, stack.pop(), branch));
+        list.add(new IfInstruction(
+                ByteCodeConstants.IFXNULL, offset, lineNumber,
+                this.cmp, stack.pop(), branch));
 
-		if (!stack.isEmpty())
-		{
-			Instruction instruction = stack.peek();
-			if (instruction.getOpcode() == ByteCodeConstants.DUPLOAD)
-			{
-				int nextOffset =
-						offset + Const.getNoOfOperands(opcode) + 1;
+        if (!stack.isEmpty())
+        {
+            Instruction instruction = stack.peek();
+            if (instruction.getOpcode() == ByteCodeConstants.DUPLOAD)
+            {
+                int nextOffset =
+                        offset + Const.getNoOfOperands(opcode) + 1;
 
-				if (nextOffset < code.length && ((code[nextOffset] & 255) == Const.POP
-						|| (code[nextOffset] & 255) == Const.ARETURN)) {
-					// Duplicate 'DupLoad' instruction used by
-					// DotClass118BReconstructor
-					DupLoad dp = (DupLoad)instruction;
-					stack.push(new DupLoad(
-							dp.getOpcode(), dp.getOffset(), dp.getLineNumber(), dp.getDupStore()));
-				}
-			}
-		}
+                if (nextOffset < code.length && ((code[nextOffset] & 255) == Const.POP
+                        || (code[nextOffset] & 255) == Const.ARETURN)) {
+                    // Duplicate 'DupLoad' instruction used by
+                    // DotClass118BReconstructor
+                    DupLoad dp = (DupLoad)instruction;
+                    stack.push(new DupLoad(
+                            dp.getOpcode(), dp.getOffset(), dp.getLineNumber(), dp.getDupStore()));
+                }
+            }
+        }
 
-		return Const.getNoOfOperands(opcode);
-	}
+        return Const.getNoOfOperands(opcode);
+    }
 }

@@ -66,8 +66,8 @@ public class TernaryOperatorExpression extends AbstractLineNumberTypeExpression 
         return "TernaryOperatorExpression{" + condition + " ? " + trueExpression + " : " + falseExpression + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new TernaryOperatorExpression(lineNumber, type, condition, trueExpression, falseExpression);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new TernaryOperatorExpression(lineNumber, type, condition, trueExpression, falseExpression);
+    }
 }

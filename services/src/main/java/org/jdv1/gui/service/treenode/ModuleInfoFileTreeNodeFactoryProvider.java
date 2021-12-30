@@ -27,73 +27,73 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 public class ModuleInfoFileTreeNodeFactoryProvider extends ClassFileTreeNodeFactoryProvider {
 
-	protected static final ImageIcon MODULE_FILE_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/module_obj.png"));
-	protected static final Factory FACTORY = new Factory();
+    protected static final ImageIcon MODULE_FILE_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/module_obj.png"));
+    protected static final Factory FACTORY = new Factory();
 
-	@Override
-	public String[] getSelectors() {
-		return appendSelectors("*:file:*/module-info.class");
-	}
+    @Override
+    public String[] getSelectors() {
+        return appendSelectors("*:file:*/module-info.class");
+    }
 
-	@Override
-	public Pattern getPathPattern() {
-		return externalPathPattern;
-	}
+    @Override
+    public Pattern getPathPattern() {
+        return externalPathPattern;
+    }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
-		int lastSlashIndex = entry.getPath().lastIndexOf('/');
-		String label = entry.getPath().substring(lastSlashIndex + 1);
-		return (T) new ModuleInfoFileTreeNode(entry, new TreeNodeBean(label, CLASS_FILE_ICON), FACTORY);
-	}
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
+        int lastSlashIndex = entry.getPath().lastIndexOf('/');
+        String label = entry.getPath().substring(lastSlashIndex + 1);
+        return (T) new ModuleInfoFileTreeNode(entry, new TreeNodeBean(label, CLASS_FILE_ICON), FACTORY);
+    }
 
-	protected static class ModuleInfoFileTreeNode extends FileTreeNode {
+    protected static class ModuleInfoFileTreeNode extends FileTreeNode {
 
-		private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-		public ModuleInfoFileTreeNode(Container.Entry entry, Object userObject, PageAndTipFactory pageAndTipFactory) {
-			super(entry, null, userObject, pageAndTipFactory);
-		}
+        public ModuleInfoFileTreeNode(Container.Entry entry, Object userObject, PageAndTipFactory pageAndTipFactory) {
+            super(entry, null, userObject, pageAndTipFactory);
+        }
 
-		// --- TreeNodeExpandable --- //
-		@Override
-		public void populateTreeNode(API api) {
-			if (!initialized) {
-				removeAllChildren();
-				// Create type node
-				TypeFactory typeFactory = api.getTypeFactory(entry);
+        // --- TreeNodeExpandable --- //
+        @Override
+        public void populateTreeNode(API api) {
+            if (!initialized) {
+                removeAllChildren();
+                // Create type node
+                TypeFactory typeFactory = api.getTypeFactory(entry);
 
-				if (typeFactory != null) {
-					Collection<Type> types = typeFactory.make(api, entry);
+                if (typeFactory != null) {
+                    Collection<Type> types = typeFactory.make(api, entry);
 
-					for (Type type : types) {
-						add(new BaseTreeNode(entry, type.getName(), new TreeNodeBean(type.getDisplayTypeName(), MODULE_FILE_ICON), factory));
-					}
-				}
+                    for (Type type : types) {
+                        add(new BaseTreeNode(entry, type.getName(), new TreeNodeBean(type.getDisplayTypeName(), MODULE_FILE_ICON), factory));
+                    }
+                }
 
-				initialized = true;
-			}
-		}
-	}
+                initialized = true;
+            }
+        }
+    }
 
-	protected static class Factory implements AbstractTypeFileTreeNodeFactoryProvider.PageAndTipFactory {
-		// --- PageAndTipFactory --- //
-		@Override
-		@SuppressWarnings("unchecked")
-		public <T extends JComponent & UriGettable> T makePage(API a, Container.Entry e) {
-			return (T) new ModuleInfoFilePage(a, e);
-		}
+    protected static class Factory implements AbstractTypeFileTreeNodeFactoryProvider.PageAndTipFactory {
+        // --- PageAndTipFactory --- //
+        @Override
+        @SuppressWarnings("unchecked")
+        public <T extends JComponent & UriGettable> T makePage(API a, Container.Entry e) {
+            return (T) new ModuleInfoFilePage(a, e);
+        }
 
-		@Override
-		public String makeTip(API api, Container.Entry entry) {
-			String location = new File(entry.getUri()).getPath();
-			StringBuilder tip = new StringBuilder("<html>Location: ");
+        @Override
+        public String makeTip(API api, Container.Entry entry) {
+            String location = new File(entry.getUri()).getPath();
+            StringBuilder tip = new StringBuilder("<html>Location: ");
 
-			tip.append(location);
-			tip.append("</html>");
+            tip.append(location);
+            tip.append("</html>");
 
-			return tip.toString();
-		}
-	}
+            return tip.toString();
+        }
+    }
 }

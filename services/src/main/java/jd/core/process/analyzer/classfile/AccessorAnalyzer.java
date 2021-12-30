@@ -58,26 +58,26 @@ public class AccessorAnalyzer
         // Recherche des accesseurs de champs statiques
         //   static AuthenticatedSubject access$000()
         if (searchGetStaticAccessor(classFile, method)) {
-			return;
-		}
+            return;
+        }
 
         // Recherche des accesseurs de champs statiques
         //   static void access$0(int)
         if (searchPutStaticAccessor(classFile, method)) {
-			return;
-		}
+            return;
+        }
 
         // Recherche des accesseurs de champs
         //   static int access$1(TestInnerClass)
         if (searchGetFieldAccessor(classFile, method)) {
-			return;
-		}
+            return;
+        }
 
         // Recherche des accesseurs de champs
         //   static void access$0(TestInnerClass, int)
         if (searchPutFieldAccessor(classFile, method)) {
-			return;
-		}
+            return;
+        }
 
         // Recherche des accesseurs de méthodes
         //   static void access$100(EntitlementFunctionLibrary, EvaluationCtx, URI, Bag, Bag[])
@@ -97,32 +97,32 @@ public class AccessorAnalyzer
     {
         List<Instruction> list = method.getInstructions();
         if (list.size() != 1) {
-			return false;
-		}
+            return false;
+        }
 
         Instruction instruction = list.get(0);
         if (instruction.getOpcode() != ByteCodeConstants.XRETURN) {
-			return false;
-		}
+            return false;
+        }
 
         instruction = ((ReturnInstruction)instruction).getValueref();
         if (instruction.getOpcode() != Const.GETSTATIC) {
-			return false;
-		}
+            return false;
+        }
 
         ConstantPool constants = classFile.getConstantPool();
         ConstantFieldref cfr = constants.getConstantFieldref(
             ((GetStatic)instruction).getIndex());
 
         if (cfr.getClassIndex() != classFile.getThisClassIndex()) {
-			return false;
-		}
+            return false;
+        }
 
         String methodDescriptor =
             constants.getConstantUtf8(method.getDescriptorIndex());
         if (methodDescriptor.charAt(1) != ')') {
-			return false;
-		}
+            return false;
+        }
 
         String methodName = constants.getConstantUtf8(method.getNameIndex());
 
@@ -155,34 +155,34 @@ public class AccessorAnalyzer
     {
         List<Instruction> list = method.getInstructions();
         if (list.size() != 2) {
-			return false;
-		}
+            return false;
+        }
 
         if (list.get(1).getOpcode() != Const.RETURN) {
-			return false;
-		}
+            return false;
+        }
 
         Instruction instruction = list.get(0);
         if (instruction.getOpcode() != Const.PUTSTATIC) {
-			return false;
-		}
+            return false;
+        }
 
         ConstantPool constants = classFile.getConstantPool();
         ConstantFieldref cfr = constants.getConstantFieldref(
             ((PutStatic)instruction).getIndex());
 
         if (cfr.getClassIndex() != classFile.getThisClassIndex()) {
-			return false;
-		}
+            return false;
+        }
 
         String methodDescriptor =
             constants.getConstantUtf8(method.getDescriptorIndex());
         if (methodDescriptor.charAt(1) == ')') {
-			return false;
-		}
+            return false;
+        }
         if (SignatureUtil.getParameterSignatureCount(methodDescriptor) != 1) {
-			return false;
-		}
+            return false;
+        }
 
         String methodName = constants.getConstantUtf8(method.getNameIndex());
 
@@ -215,35 +215,35 @@ public class AccessorAnalyzer
     {
         List<Instruction> list = method.getInstructions();
         if (list.size() != 1) {
-			return false;
-		}
+            return false;
+        }
 
         Instruction instruction = list.get(0);
         if (instruction.getOpcode() != ByteCodeConstants.XRETURN) {
-			return false;
-		}
+            return false;
+        }
 
         instruction = ((ReturnInstruction)instruction).getValueref();
         if (instruction.getOpcode() != Const.GETFIELD) {
-			return false;
-		}
+            return false;
+        }
 
         ConstantPool constants = classFile.getConstantPool();
         ConstantFieldref cfr = constants.getConstantFieldref(
             ((GetField)instruction).getIndex());
 
         if (cfr.getClassIndex() != classFile.getThisClassIndex()) {
-			return false;
-		}
+            return false;
+        }
 
         String methodDescriptor =
             constants.getConstantUtf8(method.getDescriptorIndex());
         if (methodDescriptor.charAt(1) == ')') {
-			return false;
-		}
+            return false;
+        }
         if (SignatureUtil.getParameterSignatureCount(methodDescriptor) != 1) {
-			return false;
-		}
+            return false;
+        }
 
         String methodName = constants.getConstantUtf8(method.getNameIndex());
 
@@ -283,13 +283,13 @@ public class AccessorAnalyzer
         case 2:
             {
                 if (list.get(1).getOpcode() != Const.RETURN) {
-					return false;
-				}
+                    return false;
+                }
 
                 Instruction instruction = list.get(0);
                 if (instruction.getOpcode() != Const.PUTFIELD) {
-					return false;
-				}
+                    return false;
+                }
 
                 pf = (PutField)instruction;
             }
@@ -297,17 +297,17 @@ public class AccessorAnalyzer
         case 3:
             {
                 if (list.get(0).getOpcode() != ByteCodeConstants.DUPSTORE) {
-					return false;
-				}
+                    return false;
+                }
 
                 if (list.get(2).getOpcode() != ByteCodeConstants.XRETURN) {
-					return false;
-				}
+                    return false;
+                }
 
                 Instruction instruction = list.get(1);
                 if (instruction.getOpcode() != Const.PUTFIELD) {
-					return false;
-				}
+                    return false;
+                }
 
                 pf = (PutField)instruction;
             }
@@ -320,17 +320,17 @@ public class AccessorAnalyzer
         ConstantFieldref cfr = constants.getConstantFieldref(pf.getIndex());
 
         if (cfr.getClassIndex() != classFile.getThisClassIndex()) {
-			return false;
-		}
+            return false;
+        }
 
         String methodDescriptor =
             constants.getConstantUtf8(method.getDescriptorIndex());
         if (methodDescriptor.charAt(1) == ')') {
-			return false;
-		}
+            return false;
+        }
         if (SignatureUtil.getParameterSignatureCount(methodDescriptor) != 2) {
-			return false;
-		}
+            return false;
+        }
 
         ConstantNameAndType cnat = constants.getConstantNameAndType(
                 cfr.getNameAndTypeIndex());
@@ -372,15 +372,15 @@ public class AccessorAnalyzer
         case 1:
             instruction = list.get(0);
             if (instruction.getOpcode() != ByteCodeConstants.XRETURN) {
-				return false;
-			}
+                return false;
+            }
             instruction = ((ReturnInstruction)instruction).getValueref();
             break;
         case 2:
             instruction = list.get(1);
             if (instruction.getOpcode() != Const.RETURN) {
-				return false;
-			}
+                return false;
+            }
             instruction = list.get(0);
             break;
         default:
@@ -399,8 +399,8 @@ public class AccessorAnalyzer
 
             if (insi.getObjectref().getOpcode() != Const.ALOAD ||
                 ((ALoad)insi.getObjectref()).getIndex() != 0) {
-				return false;
-			}
+                return false;
+            }
 
             ii = insi;
             break;

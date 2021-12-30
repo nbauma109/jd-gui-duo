@@ -43,10 +43,10 @@ public class ReferenceMap
             Reference ref = this.references.get(internalName);
 
             if (ref == null) {
-				this.references.put(internalName, new Reference(internalName));
-			} else {
-				ref.incCounter();
-			}
+                this.references.put(internalName, new Reference(internalName));
+            } else {
+                ref.incCounter();
+            }
         }
     }
 

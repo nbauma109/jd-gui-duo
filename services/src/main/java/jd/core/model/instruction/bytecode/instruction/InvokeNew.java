@@ -38,11 +38,11 @@ public class InvokeNew extends InvokeInstruction
         this.setEnumValueFieldRefIndex(getStatic.getIndex());
     }
 
-	public int getEnumValueFieldRefIndex() {
-		return enumValueFieldRefIndex;
-	}
+    public int getEnumValueFieldRefIndex() {
+        return enumValueFieldRefIndex;
+    }
 
-	private void setEnumValueFieldRefIndex(int enumValueFieldRefIndex) {
-		this.enumValueFieldRefIndex = enumValueFieldRefIndex;
-	}
+    private void setEnumValueFieldRefIndex(int enumValueFieldRefIndex) {
+        this.enumValueFieldRefIndex = enumValueFieldRefIndex;
+    }
 }

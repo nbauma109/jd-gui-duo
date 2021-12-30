@@ -40,8 +40,8 @@ public class FloatConstantExpression extends AbstractLineNumberTypeExpression {
         return "FloatConstantExpression{" + value + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new FloatConstantExpression(lineNumber, value);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new FloatConstantExpression(lineNumber, value);
+    }
 }

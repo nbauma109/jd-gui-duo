@@ -53,15 +53,15 @@ public class PreIncReconstructor
         for (int dupStoreIndex=0; dupStoreIndex<length; dupStoreIndex++)
         {
             if (list.get(dupStoreIndex).getOpcode() != ByteCodeConstants.DUPSTORE) {
-				continue;
-			}
+                continue;
+            }
 
             // DupStore trouvé
             DupStore dupstore = (DupStore)list.get(dupStoreIndex);
 
             if (dupstore.getObjectref().getOpcode() != ByteCodeConstants.BINARYOP) {
-				continue;
-			}
+                continue;
+            }
 
             BinaryOperatorInstruction boi =
                 (BinaryOperatorInstruction)dupstore.getObjectref();
@@ -70,24 +70,24 @@ public class PreIncReconstructor
                 boi.getValue2().getOpcode() != ByteCodeConstants.LCONST &&
                 boi.getValue2().getOpcode() != ByteCodeConstants.DCONST &&
                 boi.getValue2().getOpcode() != ByteCodeConstants.FCONST) {
-				continue;
-			}
+                continue;
+            }
 
             ConstInstruction ci = (ConstInstruction)boi.getValue2();
 
             if (ci.getValue() != 1) {
-				continue;
-			}
+                continue;
+            }
 
             int value;
 
             if ("+".equals(boi.getOperator())) {
-				value = 1;
-			} else if ("-".equals(boi.getOperator())) {
-				value = -1;
-			} else {
-				continue;
-			}
+                value = 1;
+            } else if ("-".equals(boi.getOperator())) {
+                value = -1;
+            } else {
+                continue;
+            }
 
             int xstorePutfieldPutstaticIndex = dupStoreIndex;
 
@@ -101,47 +101,47 @@ public class PreIncReconstructor
                     if (boi.getValue1().getOpcode() == Const.ALOAD &&
                         ((StoreInstruction)i).getValueref().getOpcode() == ByteCodeConstants.DUPLOAD &&
                         ((IndexInstruction)i).getIndex() == ((IndexInstruction)boi.getValue1()).getIndex()) {
-						// 1er DupLoad trouvé
+                        // 1er DupLoad trouvé
                         dupload = ((StoreInstruction)i).getValueref();
-					}
+                    }
                     break;
                 case Const.ISTORE:
                     if (boi.getValue1().getOpcode() == Const.ILOAD &&
                         ((StoreInstruction)i).getValueref().getOpcode() == ByteCodeConstants.DUPLOAD &&
                         ((IndexInstruction)i).getIndex() == ((IndexInstruction)boi.getValue1()).getIndex()) {
-						// 1er DupLoad trouvé
+                        // 1er DupLoad trouvé
                         dupload = ((StoreInstruction)i).getValueref();
-					}
+                    }
                     break;
                 case ByteCodeConstants.STORE:
                     if (boi.getValue1().getOpcode() == ByteCodeConstants.LOAD &&
                         ((StoreInstruction)i).getValueref().getOpcode() == ByteCodeConstants.DUPLOAD &&
                         ((IndexInstruction)i).getIndex() == ((IndexInstruction)boi.getValue1()).getIndex()) {
-						// 1er DupLoad trouvé
+                        // 1er DupLoad trouvé
                         dupload = ((StoreInstruction)i).getValueref();
-					}
+                    }
                     break;
                 case Const.PUTFIELD:
                     if (boi.getValue1().getOpcode() == Const.GETFIELD &&
                         ((PutField)i).getValueref().getOpcode() == ByteCodeConstants.DUPLOAD &&
                         ((IndexInstruction)i).getIndex() == ((IndexInstruction)boi.getValue1()).getIndex()) {
-						// 1er DupLoad trouvé
+                        // 1er DupLoad trouvé
                         dupload = ((PutField)i).getValueref();
-					}
+                    }
                     break;
                 case Const.PUTSTATIC:
                     if (boi.getValue1().getOpcode() == Const.GETSTATIC &&
                         ((PutStatic)i).getValueref().getOpcode() == ByteCodeConstants.DUPLOAD &&
                         ((IndexInstruction)i).getIndex() == ((IndexInstruction)boi.getValue1()).getIndex()) {
-						// 1er DupLoad trouvé
+                        // 1er DupLoad trouvé
                         dupload = ((PutStatic)i).getValueref();
-					}
+                    }
                     break;
                 }
 
                 if (dupload == null || dupload.getOffset() != dupstore.getOffset()) {
-					continue;
-				}
+                    continue;
+                }
 
                 Instruction preinc = new IncInstruction(
                     ByteCodeConstants.PREINC, boi.getOffset(),

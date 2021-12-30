@@ -44,15 +44,15 @@ public class PlainTextPrinter implements Printer {
     @Override
     public void print(char c) {
         if (this.display) {
-			this.printStream.append(String.valueOf(c));
-		}
+            this.printStream.append(String.valueOf(c));
+        }
     }
 
     @Override
     public void print(String s) {
         if (this.display) {
-			printEscape(s);
-		}
+            printEscape(s);
+        }
     }
 
     @Override
@@ -64,8 +64,8 @@ public class PlainTextPrinter implements Printer {
     @Override
     public void printKeyword(String s) {
         if (this.display) {
-			this.printStream.append(s);
-		}
+            this.printStream.append(s);
+        }
     }
 
     @Override
@@ -74,8 +74,8 @@ public class PlainTextPrinter implements Printer {
     @Override
     public void printType(String internalName, String name, String scopeInternalName) {
         if (this.display) {
-			printEscape(name);
-		}
+            printEscape(name);
+        }
     }
 
     @Override
@@ -181,8 +181,8 @@ public class PlainTextPrinter implements Printer {
     @Override
     public void desindent() {
         if (this.indentationCount > 0) {
-			this.indentationCount--;
-		}
+            this.indentationCount--;
+        }
     }
 
     @Override
@@ -207,8 +207,8 @@ public class PlainTextPrinter implements Printer {
         }
 
         for (int i=0; i<indentationCount; i++) {
-			this.printStream.append(TAB);
-		}
+            this.printStream.append(TAB);
+        }
     }
 
     @Override
@@ -270,8 +270,8 @@ public class PlainTextPrinter implements Printer {
     @Override
     public void startOfOptionalPrefix() {
         if (!this.preferences.isShowPrefixThis()) {
-			this.display = false;
-		}
+            this.display = false;
+        }
     }
 
     @Override
@@ -318,7 +318,7 @@ public class PlainTextPrinter implements Printer {
             int length = s.length();
 
             char c;
-			for (int i=0; i<length; i++) {
+            for (int i=0; i<length; i++) {
                 c = s.charAt(i);
 
                 if (c == '\t') {

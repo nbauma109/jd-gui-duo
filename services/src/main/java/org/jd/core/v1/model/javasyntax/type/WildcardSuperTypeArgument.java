@@ -16,7 +16,7 @@ public record WildcardSuperTypeArgument(Type type) implements TypeArgument {
         if (typeArgument.isWildcardSuperTypeArgument()) {
             return type.isTypeArgumentAssignableFrom(typeBounds, typeArgument.type());
         }
-		if (typeArgument instanceof Type) {
+        if (typeArgument instanceof Type) {
             return type.isTypeArgumentAssignableFrom(typeBounds, typeArgument);
         }
 
@@ -26,11 +26,11 @@ public record WildcardSuperTypeArgument(Type type) implements TypeArgument {
     @Override
     public boolean equals(Object o) {
         if (this == o) {
-			return true;
-		}
+            return true;
+        }
         if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
+            return false;
+        }
 
         WildcardSuperTypeArgument that = (WildcardSuperTypeArgument) o;
 

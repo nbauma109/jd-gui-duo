@@ -37,7 +37,7 @@ public class CaseEnumLayoutBlock extends CaseLayoutBlock
         this.switchMapKeyIndex = switchMapKeyIndex;
     }
 
-	public int getSwitchMapKeyIndex() {
-		return switchMapKeyIndex;
-	}
+    public int getSwitchMapKeyIndex() {
+        return switchMapKeyIndex;
+    }
 }

@@ -38,15 +38,15 @@ public class DeclareLayoutBlock extends LayoutBlock
         this.instruction = instruction;
     }
 
-	public ClassFile getClassFile() {
-		return classFile;
-	}
+    public ClassFile getClassFile() {
+        return classFile;
+    }
 
-	public Instruction getInstruction() {
-		return instruction;
-	}
+    public Instruction getInstruction() {
+        return instruction;
+    }
 
-	public Method getMethod() {
-		return method;
-	}
+    public Method getMethod() {
+        return method;
+    }
 }

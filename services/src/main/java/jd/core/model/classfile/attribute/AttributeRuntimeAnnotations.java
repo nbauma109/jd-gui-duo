@@ -26,7 +26,7 @@ public class AttributeRuntimeAnnotations extends Attribute
         this.annotations = annotations;
     }
 
-	public Annotation[] getAnnotations() {
-		return annotations;
-	}
+    public Annotation[] getAnnotations() {
+        return annotations;
+    }
 }

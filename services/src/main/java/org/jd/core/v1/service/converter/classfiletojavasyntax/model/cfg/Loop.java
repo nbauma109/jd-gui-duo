@@ -33,7 +33,7 @@ public class Loop {
     }
 
     public int getMemberCount() {
-    	return members.size();
+        return members.size();
     }
 
     public BasicBlock getEnd() {
@@ -45,21 +45,21 @@ public class Loop {
     }
 
     public void updateEnclosingLoop() {
-    	members.forEach(this::updateEnclosingLoop);
+        members.forEach(this::updateEnclosingLoop);
     }
 
     private void updateEnclosingLoop(BasicBlock member) {
-    	member.setEnclosingLoop(this);
+        member.setEnclosingLoop(this);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) {
-			return true;
-		}
+            return true;
+        }
         if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
+            return false;
+        }
 
         Loop loop = (Loop) o;
 
@@ -82,8 +82,8 @@ public class Loop {
             str.append(iterator.next().getIndex());
 
             while (iterator.hasNext()) {
-				str.append(", ").append(iterator.next().getIndex());
-			}
+                str.append(", ").append(iterator.next().getIndex());
+            }
         }
 
         return str + "], end=" + (end ==null ? "" : end.getIndex()) + "}";

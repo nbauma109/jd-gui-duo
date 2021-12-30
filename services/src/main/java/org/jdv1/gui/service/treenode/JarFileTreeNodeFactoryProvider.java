@@ -25,53 +25,53 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 public class JarFileTreeNodeFactoryProvider extends ZipFileTreeNodeFactoryProvider {
 
-	protected static final ImageIcon JAR_FILE_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/jar_obj.png"));
-	protected static final ImageIcon EJB_FILE_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/ejbmodule_obj.gif"));
+    protected static final ImageIcon JAR_FILE_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/jar_obj.png"));
+    protected static final ImageIcon EJB_FILE_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/ejbmodule_obj.gif"));
 
-	@Override
-	public String[] getSelectors() {
-		return appendSelectors("*:file:*.jar");
-	}
+    @Override
+    public String[] getSelectors() {
+        return appendSelectors("*:file:*.jar");
+    }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
-		int lastSlashIndex = entry.getPath().lastIndexOf("/");
-		String label = entry.getPath().substring(lastSlashIndex + 1);
-		String location = new File(entry.getUri()).getPath();
-		ImageIcon icon = isAEjbModule(entry) ? EJB_FILE_ICON : JAR_FILE_ICON;
-		T node = (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, icon));
-		// Add dummy node
-		node.add(new DefaultMutableTreeNode());
-		return node;
-	}
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
+        int lastSlashIndex = entry.getPath().lastIndexOf("/");
+        String label = entry.getPath().substring(lastSlashIndex + 1);
+        String location = new File(entry.getUri()).getPath();
+        ImageIcon icon = isAEjbModule(entry) ? EJB_FILE_ICON : JAR_FILE_ICON;
+        T node = (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, icon));
+        // Add dummy node
+        node.add(new DefaultMutableTreeNode());
+        return node;
+    }
 
-	protected static boolean isAEjbModule(Container.Entry entry) {
-		Map<Container.EntryPath, Container.Entry> children = entry.getChildren();
-		if (children != null) {
-			Container.Entry metaInf = children.get(new DirectoryEntryPath("META-INF"));
-			if (metaInf != null) {
-				children = metaInf.getChildren();
-				if (children.containsKey(new DirectoryEntryPath("META-INF/ejb-jar.xml"))) {
-					return true;
-				}
-			}
-		}
+    protected static boolean isAEjbModule(Container.Entry entry) {
+        Map<Container.EntryPath, Container.Entry> children = entry.getChildren();
+        if (children != null) {
+            Container.Entry metaInf = children.get(new DirectoryEntryPath("META-INF"));
+            if (metaInf != null) {
+                children = metaInf.getChildren();
+                if (children.containsKey(new DirectoryEntryPath("META-INF/ejb-jar.xml"))) {
+                    return true;
+                }
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	protected class TreeNode extends ZipFileTreeNodeFactoryProvider.TreeNode {
+    protected class TreeNode extends ZipFileTreeNodeFactoryProvider.TreeNode {
 
-		private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-		public TreeNode(Container.Entry entry, Object userObject) {
-			super(entry, userObject);
-		}
+        public TreeNode(Container.Entry entry, Object userObject) {
+            super(entry, userObject);
+        }
 
-		@Override
-		public Collection<Container.Entry> getChildren() {
-			return JarContainerEntryUtil.removeInnerTypeEntries(entry.getChildren());
-		}
-	}
+        @Override
+        public Collection<Container.Entry> getChildren() {
+            return JarContainerEntryUtil.removeInnerTypeEntries(entry.getChildren());
+        }
+    }
 }

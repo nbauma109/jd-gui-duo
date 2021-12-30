@@ -41,11 +41,11 @@ public class BlockLayoutBlock extends LayoutBlock
         this.setOther(null);
     }
 
-	public BlockLayoutBlock getOther() {
-		return other;
-	}
+    public BlockLayoutBlock getOther() {
+        return other;
+    }
 
-	public void setOther(BlockLayoutBlock other) {
-		this.other = other;
-	}
+    public void setOther(BlockLayoutBlock other) {
+        this.other = other;
+    }
 }

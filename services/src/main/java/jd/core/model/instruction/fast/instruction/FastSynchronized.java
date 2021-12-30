@@ -35,11 +35,11 @@ public class FastSynchronized extends FastList
         this.setMonitor(null);
     }
 
-	public Instruction getMonitor() {
-		return monitor;
-	}
+    public Instruction getMonitor() {
+        return monitor;
+    }
 
-	public void setMonitor(Instruction monitor) {
-		this.monitor = monitor;
-	}
+    public void setMonitor(Instruction monitor) {
+        this.monitor = monitor;
+    }
 }

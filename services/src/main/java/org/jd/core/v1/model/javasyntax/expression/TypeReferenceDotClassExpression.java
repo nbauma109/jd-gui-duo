@@ -54,8 +54,8 @@ public class TypeReferenceDotClassExpression implements Expression {
         return "TypeReferenceDotClassExpression{" + typeDotClass + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new TypeReferenceDotClassExpression(lineNumber, typeDotClass);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new TypeReferenceDotClassExpression(lineNumber, typeDotClass);
+    }
 }

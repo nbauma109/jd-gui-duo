@@ -35,11 +35,11 @@ public class FieldNameLayoutBlock extends LayoutBlock
         this.field = field;
     }
 
-	public ClassFile getClassFile() {
-		return classFile;
-	}
+    public ClassFile getClassFile() {
+        return classFile;
+    }
 
-	public Field getField() {
-		return field;
-	}
+    public Field getField() {
+        return field;
+    }
 }

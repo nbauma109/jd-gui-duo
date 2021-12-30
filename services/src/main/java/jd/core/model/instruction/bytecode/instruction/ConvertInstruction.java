@@ -45,15 +45,15 @@ public class ConvertInstruction extends Instruction
         return 2;
     }
 
-	public String getSignature() {
-		return signature;
-	}
+    public String getSignature() {
+        return signature;
+    }
 
-	public Instruction getValue() {
-		return value;
-	}
+    public Instruction getValue() {
+        return value;
+    }
 
-	public void setValue(Instruction value) {
-		this.value = value;
-	}
+    public void setValue(Instruction value) {
+        this.value = value;
+    }
 }

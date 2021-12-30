@@ -49,8 +49,8 @@ public class IfGotoToIfReconstructor
     {
         int length = list.size();
         if (length < 3) {
-			return;
-		}
+            return;
+        }
 
         int index = length-2;
 
@@ -63,8 +63,8 @@ public class IfGotoToIfReconstructor
 
                 i = list.get(index+1);
                 if (i.getOpcode() != Const.GOTO) {
-					continue;
-				}
+                    continue;
+                }
 
                 Goto g = (Goto)i;
 
@@ -72,8 +72,8 @@ public class IfGotoToIfReconstructor
                 int jumpOffset = bi.getJumpOffset();
 
                 if (jumpOffset <= g.getOffset() || i.getOffset() < jumpOffset) {
-					continue;
-				}
+                    continue;
+                }
 
                 // Setup BranchInstruction
                 bi.setBranch(g.getJumpOffset() - bi.getOffset());

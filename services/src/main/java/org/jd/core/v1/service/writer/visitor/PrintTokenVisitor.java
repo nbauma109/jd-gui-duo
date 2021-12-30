@@ -181,11 +181,11 @@ public class PrintTokenVisitor implements TokenVisitor {
             tokens.get(i).accept(searchLineNumberVisitor);
 
             if (searchLineNumberVisitor.lineNumber != UNKNOWN_LINE_NUMBER) {
-				return searchLineNumberVisitor.lineNumber;
-			}
+                return searchLineNumberVisitor.lineNumber;
+            }
             if (searchLineNumberVisitor.newLineCounter > 0) {
-				break;
-			}
+                break;
+            }
         }
 
         // Forward search
@@ -197,19 +197,19 @@ public class PrintTokenVisitor implements TokenVisitor {
             tokens.get(i).accept(searchLineNumberVisitor);
 
             if (searchLineNumberVisitor.lineNumber != UNKNOWN_LINE_NUMBER) {
-				return searchLineNumberVisitor.lineNumber;
-			}
+                return searchLineNumberVisitor.lineNumber;
+            }
             if (searchLineNumberVisitor.newLineCounter > 0) {
-				break;
-			}
+                break;
+            }
         }
 
         return UNKNOWN_LINE_NUMBER;
     }
 
     protected static class SearchLineNumberVisitor extends AbstractNopTokenVisitor {
-    	private int lineNumber;
-    	private int newLineCounter;
+        private int lineNumber;
+        private int newLineCounter;
 
         public void reset() {
             this.lineNumber = UNKNOWN_LINE_NUMBER;

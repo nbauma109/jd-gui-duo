@@ -109,8 +109,8 @@ public class LocalVariables
 
             if (lv.getIndex() == index && lv.getStartPc() <= offset
                     && offset < lv.getStartPc() + lv.getLength()) {
-				return lv;
-			}
+                return lv;
+            }
         }
 
         return null;
@@ -124,8 +124,8 @@ public class LocalVariables
             LocalVariable lv = this.listOfLocalVariables.get(i);
 
             if (lv.getNameIndex() == nameIndex) {
-				return true;
-			}
+                return true;
+            }
         }
 
         return false;
@@ -157,8 +157,8 @@ public class LocalVariables
             LocalVariable lv = this.listOfLocalVariables.get(i);
 
             if (lv.getIndex() == index && lv.getStartPc() <= offset) {
-				return lv;
-			}
+                return lv;
+            }
         }
 
         return null;
@@ -166,12 +166,12 @@ public class LocalVariables
 
     public void removeUselessLocalVariables()
     {
-		for (int i = this.listOfLocalVariables.size() - 1; i >= 0; i--) {
-			LocalVariable lv = this.listOfLocalVariables.get(i);
-			if (lv.isToBeRemoved()) {
-				this.listOfLocalVariables.remove(i);
-			}
-		}
+        for (int i = this.listOfLocalVariables.size() - 1; i >= 0; i--) {
+            LocalVariable lv = this.listOfLocalVariables.get(i);
+            if (lv.isToBeRemoved()) {
+                this.listOfLocalVariables.remove(i);
+            }
+        }
     }
 
     public int size()

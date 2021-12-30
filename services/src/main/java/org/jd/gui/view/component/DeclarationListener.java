@@ -102,7 +102,7 @@ public class DeclarationListener extends AbstractJavaListener {
     @Override
     public boolean visit(FieldDeclaration node) {
         @SuppressWarnings("unchecked")
-		List<VariableDeclarationFragment> fragments = node.fragments();
+        List<VariableDeclarationFragment> fragments = node.fragments();
         String name;
         int dimensionOnVariable;
         int position;
@@ -126,7 +126,7 @@ public class DeclarationListener extends AbstractJavaListener {
         SimpleName nodeName = node.getName();
         String name = nodeName.getIdentifier();
         @SuppressWarnings("unchecked")
-		String paramDescriptors = createParamDescriptors(node.parameters());
+        String paramDescriptors = createParamDescriptors(node.parameters());
         String returnDescriptor = createDescriptor(node.getReturnType2(), 0);
         String descriptor = paramDescriptors + returnDescriptor;
         int position = nodeName.getStartPosition();

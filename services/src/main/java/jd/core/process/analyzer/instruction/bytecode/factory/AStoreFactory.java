@@ -39,10 +39,10 @@ public class AStoreFactory implements InstructionFactory
         int index;
 
         if (opcode == Const.ASTORE) {
-			index = code[offset+1] & 255;
-		} else {
-			index = (code[offset] & 255) - Const.ASTORE_0;
-		}
+            index = code[offset+1] & 255;
+        } else {
+            index = (code[offset] & 255) - Const.ASTORE_0;
+        }
 
         final Instruction instruction = new AStore(
             Const.ASTORE, offset, lineNumber, index, stack.pop());

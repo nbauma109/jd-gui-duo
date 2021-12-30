@@ -139,148 +139,148 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
     @Override
     public void visit(BinaryOperatorExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(BooleanExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(CastExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(ConstructorInvocationExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(ConstructorReferenceExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(DoubleConstantExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
     }
 
     @Override
     public void visit(FieldReferenceExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         safeAccept(expression.getExpression());
     }
 
     @Override
     public void visit(FloatConstantExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
     }
 
     @Override
     public void visit(IntegerConstantExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
     }
 
     @Override
     public void visit(InstanceOfExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(LambdaFormalParametersExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(LambdaIdentifiersExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(LengthExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(LocalVariableReferenceExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(LongConstantExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
     }
 
     @Override
     public void visit(MethodInvocationExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(MethodReferenceExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         expression.getExpression().accept(this);
     }
 
     @Override
     public void visit(NewArray expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         safeAccept(expression.getDimensionExpressionList());
     }
 
     @Override
     public void visit(NewExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
 
         BaseType type = expression.getType();
 
@@ -292,87 +292,87 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
     @Override
     public void visit(NewInitializedArray expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(NullExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
     }
 
     @Override
     public void visit(ObjectTypeReferenceExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(ParenthesesExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(PostOperatorExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(PreOperatorExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(StringConstantExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(SuperExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(TernaryOperatorExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(ThisExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(TypeReferenceDotClassExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) {
-			maxLineNumber = expression.getLineNumber();
-		}
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 

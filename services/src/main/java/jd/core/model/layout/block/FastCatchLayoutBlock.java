@@ -41,15 +41,15 @@ public class FastCatchLayoutBlock extends LayoutBlock
         this.fc = fc;
     }
 
-	public ClassFile getClassFile() {
-		return classFile;
-	}
+    public ClassFile getClassFile() {
+        return classFile;
+    }
 
-	public Method getMethod() {
-		return method;
-	}
+    public Method getMethod() {
+        return method;
+    }
 
-	public FastCatch getFc() {
-		return fc;
-	}
+    public FastCatch getFc() {
+        return fc;
+    }
 }

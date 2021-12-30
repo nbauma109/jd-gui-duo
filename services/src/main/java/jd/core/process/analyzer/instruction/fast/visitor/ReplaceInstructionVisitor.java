@@ -330,8 +330,8 @@ public class ReplaceInstructionVisitor
                 List<Instruction> branchList =
                     ((ComplexConditionalBranchInstruction)instruction).getInstructions();
                 for (int i=branchList.size()-1; i>=0; --i) {
-					visit(branchList.get(i));
-				}
+                    visit(branchList.get(i));
+                }
             }
             break;
         case Const.INSTANCEOF:
@@ -628,8 +628,8 @@ public class ReplaceInstructionVisitor
                     visit(iai.getNewArray());
 
                     if (iai.getValues() != null) {
-						visit(iai.getValues());
-					}
+                        visit(iai.getValues());
+                    }
                 }
             }
             break;
@@ -682,12 +682,12 @@ public class ReplaceInstructionVisitor
                 if (this.oldInstruction == null)
                 {
                     if (ft.getFinallyInstructions() != null) {
-						visit(ft.getFinallyInstructions());
-					}
+                        visit(ft.getFinallyInstructions());
+                    }
 
                     for (int i=ft.getCatches().size()-1; i>=0 && this.oldInstruction == null; --i) {
-						visit(ft.getCatches().get(i).instructions());
-					}
+                        visit(ft.getCatches().get(i).instructions());
+                    }
                 }
             }
             break;
@@ -723,8 +723,8 @@ public class ReplaceInstructionVisitor
                     visit(fsy.getMonitor());
 
                     if (this.oldInstruction == null) {
-						visit(fsy.getInstructions());
-					}
+                        visit(fsy.getInstructions());
+                    }
                 }
             }
             break;
@@ -743,8 +743,8 @@ public class ReplaceInstructionVisitor
 
                     if (this.oldInstruction == null &&
                         ftl.getInstructions() != null) {
-						visit(ftl.getInstructions());
-					}
+                        visit(ftl.getInstructions());
+                    }
                 }
             }
             break;
@@ -785,8 +785,8 @@ public class ReplaceInstructionVisitor
     private void visit(List<Instruction> instructions)
     {
         for (int i=instructions.size()-1; i>=0; --i) {
-			visit(instructions.get(i));
-		}
+            visit(instructions.get(i));
+        }
     }
 
     public Instruction getOldInstruction()

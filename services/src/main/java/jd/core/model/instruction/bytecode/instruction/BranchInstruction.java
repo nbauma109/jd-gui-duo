@@ -36,11 +36,11 @@ public abstract class BranchInstruction extends Instruction
         this.setBranch(jumpOffset - this.getOffset());
     }
 
-	public int getBranch() {
-		return branch;
-	}
+    public int getBranch() {
+        return branch;
+    }
 
-	public void setBranch(int branch) {
-		this.branch = branch;
-	}
+    public void setBranch(int branch) {
+        this.branch = branch;
+    }
 }

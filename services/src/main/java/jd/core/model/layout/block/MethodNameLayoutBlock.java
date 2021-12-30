@@ -43,23 +43,23 @@ public class MethodNameLayoutBlock extends LayoutBlock
         this.nullCodeFlag = nullCodeFlag;
     }
 
-	public ClassFile getClassFile() {
-		return classFile;
-	}
+    public ClassFile getClassFile() {
+        return classFile;
+    }
 
-	public Method getMethod() {
-		return method;
-	}
+    public Method getMethod() {
+        return method;
+    }
 
-	public boolean hasNullCodeFlag() {
-		return nullCodeFlag;
-	}
+    public boolean hasNullCodeFlag() {
+        return nullCodeFlag;
+    }
 
-	public String getSignature() {
-		return signature;
-	}
+    public String getSignature() {
+        return signature;
+    }
 
-	public boolean hasDescriptorFlag() {
-		return descriptorFlag;
-	}
+    public boolean hasDescriptorFlag() {
+        return descriptorFlag;
+    }
 }

@@ -88,14 +88,14 @@ public class JavaModuleInfoFileIndexerProvider extends AbstractIndexerProvider {
         @Override
         public void visitExport(final String packaze, final int access, final String... modules) {
             if (modules != null) {
-            	Collections.addAll(javaModuleReferenceSet, modules);
+                Collections.addAll(javaModuleReferenceSet, modules);
             }
         }
 
         @Override
         public void visitOpen(final String packaze, final int access, final String... modules) {
             if (modules != null) {
-            	Collections.addAll(javaModuleReferenceSet, modules);
+                Collections.addAll(javaModuleReferenceSet, modules);
             }
         }
 
@@ -104,7 +104,7 @@ public class JavaModuleInfoFileIndexerProvider extends AbstractIndexerProvider {
             typeReferenceSet.add(service);
 
             if (providers != null) {
-            	Collections.addAll(typeReferenceSet, providers);
+                Collections.addAll(typeReferenceSet, providers);
             }
         }
     }

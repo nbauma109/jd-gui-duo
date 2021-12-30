@@ -26,14 +26,14 @@ import jd.core.model.instruction.bytecode.ByteCodeConstants;
 
 public class SignatureUtil
 {
-	/*
-	 * Keep letters in order for binary search
-	 */
+    /*
+     * Keep letters in order for binary search
+     */
     private static final char[] PRIMITIVE_SIGNATURES    = {'B', 'C', 'D', 'F', 'I', 'J', 'S', 'Z'};
-	private static final char[] INTEGER_SIGNATURES      = {'B', 'C', 'I', 'S'};
-	private static final char[] BYTE_SHORT_SIGNATURES   = {'B', 'S'};
-	private static final char[] OBJECT_TYPE_SIGNATURES  = {'L', 'T'};
-	private static final char[] OBJECT_SIGNATURE        = {'L'};
+    private static final char[] INTEGER_SIGNATURES      = {'B', 'C', 'I', 'S'};
+    private static final char[] BYTE_SHORT_SIGNATURES   = {'B', 'S'};
+    private static final char[] OBJECT_TYPE_SIGNATURES  = {'L', 'T'};
+    private static final char[] OBJECT_SIGNATURE        = {'L'};
 
     private SignatureUtil() {
         super();
@@ -81,8 +81,8 @@ public class SignatureUtil
                 {
                     c = caSignature[index];
                     if (c == ';' || c == '<') {
-						break;
-					}
+                        break;
+                    }
                     index++;
                 }
 
@@ -101,8 +101,8 @@ public class SignatureUtil
 
                 // pass ';'
                 if (caSignature[index] == ';') {
-					index++;
-				}
+                    index++;
+                }
                 break;
             case 'T' :
                 index = CharArrayUtil.indexOf(caSignature, ';', index+1) + 1;
@@ -119,8 +119,8 @@ public class SignatureUtil
             }
 
             if (index >= length || caSignature[index] != '.') {
-				break;
-			}
+                break;
+            }
         }
 
         return index;
@@ -145,8 +145,8 @@ public class SignatureUtil
     public static int getTypeFromSignature(String signature)
     {
         if (signature.length() != 1) {
-			return 0;
-		}
+            return 0;
+        }
 
         switch (signature.charAt(0))
         {
@@ -164,7 +164,7 @@ public class SignatureUtil
 
     public static boolean isPrimitiveSignature(String signature)
     {
-    	return isPrimitiveSignature(signature, PRIMITIVE_SIGNATURES);
+        return isPrimitiveSignature(signature, PRIMITIVE_SIGNATURES);
     }
 
     public static boolean isIntegerSignature(String signature)
@@ -174,32 +174,32 @@ public class SignatureUtil
 
     public static boolean isByteOrShortSignature(String signature)
     {
-    	return isPrimitiveSignature(signature, BYTE_SHORT_SIGNATURES);
+        return isPrimitiveSignature(signature, BYTE_SHORT_SIGNATURES);
     }
 
     private static boolean isPrimitiveSignature(String signature, char[] letters)
     {
-    	if (signature == null || signature.length() != 1) {
-    		return false;
-    	}
-    	return Arrays.binarySearch(letters, signature.charAt(0)) >= 0;
+        if (signature == null || signature.length() != 1) {
+            return false;
+        }
+        return Arrays.binarySearch(letters, signature.charAt(0)) >= 0;
     }
 
     public static boolean isObjectTypeSignature(String signature)
     {
-    	return isObjectSignature(signature, OBJECT_TYPE_SIGNATURES);
+        return isObjectSignature(signature, OBJECT_TYPE_SIGNATURES);
     }
 
     public static boolean isObjectSignature(String signature)
     {
-    	return isObjectSignature(signature, OBJECT_SIGNATURE);
+        return isObjectSignature(signature, OBJECT_SIGNATURE);
     }
 
     private static boolean isObjectSignature(String signature, char[] letters)
     {
         if (signature == null || signature.length() <= 2) {
-			return false;
-		}
+            return false;
+        }
         return Arrays.binarySearch(letters, signature.charAt(0)) >= 0;
     }
 
@@ -210,8 +210,8 @@ public class SignatureUtil
         int beginIndex = 0;
 
         while (beginIndex < length && caSignature[beginIndex] == '[') {
-			beginIndex++;
-		}
+            beginIndex++;
+        }
 
         if (beginIndex < length && caSignature[beginIndex] == 'L')
         {
@@ -228,8 +228,8 @@ public class SignatureUtil
         int beginIndex = 0;
 
         while (signature.charAt(beginIndex) == '[') {
-			beginIndex++;
-		}
+            beginIndex++;
+        }
 
         return signature.substring(beginIndex);
     }
@@ -239,8 +239,8 @@ public class SignatureUtil
         int beginIndex = 0;
 
         while (signature.charAt(beginIndex) == '[') {
-			beginIndex++;
-		}
+            beginIndex++;
+        }
 
         return beginIndex;
     }
@@ -284,8 +284,8 @@ public class SignatureUtil
     {
         int index = signature.indexOf(')');
         if (index == -1) {
-			return null;
-		}
+            return null;
+        }
 
         return signature.substring(index + 1);
     }
@@ -358,28 +358,28 @@ public class SignatureUtil
          * Lorsqu'un choix est possible, le plus 'gros' type est retourné.
          */
         if ((typesBitField & ByteCodeConstants.TBF_INT_INT) != 0) {
-			return "I";
-		}
+            return "I";
+        }
         if ((typesBitField & ByteCodeConstants.TBF_INT_SHORT) != 0) {
-			return "S";
-		}
+            return "S";
+        }
         if ((typesBitField & ByteCodeConstants.TBF_INT_CHAR) != 0) {
-			return "C";
-		}
+            return "C";
+        }
         if ((typesBitField & ByteCodeConstants.TBF_INT_BYTE) != 0) {
-			return "B";
-		}
+            return "B";
+        }
         if ((typesBitField & ByteCodeConstants.TBF_INT_BOOLEAN) != 0) {
-			return "Z";
-		}
+            return "Z";
+        }
         return "I";
     }
 
     public static String createTypeName(String signature)
     {
         if (signature.isEmpty()) {
-			return signature;
-		}
+            return signature;
+        }
 
         switch(signature.charAt(0))
         {
@@ -387,8 +387,8 @@ public class SignatureUtil
             return signature;
         case 'L', 'T':
             if (signature.charAt(signature.length()-1) == ';') {
-				return signature;
-			}
+                return signature;
+            }
             // intended fall through
         default:
             return "L" + signature + ';';

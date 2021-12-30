@@ -47,8 +47,8 @@ public class TernaryOperator extends Instruction
             ConstantPool constants, LocalVariables localVariables)
     {
         if (this.getValue1() != null) {
-			return this.getValue1().getReturnedSignature(constants, localVariables);
-		}
+            return this.getValue1().getReturnedSignature(constants, localVariables);
+        }
         return this.getValue2().getReturnedSignature(constants, localVariables);
     }
 
@@ -58,27 +58,27 @@ public class TernaryOperator extends Instruction
         return 13;
     }
 
-	public Instruction getValue1() {
-		return value1;
-	}
+    public Instruction getValue1() {
+        return value1;
+    }
 
-	public void setValue1(Instruction value1) {
-		this.value1 = value1;
-	}
+    public void setValue1(Instruction value1) {
+        this.value1 = value1;
+    }
 
-	public Instruction getValue2() {
-		return value2;
-	}
+    public Instruction getValue2() {
+        return value2;
+    }
 
-	public void setValue2(Instruction value2) {
-		this.value2 = value2;
-	}
+    public void setValue2(Instruction value2) {
+        this.value2 = value2;
+    }
 
-	public Instruction getTest() {
-		return test;
-	}
+    public Instruction getTest() {
+        return test;
+    }
 
-	public void setTest(Instruction test) {
-		this.test = test;
-	}
+    public void setTest(Instruction test) {
+        this.test = test;
+    }
 }

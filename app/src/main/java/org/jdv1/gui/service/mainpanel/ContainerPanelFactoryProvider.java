@@ -70,7 +70,7 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
             DefaultMutableTreeNode root = new DefaultMutableTreeNode();
 
             TreeNodeFactory factory;
-			for (Container.Entry nextEntry : container.getRoot().getChildren().values()) {
+            for (Container.Entry nextEntry : container.getRoot().getChildren().values()) {
                 factory = api.getTreeNodeFactory(nextEntry);
                 if (factory != null) {
                     root.add(factory.make(api, nextEntry));
@@ -228,23 +228,23 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
             return value;
         }
 
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = super.hashCode();
-			return prime * result + (wrappers == null ? 0 : wrappers.hashCode());
-		}
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = super.hashCode();
+            return prime * result + (wrappers == null ? 0 : wrappers.hashCode());
+        }
 
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (!super.equals(obj) || getClass() != obj.getClass()) {
-				return false;
-			}
-			DelegatedMapMapWithDefault other = (DelegatedMapMapWithDefault) obj;
-			return Objects.equals(wrappers, other.wrappers);
-		}
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!super.equals(obj) || getClass() != obj.getClass()) {
+                return false;
+            }
+            DelegatedMapMapWithDefault other = (DelegatedMapMapWithDefault) obj;
+            return Objects.equals(wrappers, other.wrappers);
+        }
     }
 }

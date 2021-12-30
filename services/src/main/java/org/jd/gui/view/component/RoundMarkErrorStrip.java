@@ -806,60 +806,60 @@ public class RoundMarkErrorStrip extends JComponent {
             setLocation(2, y);
         }
 
-		/**
-		 * Returns a "brighter" color.
-		 *
-		 * @param c The color.
-		 * @return A brighter color.
-		 */
-		private Color getBrighterColor(Color c) {
-		    if (brighterColors==null) {
-		        brighterColors = new HashMap<>(5); // Usually small
-		    }
-		    return brighterColors.computeIfAbsent(c, k-> {
-		        // Don't use c.brighter() as it doesn't work well for blue, and
-		        // also doesn't return something brighter "enough."
-		        int r = possiblyBrighter(c.getRed());
-		        int g = possiblyBrighter(c.getGreen());
-		        int b = possiblyBrighter(c.getBlue());
-		        return new Color(r, g, b);
-		    });
-		}
+        /**
+         * Returns a "brighter" color.
+         *
+         * @param c The color.
+         * @return A brighter color.
+         */
+        private Color getBrighterColor(Color c) {
+            if (brighterColors==null) {
+                brighterColors = new HashMap<>(5); // Usually small
+            }
+            return brighterColors.computeIfAbsent(c, k-> {
+                // Don't use c.brighter() as it doesn't work well for blue, and
+                // also doesn't return something brighter "enough."
+                int r = possiblyBrighter(c.getRed());
+                int g = possiblyBrighter(c.getGreen());
+                int b = possiblyBrighter(c.getBlue());
+                return new Color(r, g, b);
+            });
+        }
 
-		/**
-		 * Added for JD-GUI.
-		 *
-		 * Returns a "brighter" color.
-		 *
-		 * @param c The color.
-		 * @return A brighter color.
-		 */
-		private Color getDarkerColor(Color c) {
-		    if (darkerColors==null) {
-		        darkerColors = new HashMap<>(5); // Usually small
-		    }
-		    return darkerColors.computeIfAbsent(c, k -> {
-		        // Don't use c.brighter() as it doesn't work well for blue, and
-		        // also doesn't return something brighter "enough."
-		        int r = possiblyDarker(c.getRed());
-		        int g = possiblyDarker(c.getGreen());
-		        int b = possiblyDarker(c.getBlue());
-		        return new Color(r, g, b);
-		    });
-		}
+        /**
+         * Added for JD-GUI.
+         *
+         * Returns a "brighter" color.
+         *
+         * @param c The color.
+         * @return A brighter color.
+         */
+        private Color getDarkerColor(Color c) {
+            if (darkerColors==null) {
+                darkerColors = new HashMap<>(5); // Usually small
+            }
+            return darkerColors.computeIfAbsent(c, k -> {
+                // Don't use c.brighter() as it doesn't work well for blue, and
+                // also doesn't return something brighter "enough."
+                int r = possiblyDarker(c.getRed());
+                int g = possiblyDarker(c.getGreen());
+                int b = possiblyDarker(c.getBlue());
+                return new Color(r, g, b);
+            });
+        }
 
-		/**
-		 * Returns the y-offset in this component corresponding to a line in the
-		 * text component.
-		 *
-		 * @param line The line.
-		 * @return The y-offset.
-		 * @see #yToLine(int)
-		 */
-		private int lineToY(int line) {
-		    int h = textArea.getVisibleRect().height;
-		    float lineCount = textArea.getLineCount();
-		    return (int)((line-1)/(lineCount-1) * h) - 2;
-		}
+        /**
+         * Returns the y-offset in this component corresponding to a line in the
+         * text component.
+         *
+         * @param line The line.
+         * @return The y-offset.
+         * @see #yToLine(int)
+         */
+        private int lineToY(int line) {
+            int h = textArea.getVisibleRect().height;
+            float lineCount = textArea.getLineCount();
+            return (int)((line-1)/(lineCount-1) * h) - 2;
+        }
     }
 }

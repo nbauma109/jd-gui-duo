@@ -36,8 +36,8 @@ public class ANewArray extends IndexInstruction
             ConstantPool constants, LocalVariables localVariables)
     {
         if (constants == null) {
-			return null;
-		}
+            return null;
+        }
 
         String str = constants.getConstantClassName(this.getIndex());
 
@@ -45,7 +45,7 @@ public class ANewArray extends IndexInstruction
         {
             return null;
         }
-		if (str.charAt(0) == '[')
+        if (str.charAt(0) == '[')
         {
             return "[" + constants.getConstantClassName(this.getIndex());
         }
@@ -55,11 +55,11 @@ public class ANewArray extends IndexInstruction
         }
     }
 
-	public Instruction getDimension() {
-		return dimension;
-	}
+    public Instruction getDimension() {
+        return dimension;
+    }
 
-	public void setDimension(Instruction dimension) {
-		this.dimension = dimension;
-	}
+    public void setDimension(Instruction dimension) {
+        this.dimension = dimension;
+    }
 }

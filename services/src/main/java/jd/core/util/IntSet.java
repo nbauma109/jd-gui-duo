@@ -87,12 +87,12 @@ public class IntSet
                     value = this.values[medIndex];
 
                     if (value < newValue) {
-						firstIndex = medIndex+1;
-					} else if (value > newValue) {
-						lastIndex = medIndex-1;
-					} else {
-						break;
-					}
+                        firstIndex = medIndex+1;
+                    } else if (value > newValue) {
+                        lastIndex = medIndex-1;
+                    } else {
+                        break;
+                    }
                 }
 
                 medIndex = (lastIndex + firstIndex) / 2;
@@ -120,8 +120,8 @@ public class IntSet
     public int[] toArray()
     {
         if (this.values == null) {
-			return null;
-		}
+            return null;
+        }
 
         int[] tmp = new int[this.size];
         System.arraycopy(this.values, 0, tmp, 0, this.size);
@@ -131,9 +131,9 @@ public class IntSet
     public int get(int index)
     {
         if (this.values == null || index >= this.size) {
-			throw new IndexOutOfBoundsException(
+            throw new IndexOutOfBoundsException(
                 "Index: "+index+", Size: "+size);
-		}
+        }
 
         return this.values[index];
     }

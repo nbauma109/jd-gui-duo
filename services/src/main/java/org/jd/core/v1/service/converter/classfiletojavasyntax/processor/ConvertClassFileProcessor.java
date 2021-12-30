@@ -330,13 +330,13 @@ public class ConvertClassFileProcessor {
         }
         Constant constantValue = acv.constantValue();
         Expression expression = switch (constantValue.getTag()) {
-			case Const.CONSTANT_Integer -> new IntegerConstantExpression(typeField, ((ConstantInteger)constantValue).getBytes());
-			case Const.CONSTANT_Float -> new FloatConstantExpression(((ConstantFloat)constantValue).getBytes());
-			case Const.CONSTANT_Long -> new LongConstantExpression(((ConstantLong)constantValue).getBytes());
-			case Const.CONSTANT_Double -> new DoubleConstantExpression(((ConstantDouble)constantValue).getBytes());
-			case Const.CONSTANT_Utf8 -> new StringConstantExpression(((ConstantUtf8)constantValue).getBytes());
-			default -> throw new ConvertClassFileException("Invalid attributes");
-		};
+            case Const.CONSTANT_Integer -> new IntegerConstantExpression(typeField, ((ConstantInteger)constantValue).getBytes());
+            case Const.CONSTANT_Float -> new FloatConstantExpression(((ConstantFloat)constantValue).getBytes());
+            case Const.CONSTANT_Long -> new LongConstantExpression(((ConstantLong)constantValue).getBytes());
+            case Const.CONSTANT_Double -> new DoubleConstantExpression(((ConstantDouble)constantValue).getBytes());
+            case Const.CONSTANT_Utf8 -> new StringConstantExpression(((ConstantUtf8)constantValue).getBytes());
+            default -> throw new ConvertClassFileException("Invalid attributes");
+        };
         return new ExpressionVariableInitializer(expression);
     }
 

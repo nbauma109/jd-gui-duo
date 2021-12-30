@@ -36,7 +36,7 @@ public class FastTest2Lists extends FastTestList
         this.instructions2 = instructions2;
     }
 
-	public List<Instruction> getInstructions2() {
-		return instructions2;
-	}
+    public List<Instruction> getInstructions2() {
+        return instructions2;
+    }
 }

@@ -35,11 +35,11 @@ public class FastTestList extends FastList
         this.setTest(test);
     }
 
-	public Instruction getTest() {
-		return test;
-	}
+    public Instruction getTest() {
+        return test;
+    }
 
-	public void setTest(Instruction test) {
-		this.test = test;
-	}
+    public void setTest(Instruction test) {
+        this.test = test;
+    }
 }

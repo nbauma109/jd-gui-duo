@@ -40,8 +40,8 @@ public abstract class InvokeInstruction extends IndexInstruction
             ConstantPool constants, LocalVariables localVariables)
     {
         if (constants == null) {
-			return null;
-		}
+            return null;
+        }
 
         ConstantMethodref cmr = constants.getConstantMethodref(this.getIndex());
 
@@ -51,15 +51,15 @@ public abstract class InvokeInstruction extends IndexInstruction
     public List<String> getListOfParameterSignatures(ConstantPool constants)
     {
         if (constants == null) {
-			return null;
-		}
+            return null;
+        }
 
         ConstantMethodref cmr = constants.getConstantMethodref(this.getIndex());
 
         return cmr.getListOfParameterSignatures();
     }
 
-	public List<Instruction> getArgs() {
-		return args;
-	}
+    public List<Instruction> getArgs() {
+        return args;
+    }
 }

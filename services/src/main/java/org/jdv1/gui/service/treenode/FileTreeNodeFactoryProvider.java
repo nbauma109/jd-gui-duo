@@ -22,42 +22,42 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 public class FileTreeNodeFactoryProvider extends AbstractTreeNodeFactoryProvider {
 
-	protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/file_plain_obj.png"));
+    protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/file_plain_obj.png"));
 
-	@Override
-	public String[] getSelectors() {
-		return appendSelectors("*:file:*");
-	}
+    @Override
+    public String[] getSelectors() {
+        return appendSelectors("*:file:*");
+    }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
-		int lastSlashIndex = entry.getPath().lastIndexOf('/');
-		String label = entry.getPath().substring(lastSlashIndex + 1);
-		String location = new File(entry.getUri()).getPath();
-		return (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
-	}
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
+        int lastSlashIndex = entry.getPath().lastIndexOf('/');
+        String label = entry.getPath().substring(lastSlashIndex + 1);
+        String location = new File(entry.getUri()).getPath();
+        return (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
+    }
 
-	protected static class TreeNode extends DefaultMutableTreeNode implements ContainerEntryGettable, UriGettable {
+    protected static class TreeNode extends DefaultMutableTreeNode implements ContainerEntryGettable, UriGettable {
 
-		private static final long serialVersionUID = 1L;
-		protected transient Container.Entry entry;
+        private static final long serialVersionUID = 1L;
+        protected transient Container.Entry entry;
 
-		public TreeNode(Container.Entry entry, Object userObject) {
-			super(userObject);
-			this.entry = entry;
-		}
+        public TreeNode(Container.Entry entry, Object userObject) {
+            super(userObject);
+            this.entry = entry;
+        }
 
-		// --- ContainerEntryGettable --- //
-		@Override
-		public Container.Entry getEntry() {
-			return entry;
-		}
+        // --- ContainerEntryGettable --- //
+        @Override
+        public Container.Entry getEntry() {
+            return entry;
+        }
 
-		// --- UriGettable --- //
-		@Override
-		public URI getUri() {
-			return entry.getUri();
-		}
-	}
+        // --- UriGettable --- //
+        @Override
+        public URI getUri() {
+            return entry.getUri();
+        }
+    }
 }

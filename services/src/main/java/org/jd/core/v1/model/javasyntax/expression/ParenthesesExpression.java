@@ -17,7 +17,7 @@ public class ParenthesesExpression extends AbstractLineNumberExpression {
     }
 
     public ParenthesesExpression(int lineNumber, Expression expression) {
-    	super(lineNumber);
+        super(lineNumber);
         this.expression = expression;
     }
 
@@ -40,8 +40,8 @@ public class ParenthesesExpression extends AbstractLineNumberExpression {
         visitor.visit(this);
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new ParenthesesExpression(lineNumber, expression);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new ParenthesesExpression(lineNumber, expression);
+    }
 }

@@ -102,18 +102,18 @@ public class FastSwitch extends BranchInstruction
 
         @Override
         public int hashCode() {
-        	return Objects.hash(offset, key);
+            return Objects.hash(offset, key);
         }
 
         @Override
         public boolean equals(Object obj) {
-        	if (this == obj) {
-        		return true;
-        	}
-        	if (obj == null || getClass() != obj.getClass()) {
-        		return false;
-        	}
-        	return obj instanceof Pair p && compareTo(p) == 0;
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null || getClass() != obj.getClass()) {
+                return false;
+            }
+            return obj instanceof Pair p && compareTo(p) == 0;
         }
     }
 
@@ -124,19 +124,19 @@ public class FastSwitch extends BranchInstruction
         return null;
     }
 
-	public Pair[] getPairs() {
-		return pairs;
-	}
+    public Pair[] getPairs() {
+        return pairs;
+    }
 
-	public Pair getPair(int i) {
-		return pairs[i];
-	}
+    public Pair getPair(int i) {
+        return pairs[i];
+    }
 
-	public Instruction getTest() {
-		return test;
-	}
+    public Instruction getTest() {
+        return test;
+    }
 
-	public void setTest(Instruction test) {
-		this.test = test;
-	}
+    public void setTest(Instruction test) {
+        this.test = test;
+    }
 }

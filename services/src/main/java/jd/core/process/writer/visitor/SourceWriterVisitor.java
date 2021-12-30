@@ -94,8 +94,8 @@ import jd.core.util.UtilConstants;
 
 public class SourceWriterVisitor
 {
-	private static final String[] CMP_NAMES = {
-			"==", "<", ">", "", "!", "<=", ">=", "!=" };
+    private static final String[] CMP_NAMES = {
+            "==", "<", ">", "", "!", "<=", ">=", "!=" };
     private static final char[] BIN_OPS = {'&', '^', '|'};
 
     private final Loader loader;
@@ -1022,7 +1022,7 @@ public class SourceWriterVisitor
         int lineNumber;
 
         String op = boi.getOperator();
-		if (op.length() == 1 && Arrays.binarySearch(BIN_OPS, op.charAt(0)) >= 0)
+        if (op.length() == 1 && Arrays.binarySearch(BIN_OPS, op.charAt(0)) >= 0)
         {
             // Binary operators
             lineNumber =
@@ -2319,7 +2319,7 @@ public class SourceWriterVisitor
         int nextOffset = this.previousOffset + 1;
 
         String op = ai.getOperator();
-		if (this.firstOffset <= this.previousOffset &&
+        if (this.firstOffset <= this.previousOffset &&
             nextOffset <= this.lastOffset)
         {
             this.printer.print(lineNumber, ' ');

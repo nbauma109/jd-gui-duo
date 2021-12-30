@@ -33,7 +33,7 @@ public class GenericTypeNameLayoutBlock extends TypeNameLayoutBlock
         this.signature = signature;
     }
 
-	public String getSignature() {
-		return signature;
-	}
+    public String getSignature() {
+        return signature;
+    }
 }

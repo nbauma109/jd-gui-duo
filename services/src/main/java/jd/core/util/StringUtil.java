@@ -70,10 +70,10 @@ public class StringUtil
             for (int i=0; i<length; i++)
             {
                 if (s.charAt(i) == '"') {
-					sb.append("\\\"");
-				} else {
-					escapeChar(sb, s.charAt(i));
-				}
+                    sb.append("\\\"");
+                } else {
+                    escapeChar(sb, s.charAt(i));
+                }
             }
         }
 
@@ -89,10 +89,10 @@ public class StringUtil
         sb.append('\'');
 
         if (c == '\'') {
-			sb.append("\\'");
-		} else {
-			escapeChar(sb,  c);
-		}
+            sb.append("\\'");
+        } else {
+            escapeChar(sb,  c);
+        }
 
         sb.append('\'');
 

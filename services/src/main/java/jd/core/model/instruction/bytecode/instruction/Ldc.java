@@ -35,14 +35,14 @@ public class Ldc extends LdcInstruction
             ConstantPool constants, LocalVariables localVariables)
     {
         if (constants == null) {
-			return null;
-		}
+            return null;
+        }
 
         Constant c = constants.get(this.getIndex());
 
         if (c == null) {
-			return null;
-		}
+            return null;
+        }
 
         switch (c.getTag())
         {

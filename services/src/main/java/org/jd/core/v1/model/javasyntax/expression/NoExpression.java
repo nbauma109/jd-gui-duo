@@ -17,7 +17,7 @@ public class NoExpression extends AbstractLineNumberTypeExpression {
     }
 
     protected NoExpression(int lineNumber) {
-    	super(lineNumber, PrimitiveType.TYPE_VOID);
+        super(lineNumber, PrimitiveType.TYPE_VOID);
     }
 
     @Override
@@ -30,8 +30,8 @@ public class NoExpression extends AbstractLineNumberTypeExpression {
         return "NoExpression";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new NoExpression(lineNumber);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new NoExpression(lineNumber);
+    }
 }

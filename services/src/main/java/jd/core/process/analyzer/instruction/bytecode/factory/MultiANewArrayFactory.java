@@ -41,8 +41,8 @@ public class MultiANewArrayFactory implements InstructionFactory
         final Instruction[] dimensions = new Instruction[count];
 
         for (int i=0; i<count; i++) {
-			dimensions[i] = stack.pop();
-		}
+            dimensions[i] = stack.pop();
+        }
 
         final Instruction instruction =
             new MultiANewArray(opcode, offset, lineNumber, index, dimensions);

@@ -175,87 +175,87 @@ public class FastInstructionListBuilder {
 
         executeReconstructors(referenceMap, classFile, list, localVariables);
 
-		analyzeList(classFile, method, list, localVariables, offsetLabelSet, -1, -1, -1, -1, -1, -1, returnOffset);
+        analyzeList(classFile, method, list, localVariables, offsetLabelSet, -1, -1, -1, -1, -1, -1, returnOffset);
 
-		localVariables.removeUselessLocalVariables();
+        localVariables.removeUselessLocalVariables();
 
-		manageRedeclaredVariables(list);
+        manageRedeclaredVariables(list);
 
-		// Add labels
+        // Add labels
         if (!offsetLabelSet.isEmpty()) {
             addLabels(list, offsetLabelSet);
         }
     }
 
-	private static void manageRedeclaredVariables(List<Instruction> list) {
-		manageRedeclaredVariables(new HashSet<>(), new HashSet<>(), list);
-	}
+    private static void manageRedeclaredVariables(List<Instruction> list) {
+        manageRedeclaredVariables(new HashSet<>(), new HashSet<>(), list);
+    }
 
-	/**
-	 * Remove re-declarations of unassigned local variables
-	 * Convert re-declarations of assigned local variables into assignments
-	 * Attempt to manage a simplified scope of local variables.
-	 */
+    /**
+     * Remove re-declarations of unassigned local variables
+     * Convert re-declarations of assigned local variables into assignments
+     * Attempt to manage a simplified scope of local variables.
+     */
     private static void manageRedeclaredVariables(Set<FastDeclaration> outsideDeclarations, Set<FastDeclaration> insideDeclarations, List<Instruction> instructions) {
-    	Instruction instruction;
-		List<List<Instruction>> blocks;
-		for (int i = 0; i < instructions.size(); i++) {
-			instruction = instructions.get(i);
-			if (instruction instanceof FastDeclaration declaration) {
-				if (insideDeclarations.contains(declaration) || outsideDeclarations.contains(declaration)) {
-					if (declaration.getInstruction() == null) {
-						// remove re-declaration if no assignment
-						instructions.remove(i);
-						i--;
-					} else if (declaration.getInstruction() instanceof StoreInstruction si) {
-						// if variable is assigned, turn re-declaration into assignment
-						instructions.set(i, si);
-					}
-				} else {
-					insideDeclarations.add(declaration);
-				}
-			}
-			blocks = getBlocks(instruction);
-			if (!blocks.isEmpty()) {
-				/* each block has access to the previously declared local variables :
-				 * - outsideDeclarations contains the previously declared local variables from every parent block
-				 * - insideDeclarations contains the previously declared variables from the current block
-				 * as we enter a new block, the current block becomes the parent block, and the new block
-				 * becomes the current block, inheriting from a merged set of variables that contain both inside
-				 * declarations from the parent, and outside declarations from all other ancestors,
-				 * whilst starting with a brand new set of variables for its own declarations
-				 */
-				Set<FastDeclaration> mergedDeclarations = mergeSets(outsideDeclarations, insideDeclarations);
-				for (List<Instruction> block : blocks) {
-					manageRedeclaredVariables(new HashSet<>(mergedDeclarations), new HashSet<>(), block);
-				}
-			}
-		}
-	}
+        Instruction instruction;
+        List<List<Instruction>> blocks;
+        for (int i = 0; i < instructions.size(); i++) {
+            instruction = instructions.get(i);
+            if (instruction instanceof FastDeclaration declaration) {
+                if (insideDeclarations.contains(declaration) || outsideDeclarations.contains(declaration)) {
+                    if (declaration.getInstruction() == null) {
+                        // remove re-declaration if no assignment
+                        instructions.remove(i);
+                        i--;
+                    } else if (declaration.getInstruction() instanceof StoreInstruction si) {
+                        // if variable is assigned, turn re-declaration into assignment
+                        instructions.set(i, si);
+                    }
+                } else {
+                    insideDeclarations.add(declaration);
+                }
+            }
+            blocks = getBlocks(instruction);
+            if (!blocks.isEmpty()) {
+                /* each block has access to the previously declared local variables :
+                 * - outsideDeclarations contains the previously declared local variables from every parent block
+                 * - insideDeclarations contains the previously declared variables from the current block
+                 * as we enter a new block, the current block becomes the parent block, and the new block
+                 * becomes the current block, inheriting from a merged set of variables that contain both inside
+                 * declarations from the parent, and outside declarations from all other ancestors,
+                 * whilst starting with a brand new set of variables for its own declarations
+                 */
+                Set<FastDeclaration> mergedDeclarations = mergeSets(outsideDeclarations, insideDeclarations);
+                for (List<Instruction> block : blocks) {
+                    manageRedeclaredVariables(new HashSet<>(mergedDeclarations), new HashSet<>(), block);
+                }
+            }
+        }
+    }
 
     private static List<List<Instruction>> getBlocks(Instruction instruction) {
-		if (instruction instanceof FastTest2Lists fastTest2Lists) {
-			return Arrays.asList(fastTest2Lists.getInstructions(), fastTest2Lists.getInstructions2());
-		}
-		if (instruction instanceof FastTry fastTry) {
-			List<List<Instruction>> instructions = new ArrayList<>();
-			instructions.add(fastTry.getInstructions());
-			for (FastCatch fastCatch : fastTry.getCatches()) {
-				instructions.add(fastCatch.instructions());
-			}
-			if (fastTry.getFinallyInstructions() != null) {
-				instructions.add(fastTry.getFinallyInstructions());
-			}
-			return instructions;
-		}
-		return Collections.emptyList();
+        if (instruction instanceof FastTest2Lists fastTest2Lists) {
+            return Arrays.asList(fastTest2Lists.getInstructions(), fastTest2Lists.getInstructions2());
+        }
+        if (instruction instanceof FastTry fastTry) {
+            List<List<Instruction>> instructions = new ArrayList<>();
+            instructions.add(fastTry.getInstructions());
+            for (FastCatch fastCatch : fastTry.getCatches()) {
+                instructions.add(fastCatch.instructions());
+            }
+            if (fastTry.getFinallyInstructions() != null) {
+                instructions.add(fastTry.getFinallyInstructions());
+            }
+            return instructions;
+        }
+        return Collections.emptyList();
     }
 
     private static <T> Set<T> mergeSets(Set<T> a, Set<T> b) {
-		return Stream.concat(a.stream(), b.stream()).collect(Collectors.toSet());
-	}
+        return Stream.concat(a.stream(), b.stream()).collect(Collectors.toSet());
+    }
 
-	private static void initDelcarationFlags(LocalVariables localVariables) {
+    private static void initDelcarationFlags(LocalVariables localVariables) {
         int nbrOfLocalVariables = localVariables.size();
         int indexOfFirstLocalVariable = localVariables.getIndexOfFirstLocalVariable();
 
@@ -551,21 +551,21 @@ public class FastInstructionListBuilder {
                 instruction = list.remove(index);
 
                 monitor = switch (instruction.getOpcode()) {
-				case Const.ASTORE -> {
-					menter = (MonitorEnter) list.remove(index);
-					AStore astore = (AStore) instruction;
-					varMonitorIndex = astore.getIndex();
-					yield astore.getValueref();
-				}
-				case Const.MONITORENTER -> {
-					menter = (MonitorEnter) instruction;
-					AssignmentInstruction ai = (AssignmentInstruction) menter.getObjectref();
-					AStore astore = (AStore) ai.getValue1();
-					varMonitorIndex = astore.getIndex();
-					yield ai.getValue2();
-				}
-				default -> throw new UnexpectedInstructionException();
-				};
+                case Const.ASTORE -> {
+                    menter = (MonitorEnter) list.remove(index);
+                    AStore astore = (AStore) instruction;
+                    varMonitorIndex = astore.getIndex();
+                    yield astore.getValueref();
+                }
+                case Const.MONITORENTER -> {
+                    menter = (MonitorEnter) instruction;
+                    AssignmentInstruction ai = (AssignmentInstruction) menter.getObjectref();
+                    AStore astore = (AStore) ai.getValue1();
+                    varMonitorIndex = astore.getIndex();
+                    yield ai.getValue2();
+                }
+                default -> throw new UnexpectedInstructionException();
+                };
 
                 // Remove local variable for monitor
                 localVariables.removeLocalVariableWithIndexAndOffset(varMonitorIndex, menter.getOffset());
@@ -773,36 +773,36 @@ public class FastInstructionListBuilder {
         while (index-- > 0) {
             instruction = instructions.get(index);
             switch (instruction.getOpcode()) {
-			case Const.MONITOREXIT:
-				MonitorExit mexit = (MonitorExit) instruction;
-				if (mexit.getObjectref().getOpcode() == Const.ALOAD) {
+            case Const.MONITOREXIT:
+                MonitorExit mexit = (MonitorExit) instruction;
+                if (mexit.getObjectref().getOpcode() == Const.ALOAD) {
                     int aloadIndex = ((ALoad) mexit.getObjectref()).getIndex();
                     if (aloadIndex == monitorLocalVariableIndex) {
                         instructions.remove(index);
                     }
                 }
-				break;
-			case FastConstants.TRY:
-				FastTry ft = (FastTry) instruction;
-				removeAllMonitorExitInstructions(ft.getInstructions(), ft.getInstructions().size(), monitorLocalVariableIndex);
-				int i = ft.getCatches().size();
-				FastCatch fc;
-				while (i-- > 0) {
+                break;
+            case FastConstants.TRY:
+                FastTry ft = (FastTry) instruction;
+                removeAllMonitorExitInstructions(ft.getInstructions(), ft.getInstructions().size(), monitorLocalVariableIndex);
+                int i = ft.getCatches().size();
+                FastCatch fc;
+                while (i-- > 0) {
                     fc = ft.getCatches().get(i);
                     removeAllMonitorExitInstructions(fc.instructions(), fc.instructions().size(), monitorLocalVariableIndex);
                 }
-				if (ft.getFinallyInstructions() != null) {
+                if (ft.getFinallyInstructions() != null) {
                     removeAllMonitorExitInstructions(ft.getFinallyInstructions(), ft.getFinallyInstructions().size(),
                             monitorLocalVariableIndex);
                 }
-				break;
-			case FastConstants.SYNCHRONIZED:
-				FastSynchronized fsy = (FastSynchronized) instruction;
-				removeAllMonitorExitInstructions(fsy.getInstructions(), fsy.getInstructions().size(), monitorLocalVariableIndex);
-				break;
-			default:
-				break;
-			}
+                break;
+            case FastConstants.SYNCHRONIZED:
+                FastSynchronized fsy = (FastSynchronized) instruction;
+                removeAllMonitorExitInstructions(fsy.getInstructions(), fsy.getInstructions().size(), monitorLocalVariableIndex);
+                break;
+            default:
+                break;
+            }
         }
     }
 
@@ -1112,14 +1112,14 @@ public class FastInstructionListBuilder {
 
     private static void removeSyntheticReturn(List<Instruction> list, int index) {
         int iOpCode = list.get(index).getOpcode();
-		if (iOpCode == Const.RETURN) {
-			list.remove(index);
-		} else if (iOpCode == FastConstants.LABEL) {
-			FastLabel fl = (FastLabel) list.get(index);
+        if (iOpCode == Const.RETURN) {
+            list.remove(index);
+        } else if (iOpCode == FastConstants.LABEL) {
+            FastLabel fl = (FastLabel) list.get(index);
             if (fl.getInstruction().getOpcode() == Const.RETURN) {
                 fl.setInstruction(null);
             }
-		}
+        }
     }
 
     private static void addCastInstructionOnReturn(
@@ -1394,24 +1394,24 @@ public class FastInstructionListBuilder {
                     si = (StoreInstruction) instruction;
                     lv = localVariables.getLocalVariableWithIndexAndOffset(si.getIndex(), si.getOffset());
                     if (lv != null && lv.hasDeclarationFlag() == NOT_DECLARED) {
-                    	ReturnInstruction returnInstruction = findReturnInstructionForStore(list, length, i, si);
-                    	if (returnInstruction == null || returnInstruction.getLineNumber() != si.getLineNumber()) {
-                    		if (beforeListOffset < lv.getStartPc()
+                        ReturnInstruction returnInstruction = findReturnInstructionForStore(list, length, i, si);
+                        if (returnInstruction == null || returnInstruction.getLineNumber() != si.getLineNumber()) {
+                            if (beforeListOffset < lv.getStartPc()
                                     && lv.getStartPc() + lv.getLength() - 1 <= lastOffset) {
-	                            list.set(i, new FastDeclaration(FastConstants.DECLARE, si.getOffset(), si.getLineNumber(), lv, si));
-	                            lv.setDeclarationFlag(DECLARED);
-	                            updateNewAndInitArrayInstruction(si);
-                    		}
-                    	} else {
-                    		// compact store / return
-                    		returnInstruction.setValueref(si.getValueref());
-                    		// remove store instruction
-                    		list.remove(i);
-                    		i--;
-                    		length--;
-                    		// flag variable to be removed later
-                    		lv.setToBeRemoved(true);
-                    	}
+                                list.set(i, new FastDeclaration(FastConstants.DECLARE, si.getOffset(), si.getLineNumber(), lv, si));
+                                lv.setDeclarationFlag(DECLARED);
+                                updateNewAndInitArrayInstruction(si);
+                            }
+                        } else {
+                            // compact store / return
+                            returnInstruction.setValueref(si.getValueref());
+                            // remove store instruction
+                            list.remove(i);
+                            i--;
+                            length--;
+                            // flag variable to be removed later
+                            lv.setToBeRemoved(true);
+                        }
                     }
                 } else if (instruction.getOpcode() == FastConstants.FOR) {
                     FastFor ff = (FastFor) instruction;
@@ -1471,18 +1471,18 @@ public class FastInstructionListBuilder {
         }
     }
 
-	protected static ReturnInstruction findReturnInstructionForStore(List<Instruction> list, int length, int i, StoreInstruction si) {
-		if (i + 1 < length) {
-			Instruction next = list.get(i + 1);
-			if (next instanceof ReturnInstruction returnInstruction
-					&& si.getValueref() instanceof IndexInstruction
-					&& returnInstruction.getValueref() instanceof IndexInstruction returnRef
-					&& returnRef.getIndex() == si.getIndex()) {
-				return returnInstruction;
-			}
-		}
-		return null;
-	}
+    protected static ReturnInstruction findReturnInstructionForStore(List<Instruction> list, int length, int i, StoreInstruction si) {
+        if (i + 1 < length) {
+            Instruction next = list.get(i + 1);
+            if (next instanceof ReturnInstruction returnInstruction
+                    && si.getValueref() instanceof IndexInstruction
+                    && returnInstruction.getValueref() instanceof IndexInstruction returnRef
+                    && returnRef.getIndex() == si.getIndex()) {
+                return returnInstruction;
+            }
+        }
+        return null;
+    }
 
     private static void updateNewAndInitArrayInstruction(Instruction instruction) {
         if (instruction.getOpcode() == Const.ASTORE) {
@@ -1494,52 +1494,52 @@ public class FastInstructionListBuilder {
     }
 
 
-	private static void createContinue(List<Instruction> list, int beforeLoopEntryOffset, int loopEntryOffset,
-			int returnOffset) {
-		int length = list.size();
-		for (int index = 0; index < length; index++) {
-			Instruction instruction = list.get(index);
-			if (ByteCodeUtil.isIfInstruction(instruction.getOpcode(), true)) {
-				BranchInstruction bi = (BranchInstruction) instruction;
-				int jumpOffset = bi.getJumpOffset();
-				if (jumpOffset == returnOffset) {
-					if (index + 1 < length) {
-						Instruction nextInstruction = list.get(index + 1);
-						// Si il n'y a pas assez de place pour une sequence
-						// 'if' + 'return', un simple 'if' sera cree.
-						if (bi.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER
-								&& bi.getLineNumber() + 1 == nextInstruction.getLineNumber()) {
-							continue;
-						}
-					}
-					List<Instruction> instructions = new ArrayList<>(1);
-					instructions
-							.add(new Return(Const.RETURN, bi.getOffset(), Instruction.UNKNOWN_LINE_NUMBER));
-					list.set(index, new FastTestList(FastConstants.IF_SIMPLE, bi.getOffset(),
-							bi.getLineNumber(), jumpOffset - bi.getOffset(), bi, instructions));
-				} else if (beforeLoopEntryOffset < jumpOffset && jumpOffset <= loopEntryOffset) {
-					if (index + 1 < length) {
-						Instruction nextInstruction = list.get(index + 1);
-						// Si il n'y a pas assez de place pour une sequence
-						// 'if' + 'continue', un simple 'if' sera cree.
-						if (bi.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER && index + 1 < length
-								&& bi.getLineNumber() + 1 == nextInstruction.getLineNumber())
-						 {
-							continue;
-						// Si l'instruction de test est suivie d'une seule instruction
-						// 'return', la sequence 'if' + 'continue' n'est pas construite.
-						}
-						if (nextInstruction.getOpcode() == Const.RETURN
-								|| nextInstruction.getOpcode() == ByteCodeConstants.XRETURN) {
-							continue;
-						}
-					}
-					list.set(index, new FastInstruction(FastConstants.IF_CONTINUE, bi.getOffset(),
-							bi.getLineNumber(), bi));
-				}
-			}
-		}
-	}
+    private static void createContinue(List<Instruction> list, int beforeLoopEntryOffset, int loopEntryOffset,
+            int returnOffset) {
+        int length = list.size();
+        for (int index = 0; index < length; index++) {
+            Instruction instruction = list.get(index);
+            if (ByteCodeUtil.isIfInstruction(instruction.getOpcode(), true)) {
+                BranchInstruction bi = (BranchInstruction) instruction;
+                int jumpOffset = bi.getJumpOffset();
+                if (jumpOffset == returnOffset) {
+                    if (index + 1 < length) {
+                        Instruction nextInstruction = list.get(index + 1);
+                        // Si il n'y a pas assez de place pour une sequence
+                        // 'if' + 'return', un simple 'if' sera cree.
+                        if (bi.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER
+                                && bi.getLineNumber() + 1 == nextInstruction.getLineNumber()) {
+                            continue;
+                        }
+                    }
+                    List<Instruction> instructions = new ArrayList<>(1);
+                    instructions
+                            .add(new Return(Const.RETURN, bi.getOffset(), Instruction.UNKNOWN_LINE_NUMBER));
+                    list.set(index, new FastTestList(FastConstants.IF_SIMPLE, bi.getOffset(),
+                            bi.getLineNumber(), jumpOffset - bi.getOffset(), bi, instructions));
+                } else if (beforeLoopEntryOffset < jumpOffset && jumpOffset <= loopEntryOffset) {
+                    if (index + 1 < length) {
+                        Instruction nextInstruction = list.get(index + 1);
+                        // Si il n'y a pas assez de place pour une sequence
+                        // 'if' + 'continue', un simple 'if' sera cree.
+                        if (bi.getLineNumber() != Instruction.UNKNOWN_LINE_NUMBER && index + 1 < length
+                                && bi.getLineNumber() + 1 == nextInstruction.getLineNumber())
+                         {
+                            continue;
+                        // Si l'instruction de test est suivie d'une seule instruction
+                        // 'return', la sequence 'if' + 'continue' n'est pas construite.
+                        }
+                        if (nextInstruction.getOpcode() == Const.RETURN
+                                || nextInstruction.getOpcode() == ByteCodeConstants.XRETURN) {
+                            continue;
+                        }
+                    }
+                    list.set(index, new FastInstruction(FastConstants.IF_CONTINUE, bi.getOffset(),
+                            bi.getLineNumber(), bi));
+                }
+            }
+        }
+    }
 
     private static void createBreakAndContinue(Method method, List<Instruction> list, IntSet offsetLabelSet,
             int beforeLoopEntryOffset, int loopEntryOffset, int afterBodyLoopOffset, int afterListOffset,
@@ -3037,7 +3037,7 @@ public class FastInstructionListBuilder {
         ArrayLength al = (ArrayLength) siLength.getValueref();
         // Test 'test' instruction: guiMap < localGUIMap1
         if (al.getArrayref().getOpcode() != Const.ALOAD || ((ALoad) al.getArrayref()).getIndex() != siTmpArray.getIndex()
-        		|| test.getOpcode() != ByteCodeConstants.IFCMP) {
+                || test.getOpcode() != ByteCodeConstants.IFCMP) {
             return 0;
         }
         IfCmp ifcmp = (IfCmp) test;
@@ -3853,7 +3853,7 @@ public class FastInstructionListBuilder {
                         Invokevirtual iv = (Invokevirtual) ali.getIndexref();
 
                         if (iv.getArgs().isEmpty()) {
-                        	ConstantMethodref cmr = constants.getConstantMethodref(iv.getIndex());
+                            ConstantMethodref cmr = constants.getConstantMethodref(iv.getIndex());
                             cnat = constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 
                             if (StringConstants.ORDINAL_METHOD_NAME.equals(constants.getConstantUtf8(cnat.getNameIndex()))) {
@@ -4375,9 +4375,9 @@ public class FastInstructionListBuilder {
         list.set(switchIndex, new FastSwitch(switchOpcode, lastSwitchOffset, switchLineNumber, branch, test, pairs));
     }
 
-	private static void removeLastInstruction(List<Instruction> instructions) {
-		instructions.remove(instructions.size() - 1);
-	}
+    private static void removeLastInstruction(List<Instruction> instructions) {
+        instructions.remove(instructions.size() - 1);
+    }
 
     private static void addLabels(List<Instruction> list, IntSet offsetLabelSet) {
         for (int i = offsetLabelSet.size() - 1; i >= 0; --i) {

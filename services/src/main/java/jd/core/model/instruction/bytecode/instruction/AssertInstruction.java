@@ -40,19 +40,19 @@ public class AssertInstruction extends Instruction
         return null;
     }
 
-	public Instruction getTest() {
-		return test;
-	}
+    public Instruction getTest() {
+        return test;
+    }
 
-	public void setTest(Instruction test) {
-		this.test = test;
-	}
+    public void setTest(Instruction test) {
+        this.test = test;
+    }
 
-	public Instruction getMsg() {
-		return msg;
-	}
+    public Instruction getMsg() {
+        return msg;
+    }
 
-	public void setMsg(Instruction msg) {
-		this.msg = msg;
-	}
+    public void setMsg(Instruction msg) {
+        this.msg = msg;
+    }
 }

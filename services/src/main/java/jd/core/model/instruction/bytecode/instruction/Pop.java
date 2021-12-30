@@ -36,11 +36,11 @@ public class Pop extends Instruction
         return null;
     }
 
-	public Instruction getObjectref() {
-		return objectref;
-	}
+    public Instruction getObjectref() {
+        return objectref;
+    }
 
-	public void setObjectref(Instruction objectref) {
-		this.objectref = objectref;
-	}
+    public void setObjectref(Instruction objectref) {
+        this.objectref = objectref;
+    }
 }

@@ -63,11 +63,11 @@ public abstract class AbstractLocalVariable {
 
     public void setFromToOffset(int offset) {
         if (this.fromOffset > offset) {
-			this.fromOffset = offset;
-		}
+            this.fromOffset = offset;
+        }
         if (this.toOffset < offset) {
-			this.toOffset = offset;
-		}
+            this.toOffset = offset;
+        }
     }
 
     void setToOffset(int offset) {

@@ -46,23 +46,23 @@ public class InstructionLayoutBlock extends LayoutBlock
         this.lastOffset = lastOffset;
     }
 
-	public ClassFile getClassFile() {
-		return classFile;
-	}
+    public ClassFile getClassFile() {
+        return classFile;
+    }
 
-	public Method getMethod() {
-		return method;
-	}
+    public Method getMethod() {
+        return method;
+    }
 
-	public int getFirstOffset() {
-		return firstOffset;
-	}
+    public int getFirstOffset() {
+        return firstOffset;
+    }
 
-	public int getLastOffset() {
-		return lastOffset;
-	}
+    public int getLastOffset() {
+        return lastOffset;
+    }
 
-	public Instruction getInstruction() {
-		return instruction;
-	}
+    public Instruction getInstruction() {
+        return instruction;
+    }
 }

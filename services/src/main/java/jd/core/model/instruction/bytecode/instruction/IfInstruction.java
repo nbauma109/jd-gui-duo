@@ -36,11 +36,11 @@ public class IfInstruction extends ConditionalBranchInstruction
         return ByteCodeUtil.getCmpPriority(this.getCmp());
     }
 
-	public Instruction getValue() {
-		return value;
-	}
+    public Instruction getValue() {
+        return value;
+    }
 
-	public void setValue(Instruction value) {
-		this.value = value;
-	}
+    public void setValue(Instruction value) {
+        this.value = value;
+    }
 }

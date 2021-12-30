@@ -45,7 +45,7 @@ public class FastList extends BranchInstruction
         return null;
     }
 
-	public List<Instruction> getInstructions() {
-		return instructions;
-	}
+    public List<Instruction> getInstructions() {
+        return instructions;
+    }
 }

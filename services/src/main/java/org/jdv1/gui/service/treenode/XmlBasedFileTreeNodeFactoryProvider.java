@@ -23,43 +23,43 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 public class XmlBasedFileTreeNodeFactoryProvider extends TextFileTreeNodeFactoryProvider {
 
-	protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/xml_obj.gif"));
+    protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/xml_obj.gif"));
 
-	@Override
-	public String[] getSelectors() {
-		return appendSelectors("*:file:*.xsl", "*:file:*.xslt", "*:file:*.xsd", "*:file:*.tld", "*:file:*.wsdl");
-	}
+    @Override
+    public String[] getSelectors() {
+        return appendSelectors("*:file:*.xsl", "*:file:*.xslt", "*:file:*.xsd", "*:file:*.tld", "*:file:*.wsdl");
+    }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
-		int lastSlashIndex = entry.getPath().lastIndexOf("/");
-		String label = entry.getPath().substring(lastSlashIndex + 1);
-		String location = new File(entry.getUri()).getPath();
-		return (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
-	}
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
+        int lastSlashIndex = entry.getPath().lastIndexOf("/");
+        String label = entry.getPath().substring(lastSlashIndex + 1);
+        String location = new File(entry.getUri()).getPath();
+        return (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
+    }
 
-	static class TreeNode extends TextFileTreeNodeFactoryProvider.TreeNode {
+    static class TreeNode extends TextFileTreeNodeFactoryProvider.TreeNode {
 
-		private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-		public TreeNode(Container.Entry entry, Object userObject) {
-			super(entry, userObject);
-		}
+        public TreeNode(Container.Entry entry, Object userObject) {
+            super(entry, userObject);
+        }
 
-		// --- PageCreator --- //
-		@Override
-		@SuppressWarnings("unchecked")
-		public <T extends JComponent & UriGettable> T createPage(API api) {
-			return (T) new TextFileTreeNodeFactoryProvider.Page(entry) {
+        // --- PageCreator --- //
+        @Override
+        @SuppressWarnings("unchecked")
+        public <T extends JComponent & UriGettable> T createPage(API api) {
+            return (T) new TextFileTreeNodeFactoryProvider.Page(entry) {
 
-				private static final long serialVersionUID = 1L;
+                private static final long serialVersionUID = 1L;
 
-				@Override
-				public String getSyntaxStyle() {
-					return SyntaxConstants.SYNTAX_STYLE_XML;
-				}
-			};
-		}
-	}
+                @Override
+                public String getSyntaxStyle() {
+                    return SyntaxConstants.SYNTAX_STYLE_XML;
+                }
+            };
+        }
+    }
 }

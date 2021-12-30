@@ -93,27 +93,27 @@ public class BinaryOperatorInstruction extends Instruction
         return this.priority;
     }
 
-	public String getSignature() {
-		return signature;
-	}
+    public String getSignature() {
+        return signature;
+    }
 
-	public String getOperator() {
-		return operator;
-	}
+    public String getOperator() {
+        return operator;
+    }
 
-	public Instruction getValue1() {
-		return value1;
-	}
+    public Instruction getValue1() {
+        return value1;
+    }
 
-	public void setValue1(Instruction value1) {
-		this.value1 = value1;
-	}
+    public void setValue1(Instruction value1) {
+        this.value1 = value1;
+    }
 
-	public Instruction getValue2() {
-		return value2;
-	}
+    public Instruction getValue2() {
+        return value2;
+    }
 
-	public void setValue2(Instruction value2) {
-		this.value2 = value2;
-	}
+    public void setValue2(Instruction value2) {
+        this.value2 = value2;
+    }
 }

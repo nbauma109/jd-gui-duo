@@ -37,11 +37,11 @@ public class ConditionalBranchInstruction extends BranchInstruction
         return "Z";
     }
 
-	public int getCmp() {
-		return cmp;
-	}
+    public int getCmp() {
+        return cmp;
+    }
 
-	public void setCmp(int cmp) {
-		this.cmp = cmp;
-	}
+    public void setCmp(int cmp) {
+        this.cmp = cmp;
+    }
 }

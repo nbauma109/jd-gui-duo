@@ -49,8 +49,8 @@ public class InitInstanceFieldsReconstructor
         Method[] methods = classFile.getMethods();
 
         if (methods == null) {
-			return;
-		}
+            return;
+        }
 
         int methodIndex = methods.length;
         Method putFieldListMethod = null;
@@ -65,13 +65,13 @@ public class InitInstanceFieldsReconstructor
                 method.getFastNodes() == null ||
                 method.containsError() ||
                 method.getNameIndex() != constants.getInstanceConstructorIndex()) {
-				continue;
-			}
+                continue;
+            }
 
             List<Instruction> list = method.getFastNodes();
             if (list == null) {
-				continue;
-			}
+                continue;
+            }
 
             int length = list.size();
 
@@ -80,8 +80,8 @@ public class InitInstanceFieldsReconstructor
                 int j = getSuperCallIndex(classFile, constants, list);
 
                 if (j < 0) {
-					continue;
-				}
+                    continue;
+                }
 
                 j++;
 
@@ -94,37 +94,37 @@ public class InitInstanceFieldsReconstructor
                 {
                     instruction = list.get(j++);
                     if (instruction.getOpcode() != Const.PUTFIELD) {
-						break;
-					}
+                        break;
+                    }
 
                     PutField putField = (PutField)instruction;
                     ConstantFieldref cfr = constants.getConstantFieldref(putField.getIndex());
 
                     if (cfr.getClassIndex() != classFile.getThisClassIndex() ||
                         putField.getObjectref().getOpcode() != Const.ALOAD) {
-						break;
-					}
+                        break;
+                    }
 
                     ALoad aLaod = (ALoad)putField.getObjectref();
                     if (aLaod.getIndex() != 0) {
-						break;
-					}
+                        break;
+                    }
 
                     Instruction valueInstruction =
                         SearchInstructionByOpcodeVisitor.visit(
                                 putField.getValueref(), Const.ALOAD);
                     if (valueInstruction != null &&
                         ((ALoad)valueInstruction).getIndex() != 0) {
-						break;
-					}
+                        break;
+                    }
                     if (SearchInstructionByOpcodeVisitor.visit(
                             putField.getValueref(), ByteCodeConstants.LOAD) != null) {
-						break;
-					}
+                        break;
+                    }
                     if (SearchInstructionByOpcodeVisitor.visit(
                             putField.getValueref(), Const.ILOAD) != null) {
-						break;
-					}
+                        break;
+                    }
 
                     putFieldList.add(putField);
                     putFieldListMethod = method;
@@ -173,14 +173,14 @@ public class InitInstanceFieldsReconstructor
 
             if ((method.getAccessFlags() &
                     (Const.ACC_SYNTHETIC|Const.ACC_BRIDGE)) != 0) {
-				continue;
-			}
+                continue;
+            }
             if (method.getCode() == null) {
-				continue;
-			}
+                continue;
+            }
             if (method.getNameIndex() != constants.getInstanceConstructorIndex()) {
-				continue;
-			}
+                continue;
+            }
 
             List<Instruction> list = method.getFastNodes();
             int length = list.size();
@@ -191,8 +191,8 @@ public class InitInstanceFieldsReconstructor
                 int j = getSuperCallIndex(classFile, constants, list);
 
                 if (j < 0) {
-					continue;
-				}
+                    continue;
+                }
 
                 int firstPutFieldIndex = j + 1;
                 int putFieldListLength = putFieldList.size();
@@ -200,8 +200,8 @@ public class InitInstanceFieldsReconstructor
                 // If 'putFieldList' is longer than 'list',
                 // remove extra 'putField'.
                 while (firstPutFieldIndex+putFieldListLength > length) {
-					putFieldList.remove(--putFieldListLength);
-				}
+                    putFieldList.remove(--putFieldListLength);
+                }
 
                 for (int i=0; i<putFieldListLength; i++)
                 {
@@ -212,8 +212,8 @@ public class InitInstanceFieldsReconstructor
                         !visitor.visit(initFieldInstruction, instruction))
                     {
                         while (i < putFieldListLength) {
-							putFieldList.remove(--putFieldListLength);
-						}
+                            putFieldList.remove(--putFieldListLength);
+                        }
                         break;
                     }
                 }
@@ -249,8 +249,8 @@ public class InitInstanceFieldsReconstructor
                         Instruction valueref = putField.getValueref();
                         field.setValueAndMethod(valueref, putFieldListMethod);
                         if (valueref.getOpcode() == ByteCodeConstants.NEWANDINITARRAY) {
-							valueref.setOpcode(ByteCodeConstants.INITARRAY);
-						}
+                            valueref.setOpcode(ByteCodeConstants.INITARRAY);
+                        }
                         break;
                     }
                 }
@@ -275,14 +275,14 @@ public class InitInstanceFieldsReconstructor
 
                     if ((method.getAccessFlags() &
                             (Const.ACC_SYNTHETIC|Const.ACC_BRIDGE)) != 0) {
-						continue;
-					}
+                        continue;
+                    }
                     if (method.getCode() == null) {
-						continue;
-					}
+                        continue;
+                    }
                     if (method.getNameIndex() != constants.getInstanceConstructorIndex()) {
-						continue;
-					}
+                        continue;
+                    }
 
                     List<Instruction> list = method.getFastNodes();
 
@@ -296,24 +296,24 @@ public class InitInstanceFieldsReconstructor
                         {
                             Instruction instruction = list.get(index);
                             if (instruction.getOpcode() != Const.PUTFIELD) {
-								continue;
-							}
+                                continue;
+                            }
 
                             PutField putField = (PutField)instruction;
                             if (putField.getIndex() != putFieldIndex) {
-								continue;
-							}
+                                continue;
+                            }
 
                             ConstantFieldref cfr = constants.getConstantFieldref(putField.getIndex());
                             if (cfr.getClassIndex() != classFile.getThisClassIndex() ||
                                 putField.getObjectref().getOpcode() != Const.ALOAD) {
-								continue;
-							}
+                                continue;
+                            }
 
                             ALoad aLoad = (ALoad)putField.getObjectref();
                             if (aLoad.getIndex() != 0) {
-								continue;
-							}
+                                continue;
+                            }
 
                             /*
                              * Do not remove the PutField instruction if it loads a constructor parameter.
@@ -321,14 +321,14 @@ public class InitInstanceFieldsReconstructor
                              * inside the constructor.
                              */
                             if (putField.getValueref() instanceof ALoad aload && aload.getIndex() != 0) {
-								continue;
-							}
+                                continue;
+                            }
 
                             list.remove(index--);
 
                             if (++putFieldListIndex >= putFieldListLength) {
-								break;
-							}
+                                break;
+                            }
                             putFieldIndex =
                                 putFieldList.get(putFieldListIndex).getIndex();
 
@@ -349,27 +349,27 @@ public class InitInstanceFieldsReconstructor
             Instruction instruction = list.get(i);
 
             if (instruction.getOpcode() != Const.INVOKESPECIAL) {
-				continue;
-			}
+                continue;
+            }
 
             Invokespecial is = (Invokespecial)instruction;
 
             if (is.getObjectref().getOpcode() != Const.ALOAD ||
                 ((ALoad)is.getObjectref()).getIndex() != 0) {
-				continue;
-			}
+                continue;
+            }
 
             ConstantMethodref cmr = constants.getConstantMethodref(is.getIndex());
             ConstantNameAndType cnat =
                 constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 
             if (cnat.getNameIndex() != constants.getInstanceConstructorIndex()) {
-				continue;
-			}
+                continue;
+            }
 
             if (cmr.getClassIndex() == classFile.getThisClassIndex()) {
-				return -1;
-			}
+                return -1;
+            }
 
             return i;
         }

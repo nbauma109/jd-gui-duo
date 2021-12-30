@@ -35,14 +35,14 @@ public class IInc extends IndexInstruction
             ConstantPool constants, LocalVariables localVariables)
     {
         if (constants == null || localVariables == null) {
-			return null;
-		}
+            return null;
+        }
 
         LocalVariable lv = localVariables.getLocalVariableWithIndexAndOffset(this.getIndex(), this.getOffset());
 
         if (lv == null || lv.getSignatureIndex() <= 0) {
-			return null;
-		}
+            return null;
+        }
 
         return constants.getConstantUtf8(lv.getSignatureIndex());
     }
@@ -51,14 +51,14 @@ public class IInc extends IndexInstruction
     public int getPriority()
     {
         if (this.getCount() == 1 || this.getCount() == -1) {
-			// Operator '++' or '--'
+            // Operator '++' or '--'
             return 2;
-		}
+        }
         // Operator '+=' or '-='
         return 14;
     }
 
-	public int getCount() {
-		return count;
-	}
+    public int getCount() {
+        return count;
+    }
 }

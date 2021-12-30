@@ -82,10 +82,10 @@ public class ReplaceStringBuxxxerVisitor
                 ArrayLength al = (ArrayLength)instruction;
                 Instruction i = match(al.getArrayref());
                 if (i == null) {
-					visit(al.getArrayref());
-				} else {
-					al.setArrayref(i);
-				}
+                    visit(al.getArrayref());
+                } else {
+                    al.setArrayref(i);
+                }
             }
             break;
         case ByteCodeConstants.ARRAYLOAD:
@@ -93,17 +93,17 @@ public class ReplaceStringBuxxxerVisitor
                 ArrayLoadInstruction ali = (ArrayLoadInstruction)instruction;
                 Instruction i = match(ali.getArrayref());
                 if (i == null) {
-					visit(ali.getArrayref());
-				} else {
-					ali.setArrayref(i);
-				}
+                    visit(ali.getArrayref());
+                } else {
+                    ali.setArrayref(i);
+                }
 
                 i = match(ali.getIndexref());
                 if (i == null) {
-					visit(ali.getIndexref());
-				} else {
-					ali.setIndexref(i);
-				}
+                    visit(ali.getIndexref());
+                } else {
+                    ali.setIndexref(i);
+                }
             }
             break;
         case Const.AASTORE,
@@ -112,24 +112,24 @@ public class ReplaceStringBuxxxerVisitor
                 ArrayStoreInstruction asi = (ArrayStoreInstruction)instruction;
                 Instruction i = match(asi.getArrayref());
                 if (i == null) {
-					visit(asi.getArrayref());
-				} else {
-					asi.setArrayref(i);
-				}
+                    visit(asi.getArrayref());
+                } else {
+                    asi.setArrayref(i);
+                }
 
                 i = match(asi.getIndexref());
                 if (i == null) {
-					visit(asi.getIndexref());
-				} else {
-					asi.setIndexref(i);
-				}
+                    visit(asi.getIndexref());
+                } else {
+                    asi.setIndexref(i);
+                }
 
                 i = match(asi.getValueref());
                 if (i == null) {
-					visit(asi.getValueref());
-				} else {
-					asi.setValueref(i);
-				}
+                    visit(asi.getValueref());
+                } else {
+                    asi.setValueref(i);
+                }
             }
             break;
         case ByteCodeConstants.ASSERT:
@@ -137,18 +137,18 @@ public class ReplaceStringBuxxxerVisitor
                 AssertInstruction ai = (AssertInstruction)instruction;
                 Instruction i = match(ai.getTest());
                 if (i == null) {
-					visit(ai.getTest());
-				} else {
-					ai.setTest(i);
-				}
+                    visit(ai.getTest());
+                } else {
+                    ai.setTest(i);
+                }
                 if (ai.getMsg() != null)
                 {
                     i = match(ai.getMsg());
                     if (i == null) {
-						visit(ai.getMsg());
-					} else {
-						ai.setMsg(i);
-					}
+                        visit(ai.getMsg());
+                    } else {
+                        ai.setMsg(i);
+                    }
                 }
             }
             break;
@@ -157,17 +157,17 @@ public class ReplaceStringBuxxxerVisitor
                 AssignmentInstruction ai = (AssignmentInstruction)instruction;
                 Instruction i = match(ai.getValue1());
                 if (i == null) {
-					visit(ai.getValue1());
-				} else {
-					ai.setValue1(i);
-				}
+                    visit(ai.getValue1());
+                } else {
+                    ai.setValue1(i);
+                }
 
                 i = match(ai.getValue2());
                 if (i == null) {
-					visit(ai.getValue2());
-				} else {
-					ai.setValue2(i);
-				}
+                    visit(ai.getValue2());
+                } else {
+                    ai.setValue2(i);
+                }
             }
             break;
         case Const.ATHROW:
@@ -182,17 +182,17 @@ public class ReplaceStringBuxxxerVisitor
                     (BinaryOperatorInstruction)instruction;
                 Instruction i = match(boi.getValue1());
                 if (i == null) {
-					visit(boi.getValue1());
-				} else {
-					boi.setValue1(i);
-				}
+                    visit(boi.getValue1());
+                } else {
+                    boi.setValue1(i);
+                }
 
                 i = match(boi.getValue2());
                 if (i == null) {
-					visit(boi.getValue2());
-				} else {
-					boi.setValue2(i);
-				}
+                    visit(boi.getValue2());
+                } else {
+                    boi.setValue2(i);
+                }
             }
             break;
         case ByteCodeConstants.UNARYOP:
@@ -201,10 +201,10 @@ public class ReplaceStringBuxxxerVisitor
                     (UnaryOperatorInstruction)instruction;
                 Instruction i = match(uoi.getValue());
                 if (i == null) {
-					visit(uoi.getValue());
-				} else {
-					uoi.setValue(i);
-				}
+                    visit(uoi.getValue());
+                } else {
+                    uoi.setValue(i);
+                }
             }
             break;
         case ByteCodeConstants.DUPSTORE:
@@ -212,10 +212,10 @@ public class ReplaceStringBuxxxerVisitor
                 DupStore dupStore = (DupStore)instruction;
                 Instruction i = match(dupStore.getObjectref());
                 if (i == null) {
-					visit(dupStore.getObjectref());
-				} else {
-					dupStore.setObjectref(i);
-				}
+                    visit(dupStore.getObjectref());
+                } else {
+                    dupStore.setObjectref(i);
+                }
             }
             break;
         case Const.CHECKCAST:
@@ -223,10 +223,10 @@ public class ReplaceStringBuxxxerVisitor
                 CheckCast cc = (CheckCast)instruction;
                 Instruction i = match(cc.getObjectref());
                 if (i == null) {
-					visit(cc.getObjectref());
-				} else {
-					cc.setObjectref(i);
-				}
+                    visit(cc.getObjectref());
+                } else {
+                    cc.setObjectref(i);
+                }
             }
             break;
         case ByteCodeConstants.CONVERT,
@@ -235,10 +235,10 @@ public class ReplaceStringBuxxxerVisitor
                 ConvertInstruction ci = (ConvertInstruction)instruction;
                 Instruction i = match(ci.getValue());
                 if (i == null) {
-					visit(ci.getValue());
-				} else {
-					ci.setValue(i);
-				}
+                    visit(ci.getValue());
+                } else {
+                    ci.setValue(i);
+                }
             }
             break;
         case ByteCodeConstants.IF,
@@ -247,10 +247,10 @@ public class ReplaceStringBuxxxerVisitor
                 IfInstruction ifInstruction = (IfInstruction)instruction;
                 Instruction i = match(ifInstruction.getValue());
                 if (i == null) {
-					visit(ifInstruction.getValue());
-				} else {
-					ifInstruction.setValue(i);
-				}
+                    visit(ifInstruction.getValue());
+                } else {
+                    ifInstruction.setValue(i);
+                }
             }
             break;
         case ByteCodeConstants.IFCMP:
@@ -258,17 +258,17 @@ public class ReplaceStringBuxxxerVisitor
                 IfCmp ifCmpInstruction = (IfCmp)instruction;
                 Instruction i = match(ifCmpInstruction.getValue1());
                 if (i == null) {
-					visit(ifCmpInstruction.getValue1());
-				} else {
-					ifCmpInstruction.setValue1(i);
-				}
+                    visit(ifCmpInstruction.getValue1());
+                } else {
+                    ifCmpInstruction.setValue1(i);
+                }
 
                 i = match(ifCmpInstruction.getValue2());
                 if (i == null) {
-					visit(ifCmpInstruction.getValue2());
-				} else {
-					ifCmpInstruction.setValue2(i);
-				}
+                    visit(ifCmpInstruction.getValue2());
+                } else {
+                    ifCmpInstruction.setValue2(i);
+                }
             }
             break;
         case Const.INSTANCEOF:
@@ -276,10 +276,10 @@ public class ReplaceStringBuxxxerVisitor
                 InstanceOf instanceOf = (InstanceOf)instruction;
                 Instruction i = match(instanceOf.getObjectref());
                 if (i == null) {
-					visit(instanceOf.getObjectref());
-				} else {
-					instanceOf.setObjectref(i);
-				}
+                    visit(instanceOf.getObjectref());
+                } else {
+                    instanceOf.setObjectref(i);
+                }
             }
             break;
         case ByteCodeConstants.COMPLEXIF:
@@ -297,10 +297,10 @@ public class ReplaceStringBuxxxerVisitor
                 GetField getField = (GetField)instruction;
                 Instruction i = match(getField.getObjectref());
                 if (i == null) {
-					visit(getField.getObjectref());
-				} else {
-					getField.setObjectref(i);
-				}
+                    visit(getField.getObjectref());
+                } else {
+                    getField.setObjectref(i);
+                }
             }
             break;
         case Const.INVOKEVIRTUAL,
@@ -311,10 +311,10 @@ public class ReplaceStringBuxxxerVisitor
                     (InvokeNoStaticInstruction)instruction;
                 Instruction i = match(insi.getObjectref());
                 if (i == null) {
-					visit(insi.getObjectref());
-				} else {
-					insi.setObjectref(i);
-				}
+                    visit(insi.getObjectref());
+                } else {
+                    insi.setObjectref(i);
+                }
                 replaceInArgs(insi.getArgs());
             }
             break;
@@ -327,10 +327,10 @@ public class ReplaceStringBuxxxerVisitor
                 LookupSwitch lookupSwitch = (LookupSwitch)instruction;
                 Instruction i = match(lookupSwitch.getKey());
                 if (i == null) {
-					visit(lookupSwitch.getKey());
-				} else {
-					lookupSwitch.setKey(i);
-				}
+                    visit(lookupSwitch.getKey());
+                } else {
+                    lookupSwitch.setKey(i);
+                }
             }
             break;
         case Const.MULTIANEWARRAY:
@@ -343,10 +343,10 @@ public class ReplaceStringBuxxxerVisitor
                 {
                     ins = match(dimensions[i]);
                     if (ins == null) {
-						visit(dimensions[i]);
-					} else {
-						dimensions[i] = ins;
-					}
+                        visit(dimensions[i]);
+                    } else {
+                        dimensions[i] = ins;
+                    }
                 }
             }
             break;
@@ -355,10 +355,10 @@ public class ReplaceStringBuxxxerVisitor
                 NewArray newArray = (NewArray)instruction;
                 Instruction i = match(newArray.getDimension());
                 if (i == null) {
-					visit(newArray.getDimension());
-				} else {
-					newArray.setDimension(i);
-				}
+                    visit(newArray.getDimension());
+                } else {
+                    newArray.setDimension(i);
+                }
             }
             break;
         case Const.ANEWARRAY:
@@ -366,10 +366,10 @@ public class ReplaceStringBuxxxerVisitor
                 ANewArray newArray = (ANewArray)instruction;
                 Instruction i = match(newArray.getDimension());
                 if (i == null) {
-					visit(newArray.getDimension());
-				} else {
-					newArray.setDimension(i);
-				}
+                    visit(newArray.getDimension());
+                } else {
+                    newArray.setDimension(i);
+                }
             }
             break;
         case Const.POP:
@@ -380,17 +380,17 @@ public class ReplaceStringBuxxxerVisitor
                 PutField putField = (PutField)instruction;
                 Instruction i = match(putField.getObjectref());
                 if (i == null) {
-					visit(putField.getObjectref());
-				} else {
-					putField.setObjectref(i);
-				}
+                    visit(putField.getObjectref());
+                } else {
+                    putField.setObjectref(i);
+                }
 
                 i = match(putField.getValueref());
                 if (i == null) {
-					visit(putField.getValueref());
-				} else {
-					putField.setValueref(i);
-				}
+                    visit(putField.getValueref());
+                } else {
+                    putField.setValueref(i);
+                }
             }
             break;
         case Const.PUTSTATIC:
@@ -398,10 +398,10 @@ public class ReplaceStringBuxxxerVisitor
                 PutStatic putStatic = (PutStatic)instruction;
                 Instruction i = match(putStatic.getValueref());
                 if (i == null) {
-					visit(putStatic.getValueref());
-				} else {
-					putStatic.setValueref(i);
-				}
+                    visit(putStatic.getValueref());
+                } else {
+                    putStatic.setValueref(i);
+                }
             }
             break;
         case ByteCodeConstants.XRETURN:
@@ -410,10 +410,10 @@ public class ReplaceStringBuxxxerVisitor
                     (ReturnInstruction)instruction;
                 Instruction i = match(returnInstruction.getValueref());
                 if (i == null) {
-					visit(returnInstruction.getValueref());
-				} else {
-					returnInstruction.setValueref(i);
-				}
+                    visit(returnInstruction.getValueref());
+                } else {
+                    returnInstruction.setValueref(i);
+                }
             }
             break;
         case ByteCodeConstants.STORE,
@@ -424,10 +424,10 @@ public class ReplaceStringBuxxxerVisitor
                     (StoreInstruction)instruction;
                 Instruction i = match(storeInstruction.getValueref());
                 if (i == null) {
-					visit(storeInstruction.getValueref());
-				} else {
-					storeInstruction.setValueref(i);
-				}
+                    visit(storeInstruction.getValueref());
+                } else {
+                    storeInstruction.setValueref(i);
+                }
             }
             break;
         case Const.TABLESWITCH:
@@ -435,10 +435,10 @@ public class ReplaceStringBuxxxerVisitor
                 TableSwitch tableSwitch = (TableSwitch)instruction;
                 Instruction i = match(tableSwitch.getKey());
                 if (i == null) {
-					visit(tableSwitch.getKey());
-				} else {
-					tableSwitch.setKey(i);
-				}
+                    visit(tableSwitch.getKey());
+                } else {
+                    tableSwitch.setKey(i);
+                }
             }
             break;
         case ByteCodeConstants.TERNARYOPSTORE:
@@ -446,10 +446,10 @@ public class ReplaceStringBuxxxerVisitor
                 TernaryOpStore tosInstruction = (TernaryOpStore)instruction;
                 Instruction i = match(tosInstruction.getObjectref());
                 if (i == null) {
-					visit(tosInstruction.getObjectref());
-				} else {
-					tosInstruction.setObjectref(i);
-				}
+                    visit(tosInstruction.getObjectref());
+                } else {
+                    tosInstruction.setObjectref(i);
+                }
             }
             break;
         case ByteCodeConstants.TERNARYOP:
@@ -457,17 +457,17 @@ public class ReplaceStringBuxxxerVisitor
                 TernaryOperator to = (TernaryOperator)instruction;
                 Instruction i = match(to.getValue1());
                 if (i == null) {
-					visit(to.getValue1());
-				} else {
-					to.setValue1(i);
-				}
+                    visit(to.getValue1());
+                } else {
+                    to.setValue1(i);
+                }
 
                 i = match(to.getValue2());
                 if (i == null) {
-					visit(to.getValue2());
-				} else {
-					to.setValue2(i);
-				}
+                    visit(to.getValue2());
+                } else {
+                    to.setValue2(i);
+                }
             }
             break;
         case Const.MONITORENTER:
@@ -475,10 +475,10 @@ public class ReplaceStringBuxxxerVisitor
                 MonitorEnter meInstruction = (MonitorEnter)instruction;
                 Instruction i = match(meInstruction.getObjectref());
                 if (i == null) {
-					visit(meInstruction.getObjectref());
-				} else {
-					meInstruction.setObjectref(i);
-				}
+                    visit(meInstruction.getObjectref());
+                } else {
+                    meInstruction.setObjectref(i);
+                }
             }
             break;
         case Const.MONITOREXIT:
@@ -486,10 +486,10 @@ public class ReplaceStringBuxxxerVisitor
                 MonitorExit meInstruction = (MonitorExit)instruction;
                 Instruction i = match(meInstruction.getObjectref());
                 if (i == null) {
-					visit(meInstruction.getObjectref());
-				} else {
-					meInstruction.setObjectref(i);
-				}
+                    visit(meInstruction.getObjectref());
+                } else {
+                    meInstruction.setObjectref(i);
+                }
             }
             break;
         case ByteCodeConstants.INITARRAY,
@@ -499,19 +499,19 @@ public class ReplaceStringBuxxxerVisitor
                     (InitArrayInstruction)instruction;
                 Instruction i = match(iaInstruction.getNewArray());
                 if (i == null) {
-					visit(iaInstruction.getNewArray());
-				} else {
-					iaInstruction.setNewArray(i);
-				}
+                    visit(iaInstruction.getNewArray());
+                } else {
+                    iaInstruction.setNewArray(i);
+                }
 
                 for (int index=iaInstruction.getValues().size()-1; index>=0; --index)
                 {
                     i = match(iaInstruction.getValues().get(index));
                     if (i == null) {
-						visit(iaInstruction.getValues().get(index));
-					} else {
-						iaInstruction.getValues().set(index, i);
-					}
+                        visit(iaInstruction.getValues().get(index));
+                    } else {
+                        iaInstruction.getValues().set(index, i);
+                    }
                 }
             }
             break;
@@ -559,10 +559,10 @@ public class ReplaceStringBuxxxerVisitor
             {
                 ins = match(args.get(i));
                 if (ins == null) {
-					visit(args.get(i));
-				} else {
-					args.set(i, ins);
-				}
+                    visit(args.get(i));
+                } else {
+                    args.set(i, ins);
+                }
             }
         }
     }
@@ -582,8 +582,8 @@ public class ReplaceStringBuxxxerVisitor
                     constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 
                 if (cnat.getNameIndex() == constants.getToStringIndex()) {
-					return match(iv.getObjectref(), cmr.getClassIndex());
-				}
+                    return match(iv.getObjectref(), cmr.getClassIndex());
+                }
             }
         }
 
@@ -643,8 +643,8 @@ public class ReplaceStringBuxxxerVisitor
 
                         if (cnat.getNameIndex() == this.constants.getValueOfIndex() &&
                             is.getArgs().size() == 1) {
-							return is.getArgs().get(0);
-						}
+                            return is.getArgs().get(0);
+                        }
                     }
                 }
 

@@ -30,7 +30,7 @@ public class JarContainerFactoryProvider implements ContainerFactory {
         }
         // Extension: accept uncompressed JAR file containing a folder 'META-INF'
         try {
-        	// do not try to close file system due to UnsupportedOperationException
+            // do not try to close file system due to UnsupportedOperationException
             return "file".equals(rootPath.getFileSystem().provider().getScheme()) && Files.exists(rootPath.resolve("META-INF"));
         } catch (InvalidPathException e) {
             assert ExceptionUtil.printStackTrace(e);

@@ -35,8 +35,8 @@ public class SuperExpression extends AbstractLineNumberExpression {
         return "SuperExpression{" + type + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new SuperExpression(lineNumber, type);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new SuperExpression(lineNumber, type);
+    }
 }

@@ -80,27 +80,27 @@ public class SaveAllSourcesController implements SourcesSavable.Controller, Sour
          * separate by submitting a new task to avoid freezing the GUI.
          */
         executor.submit(() -> {
-	        try {
-				futureResult.get();
-			} catch (InterruptedException e) {
-				assert ExceptionUtil.printStackTrace(e);
-			    // Restore interrupted state...
-			    Thread.currentThread().interrupt();
-			} catch (ExecutionException e) {
-				assert ExceptionUtil.printStackTrace(e);
-			}
+            try {
+                futureResult.get();
+            } catch (InterruptedException e) {
+                assert ExceptionUtil.printStackTrace(e);
+                // Restore interrupted state...
+                Thread.currentThread().interrupt();
+            } catch (ExecutionException e) {
+                assert ExceptionUtil.printStackTrace(e);
+            }
         });
     }
 
-	private void trySave(SourcesSavable savable, Path path) {
-		try {
-		    savable.save(api, this, this, path);
-		} catch (Exception e) {
-		    assert ExceptionUtil.printStackTrace(e);
-		    saveAllSourcesView.showActionFailedDialog();
-		    cancel = true;
-		}
-	}
+    private void trySave(SourcesSavable savable, Path path) {
+        try {
+            savable.save(api, this, this, path);
+        } catch (Exception e) {
+            assert ExceptionUtil.printStackTrace(e);
+            saveAllSourcesView.showActionFailedDialog();
+            cancel = true;
+        }
+    }
 
     public boolean isActivated() { return saveAllSourcesView.isVisible(); }
 

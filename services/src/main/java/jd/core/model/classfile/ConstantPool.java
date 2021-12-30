@@ -212,8 +212,8 @@ public class ConstantPool
     public int addConstantUtf8(String s)
     {
         if (s == null) {
-			throw new IllegalArgumentException("Constant string is null");
-		}
+            throw new IllegalArgumentException("Constant string is null");
+        }
 
         if (s.startsWith("L[")) {
             throw new IllegalArgumentException("Constant string starts with L[");
@@ -239,8 +239,8 @@ public class ConstantPool
         if (internalName == null ||
             internalName.isEmpty() ||
             internalName.charAt(internalName.length()-1) == ';') {
-			System.err.println("ConstantPool.addConstantClass: invalid name index");
-		}
+            System.err.println("ConstantPool.addConstantClass: invalid name index");
+        }
 
         int index = this.constantClassToIndex.get(nameIndex);
 
@@ -265,13 +265,13 @@ public class ConstantPool
             Constant constant = this.listOfConstants.get(index);
 
             if (!(constant instanceof ConstantNameAndType cnat)) {
-				continue;
-			}
+                continue;
+            }
 
             if (cnat.getNameIndex() == nameIndex &&
                 cnat.getSignatureIndex() == descriptorIndex) {
-				return index;
-			}
+                return index;
+            }
         }
 
         ConstantNameAndType cnat = new ConstantNameAndType(nameIndex, descriptorIndex);
@@ -290,13 +290,13 @@ public class ConstantPool
             Constant constant = this.listOfConstants.get(index);
 
             if (!(constant instanceof ConstantFieldref cfr)) {
-				continue;
-			}
+                continue;
+            }
 
             if (cfr.getClassIndex() == classIndex &&
                 cfr.getNameAndTypeIndex() == nameAndTypeIndex) {
-				return index;
-			}
+                return index;
+            }
         }
 
         ConstantFieldref cfr = new ConstantFieldref(classIndex, nameAndTypeIndex);
@@ -323,13 +323,13 @@ public class ConstantPool
             Constant constant = this.listOfConstants.get(index);
 
             if (!(constant instanceof ConstantMethodref cmr)) {
-				continue;
-			}
+                continue;
+            }
 
             if (cmr.getClassIndex() == classIndex &&
                 cmr.getNameAndTypeIndex() == nameAndTypeIndex) {
-				return index;
-			}
+                return index;
+            }
         }
 
         ConstantMethodref cfr = new ConstantMethodref(classIndex, nameAndTypeIndex,
@@ -383,123 +383,123 @@ public class ConstantPool
         return this.listOfConstants.get(index);
     }
 
-	public int getAnnotationDefaultAttributeNameIndex() {
-		return annotationDefaultAttributeNameIndex;
-	}
+    public int getAnnotationDefaultAttributeNameIndex() {
+        return annotationDefaultAttributeNameIndex;
+    }
 
-	public int getCodeAttributeNameIndex() {
-		return codeAttributeNameIndex;
-	}
+    public int getCodeAttributeNameIndex() {
+        return codeAttributeNameIndex;
+    }
 
-	public int getConstantValueAttributeNameIndex() {
-		return constantValueAttributeNameIndex;
-	}
+    public int getConstantValueAttributeNameIndex() {
+        return constantValueAttributeNameIndex;
+    }
 
-	public int getAppendIndex() {
-		return appendIndex;
-	}
+    public int getAppendIndex() {
+        return appendIndex;
+    }
 
-	public int getClassConstructorIndex() {
-		return classConstructorIndex;
-	}
+    public int getClassConstructorIndex() {
+        return classConstructorIndex;
+    }
 
-	public int getDeprecatedAttributeNameIndex() {
-		return deprecatedAttributeNameIndex;
-	}
+    public int getDeprecatedAttributeNameIndex() {
+        return deprecatedAttributeNameIndex;
+    }
 
-	public int getEnclosingMethodAttributeNameIndex() {
-		return enclosingMethodAttributeNameIndex;
-	}
+    public int getEnclosingMethodAttributeNameIndex() {
+        return enclosingMethodAttributeNameIndex;
+    }
 
-	public int getExceptionsAttributeNameIndex() {
-		return exceptionsAttributeNameIndex;
-	}
+    public int getExceptionsAttributeNameIndex() {
+        return exceptionsAttributeNameIndex;
+    }
 
-	public int getInnerClassesAttributeNameIndex() {
-		return innerClassesAttributeNameIndex;
-	}
+    public int getInnerClassesAttributeNameIndex() {
+        return innerClassesAttributeNameIndex;
+    }
 
-	public int getLineNumberTableAttributeNameIndex() {
-		return lineNumberTableAttributeNameIndex;
-	}
+    public int getLineNumberTableAttributeNameIndex() {
+        return lineNumberTableAttributeNameIndex;
+    }
 
-	public int getLocalVariableTableAttributeNameIndex() {
-		return localVariableTableAttributeNameIndex;
-	}
+    public int getLocalVariableTableAttributeNameIndex() {
+        return localVariableTableAttributeNameIndex;
+    }
 
-	public int getLocalVariableTypeTableAttributeNameIndex() {
-		return localVariableTypeTableAttributeNameIndex;
-	}
+    public int getLocalVariableTypeTableAttributeNameIndex() {
+        return localVariableTypeTableAttributeNameIndex;
+    }
 
-	public int getInstanceConstructorIndex() {
-		return instanceConstructorIndex;
-	}
+    public int getInstanceConstructorIndex() {
+        return instanceConstructorIndex;
+    }
 
-	public int getInternalDeprecatedSignatureIndex() {
-		return internalDeprecatedSignatureIndex;
-	}
+    public int getInternalDeprecatedSignatureIndex() {
+        return internalDeprecatedSignatureIndex;
+    }
 
-	public int getObjectClassIndex() {
-		return objectClassIndex;
-	}
+    public int getObjectClassIndex() {
+        return objectClassIndex;
+    }
 
-	public int getObjectClassNameIndex() {
-		return objectClassNameIndex;
-	}
+    public int getObjectClassNameIndex() {
+        return objectClassNameIndex;
+    }
 
-	public int getObjectSignatureIndex() {
-		return objectSignatureIndex;
-	}
+    public int getObjectSignatureIndex() {
+        return objectSignatureIndex;
+    }
 
-	public int getRuntimeInvisibleAnnotationsAttributeNameIndex() {
-		return runtimeInvisibleAnnotationsAttributeNameIndex;
-	}
+    public int getRuntimeInvisibleAnnotationsAttributeNameIndex() {
+        return runtimeInvisibleAnnotationsAttributeNameIndex;
+    }
 
-	public int getRuntimeVisibleAnnotationsAttributeNameIndex() {
-		return runtimeVisibleAnnotationsAttributeNameIndex;
-	}
+    public int getRuntimeVisibleAnnotationsAttributeNameIndex() {
+        return runtimeVisibleAnnotationsAttributeNameIndex;
+    }
 
-	public int getRuntimeInvisibleParameterAnnotationsAttributeNameIndex() {
-		return runtimeInvisibleParameterAnnotationsAttributeNameIndex;
-	}
+    public int getRuntimeInvisibleParameterAnnotationsAttributeNameIndex() {
+        return runtimeInvisibleParameterAnnotationsAttributeNameIndex;
+    }
 
-	public int getRuntimeVisibleParameterAnnotationsAttributeNameIndex() {
-		return runtimeVisibleParameterAnnotationsAttributeNameIndex;
-	}
+    public int getRuntimeVisibleParameterAnnotationsAttributeNameIndex() {
+        return runtimeVisibleParameterAnnotationsAttributeNameIndex;
+    }
 
-	public int getSignatureAttributeNameIndex() {
-		return signatureAttributeNameIndex;
-	}
+    public int getSignatureAttributeNameIndex() {
+        return signatureAttributeNameIndex;
+    }
 
-	public int getSourceFileAttributeNameIndex() {
-		return sourceFileAttributeNameIndex;
-	}
+    public int getSourceFileAttributeNameIndex() {
+        return sourceFileAttributeNameIndex;
+    }
 
-	public int getSyntheticAttributeNameIndex() {
-		return syntheticAttributeNameIndex;
-	}
+    public int getSyntheticAttributeNameIndex() {
+        return syntheticAttributeNameIndex;
+    }
 
-	public int getStringBufferClassNameIndex() {
-		return stringBufferClassNameIndex;
-	}
+    public int getStringBufferClassNameIndex() {
+        return stringBufferClassNameIndex;
+    }
 
-	public int getStringBuilderClassNameIndex() {
-		return stringBuilderClassNameIndex;
-	}
+    public int getStringBuilderClassNameIndex() {
+        return stringBuilderClassNameIndex;
+    }
 
-	public int getToStringIndex() {
-		return toStringIndex;
-	}
+    public int getToStringIndex() {
+        return toStringIndex;
+    }
 
-	public int getStringClassNameIndex() {
-		return stringClassNameIndex;
-	}
+    public int getStringClassNameIndex() {
+        return stringClassNameIndex;
+    }
 
-	public int getValueOfIndex() {
-		return valueOfIndex;
-	}
+    public int getValueOfIndex() {
+        return valueOfIndex;
+    }
 
-	public int getThisLocalVariableNameIndex() {
-		return thisLocalVariableNameIndex;
-	}
+    public int getThisLocalVariableNameIndex() {
+        return thisLocalVariableNameIndex;
+    }
 }

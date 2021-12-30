@@ -30,11 +30,11 @@ public abstract class InvokeNoStaticInstruction extends InvokeInstruction
         this.setObjectref(objectref);
     }
 
-	public Instruction getObjectref() {
-		return objectref;
-	}
+    public Instruction getObjectref() {
+        return objectref;
+    }
 
-	public void setObjectref(Instruction objectref) {
-		this.objectref = objectref;
-	}
+    public void setObjectref(Instruction objectref) {
+        this.objectref = objectref;
+    }
 }

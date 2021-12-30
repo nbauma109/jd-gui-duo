@@ -9,68 +9,68 @@ import java.util.Objects;
 import static org.apache.bcel.Const.CONSTANT_Methodref;
 
 public class ConstantMethodref extends ConstantCP {
-		private List<String> listOfParameterSignatures;
-	private String returnedSignature;
+        private List<String> listOfParameterSignatures;
+    private String returnedSignature;
 
-	public ConstantMethodref(int classIndex, int nameAndTypeIndex) {
-		super(CONSTANT_Methodref, classIndex, nameAndTypeIndex);
-	}
+    public ConstantMethodref(int classIndex, int nameAndTypeIndex) {
+        super(CONSTANT_Methodref, classIndex, nameAndTypeIndex);
+    }
 
-	public ConstantMethodref(int classIndex, int nameAndTypeIndex, List<String> listOfParameterSignatures,
-			String returnedSignature) {
-		super(CONSTANT_Methodref, classIndex, nameAndTypeIndex);
-		this.listOfParameterSignatures = listOfParameterSignatures;
-		this.returnedSignature = returnedSignature;
-	}
+    public ConstantMethodref(int classIndex, int nameAndTypeIndex, List<String> listOfParameterSignatures,
+            String returnedSignature) {
+        super(CONSTANT_Methodref, classIndex, nameAndTypeIndex);
+        this.listOfParameterSignatures = listOfParameterSignatures;
+        this.returnedSignature = returnedSignature;
+    }
 
-	public List<String> getListOfParameterSignatures() {
-		return listOfParameterSignatures;
-	}
+    public List<String> getListOfParameterSignatures() {
+        return listOfParameterSignatures;
+    }
 
-	public void setParameterSignatures(List<String> listOfParameterSignatures) {
-		this.listOfParameterSignatures = listOfParameterSignatures;
-	}
+    public void setParameterSignatures(List<String> listOfParameterSignatures) {
+        this.listOfParameterSignatures = listOfParameterSignatures;
+    }
 
-	public int getNbrOfParameters() {
-		return this.listOfParameterSignatures == null ? 0 : this.listOfParameterSignatures.size();
-	}
+    public int getNbrOfParameters() {
+        return this.listOfParameterSignatures == null ? 0 : this.listOfParameterSignatures.size();
+    }
 
-	public String getReturnedSignature() {
-		return returnedSignature;
-	}
+    public String getReturnedSignature() {
+        return returnedSignature;
+    }
 
-	public void setReturnedSignature(String returnedSignature) {
-		this.returnedSignature = returnedSignature;
-	}
+    public void setReturnedSignature(String returnedSignature) {
+        this.returnedSignature = returnedSignature;
+    }
 
-	public boolean returnAResult() {
-		return this.returnedSignature != null && !"V".equals(this.returnedSignature);
-	}
+    public boolean returnAResult() {
+        return this.returnedSignature != null && !"V".equals(this.returnedSignature);
+    }
 
-	@Override
-	public void accept(Visitor v) {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public void accept(Visitor v) {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result
-				+ (listOfParameterSignatures == null ? 0 : listOfParameterSignatures.hashCode());
-		return prime * result + (returnedSignature == null ? 0 : returnedSignature.hashCode());
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result
+                + (listOfParameterSignatures == null ? 0 : listOfParameterSignatures.hashCode());
+        return prime * result + (returnedSignature == null ? 0 : returnedSignature.hashCode());
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!super.equals(obj) || getClass() != obj.getClass()) {
-			return false;
-		}
-		ConstantMethodref other = (ConstantMethodref) obj;
-		return Objects.equals(listOfParameterSignatures, other.listOfParameterSignatures) 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj) || getClass() != obj.getClass()) {
+            return false;
+        }
+        ConstantMethodref other = (ConstantMethodref) obj;
+        return Objects.equals(listOfParameterSignatures, other.listOfParameterSignatures) 
             && Objects.equals(returnedSignature, other.returnedSignature);
-	}
+    }
 }

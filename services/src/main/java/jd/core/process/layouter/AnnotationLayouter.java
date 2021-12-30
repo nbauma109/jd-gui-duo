@@ -31,41 +31,41 @@ import jd.core.model.layout.block.LayoutBlock;
 
 public class AnnotationLayouter
 {
-	private AnnotationLayouter() {
-	}
+    private AnnotationLayouter() {
+    }
 
-	public static void createBlocksForAnnotations(
-			ClassFile classFile, Attribute[] attributes,
-			List<LayoutBlock> layoutBlockList)
-	{
-		if (attributes == null) {
-			return;
-		}
+    public static void createBlocksForAnnotations(
+            ClassFile classFile, Attribute[] attributes,
+            List<LayoutBlock> layoutBlockList)
+    {
+        if (attributes == null) {
+            return;
+        }
 
-		int attributesLength = attributes.length;
-		List<Annotation> annotations =
-				new ArrayList<>(attributesLength);
+        int attributesLength = attributes.length;
+        List<Annotation> annotations =
+                new ArrayList<>(attributesLength);
 
-		Attribute attribute;
-		for (int i=0; i<attributesLength; i++)
-		{
-			attribute = attributes[i];
+        Attribute attribute;
+        for (int i=0; i<attributesLength; i++)
+        {
+            attribute = attributes[i];
 
-			if (attribute.getTag() == Const.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS || attribute.getTag() == Const.ATTR_RUNTIME_VISIBLE_ANNOTATIONS) {
-				Annotation[] array =
-						((AttributeRuntimeAnnotations)attribute).getAnnotations();
+            if (attribute.getTag() == Const.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS || attribute.getTag() == Const.ATTR_RUNTIME_VISIBLE_ANNOTATIONS) {
+                Annotation[] array =
+                        ((AttributeRuntimeAnnotations)attribute).getAnnotations();
 
-				if (array != null)
-				{
-					Collections.addAll(annotations, array);
-				}
-			}
-		}
+                if (array != null)
+                {
+                    Collections.addAll(annotations, array);
+                }
+            }
+        }
 
-		if (!annotations.isEmpty())
-		{
-			layoutBlockList.add(new AnnotationsLayoutBlock(
-					classFile, annotations));
-		}
-	}
+        if (!annotations.isEmpty())
+        {
+            layoutBlockList.add(new AnnotationsLayoutBlock(
+                    classFile, annotations));
+        }
+    }
 }

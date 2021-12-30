@@ -21,8 +21,8 @@ public class ConstantMemberRef extends ConstantCP {
         super(CONSTANT_MEMBER_REF, classIndex, nameAndTypeIndex);
     }
 
-	@Override
-	public void accept(Visitor v) {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public void accept(Visitor v) {
+        throw new UnsupportedOperationException();
+    }
 }

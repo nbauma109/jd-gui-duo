@@ -110,15 +110,15 @@ public abstract class TypeReferencePage extends HyperlinkPage {
     }
 
     public static class TypeHyperlinkData extends HyperlinkData {
-    	private final String internalTypeName;
+        private final String internalTypeName;
 
         public TypeHyperlinkData(int startPosition, int endPosition, String internalTypeName) {
             super(startPosition, endPosition);
             this.internalTypeName = internalTypeName;
         }
 
-		public String getInternalTypeName() {
-			return internalTypeName;
-		}
+        public String getInternalTypeName() {
+            return internalTypeName;
+        }
     }
 }

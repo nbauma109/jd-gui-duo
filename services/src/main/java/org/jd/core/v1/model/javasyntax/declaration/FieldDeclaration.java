@@ -54,11 +54,11 @@ public class FieldDeclaration implements MemberDeclaration {
     @Override
     public boolean equals(Object o) {
         if (this == o) {
-			return true;
-		}
+            return true;
+        }
         if (!(o instanceof FieldDeclaration that)) {
-			return false;
-		}
+            return false;
+        }
 
         return flags == that.flags && (annotationReferences != null ? annotationReferences.equals(that.annotationReferences) : that.annotationReferences == null) && fieldDeclarators.equals(that.fieldDeclarators) && type.equals(that.type);
     }

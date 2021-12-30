@@ -40,8 +40,8 @@ public class NewInitializedArray extends AbstractLineNumberTypeExpression {
         return "NewInitializedArray{new " + type + " [" + arrayInitializer + "]}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new NewInitializedArray(lineNumber, type, arrayInitializer);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new NewInitializedArray(lineNumber, type, arrayInitializer);
+    }
 }

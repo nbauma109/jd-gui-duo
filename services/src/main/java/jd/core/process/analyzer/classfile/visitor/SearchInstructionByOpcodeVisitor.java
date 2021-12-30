@@ -81,12 +81,12 @@ public class SearchInstructionByOpcodeVisitor
         throws RuntimeException
     {
         if (instruction == null) {
-			throw new IllegalStateException("Null instruction");
-		}
+            throw new IllegalStateException("Null instruction");
+        }
 
         if (instruction.getOpcode() == opcode) {
-			return instruction;
-		}
+            return instruction;
+        }
 
         switch (instruction.getOpcode())
         {
@@ -106,8 +106,8 @@ public class SearchInstructionByOpcodeVisitor
                     (BinaryOperatorInstruction)instruction;
                 Instruction tmp = visit(boi.getValue1(), opcode);
                 if (tmp != null) {
-					return tmp;
-				}
+                    return tmp;
+                }
                 return visit(boi.getValue2(), opcode);
             }
         case Const.CHECKCAST:
@@ -126,8 +126,8 @@ public class SearchInstructionByOpcodeVisitor
                 IfCmp ifCmp = (IfCmp)instruction;
                 Instruction tmp = visit(ifCmp.getValue1(), opcode);
                 if (tmp != null) {
-					return tmp;
-				}
+                    return tmp;
+                }
                 return visit(ifCmp.getValue2(), opcode);
             }
         case ByteCodeConstants.IF,
@@ -141,8 +141,8 @@ public class SearchInstructionByOpcodeVisitor
                 {
                     Instruction tmp = visit(branchList.get(i), opcode);
                     if (tmp != null) {
-						return tmp;
-					}
+                        return tmp;
+                    }
                 }
             }
             break;
@@ -155,8 +155,8 @@ public class SearchInstructionByOpcodeVisitor
                 Instruction result = visit(
                     ((InvokeNoStaticInstruction)instruction).getObjectref(), opcode);
                 if (result != null) {
-					return result;
-				}
+                    return result;
+                }
             }
             // intended fall through
         case Const.INVOKESTATIC,
@@ -167,8 +167,8 @@ public class SearchInstructionByOpcodeVisitor
                 {
                     Instruction tmp = visit(list.get(i), opcode);
                     if (tmp != null) {
-						return tmp;
-					}
+                        return tmp;
+                    }
                 }
             }
             break;
@@ -185,8 +185,8 @@ public class SearchInstructionByOpcodeVisitor
                 {
                     Instruction tmp = visit(dimensions[i], opcode);
                     if (tmp != null) {
-						return tmp;
-					}
+                        return tmp;
+                    }
                 }
             }
             break;
@@ -201,8 +201,8 @@ public class SearchInstructionByOpcodeVisitor
                 PutField putField = (PutField)instruction;
                 Instruction tmp = visit(putField.getObjectref(), opcode);
                 if (tmp != null) {
-					return tmp;
-				}
+                    return tmp;
+                }
                 return visit(putField.getValueref(), opcode);
             }
         case Const.PUTSTATIC:
@@ -224,11 +224,11 @@ public class SearchInstructionByOpcodeVisitor
                 InitArrayInstruction iai = (InitArrayInstruction)instruction;
                 Instruction tmp = visit(iai.getNewArray(), opcode);
                 if (tmp != null) {
-					return tmp;
-				}
+                    return tmp;
+                }
                 if (iai.getValues() != null) {
-					return visit(iai.getValues(), opcode);
-				}
+                    return visit(iai.getValues(), opcode);
+                }
             }
             break;
         case ByteCodeConstants.TERNARYOP:
@@ -236,8 +236,8 @@ public class SearchInstructionByOpcodeVisitor
                 TernaryOperator to = (TernaryOperator)instruction;
                 Instruction tmp = visit(to.getValue1(), opcode);
                 if (tmp != null) {
-					return tmp;
-				}
+                    return tmp;
+                }
                 return visit(to.getValue2(), opcode);
             }
         case FastConstants.TRY:
@@ -245,19 +245,19 @@ public class SearchInstructionByOpcodeVisitor
                 FastTry ft = (FastTry)instruction;
                 Instruction tmp = visit(ft.getInstructions(), opcode);
                 if (tmp != null) {
-					return tmp;
-				}
+                    return tmp;
+                }
                 List<FastCatch> catches = ft.getCatches();
                 for (int i=catches.size()-1; i>=0; --i)
                 {
                     tmp = visit(catches.get(i).instructions(), opcode);
                     if (tmp != null) {
-						return tmp;
-					}
+                        return tmp;
+                    }
                 }
                 if (ft.getFinallyInstructions() != null) {
-					return visit(ft.getFinallyInstructions(), opcode);
-				}
+                    return visit(ft.getFinallyInstructions(), opcode);
+                }
             }
             break;
         case FastConstants.SYNCHRONIZED:
@@ -265,8 +265,8 @@ public class SearchInstructionByOpcodeVisitor
                 FastSynchronized fsy = (FastSynchronized)instruction;
                 Instruction tmp = visit(fsy.getMonitor(), opcode);
                 if (tmp != null) {
-					return tmp;
-				}
+                    return tmp;
+                }
                 return visit(fsy.getInstructions(), opcode);
             }
         case FastConstants.FOR:
@@ -276,15 +276,15 @@ public class SearchInstructionByOpcodeVisitor
                 {
                     Instruction tmp = visit(ff.getInit(), opcode);
                     if (tmp != null) {
-						return tmp;
-					}
+                        return tmp;
+                    }
                 }
                 if (ff.getInc() != null)
                 {
                     Instruction tmp = visit(ff.getInc(), opcode);
                     if (tmp != null) {
-						return tmp;
-					}
+                        return tmp;
+                    }
                 }
             }
             // intended fall through
@@ -297,8 +297,8 @@ public class SearchInstructionByOpcodeVisitor
                 {
                     Instruction tmp = visit(ftl.getTest(), opcode);
                     if (tmp != null) {
-						return tmp;
-					}
+                        return tmp;
+                    }
                 }
             }
             // intended fall through
@@ -307,8 +307,8 @@ public class SearchInstructionByOpcodeVisitor
                 List<Instruction> instructions =
                         ((FastList)instruction).getInstructions();
                 if (instructions != null) {
-					return visit(instructions, opcode);
-				}
+                    return visit(instructions, opcode);
+                }
             }
             break;
         case FastConstants.FOREACH:
@@ -316,12 +316,12 @@ public class SearchInstructionByOpcodeVisitor
                 FastForEach ffe = (FastForEach)instruction;
                 Instruction tmp = visit(ffe.getVariable(), opcode);
                 if (tmp != null) {
-					return tmp;
-				}
+                    return tmp;
+                }
                 tmp = visit(ffe.getValues(), opcode);
                 if (tmp != null) {
-					return tmp;
-				}
+                    return tmp;
+                }
                 return visit(ffe.getInstructions(), opcode);
             }
         case FastConstants.IF_ELSE:
@@ -329,12 +329,12 @@ public class SearchInstructionByOpcodeVisitor
                 FastTest2Lists ft2l = (FastTest2Lists)instruction;
                 Instruction tmp = visit(ft2l.getTest(), opcode);
                 if (tmp != null) {
-					return tmp;
-				}
+                    return tmp;
+                }
                 tmp = visit(ft2l.getInstructions(), opcode);
                 if (tmp != null) {
-					return tmp;
-				}
+                    return tmp;
+                }
                 return visit(ft2l.getInstructions2(), opcode);
             }
         case FastConstants.IF_CONTINUE,
@@ -346,16 +346,16 @@ public class SearchInstructionByOpcodeVisitor
             {
                 FastInstruction fi = (FastInstruction)instruction;
                 if (fi.getInstruction() != null) {
-					return visit(fi.getInstruction(), opcode);
-				}
+                    return visit(fi.getInstruction(), opcode);
+                }
             }
             break;
         case FastConstants.DECLARE:
             {
                 FastDeclaration fd = (FastDeclaration)instruction;
                 if (fd.getInstruction() != null) {
-					return visit(fd.getInstruction(), opcode);
-				}
+                    return visit(fd.getInstruction(), opcode);
+                }
             }
             break;
         case FastConstants.SWITCH,
@@ -365,8 +365,8 @@ public class SearchInstructionByOpcodeVisitor
                 FastSwitch fs = (FastSwitch)instruction;
                 Instruction tmp = visit(fs.getTest(), opcode);
                 if (tmp != null) {
-					return tmp;
-				}
+                    return tmp;
+                }
 
                 Pair[] pairs = fs.getPairs();
                 for (int i=pairs.length-1; i>=0; --i)
@@ -376,8 +376,8 @@ public class SearchInstructionByOpcodeVisitor
                     {
                         tmp = visit(instructions, opcode);
                         if (tmp != null) {
-							return tmp;
-						}
+                            return tmp;
+                        }
                     }
                 }
             }
@@ -386,8 +386,8 @@ public class SearchInstructionByOpcodeVisitor
             {
                 FastLabel fla = (FastLabel)instruction;
                 if (fla.getInstruction() != null) {
-					return visit(fla.getInstruction(), opcode);
-				}
+                    return visit(fla.getInstruction(), opcode);
+                }
             }
             break;
         case Const.ACONST_NULL,
@@ -433,8 +433,8 @@ public class SearchInstructionByOpcodeVisitor
         {
             Instruction instruction = visit(instructions.get(i), opcode);
             if (instruction != null) {
-				return instruction;
-			}
+                return instruction;
+            }
         }
 
         return null;

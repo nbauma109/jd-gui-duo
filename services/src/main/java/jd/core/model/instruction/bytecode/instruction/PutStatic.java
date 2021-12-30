@@ -29,12 +29,12 @@ public class PutStatic extends GetStatic implements ValuerefAttribute
         this.setValueref(valueref);
     }
 
-	@Override
-	public Instruction getValueref() {
-		return valueref;
-	}
+    @Override
+    public Instruction getValueref() {
+        return valueref;
+    }
 
-	public void setValueref(Instruction valueref) {
-		this.valueref = valueref;
-	}
+    public void setValueref(Instruction valueref) {
+        this.valueref = valueref;
+    }
 }

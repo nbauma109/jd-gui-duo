@@ -12,6 +12,6 @@ import org.apache.bcel.classfile.LineNumber;
 public record AttributeLineNumberTable(LineNumber[] lineNumberTable) implements Attribute {
 
     public LineNumber getLineNumberTable(int i) {
-    	return lineNumberTable[i];
+        return lineNumberTable[i];
     }
 }

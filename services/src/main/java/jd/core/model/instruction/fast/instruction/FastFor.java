@@ -38,19 +38,19 @@ public class FastFor extends FastTestList
         this.setInc(inc);
     }
 
-	public Instruction getInc() {
-		return inc;
-	}
+    public Instruction getInc() {
+        return inc;
+    }
 
-	public void setInc(Instruction inc) {
-		this.inc = inc;
-	}
+    public void setInc(Instruction inc) {
+        this.inc = inc;
+    }
 
-	public Instruction getInit() {
-		return init;
-	}
+    public Instruction getInit() {
+        return init;
+    }
 
-	public void setInit(Instruction init) {
-		this.init = init;
-	}
+    public void setInit(Instruction init) {
+        this.init = init;
+    }
 }

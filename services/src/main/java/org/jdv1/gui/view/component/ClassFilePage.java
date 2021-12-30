@@ -50,7 +50,7 @@ public class ClassFilePage extends TypePage {
 
     private static final String INTERNAL_ERROR = "// INTERNAL ERROR //";
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
     protected static final ClassFileToJavaSourceDecompiler DECOMPILER = new ClassFileToJavaSourceDecompiler();
     protected static final Decompiler DECOMPILERV0 = new DecompilerImpl();
@@ -110,7 +110,7 @@ public class ClassFilePage extends TypePage {
                 decompileV0(preferences, loader);
             }
         } finally {
-        	maximumLineNumber = getMaximumSourceLineNumber();
+            maximumLineNumber = getMaximumSourceLineNumber();
         }
     }
 
@@ -428,22 +428,22 @@ public class ClassFilePage extends TypePage {
         @Override
         public void end() {
             String sourceCodeV1 = stringBuffer.toString();
-			if (sourceCodeV1.contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
-				listener.clearData();
-				try {
-					String sourceCodeV0 = decompileV0Internal(api.getPreferences(), new ContainerLoader(entry));
-					String patchedCode = MethodPatcher.patchCode(sourceCodeV1, sourceCodeV0, entry);
-					parseAndSetText(patchedCode);
-		        } catch (LoaderException e) {
-		            assert ExceptionUtil.printStackTrace(e);
-		            setText(INTERNAL_ERROR);
-		        }
-			} else {
+            if (sourceCodeV1.contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
+                listener.clearData();
+                try {
+                    String sourceCodeV0 = decompileV0Internal(api.getPreferences(), new ContainerLoader(entry));
+                    String patchedCode = MethodPatcher.patchCode(sourceCodeV1, sourceCodeV0, entry);
+                    parseAndSetText(patchedCode);
+                } catch (LoaderException e) {
+                    assert ExceptionUtil.printStackTrace(e);
+                    setText(INTERNAL_ERROR);
+                }
+            } else {
                 setText(sourceCodeV1);
-			}
+            }
         }
 
-		// --- Add strings --- //
+        // --- Add strings --- //
         @Override
         public void printStringConstant(String constant, String ownerInternalName) {
             if (constant == null) {

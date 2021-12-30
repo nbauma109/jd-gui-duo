@@ -42,15 +42,15 @@ public class NewArray extends Instruction
         return signature == null ? null : "[" + signature;
     }
 
-	public int getType() {
-		return type;
-	}
+    public int getType() {
+        return type;
+    }
 
-	public Instruction getDimension() {
-		return dimension;
-	}
+    public Instruction getDimension() {
+        return dimension;
+    }
 
-	public void setDimension(Instruction dimension) {
-		this.dimension = dimension;
-	}
+    public void setDimension(Instruction dimension) {
+        this.dimension = dimension;
+    }
 }

@@ -29,7 +29,7 @@ public class AttributeLocalVariableTable extends Attribute
         this.localVariableTable = localVariableTable;
     }
 
-	public LocalVariable[] getLocalVariableTable() {
-		return localVariableTable;
-	}
+    public LocalVariable[] getLocalVariableTable() {
+        return localVariableTable;
+    }
 }

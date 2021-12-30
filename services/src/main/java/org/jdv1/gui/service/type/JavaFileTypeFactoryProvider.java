@@ -380,7 +380,7 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
         public boolean visit(FieldDeclaration node) {
             int access = node.getModifiers();
             @SuppressWarnings("unchecked")
-			List<VariableDeclarationFragment> fragments = node.fragments();
+            List<VariableDeclarationFragment> fragments = node.fragments();
             for (VariableDeclarationFragment fragment : fragments) {
                 String name = fragment.getName().getIdentifier();
                 int dimensionOnVariable = fragment.getExtraDimensions();
@@ -395,7 +395,7 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
             int access = node.getModifiers();
             String name = node.isConstructor() ? StringConstants.INSTANCE_CONSTRUCTOR : node.getName().getIdentifier();
             @SuppressWarnings("unchecked")
-			String paramDescriptors = createParamDescriptors(node.parameters());
+            String paramDescriptors = createParamDescriptors(node.parameters());
             String returnDescriptor = createDescriptor(node.getReturnType2(), 0);
             String descriptor = paramDescriptors + returnDescriptor;
 

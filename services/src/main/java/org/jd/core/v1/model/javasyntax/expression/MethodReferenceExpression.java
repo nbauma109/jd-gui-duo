@@ -60,8 +60,8 @@ public class MethodReferenceExpression extends AbstractLineNumberTypeExpression 
         visitor.visit(this);
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new MethodReferenceExpression(lineNumber, type, expression, internalTypeName, name, descriptor);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new MethodReferenceExpression(lineNumber, type, expression, internalTypeName, name, descriptor);
+    }
 }

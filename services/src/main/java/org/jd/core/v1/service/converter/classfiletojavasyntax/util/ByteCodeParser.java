@@ -1432,7 +1432,7 @@ public class ByteCodeParser {
                     // Create lambda expression
                     ClassFileMethodDeclaration cfmd = (ClassFileMethodDeclaration)methodDeclaration;
                     if (cfmd.getStatements() == null) {
-                    	cfmd.setStatements(new Statements());
+                        cfmd.setStatements(new Statements());
                     }
                     stack.push(new LambdaIdentifiersExpression(
                             lineNumber, indyMethodTypes.getReturnedType(), indyMethodTypes.getReturnedType(),

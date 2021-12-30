@@ -82,7 +82,7 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
             if (" \t\n\r".indexOf(text.charAt(index)) == -1) {
                 return index;
             }
-			index++;
+            index++;
         }
 
         return index;
@@ -91,11 +91,11 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
     public int searchEndIndexOfValue(String text, int startLineIndex, int startIndex) {
         int length = text.length();
         int index;
-		for (index = startIndex; index < length; index++) {
+        for (index = startIndex; index < length; index++) {
             // MANIFEST.MF Specification: max line length = 72
             // http://docs.oracle.com/javase/7/docs/technotes/guides/jar/jar.html
             char c = text.charAt(index);
-			if (c == '\r') {
+            if (c == '\r') {
                 // CR followed by LF ?
                 if (index-startLineIndex >= 70 && index+1 < length && text.charAt(index+1) == ' ') {
                     // skip whitespace
@@ -106,16 +106,16 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
                     // (End of file) or (single line value) => return end index
                     return index;
                 }
-				// Multiline value
-				startLineIndex = index+1;
-			}
-			if (c == '\n') {
+                // Multiline value
+                startLineIndex = index+1;
+            }
+            if (c == '\n') {
                 if (index-startLineIndex < 70 || index+1 >= length || text.charAt(index+1) != ' ') {
                     // (End of file) or (single line value) => return end index
                     return index;
                 }
-				// Multiline value
-				startLineIndex = index+1;
+                // Multiline value
+                startLineIndex = index+1;
             }
         }
 
@@ -210,7 +210,7 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
     }
 
     public static class ManifestHyperlinkData extends HyperlinkData {
-    	private final String fragment;
+        private final String fragment;
 
         ManifestHyperlinkData(int startPosition, int endPosition, String fragment) {
             super(startPosition, endPosition);

@@ -40,15 +40,15 @@ public class ArrayLoadInstruction extends ArrayInstruction
         return this.getSignature();
     }
 
-	public String getSignature() {
-		return signature;
-	}
+    public String getSignature() {
+        return signature;
+    }
 
-	public Instruction getIndexref() {
-		return indexref;
-	}
+    public Instruction getIndexref() {
+        return indexref;
+    }
 
-	public void setIndexref(Instruction indexref) {
-		this.indexref = indexref;
-	}
+    public void setIndexref(Instruction indexref) {
+        this.indexref = indexref;
+    }
 }

@@ -36,9 +36,9 @@ public class ContainerLoader implements Loader {
     }
 
     protected Container.Entry getEntry(String internalPath) {
-    	if (!internalPath.endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
-    		return getEntry(internalPath + StringConstants.CLASS_FILE_SUFFIX);
-    	}
+        if (!internalPath.endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
+            return getEntry(internalPath + StringConstants.CLASS_FILE_SUFFIX);
+        }
         if (entry.getPath().equals(internalPath)) {
             return entry;
         }

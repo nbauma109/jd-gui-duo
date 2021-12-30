@@ -144,14 +144,14 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
                 stringBuffer.append("\n */");
             }
 
-			String sourceCodeV1 = stringBuffer.toString();
-			if (sourceCodeV1.contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
-				String sourceCodeV0 = v0Saver.decompileV0(api, entry);
-				String patchedCode = MethodPatcher.patchCode(sourceCodeV1, sourceCodeV0, entry);
-				writeCodeToFile(path, patchedCode);
-			} else {
-				writeCodeToFile(path, sourceCodeV1);
-			}
+            String sourceCodeV1 = stringBuffer.toString();
+            if (sourceCodeV1.contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
+                String sourceCodeV0 = v0Saver.decompileV0(api, entry);
+                String patchedCode = MethodPatcher.patchCode(sourceCodeV1, sourceCodeV0, entry);
+                writeCodeToFile(path, patchedCode);
+            } else {
+                writeCodeToFile(path, sourceCodeV1);
+            }
         } catch (Exception t) {
             assert ExceptionUtil.printStackTrace(t);
             if (!Boolean.parseBoolean(api.getPreferences().getOrDefault(USE_JD_CORE_V0, "false"))) {
@@ -160,11 +160,11 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
         }
     }
 
-	private static void writeCodeToFile(Path path, String sourceCode) {
-		try (OutputStream os = Files.newOutputStream(path)) {
-		    os.write(sourceCode.getBytes(StandardCharsets.UTF_8));
-		} catch (IOException e) {
-		    assert ExceptionUtil.printStackTrace(e);
-		}
-	}
+    private static void writeCodeToFile(Path path, String sourceCode) {
+        try (OutputStream os = Files.newOutputStream(path)) {
+            os.write(sourceCode.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            assert ExceptionUtil.printStackTrace(e);
+        }
+    }
 }

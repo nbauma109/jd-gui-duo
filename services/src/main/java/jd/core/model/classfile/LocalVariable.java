@@ -21,7 +21,7 @@ import java.util.Objects;
 public class LocalVariable
     implements Comparable<LocalVariable>
 {
-	private int startPc;
+    private int startPc;
     private int length;
     private int nameIndex;
     private int signatureIndex;
@@ -104,113 +104,113 @@ public class LocalVariable
     public int compareTo(LocalVariable other)
     {
         if (other == null) {
-			return -1;
-		}
+            return -1;
+        }
 
         if (this.getNameIndex() != other.getNameIndex()) {
-			return this.getNameIndex() - other.getNameIndex();
-		}
+            return this.getNameIndex() - other.getNameIndex();
+        }
 
         if (this.getLength() != other.getLength()) {
-			return this.getLength() - other.getLength();
-		}
+            return this.getLength() - other.getLength();
+        }
 
         if (this.getStartPc() != other.getStartPc()) {
-			return this.getStartPc() - other.getStartPc();
-		}
+            return this.getStartPc() - other.getStartPc();
+        }
 
         return this.getIndex() - other.getIndex();
     }
 
     @Override
     public int hashCode() {
-    	return Objects.hash(nameIndex, length, startPc, index);
+        return Objects.hash(nameIndex, length, startPc, index);
     }
 
     @Override
     public boolean equals(Object obj) {
-    	if (this == obj) {
-    		return true;
-    	}
-    	if (obj == null || getClass() != obj.getClass()) {
-    		return false;
-    	}
-    	return obj instanceof LocalVariable lv && compareTo(lv) == 0;
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        return obj instanceof LocalVariable lv && compareTo(lv) == 0;
     }
 
-	public boolean isToBeRemoved() {
-		return toBeRemoved;
-	}
+    public boolean isToBeRemoved() {
+        return toBeRemoved;
+    }
 
-	public void setToBeRemoved(boolean toBeRemoved) {
-		this.toBeRemoved = toBeRemoved;
-	}
+    public void setToBeRemoved(boolean toBeRemoved) {
+        this.toBeRemoved = toBeRemoved;
+    }
 
-	public int getIndex() {
-		return index;
-	}
+    public int getIndex() {
+        return index;
+    }
 
-	public int getSignatureIndex() {
-		return signatureIndex;
-	}
+    public int getSignatureIndex() {
+        return signatureIndex;
+    }
 
-	public void setSignatureIndex(int signatureIndex) {
-		this.signatureIndex = signatureIndex;
-	}
+    public void setSignatureIndex(int signatureIndex) {
+        this.signatureIndex = signatureIndex;
+    }
 
-	public boolean isExceptionOrReturnAddress() {
-		return exceptionOrReturnAddress;
-	}
+    public boolean isExceptionOrReturnAddress() {
+        return exceptionOrReturnAddress;
+    }
 
-	public void setExceptionOrReturnAddress(boolean exceptionOrReturnAddress) {
-		this.exceptionOrReturnAddress = exceptionOrReturnAddress;
-	}
+    public void setExceptionOrReturnAddress(boolean exceptionOrReturnAddress) {
+        this.exceptionOrReturnAddress = exceptionOrReturnAddress;
+    }
 
-	public int getLength() {
-		return length;
-	}
+    public int getLength() {
+        return length;
+    }
 
-	public void setLength(int length) {
-		this.length = length;
-	}
+    public void setLength(int length) {
+        this.length = length;
+    }
 
-	public int getStartPc() {
-		return startPc;
-	}
+    public int getStartPc() {
+        return startPc;
+    }
 
-	private void setStartPc(int startPc) {
-		this.startPc = startPc;
-	}
+    private void setStartPc(int startPc) {
+        this.startPc = startPc;
+    }
 
-	public int getNameIndex() {
-		return nameIndex;
-	}
+    public int getNameIndex() {
+        return nameIndex;
+    }
 
-	public void setNameIndex(int nameIndex) {
-		this.nameIndex = nameIndex;
-	}
+    public void setNameIndex(int nameIndex) {
+        this.nameIndex = nameIndex;
+    }
 
-	public int getTypesBitField() {
-		return typesBitField;
-	}
+    public int getTypesBitField() {
+        return typesBitField;
+    }
 
-	public void setTypesBitField(int typesBitField) {
-		this.typesBitField = typesBitField;
-	}
+    public void setTypesBitField(int typesBitField) {
+        this.typesBitField = typesBitField;
+    }
 
-	public boolean hasDeclarationFlag() {
-		return declarationFlag;
-	}
+    public boolean hasDeclarationFlag() {
+        return declarationFlag;
+    }
 
-	public void setDeclarationFlag(boolean declarationFlag) {
-		this.declarationFlag = declarationFlag;
-	}
+    public void setDeclarationFlag(boolean declarationFlag) {
+        this.declarationFlag = declarationFlag;
+    }
 
-	public boolean hasFinalFlag() {
-		return finalFlag;
-	}
+    public boolean hasFinalFlag() {
+        return finalFlag;
+    }
 
-	public void setFinalFlag(boolean finalFlag) {
-		this.finalFlag = finalFlag;
-	}
+    public void setFinalFlag(boolean finalFlag) {
+        this.finalFlag = finalFlag;
+    }
 }
