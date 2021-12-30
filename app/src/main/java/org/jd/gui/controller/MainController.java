@@ -7,7 +7,6 @@
 
 package org.jd.gui.controller;
 
-import org.apache.commons.io.IOUtils;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContentCopyable;
@@ -106,7 +105,7 @@ public class MainController implements API {
     private SourceLoaderService sourceLoaderService;
 
     private final History history = new History();
-    private JComponent currentPage = null;
+    private JComponent currentPage;
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
     private final List<IndexesChangeListener> containerChangeListeners = new ArrayList<>();
 
@@ -527,7 +526,11 @@ public class MainController implements API {
         protected void done() {
             progressMonitor.close();
             if (ci instanceof Closeable c) {
-                IOUtils.closeQuietly(c);
+                try {
+                    c.close();
+                } catch (IOException e) {
+                    assert ExceptionUtil.printStackTrace(e);
+                }
             }
             // Fire 'indexesChanged' event
             Collection<Future<Indexes>> collectionOfFutureIndexes = getCollectionOfFutureIndexes();

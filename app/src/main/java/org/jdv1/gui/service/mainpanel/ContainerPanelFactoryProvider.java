@@ -6,7 +6,6 @@
  */
 package org.jdv1.gui.service.mainpanel;
 
-import org.apache.commons.io.IOUtils;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContentIndexable;
@@ -148,7 +147,7 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
         @Override
         public void close() throws IOException {
             if (container instanceof Closeable c) {
-                IOUtils.closeQuietly(c);
+                c.close();
             }
         }
     }
