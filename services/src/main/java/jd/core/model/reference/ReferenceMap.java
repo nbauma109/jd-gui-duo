@@ -60,10 +60,10 @@ public class ReferenceMap
         return this.references.values();
     }
 
-//	public String toString()
-//	{
-//		return this.references.values().toString();
-//	}
+//    public String toString()
+//    {
+//        return this.references.values().toString();
+//    }
 
     public boolean contains(String internalName)
     {

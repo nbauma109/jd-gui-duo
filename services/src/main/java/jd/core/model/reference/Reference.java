@@ -42,8 +42,8 @@ public class Reference
         this.counter++;
     }
 
-//	public String toString()
-//	{
-//		return this.internalName + '#' + this.counter;
-//	}
+//    public String toString()
+//    {
+//        return this.internalName + '#' + this.counter;
+//    }
 }

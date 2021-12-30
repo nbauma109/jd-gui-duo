@@ -161,7 +161,7 @@ public class ClassFile extends Base
             // int index = this.thisClassName.lastIndexOf(
             //   AnalyzerConstants.INTERNAL_INNER_SEPARATOR);
             //if (index != -1)
-            //	return this.thisClassName.substring(index+1);
+            //    return this.thisClassName.substring(index+1);
 
             int index = this.thisClassName.lastIndexOf(
                     StringConstants.INTERNAL_PACKAGE_SEPARATOR);

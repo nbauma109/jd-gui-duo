@@ -1157,17 +1157,17 @@ public class SourceWriterVisitor
 
             return visit(2, ifInstruction.getValue());
 
-//			visit(ifInstruction, ifInstruction.value);
-//			switch (ifInstruction.cmp)
-//			{
-//			case ByteCodeConstants.CMP_EQ:
-//			case ByteCodeConstants.CMP_LE:
-//			case ByteCodeConstants.CMP_GE:
-//				spw.print(" == false");
-//				break;
-//			default:
-//				spw.print(" == true");
-//			}
+//            visit(ifInstruction, ifInstruction.value);
+//            switch (ifInstruction.cmp)
+//            {
+//            case ByteCodeConstants.CMP_EQ:
+//            case ByteCodeConstants.CMP_LE:
+//            case ByteCodeConstants.CMP_GE:
+//                spw.print(" == false");
+//                break;
+//            default:
+//                spw.print(" == true");
+//            }
         }
         int lineNumber = visit(6, ifInstruction.getValue());
         if (this.firstOffset <= this.previousOffset &&
@@ -1297,7 +1297,7 @@ public class SourceWriterVisitor
             if (lvName == null)
             {
                 //new RuntimeException("local variable not found")
-                //	.printStackTrace();
+                //    .printStackTrace();
                 this.printer.startOfError();
                 this.printer.print(lineNumber, "???");
                 this.printer.endOfError();
@@ -1443,9 +1443,9 @@ public class SourceWriterVisitor
             {
                 length =
                     firstIndex + constructor.getSuperConstructorParameterCount();
-//				if (length > in.args.size()) {
-//					throw new IllegalStateException();
-//				}
+//                if (length > in.args.size()) {
+//                    throw new IllegalStateException();
+//                }
             }
         }
 
@@ -1846,7 +1846,7 @@ public class SourceWriterVisitor
                     }
                     //else
                     //{
-                    //	// Methode de la classe courante : elimination du prefix 'this.'
+                    //    // Methode de la classe courante : elimination du prefix 'this.'
                     //}
 
                     String internalClassName =

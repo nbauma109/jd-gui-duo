@@ -151,11 +151,11 @@ public class JavaSourceLayouter
                         preferences, layoutBlockList, classFile,
                         method, (FastInstruction)instruction);
                 break;
-            //			case FastConstants.GOTO_CONTINUE:
-            //				CreateBlocksForGotoContinue(layoutBlockList);
-            //			case FastConstants.GOTO_BREAK:
-            //				CreateBlocksForGotoBreak(layoutBlockList);
-            //				break;
+            //            case FastConstants.GOTO_CONTINUE:
+            //                CreateBlocksForGotoContinue(layoutBlockList);
+            //            case FastConstants.GOTO_BREAK:
+            //                CreateBlocksForGotoBreak(layoutBlockList);
+            //                break;
             case FastConstants.GOTO_LABELED_BREAK:
                 createBlocksForGotoLabeledBreak(
                         layoutBlockList, (FastInstruction)instruction);
@@ -860,11 +860,11 @@ public class JavaSourceLayouter
                         preferences, layoutBlockList, classFile,
                         method, (FastInstruction)instruction);
                 break;
-                //					case FastConstants.GOTO_CONTINUE:
-                    //						CreateBlocksForGotoContinue(layoutBlockList);
-                    //					case FastConstants.GOTO_BREAK:
-                        //						CreateBlocksForGotoBreak(layoutBlockList);
-                        //						break;
+                //                    case FastConstants.GOTO_CONTINUE:
+                    //                        CreateBlocksForGotoContinue(layoutBlockList);
+                    //                    case FastConstants.GOTO_BREAK:
+                        //                        CreateBlocksForGotoBreak(layoutBlockList);
+                        //                        break;
                     case FastConstants.GOTO_LABELED_BREAK:
                         createBlocksForGotoLabeledBreak(
                                 layoutBlockList, (FastInstruction)instruction);
@@ -927,8 +927,8 @@ public class JavaSourceLayouter
      * @param instructions
      * @param showSingleInstructionBlock
      * @param blockEndPreferedLineCount
-     * 				2 pour les premiers blocks,
-     * 				1 pour le dernier bloc
+     *                 2 pour les premiers blocks,
+     *                 1 pour le dernier bloc
      */
     private void createBlockForSubList(
             Preferences preferences,

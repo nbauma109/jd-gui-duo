@@ -180,7 +180,7 @@ public class CompareInstructionVisitor
                 // Ce test perturbe le retrait des instructions 'finally' dans
                 // les blocs 'try' et 'catch'.
                 //  if (((IfCmp)i1).branch != ((IfCmp)i2).branch)
-                //	  return false;
+                //      return false;
 
                 if (((IfCmp)i1).getCmp() != ((IfCmp)i2).getCmp() || ! visit(((IfCmp)i1).getValue1(), ((IfCmp)i2).getValue1())) {
                     return false;

@@ -62,7 +62,7 @@ public class DecompilerImpl implements Decompiler
 
         // 4) Mise en page du code source
         List<LayoutBlock> layoutBlockList = new ArrayList<>(1024);
-        int maxLineNumber =	ClassFileLayouter.layout(
+        int maxLineNumber =    ClassFileLayouter.layout(
                 preferences, referenceMap, classFile, layoutBlockList);
 
 //System.out.println("layoutBlockList.size = " + layoutBlockList.size());
