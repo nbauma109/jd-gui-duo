@@ -20,7 +20,7 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.concurrent.Future;
 
-public class UriUtil {
+public final class UriUtil {
 
     private UriUtil() {
     }
@@ -51,7 +51,7 @@ public class UriUtil {
         }
     }
 
-    protected static String getOuterPath(Collection<Future<Indexes>> collectionOfFutureIndexes, Container.Entry entry, Type type) {
+    private static String getOuterPath(Collection<Future<Indexes>> collectionOfFutureIndexes, Container.Entry entry, Type type) {
         String outerName = type.getOuterName();
 
         if (outerName != null) {

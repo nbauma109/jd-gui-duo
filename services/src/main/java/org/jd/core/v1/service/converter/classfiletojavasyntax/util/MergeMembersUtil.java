@@ -14,11 +14,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class MergeMembersUtil {
+public final class MergeMembersUtil {
     private MergeMembersUtil() {
     }
 
-    protected static final MemberDeclarationComparator MEMBER_DECLARATION_COMPARATOR = new MemberDeclarationComparator();
+    private static final MemberDeclarationComparator MEMBER_DECLARATION_COMPARATOR = new MemberDeclarationComparator();
 
     public static MemberDeclarations merge(
             List<? extends ClassFileMemberDeclaration> fields,
@@ -49,7 +49,7 @@ public class MergeMembersUtil {
         return result;
     }
 
-    protected static void merge(List<MemberDeclaration> result, List<? extends ClassFileMemberDeclaration> members) {
+    private static void merge(List<MemberDeclaration> result, List<? extends ClassFileMemberDeclaration> members) {
         if (members != null && !members.isEmpty()) {
             sort(members);
 
@@ -102,7 +102,7 @@ public class MergeMembersUtil {
         }
     }
 
-    protected static void sort(List<? extends ClassFileMemberDeclaration> members) {
+    private static void sort(List<? extends ClassFileMemberDeclaration> members) {
         int order = 0;
         int lastLineNumber = 0;
 

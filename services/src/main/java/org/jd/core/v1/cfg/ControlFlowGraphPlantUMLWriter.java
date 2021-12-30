@@ -72,7 +72,7 @@ import net.sourceforge.plantuml.SourceStringReader;
  * http://plantuml.com/state.html
  * http://plantuml.com/plantuml
  */
-public class ControlFlowGraphPlantUMLWriter {
+public final class ControlFlowGraphPlantUMLWriter {
     private static final String EOL = "\\n\\\n";
 
     private static final String REDUCED = "<<Reduced>>\n";

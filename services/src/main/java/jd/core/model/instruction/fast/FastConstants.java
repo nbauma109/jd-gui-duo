@@ -16,7 +16,7 @@
  ******************************************************************************/
 package jd.core.model.instruction.fast;
 
-public class FastConstants
+public final class FastConstants
 {
     private FastConstants() {
         super();

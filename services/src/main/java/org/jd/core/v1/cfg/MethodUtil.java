@@ -22,7 +22,7 @@ import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
 
 import java.io.IOException;
 
-public class MethodUtil {
+public final class MethodUtil {
 
     private MethodUtil() {
     }

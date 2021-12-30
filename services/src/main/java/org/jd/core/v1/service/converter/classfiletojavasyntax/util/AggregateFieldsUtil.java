@@ -13,7 +13,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.d
 
 import java.util.List;
 
-public class AggregateFieldsUtil {
+public final class AggregateFieldsUtil {
 
     private AggregateFieldsUtil() {
         super();
@@ -62,7 +62,7 @@ public class AggregateFieldsUtil {
         }
     }
 
-    protected static void aggregate(List<ClassFileFieldDeclaration> fields, ClassFileFieldDeclaration firstField, int firstIndex, int lastIndex) {
+    private static void aggregate(List<ClassFileFieldDeclaration> fields, ClassFileFieldDeclaration firstField, int firstIndex, int lastIndex) {
         if (firstIndex < lastIndex) {
             List<ClassFileFieldDeclaration> sublist = fields.subList(firstIndex + 1, lastIndex + 1);
 

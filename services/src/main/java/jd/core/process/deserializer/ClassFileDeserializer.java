@@ -52,7 +52,7 @@ import jd.core.model.classfile.Method;
 import jd.core.model.classfile.attribute.Attribute;
 import jd.core.model.classfile.attribute.AttributeInnerClasses;
 
-public class ClassFileDeserializer
+public final class ClassFileDeserializer
 {
     private ClassFileDeserializer() {
         super();

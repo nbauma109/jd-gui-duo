@@ -56,7 +56,7 @@ import jd.core.model.instruction.bytecode.instruction.UnaryOperatorInstruction;
 import jd.core.model.instruction.fast.FastConstants;
 import jd.core.model.instruction.fast.instruction.FastDeclaration;
 
-public class MaxLineNumberVisitor
+public final class MaxLineNumberVisitor
 {
     private MaxLineNumberVisitor() {
         super();

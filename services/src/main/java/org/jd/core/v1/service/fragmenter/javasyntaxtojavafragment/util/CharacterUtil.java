@@ -7,7 +7,7 @@
 
 package org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util;
 
-public class CharacterUtil {
+public final class CharacterUtil {
 
     private CharacterUtil() {
         super();

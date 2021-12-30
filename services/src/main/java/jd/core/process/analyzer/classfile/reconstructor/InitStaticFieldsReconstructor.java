@@ -31,7 +31,7 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.PutStatic;
 import jd.core.process.analyzer.classfile.visitor.SearchInstructionByOpcodeVisitor;
 
-public class InitStaticFieldsReconstructor
+public final class InitStaticFieldsReconstructor
 {
     private InitStaticFieldsReconstructor() {
         super();

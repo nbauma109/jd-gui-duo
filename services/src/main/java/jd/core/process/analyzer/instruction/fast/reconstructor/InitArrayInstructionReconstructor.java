@@ -45,7 +45,7 @@ import jd.core.process.analyzer.util.ReconstructorUtil;
  *
  * Cette operation doit être executee avant 'AssignmentInstructionReconstructor'.
  */
-public class InitArrayInstructionReconstructor
+public final class InitArrayInstructionReconstructor
 {
     private InitArrayInstructionReconstructor() {
     }

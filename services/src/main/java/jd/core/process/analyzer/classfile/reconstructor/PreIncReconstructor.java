@@ -40,7 +40,7 @@ import jd.core.process.analyzer.util.ReconstructorUtil;
  * ...
  * ???( DupLoad )
  */
-public class PreIncReconstructor
+public final class PreIncReconstructor
 {
     private PreIncReconstructor() {
         super();

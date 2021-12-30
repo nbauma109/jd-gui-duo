@@ -16,7 +16,7 @@
  ******************************************************************************/
 package jd.core.util;
 
-public class UtilConstants
+public final class UtilConstants
 {
     private UtilConstants() {
         super();

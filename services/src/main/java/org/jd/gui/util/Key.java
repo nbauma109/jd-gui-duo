@@ -1,6 +1,6 @@
 package org.jd.gui.util;
 
-public class Key {
+public final class Key {
 
     private Key() {
         super();

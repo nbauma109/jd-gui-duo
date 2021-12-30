@@ -16,7 +16,7 @@
  ******************************************************************************/
 package jd.core.model.classfile.accessor;
 
-public class AccessorConstants
+public final class AccessorConstants
 {
     private AccessorConstants() {
         super();

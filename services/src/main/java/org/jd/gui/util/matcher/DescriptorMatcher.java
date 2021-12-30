@@ -10,7 +10,7 @@ package org.jd.gui.util.matcher;
 /*
  * Descriptor format : @see jd.gui.api.feature.UriOpenable
  */
-public class DescriptorMatcher {
+public final class DescriptorMatcher {
 
     private DescriptorMatcher() {
         super();
@@ -20,7 +20,7 @@ public class DescriptorMatcher {
         return matchDescriptors(new CharBuffer(d1), new CharBuffer(d2));
     }
 
-    protected static boolean matchDescriptors(CharBuffer cb1, CharBuffer cb2) {
+    private static boolean matchDescriptors(CharBuffer cb1, CharBuffer cb2) {
         if (cb1.read() == '?') {
             if (cb2.read() == '?') {
                 return true;

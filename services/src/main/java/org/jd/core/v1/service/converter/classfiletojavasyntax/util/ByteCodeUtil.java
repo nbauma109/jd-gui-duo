@@ -16,7 +16,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlo
 
 import static org.apache.bcel.Const.*;
 
-public class ByteCodeUtil {
+public final class ByteCodeUtil {
 
     private ByteCodeUtil() {
         super();
@@ -65,7 +65,7 @@ public class ByteCodeUtil {
         return code[lastOffset] & 255;
     }
 
-    protected static int computeNextOffset(byte[] code, int offset, int opcode) {
+    private static int computeNextOffset(byte[] code, int offset, int opcode) {
         switch (opcode) {
             case BIPUSH, LDC,
                  ILOAD, LLOAD, FLOAD, DLOAD, ALOAD,

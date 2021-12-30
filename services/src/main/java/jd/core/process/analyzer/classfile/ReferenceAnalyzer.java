@@ -50,7 +50,7 @@ import jd.core.model.reference.Reference;
 import jd.core.model.reference.ReferenceMap;
 import jd.core.process.analyzer.classfile.visitor.ReferenceVisitor;
 
-public class ReferenceAnalyzer
+public final class ReferenceAnalyzer
 {
     private ReferenceAnalyzer() {
     }

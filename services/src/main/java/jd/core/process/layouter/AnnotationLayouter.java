@@ -29,7 +29,7 @@ import jd.core.model.classfile.attribute.AttributeRuntimeAnnotations;
 import jd.core.model.layout.block.AnnotationsLayoutBlock;
 import jd.core.model.layout.block.LayoutBlock;
 
-public class AnnotationLayouter
+public final class AnnotationLayouter
 {
     private AnnotationLayouter() {
     }

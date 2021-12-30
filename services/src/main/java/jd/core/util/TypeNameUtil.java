@@ -19,13 +19,13 @@ package jd.core.util;
 import org.jd.core.v1.util.StringConstants;
 
 /*
- * internalPath:		basic/data/Test.class
- * internalClassName:	basic/data/Test
- * qualifiedClassName:	basic.data.Test
- * internalPackageName:	basic/data
- * packageName:			basic.data
+ * internalPath:        basic/data/Test.class
+ * internalClassName:    basic/data/Test
+ * qualifiedClassName:    basic.data.Test
+ * internalPackageName:    basic/data
+ * packageName:            basic.data
  */
-public class TypeNameUtil
+public final class TypeNameUtil
 {
     private TypeNameUtil() {
         super();

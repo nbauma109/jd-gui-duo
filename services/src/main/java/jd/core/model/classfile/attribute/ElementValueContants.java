@@ -16,7 +16,7 @@
  ******************************************************************************/
 package jd.core.model.classfile.attribute;
 
-public class ElementValueContants
+public final class ElementValueContants
 {
     private ElementValueContants() {
         super();

@@ -18,7 +18,7 @@ import java.util.List;
  * - org.fife.ui.rtextarea.Marker
  * - org.jd.gui.view.component.RoundMarkErrorStrip
  */
-public class Marker {
+public final class Marker {
 
     private Marker() {
         super();

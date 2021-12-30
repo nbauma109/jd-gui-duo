@@ -116,7 +116,7 @@ import static org.apache.bcel.Const.WIDE;
  //   12: aload_2
  //   13: ifnull +49 -> 62
  //   16: aload_2
- //   17: invokestatic 146	jd/core/process/deserializer/ClassFileDeserializer:Deserialize	(Ljava/io/DataInput;)Ljd/core/model/classfile/ClassFile;
+ //   17: invokestatic 146    jd/core/process/deserializer/ClassFileDeserializer:Deserialize    (Ljava/io/DataInput;)Ljd/core/model/classfile/ClassFile;
  //   20: astore_3
  //   21: goto +41 -> 62
  //   24: astore 4
@@ -125,7 +125,7 @@ import static org.apache.bcel.Const.WIDE;
  //   28: aload_2
  //   29: ifnull +46 -> 75
  //   32: aload_2
- //   33: invokevirtual 149	java/io/DataInputStream:close	()V
+ //   33: invokevirtual 149    java/io/DataInputStream:close    ()V
  //   36: goto +39 -> 75
  //   39: astore 6
  //   41: goto +34 -> 75
@@ -133,7 +133,7 @@ import static org.apache.bcel.Const.WIDE;
  //   46: aload_2
  //   47: ifnull +12 -> 59
  //   50: aload_2
- //   51: invokevirtual 149	java/io/DataInputStream:close	()V
+ //   51: invokevirtual 149    java/io/DataInputStream:close    ()V
  //   54: goto +5 -> 59
  //   57: astore 6
  //   59: aload 5
@@ -141,50 +141,50 @@ import static org.apache.bcel.Const.WIDE;
  //   62: aload_2
  //   63: ifnull +12 -> 75
  //   66: aload_2
- //   67: invokevirtual 149	java/io/DataInputStream:close	()V
+ //   67: invokevirtual 149    java/io/DataInputStream:close    ()V
  //   70: goto +5 -> 75
  //   73: astore 6
  //   75: aload_3
  //   76: areturn
  // Line number table:
- //   #Java source line	-> byte code offset
- //   #112	-> 0
- //   #113	-> 2
- //   #117	-> 4
- //   #118	-> 12
- //   #119	-> 16
- //   #120	-> 21
- //   #121	-> 24
- //   #123	-> 26
- //   #128	-> 28
- //   #129	-> 32
- //   #127	-> 44
- //   #128	-> 46
- //   #129	-> 50
- //   #130	-> 59
- //   #128	-> 62
- //   #129	-> 66
- //   #132	-> 75
+ //   #Java source line    -> byte code offset
+ //   #112    -> 0
+ //   #113    -> 2
+ //   #117    -> 4
+ //   #118    -> 12
+ //   #119    -> 16
+ //   #120    -> 21
+ //   #121    -> 24
+ //   #123    -> 26
+ //   #128    -> 28
+ //   #129    -> 32
+ //   #127    -> 44
+ //   #128    -> 46
+ //   #129    -> 50
+ //   #130    -> 59
+ //   #128    -> 62
+ //   #129    -> 66
+ //   #132    -> 75
  // Local variable table:
- //   start	length	slot	name	signature
- //   0	77	0	loader	Loader
- //   0	77	1	internalClassPath	String
- //   1	66	2	dis	java.io.DataInputStream
- //   3	73	3	classFile	ClassFile
- //   24	3	4	e	IOException
- //   44	16	5	localObject	Object
- //   39	1	6	localIOException1	IOException
- //   57	1	6	localIOException2	IOException
- //   73	1	6	localIOException3	IOException
+ //   start    length    slot    name    signature
+ //   0    77    0    loader    Loader
+ //   0    77    1    internalClassPath    String
+ //   1    66    2    dis    java.io.DataInputStream
+ //   3    73    3    classFile    ClassFile
+ //   24    3    4    e    IOException
+ //   44    16    5    localObject    Object
+ //   39    1    6    localIOException1    IOException
+ //   57    1    6    localIOException2    IOException
+ //   73    1    6    localIOException3    IOException
  // Exception table:
- //   from	to	target	type
- //   4	21	24	java/io/IOException
- //   32	36	39	java/io/IOException
- //   4	28	44	finally
- //   50	54	57	java/io/IOException
- //   66	70	73	java/io/IOException
+ //   from    to    target    type
+ //   4    21    24    java/io/IOException
+ //   32    36    39    java/io/IOException
+ //   4    28    44    finally
+ //   50    54    57    java/io/IOException
+ //   66    70    73    java/io/IOException
  */
-public class ByteCodeWriter {
+public final class ByteCodeWriter {
 
     public static final String DECOMPILATION_FAILED_AT_LINE = "Decompilation failed at line #";
 
@@ -225,7 +225,7 @@ public class ByteCodeWriter {
         return sb.toString();
     }
 
-    protected static void writeByteCode(String linePrefix, StringBuilder sb, ConstantPool constants, AttributeCode attributeCode) {
+    private static void writeByteCode(String linePrefix, StringBuilder sb, ConstantPool constants, AttributeCode attributeCode) {
         byte[] code = attributeCode.getCode();
         int length = code.length;
 
@@ -233,7 +233,7 @@ public class ByteCodeWriter {
         writeByteCode(linePrefix, sb, constants, code, 0, length);
     }
 
-    protected static void writeByteCode(String linePrefix, StringBuilder sb, ConstantPool constants, byte[] code, int fromOffset, int toOffset) {
+    private static void writeByteCode(String linePrefix, StringBuilder sb, ConstantPool constants, byte[] code, int fromOffset, int toOffset) {
         for (int offset=fromOffset; offset<toOffset; offset++) {
             int opcode = code[offset] & 255;
 
@@ -414,7 +414,7 @@ public class ByteCodeWriter {
         }
     }
 
-    protected static void writeLDC(StringBuilder sb, ConstantPool constants, Constant constant) {
+    private static void writeLDC(StringBuilder sb, ConstantPool constants, Constant constant) {
         switch (constant.getTag()) {
             case Const.CONSTANT_Integer:
                 sb.append(' ').append(((ConstantInteger) constant).getBytes());
@@ -465,7 +465,7 @@ public class ByteCodeWriter {
         }
     }
 
-    protected static void writeLineNumberTable(String linePrefix, StringBuilder sb, AttributeCode attributeCode) {
+    private static void writeLineNumberTable(String linePrefix, StringBuilder sb, AttributeCode attributeCode) {
         AttributeLineNumberTable lineNumberTable = attributeCode.getAttribute("LineNumberTable");
 
         if (lineNumberTable != null) {
@@ -510,7 +510,7 @@ public class ByteCodeWriter {
         return comments;
     }
 
-    protected static void writeLocalVariableTable(String linePrefix, StringBuilder sb, AttributeCode attributeCode) {
+    private static void writeLocalVariableTable(String linePrefix, StringBuilder sb, AttributeCode attributeCode) {
         AttributeLocalVariableTable localVariableTable = attributeCode.getAttribute("LocalVariableTable");
 
         if (localVariableTable != null) {
@@ -544,7 +544,7 @@ public class ByteCodeWriter {
         }
     }
 
-    protected static void writeExceptionTable(String linePrefix, StringBuilder sb, ConstantPool constants, AttributeCode attributeCode) {
+    private static void writeExceptionTable(String linePrefix, StringBuilder sb, ConstantPool constants, AttributeCode attributeCode) {
         CodeException[] codeExceptions = attributeCode.getExceptionTable();
 
         if (codeExceptions != null) {
@@ -568,7 +568,7 @@ public class ByteCodeWriter {
         }
     }
 
-    protected static final String[] OPCODE_NAMES = {
+    private static final String[] OPCODE_NAMES = {
         "nop", "aconst_null", "iconst_m1", "iconst_0", "iconst_1",
         "iconst_2", "iconst_3", "iconst_4", "iconst_5", "lconst_0",
         "lconst_1", "fconst_0", "fconst_1", "fconst_2", "dconst_0",

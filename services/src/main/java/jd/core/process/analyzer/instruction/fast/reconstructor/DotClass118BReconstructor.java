@@ -55,8 +55,8 @@ import jd.core.process.analyzer.classfile.visitor.ReplaceDupLoadVisitor;
  *   try
  *   {
  *     ternaryopstore( AssignmentInstruction(
- *         	putstatic( dupload ),
- *         	invokestatic( current class, 'class$...', nom de la classe ) ) )
+ *             putstatic( dupload ),
+ *             invokestatic( current class, 'class$...', nom de la classe ) ) )
  *   }
  *   catch (ClassNotFoundException localClassNotFoundException1)
  *   {
@@ -66,7 +66,7 @@ import jd.core.process.analyzer.classfile.visitor.ReplaceDupLoadVisitor;
  * ??? ( dupload )
  * ...
  */
-public class DotClass118BReconstructor
+public final class DotClass118BReconstructor
 {
     private DotClass118BReconstructor() {
         super();

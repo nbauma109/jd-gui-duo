@@ -36,7 +36,7 @@ import jd.core.process.analyzer.classfile.visitor.ReplaceDupLoadVisitor;
  * ...
  * ???( DupLoad )
  */
-public class DupStoreThisReconstructor
+public final class DupStoreThisReconstructor
 {
     private DupStoreThisReconstructor() {
         super();

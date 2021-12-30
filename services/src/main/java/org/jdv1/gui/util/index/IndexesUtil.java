@@ -20,7 +20,7 @@ import java.util.zip.ZipEntry;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class IndexesUtil {
+public final class IndexesUtil {
 
     private IndexesUtil() {
         super();

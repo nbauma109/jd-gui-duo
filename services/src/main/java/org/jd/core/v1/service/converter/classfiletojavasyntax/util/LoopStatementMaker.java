@@ -54,13 +54,13 @@ import static org.jd.core.v1.model.javasyntax.statement.ContinueStatement.CONTIN
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_ITERABLE;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 
-public class LoopStatementMaker {
+public final class LoopStatementMaker {
 
     private LoopStatementMaker() {
         super();
     }
 
-    protected static final RemoveLastContinueStatementVisitor REMOVE_LAST_CONTINUE_STATEMENT_VISITOR = new RemoveLastContinueStatementVisitor();
+    private static final RemoveLastContinueStatementVisitor REMOVE_LAST_CONTINUE_STATEMENT_VISITOR = new RemoveLastContinueStatementVisitor();
 
     public static Statement makeLoop(
             int majorVersion, Map<String, BaseType> typeBounds, LocalVariableMaker localVariableMaker,
@@ -77,7 +77,7 @@ public class LoopStatementMaker {
         return makeLabels(loopBasicBlock.getIndex(), continueOffset, breakOffset, loop, jumps);
     }
 
-    protected static Statement makeLoop(
+    private static Statement makeLoop(
             int majorVersion, Map<String, BaseType> typeBounds, LocalVariableMaker localVariableMaker,
             BasicBlock loopBasicBlock, Statements statements, Expression condition, Statements subStatements) {
         boolean forEachSupported = majorVersion >= MAJOR_1_5;
@@ -178,7 +178,7 @@ public class LoopStatementMaker {
         return makeLabels(loopBasicBlock.getIndex(), continueOffset, breakOffset, loop, jumps);
     }
 
-    protected static Statement makeLoop(LocalVariableMaker localVariableMaker, BasicBlock loopBasicBlock, Statements statements, Statements subStatements) {
+    private static Statement makeLoop(LocalVariableMaker localVariableMaker, BasicBlock loopBasicBlock, Statements statements, Statements subStatements) {
         int subStatementsSize = subStatements.size();
 
         if (subStatementsSize > 0 && subStatements.getLast() == CONTINUE) {
@@ -245,7 +245,7 @@ public class LoopStatementMaker {
         return makeLabels(loopBasicBlock.getIndex(), continueOffset, breakOffset, loop, jumps);
     }
 
-    protected static BaseExpression extractInit(Statements statements, int lineNumber) {
+    private static BaseExpression extractInit(Statements statements, int lineNumber) {
         if (lineNumber > 0) {
             switch (statements.size()) {
                 case 0:
@@ -303,7 +303,7 @@ public class LoopStatementMaker {
         return null;
     }
 
-    protected static Expressions extractUpdate(Statements statements, int firstLineNumber) {
+    private static Expressions extractUpdate(Statements statements, int firstLineNumber) {
         Expressions update = new Expressions();
         ListIterator<Statement> iterator = statements.listIterator(statements.size());
 
@@ -328,7 +328,7 @@ public class LoopStatementMaker {
         return update;
     }
 
-    protected static Statement createForStatementWithoutLineNumber(
+    private static Statement createForStatementWithoutLineNumber(
             LocalVariableMaker localVariableMaker, BasicBlock basicBlock, Statements statements, Expression condition, Statements subStatements) {
 
         if (!statements.isEmpty()) {
@@ -368,7 +368,7 @@ public class LoopStatementMaker {
         return new WhileStatement(condition, subStatements);
     }
 
-    protected static Statement makeForEachArray(
+    private static Statement makeForEachArray(
             Map<String, BaseType> typeBounds, LocalVariableMaker localVariableMaker, Statements statements,
             Expression condition, Statements subStatements) {
         if (condition == null) {
@@ -507,7 +507,7 @@ public class LoopStatementMaker {
         return new ClassFileForEachStatement(item, array, subStatements);
     }
 
-    protected static Statement makeForEachList(
+    private static Statement makeForEachList(
             Map<String, BaseType> typeBounds, LocalVariableMaker localVariableMaker, Statements statements,
             Expression condition, Statements subStatements) {
         if (condition == null) {
@@ -647,7 +647,7 @@ public class LoopStatementMaker {
         return new ClassFileForEachStatement(item, list, subStatements);
     }
 
-    protected static Statement makeLabels(int loopIndex, int continueOffset, int breakOffset, Statement loop, Statements jumps) {
+    private static Statement makeLabels(int loopIndex, int continueOffset, int breakOffset, Statement loop, Statements jumps) {
         if (!jumps.isEmpty()) {
             Iterator<Statement> iterator = jumps.iterator();
             String label = "label" + loopIndex;
@@ -689,7 +689,7 @@ public class LoopStatementMaker {
         return loop;
     }
 
-    protected static ClassFileForStatement newClassFileForStatement(
+    private static ClassFileForStatement newClassFileForStatement(
             LocalVariableMaker localVariableMaker, int fromOffset, int toOffset, BaseExpression init,
             Expression condition, BaseExpression update, BaseStatement statements) {
         if (init != null) {

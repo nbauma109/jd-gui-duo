@@ -45,7 +45,7 @@ import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.B
 import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_THROW;
 import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_TRY_DECLARATION;
 
-public class ControlFlowGraphLoopReducer {
+public final class ControlFlowGraphLoopReducer {
     private ControlFlowGraphLoopReducer() {
     }
 
@@ -241,7 +241,7 @@ public class ControlFlowGraphLoopReducer {
         return loops;
     }
 
-    protected static BitSet searchLoopMemberIndexes(int length, BitSet memberIndexes, BasicBlock current, BasicBlock start) {
+    private static BitSet searchLoopMemberIndexes(int length, BitSet memberIndexes, BasicBlock current, BasicBlock start) {
         BitSet visited = new BitSet(length);
 
         recursiveBackwardSearchLoopMemberIndexes(visited, current, start);
@@ -253,7 +253,7 @@ public class ControlFlowGraphLoopReducer {
         return memberIndexes;
     }
 
-    protected static void recursiveBackwardSearchLoopMemberIndexes(BitSet visited, BasicBlock current, BasicBlock start) {
+    private static void recursiveBackwardSearchLoopMemberIndexes(BitSet visited, BasicBlock current, BasicBlock start) {
         if (!visited.get(current.getIndex())) {
             visited.set(current.getIndex());
 
@@ -265,7 +265,7 @@ public class ControlFlowGraphLoopReducer {
         }
     }
 
-    protected static Loop makeLoop(List<BasicBlock> list, BasicBlock start, BitSet searchZoneIndexes, BitSet memberIndexes) {
+    private static Loop makeLoop(List<BasicBlock> list, BasicBlock start, BitSet searchZoneIndexes, BitSet memberIndexes) {
         int length = list.size();
         int maxOffset = -1;
 
@@ -430,7 +430,7 @@ public class ControlFlowGraphLoopReducer {
         return maxOffset;
     }
 
-    protected static BasicBlock findPrevBB(BasicBlock basicBlock) {
+    private static BasicBlock findPrevBB(BasicBlock basicBlock) {
         BasicBlock lastBB = null;
         BasicBlock previousBB = null;
 
@@ -469,7 +469,7 @@ public class ControlFlowGraphLoopReducer {
         return offset;
     }
 
-    protected static void recursiveForwardSearchLoopMemberIndexes(BitSet visited, BitSet searchZoneIndexes, BasicBlock current, BasicBlock target) {
+    private static void recursiveForwardSearchLoopMemberIndexes(BitSet visited, BitSet searchZoneIndexes, BasicBlock current, BasicBlock target) {
         if (!current.matchType(GROUP_END) && !visited.get(current.getIndex()) && searchZoneIndexes.get(current.getIndex())) {
             visited.set(current.getIndex());
 
@@ -492,7 +492,7 @@ public class ControlFlowGraphLoopReducer {
         }
     }
 
-    protected static void recursiveForwardSearchLoopMemberIndexes(BitSet visited, BitSet searchZoneIndexes, BasicBlock current, int maxOffset) {
+    private static void recursiveForwardSearchLoopMemberIndexes(BitSet visited, BitSet searchZoneIndexes, BasicBlock current, int maxOffset) {
         if (!current.matchType(TYPE_END|TYPE_LOOP_START|TYPE_LOOP_CONTINUE|TYPE_LOOP_END|TYPE_SWITCH_BREAK) &&
             !visited.get(current.getIndex()) &&
             searchZoneIndexes.get(current.getIndex()) &&
@@ -517,7 +517,7 @@ public class ControlFlowGraphLoopReducer {
         }
     }
 
-    protected static boolean recursiveForwardSearchLastLoopMemberIndexes(Set<BasicBlock> members, BitSet searchZoneIndexes, Set<BasicBlock> set, BasicBlock current, BasicBlock end) {
+    private static boolean recursiveForwardSearchLastLoopMemberIndexes(Set<BasicBlock> members, BitSet searchZoneIndexes, Set<BasicBlock> set, BasicBlock current, BasicBlock end) {
         if (current == end || members.contains(current) || set.contains(current)) {
             return true;
         }
@@ -554,7 +554,7 @@ public class ControlFlowGraphLoopReducer {
         return false;
     }
 
-    protected static boolean predecessorsInSearchZone(BasicBlock basicBlock, BitSet searchZoneIndexes) {
+    private static boolean predecessorsInSearchZone(BasicBlock basicBlock, BitSet searchZoneIndexes) {
         Set<BasicBlock> predecessors = basicBlock.getPredecessors();
 
         for (BasicBlock predecessor : predecessors) {
@@ -566,11 +566,11 @@ public class ControlFlowGraphLoopReducer {
         return true;
     }
 
-    protected static boolean inSearchZone(BasicBlock basicBlock, BitSet searchZoneIndexes) {
+    private static boolean inSearchZone(BasicBlock basicBlock, BitSet searchZoneIndexes) {
         return basicBlock.matchType(TYPE_END|TYPE_RETURN|TYPE_RET|TYPE_LOOP_END|TYPE_LOOP_START|TYPE_INFINITE_GOTO|TYPE_JUMP) || searchZoneIndexes.get(basicBlock.getIndex());
     }
 
-    protected static BasicBlock recheckEndBlock(Set<BasicBlock> members, BasicBlock end) {
+    private static BasicBlock recheckEndBlock(Set<BasicBlock> members, BasicBlock end) {
         boolean flag;
         BasicBlock newEnd;
         do {
@@ -619,7 +619,7 @@ public class ControlFlowGraphLoopReducer {
         return end;
     }
 
-    protected static BasicBlock reduceLoop(Loop loop) {
+    private static BasicBlock reduceLoop(Loop loop) {
         BasicBlock start = loop.getStart();
         Set<BasicBlock> members = loop.getMembers();
         BasicBlock end = loop.getEnd();
@@ -710,7 +710,7 @@ public class ControlFlowGraphLoopReducer {
         return loopBB;
     }
 
-    protected static BasicBlock newJumpBasicBlock(BasicBlock bb, BasicBlock target) {
+    private static BasicBlock newJumpBasicBlock(BasicBlock bb, BasicBlock target) {
         Set<BasicBlock> predecessors = new HashSet<>();
 
         predecessors.add(bb);

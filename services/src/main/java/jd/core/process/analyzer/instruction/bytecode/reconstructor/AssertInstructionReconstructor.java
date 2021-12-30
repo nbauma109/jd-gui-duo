@@ -42,7 +42,7 @@ import jd.core.model.instruction.bytecode.instruction.InvokeNew;
  *  athrow( newinvoke( classindex="AssertionError", args=["msg"] ));
  * ...
  */
-public class AssertInstructionReconstructor
+public final class AssertInstructionReconstructor
 {
     private AssertInstructionReconstructor() {
         super();

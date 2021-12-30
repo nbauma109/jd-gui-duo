@@ -28,7 +28,7 @@ import org.jd.core.v1.model.javafragment.TokensFragment;
 
 import java.util.List;
 
-public class JavaFragmentFactory {
+public final class JavaFragmentFactory {
 
     private JavaFragmentFactory() {
         super();

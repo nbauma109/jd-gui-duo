@@ -36,7 +36,7 @@ import jd.core.model.instruction.bytecode.instruction.PutField;
 import jd.core.process.analyzer.classfile.visitor.CompareInstructionVisitor;
 import jd.core.process.analyzer.classfile.visitor.SearchInstructionByOpcodeVisitor;
 
-public class InitInstanceFieldsReconstructor
+public final class InitInstanceFieldsReconstructor
 {
     private InitInstanceFieldsReconstructor() {
         super();
@@ -165,7 +165,7 @@ public class InitInstanceFieldsReconstructor
         }
 
         // Filter list
-        CompareInstructionVisitor visitor =	new CompareInstructionVisitor();
+        CompareInstructionVisitor visitor =    new CompareInstructionVisitor();
 
         while (methodIndex > 0)
         {

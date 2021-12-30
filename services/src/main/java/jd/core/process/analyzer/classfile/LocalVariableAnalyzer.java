@@ -59,7 +59,7 @@ import jd.core.process.analyzer.variable.DefaultVariableNameGenerator;
 import jd.core.util.SignatureUtil;
 import jd.core.util.UtilConstants;
 
-public class LocalVariableAnalyzer
+public final class LocalVariableAnalyzer
 {
     private LocalVariableAnalyzer() {
     }
@@ -653,32 +653,32 @@ public class LocalVariableAnalyzer
             a = 2;
         System.out.println(a);
      */
-    //	private static void MergeLocalVariables(LocalVariables localVariables)
-    //	{
-    //		for (int i=localVariables.size()-1; i>0; --i)
-    //		{
-    //			LocalVariable lv1 = localVariables.getLocalVariableAt(i);
-    //			for (int j=i-1; j>=0; --j)
-    //			{
-    //				LocalVariable lv2 = localVariables.getLocalVariableAt(j);
-    //				if ((lv1.index == lv2.index) &&
-    //					(lv1.signatureIndex == lv2.signatureIndex) &&
-    //					(lv1.nameIndex == lv2.nameIndex))
-    //				{
-    //					localVariables.remove(i);
-    //					lv2.updateRange(lv1.startPc);
-    //					lv2.updateRange(lv1.startPc+lv1.length-1);
-    //					break;
-    //				}
-    //			}
-    //		}
-    //	}
+    //    private static void MergeLocalVariables(LocalVariables localVariables)
+    //    {
+    //        for (int i=localVariables.size()-1; i>0; --i)
+    //        {
+    //            LocalVariable lv1 = localVariables.getLocalVariableAt(i);
+    //            for (int j=i-1; j>=0; --j)
+    //            {
+    //                LocalVariable lv2 = localVariables.getLocalVariableAt(j);
+    //                if ((lv1.index == lv2.index) &&
+    //                    (lv1.signatureIndex == lv2.signatureIndex) &&
+    //                    (lv1.nameIndex == lv2.nameIndex))
+    //                {
+    //                    localVariables.remove(i);
+    //                    lv2.updateRange(lv1.startPc);
+    //                    lv2.updateRange(lv1.startPc+lv1.length-1);
+    //                    break;
+    //                }
+    //            }
+    //        }
+    //    }
 
     // Create new local variables, set range and type, update attribute
     // 'exception'
     /**
      * Strategie :
-     * 	- Recherche de tous les instructions '?store' et '?load'
+     *     - Recherche de tous les instructions '?store' et '?load'
      *  - Determiner le type de la viariable
      *  - Si la variable n'est pas encore definie, ajouter une entrée dans la
      *    Liste

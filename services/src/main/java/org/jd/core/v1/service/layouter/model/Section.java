@@ -449,7 +449,7 @@ public class Section {
             throw new UnsupportedOperationException();
         }
 
-        private class Itr implements Iterator<DefaultList<FlexibleFragment>> {
+        private final class Itr implements Iterator<DefaultList<FlexibleFragment>> {
             private Itr() {
                 int length = elements.length;
 

@@ -62,7 +62,7 @@ import jd.core.util.SignatureUtil;
  * Elimine les doubles casts et ajoute des casts devant les constantes
  * numeriques si necessaire.
  */
-public class CheckCastAndConvertInstructionVisitor
+public final class CheckCastAndConvertInstructionVisitor
 {
     private CheckCastAndConvertInstructionVisitor() {
         super();

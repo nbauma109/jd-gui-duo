@@ -30,7 +30,7 @@ import jd.core.model.instruction.bytecode.instruction.MonitorEnter;
 import jd.core.model.instruction.fast.FastConstants;
 import jd.core.model.instruction.fast.instruction.FastSynchronized;
 
-public class EmptySynchronizedBlockReconstructor
+public final class EmptySynchronizedBlockReconstructor
 {
     private EmptySynchronizedBlockReconstructor() {
         super();

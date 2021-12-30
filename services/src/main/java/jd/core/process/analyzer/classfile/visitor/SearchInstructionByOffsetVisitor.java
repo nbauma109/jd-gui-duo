@@ -57,7 +57,7 @@ import jd.core.model.instruction.bytecode.instruction.UnaryOperatorInstruction;
 /*
  * utilisé par TernaryOpReconstructor
  */
-public class SearchInstructionByOffsetVisitor
+public final class SearchInstructionByOffsetVisitor
 {
     private SearchInstructionByOffsetVisitor() {
         super();

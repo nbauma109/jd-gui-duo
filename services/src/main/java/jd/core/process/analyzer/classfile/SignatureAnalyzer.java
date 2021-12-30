@@ -20,7 +20,7 @@ import jd.core.model.reference.ReferenceMap;
 import jd.core.util.CharArrayUtil;
 import jd.core.util.SignatureFormatException;
 
-public class SignatureAnalyzer
+public final class SignatureAnalyzer
 {
     private SignatureAnalyzer() {
         super();

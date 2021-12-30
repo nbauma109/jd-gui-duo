@@ -31,7 +31,7 @@ import jd.core.model.instruction.bytecode.instruction.Pop;
 import jd.core.model.instruction.bytecode.instruction.PutField;
 import jd.core.model.instruction.bytecode.instruction.TernaryOperator;
 
-public class MinLineNumberVisitor
+public final class MinLineNumberVisitor
 {
     private MinLineNumberVisitor() {
         super();

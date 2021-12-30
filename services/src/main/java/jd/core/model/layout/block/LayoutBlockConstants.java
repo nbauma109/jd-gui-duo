@@ -16,7 +16,7 @@
  ******************************************************************************/
 package jd.core.model.layout.block;
 
-public class LayoutBlockConstants
+public final class LayoutBlockConstants
 {
     private LayoutBlockConstants() {
         super();

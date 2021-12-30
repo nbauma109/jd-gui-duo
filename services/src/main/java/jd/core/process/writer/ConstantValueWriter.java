@@ -32,7 +32,7 @@ import jd.core.model.reference.ReferenceMap;
 import jd.core.printer.Printer;
 import jd.core.util.StringUtil;
 
-public class ConstantValueWriter
+public final class ConstantValueWriter
 {
     private ConstantValueWriter() {
         super();

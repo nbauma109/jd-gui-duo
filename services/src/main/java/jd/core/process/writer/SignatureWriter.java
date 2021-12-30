@@ -33,7 +33,7 @@ import jd.core.util.CharArrayUtil;
 import jd.core.util.SignatureFormatException;
 import jd.core.util.SignatureUtil;
 
-public class SignatureWriter
+public final class SignatureWriter
 {
     private SignatureWriter() {
     }

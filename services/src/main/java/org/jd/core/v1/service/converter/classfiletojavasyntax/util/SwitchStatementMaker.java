@@ -29,13 +29,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class SwitchStatementMaker {
+public final class SwitchStatementMaker {
 
     private SwitchStatementMaker() {
         super();
     }
 
-    protected static final Integer MINUS_ONE = Integer.valueOf(-1);
+    private static final Integer MINUS_ONE = Integer.valueOf(-1);
 
     public static void makeSwitchString(LocalVariableMaker localVariableMaker, Statements statements, SwitchStatement switchStatement) {
         int size = statements.size();
@@ -192,7 +192,7 @@ public class SwitchStatementMaker {
         }
     }
 
-    protected static Iterator<Statement> searchSwitchMap(FieldReferenceExpression fre, Iterator<Statement> iterator) {
+    private static Iterator<Statement> searchSwitchMap(FieldReferenceExpression fre, Iterator<Statement> iterator) {
         String name = fre.getName();
 
         while (iterator.hasNext()) {
@@ -206,7 +206,7 @@ public class SwitchStatementMaker {
         return iterator;
     }
 
-    protected static void updateSwitchStatement(SwitchStatement switchStatement, Iterator<Statement> iterator) {
+    private static void updateSwitchStatement(SwitchStatement switchStatement, Iterator<Statement> iterator) {
         // Create map<synthetic index -> enum name>
         Map<Integer, String> map = new HashMap<>();
 

@@ -16,7 +16,7 @@
  ******************************************************************************/
 package jd.core.util;
 
-public class StringUtil
+public final class StringUtil
 {
     private StringUtil() {
         super();

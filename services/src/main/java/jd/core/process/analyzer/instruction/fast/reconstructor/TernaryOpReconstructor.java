@@ -35,7 +35,7 @@ import jd.core.process.analyzer.instruction.fast.visitor.ReplaceInstructionVisit
  *    offset) TernaryOpStore
  *  offset+1) Goto
  */
-public class TernaryOpReconstructor
+public final class TernaryOpReconstructor
 {
     private TernaryOpReconstructor() {
         super();

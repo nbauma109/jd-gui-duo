@@ -24,13 +24,13 @@ import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.Method;
 
 /*
- * internalPath:		basic/data/Test.class
- * internalClassName:	basic/data/Test
- * qualifiedClassName:	basic.data.Test
- * internalPackageName:	basic/data
- * packageName:			basic.data
+ * internalPath:        basic/data/Test.class
+ * internalClassName:    basic/data/Test
+ * qualifiedClassName:    basic.data.Test
+ * internalPackageName:    basic/data
+ * packageName:            basic.data
  */
-public class ClassFileUtil
+public final class ClassFileUtil
 {
     private ClassFileUtil() {
         super();

@@ -57,7 +57,7 @@ import jd.core.process.analyzer.classfile.visitor.SearchDupLoadInstructionVisito
  *  - a = b = c;
  *  - b = c; ...; a = b;
  */
-public class AssignmentInstructionReconstructor
+public final class AssignmentInstructionReconstructor
 {
     private AssignmentInstructionReconstructor() {
         super();
@@ -156,7 +156,7 @@ public class AssignmentInstructionReconstructor
                     // Mise a jour de toutes les instructions TernaryOpStore
                     // pointant vers cette instruction d'assignation.
                     // Explication:
-                    //	ternaryOp2ndValueOffset est initialisée avec l'offset de
+                    //    ternaryOp2ndValueOffset est initialisée avec l'offset de
                     //  la derniere instruction poussant une valeur sur la pile.
                     //  Dans le cas d'une instruction d'assignation contenue
                     //  dans un operateur ternaire, ternaryOp2ndValueOffset est

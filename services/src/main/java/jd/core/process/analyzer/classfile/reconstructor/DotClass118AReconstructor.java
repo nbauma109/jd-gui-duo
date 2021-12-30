@@ -61,7 +61,7 @@ import jd.core.util.SignatureUtil;
  *  ??? ( dupload )
  * ...
  */
-public class DotClass118AReconstructor
+public final class DotClass118AReconstructor
 {
     private DotClass118AReconstructor() {
         super();
@@ -236,8 +236,8 @@ public class DotClass118AReconstructor
                 if (SignatureUtil.isObjectSignature(signatureWithoutDimension))
                 {
                     //  8: iconst_0
-                    //  9: anewarray 62	java/lang/String
-                    //  12: invokevirtual 64	java/lang/Object:getClass	()Ljava/lang/Class;
+                    //  9: anewarray 62    java/lang/String
+                    //  12: invokevirtual 64    java/lang/Object:getClass    ()Ljava/lang/Class;
                     String tmp = signatureWithoutDimension.replace(
                             StringConstants.PACKAGE_SEPARATOR,
                             StringConstants.INTERNAL_PACKAGE_SEPARATOR);
@@ -258,7 +258,7 @@ public class DotClass118AReconstructor
                 {
                     //  8: iconst_0
                     //  9: newarray byte
-                    //  11: invokevirtual 62	java/lang/Object:getClass	()Ljava/lang/Class;
+                    //  11: invokevirtual 62    java/lang/Object:getClass    ()Ljava/lang/Class;
                     newArray = new NewArray(
                         Const.NEWARRAY, ii.getOffset(), ii.getLineNumber(),
                         SignatureUtil.getTypeFromSignature(signatureWithoutDimension),

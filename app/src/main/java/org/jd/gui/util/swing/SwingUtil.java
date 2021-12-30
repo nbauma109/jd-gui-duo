@@ -19,7 +19,7 @@ import javax.swing.SwingUtilities;
  * See:
  * https://www.ailis.de/~k/archives/67-Workaround-for-borderless-Java-Swing-menus-on-Linux.html
  */
-public class SwingUtil {
+public final class SwingUtil {
 
     private SwingUtil() {
     }

@@ -70,7 +70,7 @@ import jd.core.model.instruction.fast.instruction.FastDeclaration;
  * --> Les instructions d'initialisation et les champs ne sont pas classes dans le même ordre.
  * --> Un tableau local est utilise.
  */
-public class InitDexEnumFieldsReconstructor
+public final class InitDexEnumFieldsReconstructor
 {
     private InitDexEnumFieldsReconstructor() {
         super();

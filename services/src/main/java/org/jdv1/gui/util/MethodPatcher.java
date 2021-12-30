@@ -13,7 +13,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MethodPatcher {
+public final class MethodPatcher {
 
     private MethodPatcher() {
         super();

@@ -39,7 +39,7 @@ import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
  * 41: ...
  *
  */
-public class IfGotoToIfReconstructor
+public final class IfGotoToIfReconstructor
 {
     private IfGotoToIfReconstructor() {
         super();

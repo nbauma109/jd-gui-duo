@@ -30,7 +30,7 @@ import jd.core.model.layout.block.LayoutBlock;
 import jd.core.util.CharArrayUtil;
 import jd.core.util.SignatureUtil;
 
-public class SignatureLayouter
+public final class SignatureLayouter
 {
     private SignatureLayouter() {
         super();

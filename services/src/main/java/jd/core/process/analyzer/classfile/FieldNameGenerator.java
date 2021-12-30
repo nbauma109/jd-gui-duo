@@ -20,7 +20,7 @@ import org.jd.core.v1.util.StringConstants;
 
 import jd.core.util.CharArrayUtil;
 
-public class FieldNameGenerator
+public final class FieldNameGenerator
 {
     private FieldNameGenerator() {
         super();

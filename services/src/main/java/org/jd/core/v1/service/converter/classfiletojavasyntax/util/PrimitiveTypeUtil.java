@@ -46,7 +46,7 @@ import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_LONG;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_SHORT;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_VOID;
 
-public class PrimitiveTypeUtil {
+public final class PrimitiveTypeUtil {
 
     private PrimitiveTypeUtil() {
         super();

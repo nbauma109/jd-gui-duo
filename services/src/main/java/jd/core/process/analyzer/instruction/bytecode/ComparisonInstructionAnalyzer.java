@@ -34,7 +34,7 @@ import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
 /**
  * Aggrege les instructions 'if'
  */
-public class ComparisonInstructionAnalyzer
+public final class ComparisonInstructionAnalyzer
 {
     private ComparisonInstructionAnalyzer() {
         super();
@@ -363,7 +363,7 @@ public class ComparisonInstructionAnalyzer
         ComplexConditionalBranchInstruction cbl =
             assembleAndCreateIfInstructions(branchInstructions, lastBi);
 
-        // Affectation des comparaisons	& des operateurs
+        // Affectation des comparaisons    & des operateurs
         setOperator(cbl, lastBi, false);
 
         return cbl;
@@ -782,8 +782,8 @@ public class ComparisonInstructionAnalyzer
             inverseComparison(to.getValue1());
             inverseComparison(to.getValue2());
             break;
-//		default:
-//			System.out.println("debug");
+//        default:
+//            System.out.println("debug");
         }
     }
 

@@ -41,7 +41,7 @@ import jd.core.process.analyzer.util.ReconstructorUtil;
  * ...
  * ???( DupLoad )
  */
-public class PostIncReconstructor
+public final class PostIncReconstructor
 {
     private PostIncReconstructor() {
         super();

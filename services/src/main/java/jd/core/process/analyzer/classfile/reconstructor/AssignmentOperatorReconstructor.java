@@ -49,7 +49,7 @@ import jd.core.process.analyzer.classfile.visitor.CompareInstructionVisitor;
  *    ArrayStore(arrayref, indexref,
  *               BinaryOperator(ArrayLoad(arrayref, indexref), ...))
  */
-public class AssignmentOperatorReconstructor
+public final class AssignmentOperatorReconstructor
 {
     private AssignmentOperatorReconstructor() {
         super();

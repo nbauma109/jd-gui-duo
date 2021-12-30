@@ -23,13 +23,13 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 import java.util.Collections;
 import java.util.ListIterator;
 
-public class NewArrayMaker {
+public final class NewArrayMaker {
 
     private NewArrayMaker() {
         super();
     }
 
-    protected static final ArrayVariableInitializer EMPTY_ARRAY = new ArrayVariableInitializer(PrimitiveType.TYPE_VOID);
+    private static final ArrayVariableInitializer EMPTY_ARRAY = new ArrayVariableInitializer(PrimitiveType.TYPE_VOID);
 
     public static Expression make(Statements statements, Expression newArray) {
         if (! statements.isEmpty()) {
@@ -43,7 +43,7 @@ public class NewArrayMaker {
         return newArray;
     }
 
-    protected static ArrayVariableInitializer createVariableInitializer(ListIterator<Statement> li, Expression newArray) {
+    private static ArrayVariableInitializer createVariableInitializer(ListIterator<Statement> li, Expression newArray) {
         Statement statement = li.previous();
 
         li.remove();

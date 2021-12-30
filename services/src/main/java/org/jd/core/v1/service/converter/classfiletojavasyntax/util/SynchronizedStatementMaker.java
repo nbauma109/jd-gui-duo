@@ -16,7 +16,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariabl
 
 import java.util.Iterator;
 
-public class SynchronizedStatementMaker {
+public final class SynchronizedStatementMaker {
     private SynchronizedStatementMaker() {
     }
 

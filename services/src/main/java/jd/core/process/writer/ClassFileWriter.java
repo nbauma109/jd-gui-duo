@@ -81,7 +81,7 @@ import jd.core.util.SignatureUtil;
 import jd.core.util.StringUtil;
 import jd.core.util.TypeNameUtil;
 
-public class ClassFileWriter
+public final class ClassFileWriter
 {
     private static final String BREAK = "break";
 
@@ -631,8 +631,8 @@ public class ClassFileWriter
             TypeNameUtil.internalTypeNameToQualifiedTypeName(
                 reference.getInternalName()));
 
-//		this.printer.print(':');
-//		this.printer.print(reference.getCounter());
+//        this.printer.print(':');
+//        this.printer.print(reference.getCounter());
         this.printer.print(';');
     }
 
@@ -1833,14 +1833,14 @@ public class ClassFileWriter
 
     private void writeByteCode(ByteCodeLayoutBlock bclb)
     {
-//		this.printer.debugStartOfStatementsBlockLayoutBlock();
-//		this.printer.startOfError();
-//		this.printer.print("byte-code");
-//		this.printer.endOfError();
-//		endOfLine();
-//		this.printer.startOfLine(searchFirstLineNumber());
-//		this.printer.debugEndOfStatementsBlockLayoutBlock(
-//			bclb.minimalLineCount, bclb.lineCount, bclb.maximalLineCount);
+//        this.printer.debugStartOfStatementsBlockLayoutBlock();
+//        this.printer.startOfError();
+//        this.printer.print("byte-code");
+//        this.printer.endOfError();
+//        endOfLine();
+//        this.printer.startOfLine(searchFirstLineNumber());
+//        this.printer.debugEndOfStatementsBlockLayoutBlock(
+//            bclb.minimalLineCount, bclb.lineCount, bclb.maximalLineCount);
 
         ByteCodeWriter.write(
             this.loader, this.printer, this.referenceMap,

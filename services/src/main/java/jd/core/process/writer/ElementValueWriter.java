@@ -31,7 +31,7 @@ import jd.core.model.reference.ReferenceMap;
 import jd.core.printer.Printer;
 import jd.core.util.SignatureUtil;
 
-public class ElementValueWriter
+public final class ElementValueWriter
 {
     private ElementValueWriter() {
         super();

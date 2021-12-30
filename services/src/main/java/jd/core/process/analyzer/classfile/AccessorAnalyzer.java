@@ -47,7 +47,7 @@ import jd.core.util.SignatureUtil;
 /*
  * Recherche des accesseurs
  */
-public class AccessorAnalyzer
+public final class AccessorAnalyzer
 {
     private AccessorAnalyzer() {
         super();
@@ -88,7 +88,7 @@ public class AccessorAnalyzer
      *   static AuthenticatedSubject access$000()
      *   {
      *     Byte code:
-     *       getstatic 3	com/bea/security/providers/xacml/entitlement/function/EntitlementFunctionLibrary:kernelId	Lweblogic/security/acl/internal/AuthenticatedSubject;
+     *       getstatic 3    com/bea/security/providers/xacml/entitlement/function/EntitlementFunctionLibrary:kernelId    Lweblogic/security/acl/internal/AuthenticatedSubject;
      *       areturn
      *   }
      */
@@ -146,7 +146,7 @@ public class AccessorAnalyzer
      *   {
      *     Byte code:
      *       iload_0
-     *       putstatic 11 basic/data/TestInnerClass:test0	I
+     *       putstatic 11 basic/data/TestInnerClass:test0    I
      *       return
      *   }
      */
@@ -206,7 +206,7 @@ public class AccessorAnalyzer
      *   {
      *     Byte code:
      *       aload_0
-     *       getfield 12 basic/data/TestInnerClass:test	I
+     *       getfield 12 basic/data/TestInnerClass:test    I
      *       ireturn
      *   }
      */
@@ -268,7 +268,7 @@ public class AccessorAnalyzer
      *     Byte code:
      *       aload_0
      *       iload_1
-     *       putfield 13 basic/data/TestInnerClass:test	I
+     *       putfield 13 basic/data/TestInnerClass:test    I
      *       return
      *   }
      */
@@ -357,7 +357,7 @@ public class AccessorAnalyzer
      *         aload_2
      *         aload_3
      *         aload 4
-     *         invokevirtual 2	com/bea/security/providers/xacml/entitlement/function/EntitlementFunctionLibrary:debugEval	(Lcom/bea/security/xacml/EvaluationCtx;Ljava/net/URI;Lcom/bea/common/security/xacml/attr/Bag;[Lcom/bea/common/security/xacml/attr/Bag;)V
+     *         invokevirtual 2    com/bea/security/providers/xacml/entitlement/function/EntitlementFunctionLibrary:debugEval    (Lcom/bea/security/xacml/EvaluationCtx;Ljava/net/URI;Lcom/bea/common/security/xacml/attr/Bag;[Lcom/bea/common/security/xacml/attr/Bag;)V
      *         return
      *     }
      */

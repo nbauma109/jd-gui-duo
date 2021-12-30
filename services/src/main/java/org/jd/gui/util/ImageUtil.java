@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import javax.swing.ImageIcon;
 
-public class ImageUtil {
+public final class ImageUtil {
 
     private ImageUtil() {
     }

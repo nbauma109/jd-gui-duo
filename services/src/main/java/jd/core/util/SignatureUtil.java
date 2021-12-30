@@ -24,7 +24,7 @@ import java.util.List;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 
-public class SignatureUtil
+public final class SignatureUtil
 {
     /*
      * Keep letters in order for binary search
@@ -113,8 +113,8 @@ public class SignatureUtil
             //default:
                 // DEBUG
                 //new Throwable(
-                //	"SignatureWriter.writeSignature: invalid signature '" +
-                //	String.valueOf(caSignature) + "'").printStackTrace();
+                //    "SignatureWriter.writeSignature: invalid signature '" +
+                //    String.valueOf(caSignature) + "'").printStackTrace();
                 // DEBUG
             }
 

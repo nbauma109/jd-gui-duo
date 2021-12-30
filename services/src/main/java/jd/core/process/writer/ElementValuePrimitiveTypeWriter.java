@@ -26,7 +26,7 @@ import jd.core.model.reference.ReferenceMap;
 import jd.core.printer.Printer;
 import jd.core.util.StringUtil;
 
-public class ElementValuePrimitiveTypeWriter
+public final class ElementValuePrimitiveTypeWriter
 {
     private ElementValuePrimitiveTypeWriter() {
         super();

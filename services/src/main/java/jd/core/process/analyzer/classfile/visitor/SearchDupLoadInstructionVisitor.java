@@ -59,7 +59,7 @@ import jd.core.model.instruction.bytecode.instruction.UnaryOperatorInstruction;
 /*
  * utilisé par TernaryOpReconstructor
  */
-public class SearchDupLoadInstructionVisitor
+public final class SearchDupLoadInstructionVisitor
 {
     private SearchDupLoadInstructionVisitor() {
         super();

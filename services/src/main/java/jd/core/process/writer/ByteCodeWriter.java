@@ -40,7 +40,7 @@ import jd.core.model.reference.ReferenceMap;
 import jd.core.printer.Printer;
 import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
 
-public class ByteCodeWriter
+public final class ByteCodeWriter
 {
     public static final String BYTE_CODE = "// Byte code:";
 

@@ -20,7 +20,7 @@ import org.jd.core.v1.util.StringConstants;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
-public class StringConcatenationUtil {
+public final class StringConcatenationUtil {
 
     private StringConcatenationUtil() {
         super();

@@ -42,7 +42,7 @@ import jd.core.process.analyzer.util.ReconstructorUtil;
  * ...
  * ??? DupLoad
  */
-public class NewInstructionReconstructor extends NewInstructionReconstructorBase
+public final class NewInstructionReconstructor extends NewInstructionReconstructorBase
 {
     private NewInstructionReconstructor() {
         super();

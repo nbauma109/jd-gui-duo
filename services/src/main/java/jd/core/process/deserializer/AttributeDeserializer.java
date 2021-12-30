@@ -49,7 +49,7 @@ import jd.core.model.classfile.attribute.AttributeSynthetic;
 import jd.core.model.classfile.attribute.ParameterAnnotations;
 import jd.core.model.classfile.attribute.UnknowAttribute;
 
-public class AttributeDeserializer
+public final class AttributeDeserializer
 {
     private AttributeDeserializer() {
         super();

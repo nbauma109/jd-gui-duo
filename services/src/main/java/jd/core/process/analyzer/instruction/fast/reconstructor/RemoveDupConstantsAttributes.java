@@ -34,7 +34,7 @@ import jd.core.process.analyzer.classfile.visitor.ReplaceDupLoadVisitor;
  * ...
  * ???( DupLoad )
  */
-public class RemoveDupConstantsAttributes
+public final class RemoveDupConstantsAttributes
 {
     private RemoveDupConstantsAttributes() {
         super();

@@ -41,7 +41,7 @@ import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
 import jd.core.util.IntSet;
 import jd.core.util.SignatureUtil;
 
-public class InstructionListBuilder
+public final class InstructionListBuilder
 {
     private InstructionListBuilder() {
         super();
@@ -259,14 +259,14 @@ public class InstructionListBuilder
                 // Compiler or Harmony:
                 // Byte code:
                 //   0: aload_0
-                //   1: invokevirtual 16	TryCatchFinallyClassForTest:before	()V
+                //   1: invokevirtual 16    TryCatchFinallyClassForTest:before    ()V
                 //   4: iconst_1
                 //   5: ireturn
                 //   6: astore_1       <----- Error: EmptyStackException
                 //   7: aload_0
-                //   8: invokevirtual 19	TryCatchFinallyClassForTest:inCatch1	()V
+                //   8: invokevirtual 19    TryCatchFinallyClassForTest:inCatch1    ()V
                 //   11: aload_0
-                //   12: invokevirtual 22	TryCatchFinallyClassForTest:after	()V
+                //   12: invokevirtual 22    TryCatchFinallyClassForTest:after    ()V
                 //   15: iconst_2
                 //   16: ireturn
                 throw new InstructionListException(classFile, method, offset, e);

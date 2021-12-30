@@ -22,7 +22,7 @@ import jd.core.model.instruction.bytecode.instruction.BranchInstruction;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
 
-public class InstructionUtil
+public final class InstructionUtil
 {
     private InstructionUtil() {
         super();

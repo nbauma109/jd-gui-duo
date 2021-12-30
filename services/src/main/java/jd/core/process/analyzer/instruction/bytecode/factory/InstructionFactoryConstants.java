@@ -20,7 +20,7 @@ import org.apache.bcel.Const;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 
-public class InstructionFactoryConstants
+public final class InstructionFactoryConstants
 {
     private InstructionFactoryConstants() {
         super();
@@ -242,33 +242,33 @@ public class InstructionFactoryConstants
         /**
          * Non-legal opcodes, may be used by JVM internally.
          */
-//		public static final int BREAKPOINT                    = 202;
-//		public static final int LDC_QUICK                     = 203;
-//		public static final int LDC_W_QUICK                   = 204;
-//		public static final int LDC2_W_QUICK                  = 205;
-//		public static final int GETFIELD_QUICK                = 206;
-//		public static final int PUTFIELD_QUICK                = 207;
-//		public static final int GETFIELD2_QUICK               = 208;
-//		public static final int PUTFIELD2_QUICK               = 209;
-//		public static final int GETSTATIC_QUICK               = 210;
-//		public static final int PUTSTATIC_QUICK               = 211;
-//		public static final int GETSTATIC2_QUICK              = 212;
-//		public static final int PUTSTATIC2_QUICK              = 213;
-//		public static final int INVOKEVIRTUAL_QUICK           = 214;
-//		public static final int INVOKENONVIRTUAL_QUICK        = 215;
-//		public static final int INVOKESUPER_QUICK             = 216;
-//		public static final int INVOKESTATIC_QUICK            = 217;
-//		public static final int INVOKEINTERFACE_QUICK         = 218;
-//		public static final int INVOKEVIRTUALOBJECT_QUICK     = 219;
-//		public static final int NEW_QUICK                     = 221;
-//		public static final int ANEWARRAY_QUICK               = 222;
-//		public static final int MULTIANEWARRAY_QUICK          = 223;
-//		public static final int CHECKCAST_QUICK               = 224;
-//		public static final int INSTANCEOF_QUICK              = 225;
-//		public static final int INVOKEVIRTUAL_QUICK_W         = 226;
-//		public static final int GETFIELD_QUICK_W              = 227;
-//		public static final int PUTFIELD_QUICK_W              = 228;
-//		public static final int IMPDEP1                       = 254;
-//		public static final int IMPDEP2                       = 255;
+//        public static final int BREAKPOINT                    = 202;
+//        public static final int LDC_QUICK                     = 203;
+//        public static final int LDC_W_QUICK                   = 204;
+//        public static final int LDC2_W_QUICK                  = 205;
+//        public static final int GETFIELD_QUICK                = 206;
+//        public static final int PUTFIELD_QUICK                = 207;
+//        public static final int GETFIELD2_QUICK               = 208;
+//        public static final int PUTFIELD2_QUICK               = 209;
+//        public static final int GETSTATIC_QUICK               = 210;
+//        public static final int PUTSTATIC_QUICK               = 211;
+//        public static final int GETSTATIC2_QUICK              = 212;
+//        public static final int PUTSTATIC2_QUICK              = 213;
+//        public static final int INVOKEVIRTUAL_QUICK           = 214;
+//        public static final int INVOKENONVIRTUAL_QUICK        = 215;
+//        public static final int INVOKESUPER_QUICK             = 216;
+//        public static final int INVOKESTATIC_QUICK            = 217;
+//        public static final int INVOKEINTERFACE_QUICK         = 218;
+//        public static final int INVOKEVIRTUALOBJECT_QUICK     = 219;
+//        public static final int NEW_QUICK                     = 221;
+//        public static final int ANEWARRAY_QUICK               = 222;
+//        public static final int MULTIANEWARRAY_QUICK          = 223;
+//        public static final int CHECKCAST_QUICK               = 224;
+//        public static final int INSTANCEOF_QUICK              = 225;
+//        public static final int INVOKEVIRTUAL_QUICK_W         = 226;
+//        public static final int GETFIELD_QUICK_W              = 227;
+//        public static final int PUTFIELD_QUICK_W              = 228;
+//        public static final int IMPDEP1                       = 254;
+//        public static final int IMPDEP2                       = 255;
     }
 }

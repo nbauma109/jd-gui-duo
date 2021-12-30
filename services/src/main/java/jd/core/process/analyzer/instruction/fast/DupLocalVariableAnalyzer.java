@@ -35,7 +35,7 @@ import jd.core.model.instruction.fast.instruction.FastSwitch;
 import jd.core.model.instruction.fast.instruction.FastTest2Lists;
 import jd.core.model.instruction.fast.instruction.FastTry;
 
-public class DupLocalVariableAnalyzer
+public final class DupLocalVariableAnalyzer
 {
     private DupLocalVariableAnalyzer() {
         super();

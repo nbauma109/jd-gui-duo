@@ -35,7 +35,7 @@ import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
  *   46: return true;
  * 48: return false;
  */
-public class TernaryOpInReturnReconstructor
+public final class TernaryOpInReturnReconstructor
 {
     private TernaryOpInReturnReconstructor() {
         super();

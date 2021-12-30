@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class StringUtilities {
+public final class StringUtilities {
 
     private StringUtilities() {
         super();

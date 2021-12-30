@@ -16,7 +16,7 @@
  ******************************************************************************/
 package jd.core.util;
 
-public class CharArrayUtil
+public final class CharArrayUtil
 {
     private CharArrayUtil() {
         super();

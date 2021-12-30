@@ -16,7 +16,7 @@
  ******************************************************************************/
 package org.jd.core.v1.util;
 
-public class StringConstants
+public final class StringConstants
 {
     private StringConstants() {
         super();
@@ -50,15 +50,15 @@ public class StringConstants
 
     public static final String START_OF_HEADING = "\u0001";
 
-    public static final String ENUM_VALUES_ARRAY_NAME	= "$VALUES";
+    public static final String ENUM_VALUES_ARRAY_NAME    = "$VALUES";
     public static final String ENUM_VALUES_ARRAY_NAME_ECLIPSE = "ENUM$VALUES";
-    public static final String ENUM_VALUES_METHOD_NAME	= "values";
-    public static final String ENUM_VALUEOF_METHOD_NAME	= "valueOf";
-    public static final String TOSTRING_METHOD_NAME		= "toString";
-    public static final String VALUEOF_METHOD_NAME		= "valueOf";
-    public static final String APPEND_METHOD_NAME		= "append";
-    public static final String FORNAME_METHOD_NAME		= "forName";
-    public static final String ORDINAL_METHOD_NAME		= "ordinal";
+    public static final String ENUM_VALUES_METHOD_NAME    = "values";
+    public static final String ENUM_VALUEOF_METHOD_NAME    = "valueOf";
+    public static final String TOSTRING_METHOD_NAME        = "toString";
+    public static final String VALUEOF_METHOD_NAME        = "valueOf";
+    public static final String APPEND_METHOD_NAME        = "append";
+    public static final String FORNAME_METHOD_NAME        = "forName";
+    public static final String ORDINAL_METHOD_NAME        = "ordinal";
 
     public static final String ANNOTATIONDEFAULT_ATTRIBUTE_NAME = "AnnotationDefault";
     public static final String CODE_ATTRIBUTE_NAME = "Code";

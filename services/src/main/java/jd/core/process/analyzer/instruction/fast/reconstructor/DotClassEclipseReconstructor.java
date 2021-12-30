@@ -60,7 +60,7 @@ import jd.core.process.analyzer.classfile.visitor.ReplaceDupLoadVisitor;
  * ???( getstatic( class, 'class$...' ) )
  * ...
  */
-public class DotClassEclipseReconstructor
+public final class DotClassEclipseReconstructor
 {
     private DotClassEclipseReconstructor() {
         super();

@@ -47,7 +47,7 @@ import static org.apache.bcel.Const.SIPUSH;
 
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 
-public class ByteCodeUtil
+public final class ByteCodeUtil
 {
     private ByteCodeUtil() {
         super();

@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class JarContainerEntryUtil {
+public final class JarContainerEntryUtil {
 
     private JarContainerEntryUtil() {
         super();
@@ -94,7 +94,7 @@ public class JarContainerEntryUtil {
         return filteredSubEntries.values();
     }
 
-    protected static void populateInnerTypePaths(final Set<String> innerTypePaths, Container.Entry entry) {
+    private static void populateInnerTypePaths(final Set<String> innerTypePaths, Container.Entry entry) {
         try (InputStream is = entry.getInputStream()) {
             ClassReader classReader = new ClassReader(is);
             String p = entry.getPath();

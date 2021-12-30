@@ -77,7 +77,7 @@ import jd.core.process.analyzer.instruction.fast.ReturnLineNumberAnalyzer;
 import jd.core.process.analyzer.variable.DefaultVariableNameGenerator;
 import jd.core.util.SignatureUtil;
 
-public class ClassFileAnalyzer
+public final class ClassFileAnalyzer
 {
     private ClassFileAnalyzer() {
     }
@@ -1069,7 +1069,7 @@ public class ClassFileAnalyzer
                 //   {
                 //      Byte code:
                 //        0: aload_0
-                //        1: getfield 1	basic/data/TestInnerClass$InnerClass$InnerInnerClass$InnerInnerInnerClass:this$1	Lbasic/data/TestInnerClass$InnerClass$InnerInnerClass;
+                //        1: getfield 1    basic/data/TestInnerClass$InnerClass$InnerInnerClass$InnerInnerInnerClass:this$1    Lbasic/data/TestInnerClass$InnerClass$InnerInnerClass;
                 //        4: areturn
                 //   }
                 Instruction instruction = list.get(0);
