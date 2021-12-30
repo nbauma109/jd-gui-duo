@@ -17,7 +17,7 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 public class ClassFileMethodInvocationExpression extends MethodInvocationExpression {
     private final BaseTypeParameter typeParameters;
     private BaseType parameterTypes;
-    private boolean bound = false;
+    private boolean bound;
 
     public ClassFileMethodInvocationExpression(
             int lineNumber, BaseTypeParameter typeParameters, Type type, Expression expression,

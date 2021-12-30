@@ -33,7 +33,7 @@ public class ViewerPreferencesProvider extends JPanel implements PreferencesPane
     protected static final int MIN_VALUE = 2;
     protected static final int MAX_VALUE = 40;
 
-    protected transient PreferencesPanel.PreferencesPanelChangeListener listener = null;
+    protected transient PreferencesPanel.PreferencesPanelChangeListener listener;
     protected JTextField fontSizeTextField;
     protected Color errorBackgroundColor = Color.RED;
     protected Color defaultBackgroundColor;

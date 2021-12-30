@@ -23,7 +23,7 @@ public class LocalVariables
 {
     private final List<LocalVariable> listOfLocalVariables;
 
-    private int indexOfFirstLocalVariable = 0;
+    private int indexOfFirstLocalVariable;
 
     public LocalVariables()
     {

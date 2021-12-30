@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class History {
-    private URI            current = null;
+    private URI            current;
     private final List<URI> backward = new ArrayList<>();
     private final List<URI> forward = new ArrayList<>();
 

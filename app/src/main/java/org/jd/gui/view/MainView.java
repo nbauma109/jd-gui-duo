@@ -327,7 +327,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
 
             mainTabbedPanel = new MainTabbedPanel<>(api);
             mainTabbedPanel.getPageChangedListeners().add(new PageChangeListener() {
-                protected JComponent currentPage = null;
+                protected JComponent currentPage;
 
                 @Override
                 public <U extends JComponent & UriGettable> void pageChanged(U page) {
@@ -375,7 +375,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
                 }
             });
             mainTabbedPanel.getTabbedPane().addChangeListener(new ChangeListener() {
-                protected int lastTabCount = 0;
+                protected int lastTabCount;
 
                 @Override
                 public void stateChanged(ChangeEvent e) {

@@ -95,7 +95,7 @@ public class TryStatement implements Statement {
     public static class CatchClause implements Statement {
         private final int lineNumber;
         private final ObjectType type;
-        private DefaultList<ObjectType> otherTypes = null;
+        private DefaultList<ObjectType> otherTypes;
         private final String name;
         private final BaseStatement statements;
 

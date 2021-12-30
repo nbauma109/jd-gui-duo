@@ -24,8 +24,8 @@ public abstract class AbstractLocalVariable {
     private int toOffset;
     protected String name;
     private final DefaultList<LocalVariableReference> references = new DefaultList<>();
-    private Set<AbstractLocalVariable> variablesOnRight = null;
-    private Set<AbstractLocalVariable> variablesOnLeft = null;
+    private Set<AbstractLocalVariable> variablesOnRight;
+    private Set<AbstractLocalVariable> variablesOnLeft;
 
     protected AbstractLocalVariable(int index, int offset, String name) {
         this(index, offset, name, offset == 0);

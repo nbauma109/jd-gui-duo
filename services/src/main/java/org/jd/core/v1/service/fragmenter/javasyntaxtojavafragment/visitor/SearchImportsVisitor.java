@@ -63,7 +63,7 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
     private final Loader loader;
     private final String internalPackagePrefix;
     private final ImportsFragment importsFragment = JavaFragmentFactory.newImportsFragment();
-    private int maxLineNumber = 0;
+    private int maxLineNumber;
     private final Set<String> localTypeNames = new HashSet<>();
     private final Set<String> internalTypeNames = new HashSet<>();
     private final Set<String> importTypeNames = new HashSet<>();

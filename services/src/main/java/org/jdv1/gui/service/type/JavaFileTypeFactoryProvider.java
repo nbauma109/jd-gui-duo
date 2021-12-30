@@ -279,8 +279,8 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
 
         private String displayPackageName = "";
 
-        private JavaType mainType = null;
-        private JavaType currentType = null;
+        private JavaType mainType;
+        private JavaType currentType;
         private List<Type> rootTypes = new ArrayList<>();
         private Map<String, Type> types = new HashMap<>();
 

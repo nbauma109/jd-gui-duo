@@ -28,7 +28,7 @@ public class DirectoryIndexerPreferencesProvider extends JPanel implements Prefe
     private static final long serialVersionUID = 1L;
     protected static final int MAX_VALUE = 30;
 
-    protected transient PreferencesPanel.PreferencesPanelChangeListener listener = null;
+    protected transient PreferencesPanel.PreferencesPanelChangeListener listener;
     protected JTextField maximumDepthTextField;
     protected Color errorBackgroundColor = Color.RED;
     protected Color defaultBackgroundColor;

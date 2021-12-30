@@ -23,7 +23,7 @@ public class ControlFlowGraph {
             throw new UnsupportedOperationException();
         }
     };
-    private int[] offsetToLineNumbers = null;
+    private int[] offsetToLineNumbers;
 
     public ControlFlowGraph(Method method) {
         this.method = method;

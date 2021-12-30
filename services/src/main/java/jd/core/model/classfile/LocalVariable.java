@@ -32,9 +32,9 @@ public class LocalVariable
     private int typesBitField;
     // Champs utilisé lors de la génération des déclarations de variables
     // locales (FastDeclarationAnalyzer.Analyze).
-    private boolean declarationFlag = false;
+    private boolean declarationFlag;
 
-    private boolean finalFlag = false;
+    private boolean finalFlag;
 
     private boolean toBeRemoved;
 

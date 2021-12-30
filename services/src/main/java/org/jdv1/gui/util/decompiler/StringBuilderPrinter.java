@@ -17,10 +17,10 @@ public class StringBuilderPrinter implements Printer {
     protected final StringBuilder stringBuffer = new StringBuilder(10 * 1024);
 
     private boolean unicodeEscape = true;
-    protected boolean realignmentLineNumber = false;
+    protected boolean realignmentLineNumber;
 
-    private int majorVersion = 0;
-    private int minorVersion = 0;
+    private int majorVersion;
+    private int minorVersion;
     protected int indentationCount;
 
     public void setUnicodeEscape(boolean unicodeEscape) {

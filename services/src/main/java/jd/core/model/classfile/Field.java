@@ -26,7 +26,7 @@ import jd.core.util.UtilConstants;
 
 public class Field extends FieldOrMethod
 {
-    private ValueAndMethod valueAndMethod = null;
+    private ValueAndMethod valueAndMethod;
     /*
      * Attributs pour l'affichage des champs synthetique des classes anonymes.
      * Champs modifié par:

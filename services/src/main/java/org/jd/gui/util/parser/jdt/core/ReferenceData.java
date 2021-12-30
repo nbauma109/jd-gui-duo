@@ -21,7 +21,7 @@ public class ReferenceData {
     /**
      * "Enabled" flag for link of reference
      */
-    private boolean enabled = false;
+    private boolean enabled;
 
     public ReferenceData(String typeName, String name, String descriptor, String owner) {
         this.setTypeName(typeName);

@@ -17,8 +17,8 @@ import org.jd.core.v1.model.javasyntax.type.TypeParameters;
 import java.util.Map;
 
 public class PopulateBindingsWithTypeParameterVisitor implements TypeParameterVisitor {
-    protected Map<String, TypeArgument> bindings = null;
-    protected Map<String, BaseType> typeBounds = null;
+    protected Map<String, TypeArgument> bindings;
+    protected Map<String, BaseType> typeBounds;
 
     public void init(Map<String, TypeArgument> bindings, Map<String, BaseType> typeBounds) {
         this.bindings = bindings;

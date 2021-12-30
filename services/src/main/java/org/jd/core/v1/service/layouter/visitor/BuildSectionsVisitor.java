@@ -21,7 +21,7 @@ import org.jd.core.v1.util.DefaultList;
 public class BuildSectionsVisitor implements FragmentVisitor {
     private final DefaultList<Section> sections = new DefaultList<>();
     private DefaultList<FlexibleFragment> flexibleFragments = new DefaultList<>();
-    private Section previousSection = null;
+    private Section previousSection;
 
     @Override
     public void visit(FlexibleFragment fragment) { flexibleFragments.add(fragment); }

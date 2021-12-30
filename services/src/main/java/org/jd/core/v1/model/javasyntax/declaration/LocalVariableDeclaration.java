@@ -10,7 +10,7 @@ package org.jd.core.v1.model.javasyntax.declaration;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class LocalVariableDeclaration implements Declaration {
-    private boolean fina1 = false;
+    private boolean fina1;
     protected final Type type;
     protected final BaseLocalVariableDeclarator localVariableDeclarators;
 

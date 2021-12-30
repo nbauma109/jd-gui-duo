@@ -24,7 +24,7 @@ public class ClassFileDecompilerPreferencesProvider extends JPanel implements Pr
 
     private static final long serialVersionUID = 1L;
 
-    protected transient PreferencesPanel.PreferencesPanelChangeListener listener = null;
+    protected transient PreferencesPanel.PreferencesPanelChangeListener listener;
     protected JCheckBox escapeUnicodeCharactersCheckBox;
     protected JCheckBox realignLineNumbersCheckBox;
 
