@@ -9,6 +9,8 @@ package org.jd.core.v1.model.javasyntax.reference;
 
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 
+import java.util.Objects;
+
 public class AnnotationReference implements BaseAnnotationReference {
     protected final ObjectType type;
     protected final BaseElementValue elementValue;
@@ -49,24 +51,20 @@ public class AnnotationReference implements BaseAnnotationReference {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof AnnotationReference that)) {
+        if (o == null || o.getClass() != getClass()) {
             return false;
         }
-
-        if (elementValue != null ? !elementValue.equals(that.elementValue) : that.elementValue != null) {
-            return false;
-        }
-        if (elementValuePairs != null ? !elementValuePairs.equals(that.elementValuePairs) : that.elementValuePairs != null) {
-            return false;
-        }
-        return type.equals(that.type);
+        AnnotationReference that = (AnnotationReference) o;
+        return Objects.equals(type, that.type) 
+            && Objects.equals(elementValue, that.elementValue)
+            && Objects.equals(elementValuePairs, that.elementValuePairs);
     }
 
     @Override
     public int hashCode() {
-        int result = 970748295 + type.hashCode();
-        result = 31 * result + (elementValue != null ? elementValue.hashCode() : 0);
-        result = 31 * result + (elementValuePairs != null ? elementValuePairs.hashCode() : 0);
+        int result = 970_748_295 + type.hashCode();
+        result = 31 * result + Objects.hash(elementValue);
+        result = 31 * result + Objects.hash(elementValuePairs);
         return result;
     }
 

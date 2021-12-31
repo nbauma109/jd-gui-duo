@@ -50,7 +50,7 @@ public class ClassFileFieldDeclaration extends FieldDeclaration implements Class
 
     @Override
     public int hashCode() {
-        int result = 65247265 + super.hashCode();
+        int result = 65_247_265 + super.hashCode();
         return 31 * result + firstLineNumber;
     }
 

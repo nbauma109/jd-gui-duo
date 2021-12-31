@@ -9,6 +9,7 @@ package org.jd.core.v1.model.javasyntax.type;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class ObjectType implements Type {
     public static final ObjectType TYPE_BOOLEAN           = new ObjectType(StringConstants.JAVA_LANG_BOOLEAN, "java.lang.Boolean", "Boolean");
@@ -190,21 +191,21 @@ public class ObjectType implements Type {
         }
 
         if (StringConstants.JAVA_LANG_CLASS.equals(internalName)) {
-            boolean wildcard1 = typeArguments == null || typeArguments instanceof WildcardTypeArgument;
-            boolean wildcard2 = that.typeArguments == null || that.typeArguments instanceof WildcardTypeArgument;
+            boolean wildcard1 = typeArguments == null || typeArguments.isWildcardTypeArgument();
+            boolean wildcard2 = that.typeArguments == null || that.typeArguments.isWildcardTypeArgument();
 
             if (wildcard1 && wildcard2) {
                 return true;
             }
         }
 
-        return typeArguments != null ? typeArguments.equals(that.typeArguments) : that.typeArguments == null;
+        return Objects.equals(typeArguments, that.typeArguments);
     }
 
     @Override
     public int hashCode() {
-        int result = 735485092 + internalName.hashCode();
-        result = 31 * result + (typeArguments != null ? typeArguments.hashCode() : 0);
+        int result = 735_485_092 + internalName.hashCode();
+        result = 31 * result + Objects.hash(typeArguments);
         return 31 * result + dimension;
     }
 

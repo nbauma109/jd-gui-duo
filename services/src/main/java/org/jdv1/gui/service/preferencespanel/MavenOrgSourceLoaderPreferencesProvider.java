@@ -60,7 +60,8 @@ public class MavenOrgSourceLoaderPreferencesProvider extends JPanel implements P
 
         JComponent spacer = new JComponent() {
 
-            private static final long serialVersionUID = 1L;};
+            private static final long serialVersionUID = 1L;
+        };
         JScrollPane scrollPane = new JScrollPane(filtersTextArea);
 
         String osName = System.getProperty("os.name").toLowerCase();

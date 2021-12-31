@@ -42,7 +42,7 @@ public class WatchDog {
 
         @Override
         public int hashCode() {
-            return 4807589 + parentIndex + 31 * childIndex;
+            return 4_807_589 + parentIndex + 31 * childIndex;
         }
 
         @Override

@@ -54,11 +54,7 @@ public class ConstantMethodref extends ConstantCP {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result
-                + (listOfParameterSignatures == null ? 0 : listOfParameterSignatures.hashCode());
-        return prime * result + (returnedSignature == null ? 0 : returnedSignature.hashCode());
+        return 31 * super.hashCode() + Objects.hash(listOfParameterSignatures, returnedSignature);
     }
 
     @Override

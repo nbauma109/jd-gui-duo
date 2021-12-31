@@ -229,9 +229,8 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
 
         @Override
         public int hashCode() {
-            final int prime = 31;
             int result = super.hashCode();
-            return prime * result + (wrappers == null ? 0 : wrappers.hashCode());
+            return 31 * result + (wrappers == null ? 0 : wrappers.hashCode());
         }
 
         @Override

@@ -64,7 +64,7 @@ public class GenericType implements Type {
 
     @Override
     public int hashCode() {
-        int result = 991890290 + name.hashCode();
+        int result = 991_890_290 + name.hashCode();
         return 31 * result + dimension;
     }
 

@@ -7,6 +7,7 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg;
 
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Set;
 
 public class Loop {
@@ -63,14 +64,16 @@ public class Loop {
 
         Loop loop = (Loop) o;
 
-        return start.equals(loop.start) && members.equals(loop.members) && !(end != null ? !end.equals(loop.end) : loop.end != null);
+        return Objects.equals(start, loop.start) 
+            && Objects.equals(members, loop.members)
+            && Objects.equals(end, loop.end);
     }
 
     @Override
     public int hashCode() {
-        int result = 258190310 + start.hashCode();
+        int result = 258_190_310 + start.hashCode();
         result = 31 * result + members.hashCode();
-        return 31 * result + (end != null ? end.hashCode() : 0);
+        return 31 * result + Objects.hash(end);
     }
 
     @Override

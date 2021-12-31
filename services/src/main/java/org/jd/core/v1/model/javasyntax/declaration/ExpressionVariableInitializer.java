@@ -8,6 +8,8 @@ package org.jd.core.v1.model.javasyntax.declaration;
 
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 
+import java.util.Objects;
+
 public class ExpressionVariableInitializer implements VariableInitializer {
     private Expression expression;
 
@@ -38,12 +40,12 @@ public class ExpressionVariableInitializer implements VariableInitializer {
             return false;
         }
 
-        return expression != null ? expression.equals(that.expression) : that.expression == null;
+        return Objects.equals(expression, that.expression);
     }
 
     @Override
     public int hashCode() {
-        return 25107399 + (expression != null ? expression.hashCode() : 0);
+        return 25_107_399 + Objects.hash(expression);
     }
 
     @Override

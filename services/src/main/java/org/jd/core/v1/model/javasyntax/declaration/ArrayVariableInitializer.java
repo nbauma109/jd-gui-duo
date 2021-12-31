@@ -35,9 +35,8 @@ public class ArrayVariableInitializer extends DefaultList<VariableInitializer> i
 
     @Override
     public int hashCode() {
-        final int prime = 31;
         int result = super.hashCode();
-        return prime * result + (type == null ? 0 : type.hashCode());
+        return 31 * result + (type == null ? 0 : type.hashCode());
     }
 
     @Override

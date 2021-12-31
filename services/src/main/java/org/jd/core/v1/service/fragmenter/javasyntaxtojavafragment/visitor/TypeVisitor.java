@@ -37,6 +37,7 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.apache.bcel.Const.MAJOR_1_5;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_BOOLEAN;
@@ -368,10 +369,7 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
 
         @Override
         public int hashCode() {
-            final int prime = 31;
-            int result = super.hashCode();
-            result = prime * result + getEnclosingInstance().hashCode();
-            return prime * result + currentLineNumber;
+            return 31 * super.hashCode() + Objects.hash(getEnclosingInstance(), currentLineNumber);
         }
 
         @Override

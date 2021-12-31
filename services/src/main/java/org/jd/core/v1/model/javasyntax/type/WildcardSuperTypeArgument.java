@@ -8,6 +8,7 @@
 package org.jd.core.v1.model.javasyntax.type;
 
 import java.util.Map;
+import java.util.Objects;
 
 public record WildcardSuperTypeArgument(Type type) implements TypeArgument {
 
@@ -34,12 +35,12 @@ public record WildcardSuperTypeArgument(Type type) implements TypeArgument {
 
         WildcardSuperTypeArgument that = (WildcardSuperTypeArgument) o;
 
-        return type != null ? type.equals(that.type) : that.type == null;
+        return Objects.equals(type, that.type);
     }
 
     @Override
     public int hashCode() {
-        return 979510081 + (type != null ? type.hashCode() : 0);
+        return 979_510_081 + Objects.hash(type);
     }
 
     @Override

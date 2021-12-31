@@ -6,6 +6,8 @@
  */
 package org.jd.core.v1.model.javasyntax.declaration;
 
+import java.util.Objects;
+
 public class FieldDeclarator implements BaseFieldDeclarator {
     private FieldDeclaration fieldDeclaration;
     private final String name;
@@ -50,13 +52,13 @@ public class FieldDeclarator implements BaseFieldDeclarator {
             return false;
         }
 
-        return name.equals(that.name) && (variableInitializer != null ? variableInitializer.equals(that.variableInitializer) : that.variableInitializer == null);
+        return name.equals(that.name) && Objects.equals(variableInitializer, that.variableInitializer);
     }
 
     @Override
     public int hashCode() {
-        int result = 544278669 + name.hashCode();
-        return 31 * result + (variableInitializer != null ? variableInitializer.hashCode() : 0);
+        int result = 544_278_669 + name.hashCode();
+        return 31 * result + Objects.hash(variableInitializer);
     }
 
     @Override

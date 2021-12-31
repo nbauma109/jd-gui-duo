@@ -8,6 +8,7 @@
 package org.jd.core.v1.model.javasyntax.type;
 
 import java.util.Map;
+import java.util.Objects;
 
 public record WildcardExtendsTypeArgument(Type type) implements TypeArgument {
 
@@ -34,12 +35,12 @@ public record WildcardExtendsTypeArgument(Type type) implements TypeArgument {
 
         WildcardExtendsTypeArgument that = (WildcardExtendsTypeArgument) o;
 
-        return type != null ? type.equals(that.type) : that.type == null;
+        return Objects.equals(type, that.type);
     }
 
     @Override
     public int hashCode() {
-        return 957014778 + (type != null ? type.hashCode() : 0);
+        return 957_014_778 + Objects.hash(type);
     }
 
     @Override

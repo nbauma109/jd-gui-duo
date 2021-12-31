@@ -9,6 +9,8 @@ package org.jd.core.v1.model.javasyntax.declaration;
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
+import java.util.Objects;
+
 public class FieldDeclaration implements MemberDeclaration {
     private final BaseAnnotationReference annotationReferences;
     private int flags;
@@ -60,13 +62,13 @@ public class FieldDeclaration implements MemberDeclaration {
             return false;
         }
 
-        return flags == that.flags && (annotationReferences != null ? annotationReferences.equals(that.annotationReferences) : that.annotationReferences == null) && fieldDeclarators.equals(that.fieldDeclarators) && type.equals(that.type);
+        return flags == that.flags && Objects.equals(annotationReferences, that.annotationReferences) && fieldDeclarators.equals(that.fieldDeclarators) && type.equals(that.type);
     }
 
     @Override
     public int hashCode() {
-        int result = 327494460 + flags;
-        result = 31 * result + (annotationReferences != null ? annotationReferences.hashCode() : 0);
+        int result = 327_494_460 + flags;
+        result = 31 * result + Objects.hash(annotationReferences);
         result = 31 * result + type.hashCode();
         return 31 * result + fieldDeclarators.hashCode();
     }

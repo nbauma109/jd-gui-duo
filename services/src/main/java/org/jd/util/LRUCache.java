@@ -27,9 +27,7 @@ public class LRUCache<K, V> extends LinkedHashMap<K, V> {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        return prime * result + maxEntries;
+        return 31 * super.hashCode() + maxEntries;
     }
 
     @Override

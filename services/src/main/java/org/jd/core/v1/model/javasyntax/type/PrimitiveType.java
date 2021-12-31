@@ -154,7 +154,7 @@ public class PrimitiveType implements Type {
 
     @Override
     public int hashCode() {
-        return 750039781 + flags;
+        return 750_039_781 + flags;
     }
 
     @Override
