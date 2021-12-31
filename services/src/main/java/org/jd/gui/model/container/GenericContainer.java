@@ -55,7 +55,10 @@ public class GenericContainer implements Container, Closeable {
 
     private static ZipFile makeZipFile(Container.Entry parentEntry) {
         try {
-            return new ZipFile(new File(parentEntry.getPath()));
+            File file = new File(parentEntry.getPath());
+            if (file.exists()) {
+                return new ZipFile(file);
+            }
         } catch (IOException e) {
             assert ExceptionUtil.printStackTrace(e);
         }
