@@ -99,7 +99,7 @@ public class BasicBlock {
         this.fromOffset = original.fromOffset;
         this.toOffset = original.toOffset;
         this.setNext(original.next);
-        this.branch = original.branch;
+        this.setBranch(original.branch);
         this.condition = original.condition;
         this.inverseCondition = original.inverseCondition;
         this.sub1 = original.sub1;
@@ -254,7 +254,7 @@ public class BasicBlock {
         }
 
         if (branch == old) {
-            branch = nevv;
+            setBranch(nevv);
         }
 
         for (ExceptionHandler exceptionHandler : exceptionHandlers) {
@@ -284,7 +284,7 @@ public class BasicBlock {
         }
 
         if (olds.contains(branch)) {
-            branch = nevv;
+            setBranch(nevv);
         }
 
         for (ExceptionHandler exceptionHandler : exceptionHandlers) {
