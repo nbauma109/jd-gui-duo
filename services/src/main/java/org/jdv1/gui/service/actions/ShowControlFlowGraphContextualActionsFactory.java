@@ -12,6 +12,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlF
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphGotoReducer;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphLoopReducer;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphMaker;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphPreReducer;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphReducer;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
@@ -30,6 +31,7 @@ public class ShowControlFlowGraphContextualActionsFactory implements ContextualA
     public static final int MODE_RAW = 0;
     public static final int MODE_GOTO_ONLY = 1;
     public static final int MODE_GOTO_AND_LOOP = 2;
+    public static final int MODE_PRE_REDUCE = 3;
     
     @Override
     public Collection<Action> make(API api, Container.Entry entry, String fragment) {
@@ -38,6 +40,7 @@ public class ShowControlFlowGraphContextualActionsFactory implements ContextualA
             actions.add(new ShowControlFlowGraphAction(entry, fragment, null, MODE_RAW));
             actions.add(new ShowControlFlowGraphAction(entry, fragment, null, MODE_GOTO_ONLY));
             actions.add(new ShowControlFlowGraphAction(entry, fragment, null, MODE_GOTO_AND_LOOP));
+            actions.add(new ShowControlFlowGraphAction(entry, fragment, null, MODE_PRE_REDUCE));
             for (ControlFlowGraphReducer controlFlowGraphReducer : ControlFlowGraphReducer.getPreferredReducers()) {
                 actions.add(new ShowControlFlowGraphAction(entry, fragment, controlFlowGraphReducer, MODE_GOTO_AND_LOOP));
             }
@@ -61,7 +64,7 @@ public class ShowControlFlowGraphContextualActionsFactory implements ContextualA
             this.mode = mode;
             if (controlFlowGraphReducer == null) {
                 putValue(GROUP_NAME, "Edit > ShowInitialControlFlowGraph"); // used for sorting and grouping menus
-                putValue(NAME, "Show Initial Control Flow Graph (" + getModeAsString() + ")");
+                putValue(NAME, "Show Initial Control Flow Graph " + getModeAsString());
             } else {
                 putValue(GROUP_NAME, "Edit > ShowReducedControlFlowGraph");
                 putValue(NAME, controlFlowGraphReducer.getLabel());
@@ -71,9 +74,10 @@ public class ShowControlFlowGraphContextualActionsFactory implements ContextualA
 
         private String getModeAsString() {
             return switch (mode) {
-                case MODE_RAW -> "Raw";
-                case MODE_GOTO_ONLY -> "Goto Only";
-                case MODE_GOTO_AND_LOOP -> "Goto And Loop";
+                case MODE_RAW -> "";
+                case MODE_GOTO_ONLY -> "(Goto)";
+                case MODE_GOTO_AND_LOOP -> "(Goto, Loop)";
+                case MODE_PRE_REDUCE -> "(Goto, Loop, Pre-Reduce)";
                 default -> throw new IllegalArgumentException("Unexpected value: " + mode);
             };
         }
@@ -88,6 +92,11 @@ public class ShowControlFlowGraphContextualActionsFactory implements ContextualA
                     case MODE_GOTO_AND_LOOP:
                         ControlFlowGraphGotoReducer.reduce(controlFlowGraph);
                         ControlFlowGraphLoopReducer.reduce(controlFlowGraph);
+                        break;
+                    case MODE_PRE_REDUCE:
+                        ControlFlowGraphGotoReducer.reduce(controlFlowGraph);
+                        ControlFlowGraphLoopReducer.reduce(controlFlowGraph);
+                        ControlFlowGraphPreReducer.reduce(controlFlowGraph);
                         break;
                     default:
                         break;

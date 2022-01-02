@@ -6,6 +6,7 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg;
 
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeUtil;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.HashSet;
@@ -557,4 +558,10 @@ public class BasicBlock {
         this.enclosingLoop = enclosingLoop;
     }
 
+    public void flip() {
+        BasicBlock tmp = next;
+        setNext(branch);
+        setBranch(tmp);
+        ByteCodeUtil.invertLastOpCode(this);
+    }
 }

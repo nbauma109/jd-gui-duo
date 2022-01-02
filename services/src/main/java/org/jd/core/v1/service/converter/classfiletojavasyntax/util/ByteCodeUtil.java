@@ -7,6 +7,7 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
+import org.apache.bcel.Const;
 import org.apache.bcel.classfile.ConstantNameAndType;
 import org.jd.core.v1.model.classfile.ConstantPool;
 import org.jd.core.v1.model.classfile.Method;
@@ -63,6 +64,54 @@ public final class ByteCodeUtil {
         }
 
         return code[lastOffset] & 255;
+    }
+
+    public static void invertLastOpCode(BasicBlock basicBlock) {
+        byte[] code = basicBlock.getControlFlowGraph().getMethod().<AttributeCode>getAttribute("Code").getCode();
+        int offset = basicBlock.getFromOffset();
+        int toOffset = basicBlock.getToOffset();
+
+        if (offset >= toOffset) {
+            return;
+        }
+
+        int lastOffset = offset;
+
+        for (; offset<toOffset; offset++) {
+            int opcode = code[offset] & 255;
+
+            lastOffset = offset;
+
+            offset = computeNextOffset(code, offset, opcode);
+        }
+
+        code[lastOffset] = (byte) getOppositeOpCode(code[lastOffset] & 255);
+        int delta = basicBlock.getBranch().getFromOffset() - lastOffset;
+        // Big Endian
+        code[lastOffset+1] = (byte) ((delta >> 8) & 0xFF);
+        code[lastOffset+2] = (byte) (delta & 0xFF);
+    }
+    
+    private static int getOppositeOpCode(int opCode) {
+        return switch(opCode) {
+            case IFNONNULL -> IFNULL;
+            case IFNULL -> IFNONNULL;
+            case IF_ACMPEQ -> IF_ACMPNE;
+            case IF_ACMPNE -> IF_ACMPEQ;
+            case IF_ICMPEQ -> IF_ICMPNE;
+            case IF_ICMPNE -> IF_ICMPEQ;
+            case IF_ICMPGE -> IF_ICMPLT;
+            case IF_ICMPLT -> IF_ICMPGE;
+            case IF_ICMPLE -> IF_ICMPGT;
+            case IF_ICMPGT -> IF_ICMPLE;
+            case IFEQ -> IFNE;
+            case IFNE -> IFEQ;
+            case IFGE -> IFLT;
+            case IFLT -> IFGE;
+            case IFLE -> IFGT;
+            case IFGT -> IFLE;
+            default -> throw new IllegalArgumentException("Unexpected opCode " + Const.getOpcodeName(opCode));
+        };
     }
 
     private static int computeNextOffset(byte[] code, int offset, int opcode) {

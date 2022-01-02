@@ -76,13 +76,15 @@ public abstract class ControlFlowGraphReducer {
 
     public boolean reduce(Method method) {
         controlFlowGraph = new ControlFlowGraphMaker().make(method);
-        ControlFlowGraphGotoReducer.reduce(controlFlowGraph);
-        ControlFlowGraphLoopReducer.reduce(controlFlowGraph);
+        ControlFlowGraphGotoReducer.reduce(getControlFlowGraph());
+        ControlFlowGraphLoopReducer.reduce(getControlFlowGraph());
+        ControlFlowGraphPreReducer.reduce(getControlFlowGraph());
         BasicBlock start = controlFlowGraph.getStart();
         BitSet jsrTargets = new BitSet();
         BitSet visited = new BitSet(controlFlowGraph.getBasicBlocks().size());
         return reduce(visited, start, jsrTargets);
     }
+
 
     public boolean reduce(BitSet visited, BasicBlock basicBlock, BitSet jsrTargets) {
         if (!basicBlock.matchType(GROUP_END) && !visited.get(basicBlock.getIndex())) {
