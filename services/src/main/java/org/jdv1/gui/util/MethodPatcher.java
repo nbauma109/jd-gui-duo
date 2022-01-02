@@ -55,6 +55,10 @@ public final class MethodPatcher {
                     if (methodBinding != null) {
                         String methodKey = methodBinding.getKey();
                         Range rangeV1 = methodKeyPositionRanges.get(methodKey);
+                        if (rangeV1 == null) {
+                            methodKey = methodKey.replaceAll("L(\\w+/)+", "L");
+                            rangeV1 = methodKeyPositionRanges.get(methodKey);
+                        }
                         if (rangeV1 != null) {
                             String methodV1 = sourceCodeV1.substring(rangeV1.minimum(), rangeV1.maximum());
                             int methodV0LineCount = (int) methodV0.lines().count();
