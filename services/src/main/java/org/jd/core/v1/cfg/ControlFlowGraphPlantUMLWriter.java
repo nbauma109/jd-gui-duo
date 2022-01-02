@@ -325,7 +325,7 @@ public final class ControlFlowGraphPlantUMLWriter {
         if ((method != null) && basicBlock.matchType(GROUP_CODE) && (basicBlock.getFromOffset() < basicBlock.getToOffset())) {
             String byteCode = ByteCodeWriter.write("  ", method, basicBlock.getFromOffset(), basicBlock.getToOffset());
 
-            byteCode = byteCode.substring(0, byteCode.length()-1).replace("\n", EOL);
+            byteCode = byteCode.substring(0, byteCode.length()-1).replace("\n", EOL).replace('[', '{');
             sb.append(id).append(" : code =").append(EOL).append(byteCode).append("\n");
         }
     }
