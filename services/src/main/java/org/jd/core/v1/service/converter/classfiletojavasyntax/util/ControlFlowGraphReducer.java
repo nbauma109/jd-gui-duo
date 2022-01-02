@@ -1298,6 +1298,10 @@ public abstract class ControlFlowGraphReducer {
     private static void removeLastContinueLoop(BasicBlock basicBlock) {
         BitSet visited = new BitSet();
         BasicBlock next = basicBlock.getNext();
+        
+        if (next == null) {
+            return;
+        }
 
         while (!next.matchType(GROUP_END) && !visited.get(next.getIndex())) {
             visited.set(next.getIndex());
