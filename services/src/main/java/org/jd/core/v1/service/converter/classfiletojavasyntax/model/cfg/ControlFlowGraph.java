@@ -8,6 +8,7 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg;
 
 import org.jd.core.v1.model.classfile.Method;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.processor.block.api.BlockProcessor;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.Set;
@@ -75,5 +76,9 @@ public class ControlFlowGraph {
 
     public int getLineNumber(int offset) {
         return offsetToLineNumbers == null || offset < 0 ? 0 : offsetToLineNumbers[offset];
+    }
+    
+    public void accept(BlockProcessor blockProcessor) {
+        blockProcessor.process(this);
     }
 }

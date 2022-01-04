@@ -19,6 +19,12 @@ import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.B
 
 public class MinDepthCFGReducer extends ControlFlowGraphReducer {
 
+    private boolean preReduce;
+
+    public MinDepthCFGReducer(boolean preReduce) {
+        this.preReduce = preReduce;
+    }
+    
     @Override
     protected boolean needToUpdateConditionTernaryOperator(BasicBlock basicBlock, BasicBlock nextNext) {
         return ByteCodeUtil.getMinDepth(nextNext) == -1;
@@ -60,6 +66,11 @@ public class MinDepthCFGReducer extends ControlFlowGraphReducer {
         return super.reduceTryDeclaration(visited, basicBlock, jsrTargets);
     }
 
+    @Override
+    public boolean doPreReduce() {
+        return preReduce;
+    }
+    
     @Override
     public String getLabel() {
         return "Show Minimum-Depth Control Flow Graph";

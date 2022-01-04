@@ -78,7 +78,9 @@ public abstract class ControlFlowGraphReducer {
         controlFlowGraph = new ControlFlowGraphMaker().make(method);
         ControlFlowGraphGotoReducer.reduce(getControlFlowGraph());
         ControlFlowGraphLoopReducer.reduce(getControlFlowGraph());
-        ControlFlowGraphPreReducer.reduce(getControlFlowGraph());
+        if (doPreReduce()) {
+            ControlFlowGraphPreReducer.reduce(getControlFlowGraph());
+        }
         BasicBlock start = controlFlowGraph.getStart();
         BitSet jsrTargets = new BitSet();
         BitSet visited = new BitSet(controlFlowGraph.getBasicBlocks().size());
@@ -368,6 +370,7 @@ public abstract class ControlFlowGraphReducer {
     }
 
     public abstract String getLabel();
+    public abstract boolean doPreReduce();
     protected abstract boolean needToUpdateConditionTernaryOperator(BasicBlock basicBlock, BasicBlock nextNext);
     protected abstract boolean needToUpdateCondition(BasicBlock basicBlock, BasicBlock nextNext);
     protected abstract boolean needToCreateIf(BasicBlock branch, BasicBlock nextNext, int maxOffset);
@@ -1663,7 +1666,8 @@ public abstract class ControlFlowGraphReducer {
      */
     public static List<ControlFlowGraphReducer> getPreferredReducers() {
         List<ControlFlowGraphReducer> preferredReducers = new ArrayList<>();
-        preferredReducers.add(new MinDepthCFGReducer());
+        preferredReducers.add(new MinDepthCFGReducer(false));
+        preferredReducers.add(new MinDepthCFGReducer(true));
         preferredReducers.add(new CmpDepthCFGReducer());
         return preferredReducers;
     }

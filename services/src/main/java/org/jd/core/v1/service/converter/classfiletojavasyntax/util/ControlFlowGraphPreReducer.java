@@ -6,27 +6,27 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.processor.block.api.BlockProcessor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.processor.block.impl.InLoopConditionalBranchProcessor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.processor.block.impl.MergeStatementBlockProcessor;
 
-import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_CONDITIONAL_BRANCH;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class ControlFlowGraphPreReducer {
 
+    private static List<BlockProcessor> blockProcessors = new ArrayList<>();
+    static {
+        blockProcessors.add(new MergeStatementBlockProcessor());
+        blockProcessors.add(new InLoopConditionalBranchProcessor());
+    }
+    
     private ControlFlowGraphPreReducer() {
         super();
     }
 
     public static void reduce(ControlFlowGraph cfg) {
-        for (BasicBlock basicBlock : cfg.getBasicBlocks()) {
-            if (basicBlock.getType() == TYPE_CONDITIONAL_BRANCH 
-                && basicBlock.getNext().getType() == TYPE_CONDITIONAL_BRANCH 
-                && basicBlock.getEnclosingLoop() != null
-                && basicBlock.getBranch().getNext() == BasicBlock.LOOP_START
-                && basicBlock.getNext().getPredecessors().size() >= 3
-                && basicBlock.getNext().getPredecessors().stream().filter(b -> b != basicBlock).allMatch(b -> b.getBranch() == basicBlock.getNext())) {
-                basicBlock.flip();
-            }
-        }
+        blockProcessors.stream().forEach(cfg::accept);
     }
 }

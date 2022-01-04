@@ -134,7 +134,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
             for (ControlFlowGraphReducer controlFlowGraphReducer : preferredReducers) {
                 try {
                     if (controlFlowGraphReducer.reduce(method)) {
-                        if (comd.getStatements() instanceof Statements stmts){
+                        if (comd.getStatements() instanceof Statements stmts) {
                             comd.setStatements(statementMaker.make(controlFlowGraphReducer.getControlFlowGraph(), stmts));
                         } else {
                             comd.setStatements(statementMaker.make(controlFlowGraphReducer.getControlFlowGraph(), new Statements()));
@@ -149,7 +149,6 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
             if (!reduced) {
                 System.err.println("Could not reduce control flow graph in method " + method.getName() + method.getDescriptor() + " from class " + classFile.getInternalTypeName());
                 comd.setStatements(new Statements(ByteCodeWriter.getLineNumberTableAsStatements(method)));
-//                throw new CFGReduceException("Could not reduce control flow graph in method " + method.getName() + method.getDescriptor() + " from class " + classFile.getInternalTypeName());
             }
 
             localVariableMaker.make(containsLineNumber, typeMaker);

@@ -27,6 +27,11 @@ public class CmpDepthCFGReducer extends ControlFlowGraphReducer {
     }
 
     @Override
+    public boolean doPreReduce() {
+        return false;
+    }
+
+    @Override
     public String getLabel() {
         return "Show Compare-Depth Control Flow Graph";
     }

@@ -67,7 +67,11 @@ public class ShowControlFlowGraphContextualActionsFactory implements ContextualA
                 putValue(NAME, "Show Initial Control Flow Graph " + getModeAsString());
             } else {
                 putValue(GROUP_NAME, "Edit > ShowReducedControlFlowGraph");
-                putValue(NAME, controlFlowGraphReducer.getLabel());
+                if (controlFlowGraphReducer.doPreReduce()) {
+                    putValue(NAME, controlFlowGraphReducer.getLabel() + " (with pre-reduce)");
+                } else {
+                    putValue(NAME, controlFlowGraphReducer.getLabel() + " (without pre-reduce)");
+                }
             }
             putValue(SMALL_ICON, ICON);
         }
