@@ -17,14 +17,13 @@
 package jd.core.process.analyzer.classfile;
 
 import org.apache.bcel.Const;
-import org.apache.bcel.classfile.CodeException;
+import org.jd.core.v1.model.classfile.attribute.CodeException;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ConstantPool;
@@ -285,7 +284,7 @@ public final class ReferenceAnalyzer
         int[] exceptionIndexes;
         ElementValue defaultAnnotationValue;
         LocalVariables localVariables;
-        List<Entry<Integer, CodeException>> codeExceptions;
+        CodeException[] codeExceptions;
         for (int i=methods.length-1; i>=0; --i)
         {
             method = methods[i];
@@ -360,17 +359,17 @@ public final class ReferenceAnalyzer
 
     private static void countReferencesInCodeExceptions(
             ReferenceMap referenceMap, ConstantPool constants,
-            List<Entry<Integer, CodeException>> codeExceptions)
+            CodeException[] codeExceptions)
     {
         CodeException ce;
-        for (int i=codeExceptions.size()-1; i>=0; --i)
+        for (int i=codeExceptions.length-1; i>=0; --i)
         {
-            ce = codeExceptions.get(i).getValue();
+            ce = codeExceptions[i];
 
-            if (ce.getCatchType() != 0)
+            if (ce.catchType() != 0)
             {
                 String internalClassName =
-                    constants.getConstantClassName(ce.getCatchType());
+                    constants.getConstantClassName(ce.catchType());
                 referenceMap.add(internalClassName);
             }
         }

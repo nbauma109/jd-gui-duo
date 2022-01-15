@@ -17,14 +17,13 @@
 package jd.core.process.analyzer.instruction.fast;
 
 import org.apache.bcel.Const;
-import org.apache.bcel.classfile.CodeException;
+import org.jd.core.v1.model.classfile.attribute.CodeException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Objects;
 
 import jd.core.model.classfile.LocalVariable;
@@ -71,16 +70,16 @@ public final class FastCodeExceptionAnalyzer
     public static List<FastCodeExcepcion> aggregateCodeExceptions(
             Method method, List<Instruction> list)
     {
-        List<Entry<Integer, CodeException>> arrayOfCodeException = method.getCodeExceptions();
+        CodeException[] arrayOfCodeException = method.getCodeExceptions();
 
-        if (arrayOfCodeException == null || arrayOfCodeException.isEmpty()) {
+        if (arrayOfCodeException == null || arrayOfCodeException.length == 0) {
             return null;
         }
 
         // Aggregation des 'finally' et des 'catch' executant le même bloc
         List<FastAggregatedCodeExcepcion> fastAggregatedCodeExceptions =
                 new ArrayList<>(
-                        arrayOfCodeException.size());
+                        arrayOfCodeException.length);
         populateListOfFastAggregatedCodeException(
                 method, list, fastAggregatedCodeExceptions);
 
@@ -203,37 +202,37 @@ public final class FastCodeExceptionAnalyzer
         FastAggregatedCodeExcepcion[] array =
                 new FastAggregatedCodeExcepcion[length];
 
-        List<Entry<Integer, CodeException>> arrayOfCodeException = method.getCodeExceptions();
-        length = arrayOfCodeException.size();
+        CodeException[] arrayOfCodeException = method.getCodeExceptions();
+        length = arrayOfCodeException.length;
         CodeException codeException;
         for (int i=0; i<length; i++)
         {
-            codeException = arrayOfCodeException.get(i).getValue();
+            codeException = arrayOfCodeException[i];
 
-            if (array[codeException.getHandlerPC()] == null)
+            if (array[codeException.handlerPc()] == null)
             {
                 FastAggregatedCodeExcepcion face =
-                        new FastAggregatedCodeExcepcion(codeException.getStartPC(), codeException.getEndPC(),
-                                codeException.getHandlerPC(), codeException.getCatchType());
+                        new FastAggregatedCodeExcepcion(codeException.index(), codeException.startPc(), codeException.endPc(),
+                                codeException.handlerPc(), codeException.catchType());
                 fastAggregatedCodeExceptions.add(face);
-                array[codeException.getHandlerPC()] = face;
+                array[codeException.handlerPc()] = face;
             }
             else
             {
-                FastAggregatedCodeExcepcion face = array[codeException.getHandlerPC()];
+                FastAggregatedCodeExcepcion face = array[codeException.handlerPc()];
                 // ATTENTION: la modification de 'endPc' implique la
                 //            reecriture de 'defineType(...) !!
                 if (face.getCatchType() == 0)
                 {
                     face.nbrFinally++;
                 } else // Ce type d'exception a-t-il deja ete ajoute ?
-                    if (isNotAlreadyStored(face, codeException.getCatchType()))
+                    if (isNotAlreadyStored(face, codeException.catchType()))
                     {
                         // Non
                         if (face.otherCatchTypes == null) {
                             face.otherCatchTypes = new int[length];
                         }
-                        face.otherCatchTypes[i] = codeException.getCatchType();
+                        face.otherCatchTypes[i] = codeException.catchType();
                     }
             }
         }
@@ -3291,27 +3290,27 @@ public final class FastCodeExceptionAnalyzer
         private boolean             synchronizedFlag;
         private final CodeException codeException;
 
-        public FastAggregatedCodeExcepcion(int startPc, int endPc, int handlerPc, int catchType)
+        public FastAggregatedCodeExcepcion(int index, int startPc, int endPc, int handlerPc, int catchType)
         {
-            this.codeException = new CodeException(startPc, endPc, handlerPc, catchType);
+            this.codeException = new CodeException(index, startPc, endPc, handlerPc, catchType);
             this.otherCatchTypes = null;
             this.nbrFinally = catchType == 0 ? 1 : 0;
         }
 
         public int getCatchType() {
-            return codeException.getCatchType();
+            return codeException.catchType();
         }
 
         public int getStartPC() {
-            return codeException.getStartPC();
+            return codeException.startPc();
         }
 
         public int getEndPC() {
-            return codeException.getEndPC();
+            return codeException.endPc();
         }
 
         public int getHandlerPC() {
-            return codeException.getHandlerPC();
+            return codeException.handlerPc();
         }
     }
 

@@ -18,11 +18,10 @@ package jd.core.model.classfile;
 
 
 import org.apache.bcel.Const;
-import org.apache.bcel.classfile.CodeException;
 import org.apache.bcel.classfile.LineNumber;
+import org.jd.core.v1.model.classfile.attribute.CodeException;
 
 import java.util.List;
-import java.util.Map.Entry;
 
 import jd.core.model.classfile.attribute.Attribute;
 import jd.core.model.classfile.attribute.AttributeAnnotationDefault;
@@ -34,7 +33,6 @@ import jd.core.model.classfile.attribute.AttributeRuntimeParameterAnnotations;
 import jd.core.model.classfile.attribute.ElementValue;
 import jd.core.model.classfile.attribute.ParameterAnnotations;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
-import jd.core.process.analyzer.instruction.bytecode.util.ByteCodeUtil;
 
 public class Method extends FieldOrMethod
 {
@@ -42,7 +40,7 @@ public class Method extends FieldOrMethod
     private int[] exceptionIndexes;
     private byte[] code;
     private LineNumber[] lineNumbers;
-    private List<Entry<Integer, CodeException>> codeExceptions;
+    private CodeException[] codeExceptions;
     private ParameterAnnotations[] visibleParameterAnnotations;
     private ParameterAnnotations[] invisibleParameterAnnotations;
     private ElementValue defaultAnnotationValue;
@@ -104,7 +102,7 @@ public class Method extends FieldOrMethod
 
             if (ac != null)
             {
-                this.code = ByteCodeUtil.cleanUpByteCode(ac.getCode());
+                this.code = ac.getCode();
 
                 // localVariables
                 AttributeLocalVariableTable alvt = ac.getAttributeLocalVariableTable();
@@ -181,7 +179,7 @@ public class Method extends FieldOrMethod
         return lineNumbers;
     }
 
-    public List<Entry<Integer, CodeException>> getCodeExceptions()
+    public CodeException[] getCodeExceptions()
     {
         return this.codeExceptions;
     }

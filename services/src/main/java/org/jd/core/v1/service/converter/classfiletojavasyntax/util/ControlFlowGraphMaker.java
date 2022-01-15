@@ -7,13 +7,13 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
 import org.apache.bcel.Const;
-import org.apache.bcel.classfile.CodeException;
 import org.apache.bcel.classfile.ConstantNameAndType;
 import org.apache.bcel.classfile.LineNumber;
 import org.jd.core.v1.model.classfile.ConstantPool;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.classfile.attribute.AttributeLineNumberTable;
+import org.jd.core.v1.model.classfile.attribute.CodeException;
 import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.SwitchCase;
@@ -462,8 +462,8 @@ public class ControlFlowGraphMaker {
         CodeException[] codeExceptions = attributeCode.getExceptionTable();
         if (codeExceptions != null) {
             for (CodeException codeException : codeExceptions) {
-                map[codeException.getStartPC()] = MARK;
-                map[codeException.getHandlerPC()] = MARK;
+                map[codeException.startPc()] = MARK;
+                map[codeException.handlerPc()] = MARK;
             }
         }
         // --- Create line numbers --- //
@@ -616,16 +616,16 @@ public class ControlFlowGraphMaker {
             int startPc;
             int handlerPc;
             for (CodeException codeException : codeExceptions) {
-                startPc = codeException.getStartPC();
-                handlerPc = codeException.getHandlerPC();
+                startPc = codeException.startPc();
+                handlerPc = codeException.handlerPc();
 
                 if (startPc != handlerPc && (handlePcMarks[handlerPc] != 'T' || startPc <= map[handlePcToStartPc[handlerPc]].getFromOffset())) {
-                    int catchType = codeException.getCatchType();
+                    int catchType = codeException.catchType();
                     String key = makeShortKey(codeException);
                     BasicBlock tcf = cache.get(key);
 
                     if (tcf == null) {
-                        int endPc = codeException.getEndPC();
+                        int endPc = codeException.endPc();
                         // Check 'endPc'
                         BasicBlock start = map[startPc];
 
@@ -718,7 +718,7 @@ public class ControlFlowGraphMaker {
     }
     
     public static final String makeShortKey(CodeException ce) {
-        return ce.getStartPC() + "-" + ce.getEndPC();
+        return ce.startPc() + "-" + ce.endPc();
     }
     
     /** 1) Smaller 'startPc' first 2) Smaller 'endPc' first. */
@@ -730,9 +730,9 @@ public class ControlFlowGraphMaker {
 
         @Override
         public int compare(CodeException ce1, CodeException ce2) {
-            int comp = ce1.getStartPC() - ce2.getStartPC();
+            int comp = ce1.startPc() - ce2.startPc();
             if (comp == 0) {
-                comp = ce1.getEndPC() - ce2.getEndPC();
+                comp = ce1.endPc() - ce2.endPc();
             }
             return comp;
         }

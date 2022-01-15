@@ -8,7 +8,6 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
 import org.apache.bcel.Const;
-import org.apache.bcel.classfile.CodeException;
 import org.apache.bcel.classfile.Constant;
 import org.apache.bcel.classfile.ConstantClass;
 import org.apache.bcel.classfile.ConstantDouble;
@@ -25,6 +24,7 @@ import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.classfile.attribute.AttributeLineNumberTable;
 import org.jd.core.v1.model.classfile.attribute.AttributeLocalVariableTable;
 import org.jd.core.v1.model.classfile.attribute.AttributeLocalVariableTypeTable;
+import org.jd.core.v1.model.classfile.attribute.CodeException;
 import org.jd.core.v1.model.classfile.attribute.LocalVariable;
 import org.jd.core.v1.model.classfile.attribute.LocalVariableType;
 import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
@@ -553,14 +553,14 @@ public final class ByteCodeWriter {
 
             for (CodeException codeException : codeExceptions) {
                 sb.append(linePrefix).append("  ");
-                sb.append(codeException.getStartPC()).append('\t');
-                sb.append(codeException.getEndPC()).append('\t');
-                sb.append(codeException.getHandlerPC()).append('\t');
+                sb.append(codeException.startPc()).append('\t');
+                sb.append(codeException.endPc()).append('\t');
+                sb.append(codeException.handlerPc()).append('\t');
 
-                if (codeException.getCatchType() == 0) {
+                if (codeException.catchType() == 0) {
                     sb.append("finally");
                 } else {
-                    sb.append(constants.getConstantTypeName(codeException.getCatchType()));
+                    sb.append(constants.getConstantTypeName(codeException.catchType()));
                 }
 
                 sb.append('\n');

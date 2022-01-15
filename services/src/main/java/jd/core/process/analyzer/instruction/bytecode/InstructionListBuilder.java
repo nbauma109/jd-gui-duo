@@ -17,15 +17,14 @@
 package jd.core.process.analyzer.instruction.bytecode;
 
 import org.apache.bcel.Const;
-import org.apache.bcel.classfile.CodeException;
 import org.apache.bcel.classfile.LineNumber;
+import org.jd.core.v1.model.classfile.attribute.CodeException;
 
 import java.util.ArrayDeque;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.List;
-import java.util.Map.Entry;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ConstantPool;
@@ -90,7 +89,7 @@ public final class InstructionListBuilder
                 // Declaration de variables additionnelles pour le traitement
                 // des blocs 'catch' et 'finally'.
                 final Deque<Instruction> stack = new ArrayDeque<>();
-                final List<Entry<Integer, CodeException>> codeExceptions = method.getCodeExceptions();
+                final CodeException[] codeExceptions = method.getCodeExceptions();
                 int codeExceptionsIndex = 0;
                 int exceptionOffset;
                 ConstantPool constants = classFile.getConstantPool();
@@ -102,8 +101,8 @@ public final class InstructionListBuilder
                 else
                 {
                     // Sort codeExceptions by handlerPc
-                    Collections.sort(codeExceptions, COMPARATOR);
-                    exceptionOffset = codeExceptions.get(0).getValue().getHandlerPC();
+                    Arrays.sort(codeExceptions, COMPARATOR);
+                    exceptionOffset = codeExceptions[0].handlerPc();
                 }
 
                 // Declaration de variables additionnelles pour le traitement
@@ -156,7 +155,7 @@ public final class InstructionListBuilder
                         // Ajout d'une pseudo instruction de lecture
                         // d'exception en début de bloc catch
                         int catchType =
-                                codeExceptions.get(codeExceptionsIndex).getValue().getCatchType();
+                                codeExceptions[codeExceptionsIndex].catchType();
                         int signatureIndex;
 
                         if (catchType == 0)
@@ -181,14 +180,14 @@ public final class InstructionListBuilder
                         int nextOffsetException;
                         for (;;)
                         {
-                            if (++codeExceptionsIndex >= codeExceptions.size())
+                            if (++codeExceptionsIndex >= codeExceptions.length)
                             {
                                 nextOffsetException = -1;
                                 break;
                             }
 
                             nextOffsetException =
-                                    codeExceptions.get(codeExceptionsIndex).getValue().getHandlerPC();
+                                    codeExceptions[codeExceptionsIndex].handlerPc();
 
                             if (nextOffsetException != exceptionOffset) {
                                 break;
@@ -361,7 +360,7 @@ public final class InstructionListBuilder
     }
 
     private static class CodeExceptionComparator
-    implements java.io.Serializable, Comparator<Entry<Integer, CodeException>>
+    implements java.io.Serializable, Comparator<CodeException>
     {
         /**
          * Comparators should be Serializable: A non-serializable Comparator can prevent an otherwise-Serializable ordered collection from being serializable.
@@ -369,24 +368,21 @@ public final class InstructionListBuilder
         private static final long serialVersionUID = 1L;
 
         @Override
-        public int compare(Entry<Integer, CodeException> ice1, Entry<Integer, CodeException> ice2)
+        public int compare(CodeException ce1, CodeException ce2)
         {
-            CodeException ce1 = ice1.getValue();
-            CodeException ce2 = ice2.getValue();
-
-            if (ce1.getHandlerPC() != ce2.getHandlerPC()) {
-                return ce1.getHandlerPC() - ce2.getHandlerPC();
+            if (ce1.handlerPc() != ce2.handlerPc()) {
+                return ce1.handlerPc() - ce2.handlerPc();
             }
 
-            if (ce1.getEndPC() != ce2.getEndPC()) {
-                return ce1.getEndPC() - ce2.getEndPC();
+            if (ce1.endPc() != ce2.endPc()) {
+                return ce1.endPc() - ce2.endPc();
             }
 
-            if (ce1.getStartPC() != ce2.getStartPC()) {
-                return ce1.getStartPC() - ce2.getStartPC();
+            if (ce1.startPc() != ce2.startPc()) {
+                return ce1.startPc() - ce2.startPc();
             }
 
-            return ice1.getKey() - ice2.getKey();
+            return ce1.index() - ce2.index();
         }
     }
 }

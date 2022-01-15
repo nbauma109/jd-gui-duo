@@ -17,19 +17,16 @@
 package jd.core.process.deserializer;
 
 import org.apache.bcel.Const;
-import org.apache.bcel.classfile.CodeException;
 import org.apache.bcel.classfile.InnerClass;
-import org.apache.bcel.classfile.LineNumber;
 import org.jd.core.v1.service.deserializer.classfile.attribute.InvalidAttributeLengthException;
 
 import java.io.DataInput;
 import java.io.IOException;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
 
 import static org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer.loadBootstrapMethods;
+import static org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer.loadCode;
+import static org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer.loadCodeExceptions;
+import static org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer.loadLineNumbers;
 import static org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer.loadParameters;
 
 import jd.core.model.classfile.ConstantPool;
@@ -88,8 +85,8 @@ public final class AttributeDeserializer
                 di.skipBytes(4);
                 attributes[i] = new AttributeCode(
                         Const.ATTR_CODE,
-                        deserializeCode(di),
-                        deserializeCodeExceptions(di),
+                        loadCode(di),
+                        loadCodeExceptions(di),
                         deserialize(di, constants));
             }
             else if (attributeNameIndex == constants.getConstantValueAttributeNameIndex())
@@ -134,7 +131,7 @@ public final class AttributeDeserializer
             {
                 attributes[i] = new AttributeNumberTable(
                         Const.ATTR_LINE_NUMBER_TABLE,
-                        deserializeLineNumbers(di));
+                        loadLineNumbers(di));
             }
             else if (attributeNameIndex == constants.getLocalVariableTableAttributeNameIndex())
             {
@@ -221,56 +218,6 @@ public final class AttributeDeserializer
         }
 
         return attributes;
-    }
-
-    private static byte[] deserializeCode(DataInput di)
-        throws IOException
-    {
-        int codeLength = di.readInt();
-        if (codeLength == 0) {
-            return null;
-        }
-
-        byte[] code = new byte[codeLength];
-        di.readFully(code);
-
-        return code;
-    }
-
-    private static List<Entry<Integer, CodeException>> deserializeCodeExceptions(DataInput di)
-        throws IOException
-    {
-        int count = di.readUnsignedShort();
-        if (count == 0) {
-            return null;
-        }
-
-        List<Entry<Integer, CodeException>> codeExceptions = new ArrayList<>();
-
-        for (int i=0; i<count; i++) {
-            codeExceptions.add(new SimpleEntry<>(i, new CodeException(di.readUnsignedShort(),
-                                                                  di.readUnsignedShort(),
-                                                                  di.readUnsignedShort(),
-                                                                  di.readUnsignedShort())));
-        }
-        return codeExceptions;
-    }
-
-    private static LineNumber[] deserializeLineNumbers(DataInput di)
-        throws IOException
-    {
-        int count = di.readUnsignedShort();
-        if (count == 0) {
-            return null;
-        }
-
-        LineNumber[] lineNumbers = new LineNumber[count];
-
-        for (int i=0; i<count; i++) {
-            lineNumbers[i] = new LineNumber(di.readUnsignedShort(),
-                                            di.readUnsignedShort());
-        }
-        return lineNumbers;
     }
 
     private static LocalVariable[] deserializeLocalVariable(DataInput di)

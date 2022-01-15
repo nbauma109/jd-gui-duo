@@ -17,20 +17,17 @@
 package jd.core.model.classfile.attribute;
 
 import org.apache.bcel.Const;
-import org.apache.bcel.classfile.CodeException;
-
-import java.util.List;
-import java.util.Map.Entry;
+import org.jd.core.v1.model.classfile.attribute.CodeException;
 
 public class AttributeCode extends Attribute
 {
     private final byte[] code;
-    private final List<Entry<Integer, CodeException>> exceptionTable;
+    private final CodeException[] exceptionTable;
     private final Attribute[] attributes;
 
     public AttributeCode(byte tag,
                          byte[] code,
-                         List<Entry<Integer, CodeException>> exceptionTable,
+                         CodeException[] exceptionTable,
                          Attribute[] attributes)
     {
         super(tag);
@@ -82,7 +79,7 @@ public class AttributeCode extends Attribute
         return code;
     }
 
-    public List<Entry<Integer, CodeException>> getExceptionTable() {
+    public CodeException[] getExceptionTable() {
         return exceptionTable;
     }
 }
