@@ -247,6 +247,7 @@ public final class SearchInstructionByOffsetVisitor
              Const.SIPUSH,
              Const.RET,
              Const.RETURN,
+             Const.INVOKEDYNAMIC,
              ByteCodeConstants.EXCEPTIONLOAD,
              ByteCodeConstants.RETURNADDRESSLOAD:
             break;

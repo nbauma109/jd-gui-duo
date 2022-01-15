@@ -22,6 +22,7 @@ import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.InvokeNew;
+import jd.core.model.instruction.bytecode.instruction.LambdaInstruction;
 import jd.core.model.layout.block.InstructionLayoutBlock;
 import jd.core.model.layout.block.LayoutBlock;
 import jd.core.model.layout.block.LayoutBlockConstants;
@@ -111,5 +112,36 @@ public class InstructionSplitterVisitor extends BaseInstructionSplitterVisitor
         // Add blocks for inner class body
         ClassFileLayouter.createBlocksForBodyOfAnonymousClass(
             this.preferences, innerClassFile, this.layoutBlockList);
+    }
+    
+    @Override
+    public void visitAnonymousLambda(Instruction parent, LambdaInstruction in)
+    {
+        // Add a new part of instruction
+        int lastLineNumber = MaxLineNumberVisitor.visit(in);
+        int preferedLineNumber;
+        
+        if (this.firstLineNumber != Instruction.UNKNOWN_LINE_NUMBER &&
+                lastLineNumber != Instruction.UNKNOWN_LINE_NUMBER)
+        {
+            preferedLineNumber = lastLineNumber-this.firstLineNumber;
+        }
+        else
+        {
+            preferedLineNumber = LayoutBlockConstants.UNLIMITED_LINE_COUNT;
+        }
+        
+        this.layoutBlockList.add(new InstructionLayoutBlock(
+                LayoutBlockConstants.INSTRUCTION,
+                this.firstLineNumber, lastLineNumber,
+                preferedLineNumber, preferedLineNumber, preferedLineNumber,
+                this.classFile, this.method, this.instruction,
+                this.offset1, in.getOffset()));
+        
+        this.firstLineNumber = parent.getLineNumber();
+        this.offset1 = in.getOffset();
+        
+        // Add blocks for lambda
+        ClassFileLayouter.createBlocksForBodyOfLambda(this.preferences, in, this.layoutBlockList);
     }
 }

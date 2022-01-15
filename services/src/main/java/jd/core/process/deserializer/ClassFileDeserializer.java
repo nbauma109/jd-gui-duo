@@ -139,7 +139,7 @@ public final class ClassFileDeserializer
         ClassFile classFile = null;
         try (DataInputStream dis = new DataInputStream(new ByteArrayInputStream(loader.load(internalClassPath))))
         {
-            classFile = deserialize(dis);
+            classFile = deserialize(dis, loader);
         }
         catch (IOException e)
         {
@@ -148,7 +148,7 @@ public final class ClassFileDeserializer
         return classFile;
     }
 
-    private static ClassFile deserialize(DataInput di)
+    private static ClassFile deserialize(DataInput di, Loader loader)
         throws IOException
     {
         checkMagic(di);
@@ -177,7 +177,8 @@ public final class ClassFileDeserializer
                 interfaces,
                 fieldInfos,
                 methodInfos,
-                attributeInfos
+                attributeInfos,
+                loader
         );
     }
 

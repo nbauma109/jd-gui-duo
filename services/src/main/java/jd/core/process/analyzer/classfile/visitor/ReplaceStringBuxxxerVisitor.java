@@ -537,6 +537,7 @@ public class ReplaceStringBuxxxerVisitor
              Const.ALOAD,
              Const.ILOAD,
              Const.GOTO,
+             Const.INVOKEDYNAMIC,
              ByteCodeConstants.EXCEPTIONLOAD,
              Const.RET,
              ByteCodeConstants.RETURNADDRESSLOAD:

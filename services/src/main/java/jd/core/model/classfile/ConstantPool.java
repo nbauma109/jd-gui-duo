@@ -19,6 +19,8 @@ package jd.core.model.classfile;
 import org.apache.bcel.classfile.Constant;
 import org.apache.bcel.classfile.ConstantClass;
 import org.apache.bcel.classfile.ConstantFieldref;
+import org.apache.bcel.classfile.ConstantMethodHandle;
+import org.apache.bcel.classfile.ConstantMethodType;
 import org.apache.bcel.classfile.ConstantNameAndType;
 import org.apache.bcel.classfile.ConstantUtf8;
 import org.jd.core.v1.model.classfile.constant.ConstantInterfaceMethodref;
@@ -72,6 +74,8 @@ public class ConstantPool
     private final int signatureAttributeNameIndex;
     private final int sourceFileAttributeNameIndex;
     private final int syntheticAttributeNameIndex;
+    private final int bootstrapMethodsAttributeNameIndex;
+    private final int methodParametersAttributeNameIndex;
 
     public ConstantPool(Constant[] constants)
     {
@@ -195,6 +199,12 @@ public class ConstantPool
         this.syntheticAttributeNameIndex =
             addConstantUtf8(StringConstants.SYNTHETIC_ATTRIBUTE_NAME);
 
+        this.bootstrapMethodsAttributeNameIndex =
+                addConstantUtf8(StringConstants.BOOTSTRAP_METHODS_ATTRIBUTE_NAME);
+        
+        this.methodParametersAttributeNameIndex =
+                addConstantUtf8(StringConstants.METHOD_PARAMETERS_ATTRIBUTE_NAME);
+        
     }
 
     public Constant get(int i)
@@ -373,6 +383,16 @@ public class ConstantPool
         return (ConstantMethodref)this.listOfConstants.get(index);
     }
 
+    public ConstantMethodType getConstantMethodType(int index)
+    {
+        return (ConstantMethodType)this.listOfConstants.get(index);
+    }
+    
+    public ConstantMethodHandle getConstantMethodHandle(int index)
+    {
+        return (ConstantMethodHandle)this.listOfConstants.get(index);
+    }
+    
     public ConstantInterfaceMethodref getConstantInterfaceMethodref(int index)
     {
         return (ConstantInterfaceMethodref)this.listOfConstants.get(index);
@@ -467,6 +487,14 @@ public class ConstantPool
         return runtimeVisibleParameterAnnotationsAttributeNameIndex;
     }
 
+    public int getBootstrapMethodsAttributeNameIndex() {
+        return bootstrapMethodsAttributeNameIndex;
+    }
+
+    public int getMethodParametersAttributeNameIndex() {
+        return methodParametersAttributeNameIndex;
+    }
+    
     public int getSignatureAttributeNameIndex() {
         return signatureAttributeNameIndex;
     }
@@ -501,5 +529,9 @@ public class ConstantPool
 
     public int getThisLocalVariableNameIndex() {
         return thisLocalVariableNameIndex;
+    }
+    
+    public String getLocalVariableName(LocalVariable localVariable) {
+        return getConstantUtf8(localVariable.getNameIndex());
     }
 }

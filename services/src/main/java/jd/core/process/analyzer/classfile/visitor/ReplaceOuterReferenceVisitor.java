@@ -515,6 +515,7 @@ public class ReplaceOuterReferenceVisitor
              Const.SIPUSH,
              Const.RET,
              Const.RETURN,
+             Const.INVOKEDYNAMIC,
              ByteCodeConstants.EXCEPTIONLOAD,
              ByteCodeConstants.RETURNADDRESSLOAD:
             break;

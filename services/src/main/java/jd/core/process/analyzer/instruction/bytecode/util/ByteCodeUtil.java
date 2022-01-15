@@ -364,4 +364,11 @@ public final class ByteCodeUtil
     public static int getCmpPriority(int cmp) {
         return cmp == ByteCodeConstants.CMP_EQ || cmp == ByteCodeConstants.CMP_NE ? 7 : 6;
     }
+
+    public static boolean getArrayRefIndex(byte[] code) {
+        return code.length == 5 
+                && (code[0] & 255) == Const.ILOAD_0 
+                && (code[1] & 255) == Const.ANEWARRAY
+                && (code[4] & 255) == Const.ARETURN;
+    }
 }

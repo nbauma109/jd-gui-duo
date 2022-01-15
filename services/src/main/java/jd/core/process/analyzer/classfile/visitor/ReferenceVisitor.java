@@ -455,6 +455,7 @@ public class ReferenceVisitor
              Const.SIPUSH,
              Const.RET,
              Const.RETURN,
+             Const.INVOKEDYNAMIC,
              ByteCodeConstants.EXCEPTIONLOAD,
              ByteCodeConstants.RETURNADDRESSLOAD:
             break;

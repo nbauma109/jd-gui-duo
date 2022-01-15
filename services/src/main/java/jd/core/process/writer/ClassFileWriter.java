@@ -35,6 +35,7 @@ import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.Field;
 import jd.core.model.classfile.LocalVariable;
+import jd.core.model.classfile.LocalVariables;
 import jd.core.model.classfile.Method;
 import jd.core.model.classfile.attribute.Annotation;
 import jd.core.model.classfile.attribute.AttributeSignature;
@@ -63,6 +64,7 @@ import jd.core.model.layout.block.ImplementsInterfacesLayoutBlock;
 import jd.core.model.layout.block.ImportsLayoutBlock;
 import jd.core.model.layout.block.InstructionLayoutBlock;
 import jd.core.model.layout.block.InstructionsLayoutBlock;
+import jd.core.model.layout.block.LambdaMethodLayoutBlock;
 import jd.core.model.layout.block.LayoutBlock;
 import jd.core.model.layout.block.LayoutBlockConstants;
 import jd.core.model.layout.block.MarkerLayoutBlock;
@@ -400,6 +402,9 @@ public final class ClassFileWriter
                 break;
             case LayoutBlockConstants.FRAGMENT_COMA_SPACE:
                 writeComaSpace();
+                break;
+            case LayoutBlockConstants.FRAGMENT_ARROW:
+                writeArrow();
                 break;
             }
         }
@@ -1663,12 +1668,32 @@ public final class ClassFileWriter
 
         if ((mlb.getClassFile().getAccessFlags() & Const.ACC_ANNOTATION) == 0)
         {
-            writeAccessMethod(method.getAccessFlags());
-
-            SignatureWriter.writeMethodDeclaration(
-                keywords, this.loader, this.printer, this.referenceMap,
-                mlb.getClassFile(), method, mlb.getSignature(), mlb.hasDescriptorFlag());
-
+            if (mlb instanceof LambdaMethodLayoutBlock lmlb) {
+                List<String> lambdaParameterNames = lmlb.getParameterNames();
+                switch (lambdaParameterNames.size()) {
+                    case 0:
+                        this.printer.print("()");
+                        break;
+                    case 1:
+                        this.printer.print(lambdaParameterNames.get(0));
+                        break;
+                    default:
+                        this.printer.print('(');
+                        for (Iterator<String> it = lambdaParameterNames.iterator(); it.hasNext();) {
+                            this.printer.print(it.next());
+                            if (it.hasNext()) {
+                                this.printer.print(", ");
+                            }
+                        }
+                        this.printer.print(')');
+                        break;
+                }
+            } else {
+                writeAccessMethod(method.getAccessFlags());
+                SignatureWriter.writeMethodDeclaration(
+                        keywords, this.loader, this.printer, this.referenceMap,
+                        mlb.getClassFile(), method, mlb.getSignature(), mlb.hasDescriptorFlag(), mlb.isLambda());
+            }
             if (mlb.hasNullCodeFlag()) {
                 this.printer.print(';');
             }
@@ -1680,7 +1705,7 @@ public final class ClassFileWriter
 
             SignatureWriter.writeMethodDeclaration(
                 keywords, this.loader, this.printer, this.referenceMap,
-                mlb.getClassFile(), method, mlb.getSignature(), mlb.hasDescriptorFlag());
+                mlb.getClassFile(), method, mlb.getSignature(), mlb.hasDescriptorFlag(), mlb.isLambda());
 
             ElementValue defaultAnnotationValue =
                     method.getDefaultAnnotationValue();
@@ -1862,7 +1887,9 @@ public final class ClassFileWriter
         this.instructionPrinter.startOfInstruction();
         this.visitor.visit(dlb.getInstruction());
         this.instructionPrinter.endOfInstruction();
-        this.printer.print(';');
+        if (!this.printer.toString().trim().endsWith("{")) {
+            this.printer.print(';');
+        }
         this.instructionPrinter.release();
 
         this.printer.debugEndOfInstructionBlockLayoutBlock();
@@ -1949,6 +1976,11 @@ public final class ClassFileWriter
         this.printer.print(", ");
     }
 
+    private void writeArrow()
+    {
+        this.printer.print(" -> ");
+    }
+    
     private void writeSwitch()
     {
         if (this.addSpace)
@@ -2348,8 +2380,11 @@ public final class ClassFileWriter
 
         this.printer.print(' ');
 
-        LocalVariable lv = method.getLocalVariables()
-            .searchLocalVariableWithIndexAndOffset(
+        LocalVariables localVariables = method == null ? null : method.getLocalVariables();
+        if (localVariables == null) {
+            localVariables = new LocalVariables();
+        }
+        LocalVariable lv = localVariables.searchLocalVariableWithIndexAndOffset(
                 fc.localVarIndex(), fc.exceptionOffset());
 
         if (lv == null)

@@ -22,6 +22,7 @@ import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Method;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.InvokeNew;
+import jd.core.model.instruction.bytecode.instruction.LambdaInstruction;
 import jd.core.model.layout.block.FragmentLayoutBlock;
 import jd.core.model.layout.block.InstructionsLayoutBlock;
 import jd.core.model.layout.block.LayoutBlock;
@@ -168,6 +169,23 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
             ClassFileLayouter.createBlocksForBodyOfAnonymousClass(
                 this.preferences, innerClassFile, this.layoutBlockList);
 
+        this.firstLineNumber = Instruction.UNKNOWN_LINE_NUMBER;
+        this.index1 = this.index2;
+        this.offset1 = in.getOffset();
+    }
+    
+    @Override
+    public void visitAnonymousLambda(
+            Instruction parent, LambdaInstruction in)
+    {
+        // Add a new part of instruction
+        addInstructionsLayoutBlock(in.getLineNumber(), in.getOffset());
+        
+        // Add blocks for lambda method body
+        this.maxLineNumber =
+                ClassFileLayouter.createBlocksForBodyOfLambda(
+                        this.preferences, in, this.layoutBlockList);
+        
         this.firstLineNumber = Instruction.UNKNOWN_LINE_NUMBER;
         this.index1 = this.index2;
         this.offset1 = in.getOffset();

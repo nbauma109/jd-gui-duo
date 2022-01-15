@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2007-2019 Emmanuel Dupuy GPLv3
+ * Copyright (C) 2022 GPLv3
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,31 +16,27 @@
  ******************************************************************************/
 package jd.core.model.layout.block;
 
+import static jd.core.model.instruction.bytecode.instruction.Instruction.UNKNOWN_LINE_NUMBER;
+import static jd.core.model.layout.block.LayoutBlockConstants.FRAGMENT_ARROW;
+
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Method;
-import jd.core.model.instruction.bytecode.instruction.Instruction;
 
-public class MethodNameLayoutBlock extends LayoutBlock
+public class LambdaArrowLayoutBlock extends LayoutBlock
 {
     private final ClassFile classFile;
     private final Method method;
-    private final String signature;
-    private final boolean descriptorFlag;
-    private final boolean nullCodeFlag;
 
-    public MethodNameLayoutBlock(
-        ClassFile classFile, Method method, String signature, 
-        boolean descriptorFlag, boolean nullCodeFlag)
+    public LambdaArrowLayoutBlock(ClassFile classFile, Method method)
     {
         super(
-            LayoutBlockConstants.METHOD_NAME,
-            Instruction.UNKNOWN_LINE_NUMBER, Instruction.UNKNOWN_LINE_NUMBER,
+            FRAGMENT_ARROW,
+            UNKNOWN_LINE_NUMBER,
+            UNKNOWN_LINE_NUMBER,
             0, 0, 0);
+
         this.classFile = classFile;
         this.method = method;
-        this.signature = signature;
-        this.descriptorFlag = descriptorFlag;
-        this.nullCodeFlag = nullCodeFlag;
     }
 
     public ClassFile getClassFile() {
@@ -49,21 +45,5 @@ public class MethodNameLayoutBlock extends LayoutBlock
 
     public Method getMethod() {
         return method;
-    }
-
-    public boolean hasNullCodeFlag() {
-        return nullCodeFlag;
-    }
-
-    public String getSignature() {
-        return signature;
-    }
-
-    public boolean hasDescriptorFlag() {
-        return descriptorFlag;
-    }
-
-    public boolean isLambda() {
-        return false;
     }
 }

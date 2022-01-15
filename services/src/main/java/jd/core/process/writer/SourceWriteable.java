@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2007-2019 Emmanuel Dupuy GPLv3
+ * Copyright (C) 2022 GPLv3
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,12 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package jd.core.model.classfile.attribute;
+package jd.core.process.writer;
 
-public class UnknowAttribute extends Attribute
-{
-    public UnknowAttribute(byte tag)
-    {
-        super(tag);
-    }
+import jd.core.printer.Printer;
+import jd.core.process.writer.visitor.SourceWriterVisitor;
+
+public interface SourceWriteable {
+    void write(Printer printer, SourceWriterVisitor visitor);
 }

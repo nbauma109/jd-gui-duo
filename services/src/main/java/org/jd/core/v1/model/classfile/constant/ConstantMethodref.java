@@ -9,7 +9,7 @@ import java.util.Objects;
 import static org.apache.bcel.Const.CONSTANT_Methodref;
 
 public class ConstantMethodref extends ConstantCP {
-        private List<String> listOfParameterSignatures;
+    private List<String> listOfParameterSignatures;
     private String returnedSignature;
 
     public ConstantMethodref(int classIndex, int nameAndTypeIndex) {

@@ -81,6 +81,7 @@ public final class ClassFileAnalyzer
 {
     private ClassFileAnalyzer() {
     }
+
     public static void analyze(ReferenceMap referenceMap, ClassFile classFile)
     {
         // Creation du tableau associatif [nom de classe interne, objet class].
@@ -707,15 +708,12 @@ public final class ClassFileAnalyzer
             return;
         }
 
-        int length = methods.length;
         DefaultVariableNameGenerator variableNameGenerator =
                 new DefaultVariableNameGenerator(classFile);
         int outerThisFieldrefIndex = 0;
 
-        for (int i=0; i<length; i++)
+        for (final Method method : methods)
         {
-            final Method method = methods[i];
-
             try
             {
                 if (method.getCode() == null)
@@ -730,41 +728,7 @@ public final class ClassFileAnalyzer
                 }
                 else
                 {
-                    // Build instructions
-                    List<Instruction> list = new ArrayList<>();
-                    List<Instruction> listForAnalyze = new ArrayList<>();
-
-                    InstructionListBuilder.build(
-                            classFile, method, list, listForAnalyze);
-                    method.setInstructions(list);
-
-                    if ((method.getAccessFlags() & (Const.ACC_PUBLIC|Const.ACC_PROTECTED|Const.ACC_PRIVATE|Const.ACC_STATIC)) == Const.ACC_STATIC &&
-                            hasAAccessorMethodName(classFile, method))
-                    {
-                        // Recherche des accesseurs
-                        AccessorAnalyzer.analyze(classFile, method);
-                        // Setup access flag : JDK 1.4 not set synthetic flag...
-                        method.setAccessFlags(method.getAccessFlags() | Const.ACC_SYNTHETIC);
-                    }
-                    else if ((method.getAccessFlags() &
-                            (Const.ACC_SYNTHETIC|Const.ACC_BRIDGE)) == 0)
-                    {
-                        // Create missing local variable table
-                        LocalVariableAnalyzer.analyze(
-                                classFile, method, variableNameGenerator, list, listForAnalyze);
-
-                        // Recherche du numéro de l'attribut contenant la reference
-                        // de la classe externe
-                        outerThisFieldrefIndex = searchOuterThisFieldrefIndex(
-                                classFile, method, list, outerThisFieldrefIndex);
-                    }
-                    else if ((method.getAccessFlags() & (Const.ACC_PUBLIC|Const.ACC_PROTECTED|Const.ACC_PRIVATE|Const.ACC_STATIC|Const.ACC_SYNTHETIC))
-                            == (Const.ACC_STATIC|Const.ACC_SYNTHETIC) &&
-                            hasAEclipseSwitchTableMethodName(classFile, method))
-                    {
-                        // Parse "static int[] $SWITCH_TABLE$...()" method
-                        parseEclipseOrDexSwitchTableMethod(classFile, method);
-                    }
+                    outerThisFieldrefIndex = preAnalyzeSingleMethod(classFile, variableNameGenerator, outerThisFieldrefIndex, method);
                 }
             }
             catch (Exception e)
@@ -779,6 +743,45 @@ public final class ClassFileAnalyzer
         }
     }
 
+    public static int preAnalyzeSingleMethod(ClassFile classFile, DefaultVariableNameGenerator variableNameGenerator, int outerThisFieldrefIndex, final Method method) {
+        // Build instructions
+        List<Instruction> list = new ArrayList<>();
+        List<Instruction> listForAnalyze = new ArrayList<>();
+
+        InstructionListBuilder.build(
+                classFile, method, list, listForAnalyze);
+        method.setInstructions(list);
+
+        if ((method.getAccessFlags() & (Const.ACC_PUBLIC|Const.ACC_PROTECTED|Const.ACC_PRIVATE|Const.ACC_STATIC)) == Const.ACC_STATIC &&
+                hasAAccessorMethodName(classFile, method))
+        {
+            // Recherche des accesseurs
+            AccessorAnalyzer.analyze(classFile, method);
+            // Setup access flag : JDK 1.4 not set synthetic flag...
+            method.setAccessFlags(method.getAccessFlags() | Const.ACC_SYNTHETIC);
+        }
+        else if ((method.getAccessFlags() &
+                (Const.ACC_SYNTHETIC|Const.ACC_BRIDGE)) == 0)
+        {
+            // Create missing local variable table
+            LocalVariableAnalyzer.analyze(
+                    classFile, method, variableNameGenerator, list, listForAnalyze);
+
+            // Recherche du numéro de l'attribut contenant la reference
+            // de la classe externe
+            outerThisFieldrefIndex = searchOuterThisFieldrefIndex(
+                    classFile, method, list, outerThisFieldrefIndex);
+        }
+        else if ((method.getAccessFlags() & (Const.ACC_PUBLIC|Const.ACC_PROTECTED|Const.ACC_PRIVATE|Const.ACC_STATIC|Const.ACC_SYNTHETIC))
+                == (Const.ACC_STATIC|Const.ACC_SYNTHETIC) &&
+                hasAEclipseSwitchTableMethodName(classFile, method))
+        {
+            // Parse "static int[] $SWITCH_TABLE$...()" method
+            parseEclipseOrDexSwitchTableMethod(classFile, method);
+        }
+        return outerThisFieldrefIndex;
+    }
+
     private static void analyzeMethods(
             ReferenceMap referenceMap,
             Map<String, ClassFile> innerClassesMap,
@@ -790,8 +793,6 @@ public final class ClassFileAnalyzer
             return;
         }
 
-        int length = methods.length;
-
         // Initialisation du reconstructeur traitant l'acces des champs et
         // méthodes externes si la classe courante est une classe interne ou
         // si elle contient des classes internes
@@ -799,10 +800,8 @@ public final class ClassFileAnalyzer
                 innerClassesMap != null ?
                         new OuterReferenceReconstructor(innerClassesMap, classFile) : null;
 
-        for (int i=0; i<length; i++)
+        for (final Method method : methods)
         {
-            final Method method = methods[i];
-
             if ((method.getAccessFlags() &
                     (Const.ACC_SYNTHETIC|Const.ACC_BRIDGE)) != 0 ||
                     method.getCode() == null ||
@@ -812,62 +811,7 @@ public final class ClassFileAnalyzer
 
             try
             {
-                List<Instruction> list = method.getInstructions();
-
-                // Recontruct access to outer fields and methods
-                if (outerReferenceReconstructor != null) {
-                    outerReferenceReconstructor.reconstruct(method, list);
-                }
-                // Re-construct 'new' intruction
-                NewInstructionReconstructor.reconstruct(classFile, method, list);
-                SimpleNewInstructionReconstructor.reconstruct(classFile, method, list);
-                // Recontruction des instructions de pre-incrementation non entier
-                PreIncReconstructor.reconstruct(list);
-                // Recontruction des instructions de post-incrementation non entier
-                PostIncReconstructor.reconstruct(list);
-                // Recontruction du mot clé '.class' pour le JDK 1.1.8 - A
-                DotClass118AReconstructor.reconstruct(
-                        referenceMap, classFile, list);
-                // Recontruction du mot clé '.class' pour le JDK 1.4
-                DotClass14Reconstructor.reconstruct(
-                        referenceMap, classFile, list);
-                // Replace StringBuffer and StringBuilder in java source line
-                replaceStringBufferAndStringBuilder(classFile, list);
-                // Remove unused pop instruction
-                removeUnusedPopInstruction(list);
-                // Transformation des tests sur des types 'long' et 'double'
-                transformTestOnLongOrDouble(list);
-                // Set constant type of "String.indexOf(...)" methods
-                setConstantTypeInStringIndexOfMethods(classFile, list);
-                // Elimine la séquence DupStore(this) ... DupLoad() ... DupLoad().
-                // Cette operation doit être executee avant
-                // 'AssignmentInstructionReconstructor'.
-                DupStoreThisReconstructor.reconstruct(list);
-                // Recontruction des affectations multiples
-                // Cette operation doit être executee avant
-                // 'InitArrayInstructionReconstructor', 'TernaryOpReconstructor'
-                // et la construction des instructions try-catch et finally.
-                // Cette operation doit être executee après 'DupStoreThisReconstructor'.
-                AssignmentInstructionReconstructor.reconstruct(list);
-                // Elimine les doubles casts et ajoute des casts devant les
-                // constantes numeriques si necessaire.
-                CheckCastAndConvertInstructionVisitor.visit(
-                        classFile.getConstantPool(), list);
-
-                // Build fast instructions
-                List<Instruction> fastList =
-                        new ArrayList<>(list);
-                method.setFastNodes(fastList);
-
-                // DEBUG //
-                //ConstantPool debugConstants = classFile.getConstantPool();
-                //String debugMethodName = debugConstants.getConstantUtf8(method.nameIndex);
-                // DEBUG //
-                FastInstructionListBuilder.build(
-                        referenceMap, classFile, method, fastList);
-
-                // Ajout des déclarations des variables locales temporaires
-                DupLocalVariableAnalyzer.declare(classFile, method, fastList);
+                analyzeSingleMethod(referenceMap, classFile, outerReferenceReconstructor, method);
             }
             catch (Exception e)
             {
@@ -883,10 +827,12 @@ public final class ClassFileAnalyzer
         // Recherche des initialisations des attributs d'instance
         InitInstanceFieldsReconstructor.reconstruct(classFile);
 
-        for (int i=0; i<length; i++)
-        {
-            final Method method = methods[i];
+        postAnalyzeMethods(classFile, methods);
+    }
 
+    private static void postAnalyzeMethods(ClassFile classFile, Method[] methods) {
+        for (final Method method : methods)
+        {
             if ((method.getAccessFlags() &
                     (Const.ACC_SYNTHETIC|Const.ACC_BRIDGE)) != 0 ||
                     method.getCode() == null ||
@@ -894,21 +840,83 @@ public final class ClassFileAnalyzer
                     method.containsError()) {
                 continue;
             }
+            postAnalyzeSingleMethod(classFile, method);
+        }
+    }
 
-            try
-            {
-                // Remove empty and enum super call
-                analyseAndModifyConstructors(classFile, method);
-                // Check line number of 'return'
-                ReturnLineNumberAnalyzer.check(method);
-                // Remove last instruction 'return'
-                removeLastReturnInstruction(method);
-            }
-            catch (Exception e)
-            {
-                assert ExceptionUtil.printStackTrace(e);
-                method.setContainsError(true);
-            }
+    public static void analyzeSingleMethod(ReferenceMap referenceMap, ClassFile classFile, OuterReferenceReconstructor outerReferenceReconstructor, final Method method) {
+        List<Instruction> list = method.getInstructions();
+
+        // Recontruct access to outer fields and methods
+        if (outerReferenceReconstructor != null) {
+            outerReferenceReconstructor.reconstruct(method, list);
+        }
+        // Re-construct 'new' intruction
+        NewInstructionReconstructor.reconstruct(classFile, method, list);
+        SimpleNewInstructionReconstructor.reconstruct(classFile, method, list);
+        // Recontruction des instructions de pre-incrementation non entier
+        PreIncReconstructor.reconstruct(list);
+        // Recontruction des instructions de post-incrementation non entier
+        PostIncReconstructor.reconstruct(list);
+        // Recontruction du mot clé '.class' pour le JDK 1.1.8 - A
+        DotClass118AReconstructor.reconstruct(
+                referenceMap, classFile, list);
+        // Recontruction du mot clé '.class' pour le JDK 1.4
+        DotClass14Reconstructor.reconstruct(
+                referenceMap, classFile, list);
+        // Replace StringBuffer and StringBuilder in java source line
+        replaceStringBufferAndStringBuilder(classFile, list);
+        // Remove unused pop instruction
+        removeUnusedPopInstruction(list);
+        // Transformation des tests sur des types 'long' et 'double'
+        transformTestOnLongOrDouble(list);
+        // Set constant type of "String.indexOf(...)" methods
+        setConstantTypeInStringIndexOfMethods(classFile, list);
+        // Elimine la séquence DupStore(this) ... DupLoad() ... DupLoad().
+        // Cette operation doit être executee avant
+        // 'AssignmentInstructionReconstructor'.
+        DupStoreThisReconstructor.reconstruct(list);
+        // Recontruction des affectations multiples
+        // Cette operation doit être executee avant
+        // 'InitArrayInstructionReconstructor', 'TernaryOpReconstructor'
+        // et la construction des instructions try-catch et finally.
+        // Cette operation doit être executee après 'DupStoreThisReconstructor'.
+        AssignmentInstructionReconstructor.reconstruct(list);
+        // Elimine les doubles casts et ajoute des casts devant les
+        // constantes numeriques si necessaire.
+        CheckCastAndConvertInstructionVisitor.visit(
+                classFile.getConstantPool(), list);
+
+        // Build fast instructions
+        List<Instruction> fastList =
+                new ArrayList<>(list);
+        method.setFastNodes(fastList);
+
+        // DEBUG //
+        //ConstantPool debugConstants = classFile.getConstantPool();
+        //String debugMethodName = debugConstants.getConstantUtf8(method.nameIndex);
+        // DEBUG //
+        FastInstructionListBuilder.build(
+                referenceMap, classFile, method, fastList);
+
+        // Ajout des déclarations des variables locales temporaires
+        DupLocalVariableAnalyzer.declare(classFile, method, fastList);
+    }
+
+    public static void postAnalyzeSingleMethod(ClassFile classFile, final Method method) {
+        try
+        {
+            // Remove empty and enum super call
+            analyseAndModifyConstructors(classFile, method);
+            // Check line number of 'return'
+            ReturnLineNumberAnalyzer.check(method);
+            // Remove last instruction 'return'
+            removeLastReturnInstruction(method);
+        }
+        catch (Exception e)
+        {
+            assert ExceptionUtil.printStackTrace(e);
+            method.setContainsError(true);
         }
     }
 

@@ -146,7 +146,9 @@ public final class FastInstructionListBuilder {
 
         // Initialyze delaclation flags
         LocalVariables localVariables = method.getLocalVariables();
-        initDelcarationFlags(localVariables);
+        if (localVariables != null) {
+            initDelcarationFlags(localVariables);
+        }
 
         // Initialisation de l'ensemle des offsets d'etiquette
         IntSet offsetLabelSet = new IntSet();
@@ -177,7 +179,9 @@ public final class FastInstructionListBuilder {
 
         analyzeList(classFile, method, list, localVariables, offsetLabelSet, -1, -1, -1, -1, -1, -1, returnOffset);
 
-        localVariables.removeUselessLocalVariables();
+        if (localVariables != null) {
+            localVariables.removeUselessLocalVariables();
+        }
 
         manageRedeclaredVariables(list);
 
@@ -1453,7 +1457,7 @@ public final class FastInstructionListBuilder {
             // partnerParameters.getCpCode(), parameterName });
             // 231: this.loggerTarget.debug(message);
             // }
-            int lvLength = localVariables.size();
+            final int lvLength = localVariables == null ? 0 : localVariables.size();
             for (int i = 0; i < lvLength; i++) {
                 lv = localVariables.getLocalVariableAt(i);
                 if (lv.hasDeclarationFlag() == NOT_DECLARED && !lv.isToBeRemoved() && beforeListOffset < lv.getStartPc()

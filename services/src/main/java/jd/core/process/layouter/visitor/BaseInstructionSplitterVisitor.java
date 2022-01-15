@@ -45,6 +45,7 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.InvokeInstruction;
 import jd.core.model.instruction.bytecode.instruction.InvokeNew;
 import jd.core.model.instruction.bytecode.instruction.InvokeNoStaticInstruction;
+import jd.core.model.instruction.bytecode.instruction.LambdaInstruction;
 import jd.core.model.instruction.bytecode.instruction.MultiANewArray;
 import jd.core.model.instruction.bytecode.instruction.NewArray;
 import jd.core.model.instruction.bytecode.instruction.Pop;
@@ -210,6 +211,12 @@ public abstract class BaseInstructionSplitterVisitor
                 //}
             }
             break;
+        case Const.INVOKEDYNAMIC:
+            if (instruction instanceof LambdaInstruction in) {
+                // Anonymous lambda
+                visitAnonymousLambda(parent==null ? in : parent, in);
+            }
+            break;
         case Const.INSTANCEOF:
             visit(instruction, ((InstanceOf)instruction).getObjectref());
             break;
@@ -291,6 +298,7 @@ public abstract class BaseInstructionSplitterVisitor
         }
     }
 
-    public abstract void visitAnonymousNewInvoke(
-        Instruction parent, InvokeNew in, ClassFile innerClassFile);
+    public abstract void visitAnonymousNewInvoke(Instruction parent, InvokeNew in, ClassFile innerClass);
+    
+    public abstract void visitAnonymousLambda(Instruction parent, LambdaInstruction in);
 }

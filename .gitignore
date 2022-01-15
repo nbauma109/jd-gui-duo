@@ -39,3 +39,9 @@ build/
 
 # WinMerge
 *.bak
+
+# JVM core dumps
+*.trc
+*.dmp
+javacore.*.txt
+

@@ -18,6 +18,7 @@ package jd.core.model.classfile;
 
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.ConstantClass;
+import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.HashMap;
@@ -26,7 +27,9 @@ import java.util.Map;
 
 import jd.core.model.classfile.accessor.Accessor;
 import jd.core.model.classfile.attribute.Attribute;
+import jd.core.model.classfile.attribute.AttributeBootstrapMethods;
 import jd.core.model.classfile.attribute.AttributeInnerClasses;
+import jd.core.model.classfile.attribute.AttributeMethodParameters;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.util.SignatureUtil;
 
@@ -67,14 +70,17 @@ public class ClassFile extends Base
      *   "$SwitchMap$basic$data$TestEnum$enum1".
      */
     private final Map<Integer, List<Integer>> switchMaps;
+    
+    private final Loader loader;
 
     public ClassFile(int minorVersion, int majorVersion,
                      ConstantPool constants, int accessFlags, int thisClass,
                      int superClass, int[] interfaces, Field[] fields,
-                     Method[] methods, Attribute[] attributes)
+                     Method[] methods, Attribute[] attributes, Loader loader)
     {
         super(accessFlags, attributes);
 
+        this.loader = loader;
         this.minorVersion = minorVersion;
         this.majorVersion = majorVersion;
         this.thisClass = thisClass;
@@ -223,6 +229,34 @@ public class ClassFile extends Base
         return null;
     }
 
+    public AttributeBootstrapMethods getAttributeBootstrapMethods()
+    {
+        if (this.getAttributes() != null)
+        {
+            for (Attribute attribute : this.getAttributes()) {
+                if (attribute.getTag() == Const.ATTR_BOOTSTRAP_METHODS) {
+                    return (AttributeBootstrapMethods)attribute;
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    public AttributeMethodParameters getAttributeMethodParameters()
+    {
+        if (this.getAttributes() != null)
+        {
+            for (Attribute attribute : this.getAttributes()) {
+                if (attribute.getTag() == Const.ATTR_METHOD_PARAMETERS) {
+                    return (AttributeMethodParameters)attribute;
+                }
+            }
+        }
+        
+        return null;
+    }
+    
     private boolean isAnonymousClass()
     {
         int index = this.thisClassName.lastIndexOf(
@@ -429,5 +463,9 @@ public class ClassFile extends Base
     public Map<Integer, List<Integer>> getSwitchMaps()
     {
         return this.switchMaps;
+    }
+
+    public Loader getLoader() {
+        return loader;
     }
 }

@@ -66,65 +66,65 @@ public final class SignatureWriter
     public static void writeMethodDeclaration(
             Set<String> keywordSet, Loader loader, Printer printer,
             ReferenceMap referenceMap, ClassFile classFile, Method method,
-            String signature, boolean descriptorFlag)
+            String signature, boolean descriptorFlag, boolean lambda)
     {
         char[] caSignature = signature.toCharArray();
         int length = caSignature.length;
-        int index = 0;
-
-        // Affichage des generics
-        int newIndex = writeGenerics(
-                loader, printer, referenceMap, classFile,
-                caSignature, length, index);
-
-        if (newIndex != index) {
-            printer.print(' ');
-            index = newIndex;
-        }
-
-        if (caSignature[index] != '(') {
-            throw new SignatureFormatException(signature);
-        }
-
-        // pass '('
-        index++;
-
         ConstantPool constants = classFile.getConstantPool();
-        String internalClassName = classFile.getThisClassName();
-        String descriptor = constants.getConstantUtf8(method.getDescriptorIndex());
         boolean staticMethodFlag = (method.getAccessFlags() & Const.ACC_STATIC) != 0;
-
-        if (method.getNameIndex() == constants.getInstanceConstructorIndex())
-        {
-            printer.printConstructorDeclaration(internalClassName, classFile.getClassName(), descriptor);
+        int index = 0;
+        if (!lambda) {
+            // Affichage des generics
+            int newIndex = writeGenerics(
+                    loader, printer, referenceMap, classFile,
+                    caSignature, length, index);
+    
+            if (newIndex != index) {
+                printer.print(' ');
+                index = newIndex;
+            }
+    
+            if (caSignature[index] != '(') {
+                throw new SignatureFormatException(signature);
+            }
+    
+            // pass '('
+            index++;
+    
+            String internalClassName = classFile.getThisClassName();
+            String descriptor = constants.getConstantUtf8(method.getDescriptorIndex());
+    
+            if (method.getNameIndex() == constants.getInstanceConstructorIndex())
+            {
+                printer.printConstructorDeclaration(internalClassName, classFile.getClassName(), descriptor);
+            }
+            else
+            {
+    
+                newIndex = index;
+    
+                while (newIndex < length && caSignature[newIndex++] != ')') {
+                    // search ')'
+                }
+    
+                writeSignature(
+                    loader, printer, referenceMap, classFile,
+                    caSignature, length, newIndex, false, null, false);
+    
+                printer.print(' ');
+    
+                String methodName = constants.getConstantUtf8(method.getNameIndex());
+                if (keywordSet.contains(methodName)) {
+                    methodName = StringConstants.JD_METHOD_PREFIX + methodName;
+                }
+    
+                if (staticMethodFlag) {
+                    printer.printStaticMethodDeclaration(internalClassName, methodName, descriptor);
+                } else {
+                    printer.printMethodDeclaration(internalClassName, methodName, descriptor);
+                }
+            }
         }
-        else
-        {
-
-            newIndex = index;
-
-            while (newIndex < length && caSignature[newIndex++] != ')') {
-                // search ')'
-            }
-
-            writeSignature(
-                loader, printer, referenceMap, classFile,
-                caSignature, length, newIndex, false, null, false);
-
-            printer.print(' ');
-
-            String methodName = constants.getConstantUtf8(method.getNameIndex());
-            if (keywordSet.contains(methodName)) {
-                methodName = StringConstants.JD_METHOD_PREFIX + methodName;
-            }
-
-            if (staticMethodFlag) {
-                printer.printStaticMethodDeclaration(internalClassName, methodName, descriptor);
-            } else {
-                printer.printMethodDeclaration(internalClassName, methodName, descriptor);
-            }
-        }
-
         // Arguments
         // Constructeur des classes interne non static :
         // - var 1: outer this => ne pas generer de nom

@@ -17,11 +17,9 @@ import org.jd.gui.util.decompiler.GuiPreferences;
 import org.jdv0.gui.util.decompiler.PlainTextPrinter;
 
 import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -49,7 +47,6 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
     private GuiPreferences preferences = new GuiPreferences();
     private ContainerLoader loader = new ContainerLoader();
     private PlainTextPrinter printer = new PlainTextPrinter();
-    private ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
     @Override
     public String[] getSelectors() { return appendSelectors("*:file:*.class"); }
@@ -121,9 +118,7 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
         loader.setEntry(entry);
 
         // Init printer
-        baos.reset();
-        PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name());
-        printer.setPrintStream(ps);
+        printer.reset();
         printer.setPreferences(preferences);
 
         // Decompile class file
@@ -136,36 +131,37 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
                 new File(entry.getUri()).getPath()
                 // Escape "\ u" sequence to prevent "Invalid unicode" errors
                 .replaceAll("(^|[^\\\\])\\\\u", "\\\\\\\\u");
-            ps.println();
-            ps.println();
-            ps.print("/* Location:              ");
-            ps.print(location);
+            printer.println();
+            printer.println();
+            printer.print("/* Location:              ");
+            printer.print(location);
             // Add Java compiler version
             int majorVersion = printer.getMajorVersion();
 
             if (majorVersion >= MAJOR_1_1) {
-                ps.println();
-                ps.print(" * Java compiler version: ");
+                printer.println();
+                printer.print(" * Java compiler version: ");
 
                 if (majorVersion >= MAJOR_1_5) {
-                    ps.print(majorVersion - (MAJOR_1_5 - 5));
+                    printer.print(majorVersion - (MAJOR_1_5 - 5));
                 } else {
-                    ps.print(majorVersion - (MAJOR_1_1 - 1));
+                    printer.print(majorVersion - (MAJOR_1_1 - 1));
                 }
 
-                ps.print(" (");
-                ps.print(majorVersion);
-                ps.print('.');
-                ps.print(printer.getMinorVersion());
-                ps.print(')');
+                printer.print(" (");
+                printer.print(majorVersion);
+                printer.print('.');
+                printer.print(printer.getMinorVersion());
+                printer.print(')');
             }
             // Add JD-Core version
-            ps.println();
-            ps.print(" * JD-Core Version:       ");
-            ps.println(CoreConstants.JD_CORE_VERSION);
-            ps.print(" */");
+            printer.println();
+            printer.print(" * JD-Core Version:       ");
+            printer.print(CoreConstants.JD_CORE_VERSION);
+            printer.println();
+            printer.print(" */");
         }
-        return new String(baos.toByteArray(), StandardCharsets.UTF_8);
+        return printer.toString();
     }
 
     protected static boolean getPreferenceValue(Map<String, String> preferences, String key, boolean defaultValue) {

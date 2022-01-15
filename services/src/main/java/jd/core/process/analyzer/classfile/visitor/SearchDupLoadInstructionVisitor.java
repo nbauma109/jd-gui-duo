@@ -268,6 +268,7 @@ public final class SearchDupLoadInstructionVisitor
              Const.SIPUSH,
              Const.RET,
              Const.RETURN,
+             Const.INVOKEDYNAMIC,
              ByteCodeConstants.EXCEPTIONLOAD,
              ByteCodeConstants.RETURNADDRESSLOAD:
             break;

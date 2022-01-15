@@ -413,6 +413,7 @@ public final class SearchInstructionByOpcodeVisitor
              Const.NOP,
              Const.RET,
              Const.RETURN,
+             Const.INVOKEDYNAMIC,
              ByteCodeConstants.RETURNADDRESSLOAD,
              Const.SIPUSH:
             break;

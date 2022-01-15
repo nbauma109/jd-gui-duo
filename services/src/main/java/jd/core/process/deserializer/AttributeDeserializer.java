@@ -29,10 +29,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import static org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer.loadBootstrapMethods;
+import static org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer.loadParameters;
+
 import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.LocalVariable;
 import jd.core.model.classfile.attribute.Attribute;
 import jd.core.model.classfile.attribute.AttributeAnnotationDefault;
+import jd.core.model.classfile.attribute.AttributeBootstrapMethods;
 import jd.core.model.classfile.attribute.AttributeCode;
 import jd.core.model.classfile.attribute.AttributeConstantValue;
 import jd.core.model.classfile.attribute.AttributeDeprecated;
@@ -40,6 +44,7 @@ import jd.core.model.classfile.attribute.AttributeEnclosingMethod;
 import jd.core.model.classfile.attribute.AttributeExceptions;
 import jd.core.model.classfile.attribute.AttributeInnerClasses;
 import jd.core.model.classfile.attribute.AttributeLocalVariableTable;
+import jd.core.model.classfile.attribute.AttributeMethodParameters;
 import jd.core.model.classfile.attribute.AttributeNumberTable;
 import jd.core.model.classfile.attribute.AttributeRuntimeAnnotations;
 import jd.core.model.classfile.attribute.AttributeRuntimeParameterAnnotations;
@@ -47,7 +52,7 @@ import jd.core.model.classfile.attribute.AttributeSignature;
 import jd.core.model.classfile.attribute.AttributeSourceFile;
 import jd.core.model.classfile.attribute.AttributeSynthetic;
 import jd.core.model.classfile.attribute.ParameterAnnotations;
-import jd.core.model.classfile.attribute.UnknowAttribute;
+import jd.core.model.classfile.attribute.UnknownAttribute;
 
 public final class AttributeDeserializer
 {
@@ -167,6 +172,18 @@ public final class AttributeDeserializer
                         Const.ATTR_RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS,
                         deserializeParameterAnnotations(di));
             }
+            else if (attributeNameIndex == constants.getBootstrapMethodsAttributeNameIndex())
+            {
+                attributes[i] = new AttributeBootstrapMethods(
+                        Const.ATTR_BOOTSTRAP_METHODS,
+                        loadBootstrapMethods(di));
+            }
+            else if (attributeNameIndex == constants.getMethodParametersAttributeNameIndex())
+            {
+                attributes[i] = new AttributeMethodParameters(
+                        Const.ATTR_METHOD_PARAMETERS,
+                        loadParameters(di));
+            }
             else if (attributeNameIndex == constants.getSignatureAttributeNameIndex())
             {
                 if (attributeLength != 2) {
@@ -195,7 +212,7 @@ public final class AttributeDeserializer
             }
             else
             {
-                attributes[i] = new UnknowAttribute(
+                attributes[i] = new UnknownAttribute(
                         Const.ATTR_UNKNOWN);
                 for (int j=0; j<attributeLength; j++) {
                     di.readByte();

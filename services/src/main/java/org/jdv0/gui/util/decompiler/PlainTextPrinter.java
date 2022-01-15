@@ -8,8 +8,6 @@ package org.jdv0.gui.util.decompiler;
 
 import org.jd.gui.util.decompiler.GuiPreferences;
 
-import java.io.PrintStream;
-
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.printer.Printer;
 
@@ -18,7 +16,7 @@ public class PlainTextPrinter implements Printer {
     protected static final String NEWLINE = System.lineSeparator();
 
     private GuiPreferences preferences;
-    private PrintStream printStream;
+    private StringBuilder sb = new StringBuilder();
     private int maxLineNumber;
     private int majorVersion;
     private int minorVersion;
@@ -31,20 +29,19 @@ public class PlainTextPrinter implements Printer {
     private boolean display;
 
     public void setPreferences(GuiPreferences preferences) { this.preferences = preferences; }
-    public void setPrintStream(PrintStream printStream) { this.printStream = printStream; }
 
     public int getMajorVersion() { return majorVersion; }
     public int getMinorVersion() { return minorVersion; }
 
     @Override
-    public void print(byte b) { this.printStream.append(String.valueOf(b)); }
+    public void print(byte b) { this.sb.append(String.valueOf(b)); }
     @Override
-    public void print(int i) { this.printStream.append(String.valueOf(i)); }
+    public void print(int i) { this.sb.append(String.valueOf(i)); }
 
     @Override
     public void print(char c) {
         if (this.display) {
-            this.printStream.append(String.valueOf(c));
+            this.sb.append(String.valueOf(c));
         }
     }
 
@@ -56,20 +53,20 @@ public class PlainTextPrinter implements Printer {
     }
 
     @Override
-    public void printNumeric(String s) { this.printStream.append(s); }
+    public void printNumeric(String s) { this.sb.append(s); }
 
     @Override
-    public void printString(String s, String scopeInternalName)  { this.printStream.append(s); }
+    public void printString(String s, String scopeInternalName)  { this.sb.append(s); }
 
     @Override
     public void printKeyword(String s) {
         if (this.display) {
-            this.printStream.append(s);
+            this.sb.append(s);
         }
     }
 
     @Override
-    public void printJavaWord(String s) { this.printStream.append(s); }
+    public void printJavaWord(String s) { this.sb.append(s); }
 
     @Override
     public void printType(String internalName, String name, String scopeInternalName) {
@@ -119,7 +116,7 @@ public class PlainTextPrinter implements Printer {
 
     @Override
     public void printStaticConstructorDeclaration(String internalName, String name) {
-        this.printStream.append(name);
+        this.sb.append(name);
     }
 
     @Override
@@ -189,10 +186,10 @@ public class PlainTextPrinter implements Printer {
     public void startOfLine(int lineNumber) {
         if (this.maxLineNumber > 0)
         {
-            this.printStream.append(this.lineNumberBeginPrefix);
+            this.sb.append(this.lineNumberBeginPrefix);
 
             if (lineNumber == Instruction.UNKNOWN_LINE_NUMBER) {
-                this.printStream.append(this.unknownLineNumberPrefix);
+                this.sb.append(this.unknownLineNumberPrefix);
             } else {
                 int left = 0;
 
@@ -200,21 +197,21 @@ public class PlainTextPrinter implements Printer {
                 left = printDigit(4, lineNumber,  1000, left);
                 left = printDigit(3, lineNumber,   100, left);
                 left = printDigit(2, lineNumber,    10, left);
-                this.printStream.append((char)('0' + (lineNumber-left)));
+                this.sb.append((char)('0' + (lineNumber-left)));
             }
 
-            this.printStream.append(this.lineNumberEndPrefix);
+            this.sb.append(this.lineNumberEndPrefix);
         }
 
         for (int i=0; i<indentationCount; i++) {
-            this.printStream.append(TAB);
+            this.sb.append(TAB);
         }
     }
 
     @Override
     public void endOfLine()
     {
-        this.printStream.append(NEWLINE);
+        this.sb.append(NEWLINE);
     }
 
     @Override
@@ -222,12 +219,12 @@ public class PlainTextPrinter implements Printer {
         if (this.preferences.getRealignmentLineNumber()) {
             while (count-- > 0) {
                 if (this.maxLineNumber > 0) {
-                    this.printStream.append(this.lineNumberBeginPrefix);
-                    this.printStream.append(this.unknownLineNumberPrefix);
-                    this.printStream.append(this.lineNumberEndPrefix);
+                    this.sb.append(this.lineNumberBeginPrefix);
+                    this.sb.append(this.unknownLineNumberPrefix);
+                    this.sb.append(this.lineNumberEndPrefix);
                 }
 
-                this.printStream.append(NEWLINE);
+                this.sb.append(NEWLINE);
             }
         }
     }
@@ -322,44 +319,57 @@ public class PlainTextPrinter implements Printer {
                 c = s.charAt(i);
 
                 if (c == '\t') {
-                    this.printStream.append(c);
+                    this.sb.append(c);
                 } else if (c < 32) {
                     // Write octal format
-                    this.printStream.append("\\0");
-                    this.printStream.append((char)('0' + (c >> 3)));
-                    this.printStream.append((char)('0' + (c & 0x7)));
+                    this.sb.append("\\0");
+                    this.sb.append((char)('0' + (c >> 3)));
+                    this.sb.append((char)('0' + (c & 0x7)));
                 } else if (c > 127) {
                     // Write octal format
-                    this.printStream.append("\\u");
+                    this.sb.append("\\u");
 
                     int z = c >> 12;
-                    this.printStream.append((char)(z <= 9 ? '0' + z : 'A' - 10 + z));
+                    this.sb.append((char)(z <= 9 ? '0' + z : 'A' - 10 + z));
                     z = c >> 8 & 0xF;
-                    this.printStream.append((char)(z <= 9 ? '0' + z : 'A' - 10 + z));
+                    this.sb.append((char)(z <= 9 ? '0' + z : 'A' - 10 + z));
                     z = c >> 4 & 0xF;
-                    this.printStream.append((char)(z <= 9 ? '0' + z : 'A' - 10 + z));
+                    this.sb.append((char)(z <= 9 ? '0' + z : 'A' - 10 + z));
                     z = c & 0xF;
-                    this.printStream.append((char)(z <= 9 ? '0' + z : 'A' - 10 + z));
+                    this.sb.append((char)(z <= 9 ? '0' + z : 'A' - 10 + z));
                 } else {
-                    this.printStream.append(c);
+                    this.sb.append(c);
                 }
             }
         } else {
-            this.printStream.append(s);
+            this.sb.append(s);
         }
     }
 
     protected int printDigit(int dcv, int lineNumber, int divisor, int left) {
        if (this.digitCount >= dcv) {
            if (lineNumber < divisor) {
-               this.printStream.append(' ');
+               this.sb.append(' ');
            } else {
                int e = (lineNumber-left) / divisor;
-               this.printStream.append((char)('0' + e));
+               this.sb.append((char)('0' + e));
                left += e*divisor;
            }
        }
 
        return left;
+    }
+
+    public void println() {
+        this.sb.append(NEWLINE);
+    }
+
+    public void reset() {
+        this.sb.setLength(0);
+    }
+
+    @Override
+    public String toString() {
+        return this.sb.toString();
     }
 }

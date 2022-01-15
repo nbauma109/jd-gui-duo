@@ -513,7 +513,7 @@ public class ClassFileDeserializer {
         return values;
     }
 
-    protected BootstrapMethod[] loadBootstrapMethods(DataInput reader) throws IOException {
+    public static BootstrapMethod[] loadBootstrapMethods(DataInput reader) throws IOException {
         int count = reader.readUnsignedShort();
         if (count == 0) {
             return null;
@@ -703,7 +703,7 @@ public class ClassFileDeserializer {
         return lineNumbers;
     }
 
-    protected MethodParameter[] loadParameters(DataInput reader) throws IOException {
+    public static MethodParameter[] loadParameters(DataInput reader) throws IOException {
         int count = reader.readUnsignedByte();
         if (count == 0) {
             return null;

@@ -88,6 +88,7 @@ import jd.core.model.reference.ReferenceMap;
 import jd.core.printer.InstructionPrinter;
 import jd.core.process.writer.ConstantValueWriter;
 import jd.core.process.writer.SignatureWriter;
+import jd.core.process.writer.SourceWriteable;
 import jd.core.util.SignatureUtil;
 import jd.core.util.StringUtil;
 import jd.core.util.UtilConstants;
@@ -837,6 +838,11 @@ public class SourceWriterVisitor
                 (InitArrayInstruction)instruction);
             break;
         case Const.NOP:
+            break;
+        case Const.INVOKEDYNAMIC:
+            if (instruction instanceof SourceWriteable sw) {
+                sw.write(printer, this);
+            }
             break;
         default:
             System.err.println(

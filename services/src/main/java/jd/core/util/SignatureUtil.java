@@ -39,6 +39,33 @@ public final class SignatureUtil
         super();
     }
 
+    public static int countDimensionOfArray(String signature)
+    {
+        int index = 0;
+        int length = signature.length();
+
+        // Comptage du nombre de dimensions : '[[?' ou '[L[?;'
+        if (signature.charAt(index) == '[')
+        {
+            while (++index < length)
+            {
+                if (signature.charAt(index) == 'L' &&
+                    index+1 < length &&
+                    signature.charAt(index+1) == '[')
+                {
+                    index++;
+                    length--;
+                }
+                else if (signature.charAt(index) != '[')
+                {
+                    break;
+                }
+            }
+        }
+
+        return index;
+    }
+
     /**
      * @see SignatureAnalyzer.SignatureAnalyzer(...)
      */

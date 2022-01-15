@@ -77,6 +77,8 @@ public final class StringConstants
     public static final String SIGNATURE_ATTRIBUTE_NAME = "Signature";
     public static final String SOURCEFILE_ATTRIBUTE_NAME = "SourceFile";
     public static final String SYNTHETIC_ATTRIBUTE_NAME = "Synthetic";
+    public static final String BOOTSTRAP_METHODS_ATTRIBUTE_NAME = "BootstrapMethods";
+    public static final String METHOD_PARAMETERS_ATTRIBUTE_NAME = "MethodParameters";
 
     public static final String CLASS_DOLLAR = "class$";
     public static final String ARRAY_DOLLAR = "array$";

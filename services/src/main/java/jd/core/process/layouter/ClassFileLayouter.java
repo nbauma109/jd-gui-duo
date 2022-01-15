@@ -37,6 +37,7 @@ import jd.core.model.classfile.attribute.AttributeSignature;
 import jd.core.model.instruction.bytecode.instruction.GetStatic;
 import jd.core.model.instruction.bytecode.instruction.Instruction;
 import jd.core.model.instruction.bytecode.instruction.InvokeNew;
+import jd.core.model.instruction.bytecode.instruction.LambdaInstruction;
 import jd.core.model.layout.block.BlockLayoutBlock;
 import jd.core.model.layout.block.ByteCodeLayoutBlock;
 import jd.core.model.layout.block.CommentDeprecatedLayoutBlock;
@@ -49,6 +50,8 @@ import jd.core.model.layout.block.ImplementsInterfacesLayoutBlock;
 import jd.core.model.layout.block.ImportsLayoutBlock;
 import jd.core.model.layout.block.InnerTypeBodyBlockEndLayoutBlock;
 import jd.core.model.layout.block.InnerTypeBodyBlockStartLayoutBlock;
+import jd.core.model.layout.block.LambdaArrowLayoutBlock;
+import jd.core.model.layout.block.LambdaMethodLayoutBlock;
 import jd.core.model.layout.block.LayoutBlock;
 import jd.core.model.layout.block.LayoutBlockConstants;
 import jd.core.model.layout.block.MarkerLayoutBlock;
@@ -341,23 +344,38 @@ public final class ClassFileLayouter {
         return maxLineNumber;
     }
 
-    private static int createBlocksForBody(
+    public static int createBlocksForBodyOfLambda(
         Preferences preferences,
-        ClassFile classFile,
+        LambdaInstruction lambdaInstruction,
         List<LayoutBlock> layoutBlockList)
     {
-        createBlockForEnumValues(preferences, classFile, layoutBlockList);
-
-        List<SubListLayoutBlock> sortedFieldBlockList =
-            createSortedBlocksForFields(preferences, classFile);
+        List<SubListLayoutBlock> sortedFieldBlockList = Collections.emptyList();
         List<SubListLayoutBlock> sortedMethodBlockList =
-            createSortedBlocksForMethods(preferences, classFile);
-        List<SubListLayoutBlock> sortedInnerClassBlockList =
-            createSortedBlocksForInnerClasses(preferences, classFile);
+            createSortedBlocksForLambda(preferences, lambdaInstruction);
+        List<SubListLayoutBlock> sortedInnerClassBlockList = Collections.emptyList();
 
         return mergeBlocks(
             layoutBlockList, sortedFieldBlockList,
             sortedMethodBlockList, sortedInnerClassBlockList);
+    }
+    
+    private static int createBlocksForBody(
+            Preferences preferences,
+            ClassFile classFile,
+            List<LayoutBlock> layoutBlockList)
+    {
+        createBlockForEnumValues(preferences, classFile, layoutBlockList);
+        
+        List<SubListLayoutBlock> sortedFieldBlockList =
+                createSortedBlocksForFields(preferences, classFile);
+        List<SubListLayoutBlock> sortedMethodBlockList =
+                createSortedBlocksForMethods(preferences, classFile);
+        List<SubListLayoutBlock> sortedInnerClassBlockList =
+                createSortedBlocksForInnerClasses(preferences, classFile);
+        
+        return mergeBlocks(
+                layoutBlockList, sortedFieldBlockList,
+                sortedMethodBlockList, sortedInnerClassBlockList);
     }
 
     private static void createBlockForEnumValues(
@@ -655,8 +673,8 @@ public final class ClassFileLayouter {
                 }
             }
 
-            if (method.getNameIndex() == constants.getClassConstructorIndex() && (method.getFastNodes() == null ||
-                method.getFastNodes().isEmpty())) {
+            if (method.getNameIndex() == constants.getClassConstructorIndex() 
+                    && (method.getFastNodes() == null || method.getFastNodes().isEmpty())) {
                 continue;
             }
 
@@ -688,7 +706,6 @@ public final class ClassFileLayouter {
             // 'EmptyCodeLayoutBlock'.
             nullCodeFlag = method.getCode() == null;
             displayThrowsFlag = false;
-
             if (method.getNameIndex() == constants.getClassConstructorIndex())
             {
                 subLayoutBlockList.add(new MethodStaticLayoutBlock(classFile));
@@ -3493,5 +3510,122 @@ public final class ClassFileLayouter {
                 }
             }
         }
+    }
+
+    private static List<SubListLayoutBlock> createSortedBlocksForLambda(
+            Preferences preferences, LambdaInstruction lambdaInstruction)
+    {
+        ClassFile classFile = lambdaInstruction.getClassFile();
+        Method method = lambdaInstruction.getMethod();
+        List<SubListLayoutBlock> sortedMethodBlockList = new ArrayList<>();
+        JavaSourceLayouter javaSourceLayouter = new JavaSourceLayouter();
+        ConstantPool constants = classFile.getConstantPool();
+        AttributeSignature as = method.getAttributeSignature();
+        int signatureIndex = as == null ?
+                method.getDescriptorIndex() : as.getSignatureIndex();
+        String signature = constants.getConstantUtf8(signatureIndex);
+            
+        List<LayoutBlock> subLayoutBlockList = new ArrayList<>();
+
+        boolean nullCodeFlag = method.getCode() == null;
+
+        subLayoutBlockList.add(new LambdaMethodLayoutBlock(
+                classFile, method, signature,
+                as == null, nullCodeFlag, lambdaInstruction.getParameterNames()));
+        subLayoutBlockList.add(new LambdaArrowLayoutBlock(classFile, method));
+        
+        int firstLineNumber = Instruction.UNKNOWN_LINE_NUMBER;
+        int lastLineNumber = Instruction.UNKNOWN_LINE_NUMBER;
+        int preferedLineNumber = LayoutBlockConstants.UNLIMITED_LINE_COUNT;
+
+        if (!nullCodeFlag)
+        {
+            // DEBUG //
+            if (method.containsError())
+            {
+                MethodBodyBlockStartLayoutBlock mbbslb =
+                    new MethodBodyBlockStartLayoutBlock();
+                subLayoutBlockList.add(mbbslb);
+                subLayoutBlockList.add(
+                    new ByteCodeLayoutBlock(classFile, method));
+                MethodBodyBlockEndLayoutBlock mbbelb =
+                    new MethodBodyBlockEndLayoutBlock();
+                subLayoutBlockList.add(mbbelb);
+                mbbslb.setOther(mbbelb);
+                mbbelb.setOther(mbbslb);
+            }
+            // DEBUG //
+            else
+            {
+                List<Instruction> list = method.getFastNodes();
+
+                MethodBodyBlockStartLayoutBlock mbbslb =
+                    new MethodBodyBlockStartLayoutBlock();
+                subLayoutBlockList.add(mbbslb);
+                int subLayoutBlockListLength = subLayoutBlockList.size();
+                boolean singleLine = false;
+
+                if (!list.isEmpty())
+                {
+                    try
+                    {
+                        int beforeIndex = subLayoutBlockList.size();
+                        singleLine = javaSourceLayouter.createBlocks(
+                            preferences, subLayoutBlockList,
+                            classFile, method, list);
+                        int afterIndex = subLayoutBlockList.size();
+
+                        firstLineNumber = searchFirstLineNumber(
+                            subLayoutBlockList, beforeIndex, afterIndex);
+                        lastLineNumber = searchLastLineNumber(
+                            subLayoutBlockList, beforeIndex, afterIndex);
+                    }
+                    catch (Exception e)
+                    {
+                        assert ExceptionUtil.printStackTrace(e);
+                        // Erreur durant l'affichage => Retrait de tous
+                        // les blocs
+                        int currentLength = subLayoutBlockList.size();
+                        while (currentLength > subLayoutBlockListLength) {
+                            currentLength--;
+                            subLayoutBlockList.remove(currentLength);
+                        }
+
+                        subLayoutBlockList.add(
+                            new ByteCodeLayoutBlock(classFile, method));
+                    }
+                }
+
+                if (subLayoutBlockListLength == subLayoutBlockList.size())
+                {
+                    // Bloc vide d'instructions. Transformation du bloc
+                    // 'StatementBlockStartLayoutBlock'
+                    mbbslb.transformToStartEndBlock(1);
+                }
+                else if (singleLine)
+                {
+                    mbbslb.transformToSingleLineBlock();
+                    MethodBodySingleLineBlockEndLayoutBlock mbssbelb =
+                        new MethodBodySingleLineBlockEndLayoutBlock();
+                    mbbslb.setOther(mbssbelb);
+                    mbssbelb.setOther(mbbslb);
+                    subLayoutBlockList.add(mbssbelb);
+                }
+                else
+                {
+                    MethodBodyBlockEndLayoutBlock mbbelb =
+                        new MethodBodyBlockEndLayoutBlock();
+                    mbbslb.setOther(mbbelb);
+                    mbbelb.setOther(mbbslb);
+                    subLayoutBlockList.add(mbbelb);
+                }
+            } // if (method.containsError()) else
+        } // if (nullCodeFlag == false)
+
+        sortedMethodBlockList.add(new SubListLayoutBlock(
+            LayoutBlockConstants.SUBLIST_METHOD,
+            subLayoutBlockList, firstLineNumber,
+            lastLineNumber, preferedLineNumber));
+        return sortBlocks(sortedMethodBlockList);
     }
 }

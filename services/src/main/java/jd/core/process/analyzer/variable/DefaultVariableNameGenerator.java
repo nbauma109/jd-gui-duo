@@ -23,6 +23,7 @@ import java.util.Set;
 
 import jd.core.model.classfile.ClassFile;
 import jd.core.model.classfile.Field;
+import jd.core.util.SignatureUtil;
 
 public class DefaultVariableNameGenerator implements VariableNameGenerator
 {
@@ -68,7 +69,7 @@ public class DefaultVariableNameGenerator implements VariableNameGenerator
         {
             return prefix + "VarArgs";
         }
-        int index = countDimensionOfArray(signature);
+        int index = SignatureUtil.countDimensionOfArray(signature);
         if (index > 0) {
             prefix += "ArrayOf";
         }
@@ -81,7 +82,7 @@ public class DefaultVariableNameGenerator implements VariableNameGenerator
     public String generateLocalVariableNameFromSignature(
             String signature, boolean appearsOnce)
     {
-        int index = countDimensionOfArray(signature);
+        int index = SignatureUtil.countDimensionOfArray(signature);
 
         if (index > 0)
         {
@@ -116,33 +117,6 @@ public class DefaultVariableNameGenerator implements VariableNameGenerator
             // DEBUG
             return "?";
         }
-    }
-
-    private static int countDimensionOfArray(String signature)
-    {
-        int index = 0;
-        int length = signature.length();
-
-        // Comptage du nombre de dimensions : '[[?' ou '[L[?;'
-        if (signature.charAt(index) == '[')
-        {
-            while (++index < length)
-            {
-                if (signature.charAt(index) == 'L' &&
-                    index+1 < length &&
-                    signature.charAt(index+1) == '[')
-                {
-                    index++;
-                    length--;
-                }
-                else if (signature.charAt(index) != '[')
-                {
-                    break;
-                }
-            }
-        }
-
-        return index;
     }
 
     private static String getSuffixFromSignature(String signature)

@@ -196,4 +196,8 @@ public class LocalVariables
         return length == 0 ?
             -1 : this.listOfLocalVariables.get(length-1).getIndex();
     }
+    
+    public List<String> getNames(ConstantPool constantPool) {
+        return this.listOfLocalVariables.stream().map(constantPool::getLocalVariableName).toList();
+    }
 }

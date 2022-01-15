@@ -431,6 +431,7 @@ public class CompareInstructionVisitor
              Const.NOP,
              Const.RET,
              Const.RETURN,
+             Const.INVOKEDYNAMIC,
              ByteCodeConstants.EXCEPTIONLOAD,
              ByteCodeConstants.RETURNADDRESSLOAD:
             return true;
