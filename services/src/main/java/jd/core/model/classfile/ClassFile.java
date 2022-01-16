@@ -468,4 +468,9 @@ public class ClassFile extends Base
     public Loader getLoader() {
         return loader;
     }
+
+    @Override
+    public String toString() {
+        return internalClassName;
+    }
 }
