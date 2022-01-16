@@ -37,13 +37,13 @@ import jd.core.model.instruction.bytecode.instruction.Instruction;
 public class Method extends FieldOrMethod
 {
     private boolean containsError;
-    private int[] exceptionIndexes;
-    private byte[] code;
-    private LineNumber[] lineNumbers;
+    private int[] exceptionIndexes; // NO_UCD (use final)
+    private byte[] code; // NO_UCD (use final)
+    private LineNumber[] lineNumbers; // NO_UCD (use final)
     private CodeException[] codeExceptions;
-    private ParameterAnnotations[] visibleParameterAnnotations;
-    private ParameterAnnotations[] invisibleParameterAnnotations;
-    private ElementValue defaultAnnotationValue;
+    private ParameterAnnotations[] visibleParameterAnnotations; // NO_UCD (use final)
+    private ParameterAnnotations[] invisibleParameterAnnotations; // NO_UCD (use final)
+    private ElementValue defaultAnnotationValue; // NO_UCD (use final)
     private List<Instruction> instructions;
     private List<Instruction> fastNodes;
     private LocalVariables localVariables;

@@ -22,7 +22,7 @@ public class Section {
     private final DefaultList<FlexibleFragment> flexibleFragments;
     private final FixedFragment fixedFragment;
     private final Section previousSection;
-    private       Section nextSection;
+    private       Section nextSection; // NO_UCD (use final)
     private final int targetLineCount;
     private       int rate;
 
