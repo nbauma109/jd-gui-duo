@@ -26,7 +26,7 @@ import java.util.Collection;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 
-public class ShowControlFlowGraphContextualActionsFactory implements ContextualActionsFactory {
+public class ShowControlFlowGraphContextualActionsFactory implements ContextualActionsFactory { // NO_UCD (unused code)
 
     public static final int MODE_RAW = 0;
     public static final int MODE_GOTO_ONLY = 1;

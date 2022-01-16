@@ -26,7 +26,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 
-public class CopyQualifiedNameContextualActionsFactory implements ContextualActionsFactory {
+public class CopyQualifiedNameContextualActionsFactory implements ContextualActionsFactory { // NO_UCD (unused code)
 
     @Override
     public Collection<Action> make(API api, Container.Entry entry, String fragment) {

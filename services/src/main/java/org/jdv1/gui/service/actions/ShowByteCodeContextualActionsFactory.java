@@ -26,7 +26,7 @@ import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
-public class ShowByteCodeContextualActionsFactory implements ContextualActionsFactory {
+public class ShowByteCodeContextualActionsFactory implements ContextualActionsFactory { // NO_UCD (unused code)
 
     @Override
     public Collection<Action> make(API api, Container.Entry entry, String fragment) {
