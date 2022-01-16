@@ -14,7 +14,7 @@ import org.jd.gui.view.component.LogPage;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class LogPasteHandler implements PasteHandler {
+public class LogPasteHandler implements PasteHandler { // NO_UCD (unused code)
     protected static final AtomicInteger counter = new AtomicInteger(0);
 
     @Override
