@@ -56,7 +56,7 @@ public final class MethodPatcher {
                         String methodKey = methodBinding.getKey();
                         Range rangeV1 = methodKeyPositionRanges.get(methodKey);
                         if (rangeV1 == null) {
-                            methodKey = methodKey.replaceAll("L(\\w+/)+", "L");
+                            methodKey = methodKey.replaceAll("L(\\w+/)*+", "L");
                             rangeV1 = methodKeyPositionRanges.get(methodKey);
                         }
                         if (rangeV1 != null) {
