@@ -3191,7 +3191,13 @@ public final class FastCodeExceptionAnalyzer
 
         @Override
         public boolean equals(Object obj) {
-            return this == obj || obj != null && getClass() == obj.getClass() && obj instanceof FastCodeExcepcion fce && compareTo(fce) == 0;
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null || getClass() != obj.getClass()) {
+                return false;
+            }
+            return compareTo((FastCodeExcepcion) obj) == 0;
         }
 
         public int getTryFromOffset() {
@@ -3267,7 +3273,13 @@ public final class FastCodeExceptionAnalyzer
 
         @Override
         public boolean equals(Object obj) {
-            return this == obj || obj instanceof FastCodeExceptionCatch fcec && getClass() == obj.getClass() && compareTo(fcec) == 0;
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null || getClass() != obj.getClass()) {
+                return false;
+            }
+            return compareTo((FastCodeExceptionCatch) obj) == 0;
         }
 
         public int getFromOffset() {

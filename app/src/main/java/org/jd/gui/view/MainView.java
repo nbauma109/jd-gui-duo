@@ -107,7 +107,8 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
         while (keys.hasMoreElements()) {
             Object key = keys.nextElement();
             Icon icon = UIManager.getIcon(key);
-            if (icon instanceof ImageIcon imageIcon) {
+            if (icon instanceof ImageIcon) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                ImageIcon imageIcon = (ImageIcon) icon;
                 UIManager.put(key, new ImageIcon(new CustomMultiResolutionImage(imageIcon.getImage())));
             }
         }
@@ -442,7 +443,8 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     public void closeCurrentTab() {
         invokeLater(() -> {
             Component component = mainTabbedPanel.getTabbedPane().getSelectedComponent();
-            if (component instanceof PageClosable pc) {
+            if (component instanceof PageClosable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                PageClosable pc = (PageClosable) component;
                 if (!pc.closePage()) {
                     mainTabbedPanel.removeComponent(component);
                 }

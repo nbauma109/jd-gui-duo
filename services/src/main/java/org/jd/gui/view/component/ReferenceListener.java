@@ -133,7 +133,8 @@ public class ReferenceListener extends AbstractJavaListener {
         if (currentContext != null) {
             SimpleName fieldNameNode = node.getName();
             Name qualifier = node.getQualifier();
-            if (qualifier instanceof SimpleName qualifierName) {
+            if (qualifier instanceof SimpleName) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                SimpleName qualifierName = (SimpleName) qualifier;
                 String qualifierIdentifier = qualifierName.getIdentifier();
                 String qualifierDescriptor = currentContext.getDescriptor(qualifierIdentifier);
                 if (qualifierDescriptor != null && qualifierDescriptor.charAt(0) == 'L') {
@@ -252,7 +253,8 @@ public class ReferenceListener extends AbstractJavaListener {
         String methodDescriptor = args != null ? getParametersDescriptor(args.size()).append('?').toString() : "()?";
         DeclarationData data = getDeclarations().get(currentInternalTypeName);
 
-        if (data instanceof TypeDeclarationData tdd) {
+        if (data instanceof TypeDeclarationData) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            TypeDeclarationData tdd = (TypeDeclarationData) data;
             String methodTypeName = tdd.getSuperTypeName();
             ReferenceData refData = newReferenceData(methodTypeName, StringConstants.INSTANCE_CONSTRUCTOR, methodDescriptor);
             int position = node.getStartPosition();
@@ -265,7 +267,8 @@ public class ReferenceListener extends AbstractJavaListener {
     public boolean visit(MethodInvocation node) {
         visitMethodBinding(node.getName(), node.resolveMethodBinding());
         Expression subject = node.getExpression();
-        if (subject instanceof SimpleName subjectName) {
+        if (subject instanceof SimpleName) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            SimpleName subjectName = (SimpleName) subject;
             String internalTypeName = nameToInternalTypeName.get(subjectName.getIdentifier());
             if (internalTypeName != null) {
                 ReferenceData refData = newReferenceData(internalTypeName, null, null);

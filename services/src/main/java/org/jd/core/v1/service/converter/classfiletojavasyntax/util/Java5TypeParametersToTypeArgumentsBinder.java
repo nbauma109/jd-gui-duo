@@ -454,7 +454,8 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
                             typeBound.accept(getTypeArgumentVisitor);
                             typeArguments = getTypeArgumentVisitor.getTypeArguments();
                         }
-                    } else if (expressionType instanceof ObjectType ot) {
+                    } else if (expressionType instanceof ObjectType) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                        ObjectType ot = (ObjectType) expressionType;
                         typeArguments = ot.getTypeArguments();
                     }
 

@@ -175,7 +175,8 @@ public class JavaFileIndexerProvider extends AbstractIndexerProvider {
                     superInternalTypeNameSet.add(superQualifiedTypeName);
                 }
             }
-            if (node instanceof TypeDeclaration typeDeclaration) {
+            if (node instanceof TypeDeclaration) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                TypeDeclaration typeDeclaration = (TypeDeclaration) node;
                 @SuppressWarnings("unchecked")
                 List<Type> superInterfaces = typeDeclaration.superInterfaceTypes();
                 String superQualifiedInterfaceName;

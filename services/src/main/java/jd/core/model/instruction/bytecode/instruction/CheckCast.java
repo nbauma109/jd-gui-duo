@@ -46,8 +46,10 @@ public class CheckCast extends IndexInstruction
 
         Constant c = constants.get(this.getIndex());
 
-        if (c instanceof ConstantUtf8 cutf8)
+        if (c instanceof ConstantUtf8)
         {
+            // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            ConstantUtf8 cutf8 = (ConstantUtf8) c;
             return cutf8.getBytes();
         }
         ConstantClass cc = (ConstantClass)c;

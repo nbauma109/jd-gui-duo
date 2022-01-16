@@ -75,7 +75,8 @@ public class WebXmlFilePage extends TypeReferencePage implements UriGettable, In
                 api.addURI(new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), "position=" + offset, null));
 
                 // Open link
-                if (hyperlinkData instanceof PathHyperlinkData d) {
+                if (hyperlinkData instanceof PathHyperlinkData) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                    PathHyperlinkData d = (PathHyperlinkData) hyperlinkData;
                     String path = d.path;
                     Container.Entry nextEntry = searchEntry(this.entry.getContainer().getRoot(), path);
                     if (nextEntry != null) {
@@ -159,7 +160,8 @@ public class WebXmlFilePage extends TypeReferencePage implements UriGettable, In
             TypeHyperlinkData data = (TypeHyperlinkData)nextEntry.getValue();
             boolean enabled;
 
-            if (data instanceof PathHyperlinkData d) {
+            if (data instanceof PathHyperlinkData) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                PathHyperlinkData d = (PathHyperlinkData) data;
                 enabled = searchEntry(this.entry.getContainer().getRoot(), d.path) != null;
             } else {
                 String internalTypeName = data.getInternalTypeName();

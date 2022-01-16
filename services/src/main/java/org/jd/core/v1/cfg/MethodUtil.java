@@ -43,11 +43,14 @@ public final class MethodUtil {
         BaseTypeDeclaration typeDeclarations = compilationUnit.typeDeclarations();
         BodyDeclaration bodyDeclaration = null;
 
-        if (typeDeclarations instanceof EnumDeclaration ed) {
+        if (typeDeclarations instanceof EnumDeclaration) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            EnumDeclaration ed = (EnumDeclaration) typeDeclarations;
             bodyDeclaration = ed.getBodyDeclaration();
-        } else if (typeDeclarations instanceof AnnotationDeclaration ad) {
+        } else if (typeDeclarations instanceof AnnotationDeclaration) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            AnnotationDeclaration ad = (AnnotationDeclaration) typeDeclarations;
             bodyDeclaration = ad.getBodyDeclaration();
-        } else if (typeDeclarations instanceof InterfaceDeclaration id) {
+        } else if (typeDeclarations instanceof InterfaceDeclaration) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            InterfaceDeclaration id = (InterfaceDeclaration) typeDeclarations;
             bodyDeclaration = id.getBodyDeclaration();
         }
 
@@ -55,16 +58,19 @@ public final class MethodUtil {
             ClassFileBodyDeclaration cfbd = (ClassFileBodyDeclaration) bodyDeclaration;
 
             for (ClassFileConstructorOrMethodDeclaration md : cfbd.getMethodDeclarations()) {
-                if (md instanceof ClassFileMethodDeclaration cfmd) {
+                if (md instanceof ClassFileMethodDeclaration) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                    ClassFileMethodDeclaration cfmd = (ClassFileMethodDeclaration) md;
                     if (cfmd.getName().equals(methodName) && ((methodDescriptor == null) || cfmd.getDescriptor().equals(methodDescriptor))) {
                         return cfmd.getMethod();
                     }
-                } else if (md instanceof ClassFileConstructorDeclaration cfcd) {
+                } else if (md instanceof ClassFileConstructorDeclaration) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                    ClassFileConstructorDeclaration cfcd = (ClassFileConstructorDeclaration) md;
                     if (cfcd.getMethod().getName().equals(methodName) && ((methodDescriptor == null) || cfcd.getDescriptor().equals(methodDescriptor))) {
                         return cfcd.getMethod();
                     }
-                } else if (md instanceof ClassFileStaticInitializerDeclaration cfsid && cfsid.getMethod().getName().equals(methodName)) {
-                    return cfsid.getMethod();
+                } else if (md instanceof ClassFileStaticInitializerDeclaration && ((ClassFileStaticInitializerDeclaration) md).getMethod().getName().equals(methodName)) {
+                    // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                    return ((ClassFileStaticInitializerDeclaration) md).getMethod();
                 }
             }
         }

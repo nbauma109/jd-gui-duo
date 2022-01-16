@@ -427,8 +427,10 @@ public class ReferenceVisitor
             {
                 IndexInstruction indexInstruction = (IndexInstruction)instruction;
                 Constant cst = constants.get(indexInstruction.getIndex());
-                if (cst instanceof ConstantClass cc)
+                if (cst instanceof ConstantClass)
                 {
+                    // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                    ConstantClass cc = (ConstantClass) cst;
                     internalName = constants.getConstantUtf8(cc.getNameIndex());
                     addReference(internalName);
                 }
@@ -481,8 +483,10 @@ public class ReferenceVisitor
     {
         Constant c = constants.get(index);
 
-        if (c instanceof ConstantClass cc)
+        if (c instanceof ConstantClass)
         {
+            // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            ConstantClass cc = (ConstantClass) c;
             addReference(constants.getConstantUtf8(cc.getNameIndex()));
         }
     }

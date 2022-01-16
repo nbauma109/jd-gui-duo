@@ -394,8 +394,14 @@ public class BasicBlock {
     }
 
     @Override
-    public boolean equals(Object other) {
-        return other instanceof BasicBlock otherBlock && index == otherBlock.index;
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        }
+        return index == ((BasicBlock) obj).index;
     }
 
     public static class ExceptionHandler {

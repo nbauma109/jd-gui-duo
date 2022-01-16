@@ -113,7 +113,7 @@ public class FastSwitch extends BranchInstruction
             if (obj == null || getClass() != obj.getClass()) {
                 return false;
             }
-            return obj instanceof Pair p && compareTo(p) == 0;
+            return compareTo((Pair) obj) == 0;
         }
     }
 

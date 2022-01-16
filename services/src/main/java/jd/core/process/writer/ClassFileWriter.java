@@ -1668,7 +1668,8 @@ public final class ClassFileWriter
 
         if ((mlb.getClassFile().getAccessFlags() & Const.ACC_ANNOTATION) == 0)
         {
-            if (mlb instanceof LambdaMethodLayoutBlock lmlb) {
+            if (mlb instanceof LambdaMethodLayoutBlock) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                LambdaMethodLayoutBlock lmlb = (LambdaMethodLayoutBlock) mlb;
                 List<String> lambdaParameterNames = lmlb.getParameterNames();
                 switch (lambdaParameterNames.size()) {
                     case 0:

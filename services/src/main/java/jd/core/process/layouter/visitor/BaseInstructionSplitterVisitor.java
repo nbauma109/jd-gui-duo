@@ -212,7 +212,8 @@ public abstract class BaseInstructionSplitterVisitor
             }
             break;
         case Const.INVOKEDYNAMIC:
-            if (instruction instanceof LambdaInstruction in) {
+            if (instruction instanceof LambdaInstruction) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                LambdaInstruction in = (LambdaInstruction) instruction;
                 // Anonymous lambda
                 visitAnonymousLambda(parent==null ? in : parent, in);
             }

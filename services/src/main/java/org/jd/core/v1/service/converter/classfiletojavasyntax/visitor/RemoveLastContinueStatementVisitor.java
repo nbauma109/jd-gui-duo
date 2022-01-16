@@ -38,7 +38,7 @@ public class RemoveLastContinueStatementVisitor extends AbstractJavaSyntaxVisito
         if (! list.isEmpty()) {
             Statement last = list.getLast();
 
-            if (last instanceof ContinueStatement) {
+            if (last instanceof ContinueStatement) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
                 list.removeLast();
                 visit(list);
             } else {

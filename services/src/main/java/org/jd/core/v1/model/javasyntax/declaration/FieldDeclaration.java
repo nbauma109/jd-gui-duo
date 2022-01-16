@@ -58,10 +58,10 @@ public class FieldDeclaration implements MemberDeclaration {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof FieldDeclaration that)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
+        FieldDeclaration that = (FieldDeclaration) o;
         return flags == that.flags && Objects.equals(annotationReferences, that.annotationReferences) && fieldDeclarators.equals(that.fieldDeclarators) && type.equals(that.type);
     }
 

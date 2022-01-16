@@ -630,11 +630,13 @@ public final class LoopStatementMaker {
 
                 if (type != null) {
                     if (TYPE_OBJECT.equals(item.getType())) {
-                        if (item instanceof ObjectLocalVariable olv) {
+                        if (item instanceof ObjectLocalVariable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                            ObjectLocalVariable olv = (ObjectLocalVariable) item;
                             olv.setType(typeBounds, type);
                         }
                     } else if (item.getType().isGenericType()) {
-                        if (item instanceof GenericLocalVariable glv) {
+                        if (item instanceof GenericLocalVariable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                            GenericLocalVariable glv = (GenericLocalVariable) item;
                             glv.setType((GenericType) type);
                         }
                     } else {

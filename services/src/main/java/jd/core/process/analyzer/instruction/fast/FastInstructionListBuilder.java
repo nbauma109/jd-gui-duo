@@ -205,13 +205,15 @@ public final class FastInstructionListBuilder {
         List<List<Instruction>> blocks;
         for (int i = 0; i < instructions.size(); i++) {
             instruction = instructions.get(i);
-            if (instruction instanceof FastDeclaration declaration) {
+            if (instruction instanceof FastDeclaration) {// to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                FastDeclaration declaration = (FastDeclaration) instruction;
                 if (insideDeclarations.contains(declaration) || outsideDeclarations.contains(declaration)) {
                     if (declaration.getInstruction() == null) {
                         // remove re-declaration if no assignment
                         instructions.remove(i);
                         i--;
-                    } else if (declaration.getInstruction() instanceof StoreInstruction si) {
+                    } else if (declaration.getInstruction() instanceof StoreInstruction) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                        StoreInstruction si = (StoreInstruction) declaration.getInstruction();
                         // if variable is assigned, turn re-declaration into assignment
                         instructions.set(i, si);
                     }
@@ -238,10 +240,12 @@ public final class FastInstructionListBuilder {
     }
 
     private static List<List<Instruction>> getBlocks(Instruction instruction) {
-        if (instruction instanceof FastTest2Lists fastTest2Lists) {
+        if (instruction instanceof FastTest2Lists) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            FastTest2Lists fastTest2Lists = (FastTest2Lists) instruction;
             return Arrays.asList(fastTest2Lists.getInstructions(), fastTest2Lists.getInstructions2());
         }
-        if (instruction instanceof FastTry fastTry) {
+        if (instruction instanceof FastTry) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            FastTry fastTry = (FastTry) instruction;
             List<List<Instruction>> instructions = new ArrayList<>();
             instructions.add(fastTry.getInstructions());
             for (FastCatch fastCatch : fastTry.getCatches()) {
@@ -493,11 +497,13 @@ public final class FastInstructionListBuilder {
                 MonitorEnter me = (MonitorEnter) list.remove(index);
                 if (me.getObjectref().getOpcode() == ByteCodeConstants.ASSIGNMENT) {
                     AssignmentInstruction ai = (AssignmentInstruction) me.getObjectref();
-                    if (ai.getValue1() instanceof AStore astore) {
+                    if (ai.getValue1() instanceof AStore) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                        AStore astore = (AStore) ai.getValue1();
                         // Remove local variable for monitor
                         localVariables.removeLocalVariableWithIndexAndOffset(astore.getIndex(), astore.getOffset());
                     }
-                    if (ai.getValue1() instanceof ALoad aload) {
+                    if (ai.getValue1() instanceof ALoad) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                        ALoad aload = (ALoad) ai.getValue1();
                         // Remove local variable for monitor
                         localVariables.removeLocalVariableWithIndexAndOffset(aload.getIndex(), aload.getOffset());
                     }
@@ -1478,11 +1484,12 @@ public final class FastInstructionListBuilder {
     private static ReturnInstruction findReturnInstructionForStore(List<Instruction> list, int length, int i, StoreInstruction si) {
         if (i + 1 < length) {
             Instruction next = list.get(i + 1);
-            if (next instanceof ReturnInstruction returnInstruction
+            // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            if (next instanceof ReturnInstruction
                     && si.getValueref() instanceof IndexInstruction
-                    && returnInstruction.getValueref() instanceof IndexInstruction returnRef
-                    && returnRef.getIndex() == si.getIndex()) {
-                return returnInstruction;
+                    && ((ReturnInstruction) next).getValueref() instanceof IndexInstruction
+                    && ((IndexInstruction) ((ReturnInstruction) next).getValueref()).getIndex() == si.getIndex()) {
+                return (ReturnInstruction) next;
             }
         }
         return null;

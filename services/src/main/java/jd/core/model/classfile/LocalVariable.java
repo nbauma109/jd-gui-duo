@@ -135,7 +135,7 @@ public class LocalVariable
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        return obj instanceof LocalVariable lv && compareTo(lv) == 0;
+        return compareTo((LocalVariable) obj) == 0;
     }
 
     public boolean isToBeRemoved() {

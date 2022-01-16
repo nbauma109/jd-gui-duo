@@ -371,8 +371,10 @@ public class SourceWriterVisitor
                     String signature;
                     Constant c = constants.get(checkCast.getIndex());
 
-                    if (c instanceof ConstantUtf8 cutf8)
+                    if (c instanceof ConstantUtf8)
                     {
+                        // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                        ConstantUtf8 cutf8 = (ConstantUtf8) c;
                         signature = cutf8.getBytes();
                     }
                     else
@@ -840,7 +842,8 @@ public class SourceWriterVisitor
         case Const.NOP:
             break;
         case Const.INVOKEDYNAMIC:
-            if (instruction instanceof SourceWriteable sw) {
+            if (instruction instanceof SourceWriteable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                SourceWriteable sw = (SourceWriteable) instruction;
                 sw.write(printer, this);
             }
             break;
@@ -2081,8 +2084,10 @@ public class SourceWriterVisitor
             // instruction LDC pointant un objet de type 'ConstantClass'.
             Constant cst = constants.get(ii.getIndex());
 
-            if (cst instanceof ConstantClass cc)
+            if (cst instanceof ConstantClass)
             {
+                // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                ConstantClass cc = (ConstantClass) cst;
                 // Exception a la regle
                 String signature = SignatureUtil.createTypeName(
                     constants.getConstantUtf8(cc.getNameIndex()));

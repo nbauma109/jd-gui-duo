@@ -47,7 +47,8 @@ public class WatchDog {
 
         @Override
         public boolean equals(Object o) {
-            if (o instanceof Link other) {
+            if (o instanceof Link) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                Link other = (Link) o;
                 return parentIndex == other.parentIndex && childIndex == other.childIndex;
             }
             return false;

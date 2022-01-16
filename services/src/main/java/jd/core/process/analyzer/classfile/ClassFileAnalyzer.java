@@ -329,8 +329,10 @@ public final class ClassFileAnalyzer
         {
             constant = constants.get(i);
 
-            if (constant instanceof ConstantMethodref cmr)
+            if (constant instanceof ConstantMethodref)
             {
+                // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                ConstantMethodref cmr = (ConstantMethodref) constant;
                 ConstantNameAndType cnat =
                         constants.getConstantNameAndType(cmr.getNameAndTypeIndex());
 

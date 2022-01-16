@@ -320,7 +320,9 @@ public final class InitInstanceFieldsReconstructor
                              * If field is assigned to a constructor parameter, the instruction can only be
                              * inside the constructor.
                              */
-                            if (putField.getValueref() instanceof ALoad aload && aload.getIndex() != 0) {
+                            Instruction putFieldValueref = putField.getValueref();
+                            // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved    
+                            if (putFieldValueref instanceof ALoad && ((ALoad) putFieldValueref).getIndex() != 0) {
                                 continue;
                             }
 

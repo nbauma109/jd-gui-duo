@@ -350,7 +350,7 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
 
         @Override
         public boolean add(Token token) {
-            if (token instanceof LineNumberToken) {
+            if (token instanceof LineNumberToken) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
                 throw new IllegalArgumentException("token instanceof LineNumberToken");
             }
             return super.add(token);

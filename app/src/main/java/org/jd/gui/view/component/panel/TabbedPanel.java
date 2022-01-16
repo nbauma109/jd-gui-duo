@@ -142,7 +142,8 @@ public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel impl
             @Override
             public void mouseClicked(MouseEvent e) {
                 removeComponent(page);
-                if (page instanceof Closeable closeablePage) {
+                if (page instanceof Closeable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                    Closeable closeablePage = (Closeable) page;
                     try {
                         closeablePage.close();
                     } catch (IOException ex) {
@@ -240,7 +241,8 @@ public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel impl
             }
 
             // Add SPI popup menu entries
-            if (component instanceof ContainerEntryGettable ceg) {
+            if (component instanceof ContainerEntryGettable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                ContainerEntryGettable ceg = (ContainerEntryGettable) component;
                 Collection<Action> actions = api.getContextualActions(ceg.getEntry(), null);
 
                 if (actions != null) {

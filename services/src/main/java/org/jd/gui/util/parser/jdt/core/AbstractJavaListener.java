@@ -47,10 +47,12 @@ public abstract class AbstractJavaListener extends ASTVisitor {
     }
 
     protected static String nameToString(Name name) {
-        if (name instanceof SimpleName simpleName) {
+        if (name instanceof SimpleName) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            SimpleName simpleName = (SimpleName) name;
             return simpleName.getIdentifier();
         }
-        if (name instanceof QualifiedName qualifiedName) {
+        if (name instanceof QualifiedName) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            QualifiedName qualifiedName = (QualifiedName) name;
             Name qualifier = qualifiedName.getQualifier();
             String identifier = qualifiedName.getName().getIdentifier();
             return String.join("/", nameToString(qualifier), identifier);
@@ -67,7 +69,8 @@ public abstract class AbstractJavaListener extends ASTVisitor {
     @Override
     public boolean visit(ImportDeclaration node) {
         Name name = node.getName();
-        if (name instanceof QualifiedName qualifiedName) {
+        if (name instanceof QualifiedName) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            QualifiedName qualifiedName = (QualifiedName) name;
             String simpleName = qualifiedName.getName().getIdentifier();
             String internalTypeName = nameToString(name);
             nameToInternalTypeName.put(simpleName, internalTypeName);
@@ -110,21 +113,26 @@ public abstract class AbstractJavaListener extends ASTVisitor {
     }
 
     protected static String typeToString(Type type) {
-        if (type instanceof ArrayType arrayType) {
+        if (type instanceof ArrayType) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            ArrayType arrayType = (ArrayType) type;
             return typeToString(arrayType.getElementType());
         }
-        if (type instanceof ParameterizedType parameterizedType) {
+        if (type instanceof ParameterizedType) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            ParameterizedType parameterizedType = (ParameterizedType) type;
             return typeToString(parameterizedType.getType());
         }
-        if (type instanceof QualifiedType qualifiedType) {
+        if (type instanceof QualifiedType) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            QualifiedType qualifiedType = (QualifiedType) type;
             Type qualifierType = qualifiedType.getQualifier();
             String qualifiedIdentifier = qualifiedType.getName().getIdentifier();
             return String.join("/", typeToString(qualifierType), qualifiedIdentifier);
         }
-        if (type instanceof SimpleType simpleType) {
+        if (type instanceof SimpleType) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            SimpleType simpleType = (SimpleType) type;
             return nameToString(simpleType.getName());
         }
-        if (type instanceof NameQualifiedType nameQualifiedType) {
+        if (type instanceof NameQualifiedType) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            NameQualifiedType nameQualifiedType = (NameQualifiedType) type;
             String qualifiedIdentifier = nameQualifiedType.getName().getIdentifier();
             return String.join("/", nameToString(nameQualifiedType.getQualifier()), qualifiedIdentifier);
         }
@@ -132,23 +140,29 @@ public abstract class AbstractJavaListener extends ASTVisitor {
     }
 
     protected String resolveInternalTypeName(Type type) {
-        if (type instanceof ArrayType arrayType) {
+        if (type instanceof ArrayType) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            ArrayType arrayType = (ArrayType) type;
             return resolveInternalTypeName(arrayType.getElementType());
         }
-        if (type instanceof ParameterizedType parameterizedType) {
+        if (type instanceof ParameterizedType) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            ParameterizedType parameterizedType = (ParameterizedType) type;
             return resolveInternalTypeName(parameterizedType.getType());
         }
-        if (type instanceof QualifiedType qualifiedType) {
+        if (type instanceof QualifiedType) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            QualifiedType qualifiedType = (QualifiedType) type;
             Type qualifierType = qualifiedType.getQualifier();
             String qualifiedIdentifier = qualifiedType.getName().getIdentifier();
             return String.join("/", resolveInternalTypeName(qualifierType), qualifiedIdentifier);
         }
-        if (type instanceof NameQualifiedType nameQualifiedType) {
+        if (type instanceof NameQualifiedType) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            NameQualifiedType nameQualifiedType = (NameQualifiedType) type;
             return nameToString(nameQualifiedType.getName());
         }
-        if (type instanceof SimpleType simpleType) {
+        if (type instanceof SimpleType) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            SimpleType simpleType = (SimpleType) type;
             Name simpleTypeName = simpleType.getName();
-            if (simpleTypeName instanceof SimpleName simpleName) {
+            if (simpleTypeName instanceof SimpleName) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                SimpleName simpleName = (SimpleName) simpleTypeName;
                 String name = simpleName.getIdentifier();
                 // Search in cache
                 String qualifiedName = typeNameCache.get(name);
@@ -210,10 +224,12 @@ public abstract class AbstractJavaListener extends ASTVisitor {
     }
 
     public PrimitiveType getPrimitiveTypeContext(Type type) {
-        if (type instanceof ArrayType arrayType) {
+        if (type instanceof ArrayType) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            ArrayType arrayType = (ArrayType) type;
             return getPrimitiveTypeContext(arrayType.getElementType());
         }
-        if (type instanceof PrimitiveType primitiveType) {
+        if (type instanceof PrimitiveType) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            PrimitiveType primitiveType = (PrimitiveType) type;
             return primitiveType;
         }
         return null;
@@ -273,11 +289,13 @@ public abstract class AbstractJavaListener extends ASTVisitor {
     }
 
     protected int countDimension(Type type) {
-        return type instanceof ArrayType at ? at.getDimensions() : 0;
+        // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+        return type instanceof ArrayType ? ((ArrayType) type).getDimensions() : 0;
     }
 
     protected Type getSuperType(AbstractTypeDeclaration node) {
-        if (node instanceof TypeDeclaration td) {
+        if (node instanceof TypeDeclaration) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            TypeDeclaration td = (TypeDeclaration) node;
             Type superclassType = td.getSuperclassType();
             if (superclassType != null) {
                 return superclassType;

@@ -119,7 +119,7 @@ public class DelegatingFilterContainer implements Container {
             if (obj == null || obj.getClass() != this.getClass()) {
                 return false;
             }
-            return obj instanceof DelegatedEntry de && compareTo(de) == 0;
+            return compareTo((DelegatedEntry) obj) == 0;
         }
 
         @Override

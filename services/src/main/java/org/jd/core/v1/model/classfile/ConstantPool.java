@@ -44,7 +44,8 @@ public class ConstantPool {
     public Constant getConstantValue(int index) {
         Constant constant = constants[index];
 
-        if (constant instanceof ConstantString cs) {
+        if (constant instanceof ConstantString) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            ConstantString cs = (ConstantString) constant;
             constant = constants[cs.getStringIndex()];
         }
 

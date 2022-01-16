@@ -62,7 +62,7 @@ public class LayoutSection implements Comparable<LayoutSection>
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        return obj instanceof LayoutSection ls && compareTo(ls) == 0;
+        return compareTo((LayoutSection) obj) == 0;
     }
 
     public int getOriginalLineCount() {

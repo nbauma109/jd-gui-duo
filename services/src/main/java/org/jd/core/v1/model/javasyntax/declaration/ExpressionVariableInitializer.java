@@ -36,11 +36,10 @@ public class ExpressionVariableInitializer implements VariableInitializer {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ExpressionVariableInitializer that)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
-        return Objects.equals(expression, that.expression);
+        return Objects.equals(expression, ((ExpressionVariableInitializer)o).expression);
     }
 
     @Override

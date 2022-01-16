@@ -48,10 +48,10 @@ public class FieldDeclarator implements BaseFieldDeclarator {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof FieldDeclarator that)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
+        FieldDeclarator that = (FieldDeclarator) o;
         return name.equals(that.name) && Objects.equals(variableInitializer, that.variableInitializer);
     }
 

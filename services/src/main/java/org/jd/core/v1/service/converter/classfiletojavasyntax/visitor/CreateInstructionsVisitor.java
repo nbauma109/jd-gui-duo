@@ -134,7 +134,8 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
             for (ControlFlowGraphReducer controlFlowGraphReducer : preferredReducers) {
                 try {
                     if (controlFlowGraphReducer.reduce(method)) {
-                        if (comd.getStatements() instanceof Statements stmts) {
+                        if (comd.getStatements() instanceof Statements) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                            Statements stmts = (Statements) comd.getStatements();
                             comd.setStatements(statementMaker.make(controlFlowGraphReducer.getControlFlowGraph(), stmts));
                         } else {
                             comd.setStatements(statementMaker.make(controlFlowGraphReducer.getControlFlowGraph(), new Statements()));

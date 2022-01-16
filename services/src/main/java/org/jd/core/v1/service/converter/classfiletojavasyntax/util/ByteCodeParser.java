@@ -1691,7 +1691,8 @@ public class ByteCodeParser {
     private void parseIF(DefaultStack<Expression> stack, int lineNumber, BasicBlock basicBlock, String operator1, String operator2, int priority) {
         Expression expression = stack.pop();
 
-        if (expression instanceof ClassFileCmpExpression cmp) {
+        if (expression instanceof ClassFileCmpExpression) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            ClassFileCmpExpression cmp = (ClassFileCmpExpression) expression;
             typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(cmp.getLeftExpression().getType(), cmp.getLeftExpression());
             typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(cmp.getRightExpression().getType(), cmp.getRightExpression());
 

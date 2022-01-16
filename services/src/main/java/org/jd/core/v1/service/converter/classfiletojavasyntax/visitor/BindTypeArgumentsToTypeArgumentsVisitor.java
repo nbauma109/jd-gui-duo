@@ -183,7 +183,8 @@ public class BindTypeArgumentsToTypeArgumentsVisitor extends AbstractTypeArgumen
 
         if (ta == null) {
             result = null;
-        } else if (ta instanceof Type t) {
+        } else if (ta instanceof Type) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            Type t = (Type) ta;
             result = t.createType(type.getDimension());
         } else {
             result = ta;
