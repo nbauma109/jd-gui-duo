@@ -13,6 +13,7 @@ import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeWriter;
+import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.spi.ContextualActionsFactory;
@@ -24,8 +25,8 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.stream.Stream;
 
 import javax.swing.AbstractAction;
@@ -45,7 +46,11 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
 
     @Override
     public Collection<Action> make(API api, Container.Entry entry, String fragment) {
-        return Collections.singletonList(new ShowByteCodeAction(entry, fragment));
+        Collection<Action> actions = new ArrayList<>();
+        if (entry.getPath().endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
+            actions.add(new ShowByteCodeAction(entry, fragment));
+        }
+        return actions;
     }
 
     public static class ShowByteCodeAction extends AbstractMethodAction {
