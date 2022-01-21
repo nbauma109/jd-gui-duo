@@ -7,17 +7,25 @@
 
 package org.jd.gui.controller;
 
+import org.apache.commons.io.IOUtils;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Container.Entry;
 import org.jd.gui.api.model.Type;
 import org.jd.gui.service.type.TypeFactoryService;
 import org.jd.gui.spi.TypeFactory;
+import org.jd.gui.util.ImageUtil;
 import org.jdv1.gui.model.container.DelegatingFilterContainer;
 import org.jdv1.gui.view.SelectLocationView;
+import org.netbeans.modules.editor.java.JavaKit;
 
+import java.awt.Frame;
 import java.awt.Point;
+import java.io.File;
+import java.io.InputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -28,7 +36,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+
+import de.cismet.custom.visualdiff.DiffPanel;
+
+
+import static javax.swing.JOptionPane.YES_NO_OPTION;
+import static javax.swing.JOptionPane.YES_OPTION;
+import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 
 public class SelectLocationController {
 
@@ -73,7 +90,28 @@ public class SelectLocationController {
 
         Consumer<URI> selectedEntryCallback = uri -> onLocationSelected(delegatingFilterContainers, uri, selectedLocationCallback);
 
-        selectLocationView.show(location, delegatingFilterContainers, entries.size(), selectedEntryCallback, closeCallback);
+        Entry[] pair = entries.toArray(Entry[]::new);
+        String fileNameLeft = new File(pair[0].getContainer().getRoot().getParent().getUri()).getName();
+        String fileNameRight = new File(pair[1].getContainer().getRoot().getParent().getUri()).getName();
+        String className = new File(pair[0].getUri()).getName();
+        ImageIcon icon = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/jd_icon_128.png"));
+        String message = "Compare class " + className + " in files " + fileNameLeft + " and " + fileNameRight + "?";
+        if (entries.size() == 2 && JOptionPane.showConfirmDialog(null, message, "Compare ?", YES_OPTION, QUESTION_MESSAGE, icon) == YES_OPTION) {
+            DiffPanel diffPanel = new DiffPanel();
+            try (InputStream left = pair[0].getInputStream(); InputStream right = pair[1].getInputStream()) {
+                String contentLeft = IOUtils.toString(left, StandardCharsets.UTF_8);
+                String contentRight = IOUtils.toString(right, StandardCharsets.UTF_8);
+                diffPanel.setLeftAndRight(contentLeft, JavaKit.JAVA_MIME_TYPE, fileNameLeft, contentRight, JavaKit.JAVA_MIME_TYPE, fileNameRight);
+                JFrame diffFrame = new JFrame("Comparison view for class " + className);
+                diffFrame.getContentPane().add(diffPanel);
+                diffFrame.setExtendedState(Frame.MAXIMIZED_BOTH);
+                diffFrame.setVisible(true);
+            } catch (Exception e) {
+                ExceptionUtil.printStackTrace(e);
+            }
+        } else {
+            selectLocationView.show(location, delegatingFilterContainers, entries.size(), selectedEntryCallback, closeCallback);
+        }
     }
 
     protected Collection<Container.Entry> getOuterEntries(Collection<Container.Entry> entries) {
