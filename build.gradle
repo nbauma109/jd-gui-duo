@@ -14,7 +14,6 @@ buildscript {
     dependencies {
         classpath 'com.github.TheBoegl:gradle-launch4j:2.5.1'
         classpath 'de.undercouch:gradle-download-task:4.1.2'
-        classpath 'com.guardsquare:proguard-gradle:7.2.0-beta2'
     }
 }
 
@@ -47,6 +46,9 @@ allprojects {
         mavenCentral()
         maven { 
             url 'https://jitpack.io'
+        }
+        maven {
+            url 'https://netbeans.apidesign.org/maven2/'
         }
     }
 
@@ -129,22 +131,12 @@ task downloadAndUnzipFile(dependsOn: downloadZipFile, type: Copy) {
     into buildDir
 }
 
-// Minify JAR file //
-task proguard(type: proguard.gradle.ProGuardTask, dependsOn: 'jar') {
-    configuration 'src/proguard/resources/proguard.config.txt'
-    injars jar.archivePath
-    outjars 'build/libs/' + project.name + '-' + project.version + '-min.jar'
-    libraryjars System.getProperty('java.home') + '/lib/rt.jar'
-    libraryjars System.getProperty('java.home') + '/jmods/'
-}
-
 createExe {
   dependsOn 'downloadAndUnzipFile'
-  dependsOn 'proguard'
   mainClassName = 'org.jd.gui.App'
   outfile project.name + '-' + project.version + '.exe'
   icon = "${projectDir}/src/launch4j/resources/images/jd-gui.ico"
-  jar projectDir.path + '/' + proguard.outJarFiles[0]
+  jar projectDir.path + '/build/libs/' + project.name + '-' + project.version + '.jar'
   bundledJre64Bit = 'true'
   bundledJrePath = 'jdk-17.0.1+12-jre'
 }
@@ -156,7 +148,7 @@ distributions {
             from 'build/jdk-17.0.1+12-jre'
         } 
         from 'build/launch4j/' + project.name + '-' + project.version + '.exe'
-        from 'build/libs/' + project.name + '-' + project.version + '-min.jar'
+        from 'build/libs/' + project.name + '-' + project.version + '.jar'
     }
 
     installWindowsDist.dependsOn createExe

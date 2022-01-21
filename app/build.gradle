@@ -1,6 +1,8 @@
 apply plugin: 'java'
 
 dependencies {
+    implementation 'commons-io:commons-io:2.11.0'
+    implementation 'com.github.nbauma109:netbeans-visual-diff-standalone:2.0.9'
     implementation project(':api')
     implementation project(':services')
 }
