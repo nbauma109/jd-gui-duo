@@ -94,7 +94,7 @@ public class SelectLocationController {
         String fileNameLeft = new File(pair[0].getContainer().getRoot().getParent().getUri()).getName();
         String fileNameRight = new File(pair[1].getContainer().getRoot().getParent().getUri()).getName();
         String className = new File(pair[0].getUri()).getName();
-        ImageIcon icon = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/jd_icon_128.png"));
+        ImageIcon icon = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/jd_icon_64.png"));
         String message = "Compare class " + className + " in files " + fileNameLeft + " and " + fileNameRight + "?";
         if (entries.size() == 2 && JOptionPane.showConfirmDialog(null, message, "Compare ?", YES_OPTION, QUESTION_MESSAGE, icon) == YES_OPTION) {
             DiffPanel diffPanel = new DiffPanel();
