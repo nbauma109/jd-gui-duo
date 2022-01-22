@@ -1,4 +1,10 @@
 apply plugin: 'java'
+apply plugin: 'eclipse'
+eclipse {
+    project {
+        name = 'jd-gui-duo-app'
+    }
+}
 
 dependencies {
     implementation 'commons-io:commons-io:2.11.0'

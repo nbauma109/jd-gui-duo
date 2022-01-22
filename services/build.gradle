@@ -1,4 +1,10 @@
 apply plugin: 'java'
+apply plugin: 'eclipse'
+eclipse {
+    project {
+        name = 'jd-gui-duo-services'
+    }
+}
 
 sourceSets {
 	main {
