@@ -9,6 +9,7 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>jd-gui-duo-app</artifactId>
+	<name>jd-gui-duo-app</name>
 	<repositories>
 		<repository>
 			<id>jitpack.io</id>

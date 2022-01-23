@@ -9,6 +9,7 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>jd-gui-duo-services</artifactId>
+	<name>jd-gui-duo-services</name>
 	<build>
 		<resources>
 			<resource>
