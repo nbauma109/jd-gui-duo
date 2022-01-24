@@ -27,7 +27,6 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.stream.Stream;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -140,10 +139,8 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
             cp.add(sp);
             frame.setLocation(screenSize.width / 4, screenSize.height / 4);
             frame.setSize(screenSize.width / 2, screenSize.height / 2);
-            frame.setIconImages(Stream.of(32, 64, 128).map(size -> "/org/jd/gui/images/jd_icon_" + size + ".png").map(ImageUtil::getImage).toList());
+            ImageUtil.addJDIconsToFrame(frame);
             frame.setVisible(true);
-            
-            
         }
 
         private static class SearchAction extends AbstractAction {

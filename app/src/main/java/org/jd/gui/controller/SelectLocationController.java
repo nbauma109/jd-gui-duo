@@ -40,12 +40,11 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import de.cismet.custom.visualdiff.DiffPanel;
-
-
+import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_OPTION;
 import static javax.swing.JOptionPane.YES_OPTION;
-import static javax.swing.JOptionPane.QUESTION_MESSAGE;
+
+import de.cismet.custom.visualdiff.DiffPanel;
 
 public class SelectLocationController {
 
@@ -96,13 +95,13 @@ public class SelectLocationController {
         String className = new File(pair[0].getUri()).getName();
         ImageIcon icon = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/jd_icon_64.png"));
         String message = "Compare class " + className + " in files " + fileNameLeft + " and " + fileNameRight + "?";
-        if (entries.size() == 2 && JOptionPane.showConfirmDialog(null, message, "Compare ?", YES_OPTION, QUESTION_MESSAGE, icon) == YES_OPTION) {
-            DiffPanel diffPanel = new DiffPanel();
+        if (entries.size() == 2 && JOptionPane.showConfirmDialog(null, message, "Compare JAVA source files ?", YES_NO_OPTION, QUESTION_MESSAGE, icon) == YES_OPTION) {
+            JFrame diffFrame = new JFrame("Comparison view for class " + className);
+            DiffPanel diffPanel = new DiffPanel(diffFrame);
             try (InputStream left = pair[0].getInputStream(); InputStream right = pair[1].getInputStream()) {
                 String contentLeft = IOUtils.toString(left, StandardCharsets.UTF_8);
                 String contentRight = IOUtils.toString(right, StandardCharsets.UTF_8);
                 diffPanel.setLeftAndRight(contentLeft, JavaKit.JAVA_MIME_TYPE, fileNameLeft, contentRight, JavaKit.JAVA_MIME_TYPE, fileNameRight);
-                JFrame diffFrame = new JFrame("Comparison view for class " + className);
                 diffFrame.getContentPane().add(diffPanel);
                 diffFrame.setExtendedState(Frame.MAXIMIZED_BOTH);
                 diffFrame.setVisible(true);

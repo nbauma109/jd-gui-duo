@@ -50,7 +50,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -114,10 +113,6 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
         }
     }
 
-    private static String getAppIconPath(int size) {
-        return "/org/jd/gui/images/jd_icon_" + size + ".png";
-    }
-
     public MainView(
             Configuration configuration, API api, History history,
             ActionListener openActionListener,
@@ -152,7 +147,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
         // Build GUI
         SwingUtil.invokeLater(() -> {
             mainFrame = new JFrame(JAVA_DECOMPILER);
-            mainFrame.setIconImages(Stream.of(32, 64, 128).map(MainView::getAppIconPath).map(ImageUtil::getImage).toList());
+            ImageUtil.addJDIconsToFrame(mainFrame);
             mainFrame.setMinimumSize(new Dimension(Constants.MINIMAL_WIDTH, Constants.MINIMAL_HEIGHT));
             mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 

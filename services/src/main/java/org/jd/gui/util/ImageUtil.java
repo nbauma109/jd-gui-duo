@@ -2,8 +2,10 @@ package org.jd.gui.util;
 
 import java.awt.Image;
 import java.io.IOException;
+import java.util.stream.Stream;
 
 import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 
 public final class ImageUtil {
 
@@ -20,5 +22,13 @@ public final class ImageUtil {
         } catch (IOException e) {
             throw new IllegalArgumentException("Invalid icon path : " + iconPath, e);
         }
+    }
+
+    public static void addJDIconsToFrame(JFrame frame) {
+        frame.setIconImages(Stream.of(32, 64, 128).map(ImageUtil::getAppIconPath).map(ImageUtil::getImage).toList());
+    }
+
+    public static String getAppIconPath(int size) {
+        return "/org/jd/gui/images/jd_icon_" + size + ".png";
     }
 }
