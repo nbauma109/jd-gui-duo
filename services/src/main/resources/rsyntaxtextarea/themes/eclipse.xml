@@ -41,7 +41,7 @@
       <style token="ANNOTATION" fg="808080"/>
       <style token="COMMENT_DOCUMENTATION" fg="3f5fbf"/>
       <style token="COMMENT_EOL" fg="3f7f5f"/>
-      <style token="COMMENT_MULTILINE" fg="3f7f5f"/>
+      <style token="COMMENT_MULTILINE" fg="bbbbbb"/>
       <style token="COMMENT_KEYWORD" fg="7F9FBF" bold="true"/>
       <style token="COMMENT_MARKUP" fg="7f7f9f"/>
       <style token="DATA_TYPE" fg="7f0055" bold="true"/>
