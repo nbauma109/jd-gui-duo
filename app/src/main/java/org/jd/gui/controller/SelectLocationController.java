@@ -97,6 +97,7 @@ public class SelectLocationController {
         String message = "Compare class " + className + " in files " + fileNameLeft + " and " + fileNameRight + "?";
         if (entries.size() == 2 && JOptionPane.showConfirmDialog(null, message, "Compare JAVA source files ?", YES_NO_OPTION, QUESTION_MESSAGE, icon) == YES_OPTION) {
             JFrame diffFrame = new JFrame("Comparison view for class " + className);
+            ImageUtil.addJDIconsToFrame(diffFrame);
             DiffPanel diffPanel = new DiffPanel(diffFrame);
             try (InputStream left = pair[0].getInputStream(); InputStream right = pair[1].getInputStream()) {
                 String contentLeft = IOUtils.toString(left, StandardCharsets.UTF_8);
