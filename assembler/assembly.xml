@@ -14,7 +14,7 @@
 			<includes>
 				<include>*.exe</include>
 				<include>lib/**</include>
-				<include>jdk-*/**</include>
+				<include>jdk-*-jre/**</include>
 			</includes>
 			<excludes>
 				<exclude>jdk-*/lib/src.zip</exclude>

@@ -11,8 +11,8 @@
 	<artifactId>jd-gui-duo</artifactId>
 	<packaging>pom</packaging>
 	<properties>
-		<jdk.archive>ibm-semeru-open-jdk_x64_windows_17.0.1_12_openj9-0.29.1.zip</jdk.archive>
-		<jdk.path>jdk-17.0.1+12</jdk.path>
+		<jre.archive>ibm-semeru-open-jre_x64_windows_17.0.1_12_openj9-0.29.1.zip</jre.archive>
+		<jre.path>jdk-17.0.1+12-jre</jre.path>
 	</properties>
 	<build>
 		<plugins>
@@ -52,10 +52,10 @@
 					</execution>
 				</executions>
 				<configuration>
-					<url>https://github.com/ibmruntimes/semeru17-binaries/releases/download/jdk-17.0.1%2B12_openj9-0.29.1/${jdk.archive}</url>
+					<url>https://github.com/ibmruntimes/semeru17-binaries/releases/download/jdk-17.0.1%2B12_openj9-0.29.1/${jre.archive}</url>
 					<unpack>true</unpack>
 					<outputDirectory>${project.build.directory}</outputDirectory>
-					<sha256>27b95cbd856ced51e4279d4180093b2670ea2734ced881ec02fc3244eb161571</sha256>
+					<sha256>786c36009b3a9a10acefc5e0809947eb9dfe70f7e2c41847b5992dc92fb4943f</sha256>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -96,7 +96,7 @@
 								<addDependencies>false</addDependencies>
 							</classPath>
 							<jre>
-								<path>${jdk.path}</path>
+								<path>${jre.path}</path>
 								<opts>
 									<opt>-ea</opt>
 									<opt>--add-opens java.base/java.net=ALL-UNNAMED</opt>
