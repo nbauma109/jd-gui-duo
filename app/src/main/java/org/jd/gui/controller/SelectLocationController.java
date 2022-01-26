@@ -20,8 +20,9 @@ import org.jdv1.gui.model.container.DelegatingFilterContainer;
 import org.jdv1.gui.view.SelectLocationView;
 import org.netbeans.modules.editor.java.JavaKit;
 
-import java.awt.Frame;
+import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
@@ -83,7 +84,8 @@ public class SelectLocationController {
         for (Map.Entry<Container, List<Container.Entry>> mapEntry : map.entrySet()) {
             Container container = mapEntry.getKey();
             // Create a filtered container
-            // TODO In a future release, display matching types and inner-types, not only matching files
+            // TODO In a future release, display matching types and inner-types, not only
+            // matching files
             delegatingFilterContainers.add(new DelegatingFilterContainer(container, getOuterEntries(mapEntry.getValue())));
         }
 
@@ -104,7 +106,9 @@ public class SelectLocationController {
                 String contentRight = IOUtils.toString(right, StandardCharsets.UTF_8);
                 diffPanel.setLeftAndRight(contentLeft, JavaKit.JAVA_MIME_TYPE, fileNameLeft, contentRight, JavaKit.JAVA_MIME_TYPE, fileNameRight);
                 diffFrame.getContentPane().add(diffPanel);
-                diffFrame.setExtendedState(Frame.MAXIMIZED_BOTH);
+                Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+                diffFrame.setLocation((int) Math.round(screenSize.getWidth() / 6.0), (int) Math.round(screenSize.getHeight() / 6.0));
+                diffFrame.setSize((int) Math.round(screenSize.getWidth() / 1.5), (int) Math.round(screenSize.getHeight() / 1.5));
                 diffFrame.setVisible(true);
             } catch (Exception e) {
                 ExceptionUtil.printStackTrace(e);
