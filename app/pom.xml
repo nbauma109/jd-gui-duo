@@ -49,15 +49,9 @@
 	</build>
 	<dependencies>
 		<dependency>
-			<groupId>org.frgaal</groupId>
-			<artifactId>compiler</artifactId>
-			<version>17.0.0</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
 			<groupId>com.github.nbauma109</groupId>
 			<artifactId>netbeans-visual-diff-standalone</artifactId>
-			<version>2.0.12</version>
+			<version>2.0.13</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.nbauma109</groupId>
