@@ -12,9 +12,7 @@
 		<module>app</module>
 		<module>assembler</module>
 	</modules>
-        <properties>
-                <sonar.organization>nbauma109</sonar.organization>
-                <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
