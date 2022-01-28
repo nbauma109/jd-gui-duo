@@ -101,6 +101,7 @@
 									<opt>-ea</opt>
 									<opt>--add-opens java.base/java.net=ALL-UNNAMED</opt>
 									<opt>--add-opens java.desktop/javax.swing.text=ALL-UNNAMED</opt>
+									<opt>--add-opens java.desktop/javax.swing.plaf.basic=ALL-UNNAMED</opt>
 									<opt>--add-opens java.prefs/java.util.prefs=ALL-UNNAMED</opt>
 									<opt>--add-opens java.base/java.lang.ref=ALL-UNNAMED</opt>
 								</opts>
