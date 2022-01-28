@@ -16,7 +16,7 @@ import org.jd.gui.util.function.TriConsumer;
 import org.jd.gui.util.swing.SwingUtil;
 import org.jd.gui.view.component.Tree;
 import org.jd.gui.view.renderer.TreeNodeRenderer;
-import org.jdv1.gui.model.container.DelegatingFilterContainer;
+import org.jd.gui.model.container.DelegatingFilterContainer;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;

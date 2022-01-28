@@ -13,7 +13,7 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.model.container.entry.path.SimpleEntryPath;
 import org.jd.gui.spi.ContainerFactory;
-import org.jdv1.gui.util.index.IndexesUtil;
+import org.jd.gui.util.index.IndexesUtil;
 
 import java.io.Closeable;
 import java.io.File;

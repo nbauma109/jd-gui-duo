@@ -13,8 +13,8 @@ import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.util.parser.jdt.core.HyperlinkData;
-import org.jdv1.gui.api.feature.IndexesChangeListener;
-import org.jdv1.gui.util.index.IndexesUtil;
+import org.jd.gui.api.feature.IndexesChangeListener;
+import org.jd.gui.util.index.IndexesUtil;
 
 import java.awt.Point;
 import java.net.URI;

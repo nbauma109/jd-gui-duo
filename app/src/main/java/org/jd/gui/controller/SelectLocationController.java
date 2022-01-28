@@ -16,8 +16,8 @@ import org.jd.gui.api.model.Type;
 import org.jd.gui.service.type.TypeFactoryService;
 import org.jd.gui.spi.TypeFactory;
 import org.jd.gui.util.ImageUtil;
-import org.jdv1.gui.model.container.DelegatingFilterContainer;
-import org.jdv1.gui.view.SelectLocationView;
+import org.jd.gui.model.container.DelegatingFilterContainer;
+import org.jd.gui.view.SelectLocationView;
 import org.netbeans.modules.editor.java.JavaKit;
 
 import java.awt.Dimension;

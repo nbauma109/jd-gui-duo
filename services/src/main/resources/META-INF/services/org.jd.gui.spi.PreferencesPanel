@@ -1,5 +1,5 @@
-org.jdv1.gui.service.preferencespanel.DirectoryIndexerPreferencesProvider
-org.jdv1.gui.service.preferencespanel.ClassFileSaverPreferencesProvider
-org.jdv1.gui.service.preferencespanel.ClassFileDecompilerPreferencesProvider
-org.jdv1.gui.service.preferencespanel.ViewerPreferencesProvider
-org.jdv1.gui.service.preferencespanel.MavenOrgSourceLoaderPreferencesProvider
+org.jd.gui.service.preferencespanel.DirectoryIndexerPreferencesProvider
+org.jd.gui.service.preferencespanel.ClassFileSaverPreferencesProvider
+org.jd.gui.service.preferencespanel.ClassFileDecompilerPreferencesProvider
+org.jd.gui.service.preferencespanel.ViewerPreferencesProvider
+org.jd.gui.service.preferencespanel.MavenOrgSourceLoaderPreferencesProvider

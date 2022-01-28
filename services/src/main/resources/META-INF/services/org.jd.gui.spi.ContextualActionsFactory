@@ -1,3 +1,3 @@
-org.jdv1.gui.service.actions.CopyQualifiedNameContextualActionsFactory
-org.jdv1.gui.service.actions.ShowControlFlowGraphContextualActionsFactory
-org.jdv1.gui.service.actions.ShowByteCodeContextualActionsFactory
+org.jd.gui.service.actions.CopyQualifiedNameContextualActionsFactory
+org.jd.gui.service.actions.ShowControlFlowGraphContextualActionsFactory
+org.jd.gui.service.actions.ShowByteCodeContextualActionsFactory

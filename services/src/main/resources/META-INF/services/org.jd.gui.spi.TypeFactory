@@ -1,2 +1,2 @@
-org.jdv1.gui.service.type.ClassFileTypeFactoryProvider
-org.jdv1.gui.service.type.JavaFileTypeFactoryProvider
+org.jd.gui.service.type.ClassFileTypeFactoryProvider
+org.jd.gui.service.type.JavaFileTypeFactoryProvider

@@ -16,8 +16,8 @@ import org.jd.gui.spi.TypeFactory;
 import org.jd.gui.util.function.TriConsumer;
 import org.jd.gui.view.SearchInConstantPoolsView;
 import org.jd.util.LRUCache;
-import org.jdv1.gui.api.feature.IndexesChangeListener;
-import org.jdv1.gui.model.container.DelegatingFilterContainer;
+import org.jd.gui.api.feature.IndexesChangeListener;
+import org.jd.gui.model.container.DelegatingFilterContainer;
 
 import java.net.URI;
 import java.net.URISyntaxException;

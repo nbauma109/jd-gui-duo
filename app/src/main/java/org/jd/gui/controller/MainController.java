@@ -45,9 +45,9 @@ import org.jd.gui.spi.UriLoader;
 import org.jd.gui.util.net.UriUtil;
 import org.jd.gui.util.swing.SwingUtil;
 import org.jd.gui.view.MainView;
-import org.jdv1.gui.api.feature.IndexesChangeListener;
-import org.jdv1.gui.service.fileloader.FileLoaderService;
-import org.jdv1.gui.service.sourceloader.SourceLoaderService;
+import org.jd.gui.api.feature.IndexesChangeListener;
+import org.jd.gui.service.fileloader.FileLoaderService;
+import org.jd.gui.service.sourceloader.SourceLoaderService;
 
 import java.awt.Desktop;
 import java.awt.Frame;

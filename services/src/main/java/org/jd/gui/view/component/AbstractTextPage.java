@@ -53,8 +53,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
 
 import static org.jd.gui.util.decompiler.GuiPreferences.FONT_SIZE_KEY;
-import static org.jdv1.gui.service.treenode.AbstractTreeNodeFactoryProvider.COLLAPSED_ICON;
-import static org.jdv1.gui.service.treenode.AbstractTreeNodeFactoryProvider.EXPANDED_ICON;
+import static org.jd.gui.service.treenode.AbstractTreeNodeFactoryProvider.COLLAPSED_ICON;
+import static org.jd.gui.service.treenode.AbstractTreeNodeFactoryProvider.EXPANDED_ICON;
 
 public class AbstractTextPage extends JPanel implements LineNumberNavigable, ContentSearchable, UriOpenable, PreferencesChangeListener {
 
