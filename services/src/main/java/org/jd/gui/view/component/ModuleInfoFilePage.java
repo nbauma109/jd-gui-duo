@@ -16,6 +16,7 @@ import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.TokenMap;
 import org.fife.ui.rsyntaxtextarea.TokenTypes;
 import org.fife.ui.rtextarea.Marker;
+import org.jd.core.v1.printer.StringBuilderPrinter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
@@ -26,7 +27,6 @@ import org.jd.gui.util.parser.jdt.core.DeclarationData;
 import org.jd.gui.util.parser.jdt.core.HyperlinkData;
 import org.jd.gui.util.parser.jdt.core.HyperlinkReferenceData;
 import org.jd.gui.util.parser.jdt.core.ReferenceData;
-import org.jd.gui.util.decompiler.StringBuilderPrinter;
 import org.jd.gui.util.index.IndexesUtil;
 
 import java.awt.Point;
@@ -46,7 +46,7 @@ import javax.swing.text.Segment;
 import static org.jd.core.v1.api.printer.Printer.MODULE;
 import static org.jd.core.v1.api.printer.Printer.PACKAGE;
 import static org.jd.core.v1.api.printer.Printer.TYPE;
-import static org.jd.gui.util.decompiler.GuiPreferences.ESCAPE_UNICODE_CHARACTERS;
+import static jd.core.preferences.Preferences.ESCAPE_UNICODE_CHARACTERS;
 
 public class ModuleInfoFilePage extends ClassFilePage {
 

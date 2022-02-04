@@ -10,7 +10,6 @@ package org.jd.gui.service.fileloader;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
-import org.jd.gui.service.fileloader.AbstractTypeFileLoaderProvider;
 import org.objectweb.asm.ClassReader;
 
 import java.io.BufferedInputStream;

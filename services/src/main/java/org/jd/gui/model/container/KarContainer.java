@@ -9,7 +9,6 @@ package org.jd.gui.model.container;
 
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
-import org.jd.gui.model.container.GenericContainer;
 
 import java.nio.file.Path;
 

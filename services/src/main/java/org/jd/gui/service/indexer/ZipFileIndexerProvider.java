@@ -10,7 +10,6 @@ package org.jd.gui.service.indexer;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
-import org.jd.gui.service.indexer.AbstractIndexerProvider;
 import org.jd.gui.spi.Indexer;
 
 import java.util.function.BooleanSupplier;

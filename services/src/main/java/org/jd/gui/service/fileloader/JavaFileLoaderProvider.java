@@ -8,7 +8,6 @@
 package org.jd.gui.service.fileloader;
 
 import org.jd.gui.api.API;
-import org.jd.gui.service.fileloader.AbstractTypeFileLoaderProvider;
 import org.jd.gui.util.io.TextReader;
 
 import java.io.File;

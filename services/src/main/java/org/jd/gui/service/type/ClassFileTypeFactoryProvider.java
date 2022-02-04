@@ -13,7 +13,6 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Type;
 import org.jd.gui.model.container.entry.path.FileEntryPath;
-import org.jd.gui.service.type.AbstractTypeFactoryProvider;
 import org.jd.util.LRUCache;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;

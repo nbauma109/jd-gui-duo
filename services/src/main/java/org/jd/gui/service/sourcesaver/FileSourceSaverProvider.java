@@ -10,7 +10,6 @@ package org.jd.gui.service.sourcesaver;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
-import org.jd.gui.service.sourcesaver.AbstractSourceSaverProvider;
 import org.jd.gui.spi.SourceSaver;
 
 import java.io.BufferedWriter;

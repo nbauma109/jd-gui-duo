@@ -9,14 +9,13 @@ package org.jd.gui.view.component;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
+import org.jd.gui.api.feature.IndexesChangeListener;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
+import org.jd.gui.util.index.IndexesUtil;
 import org.jd.gui.util.io.TextReader;
 import org.jd.gui.util.parser.jdt.core.HyperlinkData;
-import org.jd.gui.view.component.HyperlinkPage;
-import org.jd.gui.api.feature.IndexesChangeListener;
-import org.jd.gui.util.index.IndexesUtil;
 
 import java.awt.Point;
 import java.io.IOException;

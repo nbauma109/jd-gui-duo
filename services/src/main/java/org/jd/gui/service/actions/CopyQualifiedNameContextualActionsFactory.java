@@ -11,7 +11,6 @@ import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Type;
-import org.jd.gui.service.actions.InvalidFormatException;
 import org.jd.gui.spi.ContextualActionsFactory;
 import org.jd.gui.spi.TypeFactory;
 import org.jd.gui.util.ImageUtil;
