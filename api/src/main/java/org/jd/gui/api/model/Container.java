@@ -46,4 +46,6 @@ public interface Container {
 
         String getPath();
     }
+
+    void indexingDone();
 }

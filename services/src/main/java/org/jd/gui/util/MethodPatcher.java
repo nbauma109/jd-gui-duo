@@ -5,7 +5,6 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeWriter;
 import org.jd.gui.api.model.Container;
-import org.jd.gui.util.StringUtilities;
 import org.jd.gui.util.parser.jdt.ASTParserFactory;
 import org.jd.util.Range;
 
@@ -23,7 +22,7 @@ public final class MethodPatcher {
         Map<String, Range> methodKeyPositionRanges = new HashMap<>();
         URI jarURI = entry.getContainer().getRoot().getParent().getUri();
         String unitName = entry.getPath();
-        ASTParserFactory.getInstanceWithBindings().newASTParser(sourceCodeV1.toCharArray(), unitName, jarURI, new ASTVisitor() {
+        ASTParserFactory.getInstanceWithBindings().newASTParser(sourceCodeV1.toCharArray(), unitName, jarURI).createAST(null).accept(new ASTVisitor() {
 
             @Override
             public boolean visit(MethodDeclaration node) {
@@ -43,7 +42,7 @@ public final class MethodPatcher {
             }
         });
         Map<Range, String> replacementMap = new HashMap<>();
-        ASTParserFactory.getInstanceWithBindings().newASTParser(sourceCodeV0.toCharArray(), unitName, jarURI, new ASTVisitor() {
+        ASTParserFactory.getInstanceWithBindings().newASTParser(sourceCodeV0.toCharArray(), unitName, jarURI).createAST(null).accept(new ASTVisitor() {
 
             @Override
             public boolean visit(MethodDeclaration node) {

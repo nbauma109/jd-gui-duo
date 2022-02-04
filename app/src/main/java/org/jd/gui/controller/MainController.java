@@ -57,7 +57,6 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -536,14 +535,8 @@ public class MainController implements API {
         @Override
         protected void done() {
             progressMonitor.close();
-            if (ci instanceof Closeable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-                Closeable c = (Closeable) ci;
-                try {
-                    c.close();
-                } catch (IOException e) {
-                    assert ExceptionUtil.printStackTrace(e);
-                }
-            }
+            ci.indexingDone();
+
             // Fire 'indexesChanged' event
             Collection<Future<Indexes>> collectionOfFutureIndexes = getCollectionOfFutureIndexes();
             for (IndexesChangeListener listener : containerChangeListeners) {

@@ -13,17 +13,16 @@ import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Type;
-import org.jd.gui.service.type.AbstractTypeFactoryProvider;
 import org.jd.gui.util.parser.jdt.ASTParserFactory;
 import org.jd.gui.util.parser.jdt.core.AbstractJavaListener;
 import org.jd.util.LRUCache;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -88,8 +87,8 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
 
         try {
             listener = new Listener(entry);
-            ASTParserFactory.getInstance().newASTParser(entry, listener);
-        } catch (LoaderException e) {
+            ASTParserFactory.getInstance().newASTParser(entry).createAST(null).accept(listener);
+        } catch (IOException e) {
             assert ExceptionUtil.printStackTrace(e);
             listener = null;
         }

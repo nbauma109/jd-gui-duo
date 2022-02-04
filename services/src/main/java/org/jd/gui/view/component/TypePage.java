@@ -6,15 +6,21 @@
  */
 package org.jd.gui.view.component;
 
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.Comment;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.fife.ui.rsyntaxtextarea.DocumentRange;
 import org.fife.ui.rtextarea.Marker;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.FocusedTypeGettable;
+import org.jd.gui.api.feature.IndexesChangeListener;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.api.model.Type;
+import org.jd.gui.util.index.IndexesUtil;
 import org.jd.gui.util.matcher.DescriptorMatcher;
 import org.jd.gui.util.parser.jdt.ASTParserFactory;
 import org.jd.gui.util.parser.jdt.core.DeclarationData;
@@ -22,10 +28,6 @@ import org.jd.gui.util.parser.jdt.core.HyperlinkData;
 import org.jd.gui.util.parser.jdt.core.HyperlinkReferenceData;
 import org.jd.gui.util.parser.jdt.core.ReferenceData;
 import org.jd.gui.util.parser.jdt.core.StringData;
-import org.jd.gui.view.component.CustomLineNumbersPage;
-import org.jd.gui.view.component.ReferenceListener;
-import org.jd.gui.api.feature.IndexesChangeListener;
-import org.jd.gui.util.index.IndexesUtil;
 
 import java.awt.Point;
 import java.net.URI;
@@ -46,6 +48,8 @@ public abstract class TypePage extends CustomLineNumbersPage
 
     private static final long serialVersionUID = 1L;
 
+    private static final Pattern LINE_COMMENT_PATTERN = Pattern.compile("/\\*\s*(\\d+)\s*\\*/");
+    
     protected final transient API api;
     protected final transient Container.Entry entry;
     protected transient Collection<Future<Indexes>> collectionOfFutureIndexes = Collections.emptyList();
@@ -512,12 +516,43 @@ public abstract class TypePage extends CustomLineNumbersPage
         URI jarURI = entry.getContainer().getRoot().getParent().getUri();
         String unitName = entry.getPath();
         // 1st pass for declarations
-        ASTParserFactory.getInstance().newASTParser(source, unitName, jarURI, listener.getDeclarationListener());
+        ASTParser astParser = ASTParserFactory.getInstance().newASTParser(source, unitName, jarURI);
+        astParser.createAST(null).accept(listener.getDeclarationListener());    
         listener.init();
         // 2nd pass for references
-        ASTParserFactory.getInstanceWithBindings().newASTParser(source, unitName, jarURI, listener);
+        ASTParser astParserWithBindings = ASTParserFactory.getInstanceWithBindings().newASTParser(source, unitName, jarURI);
+        ASTNode astNode = astParserWithBindings.createAST(null);
+        astNode.accept(listener);
         // Display
         setText(text);
         initLineNumbers();
+        setMisalignedLineNumbers(astNode, text);
+    }
+
+    private void setMisalignedLineNumbers(ASTNode astNode, String text) {
+        if (astNode instanceof CompilationUnit) {
+            CompilationUnit cu = (CompilationUnit) astNode;
+            @SuppressWarnings("unchecked")
+            List<Comment> commentList = cu.getCommentList();
+            for (Comment comment : commentList) {
+                int startPosition = comment.getStartPosition();
+                int endPosition = startPosition + comment.getLength();
+                int startLineNumber = cu.getLineNumber(startPosition);
+                int endLineNumber = cu.getLineNumber(endPosition);
+                int columnNumber = cu.getColumnNumber(startPosition);
+                if (comment.isBlockComment() && columnNumber == 0 && startLineNumber == endLineNumber) {
+                    String commentText = text.substring(startPosition, endPosition);
+                    Matcher commentMatcher = LINE_COMMENT_PATTERN.matcher(commentText);
+                    if (commentMatcher.matches()) {
+                        String lineNumberText = commentMatcher.group(1);
+                        int originalLineNumber = Integer.parseInt(lineNumberText);
+                        int textAreaLineNumber = startLineNumber;
+                        if (originalLineNumber != textAreaLineNumber) {
+                            setLineNumber(textAreaLineNumber, originalLineNumber);
+                        }
+                    }
+                }
+            }
+        }
     }
 }

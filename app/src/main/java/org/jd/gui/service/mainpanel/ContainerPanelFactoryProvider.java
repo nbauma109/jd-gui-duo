@@ -151,6 +151,11 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
                 c.close();
             }
         }
+
+        @Override
+        public void indexingDone() {
+            container.indexingDone();
+        }
     }
 
     protected static class DelegatedMap<K, V> implements Map<K, V> {

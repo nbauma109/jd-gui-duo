@@ -9,5 +9,4 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>jd-gui-duo-api</artifactId>
-	<name>jd-gui-duo-api</name>
 </project>

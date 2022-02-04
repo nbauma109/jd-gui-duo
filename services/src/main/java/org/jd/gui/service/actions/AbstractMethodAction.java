@@ -6,13 +6,11 @@
 package org.jd.gui.service.actions;
 
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.cfg.MethodUtil;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.gui.api.model.Container;
-import org.jd.gui.service.actions.InvalidFormatException;
 import org.jd.gui.util.decompiler.ContainerLoader;
 
 import java.awt.event.ActionEvent;
@@ -56,7 +54,7 @@ public abstract class AbstractMethodAction extends AbstractAction {
                     Method method = MethodUtil.searchMethod(loader, typeMaker, internalTypeName, methodName, descriptor);
                     methodAction(method);
                     
-                } catch (LoaderException | IOException ex) {
+                } catch (IOException ex) {
                     assert ExceptionUtil.printStackTrace(ex);
                 }
             }

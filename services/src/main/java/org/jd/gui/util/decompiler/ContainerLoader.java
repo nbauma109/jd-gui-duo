@@ -9,7 +9,6 @@ package org.jd.gui.util.decompiler;
 
 import org.apache.commons.io.IOUtils;
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.model.container.entry.path.FileEntryPath;
@@ -52,20 +51,20 @@ public class ContainerLoader implements Loader {
     }
 
     @Override
-    public byte[] load(String internalName) throws LoaderException {
+    public byte[] load(String internalName) throws IOException {
         Container.Entry loadedEntry = getEntry(internalName);
         try (InputStream inputStream = loadedEntry.getInputStream()) {
             return IOUtils.toByteArray(inputStream);
         } catch (IOException e) {
-            throw new LoaderException(e);
+            throw new IOException(e);
         }
     }
 
-    public static char[] loadEntry(Container.Entry entry, Charset charset) throws LoaderException {
+    public static char[] loadEntry(Container.Entry entry, Charset charset) throws IOException {
         try (InputStream inputStream = entry.getInputStream()) {
             return IOUtils.toCharArray(inputStream, charset);
         } catch (IOException e) {
-            throw new LoaderException(e);
+            throw new IOException(e);
         }
     }
 }

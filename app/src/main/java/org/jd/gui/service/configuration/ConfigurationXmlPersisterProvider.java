@@ -37,7 +37,7 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
 import static org.jd.gui.util.decompiler.GuiPreferences.ERROR_BACKGROUND_COLOR;
-import static org.jd.gui.util.decompiler.GuiPreferences.JD_CORE_VERSION;
+import static jd.core.preferences.Preferences.JD_CORE_VERSION;
 
 public class ConfigurationXmlPersisterProvider implements ConfigurationPersister {
     private static final String NEW_LINE_2_TABS = "\n\t\t";

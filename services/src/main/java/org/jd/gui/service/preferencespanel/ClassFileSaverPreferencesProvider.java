@@ -17,9 +17,8 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import static org.jd.gui.util.decompiler.GuiPreferences.USE_JD_CORE_V0;
-import static org.jd.gui.util.decompiler.GuiPreferences.WRITE_LINE_NUMBERS;
-import static org.jd.gui.util.decompiler.GuiPreferences.WRITE_METADATA;
+import static jd.core.preferences.Preferences.WRITE_LINE_NUMBERS;
+import static jd.core.preferences.Preferences.WRITE_METADATA;
 
 public class ClassFileSaverPreferencesProvider extends JPanel implements PreferencesPanel {
 
@@ -27,18 +26,15 @@ public class ClassFileSaverPreferencesProvider extends JPanel implements Prefere
 
     protected JCheckBox writeLineNumbersCheckBox;
     protected JCheckBox writeMetadataCheckBox;
-    protected JCheckBox useJDCoreV0CheckBox;
 
     public ClassFileSaverPreferencesProvider() {
         super(new GridLayout(0,1));
 
         writeLineNumbersCheckBox = new JCheckBox("Write original line numbers");
         writeMetadataCheckBox = new JCheckBox("Write metadata");
-        useJDCoreV0CheckBox = new JCheckBox("Use JD-Core v0");
 
         add(writeLineNumbersCheckBox);
         add(writeMetadataCheckBox);
-        add(useJDCoreV0CheckBox);
     }
 
     // --- PreferencesPanel --- //
@@ -59,14 +55,12 @@ public class ClassFileSaverPreferencesProvider extends JPanel implements Prefere
     public void loadPreferences(Map<String, String> preferences) {
         writeLineNumbersCheckBox.setSelected(!"false".equals(preferences.get(WRITE_LINE_NUMBERS)));
         writeMetadataCheckBox.setSelected(!"false".equals(preferences.get(WRITE_METADATA)));
-        useJDCoreV0CheckBox.setSelected(Boolean.parseBoolean(preferences.get(USE_JD_CORE_V0)));
     }
 
     @Override
     public void savePreferences(Map<String, String> preferences) {
         preferences.put(WRITE_LINE_NUMBERS, Boolean.toString(writeLineNumbersCheckBox.isSelected()));
         preferences.put(WRITE_METADATA, Boolean.toString(writeMetadataCheckBox.isSelected()));
-        preferences.put(USE_JD_CORE_V0, Boolean.toString(useJDCoreV0CheckBox.isSelected()));
     }
 
     @Override

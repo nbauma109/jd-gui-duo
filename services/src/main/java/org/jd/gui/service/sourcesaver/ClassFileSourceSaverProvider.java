@@ -8,42 +8,34 @@
 package org.jd.gui.service.sourcesaver;
 
 import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeWriter;
+import org.jd.core.v1.printer.LineNumberStringBuilderPrinter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
-import org.jd.gui.service.sourcesaver.AbstractSourceSaverProvider;
 import org.jd.gui.util.decompiler.ContainerLoader;
-import org.jd.gui.util.MethodPatcher;
-import org.jd.gui.util.decompiler.LineNumberStringBuilderPrinter;
 
-import java.io.File;
+import com.heliosdecompiler.transformerapi.StandardTransformers;
+import com.heliosdecompiler.transformerapi.common.Loader;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
 
-import static org.apache.bcel.Const.MAJOR_1_1;
-import static org.apache.bcel.Const.MAJOR_1_5;
-import static org.jd.gui.util.decompiler.GuiPreferences.ESCAPE_UNICODE_CHARACTERS;
-import static org.jd.gui.util.decompiler.GuiPreferences.JD_CORE_VERSION;
-import static org.jd.gui.util.decompiler.GuiPreferences.REALIGN_LINE_NUMBERS;
-import static org.jd.gui.util.decompiler.GuiPreferences.USE_JD_CORE_V0;
-import static org.jd.gui.util.decompiler.GuiPreferences.WRITE_LINE_NUMBERS;
-import static org.jd.gui.util.decompiler.GuiPreferences.WRITE_METADATA;
+import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V1;
+import static org.jd.gui.util.decompiler.GuiPreferences.DECOMPILE_ENGINE;
 
 public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
+
+    private static final String INTERNAL_ERROR = "// INTERNAL ERROR //";
 
     protected static final ClassFileToJavaSourceDecompiler DECOMPILER = new ClassFileToJavaSourceDecompiler();
 
     protected ContainerLoader loader = new ContainerLoader();
     protected LineNumberStringBuilderPrinter printer = new LineNumberStringBuilderPrinter();
-
-    protected org.jdv0.gui.service.sourcesaver.ClassFileSourceSaverProvider v0Saver = new org.jdv0.gui.service.sourcesaver.ClassFileSourceSaverProvider();
 
     @Override
     public String[] getSelectors() { return appendSelectors("*:file:*.class"); }
@@ -74,6 +66,9 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
 
     @Override
     public void saveContent(API api, Controller controller, Listener listener, Path rootPath, Path path, Container.Entry entry) {
+
+        String decompiledOutput = "";
+        
         try {
             // Call listener
             if (path.toString().indexOf('$') == -1) {
@@ -81,83 +76,25 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
             }
             // Init preferences
             Map<String, String> preferences = api.getPreferences();
-            boolean realignmentLineNumbers = Boolean.parseBoolean(preferences.getOrDefault(REALIGN_LINE_NUMBERS, Boolean.TRUE.toString()));
-            boolean unicodeEscape = Boolean.parseBoolean(preferences.getOrDefault(ESCAPE_UNICODE_CHARACTERS, Boolean.FALSE.toString()));
-            boolean showLineNumbers = Boolean.parseBoolean(preferences.getOrDefault(WRITE_LINE_NUMBERS, Boolean.TRUE.toString()));
-
-            if (Boolean.parseBoolean(preferences.getOrDefault(USE_JD_CORE_V0, Boolean.FALSE.toString()))) {
-                v0Saver.saveContent(api, controller, listener, rootPath, path, entry);
-                return;
-            }
-
-            Map<String, Object> configuration = new HashMap<>();
-            configuration.put("realignLineNumbers", realignmentLineNumbers);
 
             // Init loader
             loader.setEntry(entry);
-
-            // Init printer
-            printer.setRealignmentLineNumber(realignmentLineNumbers);
-            printer.setUnicodeEscape(unicodeEscape);
-            printer.setShowLineNumbers(showLineNumbers);
 
             // Format internal name
             String entryPath = entry.getPath();
             assert entryPath.endsWith(StringConstants.CLASS_FILE_SUFFIX);
             String entryInternalName = entryPath.substring(0, entryPath.length() - 6); // 6 = ".class".length()
+            
+            String decompileEngine = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
+            Loader apiLoader = new Loader(loader::canLoad, loader::load);
+            decompiledOutput = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, decompileEngine);
 
-            // Decompile class file
-            DECOMPILER.decompile(loader, printer, entryInternalName, configuration);
-
-            StringBuilder stringBuffer = printer.getStringBuffer();
-
-            // Metadata
-            if (Boolean.parseBoolean(preferences.getOrDefault(WRITE_METADATA, "true"))) {
-                // Add location
-                String location =
-                    new File(entry.getUri()).getPath()
-                    // Escape "\ u" sequence to prevent "Invalid unicode" errors
-                    .replaceAll("(^|[^\\\\])\\\\u", "\\\\\\\\u");
-                stringBuffer.append("\n\n/* Location:              ");
-                stringBuffer.append(location);
-                // Add Java compiler version
-                int majorVersion = printer.getMajorVersion();
-
-                if (majorVersion >= MAJOR_1_1) {
-                    stringBuffer.append("\n * Java compiler version: ");
-
-                    if (majorVersion >= MAJOR_1_5) {
-                        stringBuffer.append(majorVersion - (MAJOR_1_5 - 5));
-                    } else {
-                        stringBuffer.append(majorVersion - (MAJOR_1_1 - 1));
-                    }
-
-                    stringBuffer.append(" (");
-                    stringBuffer.append(majorVersion);
-                    stringBuffer.append('.');
-                    stringBuffer.append(printer.getMinorVersion());
-                    stringBuffer.append(')');
-                }
-                // Add JD-Core version
-                stringBuffer.append("\n * JD-Core Version:       ");
-                stringBuffer.append(preferences.get(JD_CORE_VERSION));
-                stringBuffer.append("\n */");
-            }
-
-            String sourceCodeV1 = stringBuffer.toString();
-            if (sourceCodeV1.contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
-                String sourceCodeV0 = v0Saver.decompileV0(api, entry);
-                String patchedCode = MethodPatcher.patchCode(sourceCodeV1, sourceCodeV0, entry);
-                writeCodeToFile(path, patchedCode);
-            } else {
-                writeCodeToFile(path, sourceCodeV1);
-            }
         } catch (Exception t) {
+            decompiledOutput = INTERNAL_ERROR;
             assert ExceptionUtil.printStackTrace(t);
-            if (!Boolean.parseBoolean(api.getPreferences().getOrDefault(USE_JD_CORE_V0, "false"))) {
-                v0Saver.saveContent(api, controller, listener, rootPath, path, entry);
-            }
         }
+        
+        writeCodeToFile(path, decompiledOutput);
     }
 
     private static void writeCodeToFile(Path path, String sourceCode) {

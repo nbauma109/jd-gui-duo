@@ -18,12 +18,10 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
-import org.jd.gui.service.indexer.AbstractIndexerProvider;
 import org.jd.gui.util.parser.jdt.ASTParserFactory;
 import org.jd.gui.util.parser.jdt.core.AbstractJavaListener;
 
@@ -51,7 +49,7 @@ public class JavaFileIndexerProvider extends AbstractIndexerProvider {
     public void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
         try {
             Listener listener = new Listener(entry);
-            ASTParserFactory.getInstance().newASTParser(entry, listener);
+            ASTParserFactory.getInstance().newASTParser(entry).createAST(null).accept(listener);
 
             // Append sets to indexes
             addToIndexes(indexes, "typeDeclarations", listener.getTypeDeclarationSet(), entry);
@@ -76,7 +74,7 @@ public class JavaFileIndexerProvider extends AbstractIndexerProvider {
                 }
             }
             updateProgress(entry, getProgressFunction, setProgressFunction);
-        } catch (LoaderException | IOException e) {
+        } catch (IOException e) {
             assert ExceptionUtil.printStackTrace(e);
         }
     }

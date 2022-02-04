@@ -3,8 +3,6 @@ package org.jd.gui.util.parser.jdt;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.model.Container;
@@ -24,6 +22,9 @@ public final class ASTParserFactory {
 
     private static final String DEFAULT_JDK_VERSION = JavaCore.VERSION_1_8;
 
+    private static final ASTParserFactory INSTANCE = new ASTParserFactory(false, false, false);
+    private static final ASTParserFactory BINDING_INSTANCE = new ASTParserFactory(true, true, true);
+
     private ASTParserFactory(boolean resolveBindings, boolean bindingRecovery, boolean statementRecovery) {
         this.resolveBindings = resolveBindings;
         this.bindingRecovery = bindingRecovery;
@@ -31,32 +32,27 @@ public final class ASTParserFactory {
     }
 
     public static ASTParserFactory getInstance() {
-        return ASTParserFactoryHolder.INSTANCE;
+        return INSTANCE;
     }
 
     public static ASTParserFactory getInstanceWithBindings() {
-        return ASTParserFactoryHolder.BINDING_INSTANCE;
-    }
-
-    private static class ASTParserFactoryHolder {
-        private static final ASTParserFactory INSTANCE = new ASTParserFactory(false, false, false);
-        private static final ASTParserFactory BINDING_INSTANCE = new ASTParserFactory(true, true, true);
+        return BINDING_INSTANCE;
     }
 
     private static final Map<URI, String> jarTojdkVersion = new ConcurrentHashMap<>();
-    
+
     private final boolean resolveBindings;
     private final boolean bindingRecovery;
     private final boolean statementRecovery;
 
-    public ASTParser newASTParser(Container.Entry containerEntry, ASTVisitor listener) throws LoaderException {
+    public ASTParser newASTParser(Container.Entry containerEntry) throws IOException {
         URI jarURI = containerEntry.getContainer().getRoot().getParent().getUri();
         char[] source = ContainerLoader.loadEntry(containerEntry, StandardCharsets.UTF_8);
         String unitName = containerEntry.getPath();
-        return newASTParser(source, unitName, jarURI, listener);
+        return newASTParser(source, unitName, jarURI);
     }
 
-    public ASTParser newASTParser(char[] source, String unitName, URI jarURI, ASTVisitor listener) {
+    public ASTParser newASTParser(char[] source, String unitName, URI jarURI) {
         ASTParser parser = ASTParser.newParser(AST.getJLSLatest());
         parser.setKind(ASTParser.K_COMPILATION_UNIT);
         parser.setSource(source);
@@ -80,8 +76,6 @@ public final class ASTParserFactory {
         options.put(JavaCore.COMPILER_COMPLIANCE, majorVersion);
         options.put(JavaCore.COMPILER_SOURCE, majorVersion);
         parser.setCompilerOptions(options);
-
-        parser.createAST(null).accept(listener);
         return parser;
     }
 
