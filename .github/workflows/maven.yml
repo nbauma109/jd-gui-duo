@@ -23,6 +23,10 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
+    - name: Install packages
+      run: |
+        sudo apt-get -y update
+        sudo apt-get -y install lib32z1 lib32ncurses5
     - name: Release
       uses: qcastel/github-actions-maven-release@master
       env:
