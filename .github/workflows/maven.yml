@@ -24,10 +24,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Install packages
-      run: |
-        sudo apt-get -y update
-        sudo dpkg --add-architecture i386
-        sudo apt-get -y install libz1:i386 libncurses6:i386 libbz2-1.0:i386
+      run: sudo apt-get -y update && sudo dpkg --add-architecture i386 && sudo apt-get -y install libz1:i386 lib32ncurses6 lib32bz2
     - name: Release
       uses: qcastel/github-actions-maven-release@master
       env:
