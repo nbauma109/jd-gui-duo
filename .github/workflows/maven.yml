@@ -24,11 +24,11 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Create private key
-      run: echo "${{ secrets.SSH_PRIVATE_KEY }}" > C:\Users\runneradmin\sshkey
+      run: echo "${{ secrets.SSH_PRIVATE_KEY }}" > C:\Users\RUNNER~1\AppData\Local\Temp\sshkey
     - name: Create maven settings
       uses: s4u/maven-settings-action@v2.5.0
       with:
-        servers: '[{"id": "githubssh", "username": "git", "privateKey": "C:/Users/runneradmin/sshkey"}]'
+        servers: '[{"id": "githubssh", "username": "git", "privateKey": "C:/Users/RUNNER~1/AppData/Local/Temp/sshkey"}]'
     - name: Git Config
       run: |
         git config --global user.email "git@github.com"
@@ -36,4 +36,4 @@ jobs:
     - name: Release with Maven
       run: mvn -B -Dusername=git release:clean release:prepare release:perform
     - name: Delete key
-      run: DEL /F /Q C:\Users\runneradmin\sshkey
+      run: DEL /F /Q C:\Users\RUNNER~1\AppData\Local\Temp\sshkey
