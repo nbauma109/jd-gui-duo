@@ -13,7 +13,7 @@ on:
 jobs:
   build:
 
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -23,17 +23,16 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    - name: Create private key
-      run: echo "${{ secrets.SSH_PRIVATE_KEY }}" > C:\Users\RUNNER~1\AppData\Local\Temp\sshkey
-    - name: Create maven settings
-      uses: s4u/maven-settings-action@v2.5.0
-      with:
-        servers: '[{"id": "githubssh", "username": "git", "privateKey": "C:/Users/RUNNER~1/AppData/Local/Temp/sshkey"}]'
-    - name: Git Config
+    - name: Install packages
       run: |
-        git config --global user.email "git@github.com"
-        git config --global user.name "git"
-    - name: Release with Maven
-      run: mvn -B -Dusername=git release:clean release:prepare release:perform
-    - name: Delete key
-      run: DEL /F /Q C:\Users\RUNNER~1\AppData\Local\Temp\sshkey
+        sudo dpkg --print-architecture
+        sudo dpkg --print-foreign-architectures
+        sudo dpkg --add-architecture i386
+        sudo apt-get -y update
+        sudo apt-get -y install libz1:i386 lib32ncurses6 libbz2-1.0:i386
+    - name: Release
+      uses: qcastel/github-actions-maven-release@master
+      env:
+        JAVA_HOME: /usr/lib/jvm/java-17-openjdk/
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
