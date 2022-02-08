@@ -23,6 +23,10 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
+    - name: Display env
+      run: set
+    - name: Display settings
+      run: type C:\Users\runneradmin\.m2\settings.xml
     - name: Create private key
       run: echo "${{ secrets.SSH_PRIVATE_KEY }}" > C:/Windows/Temp/sshkey
     - name: Create maven settings
