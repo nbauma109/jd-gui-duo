@@ -26,7 +26,7 @@ jobs:
     - name: Display env
       run: "dir env:"
     - name: Display settings
-      run: type %USERPROFILE%\.m2\settings.xml
+      run: type "%USERPROFILE%\.m2\settings.xml"
     - name: Git Config
       run: |
         git config --global user.email "git@github.com"
