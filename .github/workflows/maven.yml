@@ -24,7 +24,9 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Create private key
-      run: echo "${{ secrets.SSH_PRIVATE_KEY }}" > C:\Users\runneradmin\.ssh\id_ed25519
+      run: |
+        md C:\Users\runneradmin\.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > C:\Users\runneradmin\.ssh\id_ed25519
     - name: Create maven settings
       uses: s4u/maven-settings-action@v2.5.0
       with:
