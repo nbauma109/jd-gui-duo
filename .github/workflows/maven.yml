@@ -24,11 +24,11 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Create private key
-      run: echo "${{ secrets.SSH_PRIVATE_KEY }}" > C:\Windows\Temp\sshkey
+      run: echo "${{ secrets.SSH_PRIVATE_KEY }}" > C:/Windows/Temp/sshkey
     - name: Create maven settings
       uses: s4u/maven-settings-action@v2.5.0
       with:
-        servers: '[{"id": "github", "username": "git", "privateKey": "C:\Windows\Temp\sshkey", "filePermissions": "664", "directoryPermissions": "775"}]'
+        servers: '[{"id": "github", "username": "git", "privateKey": "C:/Windows/Temp/sshkey", "filePermissions": "664", "directoryPermissions": "775"}]'
     - name: Git Config
       run: |
         git config --global user.email "git@github.com"
