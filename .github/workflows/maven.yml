@@ -20,9 +20,10 @@ jobs:
       run: |
         md C:\Users\runneradmin\.ssh
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > C:\Users\runneradmin\.ssh\id_ed25519
+        echo "${{ secrets.SSH_PUBLIC_KEY }}" > C:\Users\runneradmin\.ssh\id_ed25519.pub
     - uses: actions/checkout@v2
       with:
-        ssh-key: "C:/Users/runneradmin/.ssh/id_ed25519"
+        ssh-key: "C:/Users/runneradmin/.ssh/id_ed25519.pub"
     - name: Set up JDK 17
       uses: actions/setup-java@v2
       with:
