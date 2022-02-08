@@ -13,7 +13,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -23,13 +23,8 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    - name: Install packages
-      run: |
-        sudo dpkg --print-architecture
-        sudo dpkg --print-foreign-architectures
-        sudo dpkg --add-architecture i386
-        sudo apt-get -y update
-        sudo apt-get -y install libz1:i386 libncurses5:i386 libbz2-1.0:i386 zlib.i686 ncurses-libs.i686 bzip2-libs.i686
+    - name: Print JDK home
+      run: echo "JDK was installed in ${{ env.JAVA_HOME }} and JAVA_HOME is %JAVA_HOME%"
     - name: Release
       uses: qcastel/github-actions-maven-release@master
       env:
