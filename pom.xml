@@ -63,6 +63,6 @@
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
 		<main.class>org.jd.gui.App</main.class>
-		<project.scm.id>githubssh</project.scm.id>
+		<project.scm.id>github.com</project.scm.id>
 	</properties>
 </project>
