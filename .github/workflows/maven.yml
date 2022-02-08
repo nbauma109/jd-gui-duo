@@ -23,10 +23,12 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
+    - name: Create private key
+      run: echo "${{ secrets.SSH_PRIVATE_KEY }}" > %TMP%/sshkey
     - name: Create maven settings
       uses: s4u/maven-settings-action@v2.5.0
       with:
-        servers: '[{"id": "github", "username": "git", "privateKey": "${{ secrets.SSH_PRIVATE_KEY }}", "filePermissions": "664", "directoryPermissions": "775"}]'
+        servers: '[{"id": "github", "username": "git", "privateKey": "%TMP%/sshkey", "filePermissions": "664", "directoryPermissions": "775"}]'
     - name: Git Config
       run: |
         git config --global user.email "git@github.com"
