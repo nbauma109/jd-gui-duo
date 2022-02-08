@@ -26,18 +26,10 @@ jobs:
     - name: Display env
       run: "dir env:"
     - name: Display settings
-      run: type C:\Users\runneradmin\.m2\settings.xml
-    - name: Create private key
-      run: echo "${{ secrets.SSH_PRIVATE_KEY }}" > C:/Windows/Temp/sshkey
-    - name: Create maven settings
-      uses: s4u/maven-settings-action@v2.5.0
-      with:
-        servers: '[{"id": "github", "username": "git", "privateKey": "C:/Windows/Temp/sshkey", "filePermissions": "664", "directoryPermissions": "775"}]'
+      run: type %USERPROFILE%\.m2\settings.xml
     - name: Git Config
       run: |
         git config --global user.email "git@github.com"
         git config --global user.name "git"
     - name: Release with Maven
-      run: mvn -B -Dusername=git release:clean release:prepare release:perform
-    - name: Delete key
-      run: DEL /F /Q C:\Windows\Temp\sshkey
+      run: mvn -B release:clean release:prepare release:perform
