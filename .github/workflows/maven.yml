@@ -24,7 +24,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Display env
-      run: set
+      run: "dir env:"
     - name: Display settings
       run: type C:\Users\runneradmin\.m2\settings.xml
     - name: Create private key
