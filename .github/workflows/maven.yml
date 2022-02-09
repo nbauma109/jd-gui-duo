@@ -27,7 +27,6 @@ jobs:
       run: |
         dos2unix C:\Users\runneradmin\.ssh\known_hosts
         dos2unix C:\Users\runneradmin\.ssh\id_ed25519
-        dos2unix C:\Users\runneradmin\.ssh\id_ed25519.pub
     - name: SSH Git clone
       run: git clone ssh://git@github.com/nbauma109/jd-gui-duo.git
     - name: Set up JDK 17
