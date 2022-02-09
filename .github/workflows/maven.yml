@@ -27,7 +27,9 @@ jobs:
     - name: Create known hosts file
       run: echo "${{ secrets.KNOWN_HOSTS }}" > $HOME/.ssh/known_hosts
     - name: Create private key
-      run: echo "${{ secrets.SSH_PRIVATE_KEY }}" > $HOME/.ssh/id_ed25519
+      run: |
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > $HOME/.ssh/id_ed25519
+        chmod 700 $HOME/.ssh/id_ed25519
     - name: Convert to UNIX format
       run: |
         dos2unix $HOME/.ssh/known_hosts
