@@ -22,8 +22,8 @@ jobs:
         echo $HOME
     - name: Create .ssh directory
       run: 
-        md $HOME/.ssh
-        cd $HOME/.ssh
+        md $HOME\.ssh
+        cd $HOME\.ssh
     - name: Create known hosts file
       run: echo "${{ secrets.KNOWN_HOSTS }}" > known_hosts
     - name: Create private key
