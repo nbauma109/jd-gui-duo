@@ -26,7 +26,7 @@ jobs:
     - uses: actions/checkout@v2
       with:
         ssh-key: "${{ secrets.SSH_PRIVATE_KEY }}"
-        ssh-known-hosts: "${{ secrets.KNOWN_HOSTS }}"
+        ssh-known-hosts: "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl"
     - name: Set up JDK 17
       uses: actions/setup-java@v2
       with:
