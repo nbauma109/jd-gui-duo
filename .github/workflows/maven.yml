@@ -50,5 +50,3 @@ jobs:
       run: |
         cd jd-gui-duo
         mvn -B -Dusername=git release:clean release:prepare release:perform
-    - name: Delete key
-      run: DEL /F /Q C:\Users\runneradmin\.ssh\id_ed25519
