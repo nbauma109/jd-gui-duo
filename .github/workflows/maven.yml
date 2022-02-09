@@ -23,8 +23,6 @@ jobs:
       run: echo "${{ secrets.KNOWN_HOSTS }}" > C:\Users\runneradmin\.ssh\known_hosts
     - name: Create private key
       run: echo "${{ secrets.SSH_PRIVATE_KEY }}" > C:\Users\runneradmin\.ssh\id_ed25519
-    - name: Create public key
-      run: echo "${{ secrets.SSH_PUBLIC_KEY }}" > C:\Users\runneradmin\.ssh\id_ed25519.pub
     - name: Convert to UNIX format
       run: |
         dos2unix C:\Users\runneradmin\.ssh\known_hosts
