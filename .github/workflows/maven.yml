@@ -41,9 +41,13 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    - name: Release
-      uses: qcastel/github-actions-maven-release@master
-      env:
-        JAVA_HOME: /usr/lib/jvm/java-17-openjdk/
+    - name: Create maven settings
+      uses: s4u/maven-settings-action@v2.5.0
       with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+        servers: '[{"id": "github.com", "username": "git", "privateKey": "${user.home}/.ssh/id_ed25519"}]'
+    - name: Git Config
+      run: |
+        git config --global user.email "git@github.com"
+        git config --global user.name "git"
+    - name: Release with Maven
+      run: mvn -B -Dusername=git release:clean release:prepare release:perform
