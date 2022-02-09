@@ -19,8 +19,8 @@ jobs:
     steps:
     - name: Create .ssh directory
       run: 
-        md $env:USERPROFILE/.ssh
-        cd $env:USERPROFILE/.ssh
+        md $HOME/.ssh
+        cd $HOME/.ssh
     - name: Create known hosts file
       run: echo "${{ secrets.KNOWN_HOSTS }}" > known_hosts
     - name: Create private key
