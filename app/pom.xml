@@ -56,6 +56,11 @@
 		</dependency>
 		<dependency>
 			<groupId>com.github.nbauma109</groupId>
+			<artifactId>jd-gui-duo-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.nbauma109</groupId>
 			<artifactId>jd-gui-duo-services</artifactId>
 			<version>${project.version}</version>
 		</dependency>
