@@ -18,7 +18,7 @@ jobs:
 
     steps:
     - name: Create .ssh directory
-      run: md $HOME/.ssh
+      run: mkdir $HOME/.ssh
     - name: Create known hosts file
       run: echo "${{ secrets.KNOWN_HOSTS }}" > $HOME/.ssh/known_hosts
     - name: Create private key
