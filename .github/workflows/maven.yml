@@ -22,7 +22,7 @@ jobs:
       run: echo "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl" > C:\Users\runneradmin\.ssh\known_hosts
     - name: Create private key
       run: echo "${{ secrets.SSH_PRIVATE_KEY }}" > C:\Users\runneradmin\.ssh\id_ed25519
-    - uses: SSH Git clone
+    - name: SSH Git clone
       run: git clone ssh://git@github.com/nbauma109/jd-gui-duo.git
     - name: Set up JDK 17
       uses: actions/setup-java@v2
