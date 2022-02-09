@@ -24,7 +24,9 @@ jobs:
     - name: Create private key
       run: echo "${{ secrets.SSH_PRIVATE_KEY }}" > C:\Users\runneradmin\.ssh\id_ed25519
     - name: Convert to UNIX format
-      run: dos2unix "C:\Users\runneradmin\.ssh\*"
+      run: |
+        dos2unix C:\Users\runneradmin\.ssh\known_hosts
+        dos2unix C:\Users\runneradmin\.ssh\id_ed25519
     - uses: actions/checkout@v2
     - name: Set up JDK 17
       uses: actions/setup-java@v2
