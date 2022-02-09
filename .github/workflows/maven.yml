@@ -19,16 +19,11 @@ jobs:
     steps:
     - name: Create .ssh directory
       run: md C:\Users\runneradmin\.ssh
-    - name: Create known hosts file
-      run: echo "${{ secrets.KNOWN_HOSTS }}" > C:\Users\runneradmin\.ssh\known_hosts
     - name: Create private key
       run: echo "${{ secrets.SSH_PRIVATE_KEY }}" > C:\Users\runneradmin\.ssh\id_ed25519
     - name: Convert to UNIX format
-      run: |
-        dos2unix C:\Users\runneradmin\.ssh\known_hosts
-        dos2unix C:\Users\runneradmin\.ssh\id_ed25519
-    - name: SSH Git clone
-      run: git clone ssh://git@github.com/nbauma109/jd-gui-duo.git
+      run: dos2unix C:\Users\runneradmin\.ssh\id_ed25519
+    - uses: actions/checkout@v2
     - name: Set up JDK 17
       uses: actions/setup-java@v2
       with:
@@ -44,6 +39,4 @@ jobs:
         git config --global user.email "git@github.com"
         git config --global user.name "git"
     - name: Release with Maven
-      run: |
-        cd jd-gui-duo
-        mvn -B -Dusername=git release:clean release:prepare release:perform
+      run: mvn -B -Dusername=git release:clean release:prepare release:perform
