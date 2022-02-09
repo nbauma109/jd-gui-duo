@@ -21,7 +21,7 @@ jobs:
       run: 
         echo $HOME
     - name: Create .ssh directory
-      run: 
+      run: |
         md $HOME\.ssh
         cd $HOME\.ssh
     - name: Create known hosts file
