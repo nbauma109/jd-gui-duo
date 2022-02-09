@@ -19,7 +19,9 @@ jobs:
     - name: Create .ssh directory
       run: md C:\Users\runneradmin\.ssh
     - name: Create known hosts file
-      run: echo github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl > C:\Users\runneradmin\.ssh\known_hosts
+      run: |
+        echo github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl > C:\Users\runneradmin\.ssh\known_hosts
+        dos2unix C:\Users\runneradmin\.ssh\known_hosts
     - name: Create private key
       run: echo "${{ secrets.SSH_PRIVATE_KEY }}" > C:\Users\runneradmin\.ssh\id_ed25519
     - name: Create public key
