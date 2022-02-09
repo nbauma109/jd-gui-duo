@@ -24,6 +24,8 @@ jobs:
     - name: Convert to UNIX format
       run: dos2unix C:\Users\runneradmin\.ssh\id_ed25519
     - uses: actions/checkout@v2
+      with:
+        ssh-key: "${{ secrets.SSH_PRIVATE_KEY }}"
     - name: Set up JDK 17
       uses: actions/setup-java@v2
       with:
