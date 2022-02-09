@@ -18,15 +18,15 @@ jobs:
 
     steps:
     - name: Create .ssh directory
-      run: |
-        md $HOME\.ssh
-        cd $HOME\.ssh
+      run: md $HOME/.ssh
     - name: Create known hosts file
-      run: echo "${{ secrets.KNOWN_HOSTS }}" > known_hosts
+      run: echo "${{ secrets.KNOWN_HOSTS }}" > $HOME/known_hosts
     - name: Create private key
-      run: echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_ed25519
+      run: echo "${{ secrets.SSH_PRIVATE_KEY }}" > $HOME/id_ed25519
     - name: Convert to UNIX format
-      run: dos2unix *
+      run: |
+        dos2unix $HOME/known_hosts
+        dos2unix $HOME/id_ed25519
     - uses: actions/checkout@v2
     - name: Set up JDK 17
       uses: actions/setup-java@v2
