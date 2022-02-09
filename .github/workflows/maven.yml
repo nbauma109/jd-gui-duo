@@ -22,18 +22,6 @@ jobs:
         sudo dpkg --add-architecture i386
         sudo apt-get -y update
         sudo apt-get -y install dos2unix libz1:i386 libncurses5:i386 libbz2-1.0:i386
-    - name: Create .ssh directory
-      run: mkdir $HOME/.ssh
-    - name: Create known hosts file
-      run: echo "${{ secrets.KNOWN_HOSTS }}" > $HOME/.ssh/known_hosts
-    - name: Create private key
-      run: |
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > $HOME/.ssh/id_ed25519
-        chmod 700 $HOME/.ssh/id_ed25519
-    - name: Convert to UNIX format
-      run: |
-        dos2unix $HOME/.ssh/known_hosts
-        dos2unix $HOME/.ssh/id_ed25519
     - uses: actions/checkout@v2
     - name: Set up JDK 17
       uses: actions/setup-java@v2
@@ -41,13 +29,9 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    - name: Create maven settings
-      uses: s4u/maven-settings-action@v2.5.0
+    - name: Release
+      uses: qcastel/github-actions-maven-release@master
+      env:
+        JAVA_HOME: /usr/lib/jvm/java-17-openjdk/
       with:
-        servers: '[{"id": "github.com", "username": "git", "privateKey": "${user.home}/.ssh/id_ed25519"}]'
-    - name: Git Config
-      run: |
-        git config --global user.email "git@github.com"
-        git config --global user.name "git"
-    - name: Release with Maven
-      run: mvn -B -Dusername=git release:clean release:prepare release:perform
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
