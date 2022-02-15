@@ -28,6 +28,8 @@ import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompile
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_CFR;
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_PROCYON;
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_FERNFLOWER;
+import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JADX;
+import static com.heliosdecompiler.transformerapi.StandardTransformers.Disassemblers.ENGINE_PROCYON_DISASSEMBLER;
 
 public class ClassFileDecompilerPreferencesProvider extends JPanel implements PreferencesPanel {
 
@@ -39,7 +41,8 @@ public class ClassFileDecompilerPreferencesProvider extends JPanel implements Pr
     protected JLabel selectDecompiler;
     protected JComboBox<String> decompileEngine;
 
-    private static final String[] DECOMPILERS = { ENGINE_JD_CORE_V1, ENGINE_JD_CORE_V0, ENGINE_CFR, ENGINE_PROCYON, ENGINE_FERNFLOWER };
+    private static final String[] DECOMPILERS = { ENGINE_JD_CORE_V1, ENGINE_JD_CORE_V0, ENGINE_CFR, 
+            ENGINE_PROCYON, ENGINE_FERNFLOWER, ENGINE_JADX, ENGINE_PROCYON_DISASSEMBLER };
 
     public ClassFileDecompilerPreferencesProvider() {
         super(new GridLayout(0,1));

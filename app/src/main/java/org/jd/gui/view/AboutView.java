@@ -7,9 +7,12 @@
 
 package org.jd.gui.view;
 
+import org.benf.cfr.reader.util.CfrVersionInfo;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.swing.SwingUtil;
+
+import com.strobel.Procyon;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -40,6 +43,10 @@ import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 
 public class AboutView {
+
+    private static final String VERSION = "version ";
+    private static final String SNAPSHOT = "SNAPSHOT";
+
     private JDialog aboutDialog;
     private JButton aboutOkButton;
 
@@ -77,12 +84,13 @@ public class AboutView {
             subvbox.add(hbox);
             JPanel subsubpanel = new JPanel();
             hbox.add(subsubpanel);
-            subsubpanel.setLayout(new GridLayout(2, 2));
+            subsubpanel.setLayout(new GridLayout(6, 2));
             subsubpanel.setOpaque(false);
             subsubpanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 5));
 
-            String jdGuiVersion = "SNAPSHOT";
-            String jdCoreVersion = "SNAPSHOT";
+            String jdGuiVersion = SNAPSHOT;
+            String[] jdCoreVersions = {SNAPSHOT, SNAPSHOT};
+            String jadxVersion = SNAPSHOT;
 
             try {
                 Enumeration<URL> enumeration = AboutView.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
@@ -99,7 +107,13 @@ public class AboutView {
                         attribute = attributes.getValue("JD-Core-Version");
 
                         if (attribute != null) {
-                            jdCoreVersion = attribute;
+                            jdCoreVersions[attribute.charAt(0) - '0'] = attribute;
+                        }
+
+                        attribute = attributes.getValue("jadx-version");
+                        
+                        if (attribute != null) {
+                            jadxVersion = attribute;
                         }
                     }
                 }
@@ -108,9 +122,17 @@ public class AboutView {
             }
 
             subsubpanel.add(new JLabel("JD-GUI-DUO"));
-            subsubpanel.add(new JLabel("version " + jdGuiVersion));
-            subsubpanel.add(new JLabel("JD-Core"));
-            subsubpanel.add(new JLabel("version " + jdCoreVersion));
+            subsubpanel.add(new JLabel(VERSION + jdGuiVersion));
+            for (int i = 0; i < jdCoreVersions.length; i++) {
+                subsubpanel.add(new JLabel("JD-Core v" + i));
+                subsubpanel.add(new JLabel(VERSION + jdCoreVersions[i]));
+            }
+            subsubpanel.add(new JLabel("Procyon"));
+            subsubpanel.add(new JLabel(VERSION + Procyon.version()));
+            subsubpanel.add(new JLabel("CFR"));
+            subsubpanel.add(new JLabel(VERSION + CfrVersionInfo.VERSION_INFO));
+            subsubpanel.add(new JLabel("JADX"));
+            subsubpanel.add(new JLabel(VERSION + jadxVersion));
 
             hbox.add(Box.createHorizontalGlue());
 

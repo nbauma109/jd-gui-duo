@@ -27,6 +27,9 @@
 							<classpathPrefix>lib/</classpathPrefix>
 							<mainClass>${main.class}</mainClass>
 						</manifest>
+						<manifestEntries>
+							<JD-GUI-Version>${project.version}</JD-GUI-Version>
+						</manifestEntries>
 					</archive>
 					<descriptors>
 						<descriptor>assembly.xml</descriptor>
