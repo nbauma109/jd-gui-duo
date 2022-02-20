@@ -65,7 +65,7 @@ public class JavaModuleInfoFileIndexerProvider extends AbstractIndexerProvider {
     protected class ClassIndexer extends ClassVisitor {
         private ModuleIndexer moduleIndexer = new ModuleIndexer();
 
-        public ClassIndexer() { super(Opcodes.ASM7); }
+        public ClassIndexer() { super(Opcodes.ASM9); }
 
         @Override
         public ModuleVisitor visitModule(String moduleName, int moduleFlags, String moduleVersion) {
@@ -75,7 +75,7 @@ public class JavaModuleInfoFileIndexerProvider extends AbstractIndexerProvider {
     }
 
     protected class ModuleIndexer extends ModuleVisitor {
-        public ModuleIndexer() { super(Opcodes.ASM7); }
+        public ModuleIndexer() { super(Opcodes.ASM9); }
 
         @Override
         public void visitMainClass(final String mainClass) { typeReferenceSet.add(mainClass); }

@@ -190,7 +190,7 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
         private String name;
 
         public ClassIndexer() {
-            super(Opcodes.ASM7);
+            super(Opcodes.ASM9);
         }
 
         @Override
@@ -245,7 +245,7 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
 
     protected class SignatureIndexer extends SignatureVisitor {
         SignatureIndexer() {
-            super(Opcodes.ASM7);
+            super(Opcodes.ASM9);
         }
 
         @Override
@@ -256,7 +256,7 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
 
     protected class AnnotationIndexer extends AnnotationVisitor {
         public AnnotationIndexer() {
-            super(Opcodes.ASM7);
+            super(Opcodes.ASM9);
         }
 
         @Override
@@ -275,7 +275,7 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
         private AnnotationIndexer annotationIndexer;
 
         public FieldIndexer(AnnotationIndexer annotationIndexer) {
-            super(Opcodes.ASM7);
+            super(Opcodes.ASM9);
             this.annotationIndexer = annotationIndexer;
         }
 
@@ -296,7 +296,7 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
         private AnnotationIndexer annotationIndexer;
 
         public MethodIndexer(AnnotationIndexer annotationIndexer) {
-            super(Opcodes.ASM7);
+            super(Opcodes.ASM9);
             this.annotationIndexer = annotationIndexer;
         }
 

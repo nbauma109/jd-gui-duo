@@ -41,4 +41,21 @@ public final class StringUtilities {
         indexes.add(length);
         return new ArrayList<>(indexes);
     }
+
+    public static int countMatches(final CharSequence str, final char ch) {
+        if (isEmpty(str)) {
+            return 0;
+        }
+        int count = 0;
+        for (int i = 0; i < str.length(); i++) {
+            if (ch == str.charAt(i)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public static boolean isEmpty(final CharSequence cs) {
+        return cs == null || cs.length() == 0;
+    }
 }

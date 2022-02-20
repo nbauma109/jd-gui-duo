@@ -130,7 +130,7 @@ public class ClassFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
         protected JavaType(Container.Entry entry, ClassReader classReader, final int outerAccess) {
             this.entry = entry;
             this.name = "";
-            ClassVisitor classAndInnerClassesVisitor = new ClassVisitor(Opcodes.ASM7) {
+            ClassVisitor classAndInnerClassesVisitor = new ClassVisitor(Opcodes.ASM9) {
                 @Override
                 public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
                     setFlags(outerAccess == -1 ? access : outerAccess);
@@ -186,7 +186,7 @@ public class ClassFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
                 displayTypeName = displayTypeName.substring(lastPackageSeparatorIndex+1);
             }
 
-            ClassVisitor fieldsAndMethodsVisitor = new ClassVisitor(Opcodes.ASM7) {
+            ClassVisitor fieldsAndMethodsVisitor = new ClassVisitor(Opcodes.ASM9) {
                 @Override
                 public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
                     if ((access & (Opcodes.ACC_SYNTHETIC|Opcodes.ACC_ENUM)) == 0) {
@@ -329,7 +329,7 @@ public class ClassFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
         private String innerName;
 
         public InnerClassVisitor(String name) {
-            super(Opcodes.ASM7);
+            super(Opcodes.ASM9);
             this.name = name;
         }
 

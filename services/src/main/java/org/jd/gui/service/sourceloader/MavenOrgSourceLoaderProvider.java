@@ -10,9 +10,9 @@ import org.apache.commons.io.IOUtils;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
-import org.jd.gui.model.container.entry.path.DirectoryEntryPath;
-import org.jd.gui.spi.SourceLoader;
 import org.jd.gui.service.preferencespanel.MavenOrgSourceLoaderPreferencesProvider;
+import org.jd.gui.spi.SourceLoader;
+import org.jd.gui.util.TempFile;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -24,16 +24,17 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
-import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -124,105 +125,24 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
         if (cache.containsKey(entry)) {
             return cache.get(entry);
         }
-
         if (!entry.isDirectory() && !failed.contains(entry)) {
+            File file = new File(entry.getUri());
             try {
-                // SHA-1
-                MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
-                byte[] buffer = new byte[1024 * 2];
-
-                try (DigestInputStream is = new DigestInputStream(entry.getInputStream(), messageDigest)) {
-                    while (is.read(buffer) > -1) {
-                        // read fully
-                    }
-                }
-
-                byte[] array = messageDigest.digest();
-                StringBuilder sb = new StringBuilder();
-
-                for (byte b : array) {
-                    sb.append(hexa((b & 255) >> 4));
-                    sb.append(hexa(b & 15));
-                }
-
-                String sha1 = sb.toString();
-
-                // Search artifact on maven.org
-                URL searchUrl = new URL(MAVENORG_SEARCH_URL_PREFIX + sha1 + MAVENORG_SEARCH_URL_SUFFIX);
-                boolean sourceAvailable = false;
-                String id = null;
-                String numFound = null;
-
-                try (InputStream is = searchUrl.openStream()) {
-                    XMLInputFactory factory = XMLInputFactory.newInstance();
-                    factory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-                    factory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-                    XMLStreamReader reader = factory.createXMLStreamReader(is);
-                    String name = "";
-
-                    int next;
-                    while (reader.hasNext()) {
-                        next = reader.next();
-                        if (next == XMLStreamConstants.START_ELEMENT) {
-                            if ("str".equals(reader.getLocalName())) {
-                                if ("id".equals(reader.getAttributeValue(null, "name"))) {
-                                    name = "id";
-                                } else {
-                                    name = "str";
-                                }
-                            } else if ("result".equals(reader.getLocalName())) {
-                                numFound = reader.getAttributeValue(null, "numFound");
-                            } else {
-                                name = "";
-                            }
-                        } else if (next == XMLStreamConstants.CHARACTERS) {
-                            if ("id".equals(name)) {
-                                id = reader.getText().trim();
-                            } else if ("str".equals(name)) {
-                                sourceAvailable |= MAVENORG_LOAD_URL_SUFFIX.equals(reader.getText().trim());
-                            }
-                        }
-                    }
-
-                    reader.close();
-                }
-
-                String groupId=null;
-                String artifactId=null;
-                String version=null;
-
-                if ("0".equals(numFound)) {
-                    // File not indexed by Apache Solr of maven.org -> Try to found groupId, artifactId, version in 'pom.properties'
-                    Properties pomProperties = getPomProperties(entry);
-
-                    if (pomProperties != null) {
-                        groupId = pomProperties.getProperty("groupId");
-                        artifactId = pomProperties.getProperty("artifactId");
-                        version = pomProperties.getProperty("version");
-                    }
-                } else if ("1".equals(numFound) && sourceAvailable && id != null) {
-                    int index1 = id.indexOf(':');
-                    int index2 = id.lastIndexOf(':');
-
-                    groupId = id.substring(0, index1);
-                    artifactId = id.substring(index1+1, index2);
-                    version = id.substring(index2+1);
-                }
-
-                if (groupId != null && artifactId != null) {
+                Artifact artifact = buildArtifactFromURI(file);
+                if (artifact != null && artifact.sourceAvailable()) {
                     // Load source
+                    String groupId = artifact.groupId();
+                    String artifactId = artifact.artifactId();
+                    String version = artifact.version();
                     String filePath = groupId.replace('.', '/') + '/' + artifactId + '/' + version + '/' + artifactId + '-' + version;
                     URL loadUrl = new URL(MAVENORG_LOAD_URL_PREFIX + filePath + MAVENORG_LOAD_URL_SUFFIX);
-                    File tmpFile = File.createTempFile("jd-gui.tmp.", '.' + groupId + '_' + artifactId + '_' + version + MAVENORG_LOAD_URL_SUFFIX);
-
-                    Files.delete(tmpFile.toPath());
-                    tmpFile.deleteOnExit();
-
-                    try (InputStream is = new BufferedInputStream(loadUrl.openStream()); OutputStream os = new BufferedOutputStream(new FileOutputStream(tmpFile))) {
+                    try (TempFile tmpFile = new TempFile('.' + groupId + '_' + artifactId + '_' + version + MAVENORG_LOAD_URL_SUFFIX);
+                        InputStream is = new BufferedInputStream(loadUrl.openStream()); 
+                        OutputStream os = new BufferedOutputStream(new FileOutputStream(tmpFile))) {
                         IOUtils.copy(is, os);
+                        cache.put(entry, tmpFile);
+                        return tmpFile;
                     }
-                    cache.put(entry, tmpFile);
-                    return tmpFile;
                 }
             } catch (Exception e) {
                 assert ExceptionUtil.printStackTrace(e);
@@ -233,35 +153,117 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
         return null;
     }
 
-    private static Properties getPomProperties(Container.Entry parent) {
-        // Search 'META-INF/maven/*/*/pom.properties'
-        Container.Entry child1 = parent.getChildren().get(new DirectoryEntryPath("META-INF"));
-        if (child1 != null && child1.isDirectory()) {
-            Container.Entry child2 = child1.getChildren().get(new DirectoryEntryPath("META-INF/maven"));
-            if (child2 != null && child2.isDirectory()) {
-                Collection<Container.Entry> children = child2.getChildren().values();
-                if (children.size() == 1) {
-                    Container.Entry entry = children.iterator().next();
-                    if (entry.isDirectory()) {
-                        children = entry.getChildren().values();
-                        if (children.size() == 1) {
-                            entry = children.iterator().next();
-                            for (Container.Entry child3 : entry.getChildren().values()) {
-                                if (!child3.isDirectory() && child3.getPath().endsWith("/pom.properties")) {
-                                    // Load properties
-                                    try (InputStream is = child3.getInputStream()) {
-                                        Properties properties = new Properties();
-                                        properties.load(is);
-                                        return properties;
-                                    } catch (Exception e) {
-                                        assert ExceptionUtil.printStackTrace(e);
-                                    }
-                                }
+    public static Artifact buildArtifactFromURI(File file) {
+        try {
+            // SHA-1
+            MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
+            byte[] buffer = new byte[1024 * 2];
+    
+            try (DigestInputStream is = new DigestInputStream(new FileInputStream(file), messageDigest)) {
+                while (is.read(buffer) > -1) {
+                    // read fully
+                }
+            }
+    
+            byte[] array = messageDigest.digest();
+            StringBuilder sb = new StringBuilder();
+    
+            for (byte b : array) {
+                sb.append(hexa((b & 255) >> 4));
+                sb.append(hexa(b & 15));
+            }
+    
+            String sha1 = sb.toString();
+    
+            // Search artifact on maven.org
+            URL searchUrl = new URL(MAVENORG_SEARCH_URL_PREFIX + sha1 + MAVENORG_SEARCH_URL_SUFFIX);
+            boolean sourceAvailable = false;
+            String id = null;
+            int numFound = 0;
+    
+            try (InputStream is = searchUrl.openStream()) {
+                XMLInputFactory factory = XMLInputFactory.newInstance();
+                factory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+                factory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+                XMLStreamReader reader = factory.createXMLStreamReader(is);
+                String name = "";
+    
+                int next;
+                while (reader.hasNext()) {
+                    next = reader.next();
+                    if (next == XMLStreamConstants.START_ELEMENT) {
+                        if ("str".equals(reader.getLocalName())) {
+                            if ("id".equals(reader.getAttributeValue(null, "name"))) {
+                                name = "id";
+                            } else {
+                                name = "str";
                             }
+                        } else if ("result".equals(reader.getLocalName())) {
+                            numFound = Integer.parseInt(reader.getAttributeValue(null, "numFound"));
+                        } else {
+                            name = "";
+                        }
+                    } else if (next == XMLStreamConstants.CHARACTERS) {
+                        if ("id".equals(name)) {
+                            id = reader.getText().trim();
+                        } else if ("str".equals(name)) {
+                            sourceAvailable |= MAVENORG_LOAD_URL_SUFFIX.equals(reader.getText().trim());
                         }
                     }
                 }
+    
+                reader.close();
             }
+    
+            Artifact artifact = null;
+            boolean found = false;
+            if (numFound == 0) {
+                // File not indexed by Apache Solr of maven.org -> Try to find groupId, artifactId, version in 'pom.properties'
+                Properties pomProperties = getPomProperties(file);
+    
+                if (pomProperties != null) {
+                    String groupId = pomProperties.getProperty("groupId");
+                    String artifactId = pomProperties.getProperty("artifactId");
+                    String version = pomProperties.getProperty("version");
+                    boolean sourceMightBeAvailable = true;
+                    artifact = new Artifact(groupId, artifactId, version, file.getName(), found, sourceMightBeAvailable);
+                }
+            } else if (id != null) {
+                found = true;
+                int index1 = id.indexOf(':');
+                int index2 = id.lastIndexOf(':');
+    
+                String groupId = id.substring(0, index1);
+                String artifactId = id.substring(index1+1, index2);
+                String version = id.substring(index2+1);
+                artifact = new Artifact(groupId, artifactId, version, file.getName(), found, sourceAvailable);
+            }
+            return artifact;
+        } catch (Exception e) {
+            assert ExceptionUtil.printStackTrace(e);
+            return null;
+        }
+    }
+
+    private static Properties getPomProperties(File file) {
+        // Search 'META-INF/maven/*/*/pom.properties'
+        try (JarFile jarFile = new JarFile(file)) {
+            Enumeration<JarEntry> entries = jarFile.entries();
+            while (entries.hasMoreElements()) {
+                JarEntry nextEntry = entries.nextElement();
+                String entryName = nextEntry.getName();
+                if (entryName.startsWith("META-INF/maven/") && entryName.endsWith("/pom.properties")) {
+                    try (InputStream is = jarFile.getInputStream(nextEntry)) {
+                        Properties properties = new Properties();
+                        properties.load(is);
+                        return properties;
+                    } catch (Exception e) {
+                        assert ExceptionUtil.printStackTrace(e);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            assert ExceptionUtil.printStackTrace(e);
         }
         return null;
     }

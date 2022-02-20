@@ -96,7 +96,7 @@ public abstract class AbstractIndexerProvider implements Indexer {
         }
     }
 
-    protected void updateProgress(Container.Entry root, Container.Entry entry, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction) throws IOException {
+    private static void updateProgress(Container.Entry root, Container.Entry entry, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction) throws IOException {
         File file = new File(root.getUri());
         if (file.exists()) {
             double totalSize = Files.size(file.toPath());

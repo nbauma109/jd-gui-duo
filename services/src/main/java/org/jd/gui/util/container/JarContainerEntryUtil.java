@@ -100,7 +100,7 @@ public final class JarContainerEntryUtil {
             String p = entry.getPath();
             final String prefixPath = p.substring(0, p.length() - classReader.getClassName().length() - 6);
 
-            ClassVisitor classVisitor = new ClassVisitor(Opcodes.ASM7) {
+            ClassVisitor classVisitor = new ClassVisitor(Opcodes.ASM9) {
                 @Override
                 public void visitInnerClass(final String name, final String outerName, final String innerName, final int access) {
                     innerTypePaths.add(prefixPath + name + StringConstants.CLASS_FILE_SUFFIX);

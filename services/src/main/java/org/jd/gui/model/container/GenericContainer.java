@@ -13,6 +13,7 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.model.container.entry.path.SimpleEntryPath;
 import org.jd.gui.spi.ContainerFactory;
+import org.jd.gui.util.TempFile;
 import org.jd.gui.util.index.IndexesUtil;
 
 import java.io.Closeable;
@@ -217,33 +218,29 @@ public class GenericContainer implements Container, Closeable {
         @SuppressWarnings("resource")
         protected Map<Container.EntryPath, Container.Entry> loadChildrenFromFileEntry() throws IOException {
             StringBuilder suffix = new StringBuilder(".").append(TIMESTAMP).append('.').append(tmpFileCounter.getAndIncrement()).append('.').append(fsPath.getFileName().toString());
-            File tmpFile = File.createTempFile("jd-gui.tmp.", suffix.toString());
-            Path tmpPath = Paths.get(tmpFile.toURI());
-
-            Files.delete(tmpFile.toPath());
-            tmpFile.deleteOnExit();
-            Files.copy(fsPath, tmpPath);
-
-            @SuppressWarnings("all")
-            // Resource leak : The file system cannot be closed until the application is shutdown
-            FileSystem subFileSystem = FileSystems.newFileSystem(tmpPath, (ClassLoader)null);
-
-            Iterator<Path> rootDirectories = subFileSystem.getRootDirectories().iterator();
-
-            if (rootDirectories.hasNext()) {
-                Path rootPath = rootDirectories.next();
-                ContainerFactory containerFactory = api.getContainerFactory(rootPath);
-
-                if (containerFactory != null) {
-                    Container container = containerFactory.make(api, this, rootPath);
-
-                    if (container != null) {
-                        return container.getRoot().getChildren();
+            try (TempFile tmpFile = new TempFile(suffix.toString())) {
+                Path tmpPath = Paths.get(tmpFile.toURI());
+                Files.copy(fsPath, tmpPath);
+    
+                @SuppressWarnings("all")
+                // Resource leak : The file system cannot be closed until the application is shutdown
+                FileSystem subFileSystem = FileSystems.newFileSystem(tmpPath, (ClassLoader)null);
+    
+                Iterator<Path> rootDirectories = subFileSystem.getRootDirectories().iterator();
+    
+                if (rootDirectories.hasNext()) {
+                    Path rootPath = rootDirectories.next();
+                    ContainerFactory containerFactory = api.getContainerFactory(rootPath);
+    
+                    if (containerFactory != null) {
+                        Container container = containerFactory.make(api, this, rootPath);
+    
+                        if (container != null) {
+                            return container.getRoot().getChildren();
+                        }
                     }
                 }
             }
-
-            Files.delete(tmpFile.toPath());
             return Collections.emptyMap();
         }
     }

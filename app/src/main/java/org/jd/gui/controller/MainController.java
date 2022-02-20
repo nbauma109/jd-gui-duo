@@ -7,7 +7,9 @@
 
 package org.jd.gui.controller;
 
+import org.apache.commons.io.FilenameUtils;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContentCopyable;
 import org.jd.gui.api.feature.ContentIndexable;
@@ -15,6 +17,7 @@ import org.jd.gui.api.feature.ContentSavable;
 import org.jd.gui.api.feature.ContentSearchable;
 import org.jd.gui.api.feature.ContentSelectable;
 import org.jd.gui.api.feature.FocusedTypeGettable;
+import org.jd.gui.api.feature.IndexesChangeListener;
 import org.jd.gui.api.feature.LineNumberNavigable;
 import org.jd.gui.api.feature.PreferencesChangeListener;
 import org.jd.gui.api.feature.SourcesSavable;
@@ -25,10 +28,14 @@ import org.jd.gui.model.configuration.Configuration;
 import org.jd.gui.model.history.History;
 import org.jd.gui.service.actions.ContextualActionsFactoryService;
 import org.jd.gui.service.container.ContainerFactoryService;
+import org.jd.gui.service.fileloader.FileLoaderService;
 import org.jd.gui.service.indexer.IndexerService;
 import org.jd.gui.service.mainpanel.PanelFactoryService;
 import org.jd.gui.service.pastehandler.PasteHandlerService;
 import org.jd.gui.service.preferencespanel.PreferencesPanelService;
+import org.jd.gui.service.sourceloader.Artifact;
+import org.jd.gui.service.sourceloader.MavenOrgSourceLoaderProvider;
+import org.jd.gui.service.sourceloader.SourceLoaderService;
 import org.jd.gui.service.sourcesaver.SourceSaverService;
 import org.jd.gui.service.treenode.TreeNodeFactoryService;
 import org.jd.gui.service.type.TypeFactoryService;
@@ -42,12 +49,13 @@ import org.jd.gui.spi.SourceSaver;
 import org.jd.gui.spi.TreeNodeFactory;
 import org.jd.gui.spi.TypeFactory;
 import org.jd.gui.spi.UriLoader;
+import org.jd.gui.util.StringUtilities;
+import org.jd.gui.util.TempFile;
+import org.jd.gui.util.ZOutputStream;
+import org.jd.gui.util.matcher.ArtifactVersionMatcher;
 import org.jd.gui.util.net.UriUtil;
 import org.jd.gui.util.swing.SwingUtil;
 import org.jd.gui.view.MainView;
-import org.jd.gui.api.feature.IndexesChangeListener;
-import org.jd.gui.service.fileloader.FileLoaderService;
-import org.jd.gui.service.sourceloader.SourceLoaderService;
 
 import java.awt.Desktop;
 import java.awt.Frame;
@@ -57,6 +65,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -64,14 +73,29 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
 
 import javax.swing.Action;
 import javax.swing.Icon;
@@ -186,7 +210,7 @@ public class MainController implements API {
                 sourceLoaderService = new SourceLoaderService();
                 // Add listeners
                 mainFrame.addComponentListener(new MainFrameListener(configuration));
-                // Set drop files transfer handler
+                // Set drag and drop (DnD) files transfer handler
                 mainFrame.setTransferHandler(new FilesTransferHandler());
                 // Background class loading
                 new JFileChooser().addChoosableFileFilter(new FileNameExtensionFilter("", "dummy"));
@@ -474,6 +498,237 @@ public class MainController implements API {
         openFiles(Collections.singletonList(file));
     }
 
+    public void compareFiles(List<File> files) {
+        // TODO: XXX
+    }
+    
+    public void showGAVs(List<File> files, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
+        TreeSet<Artifact> artifacts = new TreeSet<>();
+        TreeSet<Artifact> missingArtifacts = new TreeSet<>(); 
+        TreeSet<Artifact> missingArtifactsWithGroup = new TreeSet<>();
+        for (File file : files) {
+            Artifact artifact = MavenOrgSourceLoaderProvider.buildArtifactFromURI(file);
+            if (artifact != null && artifact.found()) {
+                artifacts.add(artifact);
+            } else {
+                missingArtifacts.add(inferArtifactFromFileName(file));
+                missingArtifactsWithGroup.add(inferArtifactFromPackageAndManifest(file));
+            }
+            double progress = 100D / files.size();
+            double cumulativeProgress = getProgressFunction.getAsDouble() + progress;
+            if (cumulativeProgress <= 100) {
+                setProgressFunction.accept(cumulativeProgress);
+            }
+            if (isCancelledFunction.getAsBoolean()) {
+                return;
+            }
+        }
+        try (TempFile tempFile = new TempFile(".zip")) {
+            try (FileOutputStream out = new FileOutputStream(tempFile);
+                    ZOutputStream zos = new ZOutputStream(out)) {
+                writeGradleBuildEntry(zos, files, artifacts, missingArtifacts);
+                writeMavenBuildEntry(zos, artifacts, missingArtifactsWithGroup);
+                writeBatchFile(missingArtifactsWithGroup, zos);
+            }
+            openFiles(Collections.singletonList(tempFile));
+        } catch (Exception e) {
+            assert ExceptionUtil.printStackTrace(e);
+        }
+    }
+
+    private static void writeBatchFile(Set<Artifact> missingArtifactsWithGroup, ZOutputStream zos) throws IOException {
+        zos.writeln("@echo off");
+        for (Artifact artifact : missingArtifactsWithGroup) {
+            zos.write("call mvn deploy:deploy-file -DrepositoryId=%REPO_ID% -Durl=%REPO_URL%");
+            zos.write(" -DgroupId=");
+            zos.write(artifact.groupId());
+            zos.write(" -Dfile=");
+            zos.write(artifact.fileName());
+            zos.write(" -DartifactId=");
+            zos.write(artifact.artifactId());
+            zos.write(" -Dversion=");
+            zos.writeln(artifact.version());
+        }
+        zos.closeEntry();
+    }
+
+    private static void writeMavenBuildEntry(ZOutputStream zos, Set<Artifact> artifacts, Set<Artifact> missingArtifactsWithGroup) throws IOException {
+        zos.putNextEntry(new ZipEntry("pom.xml"));
+        zos.write("""
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<modelVersion>4.0.0</modelVersion>
+<dependencies>
+                """);
+        zos.writeln("    <!-- Thirdparty libraries available on maven central -->");
+        for (Artifact artifact : artifacts) {
+            writeMavenDependency(zos, artifact);
+        }
+        zos.writeln("    <!-- Vendor libraries and other libraries without sources -->");
+        for (Artifact artifact : missingArtifactsWithGroup) {
+            writeMavenDependency(zos, artifact);
+        }
+        zos.write("""
+</dependencies>
+</project>
+                """);
+        zos.closeEntry();
+        zos.putNextEntry(new ZipEntry("mvn_deploy.bat"));
+    }
+
+    private static void writeGradleBuildEntry(ZOutputStream zos, List<File> files, Set<Artifact> artifacts, Set<Artifact> missingArtifacts) throws IOException {
+        zos.putNextEntry(new ZipEntry("build.gradle"));
+        zos.writeln("plugins {");
+        zos.writeln("    id 'java'");
+        zos.writeln("}");
+        zos.writeln("");
+        zos.writeln("repositories {");
+        zos.writeln("    mavenCentral()");
+        zos.writeln("    flatDir {");
+        zos.write("        dirs ");
+        Set<String> dirs = files.stream().map(File::getParent).collect(Collectors.toSet());
+        for (Iterator<String> it = dirs.iterator(); it.hasNext();) {
+            String dir = it.next();
+            zos.write("\"");
+            zos.write(dir);
+            zos.write("\"");
+            if (it.hasNext()) {
+                zos.write(", ");
+            }
+        }
+        zos.writeln("");
+        zos.writeln("    }");
+        zos.writeln("}");
+        zos.writeln("");
+        zos.writeln("dependencies {");
+        if (!artifacts.isEmpty()) {
+            zos.writeln("    // Thirdparty libraries available on maven central");
+        }
+        for (Artifact artifact : artifacts) {
+            zos.write("    implementation('");
+            zos.write(artifact.groupId());
+            zos.write(":");
+            zos.write(artifact.artifactId());
+            zos.write(":");
+            zos.write(artifact.version());
+            zos.writeln("') { transitive = false }");
+        }
+        if (!missingArtifacts.isEmpty()) {
+            zos.writeln("    // Vendor libraries and other libraries without sources");
+        }
+        for (Artifact artifact : missingArtifacts) {
+            zos.write("    implementation ':");
+            zos.write(artifact.artifactId());
+            zos.write(":");
+            zos.write(artifact.version().isEmpty() ? "+" : artifact.version());
+            zos.writeln("'");
+        }
+        zos.write("}");
+        zos.closeEntry();
+    }
+
+    private static void writeMavenDependency(ZOutputStream zos, Artifact artifact) throws IOException {
+        zos.writeln("    <dependency>");
+        zos.write("      <groupId>");
+        zos.write(artifact.groupId());
+        zos.writeln("</groupId>");
+        zos.write("      <artifactId>");
+        zos.write(artifact.artifactId());
+        zos.writeln("</artifactId>");
+        zos.write("      <version>");
+        zos.write(artifact.version());
+        zos.writeln("</version>");
+        zos.writeln("    </dependency>");
+    }
+
+    private static Artifact inferArtifactFromPackageAndManifest(File file) {
+        String baseFileName = FilenameUtils.getBaseName(file.getName());
+        ArtifactVersionMatcher artifactVersionMatcher = new ArtifactVersionMatcher();
+        artifactVersionMatcher.parse(baseFileName);
+        try (JarFile jarFile = new JarFile(file)) {
+            Manifest manifest = jarFile.getManifest();
+            if (manifest == null) {
+                String artifactId = artifactVersionMatcher.getArtifactId();
+                String version = artifactVersionMatcher.getVersion();
+                return new Artifact(artifactId, artifactId, version, file.getName(), false, false);
+            } else {
+                Attributes mainAttributes = manifest.getMainAttributes();
+                String groupId = mainAttributes.getValue("Implementation-Vendor-Id");
+                if (groupId == null) {
+                    groupId = mainAttributes.getValue("Bundle-SymbolicName");
+                } 
+                if (groupId == null) {
+                    groupId = inferGroupFromFile(jarFile);
+                } 
+                String version = mainAttributes.getValue("Implementation-Version");
+                if (version == null) {
+                    version = mainAttributes.getValue("Bundle-Version");
+                }
+                if (version == null) {
+                    version = artifactVersionMatcher.getVersion();
+                }
+                String artifactId = artifactVersionMatcher.getArtifactId();
+                return new Artifact(groupId, artifactId, version, file.getName(), false, false);
+            }
+        } catch (IOException e) {
+            assert ExceptionUtil.printStackTrace(e);
+        }
+        return null;
+    }
+    
+    private static Artifact inferArtifactFromFileName(File file) {
+        String baseFileName = FilenameUtils.getBaseName(file.getName());
+        ArtifactVersionMatcher artifactVersionMatcher = new ArtifactVersionMatcher();
+        artifactVersionMatcher.parse(baseFileName);
+        String artifactId = artifactVersionMatcher.getArtifactId();
+        String version = artifactVersionMatcher.getVersion();
+        return new Artifact(artifactId, artifactId, version, file.getName(), false, false);
+    }
+
+    private static String inferGroupFromFile(JarFile jarFile) {
+        Set<String> possibleGroups = new HashSet<>();
+        int minDepth = Integer.MAX_VALUE;
+        Enumeration<JarEntry> entries = jarFile.entries();
+        while (entries.hasMoreElements()) {
+            JarEntry nextEntry = entries.nextElement();
+            String entryName = nextEntry.getName();
+            int idx = entryName.lastIndexOf('/');
+            if (idx != -1 && entryName.endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
+                String packageName = entryName.substring(0, idx);
+                int currentDepth = StringUtilities.countMatches(packageName, '/');
+                if (currentDepth < minDepth) {
+                    possibleGroups.clear();
+                    minDepth = currentDepth;
+                    possibleGroups.add(packageName.replace('/', '.'));
+                } else if (currentDepth == minDepth) {
+                    possibleGroups.add(packageName.replace('/', '.'));
+                    idx = packageName.lastIndexOf('/');
+                    if (idx != -1 && possibleGroups.size() > 1) {
+                        if (possibleGroups.size() != 2) {
+                            throw new IllegalStateException("2 groups expected");
+                        }
+                        String[] pairOfPossibleGroups = possibleGroups.toArray(String[]::new);
+                        for (int i = 0; i < pairOfPossibleGroups.length; i++) {
+                            for (String prefix : Arrays.asList("org", "net", "com")) {
+                                String otherPossibleGroup = pairOfPossibleGroups[(i + 1) % 2];
+                                if (pairOfPossibleGroups[i].startsWith(prefix) && !otherPossibleGroup.startsWith(prefix)) {
+                                    possibleGroups.remove(otherPossibleGroup);
+                                }
+                            }
+                        }
+                        if (possibleGroups.size() == 2) {
+                            possibleGroups.clear();
+                            possibleGroups.add(packageName.substring(0, idx).replace('/', '.'));
+                            minDepth--;
+                        }
+                    }
+                }
+            }
+        }
+        return possibleGroups.iterator().next();
+    }
+
     @SuppressWarnings("unchecked")
     public void openFiles(List<File> files) {
         List<String> errors = new ArrayList<>();
@@ -558,7 +813,38 @@ public class MainController implements API {
         }
     }
 
-    // --- Drop files transfer handler --- //
+    private final class GAVWorker extends SwingWorker<Void, Void> {
+        private final ProgressMonitor progressMonitor;
+        private final List<File> files;
+        private double progressPercentage;
+        
+        private GAVWorker(ProgressMonitor progressMonitor, List<File> files) {
+            this.progressMonitor = progressMonitor;
+            this.files = files;
+        }
+        
+        @Override
+        protected Void doInBackground() throws Exception {
+            showGAVs(files, this::getProgressPercentage, this::setProgressPercentage, this::isCancelled);
+            return null;
+        }
+        
+        @Override
+        protected void done() {
+            progressMonitor.close();
+        }
+        
+        public double getProgressPercentage() {
+            return progressPercentage;
+        }
+        
+        public void setProgressPercentage(double progressPercentage) {
+            super.setProgress((int) Math.round(progressPercentage));
+            this.progressPercentage = progressPercentage;
+        }
+    }
+    
+    // --- Drag and Drop (DnD) files transfer handler --- //
     protected class FilesTransferHandler extends TransferHandler {
 
         private static final long serialVersionUID = 1L;
@@ -573,7 +859,21 @@ public class MainController implements API {
         public boolean importData(TransferHandler.TransferSupport info) {
             if (info.isDrop() && info.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
                 try {
-                    openFiles((List<File>)info.getTransferable().getTransferData(DataFlavor.javaFileListFlavor));
+                    List<File> files = (List<File>)info.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                    switch (files.size()) {
+                        case 1:
+                            openFiles(files);
+                            break;
+                        case 2:
+                            compareFiles(files);
+                            break;
+                        default:
+                            ProgressMonitor progressMonitor = new ProgressMonitor(info.getComponent(), "Generating POM ...", getProgressMessage(0), 0, 100);
+                            SwingWorker<Void, Void> worker = new GAVWorker(progressMonitor, files);
+                            worker.addPropertyChangeListener(e -> onPropertyChange(e, progressMonitor, worker));
+                            worker.execute();
+                            break;
+                    }
                     return true;
                 } catch (Exception e) {
                     assert ExceptionUtil.printStackTrace(e);
@@ -583,6 +883,19 @@ public class MainController implements API {
         }
     }
 
+    public void onPropertyChange(PropertyChangeEvent evt, ProgressMonitor progressMonitor, Future<?> worker) {
+        if ("progress".equals(evt.getPropertyName())) {
+            int progress = (Integer) evt.getNewValue();
+            progressMonitor.setProgress(progress);
+            String message = getProgressMessage(progress);
+            progressMonitor.setNote(message);
+            if (progressMonitor.isCanceled()) {
+                worker.cancel(true);
+            }
+        }
+    
+    }
+    
     // --- ComponentListener --- //
     protected class MainFrameListener extends ComponentAdapter {
         private final Configuration configuration;
@@ -691,17 +1004,7 @@ public class MainController implements API {
             UIManager.put("ProgressMonitor.progressText", title);
             ProgressMonitor progressMonitor = new ProgressMonitor(component, "Indexing ...", getProgressMessage(0), 0, 100);
             SwingWorker<Indexes, Void> worker = new IndexerWorker(ci, progressMonitor);
-            worker.addPropertyChangeListener(evt -> {
-                if ("progress".equals(evt.getPropertyName())) {
-                    int progress = (Integer) evt.getNewValue();
-                    progressMonitor.setProgress(progress);
-                    String message = getProgressMessage(progress);
-                    progressMonitor.setNote(message);
-                    if (progressMonitor.isCanceled()) {
-                        worker.cancel(true);
-                    }
-                }
-            });
+            worker.addPropertyChangeListener(e -> onPropertyChange(e, progressMonitor, worker));
             worker.execute();
 
             component.putClientProperty(INDEXES, worker);
