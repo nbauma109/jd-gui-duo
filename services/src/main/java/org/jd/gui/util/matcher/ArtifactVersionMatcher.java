@@ -30,7 +30,7 @@ public class ArtifactVersionMatcher {
                 parse(artifactId);
             }
         } else {
-            artifactId = baseFileName + "-" + version;
+            artifactId = baseFileName + (version.length() > 0 ? "-" : "") + version;
             version = "";
         }
     }

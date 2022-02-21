@@ -13,6 +13,7 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.service.preferencespanel.MavenOrgSourceLoaderPreferencesProvider;
 import org.jd.gui.spi.SourceLoader;
 import org.jd.gui.util.TempFile;
+import org.jd.util.SHA1Util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -24,8 +25,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -128,7 +127,8 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
         if (!entry.isDirectory() && !failed.contains(entry)) {
             File file = new File(entry.getUri());
             try {
-                Artifact artifact = buildArtifactFromURI(file);
+                String sha1 = SHA1Util.computeSHA1(file);
+                Artifact artifact = buildArtifactFromURI(file, sha1);
                 if (artifact != null && artifact.sourceAvailable()) {
                     // Load source
                     String groupId = artifact.groupId();
@@ -153,28 +153,8 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
         return null;
     }
 
-    public static Artifact buildArtifactFromURI(File file) {
+    public static Artifact buildArtifactFromURI(File file, String sha1) {
         try {
-            // SHA-1
-            MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
-            byte[] buffer = new byte[1024 * 2];
-    
-            try (DigestInputStream is = new DigestInputStream(new FileInputStream(file), messageDigest)) {
-                while (is.read(buffer) > -1) {
-                    // read fully
-                }
-            }
-    
-            byte[] array = messageDigest.digest();
-            StringBuilder sb = new StringBuilder();
-    
-            for (byte b : array) {
-                sb.append(hexa((b & 255) >> 4));
-                sb.append(hexa(b & 15));
-            }
-    
-            String sha1 = sb.toString();
-    
             // Search artifact on maven.org
             URL searchUrl = new URL(MAVENORG_SEARCH_URL_PREFIX + sha1 + MAVENORG_SEARCH_URL_SUFFIX);
             boolean sourceAvailable = false;
@@ -217,7 +197,7 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
     
             Artifact artifact = null;
             boolean found = false;
-            if (numFound == 0) {
+            if (numFound == 0 && file.exists()) {
                 // File not indexed by Apache Solr of maven.org -> Try to find groupId, artifactId, version in 'pom.properties'
                 Properties pomProperties = getPomProperties(file);
     
@@ -257,8 +237,6 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
                         Properties properties = new Properties();
                         properties.load(is);
                         return properties;
-                    } catch (Exception e) {
-                        assert ExceptionUtil.printStackTrace(e);
                     }
                 }
             }
@@ -267,8 +245,6 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
         }
         return null;
     }
-
-    private static char hexa(int i) { return (char)( i <= 9 ? '0' + i : 'a' - 10 + i ); }
 
     protected boolean accepted(String filters, String path) {
         // 'filters' example : '+org +com.google +com.ibm +com.jcraft +com.springsource +com.sun -com +java +javax +sun +sunw'

@@ -56,6 +56,7 @@ import org.jd.gui.util.matcher.ArtifactVersionMatcher;
 import org.jd.gui.util.net.UriUtil;
 import org.jd.gui.util.swing.SwingUtil;
 import org.jd.gui.view.MainView;
+import org.jd.util.SHA1Util;
 
 import java.awt.Desktop;
 import java.awt.Frame;
@@ -77,6 +78,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -137,7 +139,7 @@ public class MainController implements API {
 
         SwingUtil.invokeLater(() ->
 
-            // Create main frame
+        // Create main frame
             mainView = new MainView<>(
                 configuration, this, history,
                 e -> onOpen(),
@@ -238,7 +240,7 @@ public class MainController implements API {
             sb.append("*.").append(extension).append(", ");
         }
 
-        sb.setLength(sb.length()-2);
+        sb.setLength(sb.length() - 2);
 
         String description = sb.toString();
         String[] array = extensions.toArray(new String[0]);
@@ -293,14 +295,14 @@ public class MainController implements API {
 
     protected void save(File selectedFile) {
         try (OutputStream os = new FileOutputStream(selectedFile)) {
-            ((ContentSavable)currentPage).save(this, os);
+            ((ContentSavable) currentPage).save(this, os);
         } catch (IOException e) {
             assert ExceptionUtil.printStackTrace(e);
         }
     }
 
     protected void onSaveAllSources() {
-        if (! saveAllSourcesController.isActivated()) {
+        if (!saveAllSourcesController.isActivated()) {
             JComponent currentPanel = mainView.getSelectedMainPanel();
             if (currentPanel instanceof SourcesSavable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
                 SourcesSavable sourcesSavable = (SourcesSavable) currentPanel;
@@ -471,7 +473,7 @@ public class MainController implements API {
             PreferencesChangeListener pcl = (PreferencesChangeListener) page;
             Map<String, String> preferences = configuration.getPreferences();
             Integer currentHashcode = preferences.hashCode();
-            Integer lastHashcode = (Integer)page.getClientProperty("preferences-hashCode");
+            Integer lastHashcode = (Integer) page.getClientProperty("preferences-hashCode");
             if (!currentHashcode.equals(lastHashcode)) {
                 pcl.preferencesChanged(preferences);
                 page.putClientProperty("preferences-hashCode", currentHashcode);
@@ -484,7 +486,7 @@ public class MainController implements API {
             IndexesChangeListener icl = (IndexesChangeListener) page;
             Collection<Future<Indexes>> collectionOfFutureIndexes = getCollectionOfFutureIndexes();
             Integer currentHashcode = collectionOfFutureIndexes.hashCode();
-            Integer lastHashcode = (Integer)page.getClientProperty("collectionOfFutureIndexes-hashCode");
+            Integer lastHashcode = (Integer) page.getClientProperty("collectionOfFutureIndexes-hashCode");
 
             if (!currentHashcode.equals(lastHashcode)) {
                 icl.indexesChanged(collectionOfFutureIndexes);
@@ -501,31 +503,35 @@ public class MainController implements API {
     public void compareFiles(List<File> files) {
         // TODO: XXX
     }
-    
-    public void showGAVs(List<File> files, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
-        TreeSet<Artifact> artifacts = new TreeSet<>();
-        TreeSet<Artifact> missingArtifacts = new TreeSet<>(); 
-        TreeSet<Artifact> missingArtifactsWithGroup = new TreeSet<>();
+
+    public void showGAVs(Set<File> files, Map<File, String> sha1Map, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
+        Set<Artifact> artifacts = new TreeSet<>();
+        Set<Artifact> missingArtifacts = new TreeSet<>();
+        Set<Artifact> missingArtifactsWithGroup = new TreeSet<>();
         for (File file : files) {
-            Artifact artifact = MavenOrgSourceLoaderProvider.buildArtifactFromURI(file);
-            if (artifact != null && artifact.found()) {
-                artifacts.add(artifact);
-            } else {
-                missingArtifacts.add(inferArtifactFromFileName(file));
-                missingArtifactsWithGroup.add(inferArtifactFromPackageAndManifest(file));
-            }
-            double progress = 100D / files.size();
-            double cumulativeProgress = getProgressFunction.getAsDouble() + progress;
-            if (cumulativeProgress <= 100) {
-                setProgressFunction.accept(cumulativeProgress);
-            }
-            if (isCancelledFunction.getAsBoolean()) {
-                return;
+            try {
+                String sha1 = sha1Map.computeIfAbsent(file, SHA1Util::computeSHA1);
+                Artifact artifact = MavenOrgSourceLoaderProvider.buildArtifactFromURI(file, sha1);
+                if (artifact != null && artifact.found()) {
+                    artifacts.add(artifact);
+                } else {
+                    missingArtifacts.add(inferArtifactFromFileName(file));
+                    missingArtifactsWithGroup.add(inferArtifactFromPackageAndManifest(file));
+                }
+                double progress = 100D / files.size();
+                double cumulativeProgress = getProgressFunction.getAsDouble() + progress;
+                if (cumulativeProgress <= 100) {
+                    setProgressFunction.accept(cumulativeProgress);
+                }
+                if (isCancelledFunction.getAsBoolean()) {
+                    return;
+                }
+            } catch (Exception e) {
+                assert ExceptionUtil.printStackTrace(e);
             }
         }
         try (TempFile tempFile = new TempFile(".zip")) {
-            try (FileOutputStream out = new FileOutputStream(tempFile);
-                    ZOutputStream zos = new ZOutputStream(out)) {
+            try (FileOutputStream out = new FileOutputStream(tempFile); ZOutputStream zos = new ZOutputStream(out)) {
                 writeGradleBuildEntry(zos, files, artifacts, missingArtifacts);
                 writeMavenBuildEntry(zos, artifacts, missingArtifactsWithGroup);
                 writeBatchFile(missingArtifactsWithGroup, zos);
@@ -555,12 +561,12 @@ public class MainController implements API {
     private static void writeMavenBuildEntry(ZOutputStream zos, Set<Artifact> artifacts, Set<Artifact> missingArtifactsWithGroup) throws IOException {
         zos.putNextEntry(new ZipEntry("pom.xml"));
         zos.write("""
-<?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-<modelVersion>4.0.0</modelVersion>
-<dependencies>
-                """);
+                <?xml version="1.0" encoding="UTF-8"?>
+                <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <modelVersion>4.0.0</modelVersion>
+                <dependencies>
+                                """);
         zos.writeln("    <!-- Thirdparty libraries available on maven central -->");
         for (Artifact artifact : artifacts) {
             writeMavenDependency(zos, artifact);
@@ -570,14 +576,14 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             writeMavenDependency(zos, artifact);
         }
         zos.write("""
-</dependencies>
-</project>
-                """);
+                </dependencies>
+                </project>
+                                """);
         zos.closeEntry();
         zos.putNextEntry(new ZipEntry("mvn_deploy.bat"));
     }
 
-    private static void writeGradleBuildEntry(ZOutputStream zos, List<File> files, Set<Artifact> artifacts, Set<Artifact> missingArtifacts) throws IOException {
+    private static void writeGradleBuildEntry(ZOutputStream zos, Set<File> files, Set<Artifact> artifacts, Set<Artifact> missingArtifacts) throws IOException {
         zos.putNextEntry(new ZipEntry("build.gradle"));
         zos.writeln("plugins {");
         zos.writeln("    id 'java'");
@@ -591,7 +597,11 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         for (Iterator<String> it = dirs.iterator(); it.hasNext();) {
             String dir = it.next();
             zos.write("\"");
-            zos.write(dir);
+            if (dir == null) {
+                zos.write("lib");
+            } else {
+                zos.write(dir);
+            }
             zos.write("\"");
             if (it.hasNext()) {
                 zos.write(", ");
@@ -646,37 +656,43 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         String baseFileName = FilenameUtils.getBaseName(file.getName());
         ArtifactVersionMatcher artifactVersionMatcher = new ArtifactVersionMatcher();
         artifactVersionMatcher.parse(baseFileName);
-        try (JarFile jarFile = new JarFile(file)) {
-            Manifest manifest = jarFile.getManifest();
-            if (manifest == null) {
-                String artifactId = artifactVersionMatcher.getArtifactId();
-                String version = artifactVersionMatcher.getVersion();
-                return new Artifact(artifactId, artifactId, version, file.getName(), false, false);
-            } else {
-                Attributes mainAttributes = manifest.getMainAttributes();
-                String groupId = mainAttributes.getValue("Implementation-Vendor-Id");
-                if (groupId == null) {
-                    groupId = mainAttributes.getValue("Bundle-SymbolicName");
-                } 
-                if (groupId == null) {
-                    groupId = inferGroupFromFile(jarFile);
-                } 
-                String version = mainAttributes.getValue("Implementation-Version");
-                if (version == null) {
-                    version = mainAttributes.getValue("Bundle-Version");
+        if (file.exists()) {
+            try (JarFile jarFile = new JarFile(file)) {
+                Manifest manifest = jarFile.getManifest();
+                if (manifest == null) {
+                    String artifactId = artifactVersionMatcher.getArtifactId();
+                    String version = artifactVersionMatcher.getVersion();
+                    return new Artifact(artifactId, artifactId, version, file.getName(), false, false);
+                } else {
+                    Attributes mainAttributes = manifest.getMainAttributes();
+                    String groupId = mainAttributes.getValue("Implementation-Vendor-Id");
+                    if (groupId == null) {
+                        groupId = mainAttributes.getValue("Bundle-SymbolicName");
+                    }
+                    if (groupId == null) {
+                        groupId = inferGroupFromFile(jarFile);
+                    }
+                    String version = mainAttributes.getValue("Implementation-Version");
+                    if (version == null) {
+                        version = mainAttributes.getValue("Bundle-Version");
+                    }
+                    if (version == null) {
+                        version = artifactVersionMatcher.getVersion();
+                    }
+                    String artifactId = artifactVersionMatcher.getArtifactId();
+                    return new Artifact(groupId, artifactId, version, file.getName(), false, false);
                 }
-                if (version == null) {
-                    version = artifactVersionMatcher.getVersion();
-                }
-                String artifactId = artifactVersionMatcher.getArtifactId();
-                return new Artifact(groupId, artifactId, version, file.getName(), false, false);
+            } catch (IOException e) {
+                assert ExceptionUtil.printStackTrace(e);
             }
-        } catch (IOException e) {
-            assert ExceptionUtil.printStackTrace(e);
+        } else {
+            String artifactId = artifactVersionMatcher.getArtifactId();
+            String version = artifactVersionMatcher.getVersion();
+            return new Artifact("com.mycompany", artifactId, version, file.getName(), false, false);
         }
         return null;
     }
-    
+
     private static Artifact inferArtifactFromFileName(File file) {
         String baseFileName = FilenameUtils.getBaseName(file.getName());
         ArtifactVersionMatcher artifactVersionMatcher = new ArtifactVersionMatcher();
@@ -776,7 +792,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         private final ContentIndexable ci;
         private final ProgressMonitor progressMonitor;
         private double progressPercentage;
-        
+
         private IndexerWorker(ContentIndexable ci, ProgressMonitor progressMonitor) {
             this.ci = ci;
             this.progressMonitor = progressMonitor;
@@ -815,35 +831,37 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     private final class GAVWorker extends SwingWorker<Void, Void> {
         private final ProgressMonitor progressMonitor;
-        private final List<File> files;
+        private final Set<File> files;
+        private final Map<File, String> sha1Map;
         private double progressPercentage;
-        
-        private GAVWorker(ProgressMonitor progressMonitor, List<File> files) {
+
+        private GAVWorker(ProgressMonitor progressMonitor, Set<File> files, Map<File, String> sha1Map) {
             this.progressMonitor = progressMonitor;
             this.files = files;
+            this.sha1Map = sha1Map;
         }
-        
+
         @Override
         protected Void doInBackground() throws Exception {
-            showGAVs(files, this::getProgressPercentage, this::setProgressPercentage, this::isCancelled);
+            showGAVs(files, sha1Map, this::getProgressPercentage, this::setProgressPercentage, this::isCancelled);
             return null;
         }
-        
+
         @Override
         protected void done() {
             progressMonitor.close();
         }
-        
+
         public double getProgressPercentage() {
             return progressPercentage;
         }
-        
+
         public void setProgressPercentage(double progressPercentage) {
             super.setProgress((int) Math.round(progressPercentage));
             this.progressPercentage = progressPercentage;
         }
     }
-    
+
     // --- Drag and Drop (DnD) files transfer handler --- //
     protected class FilesTransferHandler extends TransferHandler {
 
@@ -859,19 +877,22 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         public boolean importData(TransferHandler.TransferSupport info) {
             if (info.isDrop() && info.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
                 try {
-                    List<File> files = (List<File>)info.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                    List<File> files = (List<File>) info.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
                     switch (files.size()) {
                         case 1:
-                            openFiles(files);
+                            File file = files.get(0);
+                            if ("sha1.txt".equals(file.getName())) {
+                                Map<File, String> sha1Map = SHA1Util.readSHA1File(file);
+                                launchGAVWorker(info, sha1Map.keySet(), sha1Map);
+                            } else {
+                                openFiles(files);
+                            }
                             break;
                         case 2:
                             compareFiles(files);
                             break;
                         default:
-                            ProgressMonitor progressMonitor = new ProgressMonitor(info.getComponent(), "Generating POM ...", getProgressMessage(0), 0, 100);
-                            SwingWorker<Void, Void> worker = new GAVWorker(progressMonitor, files);
-                            worker.addPropertyChangeListener(e -> onPropertyChange(e, progressMonitor, worker));
-                            worker.execute();
+                            launchGAVWorker(info, new HashSet<>(files), new HashMap<>());
                             break;
                     }
                     return true;
@@ -880,6 +901,13 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 }
             }
             return false;
+        }
+
+        private void launchGAVWorker(TransferHandler.TransferSupport info, Set<File> files, Map<File, String> sha1Map) {
+            ProgressMonitor progressMonitor = new ProgressMonitor(info.getComponent(), "Generating POM ...", getProgressMessage(0), 0, 100);
+            SwingWorker<Void, Void> worker = new GAVWorker(progressMonitor, files, sha1Map);
+            worker.addPropertyChangeListener(e -> onPropertyChange(e, progressMonitor, worker));
+            worker.execute();
         }
     }
 
@@ -893,9 +921,9 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 worker.cancel(true);
             }
         }
-    
+
     }
-    
+
     // --- ComponentListener --- //
     protected class MainFrameListener extends ComponentAdapter {
         private final Configuration configuration;
@@ -1016,34 +1044,54 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     }
 
     @Override
-    public Collection<Action> getContextualActions(Container.Entry entry, String fragment) { return ContextualActionsFactoryService.getInstance().get(this, entry, fragment); }
+    public Collection<Action> getContextualActions(Container.Entry entry, String fragment) {
+        return ContextualActionsFactoryService.getInstance().get(this, entry, fragment);
+    }
 
     @Override
-    public FileLoader getFileLoader(File file) { return FileLoaderService.getInstance().get(file); }
+    public FileLoader getFileLoader(File file) {
+        return FileLoaderService.getInstance().get(file);
+    }
 
     @Override
-    public UriLoader getUriLoader(URI uri) { return UriLoaderService.getInstance().get(this, uri); }
+    public UriLoader getUriLoader(URI uri) {
+        return UriLoaderService.getInstance().get(this, uri);
+    }
 
     @Override
-    public PanelFactory getMainPanelFactory(Container container) { return PanelFactoryService.getInstance().get(container); }
+    public PanelFactory getMainPanelFactory(Container container) {
+        return PanelFactoryService.getInstance().get(container);
+    }
 
     @Override
-    public ContainerFactory getContainerFactory(Path rootPath) { return ContainerFactoryService.getInstance().get(this, rootPath); }
+    public ContainerFactory getContainerFactory(Path rootPath) {
+        return ContainerFactoryService.getInstance().get(this, rootPath);
+    }
 
     @Override
-    public TreeNodeFactory getTreeNodeFactory(Container.Entry entry) { return TreeNodeFactoryService.getInstance().get(entry); }
+    public TreeNodeFactory getTreeNodeFactory(Container.Entry entry) {
+        return TreeNodeFactoryService.getInstance().get(entry);
+    }
 
     @Override
-    public TypeFactory getTypeFactory(Container.Entry entry) { return TypeFactoryService.getInstance().get(entry); }
+    public TypeFactory getTypeFactory(Container.Entry entry) {
+        return TypeFactoryService.getInstance().get(entry);
+    }
 
     @Override
-    public Indexer getIndexer(Container.Entry entry) { return IndexerService.getInstance().get(entry); }
+    public Indexer getIndexer(Container.Entry entry) {
+        return IndexerService.getInstance().get(entry);
+    }
 
     @Override
-    public SourceSaver getSourceSaver(Container.Entry entry) { return SourceSaverService.getInstance().get(entry); }
+    public SourceSaver getSourceSaver(Container.Entry entry) {
+        return SourceSaverService.getInstance().get(entry);
+    }
 
     @Override
-    public Map<String, String> getPreferences() { return configuration.getPreferences(); }
+    public Map<String, String> getPreferences() {
+        return configuration.getPreferences();
+    }
 
     @Override
     @SuppressWarnings("unchecked")
@@ -1085,7 +1133,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             }
         };
         for (JComponent panel : mainPanels) {
-            Future<Indexes> futureIndexes = (Future<Indexes>)panel.getClientProperty(INDEXES);
+            Future<Indexes> futureIndexes = (Future<Indexes>) panel.getClientProperty(INDEXES);
             if (futureIndexes != null) {
                 list.add(futureIndexes);
             }

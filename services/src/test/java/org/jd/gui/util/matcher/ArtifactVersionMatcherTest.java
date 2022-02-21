@@ -58,6 +58,7 @@ public class ArtifactVersionMatcherTest {
         checkArtifactVersion("test-1.0-SNAPSHOT", "test", "1.0-SNAPSHOT");
         checkArtifactVersion("test-1.0.0-10.1.0.0", "test", "1.0.0-10.1.0.0");
         checkArtifactVersion("jboss-client", "jboss-client", "");
+        checkArtifactVersion("abc", "abc", "");
     }
 
     private void checkArtifactVersion(String baseFileName, String expectedArtifactId, String expectedVersion) {
