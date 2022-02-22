@@ -10,7 +10,6 @@ package org.jd.gui.service.sourcesaver;
 import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
 import org.jd.core.v1.printer.LineNumberStringBuilderPrinter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
-import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.util.decompiler.ContainerLoader;
@@ -27,6 +26,8 @@ import java.util.Map;
 
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V1;
 import static org.jd.gui.util.decompiler.GuiPreferences.DECOMPILE_ENGINE;
+
+import jd.core.ClassUtil;
 
 public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
 
@@ -81,9 +82,7 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
             loader.setEntry(entry);
 
             // Format internal name
-            String entryPath = entry.getPath();
-            assert entryPath.endsWith(StringConstants.CLASS_FILE_SUFFIX);
-            String entryInternalName = entryPath.substring(0, entryPath.length() - 6); // 6 = ".class".length()
+            String entryInternalName = ClassUtil.getInternalName(entry.getPath());
             
             String decompileEngine = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
             Loader apiLoader = new Loader(loader::canLoad, loader::load);

@@ -18,16 +18,15 @@ import org.fife.ui.rsyntaxtextarea.TokenTypes;
 import org.fife.ui.rtextarea.Marker;
 import org.jd.core.v1.printer.StringBuilderPrinter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
-import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.util.decompiler.ContainerLoader;
+import org.jd.gui.util.index.IndexesUtil;
 import org.jd.gui.util.parser.jdt.core.DeclarationData;
 import org.jd.gui.util.parser.jdt.core.HyperlinkData;
 import org.jd.gui.util.parser.jdt.core.HyperlinkReferenceData;
 import org.jd.gui.util.parser.jdt.core.ReferenceData;
-import org.jd.gui.util.index.IndexesUtil;
 
 import java.awt.Point;
 import java.net.URI;
@@ -43,10 +42,12 @@ import java.util.regex.Pattern;
 
 import javax.swing.text.Segment;
 
+import static jd.core.preferences.Preferences.ESCAPE_UNICODE_CHARACTERS;
 import static org.jd.core.v1.api.printer.Printer.MODULE;
 import static org.jd.core.v1.api.printer.Printer.PACKAGE;
 import static org.jd.core.v1.api.printer.Printer.TYPE;
-import static jd.core.preferences.Preferences.ESCAPE_UNICODE_CHARACTERS;
+
+import jd.core.ClassUtil;
 
 public class ModuleInfoFilePage extends ClassFilePage {
 
@@ -83,9 +84,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
             printer.setUnicodeEscape(unicodeEscape);
 
             // Format internal name
-            String entryPath = entry.getPath();
-            assert entryPath.endsWith(StringConstants.CLASS_FILE_SUFFIX);
-            String entryInternalName = entryPath.substring(0, entryPath.length() - 6); // 6 = ".class".length()
+            String entryInternalName = ClassUtil.getInternalName(entry.getPath());
 
             // Decompile class file
             DECOMPILER.decompile(loader, printer, entryInternalName);

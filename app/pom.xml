@@ -55,7 +55,7 @@
 		<dependency>
 			<groupId>com.github.nbauma109</groupId>
 			<artifactId>netbeans-visual-diff-standalone</artifactId>
-			<version>2.0.19</version>
+			<version>2.0.21</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.nbauma109</groupId>

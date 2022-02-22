@@ -9,21 +9,28 @@ package org.jd.gui.controller;
 
 import org.apache.commons.io.IOUtils;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Container.Entry;
 import org.jd.gui.api.model.Type;
+import org.jd.gui.model.container.DelegatingFilterContainer;
 import org.jd.gui.service.type.TypeFactoryService;
 import org.jd.gui.spi.TypeFactory;
 import org.jd.gui.util.ImageUtil;
-import org.jd.gui.model.container.DelegatingFilterContainer;
+import org.jd.gui.util.decompiler.ContainerLoader;
 import org.jd.gui.view.SelectLocationView;
 import org.netbeans.modules.editor.java.JavaKit;
+
+import com.heliosdecompiler.transformerapi.StandardTransformers;
+import com.heliosdecompiler.transformerapi.TransformationException;
+import com.heliosdecompiler.transformerapi.common.Loader;
 
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -41,11 +48,14 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V1;
 import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_OPTION;
 import static javax.swing.JOptionPane.YES_OPTION;
+import static org.jd.gui.util.decompiler.GuiPreferences.DECOMPILE_ENGINE;
 
 import de.cismet.custom.visualdiff.DiffPanel;
+import jd.core.ClassUtil;
 
 public class SelectLocationController {
 
@@ -101,9 +111,9 @@ public class SelectLocationController {
             JFrame diffFrame = new JFrame("Comparison view for class " + className);
             ImageUtil.addJDIconsToFrame(diffFrame);
             DiffPanel diffPanel = new DiffPanel(diffFrame);
-            try (InputStream left = pair[0].getInputStream(); InputStream right = pair[1].getInputStream()) {
-                String contentLeft = IOUtils.toString(left, StandardCharsets.UTF_8);
-                String contentRight = IOUtils.toString(right, StandardCharsets.UTF_8);
+            try {
+                String contentLeft = getContent(pair[0]);
+                String contentRight = getContent(pair[1]);
                 diffPanel.setLeftAndRight(contentLeft, JavaKit.JAVA_MIME_TYPE, fileNameLeft, contentRight, JavaKit.JAVA_MIME_TYPE, fileNameRight);
                 diffFrame.getContentPane().add(diffPanel);
                 Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -115,6 +125,20 @@ public class SelectLocationController {
             }
         } else {
             selectLocationView.show(location, delegatingFilterContainers, entries.size(), selectedEntryCallback, closeCallback);
+        }
+    }
+
+    private String getContent(Container.Entry entry) throws IOException, TransformationException {
+        if (entry.getPath().endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
+            Map<String, String> preferences = api.getPreferences();
+            ContainerLoader containerLoader = new ContainerLoader(entry);
+            String decompileEngine = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
+            Loader apiLoader = new Loader(containerLoader::canLoad, containerLoader::load);
+            String entryInternalName = ClassUtil.getInternalName(entry.getPath());
+            return StandardTransformers.decompile(apiLoader, entryInternalName, preferences, decompileEngine);
+        }
+        try (InputStream in = entry.getInputStream()) {
+            return IOUtils.toString(in, StandardCharsets.UTF_8);
         }
     }
 

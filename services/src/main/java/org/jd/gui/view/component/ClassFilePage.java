@@ -11,7 +11,6 @@ import org.fife.ui.rsyntaxtextarea.DocumentRange;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
-import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.util.decompiler.ContainerLoader;
@@ -35,6 +34,7 @@ import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompile
 import static jd.core.preferences.Preferences.REALIGN_LINE_NUMBERS;
 import static org.jd.gui.util.decompiler.GuiPreferences.DECOMPILE_ENGINE;
 
+import jd.core.ClassUtil;
 import jd.core.Decompiler;
 import jd.core.process.DecompilerImpl;
 
@@ -72,11 +72,7 @@ public class ClassFilePage extends TypePage {
             listener.clearData();
 
             // Format internal name
-            String entryPath = entry.getPath();
-            if (!entryPath.endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
-                throw new IllegalArgumentException("Not a .class file : " + entryPath);
-            }
-            String entryInternalName = entryPath.substring(0, entryPath.length() - 6); // 6 = ".class".length()
+            String entryInternalName = ClassUtil.getInternalName(entry.getPath());
             
             String engineName = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
             Loader apiLoader = new Loader(loader::canLoad, loader::load);
@@ -114,9 +110,12 @@ public class ClassFilePage extends TypePage {
             // Init preferences
             Map<String, String> preferences = api.getPreferences();
 
+            // Format internal name
+            String entryInternalName = ClassUtil.getInternalName(entry.getPath());
+
             String decompileEngine = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
             Loader apiLoader = new Loader(loader::canLoad, loader::load);
-            decompiledOutput = StandardTransformers.decompile(apiLoader , decompiledOutput, preferences, decompileEngine);
+            decompiledOutput = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, decompileEngine);
 
         } catch (Exception t) {
             assert ExceptionUtil.printStackTrace(t);

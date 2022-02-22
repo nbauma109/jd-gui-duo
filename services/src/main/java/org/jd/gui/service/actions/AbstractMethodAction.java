@@ -18,6 +18,8 @@ import java.io.IOException;
 
 import javax.swing.AbstractAction;
 
+import jd.core.ClassUtil;
+
 public abstract class AbstractMethodAction extends AbstractAction {
 
     private static final long serialVersionUID = 1L;
@@ -38,8 +40,7 @@ public abstract class AbstractMethodAction extends AbstractAction {
     private void methodAction(Container.Entry entry, String fragment) {
         Loader loader = new ContainerLoader(entry);
         TypeMaker typeMaker = new TypeMaker(loader);
-        String entryPath = entry.getPath();
-        String internalTypeName = entryPath.substring(0, entryPath.length() - 6); // 6 = ".class".length()
+        String internalTypeName = ClassUtil.getInternalName(entry.getPath());
         if (fragment != null) {
             int dashIndex = fragment.indexOf('-');
             if (dashIndex != -1) {
