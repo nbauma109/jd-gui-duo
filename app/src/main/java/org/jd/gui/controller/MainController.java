@@ -9,7 +9,6 @@ package org.jd.gui.controller;
 
 import org.apache.commons.io.FilenameUtils;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
-import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContentCopyable;
 import org.jd.gui.api.feature.ContentIndexable;
@@ -49,9 +48,9 @@ import org.jd.gui.spi.SourceSaver;
 import org.jd.gui.spi.TreeNodeFactory;
 import org.jd.gui.spi.TypeFactory;
 import org.jd.gui.spi.UriLoader;
-import org.jd.gui.util.StringUtilities;
 import org.jd.gui.util.TempFile;
 import org.jd.gui.util.ZOutputStream;
+import org.jd.gui.util.container.JarContainerEntryUtil;
 import org.jd.gui.util.matcher.ArtifactVersionMatcher;
 import org.jd.gui.util.net.UriUtil;
 import org.jd.gui.util.swing.SwingUtil;
@@ -74,10 +73,8 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -93,7 +90,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
 import java.util.jar.Attributes;
-import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
@@ -670,7 +666,7 @@ public class MainController implements API {
                         groupId = mainAttributes.getValue("Bundle-SymbolicName");
                     }
                     if (groupId == null) {
-                        groupId = inferGroupFromFile(jarFile);
+                        groupId = JarContainerEntryUtil.inferGroupFromFile(jarFile);
                     }
                     String version = mainAttributes.getValue("Implementation-Version");
                     if (version == null) {
@@ -700,49 +696,6 @@ public class MainController implements API {
         String artifactId = artifactVersionMatcher.getArtifactId();
         String version = artifactVersionMatcher.getVersion();
         return new Artifact(artifactId, artifactId, version, file.getName(), false, false);
-    }
-
-    private static String inferGroupFromFile(JarFile jarFile) {
-        Set<String> possibleGroups = new HashSet<>();
-        int minDepth = Integer.MAX_VALUE;
-        Enumeration<JarEntry> entries = jarFile.entries();
-        while (entries.hasMoreElements()) {
-            JarEntry nextEntry = entries.nextElement();
-            String entryName = nextEntry.getName();
-            int idx = entryName.lastIndexOf('/');
-            if (idx != -1 && entryName.endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
-                String packageName = entryName.substring(0, idx);
-                int currentDepth = StringUtilities.countMatches(packageName, '/');
-                if (currentDepth < minDepth) {
-                    possibleGroups.clear();
-                    minDepth = currentDepth;
-                    possibleGroups.add(packageName.replace('/', '.'));
-                } else if (currentDepth == minDepth) {
-                    possibleGroups.add(packageName.replace('/', '.'));
-                    idx = packageName.lastIndexOf('/');
-                    if (idx != -1 && possibleGroups.size() > 1) {
-                        if (possibleGroups.size() != 2) {
-                            throw new IllegalStateException("2 groups expected");
-                        }
-                        String[] pairOfPossibleGroups = possibleGroups.toArray(String[]::new);
-                        for (int i = 0; i < pairOfPossibleGroups.length; i++) {
-                            for (String prefix : Arrays.asList("org", "net", "com")) {
-                                String otherPossibleGroup = pairOfPossibleGroups[(i + 1) % 2];
-                                if (pairOfPossibleGroups[i].startsWith(prefix) && !otherPossibleGroup.startsWith(prefix)) {
-                                    possibleGroups.remove(otherPossibleGroup);
-                                }
-                            }
-                        }
-                        if (possibleGroups.size() == 2) {
-                            possibleGroups.clear();
-                            possibleGroups.add(packageName.substring(0, idx).replace('/', '.'));
-                            minDepth--;
-                        }
-                    }
-                }
-            }
-        }
-        return possibleGroups.iterator().next();
     }
 
     @SuppressWarnings("unchecked")

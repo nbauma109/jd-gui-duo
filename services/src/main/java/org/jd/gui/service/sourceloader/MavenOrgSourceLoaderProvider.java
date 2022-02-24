@@ -23,7 +23,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -209,13 +211,13 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
                     artifact = new Artifact(groupId, artifactId, version, file.getName(), found, sourceMightBeAvailable);
                 }
             } else if (id != null) {
-                found = true;
                 int index1 = id.indexOf(':');
                 int index2 = id.lastIndexOf(':');
     
                 String groupId = id.substring(0, index1);
                 String artifactId = id.substring(index1+1, index2);
                 String version = id.substring(index2+1);
+                found = findPom(groupId, artifactId, version);
                 artifact = new Artifact(groupId, artifactId, version, file.getName(), found, sourceAvailable);
             }
             return artifact;
@@ -223,6 +225,24 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
             assert ExceptionUtil.printStackTrace(e);
             return null;
         }
+    }
+
+    private static boolean findPom(String groupId, String artifactId, String version) throws IOException {
+        StringBuilder url = new StringBuilder();
+        url.append("https://search.maven.org/remotecontent?filepath=");
+        url.append(groupId.replace('.', '/'));
+        url.append('/');
+        url.append(artifactId);
+        url.append('/');
+        url.append(version);
+        url.append('/');
+        url.append(artifactId);
+        url.append('-');
+        url.append(version);
+        url.append(".pom");
+        HttpURLConnection conn = (HttpURLConnection) new URL(url.toString()).openConnection();
+        int responseCode = conn.getResponseCode();
+        return responseCode == HttpURLConnection.HTTP_OK;
     }
 
     private static Properties getPomProperties(File file) {

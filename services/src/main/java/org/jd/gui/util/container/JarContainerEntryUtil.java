@@ -11,16 +11,21 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.model.container.ContainerEntryComparator;
+import org.jd.gui.util.StringUtilities;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 public final class JarContainerEntryUtil {
 
@@ -111,5 +116,55 @@ public final class JarContainerEntryUtil {
         } catch (Exception e) {
             assert ExceptionUtil.printStackTrace(e);
         }
+    }
+
+    public static String inferGroupFromFile(JarFile jarFile) {
+        return inferGroupFromFile(jarFile, StringConstants.CLASS_FILE_SUFFIX);
+    }
+        
+    private static String inferGroupFromFile(JarFile jarFile, String extension) {
+        Set<String> possibleGroups = new HashSet<>();
+        int minDepth = Integer.MAX_VALUE;
+        Enumeration<JarEntry> entries = jarFile.entries();
+        while (entries.hasMoreElements()) {
+            JarEntry nextEntry = entries.nextElement();
+            String entryName = nextEntry.getName();
+            int idx = entryName.lastIndexOf('/');
+            if (idx != -1 && (extension == null || entryName.endsWith(extension))) {
+                String packageName = entryName.substring(0, idx);
+                int currentDepth = StringUtilities.countMatches(packageName, '/');
+                if (currentDepth < minDepth) {
+                    possibleGroups.clear();
+                    minDepth = currentDepth;
+                    possibleGroups.add(packageName.replace('/', '.'));
+                } else if (currentDepth == minDepth) {
+                    possibleGroups.add(packageName.replace('/', '.'));
+                    idx = packageName.lastIndexOf('/');
+                    if (idx != -1 && possibleGroups.size() > 1) {
+                        if (possibleGroups.size() != 2) {
+                            throw new IllegalStateException("2 groups expected");
+                        }
+                        String[] pairOfPossibleGroups = possibleGroups.toArray(String[]::new);
+                        for (int i = 0; i < pairOfPossibleGroups.length; i++) {
+                            for (String prefix : Arrays.asList("org", "net", "com")) {
+                                String otherPossibleGroup = pairOfPossibleGroups[(i + 1) % 2];
+                                if (pairOfPossibleGroups[i].startsWith(prefix) && !otherPossibleGroup.startsWith(prefix)) {
+                                    possibleGroups.remove(otherPossibleGroup);
+                                }
+                            }
+                        }
+                        if (possibleGroups.size() == 2) {
+                            possibleGroups.clear();
+                            possibleGroups.add(packageName.substring(0, idx).replace('/', '.'));
+                            minDepth--;
+                        }
+                    }
+                }
+            }
+        }
+        if (possibleGroups.isEmpty()) {
+            return inferGroupFromFile(jarFile, ".properties");
+        }
+        return possibleGroups.iterator().next();
     }
 }
