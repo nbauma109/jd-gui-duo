@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.github.nbauma109</groupId>
@@ -9,8 +11,7 @@
 	<artifactId>jd-gui-duo</artifactId>
 	<packaging>pom</packaging>
 	<properties>
-		<jre.archive>ibm-semeru-open-jre_x64_windows_17.0.1_12_openj9-0.29.1.zip</jre.archive>
-		<jre.path>jdk-17.0.1+12-jre</jre.path>
+		<jre.path>${project.build.directory}/jre</jre.path>
 	</properties>
 	<build>
 		<plugins>
@@ -37,25 +38,48 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>com.googlecode.maven-download-plugin</groupId>
-				<artifactId>download-maven-plugin</artifactId>
-				<version>1.6.8</version>
+		    <plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>3.0.0</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
+				        <configuration>
+							<target>
+								<link compress="2" includeHeaders="false" modulepath="${java.home}/jmods"
+									includeManPages="false" debug="false" destDir="target/jre">
+									<module name="java.base"/>
+									<module name="java.compiler"/>
+									<module name="java.datatransfer"/>
+									<module name="java.desktop"/>
+									<module name="java.instrument"/>
+									<module name="java.logging"/>
+									<module name="java.management"/>
+									<module name="java.naming"/>
+									<module name="java.prefs"/>
+									<module name="java.rmi"/>
+									<module name="java.scripting"/>
+									<module name="java.sql"/>
+									<module name="java.xml"/>
+									<module name="jdk.compiler"/>
+									<module name="jdk.unsupported"/>
+									<module name="jdk.zipfs"/>
+								</link>
+							</target>
+				        </configuration>
 						<goals>
-							<goal>wget</goal>
+							<goal>run</goal>
 						</goals>
 					</execution>
 				</executions>
-				<configuration>
-					<url>https://github.com/ibmruntimes/semeru17-binaries/releases/download/jdk-17.0.1%2B12_openj9-0.29.1/${jre.archive}</url>
-					<unpack>true</unpack>
-					<outputDirectory>${project.build.directory}</outputDirectory>
-					<sha256>786c36009b3a9a10acefc5e0809947eb9dfe70f7e2c41847b5992dc92fb4943f</sha256>
-				</configuration>
-			</plugin>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.ant</groupId>
+						<artifactId>ant</artifactId>
+						<version>1.10.12</version>
+					</dependency>
+				</dependencies>
+		    </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>

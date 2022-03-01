@@ -15,11 +15,8 @@
 				<include>*.bat</include>
 				<include>*.exe</include>
 				<include>lib/**</include>
-				<include>jdk-*-jre/**</include>
+				<include>jre/**</include>
 			</includes>
-			<excludes>
-				<exclude>jdk-*/lib/src.zip</exclude>
-			</excludes>
 		</fileSet>
 	</fileSets>
 </assembly>

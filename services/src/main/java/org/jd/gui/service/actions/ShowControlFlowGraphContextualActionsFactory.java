@@ -6,7 +6,6 @@
 
 package org.jd.gui.service.actions;
 
-import org.jd.core.v1.cfg.ControlFlowGraphPlantUMLWriter;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphGotoReducer;
@@ -19,6 +18,7 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.spi.ContextualActionsFactory;
 import org.jd.gui.util.ImageUtil;
+import org.jd.util.CFGViewer;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -105,10 +105,10 @@ public class ShowControlFlowGraphContextualActionsFactory implements ContextualA
                     default:
                         break;
                 }
-                ControlFlowGraphPlantUMLWriter.showGraph(controlFlowGraph);
+                CFGViewer.showGraph(controlFlowGraph);
             } else {
                 controlFlowGraphReducer.reduce(method);
-                ControlFlowGraphPlantUMLWriter.showGraph(controlFlowGraphReducer.getControlFlowGraph());
+                CFGViewer.showGraph(controlFlowGraphReducer.getControlFlowGraph());
             }
         }
     }
