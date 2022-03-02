@@ -6,3 +6,5 @@
 
 # jd-gui-duo
 A 2-in-1 JAVA decompiler based on JD-CORE v0 and v1
+
+https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/master-SNAPSHOT/jd-gui-duo-master-SNAPSHOT.zip
