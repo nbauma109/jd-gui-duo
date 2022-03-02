@@ -17,6 +17,9 @@
 				<include>lib/**</include>
 				<include>jre/**</include>
 			</includes>
+			<excludes>
+				<exclude>jre/*.tar.gz</exclude>
+			</excludes>
 		</fileSet>
 	</fileSets>
 </assembly>
