@@ -9,7 +9,7 @@
 	<artifactId>jd-gui-duo</artifactId>
 	<packaging>pom</packaging>
 	<properties>
-		<jre.archive>org.eclipse.justj.openjdk.hotspot.jre.full.stripped-17.0.2-win32-x86_64.tar.gz</jre.archive>
+		<jre.archive>org.eclipse.justj.openjdk.hotspot.jre.minimal.stripped-17.0.2-win32-x86_64.tar.gz</jre.archive>
 		<jre.path>jre</jre.path>
 	</properties>
 	<build>
@@ -43,18 +43,46 @@
 				<version>1.6.8</version>
 				<executions>
 					<execution>
+						<id>download-jre</id>
 						<phase>package</phase>
 						<goals>
 							<goal>wget</goal>
 						</goals>
+						<configuration>
+							<!-- https://www.eclipse.org/downloads/download.php?file=/justj/jres/17/downloads/20220201_1143/org.eclipse.justj.openjdk.hotspot.jre.minimal.stripped-17.0.2-win32-x86_64.tar.gz&mirror_id=1208 -->
+							<url>https://mirror.ibcp.fr/pub/eclipse/justj/jres/17/downloads/20220201_1143/${jre.archive}</url>
+							<unpack>true</unpack>
+							<outputDirectory>${project.build.directory}/jre</outputDirectory>
+							<sha512>e7cc6b1d599358e44a92f17c60bcdb65bf09dd518ec4c985836c8aed8f665a422872f176bd16e2b8b142837452cafa84068ffabc2f9486d123463271f3800806</sha512>
+						</configuration>
+					</execution>
+					<execution>
+						<id>download-nb-javac</id>
+						<phase>package</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://github.com/oracle/nb-javac/releases/download/release126/nb-javac-17.0.0.0.jar</url>
+							<unpack>false</unpack>
+							<outputDirectory>${project.build.directory}/lib</outputDirectory>
+							<sha512>92ff2b10a02f3d69403a1be417853a234d6512ea80b473ceaab03880f3c2228002677fbd00ac02f83e8e1afb9d72e2180841c3e007fa52e974ee299ac4137b88</sha512>
+						</configuration>
+					</execution>
+					<execution>
+						<id>download-nb-javac-api</id>
+						<phase>package</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://github.com/oracle/nb-javac/releases/download/release126/nb-javac-17.0.0.0-api.jar</url>
+							<unpack>false</unpack>
+							<outputDirectory>${project.build.directory}/lib</outputDirectory>
+							<sha512>388c10ce4efe0870d2b92a5939d77d15b9f260e95a39db5373fb4b70ba0d332fbbbdd0668ecc8d4236650db965902b44da90791e40edb7d984edc40204142579</sha512>
+						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<url>https://mirror.ibcp.fr/pub/eclipse/justj/jres/17/downloads/20220201_1143/org.eclipse.justj.openjdk.hotspot.jre.full.stripped-17.0.2-win32-x86_64.tar.gz</url>
-					<unpack>true</unpack>
-					<outputDirectory>${project.build.directory}/jre</outputDirectory>
-					<sha512>f7cc9f538304d5cb718f145aa1ea7a7affdd2321faf210d7c2688fb6905adba4d4708e3a4f7fd4ec52e08825be03d63e0e7bf81dbfe4c3824dd68cb523c49f40</sha512>
-				</configuration>
 		    </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -92,6 +120,7 @@
 							<classPath>
 								<mainClass>${main.class}</mainClass>
 								<addDependencies>false</addDependencies>
+								<postCp>${project.build.directory}/lib/nb-javac*.jar</postCp>
 							</classPath>
 							<jre>
 								<path>${jre.path}</path>
