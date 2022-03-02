@@ -120,7 +120,7 @@
 							<classPath>
 								<mainClass>${main.class}</mainClass>
 								<addDependencies>false</addDependencies>
-								<postCp>${project.build.directory}/lib/nb-javac*.jar</postCp>
+								<postCp>lib/nb-javac*.jar</postCp>
 							</classPath>
 							<jre>
 								<path>${jre.path}</path>
