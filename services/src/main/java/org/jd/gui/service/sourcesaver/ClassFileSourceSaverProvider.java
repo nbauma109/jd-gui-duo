@@ -9,9 +9,11 @@ package org.jd.gui.service.sourcesaver;
 
 import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
 import org.jd.core.v1.printer.LineNumberStringBuilderPrinter;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeWriter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
+import org.jd.gui.util.MethodPatcher;
 import org.jd.gui.util.decompiler.ContainerLoader;
 
 import com.heliosdecompiler.transformerapi.StandardTransformers;
@@ -24,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
+import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V0;
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V1;
 import static org.jd.gui.util.decompiler.GuiPreferences.DECOMPILE_ENGINE;
 
@@ -87,6 +90,10 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
             String decompileEngine = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
             Loader apiLoader = new Loader(loader::canLoad, loader::load);
             decompiledOutput = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, decompileEngine);
+            if (decompiledOutput.contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
+                String sourceCodeV0 = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, ENGINE_JD_CORE_V0);
+                decompiledOutput = MethodPatcher.patchCode(decompiledOutput, sourceCodeV0, entry);
+            }
 
         } catch (Exception t) {
             decompiledOutput = INTERNAL_ERROR;

@@ -23,6 +23,10 @@ public record Range(int minimum, int maximum) {
     public static Range between(int minimum, int maximum) {
         return new Range(minimum, maximum);
     }
+    
+    public int length() {
+        return maximum - minimum;
+    }
 
     @Override
     public int hashCode() {

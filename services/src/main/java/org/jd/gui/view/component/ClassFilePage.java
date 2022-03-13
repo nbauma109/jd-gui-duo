@@ -10,12 +10,13 @@ package org.jd.gui.view.component;
 import org.fife.ui.rsyntaxtextarea.DocumentRange;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeWriter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
+import org.jd.gui.util.MethodPatcher;
 import org.jd.gui.util.decompiler.ContainerLoader;
 import org.jd.gui.util.decompiler.GuiPreferences;
-import org.jd.gui.util.io.NewlineOutputStream;
 
 import com.heliosdecompiler.transformerapi.StandardTransformers;
 import com.heliosdecompiler.transformerapi.common.Loader;
@@ -30,6 +31,7 @@ import java.util.Map;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 
+import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V0;
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V1;
 import static jd.core.preferences.Preferences.REALIGN_LINE_NUMBERS;
 import static org.jd.gui.util.decompiler.GuiPreferences.DECOMPILE_ENGINE;
@@ -77,7 +79,13 @@ public class ClassFilePage extends TypePage {
             String engineName = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
             Loader apiLoader = new Loader(loader::canLoad, loader::load);
             String decompilationResult = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, engineName);
-            parseAndSetText(decompilationResult);
+            if (decompilationResult.contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
+                String sourceCodeV0 = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, ENGINE_JD_CORE_V0);
+                String patchedCode = MethodPatcher.patchCode(decompilationResult, sourceCodeV0, entry);
+                parseAndSetText(patchedCode);
+            } else {
+                parseAndSetText(decompilationResult);
+            }
         } catch (Exception t) {
             assert ExceptionUtil.printStackTrace(t);
             setText(INTERNAL_ERROR);
@@ -116,12 +124,15 @@ public class ClassFilePage extends TypePage {
             String decompileEngine = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
             Loader apiLoader = new Loader(loader::canLoad, loader::load);
             decompiledOutput = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, decompileEngine);
-
+            if (decompiledOutput.contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
+                String sourceCodeV0 = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, ENGINE_JD_CORE_V0);
+                decompiledOutput = MethodPatcher.patchCode(decompiledOutput, sourceCodeV0, entry);
+            }
         } catch (Exception t) {
             assert ExceptionUtil.printStackTrace(t);
             decompiledOutput = INTERNAL_ERROR;
         }
-        try (PrintStream ps = new PrintStream(new NewlineOutputStream(os), true, StandardCharsets.UTF_8.name())) {
+        try (PrintStream ps = new PrintStream(os, true, StandardCharsets.UTF_8.name())) {
             ps.print(decompiledOutput);
         } catch (IOException e) {
             assert ExceptionUtil.printStackTrace(e);

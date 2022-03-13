@@ -11,7 +11,6 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.model.container.ContainerEntryComparator;
-import org.jd.gui.util.StringUtilities;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
@@ -26,6 +25,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+
+import jadx.core.utils.StringUtils;
 
 public final class JarContainerEntryUtil {
 
@@ -132,7 +133,7 @@ public final class JarContainerEntryUtil {
             int idx = entryName.lastIndexOf('/');
             if (idx != -1 && (extension == null || entryName.endsWith(extension))) {
                 String packageName = entryName.substring(0, idx);
-                int currentDepth = StringUtilities.countMatches(packageName, '/');
+                int currentDepth = StringUtils.countMatches(packageName, "/");
                 if (currentDepth < minDepth) {
                     possibleGroups.clear();
                     minDepth = currentDepth;
