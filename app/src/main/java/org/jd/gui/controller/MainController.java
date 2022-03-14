@@ -541,17 +541,23 @@ public class MainController implements API {
     private static void writeBatchFile(Set<Artifact> missingArtifactsWithGroup, ZOutputStream zos) throws IOException {
         zos.writeln("@echo off");
         for (Artifact artifact : missingArtifactsWithGroup) {
-            zos.write("call mvn deploy:deploy-file -DrepositoryId=%REPO_ID% -Durl=%REPO_URL%");
-            zos.write(" -DgroupId=");
-            zos.write(artifact.groupId());
-            zos.write(" -Dfile=");
-            zos.write(artifact.fileName());
-            zos.write(" -DartifactId=");
-            zos.write(artifact.artifactId());
-            zos.write(" -Dversion=");
-            zos.writeln(artifact.version());
+            if (acceptArtifact(artifact)) {
+                zos.write("call mvn deploy:deploy-file -DrepositoryId=%REPO_ID% -Durl=%REPO_URL%");
+                zos.write(" -DgroupId=");
+                zos.write(artifact.groupId());
+                zos.write(" -Dfile=");
+                zos.write(artifact.fileName());
+                zos.write(" -DartifactId=");
+                zos.write(artifact.artifactId());
+                zos.write(" -Dversion=");
+                zos.writeln(artifact.version());
+            }
         }
         zos.closeEntry();
+    }
+
+    private static boolean acceptArtifact(Artifact a) {
+        return !a.fileName().contains("sources") && !a.fileName().contains("SNAPSHOT");
     }
 
     private static void writeMavenBuildEntry(ZOutputStream zos, Set<Artifact> artifacts, Set<Artifact> missingArtifactsWithGroup) throws IOException {
@@ -569,7 +575,9 @@ public class MainController implements API {
         }
         zos.writeln("    <!-- Vendor libraries and other libraries without sources -->");
         for (Artifact artifact : missingArtifactsWithGroup) {
-            writeMavenDependency(zos, artifact);
+            if (acceptArtifact(artifact)) {
+                writeMavenDependency(zos, artifact);
+            }
         }
         zos.write("""
                 </dependencies>
@@ -624,11 +632,15 @@ public class MainController implements API {
             zos.writeln("    // Vendor libraries and other libraries without sources");
         }
         for (Artifact artifact : missingArtifacts) {
-            zos.write("    implementation ':");
-            zos.write(artifact.artifactId());
-            zos.write(":");
-            zos.write(artifact.version().isEmpty() ? "+" : artifact.version());
-            zos.writeln("'");
+            if (acceptArtifact(artifact)) {
+                zos.write("    compile ':");
+                zos.write(artifact.artifactId());
+                if (!artifact.version().isEmpty()) {
+                    zos.write(":");
+                    zos.write(artifact.version());
+                }
+                zos.writeln("'");
+            }
         }
         zos.write("}");
         zos.closeEntry();

@@ -120,7 +120,14 @@ public final class JarContainerEntryUtil {
     }
 
     public static String inferGroupFromFile(JarFile jarFile) {
-        return inferGroupFromFile(jarFile, StringConstants.CLASS_FILE_SUFFIX);
+        String group = inferGroupFromFile(jarFile, StringConstants.CLASS_FILE_SUFFIX);
+        if (group == null) {
+            group = inferGroupFromFile(jarFile, ".properties");
+        }
+        if (group == null) {
+            group = "com.mycompany";
+        }
+        return group;
     }
         
     private static String inferGroupFromFile(JarFile jarFile, String extension) {
@@ -164,7 +171,7 @@ public final class JarContainerEntryUtil {
             }
         }
         if (possibleGroups.isEmpty()) {
-            return inferGroupFromFile(jarFile, ".properties");
+            return null;
         }
         return possibleGroups.iterator().next();
     }
