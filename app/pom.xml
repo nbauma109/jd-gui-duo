@@ -49,13 +49,23 @@
 	</build>
 	<dependencies>
 		<dependency>
+			<groupId>io.github.osobolev</groupId>
+			<artifactId>swingx-all</artifactId>
+			<version>1.7.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bidib.org.oxbow</groupId>
+			<artifactId>swingbits</artifactId>
+			<version>1.2.2</version>
+		</dependency>
+		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.github.nbauma109</groupId>
 			<artifactId>netbeans-visual-diff-standalone</artifactId>
-			<version>2.0.25</version>
+			<version>2.0.26</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.nbauma109</groupId>

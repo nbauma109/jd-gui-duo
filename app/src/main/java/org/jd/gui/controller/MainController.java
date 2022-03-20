@@ -109,6 +109,8 @@ import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 
+import tim.jarcomp.CompareWindow;
+
 public class MainController implements API {
     private static final String INDEXES = "indexes";
     private final Configuration configuration;
@@ -497,7 +499,10 @@ public class MainController implements API {
     }
 
     public void compareFiles(List<File> files) {
-        // TODO: XXX
+        // Construct main window and initialise
+        CompareWindow window = new CompareWindow(this);
+        // Pass two files to start with, or instruct to prompt
+        window.startCompare(files.get(0), files.get(1));
     }
 
     public void showGAVs(Set<File> files, Map<File, String> sha1Map, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
@@ -671,25 +676,24 @@ public class MainController implements API {
                     String artifactId = artifactVersionMatcher.getArtifactId();
                     String version = artifactVersionMatcher.getVersion();
                     return new Artifact(artifactId, artifactId, version, file.getName(), false, false);
-                } else {
-                    Attributes mainAttributes = manifest.getMainAttributes();
-                    String groupId = mainAttributes.getValue("Implementation-Vendor-Id");
-                    if (groupId == null) {
-                        groupId = mainAttributes.getValue("Bundle-SymbolicName");
-                    }
-                    if (groupId == null) {
-                        groupId = JarContainerEntryUtil.inferGroupFromFile(jarFile);
-                    }
-                    String version = mainAttributes.getValue("Implementation-Version");
-                    if (version == null) {
-                        version = mainAttributes.getValue("Bundle-Version");
-                    }
-                    if (version == null) {
-                        version = artifactVersionMatcher.getVersion();
-                    }
-                    String artifactId = artifactVersionMatcher.getArtifactId();
-                    return new Artifact(groupId, artifactId, version, file.getName(), false, false);
                 }
+                Attributes mainAttributes = manifest.getMainAttributes();
+                String groupId = mainAttributes.getValue("Implementation-Vendor-Id");
+                if (groupId == null) {
+                    groupId = mainAttributes.getValue("Bundle-SymbolicName");
+                }
+                if (groupId == null) {
+                    groupId = JarContainerEntryUtil.inferGroupFromFile(jarFile);
+                }
+                String version = mainAttributes.getValue("Implementation-Version");
+                if (version == null) {
+                    version = mainAttributes.getValue("Bundle-Version");
+                }
+                if (version == null) {
+                    version = artifactVersionMatcher.getVersion();
+                }
+                String artifactId = artifactVersionMatcher.getArtifactId();
+                return new Artifact(groupId, artifactId, version, file.getName(), false, false);
             } catch (IOException e) {
                 assert ExceptionUtil.printStackTrace(e);
             }
