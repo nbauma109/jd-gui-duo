@@ -14,6 +14,7 @@ import org.jd.gui.api.feature.PreferencesChangeListener;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.service.platform.PlatformService;
 import org.jd.gui.util.ImageUtil;
+import org.jd.gui.view.component.ComponentRemovable;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -47,7 +48,7 @@ import javax.swing.ToolTipManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel implements PreferencesChangeListener {
+public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel implements PreferencesChangeListener, ComponentRemovable {
 
     private static final String PANEL = "panel";
     private static final long serialVersionUID = 1L;
@@ -278,6 +279,7 @@ public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel impl
     }
 
     // --- Popup menu actions --- //
+    @Override
     public void removeComponent(Component component) {
         tabbedPane.remove(component);
         if (tabbedPane.getTabCount() == 0) {

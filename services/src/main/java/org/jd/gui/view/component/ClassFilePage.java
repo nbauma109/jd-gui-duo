@@ -29,7 +29,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultCaret;
 
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V0;
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V1;
@@ -167,13 +166,9 @@ public class ClassFilePage extends TypePage {
     // --- PreferencesChangeListener --- //
     @Override
     public void preferencesChanged(Map<String, String> preferences) {
-        DefaultCaret caret = (DefaultCaret) textArea.getCaret();
-        int updatePolicy = caret.getUpdatePolicy();
-
-        caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
-        decompile(preferences);
-        caret.setUpdatePolicy(updatePolicy);
-
-        super.preferencesChanged(preferences);
+        DynamicPage dynamicPage = (DynamicPage) getParent();
+        ComponentRemovable tabbedPanel = (ComponentRemovable) dynamicPage.getParent().getParent();
+        tabbedPanel.removeComponent(dynamicPage);
+        api.openURI(getUri());
     }
 }
