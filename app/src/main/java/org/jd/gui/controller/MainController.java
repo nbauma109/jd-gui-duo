@@ -141,6 +141,7 @@ public class MainController implements API {
             mainView = new MainView<>(
                 configuration, this, history,
                 e -> onOpen(),
+                e -> onCompare(),
                 e -> onClose(),
                 e -> onSaveSource(),
                 e -> onSaveAllSources(),
@@ -258,6 +259,13 @@ public class MainController implements API {
             configuration.setRecentLoadDirectory(chooser.getCurrentDirectory());
             openFile(chooser.getSelectedFile());
         }
+    }
+
+    protected void onCompare() {
+        // Construct main window and initialise
+        CompareWindow window = new CompareWindow(this);
+        // Pass two files to start with, or instruct to prompt
+        window.startCompare();
     }
 
     protected void onClose() {
