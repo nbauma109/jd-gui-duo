@@ -7,6 +7,7 @@ import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -137,15 +138,21 @@ public class ReferenceListener extends AbstractJavaListener {
                 SimpleName qualifierName = (SimpleName) qualifier;
                 String qualifierIdentifier = qualifierName.getIdentifier();
                 String qualifierDescriptor = currentContext.getDescriptor(qualifierIdentifier);
+                if (qualifierDescriptor == null) {
+                    IBinding binding = qualifier.resolveBinding();
+                    if (binding != null) {
+                        qualifierDescriptor = binding.getKey();
+                    }
+                }
                 if (qualifierDescriptor != null && qualifierDescriptor.charAt(0) == 'L') {
                     // Qualifier is a local variable or a method parameter
                     // Qualified name is a field
                     String qualifierTypeName = qualifierDescriptor.substring(1, qualifierDescriptor.length() - 1);
                     String fieldName = fieldNameNode.getIdentifier();
                     ReferenceData refData = newReferenceData(qualifierTypeName, fieldName, "?");
-                    int position = fieldNameNode.getStartPosition();
-                    int length = fieldNameNode.getLength();
-                    addHyperlink(new HyperlinkReferenceData(position, length, refData));
+                    ReferenceData qualifierRefData = newReferenceData(qualifierTypeName, null, null);
+                    addHyperlink(new HyperlinkReferenceData(qualifier.getStartPosition(), qualifier.getLength(), qualifierRefData));
+                    addHyperlink(new HyperlinkReferenceData(fieldNameNode.getStartPosition(), fieldNameNode.getLength(), refData));
                 }
             }
         }
