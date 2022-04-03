@@ -1,7 +1,9 @@
 package org.jd.gui.view.component;
 
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
@@ -131,29 +133,29 @@ public class ReferenceListener extends AbstractJavaListener {
 
     @Override
     public boolean visit(QualifiedName node) {
-        if (currentContext != null) {
-            SimpleName fieldNameNode = node.getName();
-            Name qualifier = node.getQualifier();
-            if (qualifier instanceof SimpleName) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-                SimpleName qualifierName = (SimpleName) qualifier;
-                String qualifierIdentifier = qualifierName.getIdentifier();
-                String qualifierDescriptor = currentContext.getDescriptor(qualifierIdentifier);
-                if (qualifierDescriptor == null) {
-                    IBinding binding = qualifier.resolveBinding();
-                    if (binding != null) {
-                        qualifierDescriptor = binding.getKey();
-                    }
+        SimpleName fieldNameNode = node.getName();
+        Name qualifier = node.getQualifier();
+        if (qualifier instanceof SimpleName) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            String qualifierDescriptor = null;
+            IBinding binding = qualifier.resolveBinding();
+            if (binding instanceof ITypeBinding) {
+                qualifierDescriptor = binding.getKey();
+            }
+            if (binding instanceof IVariableBinding) {
+                ITypeBinding typeBinding = qualifier.resolveTypeBinding();
+                if (typeBinding != null) {
+                    qualifierDescriptor = typeBinding.getKey();
                 }
-                if (qualifierDescriptor != null && qualifierDescriptor.charAt(0) == 'L') {
-                    // Qualifier is a local variable or a method parameter
-                    // Qualified name is a field
-                    String qualifierTypeName = qualifierDescriptor.substring(1, qualifierDescriptor.length() - 1);
-                    String fieldName = fieldNameNode.getIdentifier();
-                    ReferenceData refData = newReferenceData(qualifierTypeName, fieldName, "?");
+            }
+            if (qualifierDescriptor != null && qualifierDescriptor.charAt(0) == 'L') {
+                String qualifierTypeName = qualifierDescriptor.substring(1, qualifierDescriptor.length() - 1);
+                String fieldName = fieldNameNode.getIdentifier();
+                ReferenceData refData = newReferenceData(qualifierTypeName, fieldName, "?");
+                if (binding instanceof ITypeBinding || (binding instanceof IVariableBinding && ((IVariableBinding) binding).isField())) {
                     ReferenceData qualifierRefData = newReferenceData(qualifierTypeName, null, null);
                     addHyperlink(new HyperlinkReferenceData(qualifier.getStartPosition(), qualifier.getLength(), qualifierRefData));
-                    addHyperlink(new HyperlinkReferenceData(fieldNameNode.getStartPosition(), fieldNameNode.getLength(), refData));
                 }
+                addHyperlink(new HyperlinkReferenceData(fieldNameNode.getStartPosition(), fieldNameNode.getLength(), refData));
             }
         }
         return true;
@@ -223,22 +225,52 @@ public class ReferenceListener extends AbstractJavaListener {
         return true;
     }
 
+    private void createLinkToVariable(Expression exp) {
+        if (exp instanceof SimpleName) {
+            SimpleName simpleName = (SimpleName) exp;
+            IBinding binding = simpleName.resolveBinding();
+            if (binding instanceof IVariableBinding) {
+                IVariableBinding variableBinding = (IVariableBinding) binding;
+                createLinkToVariable(simpleName, variableBinding);
+            }
+        }
+    }
+
+    private void createLinkToVariable(SimpleName simpleName, IVariableBinding variableBinding) {
+        if (variableBinding != null && variableBinding.isField()) {
+            ITypeBinding declaringClass = variableBinding.getDeclaringClass();
+            if (declaringClass != null) {
+                String binaryName = declaringClass.getBinaryName();
+                if (binaryName != null) {
+                    String varTypeName = binaryName.replace('.', '/');
+                    int position = simpleName.getStartPosition();
+                    String varName = simpleName.getIdentifier();
+                    ReferenceData refData = newReferenceData(varTypeName, varName, "?");
+                    addHyperlink(new HyperlinkReferenceData(position, varName.length(), refData));
+                }
+            }
+        }
+    }
+    
+    @Override
+    public boolean visit(ArrayAccess node) {
+        createLinkToVariable(node.getArray());
+        return true;
+    }
+
     @Override
     public boolean visit(FieldAccess node) {
         IVariableBinding fieldBinding = node.resolveFieldBinding();
         if (fieldBinding != null) {
-            String fieldName = node.getName().getIdentifier();
-            ITypeBinding fieldDeclaringClass = fieldBinding.getDeclaringClass();
-            if (fieldDeclaringClass != null) {
-                String binaryName = fieldDeclaringClass.getBinaryName();
-                if (binaryName != null) {
-                    String fieldTypeName = binaryName.replace('.', '/');
-                    int position = node.getName().getStartPosition();
-                    ReferenceData refData = newReferenceData(fieldTypeName, fieldName, "?");
-                    addHyperlink(new HyperlinkReferenceData(position, fieldName.length(), refData));
-                }
-            }
+            createLinkToVariable(node.getName(), fieldBinding);
         }
+        return true;
+    }
+
+    @Override
+    public boolean visit(Assignment node) {
+        createLinkToVariable(node.getLeftHandSide());
+        createLinkToVariable(node.getRightHandSide());
         return true;
     }
 
