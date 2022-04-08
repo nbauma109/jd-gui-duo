@@ -20,16 +20,12 @@ import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.util.parser.jdt.core.AbstractJavaListener;
-import org.jd.gui.util.parser.jdt.core.Context;
 import org.jd.gui.util.parser.jdt.core.DeclarationData;
 import org.jd.gui.util.parser.jdt.core.HyperlinkData;
 import org.jd.gui.util.parser.jdt.core.HyperlinkReferenceData;
@@ -51,7 +47,6 @@ public class ReferenceListener extends AbstractJavaListener {
     private final StringBuilder sbTypeDeclaration = new StringBuilder();
     private final Map<String, ReferenceData> referencesCache = new HashMap<>();
     private String currentInternalTypeName;
-    private Context currentContext;
 
     private final DeclarationListener declarationListener;
 
@@ -99,7 +94,6 @@ public class ReferenceListener extends AbstractJavaListener {
         }
 
         currentInternalTypeName = sbTypeDeclaration.toString();
-        currentContext = new Context(currentContext);
         return true;
     }
 
@@ -134,57 +128,47 @@ public class ReferenceListener extends AbstractJavaListener {
     @Override
     public boolean visit(QualifiedName node) {
         SimpleName fieldNameNode = node.getName();
+        String fieldName = fieldNameNode.getIdentifier();
         Name qualifier = node.getQualifier();
         if (qualifier instanceof SimpleName) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            SimpleName qualifierSimpleName = (SimpleName) qualifier;
             String qualifierDescriptor = null;
             IBinding binding = qualifier.resolveBinding();
             if (binding instanceof ITypeBinding) {
                 qualifierDescriptor = binding.getKey();
             }
+            IVariableBinding variableBinding = null;
             if (binding instanceof IVariableBinding) {
+                variableBinding = (IVariableBinding) binding;
                 ITypeBinding typeBinding = qualifier.resolveTypeBinding();
                 if (typeBinding != null) {
                     qualifierDescriptor = typeBinding.getKey();
                 }
             }
-            if (qualifierDescriptor != null && qualifierDescriptor.charAt(0) == 'L') {
-                String qualifierTypeName = qualifierDescriptor.substring(1, qualifierDescriptor.length() - 1);
-                String fieldName = fieldNameNode.getIdentifier();
-                ReferenceData refData = newReferenceData(qualifierTypeName, fieldName, "?");
-                if (binding instanceof ITypeBinding || (binding instanceof IVariableBinding && ((IVariableBinding) binding).isField())) {
-                    ReferenceData qualifierRefData = newReferenceData(qualifierTypeName, null, null);
-                    addHyperlink(new HyperlinkReferenceData(qualifier.getStartPosition(), qualifier.getLength(), qualifierRefData));
+            if (qualifierDescriptor != null) {
+                if (qualifierDescriptor.charAt(0) == 'L') {
+                    String qualifierTypeName = qualifierDescriptor.substring(1, qualifierDescriptor.length() - 1);
+                    ReferenceData refData = newReferenceData(qualifierTypeName, fieldName, "?");
+                    if (binding instanceof ITypeBinding || (variableBinding != null && variableBinding.isField())) {
+                        ReferenceData qualifierRefData = newReferenceData(qualifierTypeName, null, null);
+                        addHyperlink(new HyperlinkReferenceData(qualifier.getStartPosition(), qualifier.getLength(), qualifierRefData));
+                    }
+                    addHyperlink(new HyperlinkReferenceData(fieldNameNode.getStartPosition(), fieldNameNode.getLength(), refData));
                 }
-                addHyperlink(new HyperlinkReferenceData(fieldNameNode.getStartPosition(), fieldNameNode.getLength(), refData));
+                if (qualifierDescriptor.charAt(0) == '[' && variableBinding != null) {
+                    ITypeBinding declaringClass = variableBinding.getDeclaringClass();
+                    if (declaringClass != null) {
+                        String declaringBinaryName = declaringClass.getBinaryName();
+                        if (declaringBinaryName != null) {
+                            String declaringInternalTypeName = declaringBinaryName.replace('.', '/');
+                            String qualifierIdentifier = qualifierSimpleName.getIdentifier();
+                            ReferenceData refData = newReferenceData(declaringInternalTypeName, qualifierIdentifier, "?");
+                            addHyperlink(new HyperlinkReferenceData(qualifier.getStartPosition(), qualifier.getLength(), refData));
+                        }
+                    }
+                }
             }
         }
-        return true;
-    }
-
-    @Override
-    public boolean visit(VariableDeclarationStatement node) {
-        @SuppressWarnings("unchecked")
-        List<VariableDeclarationFragment> fragments = node.fragments();
-        int dimensionOnVariable;
-        String descriptor;
-        String name;
-        for (VariableDeclarationFragment fragment : fragments) {
-            dimensionOnVariable = fragment.getExtraDimensions();
-            descriptor = createDescriptor(node.getType(), dimensionOnVariable);
-            name = fragment.getName().getIdentifier();
-
-            currentContext.put(name, descriptor);
-        }
-        return true;
-    }
-
-    @Override
-    public boolean visit(SingleVariableDeclaration node) {
-        int dimensionOnVariable = node.getExtraDimensions();
-        String descriptor = createDescriptor(node.getType(), dimensionOnVariable);
-        String name = node.getName().getIdentifier();
-
-        currentContext.put(name, descriptor);
         return true;
     }
 
@@ -324,7 +308,7 @@ public class ReferenceListener extends AbstractJavaListener {
 
     private boolean visitMethodBinding(SimpleName name, IMethodBinding methodBinding) {
         if (methodBinding != null) {
-            String methodName = name.getIdentifier();
+        String methodName = name.getIdentifier();
             ITypeBinding declaringClass = methodBinding.getDeclaringClass();
             String binaryName = declaringClass.getBinaryName();
             if (binaryName != null) {
@@ -332,10 +316,10 @@ public class ReferenceListener extends AbstractJavaListener {
                 ITypeBinding[] args = methodBinding.getParameterTypes();
                 String methodDescriptor = args.length > 0 ? getParametersDescriptor(args.length).append('?').toString()
                         : "()?";
-                ReferenceData refData = newReferenceData(methodTypeName, methodName, methodDescriptor);
+            ReferenceData refData = newReferenceData(methodTypeName, methodName, methodDescriptor);
                 int position = name.getStartPosition();
-                addHyperlink(new HyperlinkReferenceData(position, methodName.length(), refData));
-            }
+            addHyperlink(new HyperlinkReferenceData(position, methodName.length(), refData));
+        }
         }
         return true;
     }
@@ -378,6 +362,7 @@ public class ReferenceListener extends AbstractJavaListener {
     }
 
     public void clearData() {
+        sbTypeDeclaration.setLength(0);
         declarationListener.clearData();
         references.clear();
         strings.clear();

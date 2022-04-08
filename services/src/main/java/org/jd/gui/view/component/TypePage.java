@@ -43,8 +43,6 @@ import java.util.function.BiPredicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.jd.gui.util.decompiler.GuiPreferences.FONT_SIZE_KEY;
-
 public abstract class TypePage extends CustomLineNumbersPage
         implements UriGettable, IndexesChangeListener, FocusedTypeGettable {
 
@@ -135,8 +133,6 @@ public abstract class TypePage extends CustomLineNumbersPage
         List<DocumentRange> ranges = new ArrayList<>();
         String fragment = uri.getFragment();
         String query = uri.getQuery();
-
-        super.preferencesChanged(api.getPreferences());
 
         Marker.clearMarkAllHighlights(textArea);
 

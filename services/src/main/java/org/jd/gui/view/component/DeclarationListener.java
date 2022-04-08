@@ -145,6 +145,7 @@ public class DeclarationListener extends AbstractJavaListener {
     }
 
     public void clearData() {
+        sbTypeDeclaration.setLength(0);
         declarations.clear();
         typeDeclarations.clear();
     }
