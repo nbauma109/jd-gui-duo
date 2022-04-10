@@ -633,7 +633,7 @@ public class MainController implements API {
             zos.writeln("    // Thirdparty libraries available on maven central");
         }
         for (Artifact artifact : artifacts) {
-            zos.write("    implementation('");
+            zos.write("    compile('");
             zos.write(artifact.groupId());
             zos.write(":");
             zos.write(artifact.artifactId());
