@@ -9,7 +9,6 @@ package org.jd.gui.view.component;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.Token;
-import org.jd.gui.util.parser.jdt.core.HyperlinkData;
 
 import java.awt.Cursor;
 import java.awt.Point;
@@ -19,6 +18,8 @@ import java.awt.event.MouseEvent;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
+
+import jd.core.links.HyperlinkData;
 
 public abstract class HyperlinkPage extends TextPage {
 

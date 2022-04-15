@@ -26,11 +26,6 @@ import org.eclipse.jdt.core.dom.Type;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.util.parser.jdt.core.AbstractJavaListener;
-import org.jd.gui.util.parser.jdt.core.DeclarationData;
-import org.jd.gui.util.parser.jdt.core.HyperlinkData;
-import org.jd.gui.util.parser.jdt.core.HyperlinkReferenceData;
-import org.jd.gui.util.parser.jdt.core.ReferenceData;
-import org.jd.gui.util.parser.jdt.core.StringData;
 import org.jd.gui.util.parser.jdt.core.TypeDeclarationData;
 
 import java.util.ArrayList;
@@ -42,6 +37,12 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import static org.jd.gui.util.Key.key;
+
+import jd.core.links.DeclarationData;
+import jd.core.links.HyperlinkData;
+import jd.core.links.HyperlinkReferenceData;
+import jd.core.links.ReferenceData;
+import jd.core.links.StringData;
 
 public class ReferenceListener extends AbstractJavaListener {
     private final StringBuilder sbTypeDeclaration = new StringBuilder();
@@ -308,18 +309,17 @@ public class ReferenceListener extends AbstractJavaListener {
 
     private boolean visitMethodBinding(SimpleName name, IMethodBinding methodBinding) {
         if (methodBinding != null) {
-        String methodName = name.getIdentifier();
+            String methodName = name.getIdentifier();
             ITypeBinding declaringClass = methodBinding.getDeclaringClass();
             String binaryName = declaringClass.getBinaryName();
             if (binaryName != null) {
                 String methodTypeName = binaryName.replace('.', '/');
                 ITypeBinding[] args = methodBinding.getParameterTypes();
-                String methodDescriptor = args.length > 0 ? getParametersDescriptor(args.length).append('?').toString()
-                        : "()?";
-            ReferenceData refData = newReferenceData(methodTypeName, methodName, methodDescriptor);
+                String methodDescriptor = args.length > 0 ? getParametersDescriptor(args.length).append('?').toString() : "()?";
+                ReferenceData refData = newReferenceData(methodTypeName, methodName, methodDescriptor);
                 int position = name.getStartPosition();
-            addHyperlink(new HyperlinkReferenceData(position, methodName.length(), refData));
-        }
+                addHyperlink(new HyperlinkReferenceData(position, methodName.length(), refData));
+            }
         }
         return true;
     }

@@ -31,6 +31,7 @@ import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompile
 import static org.jd.gui.util.decompiler.GuiPreferences.DECOMPILE_ENGINE;
 
 import jd.core.ClassUtil;
+import jd.core.DecompilationResult;
 
 public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
 
@@ -71,7 +72,7 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
     @Override
     public void saveContent(API api, Controller controller, Listener listener, Path rootPath, Path path, Container.Entry entry) {
 
-        String decompiledOutput = "";
+        DecompilationResult decompiledResult = new DecompilationResult();
         
         try {
             // Call listener
@@ -89,18 +90,18 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
             
             String decompileEngine = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
             Loader apiLoader = new Loader(loader::canLoad, loader::load);
-            decompiledOutput = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, decompileEngine);
-            if (decompiledOutput.contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
-                String sourceCodeV0 = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, ENGINE_JD_CORE_V0);
-                decompiledOutput = MethodPatcher.patchCode(decompiledOutput, sourceCodeV0, entry);
+            decompiledResult = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, decompileEngine);
+            if (decompiledResult.getDecompiledOutput().contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
+                DecompilationResult sourceCodeV0 = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, ENGINE_JD_CORE_V0);
+                decompiledResult.setDecompiledOutput(MethodPatcher.patchCode(decompiledResult.getDecompiledOutput(), sourceCodeV0.getDecompiledOutput(), entry));
             }
 
         } catch (Exception t) {
-            decompiledOutput = INTERNAL_ERROR;
+            decompiledResult.setDecompiledOutput(INTERNAL_ERROR);
             assert ExceptionUtil.printStackTrace(t);
         }
         
-        writeCodeToFile(path, decompiledOutput);
+        writeCodeToFile(path, decompiledResult.getDecompiledOutput());
     }
 
     private static void writeCodeToFile(Path path, String sourceCode) {

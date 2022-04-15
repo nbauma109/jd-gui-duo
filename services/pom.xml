@@ -22,7 +22,7 @@
 		<dependency>
 			<groupId>com.fifesoft</groupId>
 			<artifactId>rsyntaxtextarea</artifactId>
-			<version>3.1.6</version>
+			<version>3.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.ow2.asm</groupId>
@@ -31,12 +31,12 @@
 		<dependency>
 		    <groupId>com.github.nbauma109</groupId>
 		    <artifactId>transformer-api</artifactId>
-		    <version>4.0.12</version>
+		    <version>4.0.14</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jdt</groupId>
 			<artifactId>org.eclipse.jdt.core</artifactId>
-			<version>3.28.0</version>
+			<version>3.29.0</version>
 			<!-- check impl/pom.xml in https://github.com/forge/roaster -->
 			<exclusions>
 				<exclusion>

@@ -23,10 +23,6 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.util.decompiler.ContainerLoader;
 import org.jd.gui.util.index.IndexesUtil;
-import org.jd.gui.util.parser.jdt.core.DeclarationData;
-import org.jd.gui.util.parser.jdt.core.HyperlinkData;
-import org.jd.gui.util.parser.jdt.core.HyperlinkReferenceData;
-import org.jd.gui.util.parser.jdt.core.ReferenceData;
 
 import java.awt.Point;
 import java.net.URI;
@@ -48,6 +44,10 @@ import static org.jd.core.v1.api.printer.Printer.PACKAGE;
 import static org.jd.core.v1.api.printer.Printer.TYPE;
 
 import jd.core.ClassUtil;
+import jd.core.links.DeclarationData;
+import jd.core.links.HyperlinkData;
+import jd.core.links.HyperlinkReferenceData;
+import jd.core.links.ReferenceData;
 
 public class ModuleInfoFilePage extends ClassFilePage {
 

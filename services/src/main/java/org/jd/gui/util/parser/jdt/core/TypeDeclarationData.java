@@ -1,5 +1,7 @@
 package org.jd.gui.util.parser.jdt.core;
 
+import jd.core.links.DeclarationData;
+
 public class TypeDeclarationData extends DeclarationData {
     private final String superTypeName;
 

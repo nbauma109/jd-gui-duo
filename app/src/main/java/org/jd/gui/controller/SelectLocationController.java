@@ -56,6 +56,7 @@ import static org.jd.gui.util.decompiler.GuiPreferences.DECOMPILE_ENGINE;
 
 import de.cismet.custom.visualdiff.DiffPanel;
 import jd.core.ClassUtil;
+import jd.core.DecompilationResult;
 
 public class SelectLocationController {
 
@@ -135,7 +136,8 @@ public class SelectLocationController {
             String decompileEngine = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
             Loader apiLoader = new Loader(containerLoader::canLoad, containerLoader::load);
             String entryInternalName = ClassUtil.getInternalName(entry.getPath());
-            return StandardTransformers.decompile(apiLoader, entryInternalName, preferences, decompileEngine);
+            DecompilationResult decompilationResult = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, decompileEngine);
+            return decompilationResult.getDecompiledOutput();
         }
         try (InputStream in = entry.getInputStream()) {
             return IOUtils.toString(in, StandardCharsets.UTF_8);

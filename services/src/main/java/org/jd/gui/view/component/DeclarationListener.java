@@ -11,7 +11,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.util.parser.jdt.core.AbstractJavaListener;
-import org.jd.gui.util.parser.jdt.core.DeclarationData;
 import org.jd.gui.util.parser.jdt.core.TypeDeclarationData;
 
 import java.util.HashMap;
@@ -21,6 +20,8 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 
 import static org.jd.gui.util.Key.key;
+
+import jd.core.links.DeclarationData;
 
 public class DeclarationListener extends AbstractJavaListener {
     private final StringBuilder sbTypeDeclaration = new StringBuilder();

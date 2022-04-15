@@ -47,6 +47,7 @@ import static org.jd.gui.util.decompiler.GuiPreferences.DECOMPILE_ENGINE;
 
 import de.cismet.custom.visualdiff.DiffPanel;
 import jd.core.ClassUtil;
+import jd.core.DecompilationResult;
 
 /**
  * Class to manage the main compare window
@@ -197,7 +198,8 @@ public class CompareWindow {
             String decompileEngine = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
             Loader apiLoader = new Loader(zipLoader::canLoad, zipLoader::load);
             String entryInternalName = ClassUtil.getInternalName(entryPath);
-            return StandardTransformers.decompile(apiLoader, entryInternalName, preferences, decompileEngine);
+            DecompilationResult decompilationResult = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, decompileEngine);
+            return decompilationResult.getDecompiledOutput();
         }
         try (ZipFile zipFile = new ZipFile(file); InputStream in = zipFile.getInputStream(zipFile.getEntry(entryPath))) {
             return IOUtils.toString(in, StandardCharsets.UTF_8);

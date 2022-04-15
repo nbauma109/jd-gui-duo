@@ -15,7 +15,6 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.util.index.IndexesUtil;
 import org.jd.gui.util.io.TextReader;
-import org.jd.gui.util.parser.jdt.core.HyperlinkData;
 
 import java.awt.Point;
 import java.io.IOException;
@@ -28,6 +27,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
+
+import jd.core.links.HyperlinkData;
 
 public class ManifestFilePage extends HyperlinkPage implements UriGettable, IndexesChangeListener {
 

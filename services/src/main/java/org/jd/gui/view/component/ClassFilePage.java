@@ -37,6 +37,7 @@ import static jd.core.preferences.Preferences.REALIGN_LINE_NUMBERS;
 import static org.jd.gui.util.decompiler.GuiPreferences.DECOMPILE_ENGINE;
 
 import jd.core.ClassUtil;
+import jd.core.DecompilationResult;
 import jd.core.Decompiler;
 import jd.core.process.DecompilerImpl;
 
@@ -78,13 +79,30 @@ public class ClassFilePage extends TypePage {
             
             String engineName = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
             Loader apiLoader = new Loader(loader::canLoad, loader::load);
-            String decompilationResult = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, engineName);
-            if (decompilationResult.contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
-                String sourceCodeV0 = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, ENGINE_JD_CORE_V0);
-                String patchedCode = MethodPatcher.patchCode(decompilationResult, sourceCodeV0, entry);
+            DecompilationResult decompilationResult = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, engineName);
+            if (decompilationResult.getDecompiledOutput().contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
+                DecompilationResult sourceCodeV0 = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, ENGINE_JD_CORE_V0);
+                String patchedCode = MethodPatcher.patchCode(decompilationResult.getDecompiledOutput(), sourceCodeV0.getDecompiledOutput(), entry);
                 parseAndSetText(patchedCode);
             } else {
-                parseAndSetText(decompilationResult);
+                listener.getStrings().addAll(decompilationResult.getStrings());
+                listener.getTypeDeclarations().putAll(decompilationResult.getTypeDeclarations());
+                listener.getDeclarations().putAll(decompilationResult.getDeclarations());
+                listener.getReferences().addAll(decompilationResult.getReferences());
+                hyperlinks.putAll(decompilationResult.getHyperlinks());
+                if (decompilationResult.getMaxLineNumber() != 0) {
+                    setMaxLineNumber(decompilationResult.getMaxLineNumber());
+                }
+                for (Map.Entry<Integer, Integer> entry : decompilationResult.getLineNumbers().entrySet()) {
+                    Integer textAreaLineNumber = entry.getKey();
+                    Integer sourceLineNumber = entry.getValue();
+                    setLineNumber(textAreaLineNumber, sourceLineNumber);
+                }
+                if (hyperlinks.isEmpty()) {
+                    parseAndSetText(decompilationResult.getDecompiledOutput());
+                } else {
+                    setText(decompilationResult.getDecompiledOutput());
+                }
             }
         } catch (Exception t) {
             assert ExceptionUtil.printStackTrace(t);
@@ -110,7 +128,7 @@ public class ClassFilePage extends TypePage {
     @Override
     public void save(API api, OutputStream os) {
 
-        String decompiledOutput = "";
+        DecompilationResult decompilationResult = new DecompilationResult();
         
         // Init loader
         ContainerLoader loader = new ContainerLoader(entry);
@@ -123,17 +141,17 @@ public class ClassFilePage extends TypePage {
 
             String decompileEngine = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
             Loader apiLoader = new Loader(loader::canLoad, loader::load);
-            decompiledOutput = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, decompileEngine);
-            if (decompiledOutput.contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
-                String sourceCodeV0 = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, ENGINE_JD_CORE_V0);
-                decompiledOutput = MethodPatcher.patchCode(decompiledOutput, sourceCodeV0, entry);
+            decompilationResult = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, decompileEngine);
+            if (decompilationResult.getDecompiledOutput().contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
+                DecompilationResult sourceCodeV0 = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, ENGINE_JD_CORE_V0);
+                decompilationResult.setDecompiledOutput(MethodPatcher.patchCode(decompilationResult.getDecompiledOutput(), sourceCodeV0.getDecompiledOutput(), entry));
             }
         } catch (Exception t) {
             assert ExceptionUtil.printStackTrace(t);
-            decompiledOutput = INTERNAL_ERROR;
+            decompilationResult.setDecompiledOutput(INTERNAL_ERROR);
         }
         try (PrintStream ps = new PrintStream(os, true, StandardCharsets.UTF_8.name())) {
-            ps.print(decompiledOutput);
+            ps.print(decompilationResult.getDecompiledOutput());
         } catch (IOException e) {
             assert ExceptionUtil.printStackTrace(e);
         }
@@ -175,5 +193,6 @@ public class ClassFilePage extends TypePage {
         caret.setUpdatePolicy(updatePolicy);
 
         super.preferencesChanged(preferences);
+        indexesChanged(collectionOfFutureIndexes);
     }
 }

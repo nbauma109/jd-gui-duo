@@ -14,11 +14,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class ZipLoader implements Loader {
-    protected HashMap<String, byte[]> map = new HashMap<>();
+
+    private static final Pattern CLASS_SUFFIX_PATTERN = Pattern.compile("\\.class$");
+
+    private HashMap<String, byte[]> map = new HashMap<>();
 
     public  ZipLoader(File zip) throws IOException {
         byte[] buffer = new byte[1024 * 2];
@@ -36,7 +40,7 @@ public class ZipLoader implements Loader {
                         read = zis.read(buffer);
                     }
 
-                    map.put(ze.getName(), out.toByteArray());
+                    map.put(removeClassSuffix(ze.getName()), out.toByteArray());
                 }
 
                 ze = zis.getNextEntry();
@@ -48,13 +52,17 @@ public class ZipLoader implements Loader {
         }
     }
 
+    private static String removeClassSuffix(String entryName) {
+        return CLASS_SUFFIX_PATTERN.matcher(entryName).replaceFirst("");
+    }
+
     @Override
     public byte[] load(String internalName) throws IOException {
-        return map.get(internalName + ".class");
+        return map.get(removeClassSuffix(internalName));
     }
 
     @Override
     public boolean canLoad(String internalName) {
-        return map.containsKey(internalName + ".class");
+        return map.containsKey(removeClassSuffix(internalName));
     }
 }

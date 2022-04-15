@@ -23,11 +23,6 @@ import org.jd.gui.api.model.Type;
 import org.jd.gui.util.index.IndexesUtil;
 import org.jd.gui.util.matcher.DescriptorMatcher;
 import org.jd.gui.util.parser.jdt.ASTParserFactory;
-import org.jd.gui.util.parser.jdt.core.DeclarationData;
-import org.jd.gui.util.parser.jdt.core.HyperlinkData;
-import org.jd.gui.util.parser.jdt.core.HyperlinkReferenceData;
-import org.jd.gui.util.parser.jdt.core.ReferenceData;
-import org.jd.gui.util.parser.jdt.core.StringData;
 
 import java.awt.Point;
 import java.net.URI;
@@ -42,6 +37,12 @@ import java.util.concurrent.Future;
 import java.util.function.BiPredicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import jd.core.links.DeclarationData;
+import jd.core.links.HyperlinkData;
+import jd.core.links.HyperlinkReferenceData;
+import jd.core.links.ReferenceData;
+import jd.core.links.StringData;
 
 public abstract class TypePage extends CustomLineNumbersPage
         implements UriGettable, IndexesChangeListener, FocusedTypeGettable {
