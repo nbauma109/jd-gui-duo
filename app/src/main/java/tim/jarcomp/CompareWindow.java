@@ -5,6 +5,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
 import org.jd.gui.util.ImageUtil;
+import org.jd.gui.util.loader.LoaderUtils;
 import org.jd.gui.util.loader.ZipLoader;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
@@ -48,6 +49,7 @@ import static org.jd.gui.util.decompiler.GuiPreferences.DECOMPILE_ENGINE;
 import de.cismet.custom.visualdiff.DiffPanel;
 import jd.core.ClassUtil;
 import jd.core.DecompilationResult;
+import jd.core.preferences.Preferences;
 
 /**
  * Class to manage the main compare window
@@ -163,7 +165,7 @@ public class CompareWindow {
                 if (e.getClickCount() == 2) {
                     int modelCol = table.convertColumnIndexToModel(0);
                     int modelRow = table.convertRowIndexToModel(table.getSelectedRow());
-                    boolean isChange = tableModel.areDifferent(modelRow);
+                    boolean isChange = tableModel.isModification(modelRow);
                     if (isChange) {
                         String fileName = (String) tableModel.getValueAt(modelRow, modelCol);
                         try {
@@ -194,9 +196,11 @@ public class CompareWindow {
     protected String getContent(File file, String entryPath) throws IOException, TransformationException {
         if (entryPath.endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
             Map<String, String> preferences = api.getPreferences();
+            preferences.put(Preferences.WRITE_LINE_NUMBERS, "false");
+            preferences.put(Preferences.REALIGN_LINE_NUMBERS, "false");
             ZipLoader zipLoader = new ZipLoader(file);
             String decompileEngine = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
-            Loader apiLoader = new Loader(zipLoader::canLoad, zipLoader::load);
+            Loader apiLoader = LoaderUtils.createLoader(preferences, zipLoader, file.toURI());
             String entryInternalName = ClassUtil.getInternalName(entryPath);
             DecompilationResult decompilationResult = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, decompileEngine);
             return decompilationResult.getDecompiledOutput();

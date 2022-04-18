@@ -15,6 +15,7 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.util.MethodPatcher;
 import org.jd.gui.util.decompiler.ContainerLoader;
+import org.jd.gui.util.loader.LoaderUtils;
 
 import com.heliosdecompiler.transformerapi.StandardTransformers;
 import com.heliosdecompiler.transformerapi.common.Loader;
@@ -89,7 +90,7 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
             String entryInternalName = ClassUtil.getInternalName(entry.getPath());
             
             String decompileEngine = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
-            Loader apiLoader = new Loader(loader::canLoad, loader::load);
+            Loader apiLoader = LoaderUtils.createLoader(preferences, loader, entry);
             decompiledResult = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, decompileEngine);
             if (decompiledResult.getDecompiledOutput().contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
                 DecompilationResult sourceCodeV0 = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, ENGINE_JD_CORE_V0);

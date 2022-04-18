@@ -19,6 +19,7 @@ import org.jd.gui.service.type.TypeFactoryService;
 import org.jd.gui.spi.TypeFactory;
 import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.decompiler.ContainerLoader;
+import org.jd.gui.util.loader.LoaderUtils;
 import org.jd.gui.view.SelectLocationView;
 import org.netbeans.modules.editor.java.JavaKit;
 
@@ -134,7 +135,7 @@ public class SelectLocationController {
             Map<String, String> preferences = api.getPreferences();
             ContainerLoader containerLoader = new ContainerLoader(entry);
             String decompileEngine = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
-            Loader apiLoader = new Loader(containerLoader::canLoad, containerLoader::load);
+            Loader apiLoader = LoaderUtils.createLoader(preferences, containerLoader, entry);
             String entryInternalName = ClassUtil.getInternalName(entry.getPath());
             DecompilationResult decompilationResult = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, decompileEngine);
             return decompilationResult.getDecompiledOutput();

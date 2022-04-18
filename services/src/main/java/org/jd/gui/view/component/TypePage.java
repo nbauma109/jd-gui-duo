@@ -23,6 +23,7 @@ import org.jd.gui.api.model.Type;
 import org.jd.gui.util.index.IndexesUtil;
 import org.jd.gui.util.matcher.DescriptorMatcher;
 import org.jd.gui.util.parser.jdt.ASTParserFactory;
+import org.jd.gui.util.parser.jdt.RSyntaxASTParser;
 
 import java.awt.Point;
 import java.net.URI;
@@ -63,6 +64,7 @@ public abstract class TypePage extends CustomLineNumbersPage
         this.entry = entry;
         this.listener = new ReferenceListener(entry);
         this.listener.setHyperlinks(hyperlinks);
+        this.textArea.addParser(new RSyntaxASTParser(entry, api));
     }
 
     @Override

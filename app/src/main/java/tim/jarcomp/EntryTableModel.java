@@ -116,4 +116,18 @@ public class EntryTableModel extends AbstractTableModel {
         }
         return false;
     }
+    
+    /**
+     * @return true if specified row represents a difference that is not addition/deletion
+     */
+    public boolean isModification(int inRowNum) {
+        if (inRowNum >= 0 && inRowNum < getRowCount()) {
+            return switch (entries.get(inRowNum).getStatus()) {
+                case ADDED, REMOVED, EQUAL, SAME_SIZE -> false;
+                case CHANGED_SIZE, CHANGED_SUM -> true;
+                default -> throw new IllegalArgumentException("Unknown status");
+            };
+        }
+        return false;
+    }
 }

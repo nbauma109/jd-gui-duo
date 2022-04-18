@@ -17,6 +17,8 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.util.MethodPatcher;
 import org.jd.gui.util.decompiler.ContainerLoader;
 import org.jd.gui.util.decompiler.GuiPreferences;
+import org.jd.gui.util.loader.LoaderUtils;
+import org.jd.gui.util.parser.jdt.core.manipulation.RemoveUnnecessaryCasts;
 
 import com.heliosdecompiler.transformerapi.StandardTransformers;
 import com.heliosdecompiler.transformerapi.common.Loader;
@@ -35,6 +37,7 @@ import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompile
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V1;
 import static jd.core.preferences.Preferences.REALIGN_LINE_NUMBERS;
 import static org.jd.gui.util.decompiler.GuiPreferences.DECOMPILE_ENGINE;
+import static org.jd.gui.util.decompiler.GuiPreferences.REMOVE_UNNECESSARY_CASTS;
 
 import jd.core.ClassUtil;
 import jd.core.DecompilationResult;
@@ -64,6 +67,7 @@ public class ClassFilePage extends TypePage {
     public void decompile(Map<String, String> preferences) {
         
         boolean realignmentLineNumbers = Boolean.parseBoolean(preferences.getOrDefault(REALIGN_LINE_NUMBERS, Boolean.FALSE.toString()));
+        boolean removeUnnecessaryCasts = Boolean.parseBoolean(preferences.getOrDefault(REMOVE_UNNECESSARY_CASTS, Boolean.FALSE.toString()));
 
         setShowMisalignment(realignmentLineNumbers);
         
@@ -78,13 +82,24 @@ public class ClassFilePage extends TypePage {
             String entryInternalName = ClassUtil.getInternalName(entry.getPath());
             
             String engineName = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
-            Loader apiLoader = new Loader(loader::canLoad, loader::load);
+            Loader apiLoader = LoaderUtils.createLoader(preferences, loader, entry);
             DecompilationResult decompilationResult = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, engineName);
             if (decompilationResult.getDecompiledOutput().contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
+                /*
+                 * Sometimes JD-Core v0 decompiles with success where JD-Core v1 fails. 
+                 * In this case, patch JD-Core v0 method into JD-Core v1 method.
+                 * It will appear with comment 'Patched from JD-Core V0'
+                 */
                 DecompilationResult sourceCodeV0 = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, ENGINE_JD_CORE_V0);
                 String patchedCode = MethodPatcher.patchCode(decompilationResult.getDecompiledOutput(), sourceCodeV0.getDecompiledOutput(), entry);
+                if (removeUnnecessaryCasts) {
+                    patchedCode = new RemoveUnnecessaryCasts(entry).process(patchedCode);
+                }
                 parseAndSetText(patchedCode);
             } else {
+                /*
+                 * Use the hyperlinks of the decompiler as preferred way providing links as it often provides more of them
+                 */
                 listener.getStrings().addAll(decompilationResult.getStrings());
                 listener.getTypeDeclarations().putAll(decompilationResult.getTypeDeclarations());
                 listener.getDeclarations().putAll(decompilationResult.getDeclarations());
@@ -98,7 +113,15 @@ public class ClassFilePage extends TypePage {
                     Integer sourceLineNumber = entry.getValue();
                     setLineNumber(textAreaLineNumber, sourceLineNumber);
                 }
-                if (hyperlinks.isEmpty()) {
+                if (hyperlinks.isEmpty() || removeUnnecessaryCasts) {
+                    /*
+                     * if hyperlinks are empty, it means the links are not supported by the decompiler, so the JAVA parser is called to 
+                     * enable the links. Same thing in case 'Remove casts' options is activated, as it ruins the hyperlinks.
+                     * Avoid shifting positions for all of them by re-parsing the source code. 
+                     */
+                    if (removeUnnecessaryCasts) {
+                        decompilationResult.setDecompiledOutput(new RemoveUnnecessaryCasts(entry).process(decompilationResult.getDecompiledOutput()));
+                    }
                     parseAndSetText(decompilationResult.getDecompiledOutput());
                 } else {
                     setText(decompilationResult.getDecompiledOutput());
@@ -140,7 +163,7 @@ public class ClassFilePage extends TypePage {
             String entryInternalName = ClassUtil.getInternalName(entry.getPath());
 
             String decompileEngine = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
-            Loader apiLoader = new Loader(loader::canLoad, loader::load);
+            Loader apiLoader = LoaderUtils.createLoader(preferences, loader, entry);
             decompilationResult = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, decompileEngine);
             if (decompilationResult.getDecompiledOutput().contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
                 DecompilationResult sourceCodeV0 = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, ENGINE_JD_CORE_V0);

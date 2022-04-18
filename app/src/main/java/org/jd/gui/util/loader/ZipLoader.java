@@ -47,8 +47,6 @@ public class ZipLoader implements Loader {
             }
 
             zis.closeEntry();
-        } catch (IOException e) {
-            throw new IOException(e);
         }
     }
 

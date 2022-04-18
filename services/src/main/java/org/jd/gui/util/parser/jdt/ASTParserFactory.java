@@ -8,10 +8,13 @@ import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.util.decompiler.ContainerLoader;
 
+import com.heliosdecompiler.transformerapi.common.ClasspathUtil;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.Attributes;
@@ -45,10 +48,10 @@ public final class ASTParserFactory {
     private final boolean bindingRecovery;
     private final boolean statementRecovery;
 
-    public ASTParser newASTParser(Container.Entry containerEntry) throws IOException {
-        URI jarURI = containerEntry.getContainer().getRoot().getParent().getUri();
-        char[] source = ContainerLoader.loadEntry(containerEntry, StandardCharsets.UTF_8);
-        String unitName = containerEntry.getPath();
+    public ASTParser newASTParser(Container.Entry entry) throws IOException {
+        URI jarURI = entry.getContainer().getRoot().getParent().getUri();
+        char[] source = ContainerLoader.loadEntry(entry, StandardCharsets.UTF_8);
+        String unitName = entry.getPath();
         return newASTParser(source, unitName, jarURI);
     }
 
@@ -59,15 +62,17 @@ public final class ASTParserFactory {
         parser.setResolveBindings(resolveBindings);
         parser.setBindingsRecovery(bindingRecovery);
         parser.setStatementsRecovery(statementRecovery);
+        List<String> jdkClasspath = ClasspathUtil.getJDKClasspath();
+        String[] classpathEntries = ClasspathUtil.createClasspathEntries(jarURI, jdkClasspath);
+        boolean includeRunningVMBootclasspath = jdkClasspath.isEmpty();
         if (unitName.endsWith(".java")) {
             String[] sourcepathEntries = { jarURI.getPath() };
             String[] encodings = { StandardCharsets.UTF_8.name() };
-            parser.setEnvironment(null, sourcepathEntries, encodings, false);
+            parser.setEnvironment(classpathEntries, sourcepathEntries, encodings, includeRunningVMBootclasspath);
             parser.setUnitName(unitName);
         }
         if (unitName.endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
-            String[] classpathEntries = { jarURI.getPath() };
-            parser.setEnvironment(classpathEntries, null, null, false);
+            parser.setEnvironment(classpathEntries, null, null, includeRunningVMBootclasspath);
             parser.setUnitName(unitName.replace(StringConstants.CLASS_FILE_SUFFIX, ".java"));
         }
 
@@ -75,6 +80,8 @@ public final class ASTParserFactory {
         String majorVersion = jarTojdkVersion.computeIfAbsent(jarURI, ASTParserFactory::resolveJDKVersion);
         options.put(JavaCore.COMPILER_COMPLIANCE, majorVersion);
         options.put(JavaCore.COMPILER_SOURCE, majorVersion);
+        options.put(JavaCore.COMPILER_PB_MAX_PER_UNIT, String.valueOf(Integer.MAX_VALUE));
+        options.put(JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK, "warning");
         parser.setCompilerOptions(options);
         return parser;
     }
