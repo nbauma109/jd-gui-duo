@@ -18,7 +18,7 @@
 				<include>jre/**</include>
 			</includes>
 			<excludes>
-				<exclude>jre/*.tar.gz</exclude>
+				<exclude>jre/lib/ct.sym</exclude>
 			</excludes>
 		</fileSet>
 	</fileSets>
