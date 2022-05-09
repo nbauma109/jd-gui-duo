@@ -229,8 +229,7 @@ public abstract class AbstractJavaListener extends ASTVisitor {
             return getPrimitiveTypeContext(arrayType.getElementType());
         }
         if (type instanceof PrimitiveType) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-            PrimitiveType primitiveType = (PrimitiveType) type;
-            return primitiveType;
+            return (PrimitiveType) type;
         }
         return null;
     }
@@ -261,16 +260,12 @@ public abstract class AbstractJavaListener extends ASTVisitor {
             };
         }
 
-        switch (dimension) {
-        case 0:
-            return name;
-        case 1:
-            return "[" + name;
-        case 2:
-            return "[[" + name;
-        default:
-            return new String(new char[dimension]).replace('\0', '[') + name;
-        }
+        return switch (dimension) {
+        case 0 -> name;
+        case 1 -> "[" + name;
+        case 2 -> "[[" + name;
+        default -> new String(new char[dimension]).replace('\0', '[') + name;
+        };
     }
 
     protected String createParamDescriptors(List<SingleVariableDeclaration> formalParameterList) {

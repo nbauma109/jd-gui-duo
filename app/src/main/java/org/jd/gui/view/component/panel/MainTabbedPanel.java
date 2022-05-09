@@ -117,14 +117,11 @@ public class MainTabbedPanel<T extends JComponent & UriGettable> extends TabbedP
     }
 
     protected String getFileManagerLabel() {
-        switch (PlatformService.getInstance().getOs()) {
-            case LINUX:
-                return "your file manager";
-            case MAC_OSX:
-                return "the Finder";
-            default:
-                return "Explorer";
-        }
+        return switch (PlatformService.getInstance().getOs()) {
+            case LINUX   -> "your file manager";
+            case MAC_OSX -> "the Finder";
+            default      -> "Explorer";
+        };
     }
 
     protected JLabel newLabel(String text, Color fontColor) {

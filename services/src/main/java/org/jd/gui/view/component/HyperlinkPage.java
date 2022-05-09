@@ -31,9 +31,9 @@ public abstract class HyperlinkPage extends TextPage {
 
     protected HyperlinkPage() {
         MouseAdapter listener = new MouseAdapter() {
-            int lastX = -1;
-            int lastY = -1;
-            int lastModifiers = -1;
+            private int lastX = -1;
+            private int lastY = -1;
+            private int lastModifiers = -1;
 
             @Override
             public void mouseClicked(MouseEvent e) {

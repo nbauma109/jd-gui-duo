@@ -28,7 +28,7 @@ public class ClassFileSaverPreferencesProvider extends JPanel implements Prefere
     protected JCheckBox writeMetadataCheckBox;
 
     public ClassFileSaverPreferencesProvider() {
-        super(new GridLayout(0,1));
+        super(new GridLayout(0, 2));
 
         writeLineNumbersCheckBox = new JCheckBox("Write original line numbers");
         writeMetadataCheckBox = new JCheckBox("Write metadata");

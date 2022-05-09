@@ -54,7 +54,7 @@ public class ClassFileDecompilerPreferencesProvider extends JPanel implements Pr
             ENGINE_PROCYON, ENGINE_FERNFLOWER, ENGINE_JADX, ENGINE_PROCYON_DISASSEMBLER };
 
     public ClassFileDecompilerPreferencesProvider() {
-        super(new GridLayout(0,1));
+        super(new GridLayout(0,2));
 
         escapeUnicodeCharactersCheckBox = new JCheckBox("Escape unicode characters");
         realignLineNumbersCheckBox = new JCheckBox("Realign line numbers");
@@ -66,14 +66,14 @@ public class ClassFileDecompilerPreferencesProvider extends JPanel implements Pr
         selectDecompiler = new JLabel("Select Decompile Engine: ");
         decompileEngine = new JComboBox<>(DECOMPILERS);
 
-        add(escapeUnicodeCharactersCheckBox);
+        add(showCompilerWarningsCheckBox);
         add(realignLineNumbersCheckBox);
         add(showCompilerErrorsCheckBox);
-        add(showCompilerWarningsCheckBox);
+        add(escapeUnicodeCharactersCheckBox);
         add(showCompilerInfoCheckBox);
         add(advancedClassLookupCheckBox);
-        add(removeUnnecessaryCastsCheckBox);
         add(selectDecompiler);
+        add(removeUnnecessaryCastsCheckBox);
         add(decompileEngine);
     }
 
