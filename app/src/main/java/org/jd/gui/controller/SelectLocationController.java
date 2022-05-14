@@ -58,6 +58,7 @@ import static org.jd.gui.util.decompiler.GuiPreferences.DECOMPILE_ENGINE;
 import de.cismet.custom.visualdiff.DiffPanel;
 import jd.core.ClassUtil;
 import jd.core.DecompilationResult;
+import jd.core.preferences.Preferences;
 
 public class SelectLocationController {
 
@@ -133,6 +134,8 @@ public class SelectLocationController {
     private String getContent(Container.Entry entry) throws IOException, TransformationException {
         if (entry.getPath().endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
             Map<String, String> preferences = api.getPreferences();
+            preferences.put(Preferences.WRITE_LINE_NUMBERS, "false");
+            preferences.put(Preferences.REALIGN_LINE_NUMBERS, "false");
             ContainerLoader containerLoader = new ContainerLoader(entry);
             String decompileEngine = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
             Loader apiLoader = LoaderUtils.createLoader(preferences, containerLoader, entry);
