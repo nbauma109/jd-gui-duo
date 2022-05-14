@@ -43,9 +43,13 @@ public final class InterProcessCommunicationUtil {
                     try (Socket socket = listener.accept();
                          ObjectInputStream ois = new ObjectInputStream(socket.getInputStream())) {
                         // Receive args from another JD-GUI instance
-                        String[] args = (String[])ois.readObject();
+                        int length = ois.readInt();
+                        String[] args = new String[length];
+                        for (int i = 0; i < args.length; i++) {
+                            args[i] = ois.readUTF();
+                        }
                         consumer.accept(args);
-                    } catch (IOException|ClassNotFoundException e) {
+                    } catch (IOException e) {
                         assert ExceptionUtil.printStackTrace(e);
                     }
                 }
@@ -57,7 +61,10 @@ public final class InterProcessCommunicationUtil {
         try (Socket socket = new Socket(InetAddress.getLocalHost(), PORT);
              ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream())) {
             // Send args to the main JD-GUI instance
-            oos.writeObject(args);
+            oos.writeInt(args.length);
+            for (String arg : args) {
+                oos.writeUTF(arg);
+            }
         } catch (IOException e) {
             assert ExceptionUtil.printStackTrace(e);
         }

@@ -83,7 +83,12 @@ public class App {
         }
         List<File> files = new ArrayList<>(paths.length);
         for (String path : paths) {
-            files.add(new File(path));
+            // disable tree traversal
+            if (path.contains("..")) {
+                System.err.println(".. in path is disabled");
+            } else {
+                files.add(new File(path));
+            }
         }
         return files;
     }
