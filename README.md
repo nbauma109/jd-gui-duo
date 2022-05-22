@@ -80,7 +80,7 @@ Select the 1st file to compare and then another file chooser will appear to sele
 
 The differences in size and CRC checksums are shown :
 
-![image](https://user-images.githubusercontent.com/9403560/169694257-3ed0ecbc-651c-425c-88c1-bfea343a0705.png)
+![image](https://user-images.githubusercontent.com/9403560/169694899-a4f57fcf-95aa-4481-8351-99827d544625.png)
 
 Double-click on the row you want to compare :
 
