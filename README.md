@@ -40,6 +40,8 @@ Use the search button to do a search for methods, string constants,...
 
 ![image](https://user-images.githubusercontent.com/9403560/169690812-1cde4346-0d08-41d9-b321-280a81727a31.png)
 
+## Decompile all classes
+
 Use File -> Save All Sources to decompile all sources into a sources jar (choose a destination directory where you have rights)
 
 ![image](https://user-images.githubusercontent.com/9403560/169691065-a7a56b8c-5949-412f-a855-816eff1aca71.png)
