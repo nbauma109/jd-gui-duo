@@ -142,3 +142,12 @@ If the code is misaligned, the numbers will appear in red.
 ## Remove unnecessary casts
 
 This option uses the same feature as Eclipse to cleanup unnecessary casts.
+
+# Credits
+
+Decompiler|Author|Link|License
+--- | --- | --- | ---
+CFR|Lee Benfield|https://github.com/leibnitz27/cfr|MIT
+Procyon|Mike Strobel|https://github.com/mstrobel/procyon|Apache v2
+Fernflower|Jetbrains|https://github.com/JetBrains/intellij-community/tree/master/plugins/java-decompiler/engine|Apache v2
+JADX|Skylot|https://github.com/skylot/jadx|Apache v2
