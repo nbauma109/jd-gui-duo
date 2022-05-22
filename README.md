@@ -64,6 +64,8 @@ Right-click on a method of the outline tree and select 'Show Byte Code' in the c
 To get a visual of the control flow graph that is used by JD-Core v1 for each of the decompilation steps, select one of the menus 'Show Control Flow Graph ...'.
 The graph is built by [plantuml](https://plantuml.com/).
 
+![image](https://user-images.githubusercontent.com/9403560/169707683-bfbf0aed-78f1-4f70-91bb-0a4d98ed08ba.png)
+
 ![image](https://user-images.githubusercontent.com/9403560/169707573-9cc0d318-e6c3-47b0-8f37-eb70df1e0b3e.png)
 
 
