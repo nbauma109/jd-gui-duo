@@ -71,7 +71,7 @@ The graph is built by [plantuml](https://plantuml.com/).
 
 ## Method patching
 
-Sometimes JD-Core v1 fails to compile a method. In this case, method will be patched from JD-Core v0 if possible and the comment 'Patched from JD-Core v0' will appear :
+Sometimes JD-Core v1 fails to decompile a method. In this case, method will be patched from JD-Core v0 if possible and the comment 'Patched from JD-Core v0' will appear :
 
 ![image](https://user-images.githubusercontent.com/9403560/169692097-4f96d304-4bac-4596-a3bf-076ae49b8670.png)
 
