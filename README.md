@@ -9,8 +9,8 @@ A 2-in-1 JAVA decompiler based on JD-CORE v0 and v1 [![image](https://user-image
 
 Initially a duo of decompilers were supported (JD-Core v0 & v1), but now other decompilers are supported with the [transformer-api](https://github.com/nbauma109/transformer-api) project.
 JD-Core v0 and v1 are 2 different decompilers rather than 2 different versions of the same one. They use a different algoithm :
- - JD-Core v0 uses byte code pattern matching like JAD, the 1st Java decompiler
- - JD-Core v1 uses an analytical algorithm like Fernflower, the 1st analytical decompiler
+ - [JD-Core v0](https://github.com/nbauma109/jd-core-v0) uses byte code pattern matching like [JAD](http://www.kpdus.com/jad.html), the 1st Java decompiler
+ - [JD-Core v1](https://github.com/nbauma109/jd-core) uses an analytical algorithm like [Fernflower](https://github.com/fesh0r/fernflower), the 1st analytical decompiler
 
 # Feature tour
 
@@ -28,7 +28,7 @@ Use the outline tree to select decompiled methods :
 
 ## Maven central
 
-In the Help -> Preferences menu, use search source code on maven.org if you want to show the original source code, if it's available :
+In the Help -> Preferences menu, use search source code on [Maven Central](https://search.maven.org/) if you want to show the original source code, if it's available :
 
 ![image](https://user-images.githubusercontent.com/9403560/169690664-6a3e1a40-dda9-4f3f-9eac-515a24ae9e65.png)
 
@@ -69,7 +69,7 @@ Sometimes JD-Core v1 fails to compile a method. In this case, method will be pat
 
 ## Comparison
 
-A modified version of JarComp is use to compare the jars
+A modified version of [JarComp](https://activityworkshop.net/software/jarcomp/index.html) is used to compare the jars
 
 ![image](https://user-images.githubusercontent.com/9403560/169692577-1d14cacc-71b0-458c-ad5c-a8686ae2fb95.png)
 
