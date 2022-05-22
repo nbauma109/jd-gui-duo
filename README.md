@@ -94,5 +94,21 @@ If you select no, you will be asked select which file you want to open
 
 ![image](https://user-images.githubusercontent.com/9403560/169694563-ac77422d-3a1b-416a-92ba-c916206bbfbd.png)
 
+## Hyperlinks
 
+The navigable links are shown as underlined portions of text. Single click navigates to definition (no CTRL click, no double click).
+
+## Select Decompiler
+
+Choose another decompiler in the preferences window and the class will be decompiled with the newly selected decompiler as soon as you press OK.
+
+![image](https://user-images.githubusercontent.com/9403560/169696132-fe35d1b2-b0e3-48a3-9023-831d6fcf49fe.png)
+
+## Compiler
+
+Compiler reports errors and warnings. Choose whether you want to report them in the preferences page.
+
+![image](https://user-images.githubusercontent.com/9403560/169695981-73198acd-7962-47ba-a540-23a872a6a862.png)
+
+![image](https://user-images.githubusercontent.com/9403560/169695797-2a97058e-1768-42aa-8cd4-34cd1f2f2043.png)
 
