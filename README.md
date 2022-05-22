@@ -112,3 +112,8 @@ Compiler reports errors and warnings. Choose whether you want to report them in 
 
 ![image](https://user-images.githubusercontent.com/9403560/169695797-2a97058e-1768-42aa-8cd4-34cd1f2f2043.png)
 
+## Advanced class lookup
+
+When this option is selected, the jars located in the same directory and the jmods (or rt.jar) of JAVA_HOME will be used by decompilers for better type resolution.
+Currently, the decompilers supporting this are CFR, JD-Core v1, Procyon.
+This option applies to the Eclipse AST parser too, to provide better hyperlinks.
