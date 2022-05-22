@@ -84,7 +84,7 @@ A modified version of [JarComp](https://activityworkshop.net/software/jarcomp/in
 
 Select the 1st file to compare and then another file chooser will appear to select the 2nd file to compare :
 
-![image](https://user-images.githubusercontent.com/9403560/169694123-a070e409-6eec-45f5-866f-cdbc06027cc0.png)
+![image](https://user-images.githubusercontent.com/9403560/169710515-ca023077-9f5a-474c-a35b-918289be01c6.png)
 ![image](https://user-images.githubusercontent.com/9403560/169694196-0fa04413-9cf1-4255-8ad0-163776c42eec.png)
 
 The differences in size and CRC checksums are shown :
