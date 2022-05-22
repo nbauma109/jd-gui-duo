@@ -55,9 +55,16 @@ Use File -> Save All Sources to decompile all sources into a sources jar (choose
 
 ## Show byte code
 
+Right-click on a method of the outline tree and select 'Show Byte Code' in the context menu.
+
 ![image](https://user-images.githubusercontent.com/9403560/169691669-8672828a-3cc0-4622-a083-4f36159b9463.png)
 
 ![image](https://user-images.githubusercontent.com/9403560/169691698-65e13ee6-5cde-41d5-b924-58f1a36abda7.png)
+
+To get a visual of the control flow graph that is used by JD-Core v1 for each of the decompilation steps, select one of the menus 'Show Control Flow Graph ...'.
+The graph is built by [plantuml](https://plantuml.com/).
+
+![image](https://user-images.githubusercontent.com/9403560/169707573-9cc0d318-e6c3-47b0-8f37-eb70df1e0b3e.png)
 
 
 ## Method patching
