@@ -8,7 +8,7 @@
 A 2-in-1 JAVA decompiler based on JD-CORE v0 and v1 [![image](https://user-images.githubusercontent.com/9403560/156565769-51264b92-4850-46c1-ad33-a4211a4c89ec.png)](https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/master-SNAPSHOT/jd-gui-duo-master-SNAPSHOT.zip)
 
 Initially a duo of decompilers were supported (JD-Core v0 & v1), but now other decompilers are supported with the [transformer-api](https://github.com/nbauma109/transformer-api) project.
-JD-Core v0 and v1 are 2 different decompilers rather than 2 different versions of the same one. They use a different algoithm :
+JD-Core v0 and v1 are 2 different decompilers rather than 2 different versions of the same one. They use a different algorithm :
  - [JD-Core v0](https://github.com/nbauma109/jd-core-v0) uses byte code pattern matching like [JAD](http://www.kpdus.com/jad.html), the 1st Java decompiler
  - [JD-Core v1](https://github.com/nbauma109/jd-core) uses an analytical algorithm like [Fernflower](https://github.com/fesh0r/fernflower), the 1st analytical decompiler
 
