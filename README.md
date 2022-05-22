@@ -126,3 +126,17 @@ Compiler reports errors and warnings. Choose whether you want to report them in 
 When this option is selected, the jars located in the same directory and the jmods (or rt.jar) of JAVA_HOME will be used by decompilers for better type resolution.
 Currently, the decompilers supporting this are CFR, JD-Core v1, Procyon.
 This option applies to the Eclipse AST parser too, to provide better hyperlinks.
+For optimal results, setup your JAVA_HOME to the same JDK that was used to build the jar you want to decompile (if any doubt, check the META-INF/MANIFEST.MF inside the jar).
+The running JRE of jd-gui-duo does not interfere.
+
+## Realign line numbers
+
+This is a known option from the original JD-GUI that enables to align code for debugging if the debugging information is present in the class files.
+As of now, this is only supported by JD-Core v0 and v1.
+If the code is misaligned, the numbers will appear in red.
+
+![image](https://user-images.githubusercontent.com/9403560/169709845-e9da03fe-5fce-4014-aa4d-56c288f0d864.png)
+
+## Remove unnecessary casts
+
+This option uses the same feature as Eclipse to cleanup unnecessary casts.
