@@ -44,28 +44,53 @@ Use File -> Save All Sources to decompile all sources into a sources jar (choose
 
 ![image](https://user-images.githubusercontent.com/9403560/169691065-a7a56b8c-5949-412f-a855-816eff1aca71.png)
 
-## Available keyboard shortcuts :
+## Keyboard shortcuts
 
  - CTRL+F Find text
  - CTRL+L Goto line
 
 ![image](https://user-images.githubusercontent.com/9403560/169691345-622a15dc-8ef8-4470-9ebb-1d5f86f126b2.png)
 
-## Show byte code :
+## Show byte code
 
 ![image](https://user-images.githubusercontent.com/9403560/169691669-8672828a-3cc0-4622-a083-4f36159b9463.png)
 
 ![image](https://user-images.githubusercontent.com/9403560/169691698-65e13ee6-5cde-41d5-b924-58f1a36abda7.png)
 
 
-## Method patching :
+## Method patching
 
 Sometimes JD-Core v1 fails to compile a method. In this case, method will be patched from JD-Core v0 if possible and the comment 'Patched from JD-Core v0' will appear :
 
 ![image](https://user-images.githubusercontent.com/9403560/169692097-4f96d304-4bac-4596-a3bf-076ae49b8670.png)
 
 
+## Comparison
 
+A modified version of JarComp is use to compare the jars
+
+![image](https://user-images.githubusercontent.com/9403560/169692577-1d14cacc-71b0-458c-ad5c-a8686ae2fb95.png)
+
+Select the 1st file to compare and then another file chooser will appear to select the 2nd file to compare :
+
+![image](https://user-images.githubusercontent.com/9403560/169694123-a070e409-6eec-45f5-866f-cdbc06027cc0.png)
+![image](https://user-images.githubusercontent.com/9403560/169694196-0fa04413-9cf1-4255-8ad0-163776c42eec.png)
+
+The differences in size and CRC checksums are shown :
+
+![image](https://user-images.githubusercontent.com/9403560/169694257-3ed0ecbc-651c-425c-88c1-bfea343a0705.png)
+
+Double-click on the row you want to compare :
+
+![image](https://user-images.githubusercontent.com/9403560/169694362-3c760435-6a4a-46c3-8944-941cea481033.png)
+
+Or alternatively, if the 2 jars are opened, you can open the type you want to compare :
+
+![image](https://user-images.githubusercontent.com/9403560/169694513-8e8ebf31-c0c9-4235-879d-94b2dc5799e8.png)
+
+If you select no, you will be asked select which file you want to open
+
+![image](https://user-images.githubusercontent.com/9403560/169694563-ac77422d-3a1b-416a-92ba-c916206bbfbd.png)
 
 
 
