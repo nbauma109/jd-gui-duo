@@ -67,4 +67,9 @@ public class UITabsPreferencesProvider extends JPanel implements PreferencesPane
 
     @Override
     public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {}
+
+    @Override
+    public void restoreDefaults() {
+        singleLineTabsCheckBox.setSelected(false);
+    }
 }

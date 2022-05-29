@@ -99,7 +99,7 @@ public class ViewerPreferencesProvider extends JPanel implements PreferencesPane
             String fontSize = fontSizeTextField.getText();
             if (fontSize != null && fontSize.matches("\\d+")) {
                 int i = Integer.parseInt(fontSize);
-                return i >= 2 && i <= 40;
+                return i >= MIN_VALUE && i <= MAX_VALUE;
             }
         } catch (NumberFormatException e) {
             assert ExceptionUtil.printStackTrace(e);
@@ -127,5 +127,10 @@ public class ViewerPreferencesProvider extends JPanel implements PreferencesPane
         if (listener != null) {
             listener.preferencesPanelChanged(this);
         }
+    }
+
+    @Override
+    public void restoreDefaults() {
+        fontSizeTextField.setText("12");
     }
 }

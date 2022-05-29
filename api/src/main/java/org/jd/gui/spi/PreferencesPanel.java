@@ -31,6 +31,8 @@ public interface PreferencesPanel {
 
     void addPreferencesChangeListener(PreferencesPanelChangeListener listener);
 
+    void restoreDefaults();
+
     interface PreferencesPanelChangeListener {
         void preferencesPanelChanged(PreferencesPanel source);
     }

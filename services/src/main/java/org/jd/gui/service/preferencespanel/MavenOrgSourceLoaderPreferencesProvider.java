@@ -164,4 +164,12 @@ public class MavenOrgSourceLoaderPreferencesProvider extends JPanel implements P
             filtersTextArea.requestFocus();
         }
     }
+
+    @Override
+    public void restoreDefaults() {
+        enableCheckBox.setSelected(true);
+        filtersTextArea.setEnabled(true);
+        resetButton.setEnabled(true);
+        filtersTextArea.setText(DEFAULT_FILTERS_VALUE);
+    }
 }

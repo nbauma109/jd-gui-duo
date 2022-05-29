@@ -33,6 +33,7 @@ import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -131,7 +132,7 @@ public class SelectLocationController {
         }
     }
 
-    private String getContent(Container.Entry entry) throws IOException, TransformationException {
+    private String getContent(Container.Entry entry) throws IOException, TransformationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         if (entry.getPath().endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
             Map<String, String> preferences = api.getPreferences();
             preferences.put(Preferences.WRITE_LINE_NUMBERS, "false");

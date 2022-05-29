@@ -28,6 +28,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.zip.ZipFile;
@@ -180,7 +181,7 @@ public class CompareWindow {
                             diffFrame.setLocation((int) Math.round(screenSize.getWidth() / 6.0), (int) Math.round(screenSize.getHeight() / 6.0));
                             diffFrame.setSize((int) Math.round(screenSize.getWidth() / 1.5), (int) Math.round(screenSize.getHeight() / 1.5));
                             diffFrame.setVisible(true);
-                        } catch (IOException | TransformationException ex) {
+                        } catch (Exception ex) {
                             assert ExceptionUtil.printStackTrace(ex);
                         }
                     }
@@ -193,7 +194,7 @@ public class CompareWindow {
         return mainPanel;
     }
 
-    protected String getContent(File file, String entryPath) throws IOException, TransformationException {
+    protected String getContent(File file, String entryPath) throws IOException, TransformationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         if (entryPath.endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
             Map<String, String> preferences = api.getPreferences();
             preferences.put(Preferences.WRITE_LINE_NUMBERS, "false");

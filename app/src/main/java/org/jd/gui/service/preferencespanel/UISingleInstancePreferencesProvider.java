@@ -66,4 +66,9 @@ public class UISingleInstancePreferencesProvider extends JPanel implements Prefe
 
     @Override
     public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {}
+
+    @Override
+    public void restoreDefaults() {
+        singleInstanceTabsCheckBox.setSelected(false);
+    }
 }

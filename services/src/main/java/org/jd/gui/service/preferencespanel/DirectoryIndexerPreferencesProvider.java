@@ -108,4 +108,9 @@ public class DirectoryIndexerPreferencesProvider extends JPanel implements Prefe
             listener.preferencesPanelChanged(this);
         }
     }
+
+    @Override
+    public void restoreDefaults() {
+        maximumDepthTextField.setText("15");
+    }
 }

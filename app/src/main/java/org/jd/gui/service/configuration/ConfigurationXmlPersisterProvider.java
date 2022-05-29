@@ -165,7 +165,12 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
                                 default:
                                     if (name.startsWith("/configuration/preferences/")) {
                                         String key = name.substring("/configuration/preferences/".length());
-                                        preferences.put(key, reader.getText().trim());
+                                        String text = reader.getText();
+                                        if (text.isBlank()) { // example: indentation property => don't trim
+                                            preferences.put(key, text);
+                                        } else {
+                                            preferences.put(key, text.trim());
+                                        }
                                     }
                                     break;
                             }
