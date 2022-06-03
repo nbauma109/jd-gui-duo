@@ -150,4 +150,5 @@ Decompiler|Author|Link|License
 CFR|Lee Benfield|https://github.com/leibnitz27/cfr|MIT
 Procyon|Mike Strobel|https://github.com/mstrobel/procyon|Apache v2
 Fernflower|Jetbrains|https://github.com/JetBrains/intellij-community/tree/master/plugins/java-decompiler/engine|Apache v2
+Quiltflower|QuiltMC|https://github.com/QuiltMC/quiltflower|Apache v2
 JADX|Skylot|https://github.com/skylot/jadx|Apache v2
