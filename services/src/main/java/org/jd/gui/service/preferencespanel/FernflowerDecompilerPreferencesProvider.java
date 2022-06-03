@@ -10,6 +10,8 @@ package org.jd.gui.service.preferencespanel;
 import org.jd.gui.spi.PreferencesPanel;
 import org.jetbrains.java.decompiler.main.extern.IFernflowerLogger.Severity;
 import org.jetbrains.java.decompiler.main.extern.IFernflowerPreferences;
+import org.jetbrains.java.decompiler.main.extern.IFernflowerPreferences.Description;
+import org.jetbrains.java.decompiler.main.extern.IFernflowerPreferences.Name;
 
 import com.strobel.reflection.FieldInfo;
 import com.strobel.reflection.Type;
@@ -55,7 +57,12 @@ public class FernflowerDecompilerPreferencesProvider extends JPanel implements P
                         component = new JTextField();
                     }
                     components.put(trigram, component);
-                    JLabel label = new JLabel(fieldInfo.getName() + " (" + trigram + ")");
+                    Name name = fieldInfo.getAnnotation(Name.class);
+                    Description description = fieldInfo.getAnnotation(Description.class);
+                    JLabel label = new JLabel((name == null ? fieldInfo.getName() : name.value()) + " (" + trigram + ")");
+                    if (description != null) {
+                        label.setToolTipText(description.value());
+                    }
                     label.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
                     add(label);
                     add(component);
