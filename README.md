@@ -80,7 +80,7 @@ Sometimes JD-Core v1 fails to decompile a method. In this case, method will be p
 
 ## Comparison
 
-A modified version of [JarComp](https://activityworkshop.net/software/jarcomp/index.html) is used to compare the jars
+A modified version of [JarComp](https://activityworkshop.net/software/jarcomp/index.html) is used to compare the jars and netbeans diff module for class comparison (see https://github.com/nbauma109/netbeans-visual-diff-standalone).
 
 ![image](https://user-images.githubusercontent.com/9403560/169692577-1d14cacc-71b0-458c-ad5c-a8686ae2fb95.png)
 
@@ -130,6 +130,7 @@ Currently, the decompilers supporting this are CFR, JD-Core v1, Procyon.
 This option applies to the Eclipse AST parser too, to provide better hyperlinks.
 For optimal results, setup your JAVA_HOME to the same JDK that was used to build the jar you want to decompile (if any doubt, check the META-INF/MANIFEST.MF inside the jar).
 The running JRE of jd-gui-duo does not interfere.
+This option does not support jars in war.
 
 ## Realign line numbers
 
