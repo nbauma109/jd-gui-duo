@@ -66,8 +66,8 @@ public class ClassFilePage extends TypePage {
 
     public void decompile(Map<String, String> preferences) {
         
-        boolean realignmentLineNumbers = Boolean.parseBoolean(preferences.getOrDefault(REALIGN_LINE_NUMBERS, Boolean.FALSE.toString()));
-        boolean removeUnnecessaryCasts = Boolean.parseBoolean(preferences.getOrDefault(REMOVE_UNNECESSARY_CASTS, Boolean.FALSE.toString()));
+        boolean realignmentLineNumbers = "true".equals(preferences.get(REALIGN_LINE_NUMBERS)) || "true".equals(preferences.get("StretchLines"));
+        boolean removeUnnecessaryCasts = "true".equals(preferences.get(REMOVE_UNNECESSARY_CASTS));
 
         setShowMisalignment(realignmentLineNumbers);
         

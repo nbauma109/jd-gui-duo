@@ -8,35 +8,48 @@ import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V0;
+import static jd.core.preferences.Preferences.DISPLAY_DEFAULT_CONSTRUCTOR;
 import static jd.core.preferences.Preferences.ESCAPE_UNICODE_CHARACTERS;
+import static jd.core.preferences.Preferences.OMIT_THIS_PREFIX;
 import static jd.core.preferences.Preferences.REALIGN_LINE_NUMBERS;
 import static jd.core.preferences.Preferences.WRITE_LINE_NUMBERS;
 import static jd.core.preferences.Preferences.WRITE_METADATA;
 
-public abstract class AbstractJDCoreDecompilerPreferencesProvider extends JPanel implements PreferencesPanel {
+public class JDCoreDecompilerPreferencesProvider extends JPanel implements PreferencesPanel {
 
     private static final long serialVersionUID = 1L;
     protected JCheckBox writeLineNumbersCheckBox;
     protected JCheckBox writeMetadataCheckBox;
     protected JCheckBox escapeUnicodeCharactersCheckBox;
     protected JCheckBox realignLineNumbersCheckBox;
+    protected JCheckBox omitThisPrefixCheckBox;
+    protected JCheckBox displayDefaultConstructorCheckBox;
+    protected JComboBox<String> decompileEngine;
 
-    protected AbstractJDCoreDecompilerPreferencesProvider() {
+    public JDCoreDecompilerPreferencesProvider(JComboBox<String> decompileEngine) {
         super(new GridLayout(0, 2));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
+        this.decompileEngine = decompileEngine;
+        
         writeLineNumbersCheckBox = new JCheckBox("Write original line numbers");
         writeMetadataCheckBox = new JCheckBox("Write metadata");
         escapeUnicodeCharactersCheckBox = new JCheckBox("Escape unicode characters");
         realignLineNumbersCheckBox = new JCheckBox("Realign line numbers");
+        omitThisPrefixCheckBox = new JCheckBox("Omit the prefix 'this' if possible");
+        displayDefaultConstructorCheckBox = new JCheckBox("Display default constructor");
 
         add(writeLineNumbersCheckBox);
         add(writeMetadataCheckBox);
         add(escapeUnicodeCharactersCheckBox);
         add(realignLineNumbersCheckBox);
+        add(omitThisPrefixCheckBox);
+        add(displayDefaultConstructorCheckBox);
     }
 
     @Override
@@ -45,6 +58,8 @@ public abstract class AbstractJDCoreDecompilerPreferencesProvider extends JPanel
         writeMetadataCheckBox.setSelected(false);
         escapeUnicodeCharactersCheckBox.setSelected(false);
         realignLineNumbersCheckBox.setSelected(false);
+        omitThisPrefixCheckBox.setSelected(false);
+        displayDefaultConstructorCheckBox.setSelected(false);
     }
 
     @Override
@@ -53,6 +68,9 @@ public abstract class AbstractJDCoreDecompilerPreferencesProvider extends JPanel
         writeMetadataCheckBox.setSelected("true".equals(preferences.get(WRITE_METADATA)));
         escapeUnicodeCharactersCheckBox.setSelected("true".equals(preferences.get(ESCAPE_UNICODE_CHARACTERS)));
         realignLineNumbersCheckBox.setSelected("true".equals(preferences.get(REALIGN_LINE_NUMBERS)));
+        omitThisPrefixCheckBox.setSelected("true".equals(preferences.get(OMIT_THIS_PREFIX)));
+        displayDefaultConstructorCheckBox.setSelected("true".equals(preferences.get(DISPLAY_DEFAULT_CONSTRUCTOR)));
+        toggleOldOptions();
     }
 
     @Override
@@ -61,6 +79,8 @@ public abstract class AbstractJDCoreDecompilerPreferencesProvider extends JPanel
         preferences.put(WRITE_METADATA, Boolean.toString(writeMetadataCheckBox.isSelected()));
         preferences.put(ESCAPE_UNICODE_CHARACTERS, Boolean.toString(escapeUnicodeCharactersCheckBox.isSelected()));
         preferences.put(REALIGN_LINE_NUMBERS, Boolean.toString(realignLineNumbersCheckBox.isSelected()));
+        preferences.put(OMIT_THIS_PREFIX, Boolean.toString(omitThisPrefixCheckBox.isSelected()));
+        preferences.put(DISPLAY_DEFAULT_CONSTRUCTOR, Boolean.toString(displayDefaultConstructorCheckBox.isSelected()));
     }
 
     // --- PreferencesPanel --- //
@@ -97,4 +117,8 @@ public abstract class AbstractJDCoreDecompilerPreferencesProvider extends JPanel
     public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {
     }
 
+    public void toggleOldOptions() {
+        omitThisPrefixCheckBox.setEnabled(ENGINE_JD_CORE_V0.equals(decompileEngine.getSelectedItem()));
+        displayDefaultConstructorCheckBox.setEnabled(ENGINE_JD_CORE_V0.equals(decompileEngine.getSelectedItem()));
+    }
 }

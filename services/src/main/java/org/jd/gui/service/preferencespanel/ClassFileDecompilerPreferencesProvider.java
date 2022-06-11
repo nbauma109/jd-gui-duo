@@ -58,15 +58,7 @@ public class ClassFileDecompilerPreferencesProvider extends JPanel implements Pr
 
     private static final String[] DECOMPILERS = { ENGINE_JD_CORE_V1, ENGINE_JD_CORE_V0, ENGINE_CFR, ENGINE_PROCYON, ENGINE_FERNFLOWER, ENGINE_JADX };
 
-    private static Map<String, PreferencesPanel> decompilerPreferencesProviders = new HashMap<>();
-    static {
-        decompilerPreferencesProviders.put(ENGINE_CFR, new CFRDecompilerPreferencesProvider());
-        decompilerPreferencesProviders.put(ENGINE_PROCYON, new ProcyonDecompilerPreferencesProvider());
-        decompilerPreferencesProviders.put(ENGINE_JD_CORE_V0, new JDCoreV0DecompilerPreferencesProvider());
-        decompilerPreferencesProviders.put(ENGINE_JD_CORE_V1, new JDCoreV1DecompilerPreferencesProvider());
-        decompilerPreferencesProviders.put(ENGINE_FERNFLOWER, new FernflowerDecompilerPreferencesProvider());
-        decompilerPreferencesProviders.put(ENGINE_JADX, new JadxDecompilerPreferencesProvider());
-    }
+    private transient Map<String, PreferencesPanel> decompilerPreferencesProviders = new HashMap<>();
 
     public ClassFileDecompilerPreferencesProvider() {
         super(new GridLayout(0, 2));
@@ -89,7 +81,17 @@ public class ClassFileDecompilerPreferencesProvider extends JPanel implements Pr
         add(showCompilerInfoCheckBox);
         add(decompileEngine);
         add(configureDecompiler);
-    }
+
+        JDCoreDecompilerPreferencesProvider jdCoreDecompilerPreferencesProvider = new JDCoreDecompilerPreferencesProvider(decompileEngine);
+        decompilerPreferencesProviders.put(ENGINE_JD_CORE_V0, jdCoreDecompilerPreferencesProvider);
+        decompilerPreferencesProviders.put(ENGINE_JD_CORE_V1, jdCoreDecompilerPreferencesProvider);
+        decompilerPreferencesProviders.put(ENGINE_CFR, new CFRDecompilerPreferencesProvider());
+        decompilerPreferencesProviders.put(ENGINE_PROCYON, new ProcyonDecompilerPreferencesProvider());
+        decompilerPreferencesProviders.put(ENGINE_FERNFLOWER, new FernflowerDecompilerPreferencesProvider());
+        decompilerPreferencesProviders.put(ENGINE_JADX, new JadxDecompilerPreferencesProvider());
+        
+        decompileEngine.addActionListener(e -> jdCoreDecompilerPreferencesProvider.toggleOldOptions());
+   }
 
     public void configureDecompiler() {
         String selectedDecompiler = decompileEngine.getSelectedItem().toString();
