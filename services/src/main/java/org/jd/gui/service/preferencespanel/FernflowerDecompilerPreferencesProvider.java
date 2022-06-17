@@ -17,6 +17,7 @@ import com.strobel.reflection.FieldInfo;
 import com.strobel.reflection.Type;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -38,6 +39,7 @@ public class FernflowerDecompilerPreferencesProvider extends JPanel implements P
     private static final String FALSE = "0";
 
     private static final String[] LOG_LEVELS = EnumSet.allOf(Severity.class).stream().map(Severity::name).toArray(String[]::new);
+    private static final Dimension FIELD_DIMENSION = new Dimension(250, 20);
 
     private Map<String, JComponent> components = new HashMap<>();
 
@@ -55,6 +57,9 @@ public class FernflowerDecompilerPreferencesProvider extends JPanel implements P
                         component = new JComboBox<>(LOG_LEVELS);
                     } else {
                         component = new JTextField();
+                        component.setMinimumSize(FIELD_DIMENSION);
+                        component.setMaximumSize(FIELD_DIMENSION);
+                        component.setPreferredSize(FIELD_DIMENSION);
                     }
                     components.put(trigram, component);
                     Name name = fieldInfo.getAnnotation(Name.class);
