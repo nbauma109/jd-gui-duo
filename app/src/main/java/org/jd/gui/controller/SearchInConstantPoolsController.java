@@ -205,6 +205,8 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
                 } else {
                     matchingOuterEntriesSet.add(entry);
                 }
+            } else {
+                matchingOuterEntriesSet.add(entry);
             }
         }
 
