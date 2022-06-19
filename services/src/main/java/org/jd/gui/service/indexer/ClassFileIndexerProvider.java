@@ -12,6 +12,7 @@ import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
+import org.jd.gui.util.ProgressUtil;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -175,7 +176,7 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
                 }
             }
             
-            updateProgress(entry, getProgressFunction, setProgressFunction);
+            ProgressUtil.updateProgress(entry, getProgressFunction, setProgressFunction);
 
         } catch (Exception e) {
             assert ExceptionUtil.printStackTrace(e);

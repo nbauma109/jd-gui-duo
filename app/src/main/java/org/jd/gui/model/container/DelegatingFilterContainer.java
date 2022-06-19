@@ -139,15 +139,5 @@ public class DelegatingFilterContainer implements Container {
         public String getType() { return container.getType(); }
         @Override
         public Entry getRoot() { return getDelegatedEntry(container.getRoot()); }
-
-        @Override
-        public void indexingDone() {
-            container.indexingDone();
-        }
-    }
-
-    @Override
-    public void indexingDone() {
-        container.indexingDone();
     }
 }

@@ -53,10 +53,12 @@ import org.jd.gui.util.ZOutputStream;
 import org.jd.gui.util.container.JarContainerEntryUtil;
 import org.jd.gui.util.matcher.ArtifactVersionMatcher;
 import org.jd.gui.util.net.UriUtil;
+import org.jd.gui.util.swing.AbstractSwingWorker;
 import org.jd.gui.util.swing.SwingUtil;
 import org.jd.gui.view.MainView;
 import org.jd.util.SHA1Util;
 
+import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.Frame;
 import java.awt.Point;
@@ -65,7 +67,6 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -102,7 +103,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLayer;
 import javax.swing.JOptionPane;
-import javax.swing.ProgressMonitor;
 import javax.swing.SwingWorker;
 import javax.swing.TransferHandler;
 import javax.swing.UIManager;
@@ -308,30 +308,28 @@ public class MainController implements API {
     }
 
     protected void onSaveAllSources() {
-        if (!saveAllSourcesController.isActivated()) {
-            JComponent currentPanel = mainView.getSelectedMainPanel();
-            if (currentPanel instanceof SourcesSavable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-                SourcesSavable sourcesSavable = (SourcesSavable) currentPanel;
-                JFileChooser chooser = new JFileChooser();
-                JFrame mainFrame = mainView.getMainFrame();
+        JComponent currentPanel = mainView.getSelectedMainPanel();
+        if (currentPanel instanceof SourcesSavable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            SourcesSavable sourcesSavable = (SourcesSavable) currentPanel;
+            JFileChooser chooser = new JFileChooser();
+            JFrame mainFrame = mainView.getMainFrame();
 
-                chooser.setSelectedFile(new File(sourcesSavable.getSourceFileName()));
+            chooser.setSelectedFile(new File(sourcesSavable.getSourceFileName()));
 
-                if (chooser.showSaveDialog(mainFrame) == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = chooser.getSelectedFile();
+            if (chooser.showSaveDialog(mainFrame) == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = chooser.getSelectedFile();
 
-                    configuration.setRecentSaveDirectory(chooser.getCurrentDirectory());
+                configuration.setRecentSaveDirectory(chooser.getCurrentDirectory());
 
-                    if (selectedFile.exists()) {
-                        String title = "Are you sure?";
-                        String message = "The file '" + selectedFile.getAbsolutePath() + "' already exists.\n Do you want to replace the existing file?";
+                if (selectedFile.exists()) {
+                    String title = "Are you sure?";
+                    String message = "The file '" + selectedFile.getAbsolutePath() + "' already exists.\n Do you want to replace the existing file?";
 
-                        if (JOptionPane.showConfirmDialog(mainFrame, message, title, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                            saveAllSourcesController.show(executor, sourcesSavable, selectedFile);
-                        }
-                    } else {
-                        saveAllSourcesController.show(executor, sourcesSavable, selectedFile);
+                    if (JOptionPane.showConfirmDialog(mainFrame, message, title, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                        saveAllSourcesController.show(sourcesSavable, selectedFile);
                     }
+                } else {
+                    saveAllSourcesController.show(sourcesSavable, selectedFile);
                 }
             }
         }
@@ -765,14 +763,12 @@ public class MainController implements API {
         }
     }
 
-    private final class IndexerWorker extends SwingWorker<Indexes, Void> {
+    private final class IndexerWorker extends AbstractSwingWorker<Indexes, Void> {
         private final ContentIndexable ci;
-        private final ProgressMonitor progressMonitor;
-        private double progressPercentage;
 
-        private IndexerWorker(ContentIndexable ci, ProgressMonitor progressMonitor) {
+        private IndexerWorker(Component component, ContentIndexable ci) {
+            super(component, "Indexing ...");
             this.ci = ci;
-            this.progressMonitor = progressMonitor;
         }
 
         @Override
@@ -782,8 +778,7 @@ public class MainController implements API {
 
         @Override
         protected void done() {
-            progressMonitor.close();
-            ci.indexingDone();
+            super.done();
 
             // Fire 'indexesChanged' event
             Collection<Future<Indexes>> collectionOfFutureIndexes = getCollectionOfFutureIndexes();
@@ -795,25 +790,14 @@ public class MainController implements API {
                 icl.indexesChanged(collectionOfFutureIndexes);
             }
         }
-
-        public double getProgressPercentage() {
-            return progressPercentage;
-        }
-
-        public void setProgressPercentage(double progressPercentage) {
-            super.setProgress((int) Math.round(progressPercentage));
-            this.progressPercentage = progressPercentage;
-        }
     }
 
-    private final class GAVWorker extends SwingWorker<Void, Void> {
-        private final ProgressMonitor progressMonitor;
+    private final class GAVWorker extends AbstractSwingWorker<Void, Void> {
         private final Set<File> files;
         private final Map<File, String> sha1Map;
-        private double progressPercentage;
 
-        private GAVWorker(ProgressMonitor progressMonitor, Set<File> files, Map<File, String> sha1Map) {
-            this.progressMonitor = progressMonitor;
+        private GAVWorker(Component component, Set<File> files, Map<File, String> sha1Map) {
+            super(component, "Generating POM ...");
             this.files = files;
             this.sha1Map = sha1Map;
         }
@@ -822,20 +806,6 @@ public class MainController implements API {
         protected Void doInBackground() throws Exception {
             showGAVs(files, sha1Map, this::getProgressPercentage, this::setProgressPercentage, this::isCancelled);
             return null;
-        }
-
-        @Override
-        protected void done() {
-            progressMonitor.close();
-        }
-
-        public double getProgressPercentage() {
-            return progressPercentage;
-        }
-
-        public void setProgressPercentage(double progressPercentage) {
-            super.setProgress((int) Math.round(progressPercentage));
-            this.progressPercentage = progressPercentage;
         }
     }
 
@@ -881,24 +851,9 @@ public class MainController implements API {
         }
 
         private void launchGAVWorker(TransferHandler.TransferSupport info, Set<File> files, Map<File, String> sha1Map) {
-            ProgressMonitor progressMonitor = new ProgressMonitor(info.getComponent(), "Generating POM ...", getProgressMessage(0), 0, 100);
-            SwingWorker<Void, Void> worker = new GAVWorker(progressMonitor, files, sha1Map);
-            worker.addPropertyChangeListener(e -> onPropertyChange(e, progressMonitor, worker));
+            SwingWorker<Void, Void> worker = new GAVWorker(info.getComponent(), files, sha1Map);
             worker.execute();
         }
-    }
-
-    public void onPropertyChange(PropertyChangeEvent evt, ProgressMonitor progressMonitor, Future<?> worker) {
-        if ("progress".equals(evt.getPropertyName())) {
-            int progress = (Integer) evt.getNewValue();
-            progressMonitor.setProgress(progress);
-            String message = getProgressMessage(progress);
-            progressMonitor.setNote(message);
-            if (progressMonitor.isCanceled()) {
-                worker.cancel(true);
-            }
-        }
-
     }
 
     // --- ComponentListener --- //
@@ -1007,17 +962,11 @@ public class MainController implements API {
             // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
             ContentIndexable ci = (ContentIndexable) component;
             UIManager.put("ProgressMonitor.progressText", title);
-            ProgressMonitor progressMonitor = new ProgressMonitor(component, "Indexing ...", getProgressMessage(0), 0, 100);
-            SwingWorker<Indexes, Void> worker = new IndexerWorker(ci, progressMonitor);
-            worker.addPropertyChangeListener(e -> onPropertyChange(e, progressMonitor, worker));
+            SwingWorker<Indexes, Void> worker = new IndexerWorker(component, ci);
             worker.execute();
 
             component.putClientProperty(INDEXES, worker);
         }
-    }
-
-    private static String getProgressMessage(int progress) {
-        return String.format("Completed %d%%.%n", progress);
     }
 
     @Override

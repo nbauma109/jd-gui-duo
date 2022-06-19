@@ -116,7 +116,7 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
         }
 
         @Override
-        public void save(API api, Controller controller, Listener listener, Path path) {
+        public void save(API api, Path path, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
             try {
                 Path parentPath = path.getParent();
 
@@ -132,11 +132,7 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
                     SourceSaver saver = api.getSourceSaver(entry);
 
                     if (saver != null) {
-                        saver.saveContent(
-                            api,
-                            controller::isCancelled,
-                            listener::pathSaved,
-                            archiveRootPath, archiveRootPath, entry);
+                        saver.saveContent(api, archiveRootPath, archiveRootPath, entry, getProgressFunction, setProgressFunction, isCancelledFunction);
                     }
                 }
             } catch (URISyntaxException|IOException e) {
@@ -150,11 +146,6 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
                 Closeable c = (Closeable) container;
                 c.close();
             }
-        }
-
-        @Override
-        public void indexingDone() {
-            container.indexingDone();
         }
     }
 

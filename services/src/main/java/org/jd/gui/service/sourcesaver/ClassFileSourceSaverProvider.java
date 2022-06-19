@@ -14,6 +14,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.util.MethodPatcher;
+import org.jd.gui.util.ProgressUtil;
 import org.jd.gui.util.decompiler.ContainerLoader;
 import org.jd.gui.util.loader.LoaderUtils;
 
@@ -26,6 +27,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V0;
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V1;
@@ -63,23 +67,19 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
     }
 
     @Override
-    public void save(API api, Controller controller, Listener listener, Path rootPath, Container.Entry entry) {
+    public void save(API api, Path rootPath, Container.Entry entry, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
         String sourcePath = getSourcePath(entry);
         Path path = rootPath.resolve(sourcePath);
 
-        saveContent(api, controller, listener, rootPath, path, entry);
+        saveContent(api, rootPath, path, entry, getProgressFunction, setProgressFunction, isCancelledFunction);
     }
 
     @Override
-    public void saveContent(API api, Controller controller, Listener listener, Path rootPath, Path path, Container.Entry entry) {
+    public void saveContent(API api, Path rootPath, Path path, Container.Entry entry, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
 
         DecompilationResult decompiledResult = new DecompilationResult();
         
         try {
-            // Call listener
-            if (path.toString().indexOf('$') == -1) {
-                listener.pathSaved(path);
-            }
             // Init preferences
             Map<String, String> preferences = api.getPreferences();
 
@@ -103,6 +103,12 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
         }
         
         writeCodeToFile(path, decompiledResult.getDecompiledOutput());
+        
+        try {
+            ProgressUtil.updateProgress(entry, getProgressFunction, setProgressFunction);
+        } catch (IOException e) {
+            assert ExceptionUtil.printStackTrace(e);
+        }
     }
 
     private static void writeCodeToFile(Path path, String sourceCode) {

@@ -77,6 +77,7 @@ public class FernflowerDecompilerPreferencesProvider extends JPanel implements P
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void restoreDefaults() {
         for (Map.Entry<String, Object> defaultEntry : IFernflowerPreferences.DEFAULTS.entrySet()) {
             String componentKey = defaultEntry.getKey();
@@ -118,6 +119,7 @@ public class FernflowerDecompilerPreferencesProvider extends JPanel implements P
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void loadPreferences(Map<String, String> preferences) {
         for (Map.Entry<String, String> preference : preferences.entrySet()) {
             String preferenceKey = preference.getKey();
@@ -147,6 +149,7 @@ public class FernflowerDecompilerPreferencesProvider extends JPanel implements P
             String componentKey = componentEntry.getKey();
             JComponent component = componentEntry.getValue();
             if (component instanceof JComboBox) {
+                @SuppressWarnings("unchecked")
                 JComboBox<String> comboBox = (JComboBox<String>) component;
                 preferences.put(componentKey, comboBox.getSelectedItem().toString());
             } else if (component instanceof JCheckBox) {

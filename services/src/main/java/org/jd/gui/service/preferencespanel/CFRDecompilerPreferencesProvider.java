@@ -48,7 +48,6 @@ public class CFRDecompilerPreferencesProvider extends JPanel implements Preferen
                 MethodInfo fnMethod = fieldType.getMethod("getFn", BindingFlags.All);
                 fnMethod.getRawMethod().setAccessible(true);
                 OptionDecoderParam optionDecoderParam = (OptionDecoderParam) fnMethod.invoke(argInstance);
-                Type<OptionDecoderParam> optionDecoderParamType = Type.of(OptionDecoderParam.class);
                 String defaultValue = optionDecoderParam.getDefaultValue();
                 String rangeDescription = optionDecoderParam.getRangeDescription();
                 MethodInfo describeMethod = fieldType.getMethod("describe", BindingFlags.All);
@@ -84,6 +83,7 @@ public class CFRDecompilerPreferencesProvider extends JPanel implements Preferen
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void restoreDefaults() {
         for (Map.Entry<String, String> defaultEntry : defaults.entrySet()) {
             String componentKey = defaultEntry.getKey();
@@ -125,6 +125,7 @@ public class CFRDecompilerPreferencesProvider extends JPanel implements Preferen
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void loadPreferences(Map<String, String> preferences) {
         for (Map.Entry<String, String> preference : preferences.entrySet()) {
             String preferenceKey = preference.getKey();
@@ -154,6 +155,7 @@ public class CFRDecompilerPreferencesProvider extends JPanel implements Preferen
             String componentKey = componentEntry.getKey();
             JComponent component = componentEntry.getValue();
             if (component instanceof JComboBox) {
+                @SuppressWarnings("unchecked")
                 JComboBox<String> comboBox = (JComboBox<String>) component;
                 if ("auto".equals(comboBox.getSelectedItem().toString())) {
                     preferences.remove(componentKey);

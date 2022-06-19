@@ -12,18 +12,14 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.spi.Indexer;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.function.DoubleConsumer;
-import java.util.function.DoubleSupplier;
 import java.util.regex.Pattern;
 
 public abstract class AbstractIndexerProvider implements Indexer {
@@ -94,24 +90,5 @@ public abstract class AbstractIndexerProvider implements Indexer {
                 index.get(key).add(entry);
             }
         }
-    }
-
-    private static void updateProgress(Container.Entry root, Container.Entry entry, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction) throws IOException {
-        File file = new File(root.getUri());
-        if (file.exists()) {
-            double totalSize = Files.size(file.toPath());
-            long entryLength = entry.compressedLength();
-            double progress = 100 * entryLength / totalSize;
-            double cumulativeProgress = getProgressFunction.getAsDouble() + progress;
-            if (cumulativeProgress <= 100) {
-                setProgressFunction.accept(cumulativeProgress);
-            }
-        } else {
-            updateProgress(root.getParent(), entry, getProgressFunction, setProgressFunction);
-        }
-    }
-    
-    protected void updateProgress(Container.Entry entry, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction) throws IOException {
-        updateProgress(entry.getContainer().getRoot().getParent(), entry, getProgressFunction, setProgressFunction);
     }
 }

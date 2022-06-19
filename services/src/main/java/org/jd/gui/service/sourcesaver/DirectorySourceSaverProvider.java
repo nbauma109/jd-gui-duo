@@ -17,6 +17,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,28 +57,28 @@ public class DirectorySourceSaverProvider extends AbstractSourceSaverProvider {
     }
 
     @Override
-    public void save(API api, SourceSaver.Controller controller, SourceSaver.Listener listener, Path rootPath, Container.Entry entry) {
+    public void save(API api, Path rootPath, Container.Entry entry, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
         Path path = rootPath.resolve(entry.getPath());
 
         try {
             Files.createDirectories(path);
-            saveContent(api, controller, listener, rootPath, path, entry);
+            saveContent(api, rootPath, path, entry, getProgressFunction, setProgressFunction, isCancelledFunction);
         } catch (IOException e) {
             assert ExceptionUtil.printStackTrace(e);
         }
     }
 
     @Override
-    public void saveContent(API api, SourceSaver.Controller controller, SourceSaver.Listener listener, Path rootPath, Path path, Container.Entry entry) {
+    public void saveContent(API api, Path rootPath, Path path, Container.Entry entry, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
         for (Container.Entry e : getChildren(entry)) {
-            if (controller.isCancelled()) {
+            if (isCancelledFunction.getAsBoolean()) {
                 break;
             }
 
             SourceSaver sourceSaver = api.getSourceSaver(e);
 
             if (sourceSaver != null) {
-                sourceSaver.save(api, controller, listener, rootPath, e);
+                sourceSaver.save(api, rootPath, e, getProgressFunction, setProgressFunction, isCancelledFunction);
             }
         }
     }

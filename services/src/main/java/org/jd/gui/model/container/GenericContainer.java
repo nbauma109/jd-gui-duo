@@ -45,7 +45,7 @@ public class GenericContainer implements Container, Closeable {
     private final API api;
     private final int rootNameCount;
     private final Container.Entry root;
-    private ZipFile zipFile; // closed after indexation or when tab is closed
+    private ZipFile zipFile; // closed when tab is closed
 
     public GenericContainer(API api, Container.Entry parentEntry, Path rootPath) {
         this.api = api;
@@ -247,12 +247,6 @@ public class GenericContainer implements Container, Closeable {
 
     @Override
     public void close() {
-        IOUtils.closeQuietly(zipFile);
-        zipFile = null;
-    }
-
-    @Override
-    public void indexingDone() {
         IOUtils.closeQuietly(zipFile);
         zipFile = null;
     }

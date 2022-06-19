@@ -16,6 +16,4 @@ import java.util.function.DoubleSupplier;
 
 public interface ContentIndexable {
     Indexes index(API api, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction);
-    
-    void indexingDone();
 }

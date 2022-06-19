@@ -10,7 +10,6 @@ package org.jd.gui.service.sourcesaver;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
-import org.jd.gui.spi.SourceSaver;
 
 import java.io.File;
 import java.net.URI;
@@ -20,6 +19,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 
 public class ZipFileSourceSaverProvider extends DirectorySourceSaverProvider {
 
@@ -27,7 +29,7 @@ public class ZipFileSourceSaverProvider extends DirectorySourceSaverProvider {
     public String[] getSelectors() { return appendSelectors("*:file:*.zip", "*:file:*.jar", "*:file:*.war", "*:file:*.ear", "*:file:*.aar", "*:file:*.jmod", "*:file:*.kar"); }
 
     @Override
-    public void save(API api, SourceSaver.Controller controller, SourceSaver.Listener listener, Path rootPath, Container.Entry entry) {
+    public void save(API api, Path rootPath, Container.Entry entry, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
         try {
             String sourcePath = getSourcePath(entry);
             Path path = rootPath.resolve(sourcePath);
@@ -55,7 +57,7 @@ public class ZipFileSourceSaverProvider extends DirectorySourceSaverProvider {
 
                 try (FileSystem tmpArchiveFs = FileSystems.newFileSystem(tmpArchiveUri, env)) {
                     Path tmpArchiveRootPath = tmpArchiveFs.getPath("/");
-                    saveContent(api, controller, listener, tmpArchiveRootPath, tmpArchiveRootPath, entry);
+                    saveContent(api, tmpArchiveRootPath, tmpArchiveRootPath, entry, getProgressFunction, setProgressFunction, isCancelledFunction);
                 }
 
                 Files.move(tmpFile.toPath(), path);

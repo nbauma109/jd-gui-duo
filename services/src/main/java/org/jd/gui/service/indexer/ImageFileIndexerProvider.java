@@ -10,6 +10,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
+import org.jd.gui.util.ProgressUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,7 +42,7 @@ public class ImageFileIndexerProvider extends AbstractIndexerProvider {
                 strings.get(imageFileName).add(entry);
                 strings.get(extension).add(entry);
             }
-            updateProgress(entry, getProgressFunction, setProgressFunction);
+            ProgressUtil.updateProgress(entry, getProgressFunction, setProgressFunction);
         } catch (IOException e) {
             assert ExceptionUtil.printStackTrace(e);
         }

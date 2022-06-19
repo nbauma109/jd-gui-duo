@@ -10,78 +10,72 @@ package org.jd.gui.controller;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.SourcesSavable;
-import org.jd.gui.view.SaveAllSourcesView;
+import org.jd.gui.util.swing.AbstractSwingWorker;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
 
 import javax.swing.JFrame;
+import javax.swing.SwingWorker;
 
-public class SaveAllSourcesController implements SourcesSavable.Controller, SourcesSavable.Listener {
+public class SaveAllSourcesController {
     private final API api;
-    private final SaveAllSourcesView saveAllSourcesView;
-    private boolean cancel;
-    private int counter;
-    private int mask;
+    private final JFrame mainFrame;
 
     public SaveAllSourcesController(API api, JFrame mainFrame) {
         this.api = api;
-        // Create UI
-        this.saveAllSourcesView = new SaveAllSourcesView(mainFrame, this::onCanceled);
+        this.mainFrame = mainFrame;
     }
 
-    public void show(ScheduledExecutorService executor, SourcesSavable savable, File file) {
-        // Show
-        this.saveAllSourcesView.show(file);
+    public void show(SourcesSavable savable, File file) {
+        SwingWorker<Void, Void> saveAllSourcesWorker = new SaveAllSourcesWorker(savable, file);
         // Execute background task
-        Future<?> futureResult = executor.submit(() -> {
-            int fileCount = savable.getFileCount();
+        saveAllSourcesWorker.execute();
+    }
 
-            saveAllSourcesView.updateProgressBar(0);
-            saveAllSourcesView.setMaxValue(fileCount);
+    private final class SaveAllSourcesWorker extends AbstractSwingWorker<Void, Void> {
+        private final SourcesSavable savable;
+        private final File file;
 
-            cancel = false;
-            counter = 0;
-            mask = 2;
+        private SaveAllSourcesWorker(SourcesSavable savable, File file) {
+            super(mainFrame, "Saving...");
+            this.savable = savable;
+            this.file = file;
+        }
 
-            while (fileCount > 64) {
-                fileCount >>= 1;
-                mask <<= 1;
-            }
-
-            mask--;
+        @Override
+        protected Void doInBackground() throws Exception {
 
             try {
                 Path path = Paths.get(file.toURI());
                 Files.deleteIfExists(path);
 
-                trySave(savable, path);
+                trySave(path);
 
-                if (cancel) {
+                if (isCancelled()) {
                     Files.deleteIfExists(path);
                 }
             } catch (Exception t) {
                 assert ExceptionUtil.printStackTrace(t);
             }
 
-            saveAllSourcesView.hide();
-        });
-        /* Throwable instances from the Error hierarchy (i.e. NoSuchMethodError, etc...)
-        /* are reported by Future.get() as cause of an ExecutionException.
-         * FutureTask.run() catches Throwable and stores it in an outcome Object which
-         * becomes the cause of the thrown ExecutionException.
-         * We'll use Future.get() as below as opposed to catching Throwable.
-         * As we are in the event dispatch thread here, we'll wait for errors in a
-         * separate by submitting a new task to avoid freezing the GUI.
-         */
-        executor.submit(() -> {
+            return null;
+        }
+
+        @Override
+        protected void done() {
+            /*
+             * Throwable instances from the Error hierarchy (i.e. NoSuchMethodError, etc...)
+             * are reported by Future.get() as cause of an ExecutionException.
+             * FutureTask.run() catches Throwable and stores it in an outcome Object which
+             * becomes the cause of the thrown ExecutionException.
+             */
+            super.done();
             try {
-                futureResult.get();
+                get();
             } catch (InterruptedException e) {
                 assert ExceptionUtil.printStackTrace(e);
                 // Restore interrupted state...
@@ -89,32 +83,14 @@ public class SaveAllSourcesController implements SourcesSavable.Controller, Sour
             } catch (ExecutionException e) {
                 assert ExceptionUtil.printStackTrace(e);
             }
-        });
-    }
-
-    private void trySave(SourcesSavable savable, Path path) {
-        try {
-            savable.save(api, this, this, path);
-        } catch (Exception e) {
-            assert ExceptionUtil.printStackTrace(e);
-            saveAllSourcesView.showActionFailedDialog();
-            cancel = true;
         }
-    }
 
-    public boolean isActivated() { return saveAllSourcesView.isVisible(); }
-
-    protected void onCanceled() { cancel = true; }
-
-    // --- SourcesSavable.Controller --- //
-    @Override
-    public boolean isCancelled() { return cancel; }
-
-    // --- SourcesSavable.Listener --- //
-    @Override
-    public void pathSaved(Path path) {
-        if ((counter++ & mask) == 0) {
-            saveAllSourcesView.updateProgressBar(counter++);
+        private void trySave(Path path) {
+            try {
+                savable.save(api, path, this::getProgressPercentage, this::setProgressPercentage, this::isCancelled);
+            } catch (Exception e) {
+                assert ExceptionUtil.printStackTrace(e);
+            }
         }
     }
 }

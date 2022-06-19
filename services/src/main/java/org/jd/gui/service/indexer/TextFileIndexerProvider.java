@@ -11,6 +11,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
+import org.jd.gui.util.ProgressUtil;
 import org.jd.gui.util.io.TextReader;
 
 import java.io.IOException;
@@ -32,7 +33,7 @@ public class TextFileIndexerProvider extends AbstractIndexerProvider {
     public void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
         try (InputStream inputStream = entry.getInputStream()) {
             indexes.getIndex("strings").get(TextReader.getText(inputStream)).add(entry);
-            updateProgress(entry, getProgressFunction, setProgressFunction);
+            ProgressUtil.updateProgress(entry, getProgressFunction, setProgressFunction);
         } catch (IOException e) {
             assert ExceptionUtil.printStackTrace(e);
         }

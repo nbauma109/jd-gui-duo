@@ -11,6 +11,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
+import org.jd.gui.util.ProgressUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -122,7 +123,7 @@ public class XmlFileIndexerProvider extends AbstractIndexerProvider {
         indexAll(entry, indexes, stringSet, typeReferenceSet);
         
         try {
-            updateProgress(entry, getProgressFunction, setProgressFunction);
+            ProgressUtil.updateProgress(entry, getProgressFunction, setProgressFunction);
         } catch (IOException e) {
             assert ExceptionUtil.printStackTrace(e);
         }

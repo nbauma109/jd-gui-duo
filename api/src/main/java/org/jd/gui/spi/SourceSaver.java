@@ -11,6 +11,9 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 
 import java.nio.file.Path;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 import java.util.regex.Pattern;
 
 public interface SourceSaver {
@@ -25,7 +28,7 @@ public interface SourceSaver {
     /**
      * Check parent path, build source file name, create NIO path and save the content.
      */
-    void save(API api, Controller controller, Listener listener, Path rootPath, Container.Entry entry);
+    void save(API api, Path rootPath, Container.Entry entry, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction);
 
     /**
      * Save content:
@@ -34,7 +37,7 @@ public interface SourceSaver {
      * <li>For directory, call 'save' for each children.</li>
      * </ul>
      */
-    void saveContent(API api, Controller controller, Listener listener, Path rootPath, Path path, Container.Entry entry);
+    void saveContent(API api, Path rootPath, Path path, Container.Entry entry, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction);
 
     interface Controller {
         boolean isCancelled();

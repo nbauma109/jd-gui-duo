@@ -22,6 +22,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
+import org.jd.gui.util.ProgressUtil;
 import org.jd.gui.util.parser.jdt.ASTParserFactory;
 import org.jd.gui.util.parser.jdt.core.AbstractJavaListener;
 
@@ -73,7 +74,7 @@ public class JavaFileIndexerProvider extends AbstractIndexerProvider {
                     index.get(superTypeName).add(typeName);
                 }
             }
-            updateProgress(entry, getProgressFunction, setProgressFunction);
+            ProgressUtil.updateProgress(entry, getProgressFunction, setProgressFunction);
         } catch (IOException e) {
             assert ExceptionUtil.printStackTrace(e);
         }

@@ -70,9 +70,6 @@ public abstract class AbstractFileLoaderProvider implements FileLoader {
             public String getType() { return "generic"; }
             @Override
             public Container.Entry getRoot() { return null; }
-            @Override
-            public void indexingDone() {
-            }
         };
 
         private Map<Container.EntryPath, Container.Entry> children = Collections.emptyMap();

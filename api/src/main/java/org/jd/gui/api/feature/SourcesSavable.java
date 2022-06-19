@@ -10,19 +10,14 @@ package org.jd.gui.api.feature;
 import org.jd.gui.api.API;
 
 import java.nio.file.Path;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 
 public interface SourcesSavable {
     String getSourceFileName();
 
     int getFileCount();
 
-    void save(API api, Controller controller, Listener listener, Path path);
-
-    interface Controller {
-        boolean isCancelled();
-    }
-
-    interface Listener {
-        void pathSaved(Path path);
-    }
+    void save(API api, Path path, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction);
 }
