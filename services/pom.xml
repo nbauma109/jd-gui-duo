@@ -27,7 +27,7 @@
 		<dependency>
 			<groupId>com.github.nbauma109</groupId>
 			<artifactId>transformer-api</artifactId>
-			<version>4.0.28</version>
+			<version>4.0.29</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jdt</groupId>

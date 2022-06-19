@@ -11,6 +11,7 @@ import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
 import org.jd.core.v1.printer.LineNumberStringBuilderPrinter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeWriter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.util.MethodPatcher;
@@ -106,6 +107,14 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
         
         try {
             ProgressUtil.updateProgress(entry, getProgressFunction, setProgressFunction);
+            // update progress of inner classes that were filtered by PackageSourceSaverProvider
+            String internalTypeName = ClassUtil.getInternalName(entry.getPath());
+            for (Container.Entry e : entry.getParent().getChildren().values()) {
+                if (e.getPath().startsWith(internalTypeName + StringConstants.INTERNAL_INNER_SEPARATOR)) {
+                    ProgressUtil.updateProgress(e, getProgressFunction, setProgressFunction);
+                }
+            }
+
         } catch (IOException e) {
             assert ExceptionUtil.printStackTrace(e);
         }
