@@ -7,17 +7,19 @@
 package org.jd.gui.controller;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
+import org.jd.gui.api.feature.IndexesChangeListener;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.api.model.Type;
+import org.jd.gui.model.container.DelegatingFilterContainer;
+import org.jd.gui.model.container.entry.path.FileEntryPath;
 import org.jd.gui.service.type.TypeFactoryService;
 import org.jd.gui.spi.TypeFactory;
 import org.jd.gui.util.function.TriConsumer;
 import org.jd.gui.view.SearchInConstantPoolsView;
 import org.jd.util.LRUCache;
-import org.jd.gui.api.feature.IndexesChangeListener;
-import org.jd.gui.model.container.DelegatingFilterContainer;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -203,7 +205,14 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
 
                     matchingOuterEntriesSet.add(outerTypeEntry);
                 } else {
-                    matchingOuterEntriesSet.add(entry);
+                    String path = entry.getPath();
+                    int idx = path.indexOf(StringConstants.INTERNAL_INNER_SEPARATOR);
+                    if (idx != -1 && path.endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
+                        FileEntryPath topLevelTypePath = new FileEntryPath(path.substring(0, idx) + StringConstants.CLASS_FILE_SUFFIX);
+                        matchingOuterEntriesSet.add(entry.getParent().getChildren().get(topLevelTypePath));
+                    } else {
+                        matchingOuterEntriesSet.add(entry);
+                    }
                 }
             } else {
                 matchingOuterEntriesSet.add(entry);
