@@ -288,15 +288,14 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
 
         if (patternLength > 0) {
             String key = indexes.hashCode() + "***" + indexName + "***" + pattern;
+            String lastKey = key.substring(0, key.length() - 1);
+            Map<String, Collection> lastMatchedTypes = cache.get(lastKey);
             Map<String, Collection> matchedEntries = cache.computeIfAbsent(key, k -> {
                 Map<String, Collection> index = indexes.getIndex(indexName);
-
                 if (index != null) {
                     if (patternLength == 1) {
                         return matchWithCharFunction.apply(pattern.charAt(0), index);
                     }
-                    String lastKey = key.substring(0, key.length() - 1);
-                    Map<String, Collection> lastMatchedTypes = cache.get(lastKey);
                     if (lastMatchedTypes != null) {
                         return matchWithStringFunction.apply(pattern, lastMatchedTypes);
                     }
