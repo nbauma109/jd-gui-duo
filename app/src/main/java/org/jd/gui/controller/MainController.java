@@ -68,6 +68,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -302,6 +303,9 @@ public class MainController implements API {
     protected void save(File selectedFile) {
         try (OutputStream os = new FileOutputStream(selectedFile)) {
             ((ContentSavable) currentPage).save(this, os);
+        } catch (FileNotFoundException e) {
+            assert ExceptionUtil.printStackTrace(e);
+            JOptionPane.showMessageDialog(currentPage, "Not authorized to save to this destination. Please restart as administrator or choose another location.", "Access denied", JOptionPane.ERROR_MESSAGE);
         } catch (IOException e) {
             assert ExceptionUtil.printStackTrace(e);
         }

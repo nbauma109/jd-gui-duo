@@ -23,6 +23,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -39,6 +40,7 @@ import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
 
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
@@ -134,6 +136,9 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
                     if (saver != null) {
                         saver.saveContent(api, archiveRootPath, archiveRootPath, entry, getProgressFunction, setProgressFunction, isCancelledFunction);
                     }
+                } catch (AccessDeniedException e) {
+                    assert ExceptionUtil.printStackTrace(e);
+                    JOptionPane.showMessageDialog(getParent(), "Not authorized to save to this destination. Please restart as administrator or choose another location.", "Access denied", JOptionPane.ERROR_MESSAGE);
                 }
             } catch (URISyntaxException|IOException e) {
                 assert ExceptionUtil.printStackTrace(e);
