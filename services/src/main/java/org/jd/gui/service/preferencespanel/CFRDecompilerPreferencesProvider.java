@@ -47,7 +47,7 @@ public class CFRDecompilerPreferencesProvider extends JPanel implements Preferen
                 ArgumentParam<?, ?> argInstance = (ArgumentParam<?, ?>) fieldInfo.getValue(null);
                 MethodInfo fnMethod = fieldType.getMethod("getFn", BindingFlags.All);
                 fnMethod.getRawMethod().setAccessible(true);
-                OptionDecoderParam optionDecoderParam = (OptionDecoderParam) fnMethod.invoke(argInstance);
+                OptionDecoderParam<?, ?> optionDecoderParam = (OptionDecoderParam<?, ?>) fnMethod.invoke(argInstance);
                 String defaultValue = optionDecoderParam.getDefaultValue();
                 String rangeDescription = optionDecoderParam.getRangeDescription();
                 MethodInfo describeMethod = fieldType.getMethod("describe", BindingFlags.All);

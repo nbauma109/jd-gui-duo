@@ -53,6 +53,9 @@ public abstract class AbstractMethodAction extends AbstractAction {
                 String descriptor = fragment.substring(lastDashIndex + 1);
                 try {
                     Method method = MethodUtil.searchMethod(loader, typeMaker, internalTypeName, methodName, descriptor);
+                    if (method == null) {
+                        method = MethodUtil.searchMethod(loader, typeMaker, internalTypeName, "<clinit>", "()V");
+                    }
                     methodAction(method);
                     
                 } catch (IOException ex) {

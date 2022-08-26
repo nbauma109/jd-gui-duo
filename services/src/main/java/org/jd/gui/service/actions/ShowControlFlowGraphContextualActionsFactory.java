@@ -6,6 +6,7 @@
 
 package org.jd.gui.service.actions;
 
+import org.apache.bcel.Const;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphGotoReducer;
@@ -25,6 +26,7 @@ import java.util.Collection;
 
 import javax.swing.Action;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 
 public class ShowControlFlowGraphContextualActionsFactory implements ContextualActionsFactory { // NO_UCD (unused code)
 
@@ -66,12 +68,9 @@ public class ShowControlFlowGraphContextualActionsFactory implements ContextualA
                 putValue(GROUP_NAME, "Edit > ShowInitialControlFlowGraph"); // used for sorting and grouping menus
                 putValue(NAME, "Show Initial Control Flow Graph " + getModeAsString());
             } else {
-                putValue(GROUP_NAME, "Edit > ShowReducedControlFlowGraph");
-                if (controlFlowGraphReducer.doPreReduce()) {
-                    putValue(NAME, controlFlowGraphReducer.getLabel() + " (with pre-reduce)");
-                } else {
-                    putValue(NAME, controlFlowGraphReducer.getLabel() + " (without pre-reduce)");
-                }
+                String suffix = controlFlowGraphReducer.doPreReduce() ? " (with pre-reduce)" : " (no pre-reduce)";
+                putValue(GROUP_NAME, "Edit > ShowReducedControlFlowGraph" + suffix);
+                putValue(NAME, controlFlowGraphReducer.getLabel() + suffix);
             }
             putValue(SMALL_ICON, ICON);
         }
@@ -87,6 +86,10 @@ public class ShowControlFlowGraphContextualActionsFactory implements ContextualA
         }
 
         protected void methodAction(Method method) {
+            if ((method.getAccessFlags() & Const.ACC_ABSTRACT) != 0) {
+                JOptionPane.showMessageDialog(null, "Method is abstract !", "ERROR", JOptionPane.ERROR_MESSAGE, ICON);
+                return;
+            }
             if (controlFlowGraphReducer == null) {
                 ControlFlowGraph controlFlowGraph = new ControlFlowGraphMaker().make(method);
                 switch (mode) {

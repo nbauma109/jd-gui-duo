@@ -3,10 +3,10 @@ package tim.jarcomp;
 import org.apache.commons.io.IOUtils;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;
+import org.jd.core.v1.util.ZipLoader;
 import org.jd.gui.api.API;
 import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.loader.LoaderUtils;
-import org.jd.gui.util.loader.ZipLoader;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.netbeans.modules.editor.java.JavaKit;
@@ -26,6 +26,7 @@ import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -199,12 +200,14 @@ public class CompareWindow {
             Map<String, String> preferences = api.getPreferences();
             preferences.put(Preferences.WRITE_LINE_NUMBERS, "false");
             preferences.put(Preferences.REALIGN_LINE_NUMBERS, "false");
-            ZipLoader zipLoader = new ZipLoader(file);
-            String decompileEngine = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
-            Loader apiLoader = LoaderUtils.createLoader(preferences, zipLoader, file.toURI());
-            String entryInternalName = ClassUtil.getInternalName(entryPath);
-            DecompilationResult decompilationResult = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, decompileEngine);
-            return decompilationResult.getDecompiledOutput();
+            try (FileInputStream in = new FileInputStream(file)) {
+                ZipLoader zipLoader = new ZipLoader(in);
+                String decompileEngine = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
+                Loader apiLoader = LoaderUtils.createLoader(preferences, zipLoader, file.toURI());
+                String entryInternalName = ClassUtil.getInternalName(entryPath);
+                DecompilationResult decompilationResult = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, decompileEngine);
+                return decompilationResult.getDecompiledOutput();
+            }
         }
         try (ZipFile zipFile = new ZipFile(file); InputStream in = zipFile.getInputStream(zipFile.getEntry(entryPath))) {
             return IOUtils.toString(in, StandardCharsets.UTF_8);

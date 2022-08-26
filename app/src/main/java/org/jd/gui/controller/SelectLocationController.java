@@ -136,7 +136,7 @@ public class SelectLocationController {
         if (entry.getPath().endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
             Map<String, String> preferences = api.getPreferences();
             preferences.put(Preferences.WRITE_LINE_NUMBERS, "false");
-            preferences.put(Preferences.REALIGN_LINE_NUMBERS, "false");
+            preferences.put(Preferences.REALIGN_LINE_NUMBERS, "true"); // useful if we compare class with source
             ContainerLoader containerLoader = new ContainerLoader(entry);
             String decompileEngine = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
             Loader apiLoader = LoaderUtils.createLoader(preferences, containerLoader, entry);
