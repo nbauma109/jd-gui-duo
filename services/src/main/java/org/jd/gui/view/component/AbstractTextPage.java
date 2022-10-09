@@ -13,6 +13,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaEditorKit;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rsyntaxtextarea.folding.FoldManager;
+import org.fife.ui.rtextarea.FoldIndicatorStyle;
 import org.fife.ui.rtextarea.Gutter;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.SearchContext;
@@ -53,8 +54,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
 
 import static org.jd.gui.util.decompiler.GuiPreferences.FONT_SIZE_KEY;
-import static org.jd.gui.service.treenode.AbstractTreeNodeFactoryProvider.COLLAPSED_ICON;
-import static org.jd.gui.service.treenode.AbstractTreeNodeFactoryProvider.EXPANDED_ICON;
 
 public class AbstractTextPage extends JPanel implements LineNumberNavigable, ContentSearchable, UriOpenable, PreferencesChangeListener {
 
@@ -157,7 +156,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
         });
 
         Gutter gutter = scrollPane.getGutter();
-        gutter.setFoldIcons(COLLAPSED_ICON, EXPANDED_ICON);
+        gutter.setFoldIndicatorStyle(FoldIndicatorStyle.CLASSIC);
         gutter.setFoldIndicatorForeground(gutter.getBorderColor());
 
         add(scrollPane, BorderLayout.CENTER);
