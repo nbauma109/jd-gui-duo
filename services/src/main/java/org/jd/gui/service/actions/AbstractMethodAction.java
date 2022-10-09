@@ -18,8 +18,6 @@ import java.io.IOException;
 
 import javax.swing.AbstractAction;
 
-import jd.core.ClassUtil;
-
 public abstract class AbstractMethodAction extends AbstractAction {
 
     private static final long serialVersionUID = 1L;
@@ -40,7 +38,6 @@ public abstract class AbstractMethodAction extends AbstractAction {
     private void methodAction(Container.Entry entry, String fragment) {
         Loader loader = new ContainerLoader(entry);
         TypeMaker typeMaker = new TypeMaker(loader);
-        String internalTypeName = ClassUtil.getInternalName(entry.getPath());
         if (fragment != null) {
             int dashIndex = fragment.indexOf('-');
             if (dashIndex != -1) {
@@ -49,6 +46,7 @@ public abstract class AbstractMethodAction extends AbstractAction {
                     // See jd.gui.api.feature.UriOpenable
                     throw new InvalidFormatException("fragment: " + fragment);
                 }
+                String internalTypeName = fragment.substring(0, dashIndex);
                 String methodName = fragment.substring(dashIndex + 1, lastDashIndex);
                 String descriptor = fragment.substring(lastDashIndex + 1);
                 try {

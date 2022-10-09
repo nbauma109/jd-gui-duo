@@ -58,16 +58,12 @@ public class ContainerLoader implements Loader {
         }
         try (InputStream inputStream = loadedEntry.getInputStream()) {
             return IOUtils.toByteArray(inputStream);
-        } catch (IOException e) {
-            throw new IOException(e);
         }
     }
 
     public static char[] loadEntry(Container.Entry entry, Charset charset) throws IOException {
         try (InputStream inputStream = entry.getInputStream()) {
             return IOUtils.toCharArray(inputStream, charset);
-        } catch (IOException e) {
-            throw new IOException(e);
         }
     }
 }
