@@ -10,7 +10,7 @@ jobs:
   build:
 
     runs-on: windows-latest
-    if: "!contains(github.event.head_commit.message, '[maven-release-plugin]')"
+    if: "contains(github.event.head_commit.message, '[ready for release]')"
 
     steps:
     - name: Create .ssh directory
