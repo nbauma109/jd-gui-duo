@@ -4,6 +4,7 @@
 	<artifactId>jd-gui-duo-parent</artifactId>
 	<version>2.0.74-SNAPSHOT</version>
 	<packaging>pom</packaging>
+	<description>A 2-in-1 JAVA decompiler based on JD-CORE v0 and v1</description>
 	<modules>
 		<module>api</module>
 		<module>services</module>
@@ -49,12 +50,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.4.0</version>
+					<version>3.5.0</version>
 				</plugin>
 				<plugin>
 					<groupId>com.akathist.maven.plugins.launch4j</groupId>
 					<artifactId>launch4j-maven-plugin</artifactId>
-					<version>2.2.0</version>
+					<version>2.3.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -84,7 +85,7 @@
 			<dependency>
 				<groupId>com.fifesoft</groupId>
 				<artifactId>rsyntaxtextarea</artifactId>
-				<version>3.3.0</version>
+				<version>3.3.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.nbauma109</groupId>
@@ -114,7 +115,7 @@
 			<dependency>
 				<groupId>net.sourceforge.plantuml</groupId>
 				<artifactId>plantuml</artifactId>
-				<version>1.2022.14</version>
+				<version>1.2023.0</version>
 			</dependency>
 			<dependency>
 				<groupId>junit</groupId>
