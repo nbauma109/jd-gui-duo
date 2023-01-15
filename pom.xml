@@ -85,7 +85,7 @@
 			<dependency>
 				<groupId>com.fifesoft</groupId>
 				<artifactId>rsyntaxtextarea</artifactId>
-				<version>3.3.0</version>
+				<version>3.3.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.nbauma109</groupId>
