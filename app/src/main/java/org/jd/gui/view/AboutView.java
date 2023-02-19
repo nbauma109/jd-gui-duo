@@ -11,6 +11,7 @@ import org.benf.cfr.reader.util.CfrVersionInfo;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.swing.SwingUtil;
+import org.jetbrains.java.decompiler.main.Fernflower;
 
 import com.strobel.Procyon;
 
@@ -84,7 +85,7 @@ public class AboutView {
             subvbox.add(hbox);
             JPanel subsubpanel = new JPanel();
             hbox.add(subsubpanel);
-            subsubpanel.setLayout(new GridLayout(6, 2));
+            subsubpanel.setLayout(new GridLayout(7, 2));
             subsubpanel.setOpaque(false);
             subsubpanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 5));
 
@@ -133,6 +134,8 @@ public class AboutView {
             subsubpanel.add(new JLabel(VERSION + CfrVersionInfo.VERSION_INFO));
             subsubpanel.add(new JLabel("JADX"));
             subsubpanel.add(new JLabel(VERSION + jadxVersion));
+            subsubpanel.add(new JLabel("QuiltFlower"));
+            subsubpanel.add(new JLabel(VERSION + Fernflower.class.getPackage().getImplementationVersion().replace("+local", "")));
 
             hbox.add(Box.createHorizontalGlue());
 
