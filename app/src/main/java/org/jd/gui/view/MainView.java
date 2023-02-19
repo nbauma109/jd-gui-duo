@@ -518,5 +518,10 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     @Override
     public void preferencesChanged(Map<String, String> preferences) {
         mainTabbedPanel.preferencesChanged(preferences);
+        repaint();
+    }
+
+    public void repaint() {
+        mainFrame.repaint();
     }
 }
