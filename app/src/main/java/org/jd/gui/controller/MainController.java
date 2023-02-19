@@ -1114,4 +1114,9 @@ public class MainController implements API {
     public File loadSourceFile(Container.Entry entry) {
         return sourceLoaderService.getSourceFile(this, entry);
     }
+
+    @Override
+    public void repaint() {
+        mainView.repaint();
+    }
 }

@@ -72,4 +72,6 @@ public interface API {
     void loadSource(Container.Entry entry, LoadSourceListener listener);
 
     File loadSourceFile(Container.Entry entry);
+
+    void repaint();
 }
