@@ -70,7 +70,7 @@
 			<dependency>
 				<groupId>io.github.osobolev</groupId>
 				<artifactId>swingx-all</artifactId>
-				<version>1.7.1</version>
+				<version>1.7.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bidib.org.oxbow</groupId>
