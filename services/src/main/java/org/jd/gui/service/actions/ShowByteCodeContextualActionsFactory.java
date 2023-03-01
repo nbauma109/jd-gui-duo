@@ -6,19 +6,20 @@
 
 package org.jd.gui.service.actions;
 
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.Code;
+import org.apache.bcel.classfile.CodeException;
+import org.apache.bcel.classfile.ConstantPool;
 import org.apache.bcel.classfile.LineNumber;
+import org.apache.bcel.classfile.LineNumberTable;
+import org.apache.bcel.classfile.LocalVariable;
+import org.apache.bcel.classfile.LocalVariableTable;
+import org.apache.bcel.classfile.Method;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
-import org.jd.core.v1.model.classfile.ConstantPool;
-import org.jd.core.v1.model.classfile.Method;
-import org.jd.core.v1.model.classfile.attribute.AttributeCode;
-import org.jd.core.v1.model.classfile.attribute.AttributeLineNumberTable;
-import org.jd.core.v1.model.classfile.attribute.AttributeLocalVariableTable;
-import org.jd.core.v1.model.classfile.attribute.CodeException;
-import org.jd.core.v1.model.classfile.attribute.LocalVariable;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeWriter;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
@@ -81,7 +82,7 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
         }
 
         @Override
-        protected void methodAction(Method method) {
+        protected void methodAction(Method method, String className) {
             String byteCode = new AsciiTableByteCodeWriter().write("    ", method);
             Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
             RSyntaxTextArea textArea = new RSyntaxTextArea(byteCode);
@@ -159,11 +160,11 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
         private static class AsciiTableByteCodeWriter extends ByteCodeWriter {
             
             @Override
-            protected void writeLineNumberTable(String linePrefix, StringBuilder sb, AttributeCode attributeCode) {
-                AttributeLineNumberTable lineNumberTable = attributeCode.getAttribute("LineNumberTable");
+            protected void writeLineNumberTable(String linePrefix, StringBuilder sb, Code attributeCode) {
+                LineNumberTable lineNumberTable = attributeCode.getLineNumberTable();
                 if (lineNumberTable != null) {
                     sb.append("\n\n").append(linePrefix).append("Line number table:\n\n").append(linePrefix);
-                    List<LineNumber> lineNumbers = Arrays.asList(lineNumberTable.lineNumberTable());
+                    List<LineNumber> lineNumbers = Arrays.asList(lineNumberTable.getLineNumberTable());
                     List<ColumnData<LineNumber>> columns = new ArrayList<>();
                     columns.add(new Column().header("Java source line number").with(lineNumber -> String.valueOf(lineNumber.getLineNumber())));
                     columns.add(new Column().header("Byte code offset").with(lineNumber -> String.valueOf(lineNumber.getStartPC())));
@@ -172,32 +173,32 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
             }
 
             @Override
-            protected void writeExceptionTable(String linePrefix, StringBuilder sb, ConstantPool constants, AttributeCode attributeCode) {
+            protected void writeExceptionTable(String linePrefix, StringBuilder sb, ConstantPool constants, Code attributeCode) {
                 CodeException[] codeExceptions = attributeCode.getExceptionTable();
                 if (codeExceptions != null) {
                     sb.append("\n\n").append(linePrefix).append("Exception table:\n\n").append(linePrefix);
                     List<CodeException> codeExceptionList = Arrays.asList(codeExceptions);
                     List<ColumnData<CodeException>> columns = new ArrayList<>();
-                    columns.add(new Column().header("From").with(ce -> String.valueOf(ce.startPc())));
-                    columns.add(new Column().header("To").with(ce -> String.valueOf(ce.endPc())));
-                    columns.add(new Column().header("Target").with(ce -> String.valueOf(ce.handlerPc())));
-                    columns.add(new Column().header("Type").with(ce -> ce.catchType() == 0 ? "finally" : constants.getConstantTypeName(ce.catchType())));
+                    columns.add(new Column().header("From").with(ce -> String.valueOf(ce.getStartPC())));
+                    columns.add(new Column().header("To").with(ce -> String.valueOf(ce.getEndPC())));
+                    columns.add(new Column().header("Target").with(ce -> String.valueOf(ce.getHandlerPC())));
+                    columns.add(new Column().header("Type").with(ce -> ce.getCatchType() == 0 ? "finally" : constants.getConstantString(ce.getCatchType(), Const.CONSTANT_Class)));
                     sb.append(AsciiTable.builder().lineSeparator("\n" + linePrefix).data(codeExceptionList, columns).asString());
                 }
             }
 
             @Override
-            protected void writeLocalVariableTable(String linePrefix, StringBuilder sb, AttributeCode attributeCode) {
-                AttributeLocalVariableTable localVariableTable = attributeCode.getAttribute("LocalVariableTable");
+            protected void writeLocalVariableTable(String linePrefix, StringBuilder sb, Code attributeCode) {
+                LocalVariableTable localVariableTable = attributeCode.getLocalVariableTable();
                 if (localVariableTable != null) {
                     sb.append("\n\n").append(linePrefix).append("Local variable table:\n\n").append(linePrefix);
-                    List<LocalVariable> localVariableList = Arrays.asList(localVariableTable.localVariableTable());
+                    List<LocalVariable> localVariableList = Arrays.asList(localVariableTable.getLocalVariableTable());
                     List<ColumnData<LocalVariable>> columns = new ArrayList<>();
-                    columns.add(new Column().header("Start").with(lv -> String.valueOf(lv.startPc())));
-                    columns.add(new Column().header("Length").with(lv -> String.valueOf(lv.length())));
-                    columns.add(new Column().header("Slot").with(lv -> String.valueOf(lv.index())));
-                    columns.add(new Column().header("Name").with(LocalVariable::name));
-                    columns.add(new Column().header("Descriptor").with(LocalVariable::descriptor));
+                    columns.add(new Column().header("Start").with(lv -> String.valueOf(lv.getStartPC())));
+                    columns.add(new Column().header("Length").with(lv -> String.valueOf(lv.getLength())));
+                    columns.add(new Column().header("Slot").with(lv -> String.valueOf(lv.getIndex())));
+                    columns.add(new Column().header("Name").with(LocalVariable::getName));
+                    columns.add(new Column().header("Descriptor").with(LocalVariable::getSignature));
                     sb.append(AsciiTable.builder().lineSeparator("\n" + linePrefix).data(localVariableList, columns).asString());
                 }
             }

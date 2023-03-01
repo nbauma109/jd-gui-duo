@@ -5,9 +5,9 @@
  */
 package org.jd.gui.service.actions;
 
+import org.apache.bcel.classfile.Method;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.cfg.MethodUtil;
-import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.gui.api.model.Container;
@@ -54,7 +54,7 @@ public abstract class AbstractMethodAction extends AbstractAction {
                     if (method == null) {
                         method = MethodUtil.searchMethod(loader, typeMaker, internalTypeName, "<clinit>", "()V");
                     }
-                    methodAction(method);
+                    methodAction(method, internalTypeName);
                     
                 } catch (IOException ex) {
                     assert ExceptionUtil.printStackTrace(ex);
@@ -63,5 +63,5 @@ public abstract class AbstractMethodAction extends AbstractAction {
         }
     }
 
-    protected abstract void methodAction(Method method);
+    protected abstract void methodAction(Method method, String className);
 }

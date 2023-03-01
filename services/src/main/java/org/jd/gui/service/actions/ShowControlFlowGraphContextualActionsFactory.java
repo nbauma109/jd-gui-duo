@@ -7,7 +7,7 @@
 package org.jd.gui.service.actions;
 
 import org.apache.bcel.Const;
-import org.jd.core.v1.model.classfile.Method;
+import org.apache.bcel.classfile.Method;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphGotoReducer;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphLoopReducer;
@@ -85,7 +85,7 @@ public class ShowControlFlowGraphContextualActionsFactory implements ContextualA
             };
         }
 
-        protected void methodAction(Method method) {
+        protected void methodAction(Method method, String className) {
             if ((method.getAccessFlags() & Const.ACC_ABSTRACT) != 0) {
                 JOptionPane.showMessageDialog(null, "Method is abstract !", "ERROR", JOptionPane.ERROR_MESSAGE, ICON);
                 return;
@@ -108,10 +108,10 @@ public class ShowControlFlowGraphContextualActionsFactory implements ContextualA
                     default:
                         break;
                 }
-                CFGViewer.showGraph(controlFlowGraph);
+                CFGViewer.showGraph(controlFlowGraph, className);
             } else {
                 controlFlowGraphReducer.reduce(method);
-                CFGViewer.showGraph(controlFlowGraphReducer.getControlFlowGraph());
+                CFGViewer.showGraph(controlFlowGraphReducer.getControlFlowGraph(), className);
             }
         }
     }
