@@ -7,49 +7,30 @@
 
 package org.jd.gui.service.treenode;
 
-import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
-import org.jd.gui.api.model.Container.Entry;
 import org.jd.gui.util.ImageUtil;
-import org.jd.gui.util.decompiler.ContainerLoader;
-import org.jd.gui.util.decompiler.GuiPreferences;
-import org.jd.gui.util.loader.LoaderUtils;
-import org.jd.gui.util.parser.jdt.ASTParserFactory;
-import org.jd.gui.view.data.ClassFileTreeNodeBean;
-import com.heliosdecompiler.transformerapi.StandardTransformers;
-import com.heliosdecompiler.transformerapi.common.Loader;
-
 import org.jd.gui.view.component.DynamicPage;
+import org.jd.gui.view.data.ClassFileTreeNodeBean;
 
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.util.Map;
 import java.util.regex.Pattern;
 
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
-import javax.swing.SwingWorker;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V1;
 import static org.apache.bcel.Const.MAJOR_1_1;
 import static org.apache.bcel.Const.MAJOR_1_5;
-import static org.jd.gui.util.decompiler.GuiPreferences.DECOMPILE_ENGINE;
 
-import jd.core.ClassUtil;
 import jd.core.CoreConstants;
-import jd.core.DecompilationResult;
 import jd.core.process.deserializer.ClassFormatException;
 
 public class ClassFileTreeNodeFactoryProvider extends AbstractTypeFileTreeNodeFactoryProvider {
@@ -77,57 +58,10 @@ public class ClassFileTreeNodeFactoryProvider extends AbstractTypeFileTreeNodeFa
     public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
         int lastSlashIndex = entry.getPath().lastIndexOf('/');
         String label = entry.getPath().substring(lastSlashIndex + 1);
-        ClassFileTreeNodeBean treeNodeBean = new ClassFileTreeNodeBean(api, label);
+        ClassFileTreeNodeBean treeNodeBean = new ClassFileTreeNodeBean(api, label, entry);
         FileTreeNode fileTreeNode = new FileTreeNode(entry, treeNodeBean, FACTORY);
-        new SwingWorker<Void, Void>() {
-
-            @Override
-            protected Void doInBackground() throws Exception {
-                treeNodeBean.setClassIcon(getIconForEntry(entry, api));
-                return null;
-            }
-            
-            @Override
-            protected void done() {
-                api.repaint();
-            }
-        }.execute();
+        treeNodeBean.getWorker().execute();
         return (T) fileTreeNode;
-    }
-
-    private static Icon getIconForEntry(Entry entry, API api) {
-        boolean showErrors = "true".equals(api.getPreferences().get(GuiPreferences.SHOW_COMPILER_ERRORS));
-        boolean showWarnings = "true".equals(api.getPreferences().get(GuiPreferences.SHOW_COMPILER_WARNINGS));
-        String unitName = entry.getPath();
-        URI jarURI = entry.getContainer().getRoot().getParent().getUri();
-        String entryInternalName = ClassUtil.getInternalName(entry.getPath());
-        Map<String, String> preferences = api.getPreferences();
-        String engineName = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
-        ContainerLoader loader = new ContainerLoader(entry);
-        Loader apiLoader = LoaderUtils.createLoader(preferences, loader, entry);
-        DecompilationResult decompilationResult;
-        try {
-            decompilationResult = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, engineName);
-        } catch (Exception e) {
-            assert ExceptionUtil.printStackTrace(e);
-            return CLASS_FILE_ICON_ERROR;
-        }
-        String text = decompilationResult.getDecompiledOutput();
-        ASTNode ast = ASTParserFactory.getInstanceWithBindings().newASTParser(text.toCharArray(), unitName, jarURI).createAST(null);
-        boolean hasWarning = false;
-        if (ast instanceof CompilationUnit) {
-            CompilationUnit cu = (CompilationUnit) ast;
-            IProblem[] problems = cu.getProblems();
-            for (IProblem pb : problems) {
-                if (showErrors && pb.isError()) {
-                    return CLASS_FILE_ICON_ERROR;
-                }
-                if (showWarnings && pb.isWarning()) {
-                    hasWarning = true;
-                }
-            }
-        }
-        return hasWarning ? CLASS_FILE_ICON_WARNING : CLASS_FILE_ICON;
     }
 
     protected static class Factory implements AbstractTypeFileTreeNodeFactoryProvider.PageAndTipFactory {
