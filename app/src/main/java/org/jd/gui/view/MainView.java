@@ -50,6 +50,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -426,8 +427,8 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
         invokeLater(() -> findComboBox.getEditor().getEditorComponent().setBackground(wasFound ? findBackgroundColor : findErrorBackgroundColor));
     }
 
-    public void addMainPanel(String title, Icon icon, String tip, T component) {
-        invokeLater(() -> mainTabbedPanel.addPage(title, icon, tip, component));
+    public void addMainPanel(String title, Supplier<Icon> iconSupplier, String tip, T component) {
+        invokeLater(() -> mainTabbedPanel.addPage(title, iconSupplier, tip, component));
     }
 
     public List<T> getMainPanels() {

@@ -204,7 +204,7 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
             if (data instanceof TreeNodeData) {
                 // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
                 TreeNodeData tnd = (TreeNodeData) data;
-                tabbedPanel.addPage(label, tnd.getIcon(), tnd.getTip(), page);
+                tabbedPanel.addPage(label, tnd::getIcon, tnd.getTip(), page);
             } else {
                 tabbedPanel.addPage(label, null, null, page);
             }

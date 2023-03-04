@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2023 GPLv3.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -41,7 +41,7 @@ import jd.core.DecompilationResult;
 public class ClassFileTreeNodeBean extends TreeNodeBean {
     private final API api;
     private final Entry entry;
-    private final Map<String, ClassFileTreeNodeState> decompilerToState = new ConcurrentHashMap<>();
+    private final Map<PreferenceKey, ClassFileTreeNodeState> decompilerToState = new ConcurrentHashMap<>();
 
     public ClassFileTreeNodeBean(API api, String label, Entry entry) {
         super(label, CLASS_FILE_ICON);
@@ -52,8 +52,7 @@ public class ClassFileTreeNodeBean extends TreeNodeBean {
     @Override
     public Icon getIcon() {
         Map<String, String> preferences = api.getPreferences();
-        String engineName = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
-        ClassFileTreeNodeState state = decompilerToState.get(engineName);
+        ClassFileTreeNodeState state = decompilerToState.get(makeKey(preferences));
         if (state != null) {
             if ("true".equals(api.getPreferences().get(SHOW_COMPILER_ERRORS)) && state.hasErrors()) {
                 return CLASS_FILE_ICON_ERROR;
@@ -67,13 +66,16 @@ public class ClassFileTreeNodeBean extends TreeNodeBean {
         return CLASS_FILE_ICON;
     }
 
+    private static PreferenceKey makeKey(Map<String, String> preferences) {
+        return new PreferenceKey(preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1), preferences);
+    }
+
     public SwingWorker<Void, Void> getWorker() {
         return new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() throws Exception {
                 Map<String, String> preferences = api.getPreferences();
-                String engineName = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
-                decompilerToState.computeIfAbsent(engineName, eng -> getStateForEntry(entry, api, eng));
+                decompilerToState.computeIfAbsent(makeKey(preferences), k -> getStateForEntry(entry, api, k.engineName()));
                 return null;
             }
             
@@ -89,12 +91,7 @@ public class ClassFileTreeNodeBean extends TreeNodeBean {
         return getIcon();
     }
 
-    public Map<String, ClassFileTreeNodeState> getDecompilerToState() {
-        return decompilerToState;
-    }
-
-
-    public static synchronized ClassFileTreeNodeState getStateForEntry(Entry entry, API api, String engineName) {
+    public static ClassFileTreeNodeState getStateForEntry(Entry entry, API api, String engineName) {
         String unitName = entry.getPath();
         URI jarURI = entry.getContainer().getRoot().getParent().getUri();
         String entryInternalName = ClassUtil.getInternalName(entry.getPath());

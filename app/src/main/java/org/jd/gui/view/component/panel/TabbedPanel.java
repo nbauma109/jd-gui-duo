@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -43,6 +44,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 import javax.swing.ToolTipManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -116,7 +118,7 @@ public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel impl
         return new Color(Math.max((int) (c.getRed() * 0.85), 0), Math.max((int) (c.getGreen() * 0.85), 0), Math.max((int) (c.getBlue() * 0.85), 0), c.getAlpha());
     }
 
-    public void addPage(String title, Icon icon, String tip, T page) {
+    public void addPage(String title, Supplier<Icon> iconSupplier, String tip, T page) {
         // Add a new tab
         JLabel tabCloseButton = new JLabel(CLOSE_ICON);
         tabCloseButton.setToolTipText("Close this panel");
@@ -157,7 +159,9 @@ public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel impl
         tab.setBorder(BorderFactory.createEmptyBorder(2, 0, 3, 0));
         tab.setOpaque(false);
         tab.setToolTipText(tip);
-        tab.add(new JLabel(title, icon, SwingConstants.LEADING), BorderLayout.CENTER);
+        JLabel tabLabel = new JLabel(title, iconSupplier.get(), SwingConstants.LEADING);
+        new Timer(200, e -> tabLabel.setIcon(iconSupplier.get())).start();
+        tab.add(tabLabel, BorderLayout.CENTER);
         tab.add(tabCloseButton, BorderLayout.EAST);
         ToolTipManager.sharedInstance().unregisterComponent(tab);
 

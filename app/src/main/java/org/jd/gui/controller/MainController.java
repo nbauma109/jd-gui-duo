@@ -91,6 +91,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -959,8 +960,8 @@ public class MainController implements API {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends JComponent & UriGettable> void addPanel(File file, String title, Icon icon, String tip, T component) {
-        mainView.addMainPanel(title, icon, tip, component);
+    public <T extends JComponent & UriGettable> void addPanel(File file, String title, Supplier<Icon> iconSupplier, String tip, T component) {
+        mainView.addMainPanel(title, iconSupplier, tip, component);
 
         if (component instanceof ContentIndexable && file != null) {
             // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved

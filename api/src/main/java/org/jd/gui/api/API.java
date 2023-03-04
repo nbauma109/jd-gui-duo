@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Future;
+import java.util.function.Supplier;
 
 import javax.swing.Action;
 import javax.swing.Icon;
@@ -37,7 +38,7 @@ public interface API {
 
     void addURI(URI uri);
 
-    <T extends JComponent & UriGettable> void addPanel(File file, String title, Icon icon, String tip, T component);
+    <T extends JComponent & UriGettable> void addPanel(File file, String title, Supplier<Icon> iconSupplier, String tip, T component);
 
     Collection<Action> getContextualActions(Container.Entry entry, String fragment);
 

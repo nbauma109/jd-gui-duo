@@ -23,6 +23,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -131,8 +132,8 @@ public class MainTabbedPanel<T extends JComponent & UriGettable> extends TabbedP
     }
 
     @Override
-    public void addPage(String title, Icon icon, String tip, T page) {
-        super.addPage(title, icon, tip, page);
+    public void addPage(String title, Supplier<Icon> iconSupplier, String tip, T page) {
+        super.addPage(title, iconSupplier, tip, page);
         if (page instanceof PageChangeable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
             PageChangeable pc = (PageChangeable) page;
             pc.addPageChangeListener(this);

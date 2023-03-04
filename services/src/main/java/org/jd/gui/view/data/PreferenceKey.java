@@ -6,5 +6,7 @@
  */
 package org.jd.gui.view.data;
 
-public record ClassFileTreeNodeState(boolean hasErrors, boolean hasWarnings) {
+import java.util.Map;
+
+public record PreferenceKey(String engineName, Map<String, String> preferences) {
 }
