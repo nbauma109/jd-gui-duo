@@ -91,7 +91,7 @@ public class ClassFileTreeNodeBean extends TreeNodeBean {
         return getIcon();
     }
 
-    public static ClassFileTreeNodeState getStateForEntry(Entry entry, API api, String engineName) {
+    public static synchronized ClassFileTreeNodeState getStateForEntry(Entry entry, API api, String engineName) {
         String unitName = entry.getPath();
         URI jarURI = entry.getContainer().getRoot().getParent().getUri();
         String entryInternalName = ClassUtil.getInternalName(entry.getPath());
