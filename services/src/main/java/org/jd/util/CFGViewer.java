@@ -8,6 +8,7 @@
 package org.jd.util;
 
 import org.apache.bcel.classfile.Method;
+import org.apache.bcel.classfile.Utility;
 import org.jd.core.v1.cfg.ControlFlowGraphPlantUMLWriter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
@@ -44,7 +45,7 @@ public final class CFGViewer {
             // The XML is stored into svg
             final String svg = new String(os.toByteArray(), StandardCharsets.UTF_8);
             Method method = cfg.getMethod();
-            String svgFileName = className + '.' + method.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+            String svgFileName = Utility.pathToPackage(className) + '.' + method.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
             File svgFile = File.createTempFile(svgFileName, ".svg");
             svgFile.deleteOnExit();
             Files.write(svgFile.toPath(), svg.getBytes(StandardCharsets.UTF_8));
