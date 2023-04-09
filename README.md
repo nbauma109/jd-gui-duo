@@ -12,7 +12,7 @@ JD-Core v0 and v1 are 2 different decompilers rather than 2 different versions o
  - [JD-Core v0](https://github.com/nbauma109/jd-core-v0) uses byte code pattern matching like [JAD](http://www.kpdus.com/jad.html), the 1st Java decompiler
  - [JD-Core v1](https://github.com/nbauma109/jd-core) uses an analytical algorithm like [Fernflower](https://github.com/fesh0r/fernflower), the 1st analytical decompiler
 
-This project is built on top of original JD-GUI written by [Emmanuel Dupuy](https://github.com/emmanue1).
+This project is built on top of original [JD-GUI](https://github.com/java-decompiler/jd-gui) written by [Emmanuel Dupuy](https://github.com/emmanue1).
 
 # Feature tour
 

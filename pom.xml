@@ -29,7 +29,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-release-plugin</artifactId>
-					<version>3.0.0-M7</version>
+					<version>3.0.0</version>
 					<configuration>
 						<arguments>${arguments}</arguments>
 						<goals>install</goals>
@@ -40,7 +40,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
-					<version>3.3.0</version>
+					<version>3.3.1</version>
 				</plugin>
 				<plugin>
 					<groupId>com.googlecode.maven-download-plugin</groupId>
@@ -55,7 +55,7 @@
 				<plugin>
 					<groupId>com.akathist.maven.plugins.launch4j</groupId>
 					<artifactId>launch4j-maven-plugin</artifactId>
-					<version>2.3.2</version>
+					<version>2.3.3</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -80,12 +80,12 @@
 			<dependency>
 				<groupId>com.github.nbauma109</groupId>
 				<artifactId>netbeans-visual-diff-standalone</artifactId>
-				<version>2.0.32</version>
+				<version>2.0.34</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fifesoft</groupId>
 				<artifactId>rsyntaxtextarea</artifactId>
-				<version>3.3.2</version>
+				<version>3.3.3</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.nbauma109</groupId>
@@ -95,12 +95,12 @@
 			<dependency>
 				<groupId>org.eclipse.jdt</groupId>
 				<artifactId>org.eclipse.jdt.core.manipulation</artifactId>
-				<version>1.17.0</version>
+				<version>1.18.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jdt</groupId>
 				<artifactId>org.eclipse.jdt.core</artifactId>
-				<version>3.32.0</version>
+				<version>3.33.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.freva</groupId>
@@ -115,7 +115,7 @@
 			<dependency>
 				<groupId>net.sourceforge.plantuml</groupId>
 				<artifactId>plantuml</artifactId>
-				<version>1.2023.2</version>
+				<version>1.2023.5</version>
 			</dependency>
 			<dependency>
 				<groupId>junit</groupId>
