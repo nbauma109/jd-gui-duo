@@ -7,6 +7,7 @@
 
 package org.jd.gui.view.component;
 
+import org.apache.bcel.classfile.Utility;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMaker;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.DocumentRange;
@@ -287,6 +288,14 @@ public class ModuleInfoFilePage extends ClassFilePage {
         public ModuleInfoReferenceData(int type, String typeName, String name, String descriptor, String owner) {
             super(typeName, name, descriptor, owner);
             this.type = type;
+        }
+
+        @Override
+        public String getTypeName() {
+            if (type == PACKAGE) {
+                return Utility.packageToPath(super.getTypeName());
+            }
+            return super.getTypeName();
         }
     }
 
