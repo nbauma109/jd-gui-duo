@@ -14,6 +14,7 @@ import org.apache.bcel.classfile.LineNumber;
 import org.apache.bcel.classfile.LineNumberTable;
 import org.apache.bcel.classfile.LocalVariable;
 import org.apache.bcel.classfile.LocalVariableTable;
+import org.apache.bcel.classfile.LocalVariableTypeTable;
 import org.apache.bcel.classfile.Method;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -41,6 +42,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -193,6 +196,21 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
                 if (localVariableTable != null) {
                     sb.append("\n\n").append(linePrefix).append("Local variable table:\n\n").append(linePrefix);
                     List<LocalVariable> localVariableList = Arrays.asList(localVariableTable.getLocalVariableTable());
+                    List<ColumnData<LocalVariable>> columns = new ArrayList<>();
+                    columns.add(new Column().header("Start").with(lv -> String.valueOf(lv.getStartPC())));
+                    columns.add(new Column().header("Length").with(lv -> String.valueOf(lv.getLength())));
+                    columns.add(new Column().header("Slot").with(lv -> String.valueOf(lv.getIndex())));
+                    columns.add(new Column().header("Name").with(LocalVariable::getName));
+                    columns.add(new Column().header("Descriptor").with(LocalVariable::getSignature));
+                    sb.append(AsciiTable.builder().lineSeparator("\n" + linePrefix).data(localVariableList, columns).asString());
+                }
+
+                LocalVariableTypeTable localVariableTypeTable = (LocalVariableTypeTable) Optional.ofNullable(attributeCode.getAttributes())
+                        .map(Stream::of).orElseGet(Stream::empty).filter(LocalVariableTypeTable.class::isInstance).findAny().orElse(null);
+
+                if (localVariableTypeTable != null) {
+                    sb.append("\n\n").append(linePrefix).append("Local variable type table:\n\n").append(linePrefix);
+                    List<LocalVariable> localVariableList = Arrays.asList(localVariableTypeTable.getLocalVariableTypeTable());
                     List<ColumnData<LocalVariable>> columns = new ArrayList<>();
                     columns.add(new Column().header("Start").with(lv -> String.valueOf(lv.getStartPC())));
                     columns.add(new Column().header("Length").with(lv -> String.valueOf(lv.getLength())));
