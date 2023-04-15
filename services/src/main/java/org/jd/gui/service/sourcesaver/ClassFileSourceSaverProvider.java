@@ -7,7 +7,6 @@
 
 package org.jd.gui.service.sourcesaver;
 
-import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
 import org.jd.core.v1.printer.LineNumberStringBuilderPrinter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeWriter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
@@ -42,8 +41,6 @@ import jd.core.DecompilationResult;
 public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
 
     private static final String INTERNAL_ERROR = "// INTERNAL ERROR //";
-
-    protected static final ClassFileToJavaSourceDecompiler DECOMPILER = new ClassFileToJavaSourceDecompiler();
 
     protected ContainerLoader loader = new ContainerLoader();
     protected LineNumberStringBuilderPrinter printer = new LineNumberStringBuilderPrinter();

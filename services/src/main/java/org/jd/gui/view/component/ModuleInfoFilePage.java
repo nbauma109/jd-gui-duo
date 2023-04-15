@@ -24,6 +24,8 @@ import org.jd.gui.api.model.Indexes;
 import org.jd.gui.util.decompiler.ContainerLoader;
 import org.jd.gui.util.index.IndexesUtil;
 
+import com.heliosdecompiler.transformerapi.decompilers.jd.JDCoreV1Decompiler;
+
 import java.awt.Point;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -87,7 +89,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
             String entryInternalName = ClassUtil.getInternalName(entry.getPath());
 
             // Decompile class file
-            DECOMPILER.decompile(loader, printer, entryInternalName);
+            JDCoreV1Decompiler.DECOMPILER.decompile(loader, printer, entryInternalName);
         } catch (Exception t) {
             assert ExceptionUtil.printStackTrace(t);
             setText("// INTERNAL ERROR //");

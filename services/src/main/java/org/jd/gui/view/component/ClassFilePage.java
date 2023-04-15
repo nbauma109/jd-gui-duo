@@ -9,7 +9,6 @@ package org.jd.gui.view.component;
 
 import org.fife.ui.rsyntaxtextarea.DocumentRange;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeWriter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
@@ -41,17 +40,12 @@ import static org.jd.gui.util.decompiler.GuiPreferences.REMOVE_UNNECESSARY_CASTS
 
 import jd.core.ClassUtil;
 import jd.core.DecompilationResult;
-import jd.core.Decompiler;
-import jd.core.process.DecompilerImpl;
 
 public class ClassFilePage extends TypePage {
 
     private static final String INTERNAL_ERROR = "// INTERNAL ERROR //";
 
     private static final long serialVersionUID = 1L;
-
-    protected static final ClassFileToJavaSourceDecompiler DECOMPILER = new ClassFileToJavaSourceDecompiler();
-    protected static final Decompiler DECOMPILERV0 = new DecompilerImpl();
 
     private int maximumLineNumber = -1;
 
