@@ -7,6 +7,7 @@
 
 package org.jd.gui.service.actions;
 
+import org.apache.bcel.classfile.Utility;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
@@ -18,8 +19,8 @@ import org.jd.gui.util.ImageUtil;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -29,7 +30,7 @@ public class CopyQualifiedNameContextualActionsFactory implements ContextualActi
 
     @Override
     public Collection<Action> make(API api, Container.Entry entry, String fragment) {
-        return Collections.singletonList(new CopyQualifiedNameAction(api, entry, fragment));
+        return Arrays.asList(new CopyQualifiedNameAction(api, entry, fragment, true), new CopyQualifiedNameAction(api, entry, fragment, false));
     }
 
     public static class CopyQualifiedNameAction extends AbstractAction {
@@ -41,14 +42,20 @@ public class CopyQualifiedNameContextualActionsFactory implements ContextualActi
         private final transient API api;
         private final transient Container.Entry entry;
         private final String fragment;
+        private final boolean qualified;
 
-        public CopyQualifiedNameAction(API api, Container.Entry entry, String fragment) {
+        public CopyQualifiedNameAction(API api, Container.Entry entry, String fragment, boolean qualified) {
             this.api = api;
             this.entry = entry;
             this.fragment = fragment;
+            this.qualified = qualified;
 
             putValue(GROUP_NAME, "Edit > CutCopyPaste");
-            putValue(NAME, "Copy Qualified Name");
+            if (qualified) {
+                putValue(NAME, "Copy Qualified Name");
+            } else {
+                putValue(NAME, "Copy Internal Name");
+            }
             putValue(SMALL_ICON, ICON);
         }
 
@@ -60,10 +67,14 @@ public class CopyQualifiedNameContextualActionsFactory implements ContextualActi
                 Type type = typeFactory.make(api, entry, fragment);
 
                 if (type != null) {
-                    StringBuilder sb = new StringBuilder(type.getDisplayPackageName());
+                    String displayPackageName = type.getDisplayPackageName();
+                    if (!qualified) { 
+                        displayPackageName = Utility.packageToPath(displayPackageName);
+                    }
+                    StringBuilder sb = new StringBuilder(displayPackageName);
 
                     if (sb.length() > 0) {
-                        sb.append('.');
+                        sb.append(qualified ? '.' : '/');
                     }
 
                     sb.append(type.getDisplayTypeName());
@@ -107,7 +118,7 @@ public class CopyQualifiedNameContextualActionsFactory implements ContextualActi
             // Create qualified name from URI
             String path = entry.getUri().getPath();
             String rootPath = entry.getContainer().getRoot().getUri().getPath();
-            String qualifiedName = path.substring(rootPath.length()).replace('/', '.');
+            String qualifiedName = path.substring(rootPath.length());
 
             if (qualifiedName.endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
                 qualifiedName = qualifiedName.substring(0, qualifiedName.length()-6);

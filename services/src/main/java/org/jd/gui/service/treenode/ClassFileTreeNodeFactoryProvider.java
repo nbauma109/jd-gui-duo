@@ -7,6 +7,7 @@
 
 package org.jd.gui.service.treenode;
 
+import org.apache.bcel.classfile.ClassFormatException;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContainerEntryGettable;
@@ -31,7 +32,6 @@ import static org.apache.bcel.Const.MAJOR_1_1;
 import static org.apache.bcel.Const.MAJOR_1_5;
 
 import jd.core.CoreConstants;
-import jd.core.process.deserializer.ClassFormatException;
 
 public class ClassFileTreeNodeFactoryProvider extends AbstractTypeFileTreeNodeFactoryProvider {
 
