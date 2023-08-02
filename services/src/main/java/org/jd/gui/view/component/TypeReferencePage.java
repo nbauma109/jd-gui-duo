@@ -8,7 +8,6 @@
 package org.jd.gui.view.component;
 
 import org.fife.ui.rsyntaxtextarea.DocumentRange;
-import org.fife.ui.rtextarea.Marker;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 
 import java.net.URI;
@@ -34,7 +33,7 @@ public abstract class TypeReferencePage extends HyperlinkPage {
         List<DocumentRange> ranges = new ArrayList<>();
         String query = uri.getQuery();
 
-        Marker.clearMarkAllHighlights(textArea);
+        textArea.clearMarkAllHighlights();
 
         if (query != null) {
             Map<String, String> parameters = parseQuery(query);
@@ -95,7 +94,7 @@ public abstract class TypeReferencePage extends HyperlinkPage {
 
         if (!ranges.isEmpty()) {
             textArea.setMarkAllHighlightColor(SELECT_HIGHLIGHT_COLOR);
-            Marker.markAll(textArea, ranges);
+            textArea.markAll(ranges);
             Collections.sort(ranges);
             setCaretPositionAndCenter(ranges.get(0));
         }

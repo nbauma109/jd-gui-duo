@@ -16,7 +16,6 @@ import org.fife.ui.rsyntaxtextarea.Token;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.TokenMap;
 import org.fife.ui.rsyntaxtextarea.TokenTypes;
-import org.fife.ui.rtextarea.Marker;
 import org.jd.core.v1.printer.StringBuilderPrinter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
@@ -163,7 +162,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
         String fragment = uri.getFragment();
         String query = uri.getQuery();
 
-        Marker.clearMarkAllHighlights(textArea);
+        textArea.clearMarkAllHighlights();
 
         if (fragment != null && listener.getDeclarations().size() == 1) {
             DeclarationData declaration = listener.getDeclarations().entrySet().iterator().next().getValue();
@@ -217,7 +216,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
 
         if (!ranges.isEmpty()) {
             textArea.setMarkAllHighlightColor(SELECT_HIGHLIGHT_COLOR);
-            Marker.markAll(textArea, ranges);
+            textArea.markAll(ranges);
             Collections.sort(ranges);
             setCaretPositionAndCenter(ranges.get(0));
         }

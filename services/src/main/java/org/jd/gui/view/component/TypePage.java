@@ -11,7 +11,6 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.fife.ui.rsyntaxtextarea.DocumentRange;
-import org.fife.ui.rtextarea.Marker;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.FocusedTypeGettable;
@@ -137,7 +136,7 @@ public abstract class TypePage extends CustomLineNumbersPage
         String fragment = uri.getFragment();
         String query = uri.getQuery();
 
-        Marker.clearMarkAllHighlights(textArea);
+        textArea.clearMarkAllHighlights();
 
         if (fragment != null) {
             matchFragmentAndAddDocumentRange(fragment, listener.getDeclarations(), ranges);
@@ -177,7 +176,7 @@ public abstract class TypePage extends CustomLineNumbersPage
 
         if (!ranges.isEmpty()) {
             textArea.setMarkAllHighlightColor(SELECT_HIGHLIGHT_COLOR);
-            Marker.markAll(textArea, ranges);
+            textArea.markAll(ranges);
             Collections.sort(ranges);
             setCaretPositionAndCenter(ranges.get(0));
         }
