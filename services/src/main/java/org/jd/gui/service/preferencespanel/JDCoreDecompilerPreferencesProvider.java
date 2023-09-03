@@ -54,8 +54,8 @@ public class JDCoreDecompilerPreferencesProvider extends JPanel implements Prefe
 
     @Override
     public void restoreDefaults() {
-        writeLineNumbersCheckBox.setSelected(false);
-        writeMetadataCheckBox.setSelected(false);
+        writeLineNumbersCheckBox.setSelected(true);
+        writeMetadataCheckBox.setSelected(true);
         escapeUnicodeCharactersCheckBox.setSelected(false);
         realignLineNumbersCheckBox.setSelected(false);
         omitThisPrefixCheckBox.setSelected(false);
@@ -64,8 +64,8 @@ public class JDCoreDecompilerPreferencesProvider extends JPanel implements Prefe
 
     @Override
     public void loadPreferences(Map<String, String> preferences) {
-        writeLineNumbersCheckBox.setSelected("true".equals(preferences.get(WRITE_LINE_NUMBERS)));
-        writeMetadataCheckBox.setSelected("true".equals(preferences.get(WRITE_METADATA)));
+        writeLineNumbersCheckBox.setSelected("false".equals(preferences.get(WRITE_LINE_NUMBERS)));
+        writeMetadataCheckBox.setSelected("false".equals(preferences.get(WRITE_METADATA)));
         escapeUnicodeCharactersCheckBox.setSelected("true".equals(preferences.get(ESCAPE_UNICODE_CHARACTERS)));
         realignLineNumbersCheckBox.setSelected("true".equals(preferences.get(REALIGN_LINE_NUMBERS)));
         omitThisPrefixCheckBox.setSelected("true".equals(preferences.get(OMIT_THIS_PREFIX)));
