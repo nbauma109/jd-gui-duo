@@ -75,7 +75,7 @@
 			<dependency>
 				<groupId>org.bidib.org.oxbow</groupId>
 				<artifactId>swingbits</artifactId>
-				<version>1.3.1</version>
+				<version>1.3.2</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.nbauma109</groupId>
