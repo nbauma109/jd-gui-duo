@@ -10,7 +10,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFixCore.RemoveAllCastOperation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.ui.text.correction.ProblemLocationCore;
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.MalformedTreeException;
@@ -40,11 +40,11 @@ public final class RemoveUnnecessaryCasts {
         IProblem[] problems = cu.getProblems();
         for (IProblem pb : problems) {
             if (pb.getID() == IProblem.UnnecessaryCast) {
-                ProblemLocationCore problemLocationCore = new ProblemLocationCore(pb);
-                ASTNode selectedNode = problemLocationCore.getCoveringNode(cu);
+                ProblemLocation problemLocation = new ProblemLocation(pb);
+                ASTNode selectedNode = problemLocation.getCoveringNode(cu);
                 ASTNode curr = ASTNodes.getUnparenthesedExpression(selectedNode);
-                if (curr instanceof CastExpression) {
-                    unnecessaryCasts.add((CastExpression) curr);
+                if (curr instanceof CastExpression ce) {
+                    unnecessaryCasts.add(ce);
                 }
             }
         }
