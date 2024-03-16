@@ -64,12 +64,12 @@ public class JDCoreDecompilerPreferencesProvider extends JPanel implements Prefe
 
     @Override
     public void loadPreferences(Map<String, String> preferences) {
-        writeLineNumbersCheckBox.setSelected("false".equals(preferences.get(WRITE_LINE_NUMBERS)));
-        writeMetadataCheckBox.setSelected("false".equals(preferences.get(WRITE_METADATA)));
-        escapeUnicodeCharactersCheckBox.setSelected("true".equals(preferences.get(ESCAPE_UNICODE_CHARACTERS)));
-        realignLineNumbersCheckBox.setSelected("true".equals(preferences.get(REALIGN_LINE_NUMBERS)));
-        omitThisPrefixCheckBox.setSelected("true".equals(preferences.get(OMIT_THIS_PREFIX)));
-        displayDefaultConstructorCheckBox.setSelected("true".equals(preferences.get(DISPLAY_DEFAULT_CONSTRUCTOR)));
+        writeLineNumbersCheckBox.setSelected(Boolean.parseBoolean(preferences.getOrDefault(WRITE_LINE_NUMBERS, Boolean.TRUE.toString())));
+        writeMetadataCheckBox.setSelected(Boolean.parseBoolean(preferences.getOrDefault(WRITE_METADATA, Boolean.TRUE.toString())));
+        escapeUnicodeCharactersCheckBox.setSelected(Boolean.parseBoolean(preferences.getOrDefault(ESCAPE_UNICODE_CHARACTERS, Boolean.FALSE.toString())));
+        realignLineNumbersCheckBox.setSelected(Boolean.parseBoolean(preferences.getOrDefault(REALIGN_LINE_NUMBERS, Boolean.FALSE.toString())));
+        omitThisPrefixCheckBox.setSelected(Boolean.parseBoolean(preferences.getOrDefault(OMIT_THIS_PREFIX, Boolean.FALSE.toString())));
+        displayDefaultConstructorCheckBox.setSelected(Boolean.parseBoolean(preferences.getOrDefault(DISPLAY_DEFAULT_CONSTRUCTOR, Boolean.FALSE.toString())));
         toggleOldOptions();
     }
 
