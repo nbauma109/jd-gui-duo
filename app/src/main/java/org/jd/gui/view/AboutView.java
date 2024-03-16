@@ -134,13 +134,13 @@ public class AboutView {
             subsubpanel.add(new JLabel(VERSION + CfrVersionInfo.VERSION_INFO));
             subsubpanel.add(new JLabel("JADX"));
             subsubpanel.add(new JLabel(VERSION + jadxVersion));
-            subsubpanel.add(new JLabel("QuiltFlower"));
-            subsubpanel.add(new JLabel(VERSION + Fernflower.class.getPackage().getImplementationVersion().replace("+local", "")));
+            subsubpanel.add(new JLabel("VineFlower"));
+            subsubpanel.add(new JLabel(VERSION + Fernflower.class.getPackage().getImplementationVersion()));
 
             hbox.add(Box.createHorizontalGlue());
 
             hbox = Box.createHorizontalBox();
-            hbox.add(new JLabel("Copyright © 2008-2019 Emmanuel Dupuy"));
+            hbox.add(new JLabel("Copyright © 2008-2024 Emmanuel Dupuy and other contributors"));
             hbox.add(Box.createHorizontalGlue());
             subvbox.add(hbox);
 
