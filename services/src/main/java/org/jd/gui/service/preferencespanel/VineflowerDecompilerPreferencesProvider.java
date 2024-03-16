@@ -31,7 +31,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public class FernflowerDecompilerPreferencesProvider extends JPanel implements PreferencesPanel {
+public class VineflowerDecompilerPreferencesProvider extends JPanel implements PreferencesPanel {
 
     private static final long serialVersionUID = 1L;
 
@@ -43,7 +43,7 @@ public class FernflowerDecompilerPreferencesProvider extends JPanel implements P
 
     private Map<String, JComponent> components = new HashMap<>();
 
-    public FernflowerDecompilerPreferencesProvider() {
+    public VineflowerDecompilerPreferencesProvider() {
         super(new GridLayout(0, 4));
         for (FieldInfo fieldInfo : Type.of(IFernflowerPreferences.class).getFields()) {
             if (String.class.getName().equals(fieldInfo.getFieldType().getTypeName())) {
