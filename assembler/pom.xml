@@ -9,7 +9,7 @@
 	<artifactId>jd-gui-duo</artifactId>
 	<packaging>pom</packaging>
 	<properties>
-		<jre.archive>jre-2.0.0.zip</jre.archive>
+		<jre.archive>org.eclipse.justj.openjdk.hotspot.jre.full-17.0.10-win32-x86_64.tar.gz</jre.archive>
 		<jre.path>jre</jre.path>
 	</properties>
 	<build>
@@ -47,10 +47,10 @@
 							<goal>wget</goal>
 						</goals>
 						<configuration>
-							<url>https://github.com/nbauma109/jre-builder/releases/download/2.0.0/${jre.archive}</url>
+							<url>https://www.eclipse.org/downloads/download.php?file=/justj/jres/17/downloads/20240120_0921/${jre.archive}&mirror_id=1208</url>
 							<unpack>true</unpack>
 							<outputDirectory>${project.build.directory}/jre</outputDirectory>
-							<sha512>44580661a3809531b51d52fbd50abd89ba8d62d733e0e4985c2e36e143de0d7fc08961643840b16416486857366aff8970ff4cb123c477857482ce6caeb908f6</sha512>
+							<sha512>e35ebc002785c6f43bf2fa13d266d5a1c51dd408590d08fa98d2d5593472421890a5bc70319e3f05b2d79bbb42426f534b8485154f01384e4c634d7f971d9b97</sha512>
 						</configuration>
 					</execution>
 				</executions>
