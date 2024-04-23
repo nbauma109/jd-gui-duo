@@ -90,7 +90,7 @@
 			<dependency>
 				<groupId>com.github.nbauma109</groupId>
 				<artifactId>transformer-api</artifactId>
-				<version>4.0.44</version>
+				<version>4.0.46</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jdt</groupId>
