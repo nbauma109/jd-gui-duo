@@ -1,0 +1,23 @@
+name: Check Jitpack Artifact
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  check-artifact:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Jitpack Artifact
+        run: |
+          URL="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/${GITHUB_REF##*/}-SNAPSHOT/jd-gui-duo-${GITHUB_REF##*/}-SNAPSHOT.zip"
+          curl --location --fail --connect-timeout 300 --max-time 600 "$URL" --output "jd-gui-duo-${GITHUB_REF##*/}-SNAPSHOT.zip"
+      - name: Check if the ZIP file is valid
+        run: |
+          if unzip -tq "jd-gui-duo-${GITHUB_REF##*/}-SNAPSHOT.zip"; then
+            echo "The ZIP file is valid."
+          else
+            echo "The ZIP file is invalid."
+            exit 1
+          fi
