@@ -9,11 +9,6 @@ jobs:
   check-artifact:
     runs-on: ubuntu-latest
     steps:
-      - name: Download and show log by commit hash
-        run: |
-          URL="https://jitpack.io/com/github/nbauma109/jd-gui-duo/${GITHUB_SHA:0:7}/build.log"
-          echo "Downloading URL $URL"
-          curl --location --fail --connect-timeout 3000 --max-time 6000 "$URL"
       - name: Download Jitpack Artifact by commit hash
         run: |
           URL="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/${GITHUB_SHA:0:7}/jd-gui-duo-${GITHUB_SHA:0:7}.zip"
@@ -27,11 +22,6 @@ jobs:
             echo "The ZIP file is invalid."
             exit 1
           fi
-      - name: Download and show log by branch SNAPSHOT
-        run: |
-          URL="https://jitpack.io/com/github/nbauma109/jd-gui-duo/${GITHUB_REF##*/}-SNAPSHOT/build.log"
-          echo "Downloading URL $URL"
-          curl --location --fail --connect-timeout 3000 --max-time 6000 "$URL"
       - name: Download Jitpack Artifact by branch SNAPSHOT
         run: |
           URL="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/${GITHUB_REF##*/}-SNAPSHOT/jd-gui-duo-${GITHUB_REF##*/}-SNAPSHOT.zip"
