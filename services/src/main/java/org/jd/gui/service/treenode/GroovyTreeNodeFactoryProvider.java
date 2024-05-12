@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.gui.service.treenode;
 
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -21,13 +20,13 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-public class PropertiesFileTreeNodeFactoryProvider extends TextFileTreeNodeFactoryProvider {
+public class GroovyTreeNodeFactoryProvider extends TextFileTreeNodeFactoryProvider {
 
-    protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/ascii_obj.png"));
+    protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/groovy_obj.png"));
 
     @Override
     public String[] getSelectors() {
-        return appendSelectors("*:file:*.properties", "*:file:*.cfg");
+        return appendSelectors("*:file:*.groovy");
     }
 
     @Override
@@ -57,7 +56,7 @@ public class PropertiesFileTreeNodeFactoryProvider extends TextFileTreeNodeFacto
 
                 @Override
                 public String getSyntaxStyle() {
-                    return SyntaxConstants.SYNTAX_STYLE_PROPERTIES_FILE;
+                    return SyntaxConstants.SYNTAX_STYLE_GROOVY;
                 }
             };
         }

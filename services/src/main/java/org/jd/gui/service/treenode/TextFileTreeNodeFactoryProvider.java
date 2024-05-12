@@ -42,7 +42,7 @@ public class TextFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvider
 
     @Override
     public String[] getSelectors() {
-        return appendSelectors("*:file:*.txt", "*:file:*.md", "*:file:*.SF", "*:file:*.policy", "*:file:*.yaml", "*:file:*.yml", "*:file:*/COPYRIGHT", "*:file:*/LICENSE");
+        return appendSelectors("*:file:*.txt", "*:file:*.md", "*:file:*.SF", "*:file:*.policy", "*:file:*.yaml", "*:file:*.yml", "*:file:*/COPYRIGHT", "*:file:*/LICENSE", "*:file:*.cnd", "*:file:*.drl", "*:file:*.dsl");
     }
 
     @Override

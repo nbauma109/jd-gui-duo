@@ -34,3 +34,4 @@ org.jd.gui.service.treenode.ZipFileTreeNodeFactoryProvider
 org.jd.gui.service.treenode.ImageFileTreeNodeFactoryProvider
 org.jd.gui.service.treenode.GradleFileTreeNodeFactoryProvider
 org.jd.gui.service.treenode.BatFileTreeNodeFactoryProvider
+org.jd.gui.service.treenode.GroovyTreeNodeFactoryProvider
