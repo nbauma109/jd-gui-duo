@@ -7,6 +7,7 @@
 
 package org.jd.gui.view.component;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.IndexesChangeListener;
@@ -16,9 +17,11 @@ import org.jd.gui.api.model.Indexes;
 import org.jd.gui.util.index.IndexesUtil;
 import org.jd.gui.util.io.TextReader;
 
+import java.awt.BorderLayout;
 import java.awt.Point;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -26,7 +29,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
 import java.util.concurrent.Future;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
+
+import javax.swing.JCheckBox;
 
 import jd.core.links.HyperlinkData;
 
@@ -34,55 +43,79 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
 
     private static final long serialVersionUID = 1L;
 
-    private final transient API api;
-    private final transient Container.Entry entry;
-    private transient Collection<Future<Indexes>> collectionOfFutureIndexes = Collections.emptyList();
+    protected API api;
+    protected Container.Entry entry;
+    protected Collection<Future<Indexes>> collectionOfFutureIndexes = Collections.emptyList();
+    protected boolean beautify = false;
+    protected JCheckBox beautifyCheckbox;
 
     public ManifestFilePage(API api, Container.Entry entry) {
+        beautifyCheckbox = new JCheckBox();
+        beautifyCheckbox.setText("Beautify");
+        beautifyCheckbox.addChangeListener(e -> {
+            beautify = beautifyCheckbox.isSelected();
+            buildText(entry);
+        });
+        add(beautifyCheckbox, BorderLayout.NORTH);
         this.api = api;
         this.entry = entry;
-        try (InputStream inputStream = entry.getInputStream()) {
-            // Load content file
-            String text = TextReader.getText(inputStream);
-            // Parse hyperlinks. Docs:
-            // - http://docs.oracle.com/javase/7/docs/technotes/guides/jar/jar.html
-            // - http://docs.oracle.com/javase/7/docs/api/java/lang/instrument/package-summary.html
-            int startLineIndex = text.indexOf("Main-Class:");
-            if (startLineIndex != -1) {
-                // Example: Main-Class: jd.gui.App
-                int startIndex = skipSeparators(text, startLineIndex + "Main-Class:".length());
-                int endIndex = searchEndIndexOfValue(text, startLineIndex, startIndex);
-                String typeName = text.substring(startIndex, endIndex);
-                String internalTypeName = typeName.replace('.', '/');
-                addHyperlink(new ManifestHyperlinkData(startIndex, endIndex, internalTypeName + "-main-([Ljava/lang/String;)V"));
-            }
+        buildText(entry);
+    }
 
-            startLineIndex = text.indexOf("Premain-Class:");
-            if (startLineIndex != -1) {
-                // Example: Premain-Class: packge.JavaAgent
-                int startIndex = skipSeparators(text, startLineIndex + "Premain-Class:".length());
-                int endIndex = searchEndIndexOfValue(text, startLineIndex, startIndex);
-                String typeName = text.substring(startIndex, endIndex);
-                String internalTypeName = typeName.replace('.', '/');
-                // Undefined parameters : 2 candidate methods
-                // http://docs.oracle.com/javase/6/docs/api/java/lang/instrument/package-summary.html
-                addHyperlink(new ManifestHyperlinkData(startIndex, endIndex, internalTypeName + "-premain-(*)?"));
+    private void buildText(Container.Entry entry) {
+        // Load content file
+        String text = TextReader.getText(entry.getInputStream());
+        if (beautify) {
+            Manifest manifest = new Manifest();
+            try {
+                manifest.read(entry.getInputStream());
+                StringWriter stringWriter = new StringWriter();
+                PrintWriter printWriter = new PrintWriter(stringWriter);
+                dumpManifestHeaders(manifest, printWriter);
+                text = stringWriter.toString();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            // Display
-            setText(text);
-        } catch (IOException e) {
-            assert ExceptionUtil.printStackTrace(e);
         }
+        // Parse hyperlinks. Docs:
+        // - http://docs.oracle.com/javase/7/docs/technotes/guides/jar/jar.html
+        // - http://docs.oracle.com/javase/7/docs/api/java/lang/instrument/package-summary.html
+        int startLineIndex = text.indexOf("Main-Class:");
+        if (startLineIndex != -1) {
+            // Example: Main-Class: jd.gui.App
+            int startIndex = skipSeparators(text, startLineIndex + "Main-Class:".length());
+            int endIndex = searchEndIndexOfValue(text, startLineIndex, startIndex);
+            String typeName = text.substring(startIndex, endIndex);
+            String internalTypeName = typeName.replace('.', '/');
+            addHyperlink(new ManifestHyperlinkData(startIndex, endIndex, internalTypeName + "-main-([Ljava/lang/String;)V"));
+        }
+
+        startLineIndex = text.indexOf("Premain-Class:");
+        if (startLineIndex != -1) {
+            // Example: Premain-Class: packge.JavaAgent
+            int startIndex = skipSeparators(text, startLineIndex + "Premain-Class:".length());
+            int endIndex = searchEndIndexOfValue(text, startLineIndex, startIndex);
+            String typeName = text.substring(startIndex, endIndex);
+            String internalTypeName = typeName.replace('.', '/');
+            // Undefined parameters : 2 candidate methods
+            // http://docs.oracle.com/javase/6/docs/api/java/lang/instrument/package-summary.html
+            addHyperlink(new ManifestHyperlinkData(startIndex, endIndex, internalTypeName + "-premain-(*)?"));
+        }
+        // Display
+        setText(text);
     }
 
     public int skipSeparators(String text, int index) {
         int length = text.length();
 
         while (index < length) {
-            if (" \t\n\r".indexOf(text.charAt(index)) == -1) {
-                return index;
+            switch (text.charAt(index)) {
+                case ' ': case '\t': case '\n': case '\r':
+                    index++;
+                    break;
+                default:
+                    return index;
             }
-            index++;
         }
 
         return index;
@@ -90,50 +123,52 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
 
     public int searchEndIndexOfValue(String text, int startLineIndex, int startIndex) {
         int length = text.length();
-        int index;
-        for (index = startIndex; index < length; index++) {
+        int index = startIndex;
+
+        while (index < length) {
             // MANIFEST.MF Specification: max line length = 72
             // http://docs.oracle.com/javase/7/docs/technotes/guides/jar/jar.html
-            char c = text.charAt(index);
-            if (c == '\r') {
-                // CR followed by LF ?
-                if (index-startLineIndex >= 70 && index+1 < length && text.charAt(index+1) == ' ') {
-                    // skip whitespace
-                } else if (index-startLineIndex >= 70 && index+2 < length && text.charAt(index+1) == '\n' && text.charAt(index+2) == ' ') {
-                    // Multiline value
-                    index++;
-                } else {
-                    // (End of file) or (single line value) => return end index
-                    return index;
-                }
-                // Multiline value
-                startLineIndex = index+1;
+            switch (text.charAt(index)) {
+                case '\r':
+                    // CR followed by LF ?
+                    if ((index-startLineIndex >= 70) && (index+1 < length) && (text.charAt(index+1) == ' ')) {
+                        // Multiline value
+                        startLineIndex = index+1;
+                    } else if ((index-startLineIndex >= 70) && (index+2 < length) && (text.charAt(index+1) == '\n') && (text.charAt(index+2) == ' ')) {
+                        // Multiline value
+                        index++;
+                        startLineIndex = index+1;
+                    } else {
+                        // (End of file) or (single line value) => return end index
+                        return index;
+                    }
+                    break;
+                case '\n':
+                    if ((index-startLineIndex >= 70) && (index+1 < length) && (text.charAt(index+1) == ' ')) {
+                        // Multiline value
+                        startLineIndex = index+1;
+                    } else {
+                        // (End of file) or (single line value) => return end index
+                        return index;
+                    }
+                    break;
             }
-            if (c == '\n') {
-                if (index-startLineIndex < 70 || index+1 >= length || text.charAt(index+1) != ' ') {
-                    // (End of file) or (single line value) => return end index
-                    return index;
-                }
-                // Multiline value
-                startLineIndex = index+1;
-            }
+            index++;
         }
 
         return index;
     }
 
-    @Override
-    protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return ((ManifestHyperlinkData)hyperlinkData).isEnabled(); }
+    protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return ((ManifestHyperlinkData)hyperlinkData).enabled; }
 
-    @Override
     protected void openHyperlink(int x, int y, HyperlinkData hyperlinkData) {
         ManifestHyperlinkData data = (ManifestHyperlinkData)hyperlinkData;
 
-        if (data.isEnabled()) {
+        if (data.enabled) {
             try {
                 // Save current position in history
                 Point location = textArea.getLocationOnScreen();
-                int offset = textArea.viewToModel2D(new Point(x-location.x, y-location.y));
+                int offset = textArea.viewToModel(new Point(x-location.x, y-location.y));
                 URI uri = entry.getUri();
                 api.addURI(new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), "position=" + offset, null));
                 // Open link
@@ -142,11 +177,11 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
                 String internalTypeName = textLink.replace('.', '/');
                 List<Container.Entry> entries = IndexesUtil.findInternalTypeName(collectionOfFutureIndexes, internalTypeName);
                 String rootUri = entry.getContainer().getRoot().getUri().toString();
-                List<Container.Entry> sameContainerEntries = new ArrayList<>();
+                ArrayList<Container.Entry> sameContainerEntries = new ArrayList<>();
 
-                for (Container.Entry nextEntry : entries) {
-                    if (nextEntry.getUri().toString().startsWith(rootUri)) {
-                        sameContainerEntries.add(nextEntry);
+                for (Container.Entry entry : entries) {
+                    if (entry.getUri().toString().startsWith(rootUri)) {
+                        sameContainerEntries.add(entry);
                     }
                 }
 
@@ -162,11 +197,9 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
     }
 
     // --- UriGettable --- //
-    @Override
     public URI getUri() { return entry.getUri(); }
 
     // --- ContentSavable --- //
-    @Override
     public String getFileName() {
         String path = entry.getPath();
         int index = path.lastIndexOf('/');
@@ -174,7 +207,6 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
     }
 
     // --- IndexesChangeListener --- //
-    @Override
     public void indexesChanged(Collection<Future<Indexes>> collectionOfFutureIndexes) {
         // Update the list of containers
         this.collectionOfFutureIndexes = collectionOfFutureIndexes;
@@ -182,14 +214,14 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
         boolean refresh = false;
         String text = getText();
 
-        for (Map.Entry<Integer, HyperlinkData> nextEntry : hyperlinks.entrySet()) {
-            ManifestHyperlinkData entryData = (ManifestHyperlinkData)nextEntry.getValue();
+        for (Map.Entry<Integer, HyperlinkData> entry : hyperlinks.entrySet()) {
+            ManifestHyperlinkData entryData = (ManifestHyperlinkData)entry.getValue();
             String textLink = getValue(text, entryData.getStartPosition(), entryData.getEndPosition());
             String internalTypeName = textLink.replace('.', '/');
             boolean enabled = IndexesUtil.containsInternalTypeName(collectionOfFutureIndexes, internalTypeName);
 
-            if (entryData.isEnabled() != enabled) {
-                entryData.setEnabled(enabled);
+            if (entryData.enabled != enabled) {
+                entryData.enabled = enabled;
                 refresh = true;
             }
         }
@@ -210,11 +242,69 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
     }
 
     public static class ManifestHyperlinkData extends HyperlinkData {
-        private final String fragment;
+        public boolean enabled;
+        public String fragment;
 
         ManifestHyperlinkData(int startPosition, int endPosition, String fragment) {
             super(startPosition, endPosition);
+            this.enabled = false;
             this.fragment = fragment;
         }
     }
+
+    public static PrintWriter dumpManifestHeaders(Manifest manifest, PrintWriter out) {
+
+        Attributes mainAttributes = manifest.getMainAttributes();
+        Map<String, String> sortedMainAttributes = getSortedAttributes(mainAttributes);
+        for (Map.Entry<String,String> attributeEntry : sortedMainAttributes.entrySet()) {
+            out.print(attributeEntry.getKey());
+            out.print(": ");
+            out.println(dumpValue(attributeEntry.getValue()));
+        }
+
+        for (Map.Entry<String, Attributes> entryAttributes : manifest.getEntries().entrySet()) {
+            out.println("");
+            out.println("Entry: " + entryAttributes.getKey());
+            Map<String, String> sortedEntryAttributes = getSortedAttributes(entryAttributes.getValue());
+            for (Map.Entry<String,String> attributeEntry : sortedEntryAttributes.entrySet()) {
+                out.print(attributeEntry.getKey());
+                out.print(": ");
+                out.println(dumpValue(attributeEntry.getValue()));
+            }
+        }
+        return out;
+    }
+
+    private static Map<String, String> getSortedAttributes(Attributes mainAttributes) {
+        Map<String,String> sortedMainAttributes = new TreeMap<>();
+        for (Map.Entry<Object,Object> attributeEntry : mainAttributes.entrySet()) {
+            Attributes.Name attributeName = (Attributes.Name) attributeEntry.getKey();
+            sortedMainAttributes.put(attributeName.toString(), (String) attributeEntry.getValue());
+        }
+        return sortedMainAttributes;
+    }
+
+    private static String dumpValue(String value) {
+        StringTokenizer valueTokenizer = new StringTokenizer(value, "\",", true);
+        boolean inString = false;
+        List<String> valueParts = new ArrayList<>();
+        StringBuilder currentPart = new StringBuilder();
+        while (valueTokenizer.hasMoreTokens()) {
+            String currentToken = valueTokenizer.nextToken();
+            if ("\"".equals(currentToken)) {
+                inString = !inString;
+                currentPart.append(currentToken);
+            } else if (",".equals(currentToken) && !inString) {
+                valueParts.add(currentPart.toString());
+                currentPart = new StringBuilder();
+            } else {
+                currentPart.append(currentToken);
+            }
+        }
+        if (currentPart.length() > 0) {
+            valueParts.add(currentPart.toString());
+        }
+        return StringUtils.join(valueParts, ",\n  ");
+    }
+
 }
