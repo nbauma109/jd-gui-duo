@@ -1,7 +1,10 @@
 package tim.jarcomp;
 
 import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.table.AbstractTableModel;
+
 import tim.jarcomp.EntryDetails.EntryStatus;
 
 /**
@@ -11,7 +14,7 @@ public class EntryTableModel extends AbstractTableModel {
     private static final long serialVersionUID = 1L;
 
     /** list of entries */
-    private transient ArrayList<EntryDetails> entries;
+    private transient List<EntryDetails> entries;
 
     /**
      * Clear list to start a new comparison
@@ -25,7 +28,7 @@ public class EntryTableModel extends AbstractTableModel {
      * 
      * @param inList list of EntryDetails objects
      */
-    public void setEntryList(ArrayList<EntryDetails> inList) {
+    public void setEntryList(List<EntryDetails> inList) {
         entries = inList;
         fireTableDataChanged();
     }

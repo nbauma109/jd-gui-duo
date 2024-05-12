@@ -1,27 +1,27 @@
 package tim.jarcomp;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class to hold the results of a compare operation
  */
 public class CompareResults extends EntryDetails {
     /** list of entries */
-    private ArrayList<EntryDetails> entries;
+    private List<EntryDetails> entries;
     /** Number of files in each archive */
     private int[] numFiles = new int[2];
 
     /**
      * @param inList list of EntryDetails objects
      */
-    public void setEntryList(ArrayList<EntryDetails> inList) {
+    public void setEntryList(List<EntryDetails> inList) {
         entries = inList;
     }
 
     /**
      * @return entry list
      */
-    public ArrayList<EntryDetails> getEntryList() {
+    public List<EntryDetails> getEntryList() {
         return entries;
     }
 

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -109,7 +110,7 @@ public final class Comparer {
      * @param inIndex   0 or 1
      */
     private static void collectCRCChecksums(CompareResults inResults, File inFile, int inIndex) {
-        ArrayList<EntryDetails> list = inResults.getEntryList();
+        List<EntryDetails> list = inResults.getEntryList();
         try (ZipFile zip = new ZipFile(inFile)) {
             for (EntryDetails entry : list) {
                 if (entry.getStatus() == EntryDetails.EntryStatus.SAME_SIZE) {

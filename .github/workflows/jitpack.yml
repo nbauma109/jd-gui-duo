@@ -12,6 +12,7 @@ jobs:
       - name: Download Jitpack Artifact
         run: |
           URL="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/${GITHUB_REF##*/}-SNAPSHOT/jd-gui-duo-${GITHUB_REF##*/}-SNAPSHOT.zip"
+          echo "Downloading URL $URL"
           curl --location --fail --connect-timeout 300 --max-time 600 "$URL" --output "jd-gui-duo-${GITHUB_REF##*/}-SNAPSHOT.zip"
       - name: Check if the ZIP file is valid
         run: |
