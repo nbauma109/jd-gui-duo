@@ -1,4 +1,4 @@
 install:
   - export M3_VERSION=$(curl -Ls -o /dev/null -w %{url_effective} https://github.com/apache/maven/releases/latest | sed 's,https://github.com/apache/maven/releases/tag/maven-,,g')
   - mvn wrapper:wrapper -Dmaven=${M3_VERSION} --no-transfer-progress
-  - ./mvnw -B -V install -DskipTests -Dsigning.disabled=true --no-transfer-progress
+  - ./mvnw -B -X install -DskipTests -Dsigning.disabled=true --no-transfer-progress
