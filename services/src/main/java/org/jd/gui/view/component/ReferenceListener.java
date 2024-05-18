@@ -181,12 +181,32 @@ public class ReferenceListener extends AbstractJavaListener {
         // Constructor call -> Add a link to the constructor declaration
         @SuppressWarnings("unchecked")
         List<Expression> expressionList = node.arguments();
-        String descriptor = expressionList != null ? getParametersDescriptor(expressionList.size()).append('V').toString()
-                : "()V";
-
+        String descriptor;
+        if (expressionList != null) {
+            IMethodBinding constructorBinding = node.resolveConstructorBinding();
+            if (constructorBinding != null) {
+                ITypeBinding[] parameterTypes = constructorBinding.getParameterTypes();
+                descriptor = getParametersDescriptor(parameterTypes).append('V').toString();
+            } else {
+                descriptor = getParametersDescriptor(expressionList.size()).append('V').toString();
+            }
+        } else {
+            descriptor = "()V";
+        }
+        
+        
         ReferenceData refData = newReferenceData(internalTypeName, StringConstants.INSTANCE_CONSTRUCTOR, descriptor);
         addHyperlink(new HyperlinkReferenceData(position, node.getLength(), refData));
         return true;
+    }
+
+    private static StringBuilder getParametersDescriptor(ITypeBinding[] argTypes) {
+        StringBuilder sb = new StringBuilder("(");
+        for (ITypeBinding argType : argTypes) {
+            sb.append(argType.getKey());
+        }
+        sb.append(')');
+        return sb;
     }
 
     private static StringBuilder getParametersDescriptor(int paramCount) {
@@ -263,8 +283,19 @@ public class ReferenceListener extends AbstractJavaListener {
     public boolean visit(ConstructorInvocation node) {
         @SuppressWarnings("unchecked")
         List<Expression> args = node.arguments();
-        String methodDescriptor = args != null ? getParametersDescriptor(args.size()).append('?').toString() : "()?";
-        ReferenceData refData = newReferenceData(currentInternalTypeName, StringConstants.INSTANCE_CONSTRUCTOR, methodDescriptor);
+        String constructorDescriptor;
+        if (args != null) {
+            IMethodBinding constructorBinding = node.resolveConstructorBinding();
+            if (constructorBinding != null) {
+                ITypeBinding[] parameterTypes = constructorBinding.getParameterTypes();
+                constructorDescriptor = getParametersDescriptor(parameterTypes).append('V').toString();
+            } else {
+                constructorDescriptor = getParametersDescriptor(args.size()).append('V').toString();
+            }
+        } else {
+            constructorDescriptor = "()V";
+        }
+        ReferenceData refData = newReferenceData(currentInternalTypeName, StringConstants.INSTANCE_CONSTRUCTOR, constructorDescriptor);
         int position = node.getStartPosition();
         addHyperlink(new HyperlinkReferenceData(position, 4 /* this */, refData));
         return true;
@@ -274,13 +305,24 @@ public class ReferenceListener extends AbstractJavaListener {
     public boolean visit(SuperConstructorInvocation node) {
         @SuppressWarnings("unchecked")
         List<Expression> args = node.arguments();
-        String methodDescriptor = args != null ? getParametersDescriptor(args.size()).append('?').toString() : "()?";
+        String constructorDescriptor;
+        if (args != null) {
+            IMethodBinding constructorBinding = node.resolveConstructorBinding();
+            if (constructorBinding != null) {
+                ITypeBinding[] parameterTypes = constructorBinding.getParameterTypes();
+                constructorDescriptor = getParametersDescriptor(parameterTypes).append('V').toString();
+            } else {
+                constructorDescriptor = getParametersDescriptor(args.size()).append('V').toString();
+            }
+        } else {
+            constructorDescriptor = "()V";
+        }
         DeclarationData data = getDeclarations().get(currentInternalTypeName);
 
         if (data instanceof TypeDeclarationData) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
             TypeDeclarationData tdd = (TypeDeclarationData) data;
             String methodTypeName = tdd.getSuperTypeName();
-            ReferenceData refData = newReferenceData(methodTypeName, StringConstants.INSTANCE_CONSTRUCTOR, methodDescriptor);
+            ReferenceData refData = newReferenceData(methodTypeName, StringConstants.INSTANCE_CONSTRUCTOR, constructorDescriptor);
             int position = node.getStartPosition();
             addHyperlink(new HyperlinkReferenceData(position, 5 /* super */, refData));
         }
@@ -315,7 +357,8 @@ public class ReferenceListener extends AbstractJavaListener {
             if (binaryName != null) {
                 String methodTypeName = binaryName.replace('.', '/');
                 ITypeBinding[] args = methodBinding.getParameterTypes();
-                String methodDescriptor = args.length > 0 ? getParametersDescriptor(args.length).append('?').toString() : "()?";
+                ITypeBinding returnType = methodBinding.getReturnType();
+                String methodDescriptor = args.length > 0 ? getParametersDescriptor(args).append(returnType.getKey()).toString() : "()" + returnType.getKey();
                 ReferenceData refData = newReferenceData(methodTypeName, methodName, methodDescriptor);
                 int position = name.getStartPosition();
                 addHyperlink(new HyperlinkReferenceData(position, methodName.length(), refData));
