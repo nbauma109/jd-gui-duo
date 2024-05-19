@@ -35,3 +35,5 @@ org.jd.gui.service.treenode.ImageFileTreeNodeFactoryProvider
 org.jd.gui.service.treenode.GradleFileTreeNodeFactoryProvider
 org.jd.gui.service.treenode.BatFileTreeNodeFactoryProvider
 org.jd.gui.service.treenode.GroovyTreeNodeFactoryProvider
+org.jd.gui.service.treenode.ScalaFileTreeNodeFactoryProvider
+org.jd.gui.service.treenode.KotlinFileTreeNodeFactoryProvider
