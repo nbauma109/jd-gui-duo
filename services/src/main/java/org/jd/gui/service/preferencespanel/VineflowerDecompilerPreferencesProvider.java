@@ -47,31 +47,29 @@ public class VineflowerDecompilerPreferencesProvider extends JPanel implements P
         super(new GridLayout(0, 4));
         for (FieldInfo fieldInfo : Type.of(IFernflowerPreferences.class).getFields()) {
             if (String.class.getName().equals(fieldInfo.getFieldType().getTypeName())) {
-                String trigram = (String) fieldInfo.getValue(null);
-                if (trigram.matches("\\w{3}")) {
-                    JComponent component;
-                    Object defaultValue = IFernflowerPreferences.DEFAULTS.get(trigram);
-                    if (!"mpm".equals(trigram) && (FALSE.equals(defaultValue) || TRUE.equals(defaultValue))) {
-                        component = new JCheckBox();
-                    } else if ("log".equals(trigram)) {
-                        component = new JComboBox<>(LOG_LEVELS);
-                    } else {
-                        component = new JTextField();
-                        component.setMinimumSize(FIELD_DIMENSION);
-                        component.setMaximumSize(FIELD_DIMENSION);
-                        component.setPreferredSize(FIELD_DIMENSION);
-                    }
-                    components.put(trigram, component);
-                    Name name = fieldInfo.getAnnotation(Name.class);
-                    Description description = fieldInfo.getAnnotation(Description.class);
-                    JLabel label = new JLabel((name == null ? fieldInfo.getName() : name.value()) + " (" + trigram + ")");
-                    if (description != null) {
-                        label.setToolTipText(description.value());
-                    }
-                    label.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-                    add(label);
-                    add(component);
+                String optionKey = (String) fieldInfo.getValue(null);
+                JComponent component;
+                Object defaultValue = IFernflowerPreferences.DEFAULTS.get(optionKey);
+                if (!"max-time-per-method".equals(optionKey) && (FALSE.equals(defaultValue) || TRUE.equals(defaultValue))) {
+                    component = new JCheckBox();
+                } else if ("log-level".equals(optionKey)) {
+                    component = new JComboBox<>(LOG_LEVELS);
+                } else {
+                    component = new JTextField();
+                    component.setMinimumSize(FIELD_DIMENSION);
+                    component.setMaximumSize(FIELD_DIMENSION);
+                    component.setPreferredSize(FIELD_DIMENSION);
                 }
+                components.put(optionKey, component);
+                Name name = fieldInfo.getAnnotation(Name.class);
+                Description description = fieldInfo.getAnnotation(Description.class);
+                JLabel label = new JLabel((name == null ? fieldInfo.getName() : name.value()) + " (" + optionKey + ")");
+                if (description != null) {
+                    label.setToolTipText(description.value());
+                }
+                label.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+                add(label);
+                add(component);
             }
         }
     }
