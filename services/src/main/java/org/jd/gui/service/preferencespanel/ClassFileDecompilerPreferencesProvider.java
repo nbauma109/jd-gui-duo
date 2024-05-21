@@ -31,6 +31,7 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_CFR;
+import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_FERNFLOWER;
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_VINEFLOWER;
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JADX;
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V0;
@@ -56,7 +57,7 @@ public class ClassFileDecompilerPreferencesProvider extends JPanel implements Pr
     protected JComboBox<String> decompileEngine;
     protected JButton configureDecompiler;
 
-    private static final String[] DECOMPILERS = { ENGINE_JD_CORE_V1, ENGINE_JD_CORE_V0, ENGINE_CFR, ENGINE_PROCYON, ENGINE_VINEFLOWER, ENGINE_JADX };
+    private static final String[] DECOMPILERS = { ENGINE_JD_CORE_V1, ENGINE_JD_CORE_V0, ENGINE_CFR, ENGINE_PROCYON, ENGINE_FERNFLOWER, ENGINE_VINEFLOWER, ENGINE_JADX };
 
     private transient Map<String, PreferencesPanel> decompilerPreferencesProviders = new HashMap<>();
 
@@ -87,6 +88,7 @@ public class ClassFileDecompilerPreferencesProvider extends JPanel implements Pr
         decompilerPreferencesProviders.put(ENGINE_JD_CORE_V1, jdCoreDecompilerPreferencesProvider);
         decompilerPreferencesProviders.put(ENGINE_CFR, new CFRDecompilerPreferencesProvider());
         decompilerPreferencesProviders.put(ENGINE_PROCYON, new ProcyonDecompilerPreferencesProvider());
+        decompilerPreferencesProviders.put(ENGINE_FERNFLOWER, new FernflowerDecompilerPreferencesProvider());
         decompilerPreferencesProviders.put(ENGINE_VINEFLOWER, new VineflowerDecompilerPreferencesProvider());
         decompilerPreferencesProviders.put(ENGINE_JADX, new JadxDecompilerPreferencesProvider());
         

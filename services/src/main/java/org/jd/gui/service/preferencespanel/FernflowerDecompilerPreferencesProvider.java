@@ -8,10 +8,8 @@
 package org.jd.gui.service.preferencespanel;
 
 import org.jd.gui.spi.PreferencesPanel;
-import org.vineflower.java.decompiler.main.extern.IFernflowerLogger.Severity;
-import org.vineflower.java.decompiler.main.extern.IFernflowerPreferences;
-import org.vineflower.java.decompiler.main.extern.IFernflowerPreferences.Description;
-import org.vineflower.java.decompiler.main.extern.IFernflowerPreferences.Name;
+import org.jetbrains.java.decompiler.main.extern.IFernflowerLogger.Severity;
+import org.jetbrains.java.decompiler.main.extern.IFernflowerPreferences;
 
 import com.strobel.reflection.FieldInfo;
 import com.strobel.reflection.Type;
@@ -31,7 +29,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public class VineflowerDecompilerPreferencesProvider extends JPanel implements PreferencesPanel {
+public class FernflowerDecompilerPreferencesProvider extends JPanel implements PreferencesPanel {
 
     private static final long serialVersionUID = 1L;
 
@@ -43,39 +41,35 @@ public class VineflowerDecompilerPreferencesProvider extends JPanel implements P
 
     private Map<String, JComponent> components = new HashMap<>();
 
-    public VineflowerDecompilerPreferencesProvider() {
+    public FernflowerDecompilerPreferencesProvider() {
         super(new GridLayout(0, 4));
         for (FieldInfo fieldInfo : Type.of(IFernflowerPreferences.class).getFields()) {
             if (String.class.getName().equals(fieldInfo.getFieldType().getTypeName())) {
-                String optionKey = (String) fieldInfo.getValue(null);
-                JComponent component;
-                Object defaultValue = IFernflowerPreferences.DEFAULTS.get(optionKey);
-                if (!"max-time-per-method".equals(optionKey) && (FALSE.equals(defaultValue) || TRUE.equals(defaultValue))) {
-                    component = new JCheckBox();
-                } else if ("log-level".equals(optionKey)) {
-                    component = new JComboBox<>(LOG_LEVELS);
-                } else {
-                    component = new JTextField();
-                    component.setMinimumSize(FIELD_DIMENSION);
-                    component.setMaximumSize(FIELD_DIMENSION);
-                    component.setPreferredSize(FIELD_DIMENSION);
+                String trigram = (String) fieldInfo.getValue(null);
+                if (trigram.matches("\\w{3}")) {
+                    JComponent component;
+                    Object defaultValue = IFernflowerPreferences.DEFAULTS.get(trigram);
+                    if (!"mpm".equals(trigram) && (FALSE.equals(defaultValue) || TRUE.equals(defaultValue))) {
+                        component = new JCheckBox();
+                    } else if ("log".equals(trigram)) {
+                        component = new JComboBox<>(LOG_LEVELS);
+                    } else {
+                        component = new JTextField();
+                        component.setMinimumSize(FIELD_DIMENSION);
+                        component.setMaximumSize(FIELD_DIMENSION);
+                        component.setPreferredSize(FIELD_DIMENSION);
+                    }
+                    components.put(trigram, component);
+                    JLabel label = new JLabel(fieldInfo.getName() + " (" + trigram + ")");
+                    label.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+                    add(label);
+                    add(component);
                 }
-                components.put(optionKey, component);
-                Name name = fieldInfo.getAnnotation(Name.class);
-                Description description = fieldInfo.getAnnotation(Description.class);
-                JLabel label = new JLabel((name == null ? fieldInfo.getName() : name.value()) + " (" + optionKey + ")");
-                if (description != null) {
-                    label.setToolTipText(description.value());
-                }
-                label.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-                add(label);
-                add(component);
             }
         }
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void restoreDefaults() {
         for (Map.Entry<String, Object> defaultEntry : IFernflowerPreferences.DEFAULTS.entrySet()) {
             String componentKey = defaultEntry.getKey();
@@ -117,7 +111,6 @@ public class VineflowerDecompilerPreferencesProvider extends JPanel implements P
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void loadPreferences(Map<String, String> preferences) {
         for (Map.Entry<String, String> preference : preferences.entrySet()) {
             String preferenceKey = preference.getKey();
@@ -147,7 +140,6 @@ public class VineflowerDecompilerPreferencesProvider extends JPanel implements P
             String componentKey = componentEntry.getKey();
             JComponent component = componentEntry.getValue();
             if (component instanceof JComboBox) {
-                @SuppressWarnings("unchecked")
                 JComboBox<String> comboBox = (JComboBox<String>) component;
                 preferences.put(componentKey, comboBox.getSelectedItem().toString());
             } else if (component instanceof JCheckBox) {
