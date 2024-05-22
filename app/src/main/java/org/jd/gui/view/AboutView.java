@@ -11,8 +11,8 @@ import org.benf.cfr.reader.util.CfrVersionInfo;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.swing.SwingUtil;
-import org.jetbrains.java.decompiler.main.Fernflower;
 
+import com.heliosdecompiler.transformerapi.decompilers.Decompiler;
 import com.strobel.Procyon;
 
 import java.awt.BorderLayout;
@@ -42,6 +42,8 @@ import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
+
+import jadx.core.Jadx;
 
 public class AboutView {
 
@@ -85,13 +87,11 @@ public class AboutView {
             subvbox.add(hbox);
             JPanel subsubpanel = new JPanel();
             hbox.add(subsubpanel);
-            subsubpanel.setLayout(new GridLayout(7, 2));
+            subsubpanel.setLayout(new GridLayout(9, 2));
             subsubpanel.setOpaque(false);
             subsubpanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 5));
 
             String jdGuiVersion = SNAPSHOT;
-            String[] jdCoreVersions = {SNAPSHOT, SNAPSHOT};
-            String jadxVersion = SNAPSHOT;
 
             try {
                 Enumeration<URL> enumeration = AboutView.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
@@ -103,18 +103,7 @@ public class AboutView {
 
                         if (attribute != null) {
                             jdGuiVersion = attribute;
-                        }
-
-                        attribute = attributes.getValue("JD-Core-Version");
-
-                        if (attribute != null) {
-                            jdCoreVersions[attribute.charAt(0) - '0'] = attribute;
-                        }
-
-                        attribute = attributes.getValue("jadx-version");
-                        
-                        if (attribute != null) {
-                            jadxVersion = attribute;
+                            break;
                         }
                     }
                 }
@@ -122,21 +111,42 @@ public class AboutView {
                 assert ExceptionUtil.printStackTrace(e);
             }
 
+            Attributes allAttributes = new Attributes();
+            try {
+                Enumeration<URL> enumeration = Decompiler.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
+                
+                while (enumeration.hasMoreElements()) {
+                    try (InputStream is = enumeration.nextElement().openStream()) {
+                        Attributes attributes = new Manifest(is).getMainAttributes();
+                        if (attributes != null) {
+                            allAttributes.putAll(attributes);
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                assert ExceptionUtil.printStackTrace(e);
+            }
+            
             subsubpanel.add(new JLabel("JD-GUI-DUO"));
             subsubpanel.add(new JLabel(VERSION + jdGuiVersion));
-            for (int i = 0; i < jdCoreVersions.length; i++) {
-                subsubpanel.add(new JLabel("JD-Core v" + i));
-                subsubpanel.add(new JLabel(VERSION + jdCoreVersions[i]));
+            if (allAttributes != null) {
+                subsubpanel.add(new JLabel("Transformer API"));
+                subsubpanel.add(new JLabel(VERSION + allAttributes.getValue("transformer-api-version")));
+                subsubpanel.add(new JLabel("JD-Core v0"));
+                subsubpanel.add(new JLabel(VERSION + allAttributes.getValue("jd-core-v0-version")));
+                subsubpanel.add(new JLabel("JD-Core v1"));
+                subsubpanel.add(new JLabel(VERSION + allAttributes.getValue("jd-core-v1-version")));
+                subsubpanel.add(new JLabel("FernFlower"));
+                subsubpanel.add(new JLabel(VERSION + allAttributes.getValue("fernflower-version")));
+                subsubpanel.add(new JLabel("VineFlower"));
+                subsubpanel.add(new JLabel(VERSION + allAttributes.getValue("vineflower-version")));
             }
             subsubpanel.add(new JLabel("Procyon"));
             subsubpanel.add(new JLabel(VERSION + Procyon.version()));
             subsubpanel.add(new JLabel("CFR"));
             subsubpanel.add(new JLabel(VERSION + CfrVersionInfo.VERSION_INFO));
             subsubpanel.add(new JLabel("JADX"));
-            subsubpanel.add(new JLabel(VERSION + jadxVersion));
-            subsubpanel.add(new JLabel("VineFlower"));
-            subsubpanel.add(new JLabel(VERSION + Fernflower.class.getPackage().getImplementationVersion()));
-
+            subsubpanel.add(new JLabel(VERSION + Jadx.getVersion()));
             hbox.add(Box.createHorizontalGlue());
 
             hbox = Box.createHorizontalBox();
