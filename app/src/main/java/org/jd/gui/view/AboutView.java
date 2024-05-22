@@ -12,7 +12,6 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil
 import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.swing.SwingUtil;
 
-import com.heliosdecompiler.transformerapi.decompilers.Decompiler;
 import com.strobel.Procyon;
 
 import java.awt.BorderLayout;
@@ -91,29 +90,9 @@ public class AboutView {
             subsubpanel.setOpaque(false);
             subsubpanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 5));
 
-            String jdGuiVersion = SNAPSHOT;
-
-            try {
-                Enumeration<URL> enumeration = AboutView.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
-
-                while (enumeration.hasMoreElements()) {
-                    try (InputStream is = enumeration.nextElement().openStream()) {
-                        Attributes attributes = new Manifest(is).getMainAttributes();
-                        String attribute = attributes.getValue("JD-GUI-Version");
-
-                        if (attribute != null) {
-                            jdGuiVersion = attribute;
-                            break;
-                        }
-                    }
-                }
-            } catch (IOException e) {
-                assert ExceptionUtil.printStackTrace(e);
-            }
-
             Attributes allAttributes = new Attributes();
             try {
-                Enumeration<URL> enumeration = Decompiler.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
+                Enumeration<URL> enumeration = AboutView.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
                 
                 while (enumeration.hasMoreElements()) {
                     try (InputStream is = enumeration.nextElement().openStream()) {
@@ -128,7 +107,7 @@ public class AboutView {
             }
             
             subsubpanel.add(new JLabel("JD-GUI-DUO"));
-            subsubpanel.add(new JLabel(VERSION + jdGuiVersion));
+            subsubpanel.add(new JLabel(VERSION + allAttributes.getValue("JD-GUI-Version")));
             if (allAttributes != null) {
                 subsubpanel.add(new JLabel("Transformer API"));
                 subsubpanel.add(new JLabel(VERSION + allAttributes.getValue("transformer-api-version")));
