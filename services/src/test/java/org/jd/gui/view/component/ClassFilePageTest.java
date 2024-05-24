@@ -1,20 +1,22 @@
 package org.jd.gui.view.component;
 
 import org.fife.ui.rsyntaxtextarea.DocumentRange;
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import jd.core.links.DeclarationData;
 import jd.core.links.HyperlinkData;
 import jd.core.links.HyperlinkReferenceData;
 import jd.core.links.ReferenceData;
 import jd.core.links.StringData;
-import junit.framework.TestCase;
 
-public class ClassFilePageTest extends TestCase {
+public class ClassFilePageTest {
 
     public HashMap<String, DeclarationData> initDeclarations() {
         DeclarationData data = new DeclarationData(0, 1, "Test", "test", "I");
@@ -66,39 +68,41 @@ public class ClassFilePageTest extends TestCase {
         return strings;
     }
 
+    @Test
     public void testMatchFragmentAndAddDocumentRange() {
         HashMap<String, DeclarationData> declarations = initDeclarations();
         ArrayList<DocumentRange> ranges = new ArrayList<>();
 
         ranges.clear();
         ClassFilePage.matchFragmentAndAddDocumentRange("Test-attributeBoolean-Z", declarations, ranges);
-        Assert.assertEquals(1, ranges.size());
+        assertEquals(1, ranges.size());
 
         ranges.clear();
         ClassFilePage.matchFragmentAndAddDocumentRange("test/Test-attributeBoolean-Z", declarations, ranges);
-        Assert.assertEquals(1, ranges.size());
+        assertEquals(1, ranges.size());
 
         ranges.clear();
         ClassFilePage.matchFragmentAndAddDocumentRange("*/Test-attributeBoolean-Z", declarations, ranges);
-        Assert.assertEquals(2, ranges.size());
+        assertEquals(2, ranges.size());
 
         ranges.clear();
         ClassFilePage.matchFragmentAndAddDocumentRange("Test-createBuffer-(I)[C", declarations, ranges);
-        Assert.assertEquals(1, ranges.size());
+        assertEquals(1, ranges.size());
 
         ranges.clear();
         ClassFilePage.matchFragmentAndAddDocumentRange("test/Test-createBuffer-(I)[C", declarations, ranges);
-        Assert.assertEquals(1, ranges.size());
+        assertEquals(1, ranges.size());
 
         ranges.clear();
         ClassFilePage.matchFragmentAndAddDocumentRange("*/Test-getString-(*)?", declarations, ranges);
-        Assert.assertEquals(2, ranges.size());
+        assertEquals(2, ranges.size());
 
         ranges.clear();
         ClassFilePage.matchFragmentAndAddDocumentRange("test/Test-add-(?J)?", declarations, ranges);
-        Assert.assertEquals(1, ranges.size());
+        assertEquals(1, ranges.size());
     }
 
+    @Test
     public void testMatchQueryAndAddDocumentRange() {
         HashMap<String, String> parameters = new HashMap<>();
         HashMap<String, DeclarationData> declarations = initDeclarations();
@@ -112,31 +116,32 @@ public class ClassFilePageTest extends TestCase {
         parameters.put("highlightScope", null);
         ranges.clear();
         ClassFilePage.matchQueryAndAddDocumentRange(parameters, declarations, hyperlinks, strings, ranges);
-        Assert.assertEquals(1, ranges.size());
+        assertEquals(1, ranges.size());
 
         parameters.put("highlightScope", "");
         ranges.clear();
         ClassFilePage.matchQueryAndAddDocumentRange(parameters, declarations, hyperlinks, strings, ranges);
-        Assert.assertEquals(1, ranges.size());
+        assertEquals(1, ranges.size());
 
         parameters.put("highlightScope", "Test");
         ranges.clear();
         ClassFilePage.matchQueryAndAddDocumentRange(parameters, declarations, hyperlinks, strings, ranges);
-        Assert.assertEquals(1, ranges.size());
+        assertEquals(1, ranges.size());
     }
 
+    @Test
     public void testMatchScope() {
-        Assert.assertTrue(ClassFilePage.matchScope(null, "java/lang/String"));
-        Assert.assertTrue(ClassFilePage.matchScope("", "java/lang/String"));
+        assertTrue(ClassFilePage.matchScope(null, "java/lang/String"));
+        assertTrue(ClassFilePage.matchScope("", "java/lang/String"));
 
-        Assert.assertTrue(ClassFilePage.matchScope("java/lang/String", "java/lang/String"));
-        Assert.assertTrue(ClassFilePage.matchScope("*/lang/String", "java/lang/String"));
-        Assert.assertTrue(ClassFilePage.matchScope("*/String", "java/lang/String"));
+        assertTrue(ClassFilePage.matchScope("java/lang/String", "java/lang/String"));
+        assertTrue(ClassFilePage.matchScope("*/lang/String", "java/lang/String"));
+        assertTrue(ClassFilePage.matchScope("*/String", "java/lang/String"));
 
-        Assert.assertTrue(ClassFilePage.matchScope(null, "Test"));
-        Assert.assertTrue(ClassFilePage.matchScope("", "Test"));
+        assertTrue(ClassFilePage.matchScope(null, "Test"));
+        assertTrue(ClassFilePage.matchScope("", "Test"));
 
-        Assert.assertTrue(ClassFilePage.matchScope("Test", "Test"));
-        Assert.assertTrue(ClassFilePage.matchScope("*/Test", "Test"));
+        assertTrue(ClassFilePage.matchScope("Test", "Test"));
+        assertTrue(ClassFilePage.matchScope("*/Test", "Test"));
     }
 }

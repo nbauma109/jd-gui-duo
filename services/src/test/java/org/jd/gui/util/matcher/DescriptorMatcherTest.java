@@ -1,8 +1,13 @@
 package org.jd.gui.util.matcher;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class DescriptorMatcherTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class DescriptorMatcherTest {
+
+    @Test
     public void testMatchFieldDescriptors() {
         assertTrue(DescriptorMatcher.matchFieldDescriptors("?", "?"));
 
@@ -37,6 +42,7 @@ public class DescriptorMatcherTest extends TestCase {
         assertTrue(DescriptorMatcher.matchFieldDescriptors("?", "[[[L*/Test;"));
     }
 
+    @Test
     public void testMatchMethodDescriptors() {
         assertFalse(DescriptorMatcher.matchMethodDescriptors("I", "I"));
 
