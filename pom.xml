@@ -95,7 +95,7 @@
 			<dependency>
 				<groupId>org.eclipse.jdt</groupId>
 				<artifactId>org.eclipse.jdt.core.manipulation</artifactId>
-				<version>1.21.100</version>
+				<version>1.21.200</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jdt</groupId>
