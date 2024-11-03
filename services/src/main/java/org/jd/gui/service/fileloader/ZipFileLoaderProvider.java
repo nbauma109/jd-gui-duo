@@ -24,6 +24,10 @@ import java.util.Iterator;
 public class ZipFileLoaderProvider extends AbstractFileLoaderProvider {
     protected static final String[] EXTENSIONS = { "zip" };
 
+    private boolean isValidScheme(String scheme) {
+        return "file".equals(scheme);
+    }
+
     @Override
     public String[] getExtensions() { return EXTENSIONS; }
     @Override
@@ -39,6 +43,9 @@ public class ZipFileLoaderProvider extends AbstractFileLoaderProvider {
     public boolean load(API api, File file) {
         try {
             URI fileUri = file.toURI();
+            if (!isValidScheme(fileUri.getScheme())) {
+                throw new URISyntaxException(fileUri.toString(), "Invalid URI scheme");
+            }
             URI uri = new URI("jar:" + fileUri.getScheme(), fileUri.getHost(), fileUri.getPath() + "!/", null);
 
             FileSystem fileSystem;
