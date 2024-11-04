@@ -106,7 +106,7 @@
 		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.plantuml</groupId>
-			<artifactId>plantuml</artifactId>
+			<artifactId>plantuml-mit</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.github.nbauma109</groupId>
