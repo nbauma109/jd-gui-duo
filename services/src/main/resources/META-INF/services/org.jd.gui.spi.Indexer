@@ -11,3 +11,4 @@ org.jd.gui.service.indexer.ZipFileIndexerProvider
 org.jd.gui.service.indexer.XmlBasedFileIndexerProvider
 org.jd.gui.service.indexer.XmlFileIndexerProvider
 org.jd.gui.service.indexer.ImageFileIndexerProvider
+org.jd.gui.service.indexer.PropertyFileIndexerProvider
