@@ -95,12 +95,12 @@
 			<dependency>
 				<groupId>org.eclipse.jdt</groupId>
 				<artifactId>org.eclipse.jdt.core.manipulation</artifactId>
-				<version>1.21.300</version>
+				<version>1.22.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jdt</groupId>
 				<artifactId>org.eclipse.jdt.core</artifactId>
-				<version>3.40.0</version>
+				<version>3.41.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.freva</groupId>
@@ -122,8 +122,8 @@
 	</dependencyManagement>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
+		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
 		<main.class>org.jd.gui.App</main.class>
 		<project.scm.id>github.com</project.scm.id>
 	</properties>
