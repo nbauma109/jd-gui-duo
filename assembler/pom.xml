@@ -118,7 +118,7 @@
             </goals>
             <configuration>
               <appendAssemblyId>false</appendAssemblyId>
-              <finalName>jd-gui-duo-windows</finalName>
+              <finalName>jd-gui-duo-windows-${project.version}</finalName>
               <descriptors>
                 <descriptor>assembly-windows.xml</descriptor>
               </descriptors>
@@ -132,7 +132,7 @@
             </goals>
             <configuration>
               <appendAssemblyId>false</appendAssemblyId>
-              <finalName>jd-gui-duo-linux</finalName>
+              <finalName>jd-gui-duo-linux-${project.version}</finalName>
               <descriptors>
                 <descriptor>assembly-linux.xml</descriptor>
               </descriptors>
@@ -146,7 +146,7 @@
             </goals>
             <configuration>
               <appendAssemblyId>false</appendAssemblyId>
-              <finalName>jd-gui-duo-macos</finalName>
+              <finalName>jd-gui-duo-macos-${project.version}</finalName>
               <descriptors>
                 <descriptor>assembly-macos.xml</descriptor>
               </descriptors>
