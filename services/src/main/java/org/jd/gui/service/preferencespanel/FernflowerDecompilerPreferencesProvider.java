@@ -71,7 +71,7 @@ public class FernflowerDecompilerPreferencesProvider extends JPanel implements P
 
     @Override
     public void restoreDefaults() {
-        for (Map.Entry<String, Object> defaultEntry : IFernflowerPreferences.DEFAULTS.entrySet()) {
+        for (Map.Entry<String, String> defaultEntry : IFernflowerPreferences.DEFAULTS.entrySet()) {
             String componentKey = defaultEntry.getKey();
             Object defaultValue = defaultEntry.getValue();
             JComponent component = components.get(componentKey);
