@@ -169,18 +169,18 @@
             <configuration>
               <artifacts>
                 <artifact>
-                  <file>${project.build.directory}/jd-gui-duo-windows-${project.version}.zip</file>
-                  <type>zip</type>
+                  <file>${project.build.directory}/jd-gui-duo-windows-${project.version}.tar.xz</file>
+                  <type>tar.xz</type>
                   <classifier>windows</classifier>
                 </artifact>
                 <artifact>
-                  <file>${project.build.directory}/jd-gui-duo-linux-${project.version}.zip</file>
-                  <type>zip</type>
+                  <file>${project.build.directory}/jd-gui-duo-linux-${project.version}.tar.xz</file>
+                  <type>tar.xz</type>
                   <classifier>linux</classifier>
                 </artifact>
                 <artifact>
-                  <file>${project.build.directory}/jd-gui-duo-macos-${project.version}.zip</file>
-                  <type>zip</type>
+                  <file>${project.build.directory}/jd-gui-duo-macos-${project.version}.tar.xz</file>
+                  <type>tar.xz</type>
                   <classifier>macos</classifier>
                 </artifact>
               </artifacts>
@@ -197,48 +197,48 @@
             <phase>none</phase>
           </execution>
           <execution>
-            <id>install-windows-zip</id>
+            <id>install-windows-tar.xz</id>
             <phase>install</phase>
             <goals>
               <goal>install-file</goal>
             </goals>
             <configuration>
-              <file>${project.build.directory}/jd-gui-duo-windows-${project.version}.zip</file>
+              <file>${project.build.directory}/jd-gui-duo-windows-${project.version}.tar.xz</file>
               <groupId>${project.groupId}</groupId>
               <artifactId>${project.artifactId}</artifactId>
               <version>${project.version}</version>
               <classifier>windows</classifier>
-              <packaging>zip</packaging>
+              <packaging>tar.xz</packaging>
             </configuration>
           </execution>
           <execution>
-            <id>install-linux-zip</id>
+            <id>install-linux-tar.xz</id>
             <phase>install</phase>
             <goals>
               <goal>install-file</goal>
             </goals>
             <configuration>
-              <file>${project.build.directory}/jd-gui-duo-linux-${project.version}.zip</file>
+              <file>${project.build.directory}/jd-gui-duo-linux-${project.version}.tar.xz</file>
               <groupId>${project.groupId}</groupId>
               <artifactId>${project.artifactId}</artifactId>
               <version>${project.version}</version>
               <classifier>linux</classifier>
-              <packaging>zip</packaging>
+              <packaging>tar.xz</packaging>
             </configuration>
           </execution>
           <execution>
-            <id>install-macos-zip</id>
+            <id>install-macos-tar.xz</id>
             <phase>install</phase>
             <goals>
               <goal>install-file</goal>
             </goals>
             <configuration>
-              <file>${project.build.directory}/jd-gui-duo-macos-${project.version}.zip</file>
+              <file>${project.build.directory}/jd-gui-duo-macos-${project.version}.tar.xz</file>
               <groupId>${project.groupId}</groupId>
               <artifactId>${project.artifactId}</artifactId>
               <version>${project.version}</version>
               <classifier>macos</classifier>
-              <packaging>zip</packaging>
+              <packaging>tar.xz</packaging>
             </configuration>
           </execution>
         </executions>

@@ -3,7 +3,7 @@
           xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.1.0 http://maven.apache.org/xsd/assembly-2.1.0.xsd">
   <id>windows</id>
   <formats>
-    <format>zip</format>
+    <format>tar.xz</format>
   </formats>
   <includeBaseDirectory>false</includeBaseDirectory>
 
