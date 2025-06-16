@@ -243,57 +243,42 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>com.akathist.maven.plugins.launch4j</groupId>
+        <artifactId>launch4j-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>l4j-clui</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>launch4j</goal>
+            </goals>
+            <configuration>
+              <headerType>gui</headerType>
+              <outfile>${project.build.directory}/windows/jd-gui-duo-${project.version}.exe</outfile>
+              <jar>${project.build.directory}/lib/jd-gui-duo-app-${project.version}.jar</jar>
+              <classPath>
+                <mainClass>${main.class}</mainClass>
+                <addDependencies>false</addDependencies>
+              </classPath>
+              <jre>
+                <path>jre</path>
+                <opts>
+                  <opt>-ea</opt>
+                  <opt>--add-opens java.base/java.net=ALL-UNNAMED</opt>
+                  <opt>--add-opens java.desktop/javax.swing.text=ALL-UNNAMED</opt>
+                  <opt>--add-opens java.desktop/javax.swing.plaf.basic=ALL-UNNAMED</opt>
+                  <opt>--add-opens java.prefs/java.util.prefs=ALL-UNNAMED</opt>
+                  <opt>--add-opens java.base/java.lang.ref=ALL-UNNAMED</opt>
+                </opts>
+              </jre>
+              <icon>${project.parent.basedir}/src/launch4j/resources/images/jd-gui.ico</icon>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
-
-  <profiles>
-    <profile>
-      <id>windows</id>
-      <activation>
-        <os>
-          <family>Windows</family>
-        </os>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>com.akathist.maven.plugins.launch4j</groupId>
-            <artifactId>launch4j-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>l4j-clui</id>
-                <phase>prepare-package</phase>
-                <goals>
-                  <goal>launch4j</goal>
-                </goals>
-                <configuration>
-                  <headerType>gui</headerType>
-                  <outfile>${project.build.directory}/windows/jd-gui-duo-${project.version}.exe</outfile>
-                  <jar>${project.build.directory}/lib/jd-gui-duo-app-${project.version}.jar</jar>
-                  <classPath>
-                    <mainClass>${main.class}</mainClass>
-                    <addDependencies>false</addDependencies>
-                  </classPath>
-                  <jre>
-                    <path>jre</path>
-                    <opts>
-                      <opt>-ea</opt>
-                      <opt>--add-opens java.base/java.net=ALL-UNNAMED</opt>
-                      <opt>--add-opens java.desktop/javax.swing.text=ALL-UNNAMED</opt>
-                      <opt>--add-opens java.desktop/javax.swing.plaf.basic=ALL-UNNAMED</opt>
-                      <opt>--add-opens java.prefs/java.util.prefs=ALL-UNNAMED</opt>
-                      <opt>--add-opens java.base/java.lang.ref=ALL-UNNAMED</opt>
-                    </opts>
-                  </jre>
-                  <icon>${project.parent.basedir}/src/launch4j/resources/images/jd-gui.ico</icon>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 
   <dependencies>
     <dependency>
