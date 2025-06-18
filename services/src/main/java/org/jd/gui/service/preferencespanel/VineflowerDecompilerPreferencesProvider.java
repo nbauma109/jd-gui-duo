@@ -8,28 +8,19 @@
 package org.jd.gui.service.preferencespanel;
 
 import org.jd.gui.spi.PreferencesPanel;
+import org.vineflower.java.decompiler.api.DecompilerOption;
+import org.vineflower.java.decompiler.main.Init;
 import org.vineflower.java.decompiler.main.extern.IFernflowerLogger.Severity;
 import org.vineflower.java.decompiler.main.extern.IFernflowerPreferences;
-import org.vineflower.java.decompiler.main.extern.IFernflowerPreferences.Description;
-import org.vineflower.java.decompiler.main.extern.IFernflowerPreferences.Name;
-
-import com.strobel.reflection.FieldInfo;
-import com.strobel.reflection.Type;
 
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.util.EnumSet;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.BorderFactory;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 public class VineflowerDecompilerPreferencesProvider extends JPanel implements PreferencesPanel {
 
@@ -38,57 +29,72 @@ public class VineflowerDecompilerPreferencesProvider extends JPanel implements P
     private static final String TRUE = "1";
     private static final String FALSE = "0";
 
-    private static final String[] LOG_LEVELS = EnumSet.allOf(Severity.class).stream().map(Severity::name).toArray(String[]::new);
+    private static final String[] LOG_LEVELS = Arrays.stream(Severity.values()).map(Severity::name).toArray(String[]::new);
     private static final Dimension FIELD_DIMENSION = new Dimension(250, 20);
 
-    private Map<String, JComponent> components = new HashMap<>();
+    private final Map<String, JComponent> components = new HashMap<>();
 
     public VineflowerDecompilerPreferencesProvider() {
         super(new GridLayout(0, 4));
-        for (FieldInfo fieldInfo : Type.of(IFernflowerPreferences.class).getFields()) {
-            if (String.class.getName().equals(fieldInfo.getFieldType().getTypeName())) {
-                String optionKey = (String) fieldInfo.getValue(null);
-                JComponent component;
-                Object defaultValue = IFernflowerPreferences.DEFAULTS.get(optionKey);
-                if (!"max-time-per-method".equals(optionKey) && (FALSE.equals(defaultValue) || TRUE.equals(defaultValue))) {
-                    component = new JCheckBox();
-                } else if ("log-level".equals(optionKey)) {
-                    component = new JComboBox<>(LOG_LEVELS);
-                } else {
-                    component = new JTextField();
-                    component.setMinimumSize(FIELD_DIMENSION);
-                    component.setMaximumSize(FIELD_DIMENSION);
-                    component.setPreferredSize(FIELD_DIMENSION);
+
+        // Initialize Vineflower (to load plugins)
+        Init.init();
+
+        for (DecompilerOption option : DecompilerOption.getAll()) {
+            JComponent component = switch (option.type()) {
+                case BOOLEAN -> new JCheckBox();
+                case INTEGER -> new JSpinner();
+                case STRING -> {
+                    if ("log-level".equals(option.id())) {
+                        yield new JComboBox<>(LOG_LEVELS);
+                    }
+
+                    JTextField text = new JTextField();
+                    text.setMaximumSize(FIELD_DIMENSION);
+                    text.setMinimumSize(FIELD_DIMENSION);
+                    text.setPreferredSize(FIELD_DIMENSION);
+                    yield text;
                 }
-                components.put(optionKey, component);
-                Name name = fieldInfo.getAnnotation(Name.class);
-                Description description = fieldInfo.getAnnotation(Description.class);
-                JLabel label = new JLabel((name == null ? fieldInfo.getName() : name.value()) + " (" + optionKey + ")");
-                if (description != null) {
-                    label.setToolTipText(description.value());
-                }
-                label.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-                add(label);
-                add(component);
+            };
+
+            components.put(option.id(), component);
+            JLabel label = new JLabel(option.name());
+            if (option.description() != null) {
+                label.setToolTipText(option.description());
             }
+            label.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+
+            add(label);
+            add(component);
         }
+
+        JComponent dumpLines = new JCheckBox();
+        components.put(IFernflowerPreferences.DUMP_ORIGINAL_LINES, dumpLines);
+        JLabel linesLabel = new JLabel("Dump Line Numbers");
+        linesLabel.setToolTipText("Dump original line numbers in the output");
+        linesLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+        add(linesLabel);
+        add(dumpLines);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void restoreDefaults() {
-        for (Map.Entry<String, Object> defaultEntry : IFernflowerPreferences.DEFAULTS.entrySet()) {
-            String componentKey = defaultEntry.getKey();
-            Object defaultValue = defaultEntry.getValue();
-            JComponent component = components.get(componentKey);
-            if (component instanceof JComboBox) {
-                ((JComboBox<String>) component).setSelectedItem(defaultValue);
-            } else if (component instanceof JCheckBox) {
-                ((JCheckBox) component).setSelected(TRUE.equals(defaultValue));
-            } else if (component instanceof JTextField) {
-                ((JTextField) component).setText(defaultValue.toString());
+        for (DecompilerOption option : DecompilerOption.getAll()) {
+            JComponent component = components.get(option.id());
+            if ("log-level".equals(option.id())) {
+                ((JComboBox<?>) component).setSelectedItem(option.defaultValue());
+                continue;
+            }
+
+            switch (option.type()) {
+                case BOOLEAN -> ((JCheckBox) component).setSelected(TRUE.equals(option.defaultValue()));
+                case STRING -> ((JTextField) component).setText(option.defaultValue());
+                case INTEGER -> ((JSpinner) component).setValue(Integer.parseInt(option.defaultValue()));
             }
         }
+
+        JCheckBox dumpLines = (JCheckBox) components.get(IFernflowerPreferences.DUMP_ORIGINAL_LINES);
+        dumpLines.setSelected(false);
     }
 
     // --- PreferencesPanel --- //
@@ -117,26 +123,30 @@ public class VineflowerDecompilerPreferencesProvider extends JPanel implements P
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void loadPreferences(Map<String, String> preferences) {
+        Map<String, String> defaults = new HashMap<>();
+        for (DecompilerOption option : DecompilerOption.getAll()) {
+            defaults.put(option.id(), option.defaultValue());
+        }
+
         for (Map.Entry<String, String> preference : preferences.entrySet()) {
             String preferenceKey = preference.getKey();
             String preferenceValue = preference.getValue();
             JComponent component = components.get(preferenceKey);
             if (preferenceValue != null) {
                 if (component instanceof JComboBox) {
-                    ((JComboBox<String>) component).setSelectedItem(preferenceValue);
+                    ((JComboBox<?>) component).setSelectedItem(preferenceValue);
                 } else if (component instanceof JCheckBox) {
                     ((JCheckBox) component).setSelected(TRUE.equals(preferenceValue));
                 } else if (component instanceof JTextField) {
                     ((JTextField) component).setText(preferenceValue);
                 }
             } else if (component instanceof JComboBox) {
-                ((JComboBox<String>) component).setSelectedItem(IFernflowerPreferences.DEFAULTS.get(preferenceKey));
+                ((JComboBox<?>) component).setSelectedItem(defaults.get(preferenceKey));
             } else if (component instanceof JCheckBox) {
-                ((JCheckBox) component).setSelected(TRUE.equals(IFernflowerPreferences.DEFAULTS.get(preferenceKey)));
+                ((JCheckBox) component).setSelected(TRUE.equals(defaults.get(preferenceKey)));
             } else if (component instanceof JTextField) {
-                ((JTextField) component).setText(IFernflowerPreferences.DEFAULTS.getOrDefault(preferenceKey, "").toString());
+                ((JTextField) component).setText(defaults.getOrDefault(preferenceKey, ""));
             }
         }
     }
