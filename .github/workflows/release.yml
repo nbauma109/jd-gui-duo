@@ -26,4 +26,4 @@ jobs:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         prerelease: false
         files: |
-          **/jd-*.zip
+          **/jd-*.tar.xz
