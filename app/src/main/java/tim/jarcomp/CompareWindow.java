@@ -23,6 +23,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -31,10 +32,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipFile;
 
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -42,7 +45,10 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.TransferHandler;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.table.TableCellRenderer;
 
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V1;
@@ -92,7 +98,7 @@ public class CompareWindow {
 
     /**
      * Make the GUI components for the main dialog
-     * 
+     *
      * @return JPanel containing GUI components
      */
     private JPanel makeComponents() {
@@ -160,7 +166,7 @@ public class CompareWindow {
         table.getColumnModel().getColumn(2).setPreferredWidth(70);
         // Table sorting by clicking on column headings
         table.setAutoCreateRowSorter(true);
-        
+
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -189,13 +195,14 @@ public class CompareWindow {
                 }
             }
         });
-        
+
         mainPanel.add(new JScrollPane(table), BorderLayout.CENTER);
 
         return mainPanel;
     }
 
-    protected String getContent(File file, String entryPath) throws IOException, TransformationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    protected String getContent(File file, String entryPath)
+            throws IOException, TransformationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         if (entryPath.endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
             Map<String, String> preferences = api.getPreferences();
             preferences.put(Preferences.WRITE_LINE_NUMBERS, "false");
@@ -209,7 +216,8 @@ public class CompareWindow {
                 return decompilationResult.getDecompiledOutput();
             }
         }
-        try (ZipFile zipFile = new ZipFile(file); InputStream in = zipFile.getInputStream(zipFile.getEntry(entryPath))) {
+        try (ZipFile zipFile = new ZipFile(file);
+             InputStream in = zipFile.getInputStream(zipFile.getEntry(entryPath))) {
             return IOUtils.toString(in, StandardCharsets.UTF_8);
         }
     }
@@ -223,7 +231,7 @@ public class CompareWindow {
 
     /**
      * Start the comparison using the two specified files
-     * 
+     *
      * @param inFile1 first file
      * @param inFile2 second file
      */
@@ -231,25 +239,13 @@ public class CompareWindow {
         // Clear table model
         tableModel.reset();
 
-        File file1 = inFile1;
-        File file2 = inFile2;
-        if (file1 == null || !file1.exists() || !file1.canRead()) {
-            file1 = selectFile("Select first file", null);
-        }
-        // Bail if cancel pressed
-        if (file1 == null) {
+        // Open the unified selection dialog
+        File[] selected = selectTwoFiles(mainWindow, inFile1, inFile2);
+        if (selected == null) {
             return;
         }
-        // Select second file if necessary
-        if (file2 == null || !file2.exists() || !file2.canRead()) {
-            file2 = selectFile("Select second file", file1);
-        }
-        // Bail if cancel pressed
-        if (file2 == null) {
-            return;
-        }
-        files[0] = file1;
-        files[1] = file2;
+        files[0] = selected[0];
+        files[1] = selected[1];
 
         // Clear displays
         detailsDisplays[0].clear();
@@ -274,9 +270,6 @@ public class CompareWindow {
         }
         detailsDisplays[0].setContents(files[0], results, 0);
         detailsDisplays[1].setContents(files[1], results, 1);
-        // System.out.println(_files[0].getName() + " has " + results.getNumFiles(0) + "
-        // files, "
-        // + _files[1].getName() + " has " + results.getNumFiles(1));
         if (results.getEntriesDifferent()) {
             statusLabel2.setText((archivesDifferent ? "and" : "but") + " the files have different contents");
         } else {
@@ -287,45 +280,176 @@ public class CompareWindow {
             }
         }
         refreshButton.setEnabled(true);
-        // Possibilities:
-        // Jars have same size, same CRC checksum, same contents
-        // Jars have same size but different CRC checksum, different contents
-        // Jars have different size, different CRC checksum, but same contents
-        // Individual files have same size but different CRC checksum
-        // Jars have absolutely nothing in common
     }
 
     /**
-     * Select a file for the comparison
-     * 
-     * @param inTitle     title of dialog
-     * @param inFirstFile File to compare selected file with (or null)
-     * @return selected File, or null if cancelled
+     * Show a dialog with two file selectors and return the selected files.
+     * The text fields are wide and accept drag and drop of .jar, .zip, .war, or .ear files.
+     *
+     * @param parentFrame parent frame for the dialog
+     * @param default1    optional default file for the first selector
+     * @param default2    optional default file for the second selector
+     * @return an array of two selected files, or null if cancelled or invalid
      */
-    private File selectFile(String inTitle, File inFirstFile) {
+    private File[] selectTwoFiles(JFrame parentFrame, File default1, File default2) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(2, 1, 10, 10));
+        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+        // Shared file chooser
         if (fileChooser == null) {
             fileChooser = new JFileChooser();
-            fileChooser.setFileFilter(new GenericFileFilter("Jar files and Zip files", new String[] { "jar", "zip" }));
-        }
-        fileChooser.setDialogTitle(inTitle);
-        File file = null;
-        boolean rechoose = true;
-        while (rechoose) {
-            file = null;
-            rechoose = false;
-            int result = fileChooser.showOpenDialog(mainWindow);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                file = fileChooser.getSelectedFile();
-                rechoose = (!file.exists() || !file.canRead());
-            }
-            // Check it's not the same as the first file, if any
-            if (inFirstFile != null && file != null && file.equals(inFirstFile)) {
-                JOptionPane.showMessageDialog(mainWindow,
-                        "The second file is the same as the first file!\n" + "Please select another file to compare with '" + inFirstFile.getName() + "'", "Two files equal",
-                        JOptionPane.ERROR_MESSAGE);
-                rechoose = true;
+            fileChooser.setFileFilter(new GenericFileFilter(
+                    "Jar, Zip, War, and Ear archives",
+                    new String[]{"jar", "zip", "war", "ear"}
+            ));
+            // Start in user home directory
+            File home = new File(System.getProperty("user.home"));
+            if (home.isDirectory()) {
+                fileChooser.setCurrentDirectory(home);
             }
         }
-        return file;
+
+        // First selector
+        JPanel filePanel1 = new JPanel(new BorderLayout(5, 5));
+        filePanel1.setBorder(new TitledBorder("Select first file"));
+        JTextField field1 = new JTextField(60);
+        field1.setEditable(false);
+        if (default1 != null) {
+            field1.setText(default1.getAbsolutePath());
+        }
+        configureFileDrop(field1, parentFrame);
+
+        JButton button1 = new JButton(new ImageIcon(getClass().getResource("/org/jd/gui/images/open.png")));
+        button1.addActionListener(e -> {
+            if (fileChooser.showOpenDialog(parentFrame) == JFileChooser.APPROVE_OPTION) {
+                File chosen = fileChooser.getSelectedFile();
+                if (!isArchiveFile(chosen)) {
+                    JOptionPane.showMessageDialog(parentFrame, "Please choose a .jar, .zip, .war, or .ear file.", "Invalid File Type", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                field1.setText(chosen.getAbsolutePath());
+            }
+        });
+        filePanel1.add(field1, BorderLayout.CENTER);
+        filePanel1.add(button1, BorderLayout.EAST);
+
+        // Second selector
+        JPanel filePanel2 = new JPanel(new BorderLayout(5, 5));
+        filePanel2.setBorder(new TitledBorder("Select second file"));
+        JTextField field2 = new JTextField(60);
+        field2.setEditable(false);
+        if (default2 != null) {
+            field2.setText(default2.getAbsolutePath());
+        }
+        configureFileDrop(field2, parentFrame);
+
+        JButton button2 = new JButton(new ImageIcon(getClass().getResource("/org/jd/gui/images/open.png")));
+        button2.addActionListener(e -> {
+            if (fileChooser.showOpenDialog(parentFrame) == JFileChooser.APPROVE_OPTION) {
+                File chosen = fileChooser.getSelectedFile();
+                if (!isArchiveFile(chosen)) {
+                    JOptionPane.showMessageDialog(parentFrame, "Please choose a .jar, .zip, .war, or .ear file.", "Invalid File Type", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                field2.setText(chosen.getAbsolutePath());
+            }
+        });
+        filePanel2.add(field2, BorderLayout.CENTER);
+        filePanel2.add(button2, BorderLayout.EAST);
+
+        // Add both panels
+        panel.add(filePanel1);
+        panel.add(filePanel2);
+
+        // Show dialog
+        int result = JOptionPane.showConfirmDialog(
+                parentFrame,
+                panel,
+                "Select files to compare - Drag and drop",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (result == JOptionPane.OK_OPTION) {
+            File file1 = field1.getText().isEmpty() ? null : new File(field1.getText());
+            File file2 = field2.getText().isEmpty() ? null : new File(field2.getText());
+
+            if (file1 == null || !file1.exists() || !file1.canRead() || !isArchiveFile(file1)) {
+                JOptionPane.showMessageDialog(parentFrame, "First file is invalid. Please select a readable .jar, .zip, .war, or .ear file.", "Error", JOptionPane.ERROR_MESSAGE);
+                return null;
+            }
+            if (file2 == null || !file2.exists() || !file2.canRead() || !isArchiveFile(file2)) {
+                JOptionPane.showMessageDialog(parentFrame, "Second file is invalid. Please select a readable .jar, .zip, .war, or .ear file.", "Error", JOptionPane.ERROR_MESSAGE);
+                return null;
+            }
+            if (file1.equals(file2)) {
+                JOptionPane.showMessageDialog(parentFrame, "The two files are the same. Please select different files.", "Error", JOptionPane.ERROR_MESSAGE);
+                return null;
+            }
+            return new File[]{file1, file2};
+        }
+
+        return null;
+    }
+
+    /**
+     * Configure drag and drop support for a text field to accept a single archive file.
+     *
+     * @param field       the text field to configure
+     * @param parentFrame the parent frame used for error dialogs
+     */
+    private void configureFileDrop(JTextField field, JFrame parentFrame) {
+        field.setTransferHandler(new TransferHandler() {
+            @Override
+            public boolean canImport(TransferSupport support) {
+                if (!support.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+                    return false;
+                }
+                support.setDropAction(COPY);
+                return true;
+            }
+
+            @Override
+            @SuppressWarnings("unchecked")
+            public boolean importData(TransferSupport support) {
+                if (!canImport(support)) {
+                    return false;
+                }
+                try {
+                    List<File> dropped = (List<File>) support.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                    if (dropped == null || dropped.isEmpty()) {
+                        return false;
+                    }
+                    File f = dropped.get(0);
+                    if (!f.isFile()) {
+                        JOptionPane.showMessageDialog(parentFrame, "Please drop a file, not a directory.", "Invalid Drop", JOptionPane.ERROR_MESSAGE);
+                        return false;
+                    }
+                    if (!isArchiveFile(f)) {
+                        JOptionPane.showMessageDialog(parentFrame, "Please drop a .jar, .zip, .war, or .ear file.", "Invalid File Type", JOptionPane.ERROR_MESSAGE);
+                        return false;
+                    }
+                    field.setText(f.getAbsolutePath());
+                    return true;
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(parentFrame, "Could not import the dropped file.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+            }
+        });
+        field.setFocusable(true);
+    }
+
+    /**
+     * Check if a file has an allowed archive extension.
+     *
+     * @param f file to check
+     * @return true if extension is jar, zip, war, or ear
+     */
+    private boolean isArchiveFile(File f) {
+        if (f == null) return false;
+        String name = f.getName().toLowerCase();
+        return name.endsWith(".jar") || name.endsWith(".zip") || name.endsWith(".war") || name.endsWith(".ear");
     }
 }
