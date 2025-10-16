@@ -100,7 +100,6 @@ A modified version of [JarComp](https://activityworkshop.net/software/jarcomp/in
 ![image](https://user-images.githubusercontent.com/9403560/169692577-1d14cacc-71b0-458c-ad5c-a8686ae2fb95.png)
 
 Select the 2 files to compare or drag and drop files into the inputs :
-
 <img width="698" height="279" alt="image" src="https://github.com/user-attachments/assets/b5cb4a27-5371-4f74-b8c8-0464edd4f516" />
 
 The differences in size and CRC checksums are shown :
