@@ -99,10 +99,9 @@ A modified version of [JarComp](https://activityworkshop.net/software/jarcomp/in
 
 ![image](https://user-images.githubusercontent.com/9403560/169692577-1d14cacc-71b0-458c-ad5c-a8686ae2fb95.png)
 
-Select the 1st file to compare and then another file chooser will appear to select the 2nd file to compare :
+Select the 2 files to compare or drag and drop files into the inputs :
 
-![image](https://user-images.githubusercontent.com/9403560/169710515-ca023077-9f5a-474c-a35b-918289be01c6.png)
-![image](https://user-images.githubusercontent.com/9403560/169694196-0fa04413-9cf1-4255-8ad0-163776c42eec.png)
+<img width="698" height="279" alt="image" src="https://github.com/user-attachments/assets/b5cb4a27-5371-4f74-b8c8-0464edd4f516" />
 
 The differences in size and CRC checksums are shown :
 
