@@ -147,8 +147,7 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
 
         @Override
         public void close() throws IOException {
-            if (container instanceof Closeable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-                Closeable c = (Closeable) container;
+            if (container instanceof Closeable c) {
                 c.close();
             }
         }

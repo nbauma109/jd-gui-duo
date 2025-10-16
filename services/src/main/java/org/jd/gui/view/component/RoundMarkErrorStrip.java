@@ -518,8 +518,7 @@ public class RoundMarkErrorStrip extends JComponent {
         @Override
         public void mouseClicked(MouseEvent e) {
             Component source = (Component)e.getSource();
-            if (source instanceof Marker) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-                Marker m = (Marker) source;
+            if (source instanceof Marker m) {
                 m.mouseClicked();
                 return;
             }

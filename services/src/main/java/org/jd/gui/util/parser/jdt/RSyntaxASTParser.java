@@ -40,8 +40,7 @@ public class RSyntaxASTParser extends AbstractParser {
             String unitName = entry.getPath();
             URI jarURI = entry.getContainer().getRoot().getParent().getUri();
             ASTNode ast = ASTParserFactory.getInstanceWithBindings().newASTParser(text.toCharArray(), unitName, jarURI).createAST(null);
-            if (ast instanceof CompilationUnit) {
-                CompilationUnit cu = (CompilationUnit) ast;
+            if (ast instanceof CompilationUnit cu) {
                 IProblem[] problems = cu.getProblems();
                 for (IProblem pb : problems) {
                     int sourceStart = pb.getSourceStart();

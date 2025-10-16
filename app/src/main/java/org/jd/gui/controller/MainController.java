@@ -324,8 +324,7 @@ public class MainController implements API {
     }
 
     protected void onSaveSource() {
-        if (currentPage instanceof ContentSavable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-            ContentSavable cs = (ContentSavable) currentPage;
+        if (currentPage instanceof ContentSavable cs) {
             JFileChooser chooser = new JFileChooser();
             JFrame mainFrame = mainView.getMainFrame();
 
@@ -363,8 +362,7 @@ public class MainController implements API {
 
     protected void onSaveAllSources() {
         JComponent currentPanel = mainView.getSelectedMainPanel();
-        if (currentPanel instanceof SourcesSavable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-            SourcesSavable sourcesSavable = (SourcesSavable) currentPanel;
+        if (currentPanel instanceof SourcesSavable sourcesSavable) {
             JFileChooser chooser = new JFileChooser();
             JFrame mainFrame = mainView.getMainFrame();
 
@@ -390,8 +388,7 @@ public class MainController implements API {
     }
 
     protected void onCopy() {
-        if (currentPage instanceof ContentCopyable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-            ContentCopyable cc = (ContentCopyable) currentPage;
+        if (currentPage instanceof ContentCopyable cc) {
             cc.copy();
         }
     }
@@ -414,28 +411,25 @@ public class MainController implements API {
     }
 
     protected void onSelectAll() {
-        if (currentPage instanceof ContentSelectable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-            ContentSelectable cs = (ContentSelectable) currentPage;
+        if (currentPage instanceof ContentSelectable cs) {
             cs.selectAll();
         }
     }
 
     protected void onFind() {
-        if (currentPage instanceof ContentSearchable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+        if (currentPage instanceof ContentSearchable) {
             mainView.showFindPanel();
         }
     }
 
     protected void onFindCriteriaChanged() {
-        if (currentPage instanceof ContentSearchable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-            ContentSearchable cs = (ContentSearchable) currentPage;
+        if (currentPage instanceof ContentSearchable cs) {
             mainView.setFindBackgroundColor(cs.highlightText(mainView.getFindText(), mainView.getFindCaseSensitive()));
         }
     }
 
     protected void onFindNext() {
-        if (currentPage instanceof ContentSearchable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-            ContentSearchable cs = (ContentSearchable) currentPage;
+        if (currentPage instanceof ContentSearchable cs) {
             cs.findNext(mainView.getFindText(), mainView.getFindCaseSensitive());
         }
     }
@@ -445,15 +439,13 @@ public class MainController implements API {
     }
 
     protected void onOpenTypeHierarchy() {
-        if (currentPage instanceof FocusedTypeGettable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-            FocusedTypeGettable ftg = (FocusedTypeGettable) currentPage;
+        if (currentPage instanceof FocusedTypeGettable ftg) {
             openTypeHierarchyController.show(getCollectionOfFutureIndexes(), ftg.getEntry(), ftg.getFocusedTypeName(), this::openURI);
         }
     }
 
     protected void onGoTo() {
-        if (currentPage instanceof LineNumberNavigable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-            LineNumberNavigable lnn = (LineNumberNavigable) currentPage;
+        if (currentPage instanceof LineNumberNavigable lnn) {
             goToController.show(lnn, lnn::goToLineNumber);
         }
     }
@@ -463,8 +455,7 @@ public class MainController implements API {
     }
 
     protected void onFindPrevious() {
-        if (currentPage instanceof ContentSearchable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-            ContentSearchable cs = (ContentSearchable) currentPage;
+        if (currentPage instanceof ContentSearchable cs) {
             cs.findPrevious(mainView.getFindText(), mainView.getFindCaseSensitive());
         }
     }
@@ -527,8 +518,7 @@ public class MainController implements API {
     }
 
     protected void checkPreferencesChange(JComponent page) {
-        if (page instanceof PreferencesChangeListener) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-            PreferencesChangeListener pcl = (PreferencesChangeListener) page;
+        if (page instanceof PreferencesChangeListener pcl) {
             Map<String, String> preferences = configuration.getPreferences();
             Integer currentHashcode = preferences.hashCode();
             Integer lastHashcode = (Integer) page.getClientProperty("preferences-hashCode");
@@ -540,8 +530,7 @@ public class MainController implements API {
     }
 
     protected void checkIndexesChange(JComponent page) {
-        if (page instanceof IndexesChangeListener) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-            IndexesChangeListener icl = (IndexesChangeListener) page;
+        if (page instanceof IndexesChangeListener icl) {
             Collection<Future<Indexes>> collectionOfFutureIndexes = getCollectionOfFutureIndexes();
             Integer currentHashcode = collectionOfFutureIndexes.hashCode();
             Integer lastHashcode = (Integer) page.getClientProperty("collectionOfFutureIndexes-hashCode");
@@ -839,8 +828,7 @@ public class MainController implements API {
             for (IndexesChangeListener listener : containerChangeListeners) {
                 listener.indexesChanged(collectionOfFutureIndexes);
             }
-            if (currentPage instanceof IndexesChangeListener) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-                IndexesChangeListener icl = (IndexesChangeListener) currentPage;
+            if (currentPage instanceof IndexesChangeListener icl) {
                 icl.indexesChanged(collectionOfFutureIndexes);
             }
         }
@@ -950,8 +938,7 @@ public class MainController implements API {
             for (IndexesChangeListener listener : containerChangeListeners) {
                 listener.indexesChanged(collectionOfFutureIndexes);
             }
-            if (currentPage instanceof IndexesChangeListener) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-                IndexesChangeListener icl = (IndexesChangeListener) currentPage;
+            if (currentPage instanceof IndexesChangeListener icl) {
                 icl.indexesChanged(collectionOfFutureIndexes);
             }
         });
@@ -1012,9 +999,7 @@ public class MainController implements API {
     public <T extends JComponent & UriGettable> void addPanel(File file, String title, Supplier<Icon> iconSupplier, String tip, T component) {
         mainView.addMainPanel(title, iconSupplier, tip, component);
 
-        if (component instanceof ContentIndexable && file != null) {
-            // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-            ContentIndexable ci = (ContentIndexable) component;
+        if (component instanceof ContentIndexable ci && file != null) {
             UIManager.put("ProgressMonitor.progressText", title);
             SwingWorker<Indexes, Void> worker = new IndexerWorker(component, ci);
             worker.execute();

@@ -85,8 +85,7 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
             @Override
             public void treeExpanded(TreeExpansionEvent e) {
                 TreeNode node = (TreeNode)e.getPath().getLastPathComponent();
-                if (node instanceof TreeNodeExpandable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-                    TreeNodeExpandable tne = (TreeNodeExpandable) node;
+                if (node instanceof TreeNodeExpandable tne) {
                     int oldHashCode = createHashCode(node.children());
                     tne.populateTreeNode(api);
                     int newHashCode = createHashCode(node.children());
@@ -191,9 +190,7 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
     protected <P extends JComponent & UriGettable> boolean showPage(URI uri, URI baseUri, DefaultMutableTreeNode baseNode) {
         P page = (P)tabbedPanel.showPage(baseUri);
 
-        if (page == null && baseNode instanceof PageCreator) {
-            // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-            PageCreator pc = (PageCreator) baseNode;
+        if (page == null && baseNode instanceof PageCreator pc) {
             page = pc.createPage(api);
             page.putClientProperty("node", baseNode);
 
@@ -201,18 +198,14 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
             String label = path.substring(path.lastIndexOf('/')+1);
             Object data = baseNode.getUserObject();
 
-            if (data instanceof TreeNodeData) {
-                // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-                TreeNodeData tnd = (TreeNodeData) data;
+            if (data instanceof TreeNodeData tnd) {
                 tabbedPanel.addPage(label, tnd::getIcon, tnd.getTip(), page);
             } else {
                 tabbedPanel.addPage(label, null, null, page);
             }
         }
 
-        if (openUriEnabled && page instanceof UriOpenable) {
-            // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-            UriOpenable uo = (UriOpenable) page;
+        if (openUriEnabled && page instanceof UriOpenable uo) {
             uo.openUri(uri);
         }
 
@@ -299,8 +292,7 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
 
     @SuppressWarnings("unchecked")
     protected DefaultMutableTreeNode searchTreeNode(URI uri, DefaultMutableTreeNode node) {
-        if (node instanceof TreeNodeExpandable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-            TreeNodeExpandable tne = (TreeNodeExpandable) node;
+        if (node instanceof TreeNodeExpandable tne) {
             tne.populateTreeNode(api);
         }
 

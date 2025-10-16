@@ -105,8 +105,7 @@ public class MainTabbedPanel<T extends JComponent & UriGettable> extends TabbedP
                         listener.pageChanged(page);
                     }
                     // Update current sub-page preferences
-                    if (subPage instanceof PreferencesChangeListener) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-                        PreferencesChangeListener pcl = (PreferencesChangeListener) subPage;
+                    if (subPage instanceof PreferencesChangeListener pcl) {
                         pcl.preferencesChanged(preferences);
                     }
                 }
@@ -134,8 +133,7 @@ public class MainTabbedPanel<T extends JComponent & UriGettable> extends TabbedP
     @Override
     public void addPage(String title, Supplier<Icon> iconSupplier, String tip, T page) {
         super.addPage(title, iconSupplier, tip, page);
-        if (page instanceof PageChangeable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-            PageChangeable pc = (PageChangeable) page;
+        if (page instanceof PageChangeable pc) {
             pc.addPageChangeListener(this);
         }
     }
@@ -163,8 +161,7 @@ public class MainTabbedPanel<T extends JComponent & UriGettable> extends TabbedP
             T page = showPage(uri);
 
             if (page != null) {
-                if (page instanceof UriOpenable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-                    UriOpenable uo = (UriOpenable) page;
+                if (page instanceof UriOpenable uo) {
                     // Enable page changed event
                     pageChangedListenersEnabled = true;
                     // Search & display sub tab
@@ -207,8 +204,7 @@ public class MainTabbedPanel<T extends JComponent & UriGettable> extends TabbedP
 
         // Update current sub-page preferences
         Component subPage = tabbedPane.getSelectedComponent();
-        if (subPage instanceof PreferencesChangeListener) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-            PreferencesChangeListener pcl = (PreferencesChangeListener) subPage;
+        if (subPage instanceof PreferencesChangeListener pcl) {
             pcl.preferencesChanged(preferences);
         }
     }

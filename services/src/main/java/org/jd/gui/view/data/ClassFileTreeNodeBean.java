@@ -109,8 +109,7 @@ public class ClassFileTreeNodeBean extends TreeNodeBean {
         ASTNode ast = ASTParserFactory.getInstanceWithBindings().newASTParser(text.toCharArray(), unitName, jarURI).createAST(null);
         boolean hasWarning = false;
         boolean hasError = false;
-        if (ast instanceof CompilationUnit) {
-            CompilationUnit cu = (CompilationUnit) ast;
+        if (ast instanceof CompilationUnit cu) {
             IProblem[] problems = cu.getProblems();
             for (IProblem pb : problems) {
                 hasError |= pb.isError();

@@ -131,8 +131,7 @@ public class ReferenceListener extends AbstractJavaListener {
         SimpleName fieldNameNode = node.getName();
         String fieldName = fieldNameNode.getIdentifier();
         Name qualifier = node.getQualifier();
-        if (qualifier instanceof SimpleName) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-            SimpleName qualifierSimpleName = (SimpleName) qualifier;
+        if (qualifier instanceof SimpleName qualifierSimpleName) {
             String qualifierDescriptor = null;
             IBinding binding = qualifier.resolveBinding();
             if (binding instanceof ITypeBinding) {
@@ -231,11 +230,9 @@ public class ReferenceListener extends AbstractJavaListener {
     }
 
     private void createLinkToVariable(Expression exp) {
-        if (exp instanceof SimpleName) {
-            SimpleName simpleName = (SimpleName) exp;
+        if (exp instanceof SimpleName simpleName) {
             IBinding binding = simpleName.resolveBinding();
-            if (binding instanceof IVariableBinding) {
-                IVariableBinding variableBinding = (IVariableBinding) binding;
+            if (binding instanceof IVariableBinding variableBinding) {
                 createLinkToVariable(simpleName, variableBinding);
             }
         }
@@ -319,8 +316,7 @@ public class ReferenceListener extends AbstractJavaListener {
         }
         DeclarationData data = getDeclarations().get(currentInternalTypeName);
 
-        if (data instanceof TypeDeclarationData) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-            TypeDeclarationData tdd = (TypeDeclarationData) data;
+        if (data instanceof TypeDeclarationData tdd) {
             String methodTypeName = tdd.getSuperTypeName();
             ReferenceData refData = newReferenceData(methodTypeName, StringConstants.INSTANCE_CONSTRUCTOR, constructorDescriptor);
             int position = node.getStartPosition();
@@ -333,8 +329,7 @@ public class ReferenceListener extends AbstractJavaListener {
     public boolean visit(MethodInvocation node) {
         visitMethodBinding(node.getName(), node.resolveMethodBinding());
         Expression subject = node.getExpression();
-        if (subject instanceof SimpleName) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-            SimpleName subjectName = (SimpleName) subject;
+        if (subject instanceof SimpleName subjectName) {
             String internalTypeName = nameToInternalTypeName.get(subjectName.getIdentifier());
             if (internalTypeName != null) {
                 ReferenceData refData = newReferenceData(internalTypeName, null, null);

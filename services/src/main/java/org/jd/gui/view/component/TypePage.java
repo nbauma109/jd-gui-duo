@@ -532,8 +532,7 @@ public abstract class TypePage extends CustomLineNumbersPage
     }
 
     private void setMisalignedLineNumbers(ASTNode astNode, String text) {
-        if (astNode instanceof CompilationUnit) {
-            CompilationUnit cu = (CompilationUnit) astNode;
+        if (astNode instanceof CompilationUnit cu) {
             @SuppressWarnings("unchecked")
             List<Comment> commentList = cu.getCommentList();
             for (Comment comment : commentList) {

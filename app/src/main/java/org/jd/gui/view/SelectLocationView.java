@@ -197,8 +197,7 @@ public class SelectLocationView<T extends DefaultMutableTreeNode & ContainerEntr
 
     @SuppressWarnings("unchecked")
     protected void populate(Set<URI> uris, DefaultMutableTreeNode node) {
-        if (node instanceof TreeNodeExpandable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
-            TreeNodeExpandable tne = (TreeNodeExpandable) node;
+        if (node instanceof TreeNodeExpandable tne) {
             tne.populateTreeNode(api);
 
             int i = node.getChildCount();
