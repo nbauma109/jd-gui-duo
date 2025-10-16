@@ -22,6 +22,7 @@ import org.jd.gui.api.feature.PreferencesChangeListener;
 import org.jd.gui.api.feature.SourcesSavable;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
+import org.jd.gui.api.model.Container.Entry;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.model.configuration.Configuration;
 import org.jd.gui.model.history.History;
@@ -48,18 +49,27 @@ import org.jd.gui.spi.SourceSaver;
 import org.jd.gui.spi.TreeNodeFactory;
 import org.jd.gui.spi.TypeFactory;
 import org.jd.gui.spi.UriLoader;
+import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.TempFile;
 import org.jd.gui.util.ZOutputStream;
 import org.jd.gui.util.container.JarContainerEntryUtil;
+import org.jd.gui.util.decompiler.ContainerLoader;
+import org.jd.gui.util.loader.LoaderUtils;
 import org.jd.gui.util.matcher.ArtifactVersionMatcher;
 import org.jd.gui.util.net.UriUtil;
 import org.jd.gui.util.swing.AbstractSwingWorker;
 import org.jd.gui.util.swing.SwingUtil;
 import org.jd.gui.view.MainView;
+import org.jd.gui.view.component.DynamicPage;
 import org.jd.util.SHA1Util;
+import org.netbeans.modules.editor.java.JavaKit;
+
+import com.heliosdecompiler.transformerapi.StandardTransformers;
+import com.heliosdecompiler.transformerapi.common.Loader;
 
 import java.awt.Component;
 import java.awt.Desktop;
+import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -111,6 +121,13 @@ import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 
+import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V0;
+import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V1;
+
+import de.cismet.custom.visualdiff.DiffPanel;
+import jd.core.ClassUtil;
+import jd.core.DecompilationResult;
+import jd.core.preferences.Preferences;
 import tim.jarcomp.CompareWindow;
 
 public class MainController implements API {
@@ -144,6 +161,7 @@ public class MainController implements API {
                 configuration, this, history,
                 e -> onOpen(),
                 e -> onCompare(),
+                e -> onCompareJD(),
                 e -> onClose(),
                 e -> onSaveSource(),
                 e -> onSaveAllSources(),
@@ -270,6 +288,37 @@ public class MainController implements API {
         window.startCompare();
     }
 
+    protected void onCompareJD() {
+        if (currentPage instanceof DynamicPage page) {
+        	Entry entry = page.getEntry();
+        	if (getSource(entry) == null) {
+                ContainerLoader containerLoader = new ContainerLoader(entry);
+                Map<String, String> preferences = new HashMap<>(getPreferences());
+                preferences.put(Preferences.REALIGN_LINE_NUMBERS, "true");
+                Loader apiLoader = LoaderUtils.createLoader(preferences, containerLoader, entry);
+                String entryInternalName = ClassUtil.getInternalName(entry.getPath());
+                try {
+	                DecompilationResult resultV0 = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, ENGINE_JD_CORE_V0);
+	                DecompilationResult resultV1 = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, ENGINE_JD_CORE_V1);
+	                String entryPath = entry.getPath();
+					JFrame diffFrame = new JFrame("Comparison view for class " + entryPath);
+	                ImageUtil.addJDIconsToFrame(diffFrame);
+	                DiffPanel diffPanel = new DiffPanel(diffFrame);
+                    String contentLeft = resultV0.getDecompiledOutput();
+                    String contentRight = resultV1.getDecompiledOutput();
+                    diffPanel.setLeftAndRight(contentLeft, JavaKit.JAVA_MIME_TYPE, entryPath + " (JD-Core V0)", contentRight, JavaKit.JAVA_MIME_TYPE, entryPath + " (JD-Core V1)");
+                    diffFrame.getContentPane().add(diffPanel);
+                    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+                    diffFrame.setLocation((int) Math.round(screenSize.getWidth() / 6.0), (int) Math.round(screenSize.getHeight() / 6.0));
+                    diffFrame.setSize((int) Math.round(screenSize.getWidth() / 1.5), (int) Math.round(screenSize.getHeight() / 1.5));
+                    diffFrame.setVisible(true);
+                } catch (Exception e) {
+                    ExceptionUtil.printStackTrace(e);
+                }           
+        	}
+        }
+    }
+    
     protected void onClose() {
         mainView.closeCurrentTab();
     }
@@ -292,18 +341,18 @@ public class MainController implements API {
                     String message = "The file '" + selectedFile.getAbsolutePath() + "' already exists.\n Do you want to replace the existing file?";
 
                     if (JOptionPane.showConfirmDialog(mainFrame, message, title, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                        save(selectedFile);
+                        save(selectedFile, cs);
                     }
                 } else {
-                    save(selectedFile);
+                    save(selectedFile, cs);
                 }
             }
         }
     }
 
-    protected void save(File selectedFile) {
+    protected void save(File selectedFile, ContentSavable cs) {
         try (OutputStream os = new FileOutputStream(selectedFile)) {
-            ((ContentSavable) currentPage).save(this, os);
+            cs.save(this, os);
         } catch (FileNotFoundException e) {
             assert ExceptionUtil.printStackTrace(e);
             JOptionPane.showMessageDialog(currentPage, "Not authorized to save to this destination. Please restart as administrator or choose another location.", "Access denied", JOptionPane.ERROR_MESSAGE);

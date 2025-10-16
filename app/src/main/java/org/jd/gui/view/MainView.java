@@ -29,6 +29,7 @@ import org.jd.gui.util.CustomMultiResolutionImage;
 import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.decompiler.GuiPreferences;
 import org.jd.gui.util.swing.SwingUtil;
+import org.jd.gui.view.component.DynamicPage;
 import org.jd.gui.view.component.IconButton;
 import org.jd.gui.view.component.panel.MainTabbedPanel;
 
@@ -118,6 +119,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             Configuration configuration, API api, History history,
             ActionListener openActionListener,
             ActionListener compareActionListener,
+            ActionListener compareJDActionListener,
             ActionListener closeActionListener,
             ActionListener saveActionListener,
             ActionListener saveAllSourcesActionListener,
@@ -236,6 +238,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             boolean browser = Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE);
             Action openAction = newAction("Open File...", newImageIcon("/org/jd/gui/images/open.png"), true, "Open a file", openActionListener);
             Action compareAction = newAction("Compare Files...", true, compareActionListener);
+            Action compareJDAction = newAction("Compare JD-Core V0 vs V1...", false, compareJDActionListener);
             closeAction = newAction("Close", false, closeActionListener);
             Action saveAction = newAction("Save", newImageIcon("/org/jd/gui/images/save.png"), false, saveActionListener);
             Action saveAllSourcesAction = newAction("Save All Sources", newImageIcon("/org/jd/gui/images/save_all.png"), false, saveAllSourcesActionListener);
@@ -264,6 +267,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             menuBar.add(menu);
             menu.add(openAction).setAccelerator(KeyStroke.getKeyStroke('O', menuShortcutKeyMask));
             menu.add(compareAction);
+            menu.add(compareJDAction);
             menu.addSeparator();
             menu.add(closeAction).setAccelerator(KeyStroke.getKeyStroke('W', menuShortcutKeyMask));
             menu.addSeparator();
@@ -360,6 +364,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
                                 updateHistoryActions();
                                 // Update menu
                                 saveAction.setEnabled(page instanceof ContentSavable);
+                                compareJDAction.setEnabled(page instanceof DynamicPage dp && api.getSource(dp.getEntry()) == null);
                                 copyAction.setEnabled(page instanceof ContentCopyable);
                                 selectAllAction.setEnabled(page instanceof ContentSelectable);
                                 findAction.setEnabled(page instanceof ContentSearchable);
