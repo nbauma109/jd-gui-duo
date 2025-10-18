@@ -1,0 +1,118 @@
+name: Refresh Release Notes (idempotent exact match)
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "0 20 * * *" # run daily at 20:00 UTC
+
+permissions:
+  contents: write   # needed to update release bodies
+
+concurrency:
+  group: refresh-release-notes
+  cancel-in-progress: true
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      targets: ${{ steps.find.outputs.targets }}
+
+    steps:
+      - name: Find releases whose body contains a line exactly "## Commits"
+        id: find
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Retrieve all releases (paginate) and filter for those whose body contains
+            // a standalone line matching exactly "## Commits" (no spaces, case-sensitive)
+            const releases = await github.paginate(github.rest.repos.listReleases, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+
+            const re = /^## Commits$/m; // exact match, multiline mode, case-sensitive
+
+            const targets = releases
+              .filter(r => re.test(r.body || ''))
+              .map(r => ({
+                id: r.id,
+                tag: r.tag_name || '',
+                name: r.name || ''
+              }));
+
+            core.info(`Found ${targets.length} release(s) with '## Commits' heading.`);
+            core.setOutput('targets', JSON.stringify(targets));
+
+  process:
+    needs: discover
+    if: ${{ needs.discover.outputs.targets != '[]' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        rel: ${{ fromJSON(needs.discover.outputs.targets) }}
+
+    steps:
+      - name: Checkout repository (contains Groovy script)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Groovy (latest) via SDKMAN
+        shell: bash
+        run: |
+          set -eo pipefail
+          curl -s "https://get.sdkman.io" | bash
+          source "$HOME/.sdkman/bin/sdkman-init.sh"
+          sdk install groovy
+          echo "$HOME/.sdkman/candidates/groovy/current/bin" >> "$GITHUB_PATH"
+          groovy -v
+
+      - name: Fetch release body and confirm guard condition
+        id: fetch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const re = /^## Commits$/m; // exact line match, case-sensitive
+            const rel = await github.rest.repos.getRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: ${{ matrix.rel.id }}
+            });
+            const body = rel.data.body || '';
+            const shouldFormat = re.test(body);
+            require('fs').writeFileSync('commits_src.md', body, 'utf8');
+            core.setOutput('should_format', String(shouldFormat));
+            core.info(`Release ${rel.data.tag_name}: shouldFormat=${shouldFormat}`);
+
+      - name: Format release notes with Groovy script
+        if: steps.fetch.outputs.should_format == 'true'
+        shell: bash
+        run: |
+          git clone https://github.com/nbauma109/release-notes.git
+          groovy release-notes/release_notes.groovy commits_src.md > RELEASE_NOTES.md
+          echo "=== Full RELEASE_NOTES.md for ${{ matrix.rel.tag }} ==="
+          cat RELEASE_NOTES.md
+
+      - name: Update release body
+        if: steps.fetch.outputs.should_format == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('RELEASE_NOTES.md', 'utf8');
+            await github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: ${{ matrix.rel.id }},
+              body
+            });
+            core.info(`Updated release ${{ matrix.rel.tag }} with formatted notes.`);
