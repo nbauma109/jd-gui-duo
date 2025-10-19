@@ -42,6 +42,7 @@ public class EjbJarXmlFilePage extends TypeReferencePage implements UriGettable,
     private transient Collection<Future<Indexes>> collectionOfFutureIndexes = Collections.emptyList();
 
     public EjbJarXmlFilePage(API api, Container.Entry entry) {
+    	super(api);
         this.api = api;
         this.entry = entry;
         try (InputStream inputStream = entry.getInputStream()) {

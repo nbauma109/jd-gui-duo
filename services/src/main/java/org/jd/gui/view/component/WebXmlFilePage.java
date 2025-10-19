@@ -42,6 +42,7 @@ public class WebXmlFilePage extends TypeReferencePage implements UriGettable, In
     private transient Collection<Future<Indexes>> collectionOfFutureIndexes;
 
     public WebXmlFilePage(API api, Container.Entry entry) {
+    	super(api);
         this.api = api;
         this.entry = entry;
         try (InputStream inputStream = entry.getInputStream()) {

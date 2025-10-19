@@ -1,2 +1,3 @@
 org.jd.gui.service.preferencespanel.UISingleInstancePreferencesProvider
 org.jd.gui.service.preferencespanel.UITabsPreferencesProvider
+org.jd.gui.service.preferencespanel.UIThemePreferencesProvider

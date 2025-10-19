@@ -51,6 +51,7 @@ import org.jd.gui.spi.TypeFactory;
 import org.jd.gui.spi.UriLoader;
 import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.TempFile;
+import org.jd.gui.util.ThemeUtil;
 import org.jd.gui.util.ZOutputStream;
 import org.jd.gui.util.container.JarContainerEntryUtil;
 import org.jd.gui.util.decompiler.ContainerLoader;
@@ -504,6 +505,11 @@ public class MainController implements API {
         preferencesController.show(() -> {
             checkPreferencesChange(currentPage);
             mainView.preferencesChanged(getPreferences());
+            if (Boolean.parseBoolean(getPreferences().getOrDefault("UIMainWindowPreferencesProvider.darkMode", "false"))) {
+            	configuration.setLookAndFeel("com.formdev.flatlaf.intellijthemes.FlatOneDarkIJTheme");
+            } else {
+            	configuration.setLookAndFeel(ThemeUtil.getDefaultLookAndFeel());
+            }
         });
     }
 

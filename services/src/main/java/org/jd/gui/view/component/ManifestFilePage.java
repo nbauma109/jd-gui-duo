@@ -50,6 +50,7 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
     protected JCheckBox beautifyCheckbox;
 
     public ManifestFilePage(API api, Container.Entry entry) {
+    	super(api);
         beautifyCheckbox = new JCheckBox();
         beautifyCheckbox.setText("Beautify");
         beautifyCheckbox.addChangeListener(e -> {

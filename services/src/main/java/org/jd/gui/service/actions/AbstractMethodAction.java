@@ -10,6 +10,7 @@ import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.cfg.MethodUtil;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
+import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.util.decompiler.ContainerLoader;
 
@@ -22,20 +23,22 @@ public abstract class AbstractMethodAction extends AbstractAction {
 
     private static final long serialVersionUID = 1L;
 
+    private final transient API api;
     private final transient Container.Entry entry;
     private final String fragment;
 
-    protected AbstractMethodAction(Container.Entry entry, String fragment) {
+    protected AbstractMethodAction(API api, Container.Entry entry, String fragment) {
+    	this.api = api;
         this.entry = entry;
         this.fragment = fragment;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        methodAction(entry, fragment);
+        methodAction(api, entry, fragment);
     }
 
-    private void methodAction(Container.Entry entry, String fragment) {
+    private void methodAction(API api, Container.Entry entry, String fragment) {
         Loader loader = new ContainerLoader(entry);
         TypeMaker typeMaker = new TypeMaker(loader);
         if (fragment != null) {
@@ -54,7 +57,7 @@ public abstract class AbstractMethodAction extends AbstractAction {
                     if (method == null) {
                         method = MethodUtil.searchMethod(loader, typeMaker, internalTypeName, "<clinit>", "()V");
                     }
-                    methodAction(method, internalTypeName);
+                    methodAction(api, method, internalTypeName);
                     
                 } catch (IOException ex) {
                     assert ExceptionUtil.printStackTrace(ex);
@@ -63,5 +66,5 @@ public abstract class AbstractMethodAction extends AbstractAction {
         }
     }
 
-    protected abstract void methodAction(Method method, String className);
+    protected abstract void methodAction(API api, Method method, String className);
 }

@@ -58,7 +58,9 @@ public abstract class TypePage extends CustomLineNumbersPage
     protected final transient ReferenceListener listener;
 
     protected TypePage(API api, Container.Entry entry) {
-        // Init attributes
+    	super(api);
+
+    	// Init attributes
         this.api = api;
         this.entry = entry;
         this.listener = new ReferenceListener(entry);

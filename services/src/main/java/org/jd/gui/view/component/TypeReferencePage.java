@@ -9,6 +9,7 @@ package org.jd.gui.view.component;
 
 import org.fife.ui.rsyntaxtextarea.DocumentRange;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.api.API;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -25,7 +26,11 @@ import jd.core.links.HyperlinkData;
  */
 public abstract class TypeReferencePage extends HyperlinkPage {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
+
+	protected TypeReferencePage(API api) {
+		super(api);
+	}
 
     // --- UriOpenable --- //
     @Override

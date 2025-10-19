@@ -51,7 +51,7 @@ public class PropertiesFileTreeNodeFactoryProvider extends TextFileTreeNodeFacto
         @Override
         @SuppressWarnings("unchecked")
         public <T extends JComponent & UriGettable> T createPage(API api) {
-            return (T) new TextFileTreeNodeFactoryProvider.Page(entry) {
+            return (T) new TextFileTreeNodeFactoryProvider.Page(api, entry) {
 
                 private static final long serialVersionUID = 1L;
 

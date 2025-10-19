@@ -10,6 +10,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil
 import org.jd.gui.Constants;
 import org.jd.gui.model.configuration.Configuration;
 import org.jd.gui.service.platform.PlatformService;
+import org.jd.gui.util.ThemeUtil;
 
 import java.awt.Dimension;
 import java.awt.Point;
@@ -28,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.jar.Manifest;
 
-import javax.swing.UIManager;
 import javax.xml.XMLConstants;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
@@ -97,9 +97,7 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
         config.setMainWindowSize(new Dimension(w, h));
         config.setMainWindowMaximize(false);
 
-        String defaultLaf = System.getProperty("swing.defaultlaf");
-
-        config.setLookAndFeel(defaultLaf != null ? defaultLaf : UIManager.getSystemLookAndFeelClassName());
+        config.setLookAndFeel(ThemeUtil.getDefaultLookAndFeel());
 
         File recentSaveDirectory = new File(System.getProperty("user.dir"));
 

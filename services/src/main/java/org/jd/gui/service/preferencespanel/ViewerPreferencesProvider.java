@@ -8,14 +8,12 @@
 package org.jd.gui.service.preferencespanel;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.Theme;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.spi.PreferencesPanel;
+import org.jd.gui.util.ThemeUtil;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 
 import javax.swing.JComponent;
@@ -72,14 +70,7 @@ public class ViewerPreferencesProvider extends JPanel implements PreferencesPane
 
         if (fontSize == null) {
             // Search default value for the current platform
-            RSyntaxTextArea textArea = new RSyntaxTextArea();
-
-            try (InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("rsyntaxtextarea/themes/eclipse.xml")) {
-                Theme theme = Theme.load(resourceAsStream);
-                theme.apply(textArea);
-            } catch (IOException e) {
-                assert ExceptionUtil.printStackTrace(e);
-            }
+            RSyntaxTextArea textArea = ThemeUtil.applyTheme(preferences, new RSyntaxTextArea());
 
             fontSize = String.valueOf(textArea.getFont().getSize());
         }

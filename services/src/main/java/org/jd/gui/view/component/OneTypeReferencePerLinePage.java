@@ -40,6 +40,7 @@ public class OneTypeReferencePerLinePage extends TypeReferencePage implements Ur
     private transient Collection<Future<Indexes>> collectionOfFutureIndexes = Collections.emptyList();
 
     public OneTypeReferencePerLinePage(API api, Container.Entry entry) {
+    	super(api);
         this.api = api;
         this.entry = entry;
         // Load content file & Create hyperlinks

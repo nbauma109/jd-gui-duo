@@ -27,6 +27,7 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.spi.ContextualActionsFactory;
 import org.jd.gui.util.ImageUtil;
+import org.jd.gui.util.ThemeUtil;
 
 import com.github.freva.asciitable.AsciiTable;
 import com.github.freva.asciitable.Column;
@@ -64,7 +65,7 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
     public Collection<Action> make(API api, Container.Entry entry, String fragment) {
         Collection<Action> actions = new ArrayList<>();
         if (entry.getPath().endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
-            actions.add(new ShowByteCodeAction(entry, fragment));
+            actions.add(new ShowByteCodeAction(api, entry, fragment));
         }
         return actions;
     }
@@ -77,18 +78,18 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
         protected static final ImageIcon NEXT_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/forward_nav.png"));
         protected static final ImageIcon PREV_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/backward_nav.png"));
 
-        public ShowByteCodeAction(Container.Entry entry, String fragment) {
-            super(entry, fragment);
+        public ShowByteCodeAction(API api, Container.Entry entry, String fragment) {
+            super(api, entry, fragment);
             putValue(GROUP_NAME, "Edit > ShowByteCode"); // used for sorting and grouping menus
             putValue(NAME, "Show Byte Code");
             putValue(SMALL_ICON, ICON);
         }
 
         @Override
-        protected void methodAction(Method method, String className) {
+        protected void methodAction(API api, Method method, String className) {
             String byteCode = new AsciiTableByteCodeWriter().write("    ", method);
             Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-            RSyntaxTextArea textArea = new RSyntaxTextArea(byteCode);
+            RSyntaxTextArea textArea = ThemeUtil.applyTheme(api, new RSyntaxTextArea(byteCode));
             textArea.setCaretPosition(0);
             textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
             RTextScrollPane sp = new RTextScrollPane(textArea);

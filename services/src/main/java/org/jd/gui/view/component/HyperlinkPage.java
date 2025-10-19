@@ -9,6 +9,8 @@ package org.jd.gui.view.component;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.Token;
+import org.jd.gui.api.API;
+import org.jd.gui.util.ThemeUtil;
 
 import java.awt.Cursor;
 import java.awt.Point;
@@ -29,7 +31,8 @@ public abstract class HyperlinkPage extends TextPage {
 
     protected final transient NavigableMap<Integer, HyperlinkData> hyperlinks = new TreeMap<>();
 
-    protected HyperlinkPage() {
+    protected HyperlinkPage(API api) {
+    	super(api);
         MouseAdapter listener = new MouseAdapter() {
             private int lastX = -1;
             private int lastY = -1;
@@ -86,7 +89,7 @@ public abstract class HyperlinkPage extends TextPage {
     }
 
     @Override
-    protected RSyntaxTextArea newSyntaxTextArea() { return new HyperlinkSyntaxTextArea(); }
+    protected RSyntaxTextArea newSyntaxTextArea(API api) { return ThemeUtil.applyTheme(api, new HyperlinkSyntaxTextArea()); }
 
     public void addHyperlink(HyperlinkData hyperlinkData) {
         hyperlinks.put(hyperlinkData.getStartPosition(), hyperlinkData);

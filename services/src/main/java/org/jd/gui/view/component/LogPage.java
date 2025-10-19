@@ -35,6 +35,7 @@ public class LogPage extends HyperlinkPage implements UriGettable, IndexesChange
     private transient Collection<Future<Indexes>> collectionOfFutureIndexes = Collections.emptyList();
 
     public LogPage(API api, URI uri, String content) {
+    	super(api);
         this.api = api;
         this.uri = uri;
         // Parse

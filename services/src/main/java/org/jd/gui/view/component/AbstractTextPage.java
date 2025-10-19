@@ -11,7 +11,6 @@ import org.fife.ui.rsyntaxtextarea.DocumentRange;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaEditorKit;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rsyntaxtextarea.folding.FoldManager;
 import org.fife.ui.rtextarea.FoldIndicatorStyle;
 import org.fife.ui.rtextarea.Gutter;
@@ -20,10 +19,12 @@ import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 import org.fife.ui.rtextarea.SearchResult;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContentSearchable;
 import org.jd.gui.api.feature.LineNumberNavigable;
 import org.jd.gui.api.feature.PreferencesChangeListener;
 import org.jd.gui.api.feature.UriOpenable;
+import org.jd.gui.util.ThemeUtil;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -37,8 +38,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Rectangle2D;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -71,10 +70,12 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
 
     private Map<String, String> preferences;
 
-    public AbstractTextPage() {
+    public AbstractTextPage(API api) {
         super(new BorderLayout());
 
-        textArea = newSyntaxTextArea();
+        preferences = api.getPreferences();
+
+        textArea = newSyntaxTextArea(api);
         textArea.setSyntaxEditingStyle(getSyntaxStyle());
         textArea.setCodeFoldingEnabled(true);
         textArea.setAntiAliasingEnabled(true);
@@ -99,13 +100,6 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
         inputMap.put(ctrlA, "none");
         inputMap.put(ctrlC, "none");
         inputMap.put(ctrlV, "none");
-
-        try (InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("rsyntaxtextarea/themes/eclipse.xml")) {
-            Theme theme = Theme.load(resourceAsStream);
-            theme.apply(textArea);
-        } catch (IOException e) {
-            assert ExceptionUtil.printStackTrace(e);
-        }
 
         scrollPane = new RTextScrollPane(textArea);
         scrollPane.setFoldIndicatorEnabled(true);
@@ -163,8 +157,8 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
         add(new RoundMarkErrorStrip(textArea), BorderLayout.LINE_END);
     }
 
-    protected RSyntaxTextArea newSyntaxTextArea() {
-        return new RSyntaxTextArea();
+    protected RSyntaxTextArea newSyntaxTextArea(API api) {
+        return ThemeUtil.applyTheme(api, new RSyntaxTextArea());
     }
 
     public String getText() {

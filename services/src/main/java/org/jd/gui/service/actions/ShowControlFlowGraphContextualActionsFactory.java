@@ -39,12 +39,12 @@ public class ShowControlFlowGraphContextualActionsFactory implements ContextualA
     public Collection<Action> make(API api, Container.Entry entry, String fragment) {
         Collection<Action> actions = new ArrayList<>();
         if (entry.getPath().endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
-            actions.add(new ShowControlFlowGraphAction(entry, fragment, null, MODE_RAW));
-            actions.add(new ShowControlFlowGraphAction(entry, fragment, null, MODE_GOTO_ONLY));
-            actions.add(new ShowControlFlowGraphAction(entry, fragment, null, MODE_GOTO_AND_LOOP));
-            actions.add(new ShowControlFlowGraphAction(entry, fragment, null, MODE_PRE_REDUCE));
+            actions.add(new ShowControlFlowGraphAction(api, entry, fragment, null, MODE_RAW));
+            actions.add(new ShowControlFlowGraphAction(api, entry, fragment, null, MODE_GOTO_ONLY));
+            actions.add(new ShowControlFlowGraphAction(api, entry, fragment, null, MODE_GOTO_AND_LOOP));
+            actions.add(new ShowControlFlowGraphAction(api, entry, fragment, null, MODE_PRE_REDUCE));
             for (ControlFlowGraphReducer controlFlowGraphReducer : ControlFlowGraphReducer.getPreferredReducers()) {
-                actions.add(new ShowControlFlowGraphAction(entry, fragment, controlFlowGraphReducer, MODE_GOTO_AND_LOOP));
+                actions.add(new ShowControlFlowGraphAction(api, entry, fragment, controlFlowGraphReducer, MODE_GOTO_AND_LOOP));
             }
         }
         return actions;
@@ -60,8 +60,8 @@ public class ShowControlFlowGraphContextualActionsFactory implements ContextualA
         
         private int mode;
 
-        public ShowControlFlowGraphAction(Container.Entry entry, String fragment, ControlFlowGraphReducer controlFlowGraphReducer, int mode) {
-            super(entry, fragment);
+        public ShowControlFlowGraphAction(API api, Container.Entry entry, String fragment, ControlFlowGraphReducer controlFlowGraphReducer, int mode) {
+            super(api, entry, fragment);
             this.controlFlowGraphReducer = controlFlowGraphReducer;
             this.mode = mode;
             if (controlFlowGraphReducer == null) {
@@ -85,7 +85,8 @@ public class ShowControlFlowGraphContextualActionsFactory implements ContextualA
             };
         }
 
-        protected void methodAction(Method method, String className) {
+        @Override
+        protected void methodAction(API api, Method method, String className) {
             if ((method.getAccessFlags() & Const.ACC_ABSTRACT) != 0) {
                 JOptionPane.showMessageDialog(null, "Method is abstract !", "ERROR", JOptionPane.ERROR_MESSAGE, ICON);
                 return;

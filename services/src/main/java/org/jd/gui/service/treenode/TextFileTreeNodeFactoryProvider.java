@@ -7,7 +7,6 @@
 
 package org.jd.gui.service.treenode;
 
-import org.fife.ui.rsyntaxtextarea.Theme;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContainerEntryGettable;
@@ -31,14 +30,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 public class TextFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvider {
 
     protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/ascii_obj.png"));
-
-    static {
-        try (InputStream inputStream = TextFileTreeNodeFactoryProvider.class.getClassLoader().getResourceAsStream("rsyntaxtextarea/themes/eclipse.xml")) {
-            Theme.load(inputStream);
-        } catch (IOException e) {
-            assert ExceptionUtil.printStackTrace(e);
-        }
-    }
 
     @Override
     public String[] getSelectors() {
@@ -66,7 +57,7 @@ public class TextFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvider
         @Override
         @SuppressWarnings("unchecked")
         public <T extends JComponent & UriGettable> T createPage(API api) {
-            return (T) new Page(entry);
+            return (T) new Page(api, entry);
         }
     }
 
@@ -75,7 +66,8 @@ public class TextFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvider
         private static final long serialVersionUID = 1L;
         private transient Container.Entry entry;
 
-        public Page(Container.Entry entry) {
+        public Page(API api, Container.Entry entry) {
+        	super(api);
             this.entry = entry;
             try (InputStream inputStream = entry.getInputStream()) {
                 setText(TextReader.getText(inputStream));

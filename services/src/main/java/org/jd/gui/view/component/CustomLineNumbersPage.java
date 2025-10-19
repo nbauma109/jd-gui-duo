@@ -16,6 +16,8 @@ import org.fife.ui.rtextarea.Gutter;
 import org.fife.ui.rtextarea.LineNumberList;
 import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextAreaUI;
+import org.jd.gui.api.API;
+import org.jd.gui.util.ThemeUtil;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -50,6 +52,10 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
     /** Map[textarea line number] = original line number. */
     private int[] lineNumberMap;
     private int maxLineNumber;
+
+    protected CustomLineNumbersPage(API api) {
+    	super(api);
+    }
 
     protected void setMaxLineNumber(int maxLineNumber) {
         if (maxLineNumber > 0) {
@@ -119,7 +125,7 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
     }
 
     @Override
-    protected RSyntaxTextArea newSyntaxTextArea() { return new SourceSyntaxTextArea(); }
+    protected RSyntaxTextArea newSyntaxTextArea(API api) { return ThemeUtil.applyTheme(api, new SourceSyntaxTextArea()); }
 
     public class SourceSyntaxTextArea extends HyperlinkSyntaxTextArea {
         private static final long serialVersionUID = 1L;

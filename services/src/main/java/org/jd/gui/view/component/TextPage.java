@@ -22,8 +22,12 @@ import java.nio.charset.StandardCharsets;
 
 public class TextPage extends AbstractTextPage implements ContentCopyable, ContentSelectable, ContentSavable {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
+	public TextPage(API api) {
+		super(api);
+	}
+	
     // --- ContentCopyable --- //
     @Override
     public void copy() {
