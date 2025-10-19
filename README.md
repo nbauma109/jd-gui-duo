@@ -158,6 +158,10 @@ If the code is misaligned, the numbers will appear in red.
 
 This option uses the same feature as Eclipse to cleanup unnecessary casts.
 
+## Dark mode
+
+<img width="1235" height="794" alt="image" src="https://github.com/user-attachments/assets/d548b96a-3999-4afe-ad75-7011c9f94254" />
+
 # Credits
 
 Decompiler|Author|Link|License
