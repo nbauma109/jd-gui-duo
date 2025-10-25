@@ -159,7 +159,7 @@
                 <echo file="${app.dir}/Contents/MacOS/jd-gui-duo"><![CDATA[
 #!/usr/bin/env bash
 APP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-JRE="$APP_DIR/runtime/Contents/Home"
+JRE="$APP_DIR/runtime/Contents"
 JAVA="$JRE/bin/java"
 LIB="$APP_DIR/lib"
 exec "$JAVA" -ea \
