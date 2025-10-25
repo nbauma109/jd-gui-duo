@@ -159,9 +159,9 @@
                 <echo file="${app.dir}/Contents/MacOS/jd-gui-duo"><![CDATA[
 #!/usr/bin/env bash
 APP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-JRE="$APP_DIR/Contents/runtime/Contents/Home"
+JRE="$APP_DIR/runtime/Contents/Home"
 JAVA="$JRE/bin/java"
-LIB="$APP_DIR/Contents/lib"
+LIB="$APP_DIR/lib"
 exec "$JAVA" -ea \
   --add-opens=java.base/java.net=ALL-UNNAMED \
   --add-opens=java.desktop/javax.swing.text=ALL-UNNAMED \
