@@ -9,7 +9,6 @@ package org.jd.gui.service.configuration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.Constants;
 import org.jd.gui.model.configuration.Configuration;
-import org.jd.gui.service.platform.PlatformService;
 import org.jd.gui.util.ThemeUtil;
 
 import java.awt.Dimension;
@@ -37,50 +36,15 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
 import static org.jd.gui.util.decompiler.GuiPreferences.ERROR_BACKGROUND_COLOR;
+
+import de.cismet.custom.visualdiff.ConfigFileUtil;
+
 import static jd.core.preferences.Preferences.JD_CORE_VERSION;
 
 public class ConfigurationXmlPersisterProvider implements ConfigurationPersister {
     private static final String NEW_LINE_2_TABS = "\n\t\t";
     private static final String NEW_LINE_3_TABS = "\n\t\t\t";
-    protected static final File FILE = getConfigFile();
-
-    protected static File getConfigFile() {
-        String configFilePath = System.getProperty(Constants.CONFIG_FILENAME);
-
-        if (configFilePath != null) {
-            File configFile = new File(configFilePath);
-            if (configFile.exists()) {
-                return configFile;
-            }
-        }
-
-        if (PlatformService.getInstance().isLinux()) {
-            // See: http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
-            String xdgConfigHome = System.getenv("XDG_CONFIG_HOME");
-            if (xdgConfigHome != null) {
-                File xdgConfigHomeFile = new File(xdgConfigHome);
-                if (xdgConfigHomeFile.exists()) {
-                    return new File(xdgConfigHomeFile, Constants.CONFIG_FILENAME);
-                }
-            }
-
-            File userConfigFile = new File(System.getProperty("user.home"), ".config");
-            if (userConfigFile.exists()) {
-                return new File(userConfigFile, Constants.CONFIG_FILENAME);
-            }
-        } else if (PlatformService.getInstance().isWindows()) {
-            // See: http://blogs.msdn.com/b/patricka/archive/2010/03/18/where-should-i-store-my-data-and-configuration-files-if-i-target-multiple-os-versions.aspx
-            String roamingConfigHome = System.getenv("APPDATA");
-            if (roamingConfigHome != null) {
-                File roamingConfigHomeFile = new File(roamingConfigHome);
-                if (roamingConfigHomeFile.exists()) {
-                    return new File(roamingConfigHomeFile, Constants.CONFIG_FILENAME);
-                }
-            }
-        }
-
-        return new File(Constants.CONFIG_FILENAME);
-    }
+    protected static final File FILE = ConfigFileUtil.getJDGUIConfigFile();
 
     @Override
     public Configuration load() {
