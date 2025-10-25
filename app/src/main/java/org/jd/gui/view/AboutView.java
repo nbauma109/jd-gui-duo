@@ -47,7 +47,6 @@ import jadx.core.Jadx;
 public class AboutView {
 
     private static final String VERSION = "version ";
-    private static final String SNAPSHOT = "SNAPSHOT";
 
     private JDialog aboutDialog;
     private JButton aboutOkButton;

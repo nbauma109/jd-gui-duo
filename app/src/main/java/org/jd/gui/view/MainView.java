@@ -307,10 +307,8 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
                 menu.addSeparator();
             }
             menu.add(preferencesAction).setAccelerator(KeyStroke.getKeyStroke('P', menuShortcutKeyMask | InputEvent.SHIFT_DOWN_MASK));
-            if (!PlatformService.getInstance().isMac()) {
-                menu.addSeparator();
-                menu.add(aboutAction).setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
-            }
+            menu.addSeparator();
+            menu.add(aboutAction).setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
             mainFrame.setJMenuBar(menuBar);
 
             // Icon bar //
