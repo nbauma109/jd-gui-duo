@@ -7,7 +7,6 @@
 
 package org.jd.gui.service.preferencespanel;
 
-import org.jd.gui.service.platform.PlatformService;
 import org.jd.gui.spi.PreferencesPanel;
 
 import java.awt.Color;
@@ -46,7 +45,7 @@ public class UIThemePreferencesProvider extends JPanel implements PreferencesPan
     public void init(Color errorBackgroundColor) {}
 
     @Override
-    public boolean isActivated() { return !PlatformService.getInstance().isMac(); }
+    public boolean isActivated() { return true; }
 
     @Override
     public void loadPreferences(Map<String, String> preferences) {
