@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.github.nbauma109</groupId>
     <artifactId>jd-gui-duo-parent</artifactId>
-    <version>2.0.96-SNAPSHOT</version>
+    <version>2.0.96</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -119,24 +119,24 @@
             </goals>
             <configuration>
               <target>
-                <property name="app.dir" value="${project.build.directory}/macos/jd-gui-duo.app"/>
+                <property name="app.dir" value="${project.build.directory}/macos/jd-gui-duo.app" />
 
-                <mkdir dir="${app.dir}/Contents/MacOS"/>
-                <mkdir dir="${app.dir}/Contents/Resources"/>
-                <mkdir dir="${app.dir}/Contents/lib"/>
-                <mkdir dir="${app.dir}/Contents/runtime"/>
+                <mkdir dir="${app.dir}/Contents/MacOS" />
+                <mkdir dir="${app.dir}/Contents/Resources" />
+                <mkdir dir="${app.dir}/Contents/lib" />
+                <mkdir dir="${app.dir}/Contents/runtime" />
 
                 <!-- icon -->
-                <copy file="${app.icon.path}" tofile="${app.dir}/Contents/Resources/JDGUI.icns" overwrite="true"/>
+                <copy file="${app.icon.path}" tofile="${app.dir}/Contents/Resources/JDGUI.icns" overwrite="true" />
 
                 <!-- JRE into app -->
                 <copy todir="${app.dir}/Contents/runtime">
-                  <fileset dir="${project.build.directory}/macos/jre"/>
+                  <fileset dir="${project.build.directory}/macos/jre" />
                 </copy>
 
                 <!-- libraries -->
                 <copy todir="${app.dir}/Contents/lib">
-                  <fileset dir="${project.build.directory}/lib"/>
+                  <fileset dir="${project.build.directory}/lib" />
                 </copy>
 
                 <!-- Info.plist -->
@@ -171,7 +171,7 @@ exec "$JAVA" -ea \
   -cp "$LIB/jd-gui-duo-app-${project.version}.jar:$LIB/*" \
   ${main.class} "$@"
 ]]></echo>
-                <chmod file="${app.dir}/Contents/MacOS/jd-gui-duo" perm="0755"/>
+                <chmod file="${app.dir}/Contents/MacOS/jd-gui-duo" perm="0755" />
               </target>
             </configuration>
           </execution>
