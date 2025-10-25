@@ -12,17 +12,10 @@
       <directory>${project.build.directory}/macos</directory>
       <outputDirectory>/</outputDirectory>
       <includes>
-        <include>jre/**</include>
-      </includes>
-    </fileSet>
-    <fileSet>
-      <directory>${project.build.directory}</directory>
-      <outputDirectory>/</outputDirectory>
-      <includes>
-        <include>lib/**</include>
-        <include>jd-gui-duo.command</include>
+        <include>jd-gui-duo.app/**</include>
       </includes>
       <fileMode>0755</fileMode>
+      <directoryMode>0755</directoryMode>
     </fileSet>
   </fileSets>
 </assembly>
