@@ -66,7 +66,7 @@ public class LogPage extends HyperlinkPage implements UriGettable, IndexesChange
     }
 
     @Override
-    protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return ((LogHyperlinkData)hyperlinkData).isEnabled(); }
+    protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return hyperlinkData.isEnabled(); }
 
     @Override
     protected void openHyperlink(int x, int y, HyperlinkData hyperlinkData) {
