@@ -95,7 +95,7 @@
       <dependency>
         <groupId>com.github.nbauma109</groupId>
         <artifactId>netbeans-visual-diff-standalone</artifactId>
-        <version>2.0.45</version>
+        <version>${netbeans-visual-diff-standalone.version}</version>
       </dependency>
       <dependency>
         <groupId>com.fifesoft</groupId>
@@ -143,5 +143,6 @@
     <project.scm.id>github.com</project.scm.id>
     <flatlaf.version>3.6.2</flatlaf.version>
     <transformer-api.version>4.0.58</transformer-api.version>
+    <netbeans-visual-diff-standalone.version>2.0.45</netbeans-visual-diff-standalone.version>
   </properties>
 </project>
