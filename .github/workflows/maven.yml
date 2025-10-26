@@ -37,4 +37,4 @@ jobs:
         git config --global user.email "git@github.com"
         git config --global user.name "git"
     - name: Release with Maven
-      run: mvn -B -Dusername=git release:clean release:prepare release:perform
+      run: mvn --no-transfer-progress -B -Dusername=git release:clean release:prepare release:perform
