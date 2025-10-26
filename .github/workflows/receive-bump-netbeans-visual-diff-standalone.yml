@@ -29,48 +29,30 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Produce direct dependency list at project root
-        run: |
-          set -euo pipefail
-          rm -rf target && mkdir -p target
-          mvn -B -q dependency:list \
-            -DincludeGroupIds=com.github.nbauma109 \
-            -DincludeArtifactIds=netbeans-visual-diff-standalone \
-            -DexcludeTransitive=true \
-            -DoutputFile=target/dep-list.txt
-
-      - name: Read current netbeans-visual-diff-standalone version from target/dep-list.txt
+      - name: Read current netbeans-visual-diff-standalone.version
         id: current
         run: |
           set -euo pipefail
-          if [ ! -f target/dep-list.txt ]; then
-            echo "target/dep-list.txt not found"
-            exit 1
-          fi
-
-          cur="$(sed -n 's/.*com\.github\.nbauma109:netbeans-visual-diff-standalone:jar:\([0-9A-Za-z._+-]\+\).*/\1/p' target/dep-list.txt | head -n1)"
+          cur=$(grep -Eo '<netbeans-visual-diff-standalone\.version>[0-9A-Za-z._+-]+</netbeans-visual-diff-standalone\.version>' pom.xml | sed -E 's/.*<netbeans-visual-diff-standalone\.version>([^<]+)<\/netbeans-visual-diff-standalone\.version>.*/\1/' | head -n1)
           if [ -z "$cur" ]; then
-            echo "No direct dependency on com.github.nbauma109:netbeans-visual-diff-standalone was found by dependency:list."
+            echo "Could not find <netbeans-visual-diff-standalone.version>…</netbeans-visual-diff-standalone.version> in pom.xml"
             exit 1
           fi
-
           echo "Detected old version: $cur"
           echo "version=$cur" >> "$GITHUB_OUTPUT"
 
-      - name: Bump com.github.nbauma109:netbeans-visual-diff-standalone across dependencyManagement and modules
+      - name: Set netbeans-visual-diff-standalone.version to new value
         run: |
           set -euo pipefail
-          mvn -B versions:use-dep-version \
-            -Dincludes='com.github.nbauma109:netbeans-visual-diff-standalone' \
-            -DdepVersion='${{ github.event.client_payload.version }}' \
-            -DforceVersion=true \
-            -DprocessDependencyManagement=true \
-            -DprocessAllModules=true \
+          mvn --no-transfer-progress -B versions:set-property \
+            -Dproperty=netbeans-visual-diff-standalone.version \
+            -DnewVersion='${{ github.event.client_payload.version }}' \
             -DgenerateBackupPoms=false
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v6
         with:
+          token: ${{ secrets.PAT_TOKEN }}
           branch: "bump-com.github.nbauma109-netbeans-visual-diff-standalone-${{ github.event.client_payload.version }}"
           commit-message: "Bump com.github.nbauma109:netbeans-visual-diff-standalone from ${{ steps.current.outputs.version }} to ${{ github.event.client_payload.version }}"
           title: "Bump com.github.nbauma109:netbeans-visual-diff-standalone from ${{ steps.current.outputs.version }} to ${{ github.event.client_payload.version }}"
