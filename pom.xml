@@ -105,7 +105,7 @@
       <dependency>
         <groupId>com.github.nbauma109</groupId>
         <artifactId>transformer-api</artifactId>
-        <version>4.0.58</version>
+        <version>${transformer-api.version}</version>
       </dependency>
       <dependency>
         <groupId>org.eclipse.jdt</groupId>
@@ -142,5 +142,6 @@
     <main.class>org.jd.gui.App</main.class>
     <project.scm.id>github.com</project.scm.id>
     <flatlaf.version>3.6.2</flatlaf.version>
+    <transformer-api.version>4.0.58</transformer-api.version>
   </properties>
 </project>
