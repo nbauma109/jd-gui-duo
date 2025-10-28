@@ -144,7 +144,7 @@
     <flatlaf.version>3.6.2</flatlaf.version>
     <!-- ======================================================================
          Transformer API — Unified Transformer Access Layer
-         ----------------------------------------------------------------------
+         ======================================================================
          The Transformer API provides convenient access to different
          transformers (currently decompilers only) under a unified API.
          The API is still subject to major changes, but only with a major
@@ -162,7 +162,7 @@
     <transformer-api.version>4.0.58</transformer-api.version>
     <!-- ======================================================================
          NetBeans Visual Diff Standalone — Diff Component for Swing
-         ----------------------------------------------------------------------
+         ======================================================================
          Use the NetBeans diff component in any Java Swing project!
          Supported features include, but not limited to :
          • Java syntax coloring with Eclipse theme.
