@@ -50,7 +50,7 @@ jobs:
             -DgenerateBackupPoms=false
 
       - name: Create pull request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.PAT_TOKEN }}
           branch: "bump-com.github.nbauma109-transformer-api-${{ github.event.client_payload.version }}"
