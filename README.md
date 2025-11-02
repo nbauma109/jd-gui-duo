@@ -14,6 +14,8 @@ Downloads from Jitpack :
 [![Jitpack Downloads](https://jitpack.io/v/nbauma109/jd-gui-duo/month.svg)](https://jitpack.io/#nbauma109/jd-gui-duo)
 [![Jitpack Downloads](https://jitpack.io/v/nbauma109/jd-gui-duo/week.svg)](https://jitpack.io/#nbauma109/jd-gui-duo)
 
+Looking for an Eclipse plugin ? Try [ECD](https://github.com/nbauma109/ecd)
+
 # jd-gui-duo
 A 2-in-1 JAVA decompiler based on JD-CORE v0 and v1
  - [![image](https://user-images.githubusercontent.com/9403560/156565769-51264b92-4850-46c1-ad33-a4211a4c89ec.png)](https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/master-SNAPSHOT/jd-gui-duo-master-SNAPSHOT-windows.tar.xz) Windows
