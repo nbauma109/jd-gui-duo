@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008-2025 Emmanuel Dupuy and other contributors.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -49,6 +49,7 @@ import org.jd.gui.spi.SourceSaver;
 import org.jd.gui.spi.TreeNodeFactory;
 import org.jd.gui.spi.TypeFactory;
 import org.jd.gui.spi.UriLoader;
+import org.jd.gui.util.DownloadUtil;
 import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.TempFile;
 import org.jd.gui.util.ThemeUtil;
@@ -57,7 +58,9 @@ import org.jd.gui.util.container.JarContainerEntryUtil;
 import org.jd.gui.util.decompiler.ContainerLoader;
 import org.jd.gui.util.loader.LoaderUtils;
 import org.jd.gui.util.matcher.ArtifactVersionMatcher;
+import org.jd.gui.util.maven.central.helper.NexusSearchFrame;
 import org.jd.gui.util.net.UriUtil;
+import org.jd.gui.util.nexus.model.NexusArtifact;
 import org.jd.gui.util.swing.AbstractSwingWorker;
 import org.jd.gui.util.swing.SwingUtil;
 import org.jd.gui.view.MainView;
@@ -185,6 +188,7 @@ public class MainController implements API {
                 e -> onJdGuiIssues(),
                 e -> onJdCoreIssues(),
                 e -> onPreferences(),
+                e -> onMavenCentralSearch(),
                 e -> onAbout(),
                 this::panelClosed,
                 this::onCurrentPageChanged,
@@ -192,7 +196,7 @@ public class MainController implements API {
         );
     }
 
-    // --- Show GUI --- //
+	// --- Show GUI --- //
     @SuppressWarnings("unchecked")
     public void show(List<File> files) {
         SwingUtil.invokeLater(() -> {
@@ -513,6 +517,11 @@ public class MainController implements API {
         });
     }
 
+    protected void onMavenCentralSearch() {
+		NexusSearchFrame nexusSearchFrame = new NexusSearchFrame(this);
+		nexusSearchFrame.setVisible(true);
+	}
+
     protected void onAbout() {
         aboutController.show();
     }
@@ -554,21 +563,36 @@ public class MainController implements API {
     }
 
     public void compareFiles(List<File> files) {
-        // Construct main window and initialise
-        CompareWindow window = new CompareWindow(this);
-        // Pass two files to start with, or instruct to prompt
-        window.startCompare(files.get(0), files.get(1));
+        compareFiles(files.get(0), files.get(1));
     }
 
-    public void showGAVs(Set<File> files, Map<File, String> sha1Map, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
+    public void compareFiles(URI uri1, URI uri2) {
+        try {
+            File file1 = DownloadUtil.downloadToTemp(uri1, this, mainView.getMainFrame());
+            File file2 = DownloadUtil.downloadToTemp(uri2, this, mainView.getMainFrame());
+            compareFiles(file1, file2);
+        } catch (IOException e) {
+            assert ExceptionUtil.printStackTrace(e);
+        }
+    }
+
+    public void compareFiles(File file1, File file2) {
+    	// Construct main window and initialise
+    	CompareWindow window = new CompareWindow(this);
+    	// Pass two files to start with, or instruct to prompt
+    	window.startCompare(file1, file2);
+    }
+    
+    public void showGAVs(API api, Set<File> files, Map<File, String> sha1Map, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
         Set<Artifact> artifacts = new TreeSet<>();
         Set<Artifact> missingArtifacts = new TreeSet<>();
         Set<Artifact> missingArtifactsWithGroup = new TreeSet<>();
         for (File file : files) {
             try {
                 String sha1 = sha1Map.computeIfAbsent(file, SHA1Util::computeSHA1);
-                Artifact artifact = MavenOrgSourceLoaderProvider.buildArtifactFromURI(file, sha1);
-                if (artifact != null && artifact.found()) {
+                NexusArtifact nexusArtifact = MavenOrgSourceLoaderProvider.buildArtifactFromURI(api, sha1, false);
+                if (nexusArtifact != null) {
+                	Artifact artifact = new Artifact(nexusArtifact, file.getName());
                     artifacts.add(artifact);
                 } else {
                     missingArtifacts.add(inferArtifactFromFileName(file));
@@ -815,8 +839,8 @@ public class MainController implements API {
     private final class IndexerWorker extends AbstractSwingWorker<Indexes, Void> {
         private final ContentIndexable ci;
 
-        private IndexerWorker(Component component, ContentIndexable ci) {
-            super(component, "Indexing ...");
+        private IndexerWorker(API api, Component component, ContentIndexable ci) {
+            super(api, component, "Indexing ...");
             this.ci = ci;
         }
 
@@ -844,15 +868,15 @@ public class MainController implements API {
         private final Set<File> files;
         private final Map<File, String> sha1Map;
 
-        private GAVWorker(Component component, Set<File> files, Map<File, String> sha1Map) {
-            super(component, "Generating POM ...");
+        private GAVWorker(API api, Component component, Set<File> files, Map<File, String> sha1Map) {
+            super(api, component, "Generating POM ...");
             this.files = files;
             this.sha1Map = sha1Map;
         }
 
         @Override
         protected Void doInBackground() throws Exception {
-            showGAVs(files, sha1Map, this::getProgressPercentage, this::setProgressPercentage, this::isCancelled);
+            showGAVs(api, files, sha1Map, this::getProgressPercentage, this::setProgressPercentage, this::isCancelled);
             return null;
         }
     }
@@ -899,7 +923,7 @@ public class MainController implements API {
         }
 
         private void launchGAVWorker(TransferHandler.TransferSupport info, Set<File> files, Map<File, String> sha1Map) {
-            SwingWorker<Void, Void> worker = new GAVWorker(info.getComponent(), files, sha1Map);
+            SwingWorker<Void, Void> worker = new GAVWorker(MainController.this, info.getComponent(), files, sha1Map);
             worker.execute();
         }
     }
@@ -1007,7 +1031,7 @@ public class MainController implements API {
 
         if (component instanceof ContentIndexable ci && file != null) {
             UIManager.put("ProgressMonitor.progressText", title);
-            SwingWorker<Indexes, Void> worker = new IndexerWorker(component, ci);
+            SwingWorker<Indexes, Void> worker = new IndexerWorker(MainController.this, component, ci);
             worker.execute();
 
             component.putClientProperty(INDEXES, worker);

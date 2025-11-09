@@ -1,1 +1,2 @@
 org.jd.gui.service.uriloader.FileUriLoaderProvider
+org.jd.gui.service.uriloader.HttpUriLoaderProvider

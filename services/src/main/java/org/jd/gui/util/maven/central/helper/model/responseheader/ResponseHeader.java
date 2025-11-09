@@ -14,32 +14,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package org.jd.gui.util.matcher;
+package org.jd.gui.util.maven.central.helper.model.responseheader;
 
-public class ArtifactVersionMatcher {
+import jakarta.json.bind.annotation.JsonbProperty;
+import org.jd.gui.util.maven.central.helper.model.responseheader.params.Params;
 
-    private String artifactId;
-    private String version = "";
+public class ResponseHeader {
+    private int status;
+    @JsonbProperty("QTime")
+    private long queryTime;
+    private Params params;
 
-    public void parse(String baseFileName) {
-        int idx = baseFileName.lastIndexOf('-');
-        if (idx != -1) {
-            artifactId = baseFileName.substring(0, idx);
-            version = baseFileName.substring(idx + 1) + (!version.isEmpty() ? "-" : "") + version;
-            if (version.matches("[A-Za-z]+") || artifactId.matches(".*-[\\d.]+")) {
-                parse(artifactId);
-            }
-        } else {
-            artifactId = baseFileName + (!version.isEmpty() ? "-" : "") + version;
-            version = "";
-        }
+    public int getStatus() {
+        return status;
     }
 
-    public String getArtifactId() {
-        return artifactId;
+    public void setStatus(final int status) {
+        this.status = status;
     }
 
-    public String getVersion() {
-        return version;
+    public long getQueryTime() {
+        return queryTime;
     }
+
+    public void setQueryTime(final long queryTime) {
+        this.queryTime = queryTime;
+    }
+
+    public Params getParams() {
+        return params;
+    }
+
+    public void setParams(final Params params) {
+        this.params = params;
+    }
+
 }

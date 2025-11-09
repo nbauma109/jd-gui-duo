@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008-2025 Emmanuel Dupuy and other contributors.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -37,6 +37,8 @@ public interface API {
     boolean openURI(int x, int y, Collection<Container.Entry> entries, String query, String fragment);
 
     void addURI(URI uri);
+
+    void compareFiles(URI file1, URI file2);
 
     <T extends JComponent & UriGettable> void addPanel(File file, String title, Supplier<Icon> iconSupplier, String tip, T component);
 
