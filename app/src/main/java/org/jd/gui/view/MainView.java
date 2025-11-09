@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008-2025 Emmanuel Dupuy and other contributors.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -141,6 +141,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             ActionListener jdGuiIssuesActionListener,
             ActionListener jdCoreIssuesActionListener,
             ActionListener preferencesActionListener,
+            ActionListener mavenCentralHelperActionListener,
             ActionListener aboutActionListener,
             Runnable panelClosedCallback,
             Consumer<T> currentPageChangedCallback,
@@ -236,7 +237,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             // Actions //
             boolean browser = Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE);
             Action openAction = newAction("Open File...", newImageIcon("/org/jd/gui/images/open.png"), true, "Open a file", openActionListener);
-            Action compareAction = newAction("Compare Files...", true, compareActionListener);
+            Action compareAction = newAction("Compare Files...", newImageIcon("/org/jd/gui/images/copy.png"), true, compareActionListener);
             Action compareJDAction = newAction("Compare JD-Core V0 vs V1...", false, compareJDActionListener);
             closeAction = newAction("Close", false, closeActionListener);
             Action saveAction = newAction("Save", newImageIcon("/org/jd/gui/images/save.png"), false, saveActionListener);
@@ -257,6 +258,8 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             Action jdCoreIssuesActionAction = newAction("JD-Core issues", browser, "Open JD-Core issues page", jdCoreIssuesActionListener);
             Action preferencesAction = newAction("Preferences...", newImageIcon("/org/jd/gui/images/preferences.png"), true, "Open the preferences panel",
                     preferencesActionListener);
+            Action mavenCentralHelperAction = newAction("Search maven central...", newImageIcon("/org/jd/gui/images/search_src.png"), true, "Search maven central",
+            		mavenCentralHelperActionListener);
             Action aboutAction = newAction("About...", true, "About JD-GUI", aboutActionListener);
 
             // Menu //
@@ -307,6 +310,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
                 menu.addSeparator();
             }
             menu.add(preferencesAction).setAccelerator(KeyStroke.getKeyStroke('P', menuShortcutKeyMask | InputEvent.SHIFT_DOWN_MASK));
+            menu.add(mavenCentralHelperAction);
             menu.addSeparator();
             menu.add(aboutAction).setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
             mainFrame.setJMenuBar(menuBar);

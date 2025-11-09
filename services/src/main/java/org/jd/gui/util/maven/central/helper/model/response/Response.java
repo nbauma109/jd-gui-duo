@@ -14,32 +14,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package org.jd.gui.util.matcher;
+package org.jd.gui.util.maven.central.helper.model.response;
 
-public class ArtifactVersionMatcher {
+import java.util.List;
 
-    private String artifactId;
-    private String version = "";
+import org.jd.gui.util.maven.central.helper.model.response.docs.Docs;
 
-    public void parse(String baseFileName) {
-        int idx = baseFileName.lastIndexOf('-');
-        if (idx != -1) {
-            artifactId = baseFileName.substring(0, idx);
-            version = baseFileName.substring(idx + 1) + (!version.isEmpty() ? "-" : "") + version;
-            if (version.matches("[A-Za-z]+") || artifactId.matches(".*-[\\d.]+")) {
-                parse(artifactId);
-            }
-        } else {
-            artifactId = baseFileName + (!version.isEmpty() ? "-" : "") + version;
-            version = "";
-        }
+public class Response {
+    private int numFound;
+    private int start;
+    private List<Docs> docs;
+
+    public int getNumFound() {
+        return numFound;
     }
 
-    public String getArtifactId() {
-        return artifactId;
+    public void setNumFound(int numFound) {
+        this.numFound = numFound;
     }
 
-    public String getVersion() {
-        return version;
+    public int getStart() {
+        return start;
     }
+
+    public void setStart(int start) {
+        this.start = start;
+    }
+
+    public List<Docs> getDocs() {
+        return docs;
+    }
+
+    public void setDocs(List<Docs> docs) {
+        this.docs = docs;
+    }
+
 }

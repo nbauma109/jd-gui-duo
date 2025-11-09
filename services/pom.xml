@@ -16,6 +16,14 @@
   <dependencies>
     <!-- Compile time dependencies -->
     <dependency>
+      <groupId>org.eclipse</groupId>
+      <artifactId>yasson</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish</groupId>
+      <artifactId>jakarta.json</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.fifesoft</groupId>
       <artifactId>rsyntaxtextarea</artifactId>
     </dependency>

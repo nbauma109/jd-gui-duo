@@ -14,32 +14,47 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package org.jd.gui.util.matcher;
+package org.jd.gui.util.nexus.dto;
 
-public class ArtifactVersionMatcher {
+/**
+ * We represent the checksum block of an asset.
+ */
+public final class Checksum {
 
-    private String artifactId;
-    private String version = "";
+    private String sha1;
+    private String sha256;
+    private String sha512;
+    private String md5;
 
-    public void parse(String baseFileName) {
-        int idx = baseFileName.lastIndexOf('-');
-        if (idx != -1) {
-            artifactId = baseFileName.substring(0, idx);
-            version = baseFileName.substring(idx + 1) + (!version.isEmpty() ? "-" : "") + version;
-            if (version.matches("[A-Za-z]+") || artifactId.matches(".*-[\\d.]+")) {
-                parse(artifactId);
-            }
-        } else {
-            artifactId = baseFileName + (!version.isEmpty() ? "-" : "") + version;
-            version = "";
-        }
+    public String getSha1() {
+        return sha1;
     }
 
-    public String getArtifactId() {
-        return artifactId;
+    public void setSha1(String sha1) {
+        this.sha1 = sha1;
     }
 
-    public String getVersion() {
-        return version;
+    public String getSha256() {
+        return sha256;
+    }
+
+    public void setSha256(String sha256) {
+        this.sha256 = sha256;
+    }
+
+    public String getSha512() {
+        return sha512;
+    }
+
+    public void setSha512(String sha512) {
+        this.sha512 = sha512;
+    }
+
+    public String getMd5() {
+        return md5;
+    }
+
+    public void setMd5(String md5) {
+        this.md5 = md5;
     }
 }

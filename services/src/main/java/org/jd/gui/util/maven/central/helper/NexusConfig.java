@@ -14,32 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package org.jd.gui.util.matcher;
+package org.jd.gui.util.maven.central.helper;
 
-public class ArtifactVersionMatcher {
+/**
+ * We carry minimal connection information for a Nexus server.
+ * We keep credentials optional and do not perform any storage here.
+ */
+public final class NexusConfig {
+    public final String baseUrl;   // Example: https://nexus.example.com
+    public final String username;  // Optional
+    public final char[] password;  // Optional
 
-    private String artifactId;
-    private String version = "";
-
-    public void parse(String baseFileName) {
-        int idx = baseFileName.lastIndexOf('-');
-        if (idx != -1) {
-            artifactId = baseFileName.substring(0, idx);
-            version = baseFileName.substring(idx + 1) + (!version.isEmpty() ? "-" : "") + version;
-            if (version.matches("[A-Za-z]+") || artifactId.matches(".*-[\\d.]+")) {
-                parse(artifactId);
-            }
-        } else {
-            artifactId = baseFileName + (!version.isEmpty() ? "-" : "") + version;
-            version = "";
-        }
+    public NexusConfig(String baseUrl, String username, char[] password) {
+        this.baseUrl = trimToNull(baseUrl);
+        this.username = trimToNull(username);
+        this.password = password;
     }
 
-    public String getArtifactId() {
-        return artifactId;
-    }
+    public boolean isPresent() { return baseUrl != null; }
 
-    public String getVersion() {
-        return version;
+    private static String trimToNull(String s) {
+        if (s == null) return null;
+        String t = s.trim();
+        return t.isEmpty() ? null : t;
     }
 }

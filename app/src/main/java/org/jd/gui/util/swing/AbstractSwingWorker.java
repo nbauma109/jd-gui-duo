@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2022 GPLv3
+ * Copyright (C) 2008-2025 Emmanuel Dupuy and other contributors.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@
  ******************************************************************************/
 package org.jd.gui.util.swing;
 
+import org.jd.gui.api.API;
+
 import java.awt.Component;
 import java.beans.PropertyChangeEvent;
 
@@ -26,8 +28,10 @@ public abstract class AbstractSwingWorker<T, V> extends SwingWorker<T, V> {
 
     private final ProgressMonitor progressMonitor;
     private double progressPercentage;
+    protected API api;
 
-    protected AbstractSwingWorker(Component component, String message) {
+    protected AbstractSwingWorker(API api, Component component, String message) {
+    	this.api = api;
         progressMonitor = new ProgressMonitor(component, message, getProgressMessage(0), 0, 100);
         addPropertyChangeListener(e -> onPropertyChange(e, progressMonitor));
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2022 GPLv3
+ * Copyright (C) 2008-2025 Emmanuel Dupuy and other contributors.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,10 +16,16 @@
  ******************************************************************************/
 package org.jd.gui.service.sourceloader;
 
+import org.jd.gui.util.nexus.model.NexusArtifact;
+
 public record Artifact(String groupId, String artifactId, String version, String fileName, boolean found, boolean sourceAvailable)
 implements Comparable<Artifact> {
 
-    @Override
+    public Artifact(NexusArtifact a, String fileName) {
+		this(a.groupId(), a.artifactId(), a.version(), fileName, false, false);
+	}
+
+	@Override
     public int compareTo(Artifact o) {
         int cmp = groupId.compareTo(o.groupId);
         if (cmp == 0) {
