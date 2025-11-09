@@ -64,7 +64,7 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
     @Override
     public Collection<Action> make(API api, Container.Entry entry, String fragment) {
         Collection<Action> actions = new ArrayList<>();
-        if (entry.getPath().endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
+        if (entry.getPath().endsWith(StringConstants.CLASS_FILE_SUFFIX) && isMethod(fragment)) {
             actions.add(new ShowByteCodeAction(api, entry, fragment));
         }
         return actions;

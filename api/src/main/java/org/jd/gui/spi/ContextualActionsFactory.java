@@ -25,4 +25,8 @@ public interface ContextualActionsFactory {
      * @return a collection of actions
      */
     Collection<Action> make(API api, Container.Entry entry, String fragment);
+
+    default boolean isMethod(String fragment) {
+        return fragment != null && fragment.indexOf('(') != -1;
+    }
 }

@@ -38,7 +38,7 @@ public class ShowControlFlowGraphContextualActionsFactory implements ContextualA
     @Override
     public Collection<Action> make(API api, Container.Entry entry, String fragment) {
         Collection<Action> actions = new ArrayList<>();
-        if (entry.getPath().endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
+        if (entry.getPath().endsWith(StringConstants.CLASS_FILE_SUFFIX) && isMethod(fragment)) {
             actions.add(new ShowControlFlowGraphAction(api, entry, fragment, null, MODE_RAW));
             actions.add(new ShowControlFlowGraphAction(api, entry, fragment, null, MODE_GOTO_ONLY));
             actions.add(new ShowControlFlowGraphAction(api, entry, fragment, null, MODE_GOTO_AND_LOOP));
