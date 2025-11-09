@@ -142,7 +142,7 @@ public final class ProxyPreferencesProvider extends JPanel implements Preference
 
     // --- PreferencesPanel --- //
     @Override public String getPreferencesGroupTitle() { return "Proxy"; }
-    @Override public String getPreferencesPanelTitle() { return null; }
+    @Override public String getPreferencesPanelTitle() { return "Proxy for internet artifact search with maven.org"; }
     @Override public JComponent getPanel() { return this; }
 
     @Override

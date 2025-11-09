@@ -121,8 +121,8 @@ public final class NexusPreferencesProvider extends JPanel implements Preference
     }
 
     // PreferencesPanel
-    @Override public String getPreferencesGroupTitle() { return "Nexus"; }
-    @Override public String getPreferencesPanelTitle() { return null; }
+    @Override public String getPreferencesGroupTitle() { return "Nexus Sonatype"; }
+    @Override public String getPreferencesPanelTitle() { return "Intranet artifact search instead of proxy-based internet search"; }
     @Override public JComponent getPanel() { return this; }
 
     @Override
