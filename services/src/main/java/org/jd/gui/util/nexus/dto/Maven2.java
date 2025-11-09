@@ -14,32 +14,56 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package org.jd.gui.util.matcher;
+package org.jd.gui.util.nexus.dto;
 
-public class ArtifactVersionMatcher {
+/**
+ * We represent Maven coordinates and extension for an asset.
+ */
+public final class Maven2 {
 
+    private String extension;
+    private String groupId;
     private String artifactId;
-    private String version = "";
+    private String version;
+    private String classifier;
 
-    public void parse(String baseFileName) {
-        int idx = baseFileName.lastIndexOf('-');
-        if (idx != -1) {
-            artifactId = baseFileName.substring(0, idx);
-            version = baseFileName.substring(idx + 1) + (!version.isEmpty() ? "-" : "") + version;
-            if (version.matches("[A-Za-z]+") || artifactId.matches(".*-[\\d.]+")) {
-                parse(artifactId);
-            }
-        } else {
-            artifactId = baseFileName + (!version.isEmpty() ? "-" : "") + version;
-            version = "";
-        }
+    public String getExtension() {
+        return extension;
+    }
+
+    public void setExtension(String extension) {
+        this.extension = extension;
+    }
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
     }
 
     public String getArtifactId() {
         return artifactId;
     }
 
+    public void setArtifactId(String artifactId) {
+        this.artifactId = artifactId;
+    }
+
     public String getVersion() {
         return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getClassifier() {
+        return classifier;
+    }
+
+    public void setClassifier(String classifier) {
+        this.classifier = classifier;
     }
 }

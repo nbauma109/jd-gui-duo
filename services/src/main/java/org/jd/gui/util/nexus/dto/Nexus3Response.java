@@ -14,32 +14,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package org.jd.gui.util.matcher;
+package org.jd.gui.util.nexus.dto;
 
-public class ArtifactVersionMatcher {
+import java.util.List;
 
-    private String artifactId;
-    private String version = "";
+/**
+ * We map the Nexus Repository Manager version 3 search response structure
+ * (component list with nested assets) exactly as found in the provided JSON.
+ * We keep private fields and expose standard getters and setters so JSON-B
+ * (Yasson) can bind values by name without extra annotations.
+ *
+ */
+public final class Nexus3Response {
 
-    public void parse(String baseFileName) {
-        int idx = baseFileName.lastIndexOf('-');
-        if (idx != -1) {
-            artifactId = baseFileName.substring(0, idx);
-            version = baseFileName.substring(idx + 1) + (!version.isEmpty() ? "-" : "") + version;
-            if (version.matches("[A-Za-z]+") || artifactId.matches(".*-[\\d.]+")) {
-                parse(artifactId);
-            }
-        } else {
-            artifactId = baseFileName + (!version.isEmpty() ? "-" : "") + version;
-            version = "";
-        }
+    private List<Component> items;
+    private String continuationToken;
+
+    public List<Component> getItems() {
+        return items;
     }
 
-    public String getArtifactId() {
-        return artifactId;
+    public void setItems(List<Component> items) {
+        this.items = items;
     }
 
-    public String getVersion() {
-        return version;
+    public String getContinuationToken() {
+        return continuationToken;
+    }
+
+    public void setContinuationToken(String continuationToken) {
+        this.continuationToken = continuationToken;
     }
 }

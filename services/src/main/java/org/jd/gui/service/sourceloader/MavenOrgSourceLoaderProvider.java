@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008-2025 Emmanuel Dupuy and other contributors.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -12,36 +12,26 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.service.preferencespanel.MavenOrgSourceLoaderPreferencesProvider;
 import org.jd.gui.spi.SourceLoader;
-import org.jd.gui.util.TempFile;
+import org.jd.gui.util.DownloadUtil;
+import org.jd.gui.util.nexus.NexusSearch;
+import org.jd.gui.util.nexus.NexusSearchFactory;
+import org.jd.gui.util.nexus.model.NexusArtifact;
+import org.jd.gui.util.nexus.model.NexusSearchResult;
 import org.jd.util.SHA1Util;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import javax.xml.XMLConstants;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamReader;
 
 public class MavenOrgSourceLoaderProvider implements SourceLoader {
     protected static final String MAVENORG_SEARCH_URL_PREFIX = "https://search.maven.org/solrsearch/select?q=1:%22";
@@ -80,7 +70,7 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
             }
 
             if (accepted(filters, entry.getPath())) {
-                return searchSource(entry, downloadSourceJarFile(entry.getContainer().getRoot().getParent()));
+                return searchSource(entry, downloadSourceJarFile(api, entry.getContainer().getRoot().getParent()));
             }
         }
 
@@ -89,7 +79,7 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
 
     @Override
     public File loadSourceFile(API api, Container.Entry entry) {
-        return isActivated(api) ? downloadSourceJarFile(entry) : null;
+        return isActivated(api) ? downloadSourceJarFile(api, entry) : null;
     }
 
     private static boolean isActivated(API api) {
@@ -121,7 +111,7 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
         return null;
     }
 
-    protected File downloadSourceJarFile(Container.Entry entry) {
+    protected File downloadSourceJarFile(API api, Container.Entry entry) {
         if (cache.containsKey(entry)) {
             return cache.get(entry);
         }
@@ -129,21 +119,13 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
             File file = new File(entry.getUri());
             try {
                 String sha1 = SHA1Util.computeSHA1(file);
-                Artifact artifact = buildArtifactFromURI(file, sha1);
-                if (artifact != null && artifact.sourceAvailable()) {
+                NexusArtifact artifact = buildArtifactFromURI(api, sha1, true);
+                if (artifact != null && artifact.artifactLink() != null) {
                     // Load source
-                    String groupId = artifact.groupId();
-                    String artifactId = artifact.artifactId();
-                    String version = artifact.version();
-                    String filePath = groupId.replace('.', '/') + '/' + artifactId + '/' + version + '/' + artifactId + '-' + version;
-                    URL loadUrl = new URL(MAVENORG_LOAD_URL_PREFIX + filePath + MAVENORG_LOAD_URL_SUFFIX);
-                    try (TempFile tmpFile = new TempFile('.' + groupId + '_' + artifactId + '_' + version + MAVENORG_LOAD_URL_SUFFIX);
-                        InputStream is = new BufferedInputStream(loadUrl.openStream()); 
-                        OutputStream os = new BufferedOutputStream(new FileOutputStream(tmpFile))) {
-                        IOUtils.copy(is, os);
-                        cache.put(entry, tmpFile);
-                        return tmpFile;
-                    }
+                	URI downloadURI = URI.create(artifact.artifactLink());
+					File tmpFile = DownloadUtil.downloadToTemp(downloadURI, api, null);
+                    cache.put(entry, tmpFile);
+                    return tmpFile;
                 }
             } catch (Exception e) {
                 assert ExceptionUtil.printStackTrace(e);
@@ -154,115 +136,23 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
         return null;
     }
 
-    public static Artifact buildArtifactFromURI(File file, String sha1) {
-        try {
-            // Search artifact on maven.org
-            URL searchUrl = new URL(MAVENORG_SEARCH_URL_PREFIX + sha1 + MAVENORG_SEARCH_URL_SUFFIX);
-            boolean sourceAvailable = false;
-            String id = null;
-            int numFound = 0;
-    
-            try (InputStream is = searchUrl.openStream()) {
-                XMLInputFactory factory = XMLInputFactory.newInstance();
-                factory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-                factory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-                XMLStreamReader reader = factory.createXMLStreamReader(is);
-                String name = "";
-    
-                int next;
-                while (reader.hasNext()) {
-                    next = reader.next();
-                    if (next == XMLStreamConstants.START_ELEMENT) {
-                        if ("str".equals(reader.getLocalName())) {
-                            if ("id".equals(reader.getAttributeValue(null, "name"))) {
-                                name = "id";
-                            } else {
-                                name = "str";
-                            }
-                        } else if ("result".equals(reader.getLocalName())) {
-                            numFound = Integer.parseInt(reader.getAttributeValue(null, "numFound"));
-                        } else {
-                            name = "";
-                        }
-                    } else if (next == XMLStreamConstants.CHARACTERS) {
-                        if ("id".equals(name)) {
-                            id = reader.getText().trim();
-                        } else if ("str".equals(name)) {
-                            sourceAvailable |= MAVENORG_LOAD_URL_SUFFIX.equals(reader.getText().trim());
-                        }
-                    }
-                }
-    
-                reader.close();
-            }
-    
-            Artifact artifact = null;
-            boolean found = false;
-            if (numFound == 0 && file.exists()) {
-                // File not indexed by Apache Solr of maven.org -> Try to find groupId, artifactId, version in 'pom.properties'
-                Properties pomProperties = getPomProperties(file);
-    
-                if (pomProperties != null) {
-                    String groupId = pomProperties.getProperty("groupId");
-                    String artifactId = pomProperties.getProperty("artifactId");
-                    String version = pomProperties.getProperty("version");
-                    boolean sourceMightBeAvailable = true;
-                    artifact = new Artifact(groupId, artifactId, version, file.getName(), found, sourceMightBeAvailable);
-                }
-            } else if (id != null) {
-                int index1 = id.indexOf(':');
-                int index2 = id.lastIndexOf(':');
-    
-                String groupId = id.substring(0, index1);
-                String artifactId = id.substring(index1+1, index2);
-                String version = id.substring(index2+1);
-                found = findPom(groupId, artifactId, version);
-                artifact = new Artifact(groupId, artifactId, version, file.getName(), found, sourceAvailable);
-            }
-            return artifact;
-        } catch (Exception e) {
-            assert ExceptionUtil.printStackTrace(e);
-            return null;
-        }
-    }
-
-    private static boolean findPom(String groupId, String artifactId, String version) throws IOException {
-        StringBuilder url = new StringBuilder();
-        url.append("https://search.maven.org/remotecontent?filepath=");
-        url.append(groupId.replace('.', '/'));
-        url.append('/');
-        url.append(artifactId);
-        url.append('/');
-        url.append(version);
-        url.append('/');
-        url.append(artifactId);
-        url.append('-');
-        url.append(version);
-        url.append(".pom");
-        HttpURLConnection conn = (HttpURLConnection) new URL(url.toString()).openConnection();
-        int responseCode = conn.getResponseCode();
-        return responseCode == HttpURLConnection.HTTP_OK;
-    }
-
-    private static Properties getPomProperties(File file) {
-        // Search 'META-INF/maven/*/*/pom.properties'
-        try (JarFile jarFile = new JarFile(file)) {
-            Enumeration<JarEntry> entries = jarFile.entries();
-            while (entries.hasMoreElements()) {
-                JarEntry nextEntry = entries.nextElement();
-                String entryName = nextEntry.getName();
-                if (entryName.startsWith("META-INF/maven/") && entryName.endsWith("/pom.properties")) {
-                    try (InputStream is = jarFile.getInputStream(nextEntry)) {
-                        Properties properties = new Properties();
-                        properties.load(is);
-                        return properties;
-                    }
-                }
-            }
-        } catch (IOException e) {
-            assert ExceptionUtil.printStackTrace(e);
-        }
-        return null;
+    public static NexusArtifact buildArtifactFromURI(API api, String sha1, boolean sources) throws Exception {
+    	NexusSearch nexusSearch = NexusSearchFactory.create(api, null);
+    	NexusSearchResult nexusSearchResult = nexusSearch.searchBySha1(sha1, 0);
+		if (nexusSearchResult.artifacts() != null && !nexusSearchResult.artifacts().isEmpty()) {
+			NexusArtifact nexusArtifact = nexusSearchResult.artifacts().get(0);
+			if (sources) {
+				String g = nexusArtifact.groupId();
+				String a = nexusArtifact.artifactId();
+				String v = nexusArtifact.version();
+				NexusSearchResult results = nexusSearch.searchByGav(g, a, v, "sources", "jar", 0);
+				if (results.artifacts() != null && !results.artifacts().isEmpty()) {
+					return results.artifacts().get(0);
+				}
+			}
+			return nexusArtifact;
+		}
+    	return null;
     }
 
     protected boolean accepted(String filters, String path) {
