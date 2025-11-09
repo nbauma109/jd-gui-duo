@@ -13,6 +13,9 @@ import java.util.Map;
 import javax.swing.JComponent;
 
 public interface PreferencesPanel {
+
+    boolean useCompactDisplay();
+
     String getPreferencesGroupTitle();
 
     String getPreferencesPanelTitle();

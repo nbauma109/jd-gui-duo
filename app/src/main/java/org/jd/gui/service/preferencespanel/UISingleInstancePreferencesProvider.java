@@ -32,7 +32,7 @@ public class UISingleInstancePreferencesProvider extends JPanel implements Prefe
     public UISingleInstancePreferencesProvider() {
         super(new GridLayout(0,1));
 
-        singleInstanceTabsCheckBox = new JCheckBox("Single instance");
+        singleInstanceTabsCheckBox = new JCheckBox("Single instance (needs restart)");
 
         add(singleInstanceTabsCheckBox);
     }
@@ -46,7 +46,9 @@ public class UISingleInstancePreferencesProvider extends JPanel implements Prefe
     public JComponent getPanel() { return this; }
 
     @Override
-    public void init(Color errorBackgroundColor) {}
+    public void init(Color errorBackgroundColor) {
+        // nothing to do
+    }
 
     @Override
     public boolean isActivated() { return !PlatformService.getInstance().isMac(); }
@@ -65,10 +67,17 @@ public class UISingleInstancePreferencesProvider extends JPanel implements Prefe
     public boolean arePreferencesValid() { return true; }
 
     @Override
-    public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {}
+    public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {
+        // nothing to do
+    }
 
     @Override
     public void restoreDefaults() {
         singleInstanceTabsCheckBox.setSelected(false);
+    }
+
+    @Override
+    public boolean useCompactDisplay() {
+        return true;
     }
 }

@@ -115,10 +115,16 @@ public class JDCoreDecompilerPreferencesProvider extends JPanel implements Prefe
 
     @Override
     public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {
+        // nothing to do
     }
 
     public void toggleOldOptions() {
         omitThisPrefixCheckBox.setEnabled(ENGINE_JD_CORE_V0.equals(decompileEngine.getSelectedItem()));
         displayDefaultConstructorCheckBox.setEnabled(ENGINE_JD_CORE_V0.equals(decompileEngine.getSelectedItem()));
+    }
+
+    @Override
+    public boolean useCompactDisplay() {
+        return false;
     }
 }

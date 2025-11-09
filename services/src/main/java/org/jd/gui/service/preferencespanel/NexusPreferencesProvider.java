@@ -122,7 +122,7 @@ public final class NexusPreferencesProvider extends JPanel implements Preference
 
     // PreferencesPanel
     @Override public String getPreferencesGroupTitle() { return "Nexus Sonatype"; }
-    @Override public String getPreferencesPanelTitle() { return "Intranet artifact search instead of proxy-based internet search"; }
+    @Override public String getPreferencesPanelTitle() { return "Intranet artifact search supersedes proxy-based internet search"; }
     @Override public JComponent getPanel() { return this; }
 
     @Override
@@ -253,5 +253,10 @@ public final class NexusPreferencesProvider extends JPanel implements Preference
     private static void zero(char[] a) {
         if (a == null) return;
         Arrays.fill(a, '\0');
+    }
+
+    @Override
+    public boolean useCompactDisplay() {
+        return false;
     }
 }

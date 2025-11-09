@@ -47,7 +47,9 @@ public class UITabsPreferencesProvider extends JPanel implements PreferencesPane
     public JComponent getPanel() { return this; }
 
     @Override
-    public void init(Color errorBackgroundColor) {}
+    public void init(Color errorBackgroundColor) {
+        // nothing to do
+    }
 
     @Override
     public boolean isActivated() { return !PlatformService.getInstance().isMac(); }
@@ -66,10 +68,17 @@ public class UITabsPreferencesProvider extends JPanel implements PreferencesPane
     public boolean arePreferencesValid() { return true; }
 
     @Override
-    public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {}
+    public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {
+        // nothing to do
+    }
 
     @Override
     public void restoreDefaults() {
         singleLineTabsCheckBox.setSelected(false);
+    }
+
+    @Override
+    public boolean useCompactDisplay() {
+        return true;
     }
 }

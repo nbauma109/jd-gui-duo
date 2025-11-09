@@ -300,4 +300,9 @@ public final class ProxyPreferencesProvider extends JPanel implements Preference
     private static String nvl(String s) { return s == null ? "" : s; }
 
     private static void zero(char[] a) { if (a != null) Arrays.fill(a, '\0'); }
+
+    @Override
+    public boolean useCompactDisplay() {
+        return false;
+    }
 }

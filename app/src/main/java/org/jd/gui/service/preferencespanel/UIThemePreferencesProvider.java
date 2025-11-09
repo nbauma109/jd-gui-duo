@@ -61,10 +61,17 @@ public class UIThemePreferencesProvider extends JPanel implements PreferencesPan
     public boolean arePreferencesValid() { return true; }
 
     @Override
-    public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {}
+    public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {
+        // nothing to do
+    }
 
     @Override
     public void restoreDefaults() {
         darkModeTabsCheckBox.setSelected(false);
+    }
+
+    @Override
+    public boolean useCompactDisplay() {
+        return true;
     }
 }

@@ -43,6 +43,7 @@ import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.border.TitledBorder;
 
 public class PreferencesView implements PreferencesPanel.PreferencesPanelChangeListener {
     private final Map<String, String> preferences;
@@ -97,20 +98,24 @@ public class PreferencesView implements PreferencesPanel.PreferencesPanelChangeL
             // Add preferences panels
             for (String groupName : sortedGroupNames) {
                 Box vbox = Box.createVerticalBox();
-                vbox.setBorder(BorderFactory.createTitledBorder(groupName));
+                TitledBorder titledBorder = BorderFactory.createTitledBorder(groupName);
+                titledBorder.setTitleFont(titledBorder.getTitleFont().deriveFont(Font.BOLD));
+                vbox.setBorder(titledBorder);
 
                 List<PreferencesPanel> sortedPreferencesPanels = groups.get(groupName);
                 Collections.sort(sortedPreferencesPanels, Comparator.comparing(PreferencesPanel::getPreferencesPanelTitle));
 
                 for (PreferencesPanel pp : sortedPreferencesPanels) {
-                    // Add title
-                    Box hbox = Box.createHorizontalBox();
-                    JLabel title = new JLabel(pp.getPreferencesPanelTitle());
-                    title.setFont(title.getFont().deriveFont(Font.BOLD));
-                    hbox.add(title);
-                    hbox.add(Box.createHorizontalGlue());
-                    hbox.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
-                    vbox.add(hbox);
+                    if (!pp.useCompactDisplay()) {
+                        // Add title
+                        Box hbox = Box.createHorizontalBox();
+                        JLabel title = new JLabel(pp.getPreferencesPanelTitle());
+                        title.setFont(title.getFont().deriveFont(Font.PLAIN));
+                        hbox.add(title);
+                        hbox.add(Box.createHorizontalGlue());
+                        hbox.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
+                        vbox.add(hbox);
+                    }
                     // Add panel
                     JComponent component = pp.getPanel();
                     component.setMaximumSize(new Dimension(component.getMaximumSize().width, component.getPreferredSize().height));

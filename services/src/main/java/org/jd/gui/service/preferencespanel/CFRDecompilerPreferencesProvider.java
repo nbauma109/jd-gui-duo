@@ -83,18 +83,17 @@ public class CFRDecompilerPreferencesProvider extends JPanel implements Preferen
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void restoreDefaults() {
         for (Map.Entry<String, String> defaultEntry : defaults.entrySet()) {
             String componentKey = defaultEntry.getKey();
             String defaultValue = defaultEntry.getValue();
             JComponent component = components.get(componentKey);
-            if (component instanceof JComboBox) {
-                ((JComboBox<String>) component).setSelectedItem(defaultValue);
-            } else if (component instanceof JCheckBox) {
-                ((JCheckBox) component).setSelected("true".equals(defaultValue));
-            } else if (component instanceof JTextField) {
-                ((JTextField) component).setText(defaultValue);
+            if (component instanceof JComboBox<?> comboBox) {
+                comboBox.setSelectedItem(defaultValue);
+            } else if (component instanceof JCheckBox checkBox) {
+                checkBox.setSelected("true".equals(defaultValue));
+            } else if (component instanceof JTextField textField) {
+                textField.setText(defaultValue);
             }
         }
     }
@@ -117,6 +116,7 @@ public class CFRDecompilerPreferencesProvider extends JPanel implements Preferen
 
     @Override
     public void init(Color errorBackgroundColor) {
+        // nothing to do
     }
 
     @Override
@@ -125,26 +125,25 @@ public class CFRDecompilerPreferencesProvider extends JPanel implements Preferen
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void loadPreferences(Map<String, String> preferences) {
         for (Map.Entry<String, String> preference : preferences.entrySet()) {
             String preferenceKey = preference.getKey();
             String preferenceValue = preference.getValue();
             JComponent component = components.get(preferenceKey);
             if (preferenceValue != null) {
-                if (component instanceof JComboBox) {
-                    ((JComboBox<String>) component).setSelectedItem(preferenceValue);
-                } else if (component instanceof JCheckBox) {
-                    ((JCheckBox) component).setSelected("true".equals(preferenceValue));
-                } else if (component instanceof JTextField) {
-                    ((JTextField) component).setText(preferenceValue);
+                if (component instanceof JComboBox<?> comboBox) {
+                    comboBox.setSelectedItem(preferenceValue);
+                } else if (component instanceof JCheckBox checkBox) {
+                    checkBox.setSelected("true".equals(preferenceValue));
+                } else if (component instanceof JTextField textField) {
+                    textField.setText(preferenceValue);
                 }
-            } else if (component instanceof JComboBox) {
-                ((JComboBox<String>) component).setSelectedItem(defaults.getOrDefault(preferenceKey, "auto"));
-            } else if (component instanceof JCheckBox) {
-                ((JCheckBox) component).setSelected("true".equals(defaults.get(preferenceKey)));
-            } else if (component instanceof JTextField) {
-                ((JTextField) component).setText(defaults.getOrDefault(preferenceKey, ""));
+            } else if (component instanceof JComboBox<?> comboBox) {
+                comboBox.setSelectedItem(defaults.getOrDefault(preferenceKey, "auto"));
+            } else if (component instanceof JCheckBox checkBox) {
+                checkBox.setSelected("true".equals(defaults.get(preferenceKey)));
+            } else if (component instanceof JTextField textField) {
+                textField.setText(defaults.getOrDefault(preferenceKey, ""));
             }
         }
     }
@@ -154,18 +153,16 @@ public class CFRDecompilerPreferencesProvider extends JPanel implements Preferen
         for (Map.Entry<String, JComponent> componentEntry : components.entrySet()) {
             String componentKey = componentEntry.getKey();
             JComponent component = componentEntry.getValue();
-            if (component instanceof JComboBox) {
-                @SuppressWarnings("unchecked")
-                JComboBox<String> comboBox = (JComboBox<String>) component;
+            if (component instanceof JComboBox<?> comboBox) {
                 if ("auto".equals(comboBox.getSelectedItem().toString())) {
                     preferences.remove(componentKey);
                 } else {
                     preferences.put(componentKey, comboBox.getSelectedItem().toString());
                 }
-            } else if (component instanceof JCheckBox) {
-                preferences.put(componentKey, Boolean.toString(((JCheckBox) component).isSelected()));
-            } else if (component instanceof JTextField) {
-                String text = ((JTextField) component).getText();
+            } else if (component instanceof JCheckBox checkBox) {
+                preferences.put(componentKey, Boolean.toString(checkBox.isSelected()));
+            } else if (component instanceof JTextField textField) {
+                String text = textField.getText();
                 if (text.isEmpty()) {
                     preferences.remove(componentKey);
                 } else {
@@ -182,5 +179,11 @@ public class CFRDecompilerPreferencesProvider extends JPanel implements Preferen
 
     @Override
     public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {
+        // nothing to do
+    }
+
+    @Override
+    public boolean useCompactDisplay() {
+        return false;
     }
 }

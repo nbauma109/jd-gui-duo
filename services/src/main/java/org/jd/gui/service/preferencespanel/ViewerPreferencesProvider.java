@@ -124,4 +124,9 @@ public class ViewerPreferencesProvider extends JPanel implements PreferencesPane
     public void restoreDefaults() {
         fontSizeTextField.setText("12");
     }
+
+    @Override
+    public boolean useCompactDisplay() {
+        return true;
+    }
 }

@@ -36,7 +36,7 @@ public class DirectoryIndexerPreferencesProvider extends JPanel implements Prefe
     public DirectoryIndexerPreferencesProvider() {
         super(new BorderLayout());
 
-        add(new JLabel("Maximum depth (1.." + MAX_VALUE + "): "), BorderLayout.WEST);
+        add(new JLabel("Maximum depth for directory exploration (1.." + MAX_VALUE + "): "), BorderLayout.WEST);
 
         maximumDepthTextField = new JTextField();
         maximumDepthTextField.getDocument().addDocumentListener(this);
@@ -112,5 +112,10 @@ public class DirectoryIndexerPreferencesProvider extends JPanel implements Prefe
     @Override
     public void restoreDefaults() {
         maximumDepthTextField.setText("15");
+    }
+
+    @Override
+    public boolean useCompactDisplay() {
+        return true;
     }
 }

@@ -80,10 +80,10 @@ public class JadxDecompilerPreferencesProvider extends JPanel implements Prefere
             String defaultValue = defaultEntry.getValue();
             JComponent component = components.get(componentKey);
             if (component != null) {
-                if (component instanceof JCheckBox) {
-                    ((JCheckBox) component).setSelected("true".equals(defaultValue));
-                } else if (component instanceof JTextField) {
-                    ((JTextField) component).setText(defaultValue);
+                if (component instanceof JCheckBox checkBox) {
+                    checkBox.setSelected("true".equals(defaultValue));
+                } else if (component instanceof JTextField textField) {
+                    textField.setText(defaultValue);
                 }
             }
         }
@@ -107,6 +107,7 @@ public class JadxDecompilerPreferencesProvider extends JPanel implements Prefere
 
     @Override
     public void init(Color errorBackgroundColor) {
+        // nothing to do
     }
 
     @Override
@@ -121,15 +122,15 @@ public class JadxDecompilerPreferencesProvider extends JPanel implements Prefere
             String preferenceValue = preference.getValue();
             JComponent component = components.get(preferenceKey);
             if (preferenceValue != null) {
-                if (component instanceof JCheckBox) {
-                    ((JCheckBox) component).setSelected("true".equals(preferenceValue));
-                } else if (component instanceof JTextField) {
-                    ((JTextField) component).setText(preferenceValue);
+                if (component instanceof JCheckBox checkBox) {
+                    checkBox.setSelected("true".equals(preferenceValue));
+                } else if (component instanceof JTextField textField) {
+                    textField.setText(preferenceValue);
                 }
-            } else if (component instanceof JCheckBox) {
-                ((JCheckBox) component).setSelected("true".equals(defaults.get(preferenceKey)));
-            } else if (component instanceof JTextField) {
-                ((JTextField) component).setText(defaults.getOrDefault(preferenceKey, ""));
+            } else if (component instanceof JCheckBox checkBox) {
+                checkBox.setSelected("true".equals(defaults.get(preferenceKey)));
+            } else if (component instanceof JTextField textField) {
+                textField.setText(defaults.getOrDefault(preferenceKey, ""));
             }
         }
     }
@@ -139,10 +140,10 @@ public class JadxDecompilerPreferencesProvider extends JPanel implements Prefere
         for (Map.Entry<String, JComponent> componentEntry : components.entrySet()) {
             String componentKey = componentEntry.getKey();
             JComponent component = componentEntry.getValue();
-            if (component instanceof JCheckBox) {
-                preferences.put(componentKey, Boolean.toString(((JCheckBox) component).isSelected()));
-            } else if (component instanceof JTextField) {
-                String text = ((JTextField) component).getText();
+            if (component instanceof JCheckBox checkBox) {
+                preferences.put(componentKey, Boolean.toString(checkBox.isSelected()));
+            } else if (component instanceof JTextField textField) {
+                String text = textField.getText();
                 if (text.isEmpty()) {
                     preferences.remove(componentKey);
                 } else {
@@ -159,5 +160,11 @@ public class JadxDecompilerPreferencesProvider extends JPanel implements Prefere
 
     @Override
     public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {
+        // nothing to do
+    }
+
+    @Override
+    public boolean useCompactDisplay() {
+        return false;
     }
 }

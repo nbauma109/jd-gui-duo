@@ -69,7 +69,7 @@ public class ClassFileDecompilerPreferencesProvider extends JPanel implements Pr
         showCompilerInfoCheckBox = new JCheckBox("Show compiler info");
         advancedClassLookupCheckBox = new JCheckBox("Advanced class lookup");
         removeUnnecessaryCastsCheckBox = new JCheckBox("Remove unnecessary casts");
-        selectDecompiler = new JLabel("Select Decompile Engine: ");
+        selectDecompiler = new JLabel("Select Decompiler Engine: ");
         decompileEngine = new JComboBox<>(DECOMPILERS);
         configureDecompiler = new JButton("Configure", new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/preferences.png")));
         configureDecompiler.addActionListener(e -> configureDecompiler());
@@ -144,6 +144,7 @@ public class ClassFileDecompilerPreferencesProvider extends JPanel implements Pr
 
     @Override
     public void init(Color errorBackgroundColor) {
+        // nothing to do
     }
 
     @Override
@@ -184,6 +185,7 @@ public class ClassFileDecompilerPreferencesProvider extends JPanel implements Pr
 
     @Override
     public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {
+        // nothing to do
     }
 
     @Override
@@ -194,5 +196,10 @@ public class ClassFileDecompilerPreferencesProvider extends JPanel implements Pr
         advancedClassLookupCheckBox.setSelected(false);
         removeUnnecessaryCastsCheckBox.setSelected(false);
         decompileEngine.setSelectedItem(ENGINE_JD_CORE_V1);
+    }
+
+    @Override
+    public boolean useCompactDisplay() {
+        return true;
     }
 }

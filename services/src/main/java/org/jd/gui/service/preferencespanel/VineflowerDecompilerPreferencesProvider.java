@@ -115,6 +115,7 @@ public class VineflowerDecompilerPreferencesProvider extends JPanel implements P
 
     @Override
     public void init(Color errorBackgroundColor) {
+        // nothing to do
     }
 
     @Override
@@ -134,19 +135,19 @@ public class VineflowerDecompilerPreferencesProvider extends JPanel implements P
             String preferenceValue = preference.getValue();
             JComponent component = components.get(preferenceKey);
             if (preferenceValue != null) {
-                if (component instanceof JComboBox) {
-                    ((JComboBox<?>) component).setSelectedItem(preferenceValue);
-                } else if (component instanceof JCheckBox) {
-                    ((JCheckBox) component).setSelected(TRUE.equals(preferenceValue));
-                } else if (component instanceof JTextField) {
-                    ((JTextField) component).setText(preferenceValue);
+                if (component instanceof JComboBox<?> comboBox) {
+                    comboBox.setSelectedItem(preferenceValue);
+                } else if (component instanceof JCheckBox checkBox) {
+                    checkBox.setSelected(TRUE.equals(preferenceValue));
+                } else if (component instanceof JTextField textField) {
+                    textField.setText(preferenceValue);
                 }
-            } else if (component instanceof JComboBox) {
-                ((JComboBox<?>) component).setSelectedItem(defaults.get(preferenceKey));
-            } else if (component instanceof JCheckBox) {
-                ((JCheckBox) component).setSelected(TRUE.equals(defaults.get(preferenceKey)));
-            } else if (component instanceof JTextField) {
-                ((JTextField) component).setText(defaults.getOrDefault(preferenceKey, ""));
+            } else if (component instanceof JComboBox<?> comboBox) {
+                comboBox.setSelectedItem(defaults.get(preferenceKey));
+            } else if (component instanceof JCheckBox checkBox) {
+                checkBox.setSelected(TRUE.equals(defaults.get(preferenceKey)));
+            } else if (component instanceof JTextField textField) {
+                textField.setText(defaults.getOrDefault(preferenceKey, ""));
             }
         }
     }
@@ -156,14 +157,12 @@ public class VineflowerDecompilerPreferencesProvider extends JPanel implements P
         for (Map.Entry<String, JComponent> componentEntry : components.entrySet()) {
             String componentKey = componentEntry.getKey();
             JComponent component = componentEntry.getValue();
-            if (component instanceof JComboBox) {
-                @SuppressWarnings("unchecked")
-                JComboBox<String> comboBox = (JComboBox<String>) component;
+            if (component instanceof JComboBox<?> comboBox) {
                 preferences.put(componentKey, comboBox.getSelectedItem().toString());
-            } else if (component instanceof JCheckBox) {
-                preferences.put(componentKey, ((JCheckBox) component).isSelected() ? TRUE : FALSE);
-            } else if (component instanceof JTextField) {
-                String text = ((JTextField) component).getText();
+            } else if (component instanceof JCheckBox checkBox) {
+                preferences.put(componentKey, checkBox.isSelected() ? TRUE : FALSE);
+            } else if (component instanceof JTextField textField) {
+                String text = textField.getText();
                 if (text.isEmpty()) {
                     preferences.remove(componentKey);
                 } else {
@@ -180,5 +179,11 @@ public class VineflowerDecompilerPreferencesProvider extends JPanel implements P
 
     @Override
     public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {
+        // nothing to do
+    }
+
+    @Override
+    public boolean useCompactDisplay() {
+        return false;
     }
 }

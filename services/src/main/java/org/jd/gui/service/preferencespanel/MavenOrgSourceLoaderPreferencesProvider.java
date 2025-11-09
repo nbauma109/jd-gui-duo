@@ -172,4 +172,9 @@ public class MavenOrgSourceLoaderPreferencesProvider extends JPanel implements P
         resetButton.setEnabled(true);
         filtersTextArea.setText(DEFAULT_FILTERS_VALUE);
     }
+
+    @Override
+    public boolean useCompactDisplay() {
+        return true;
+    }
 }
