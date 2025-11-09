@@ -8,6 +8,7 @@
 package org.jd.gui.service.preferencespanel;
 
 import org.jd.gui.spi.PreferencesPanel;
+import org.jd.gui.util.ImageUtil;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -78,7 +79,7 @@ public class MavenOrgSourceLoaderPreferencesProvider extends JPanel implements P
             scrollPane.setPreferredSize(new Dimension(-1, 56));
         }
 
-        resetButton = new JButton("Reset");
+        resetButton = new JButton("Reset", ImageUtil.newImageIcon("/org/jd/gui/images/close_active.gif"));
         resetButton.addActionListener(this);
 
         JPanel southPanel = new JPanel(new BorderLayout());

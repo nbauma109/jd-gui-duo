@@ -9,6 +9,7 @@ package org.jd.gui.view;
 
 import org.jd.gui.model.configuration.Configuration;
 import org.jd.gui.spi.PreferencesPanel;
+import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.decompiler.GuiPreferences;
 import org.jd.gui.util.swing.SwingUtil;
 
@@ -148,7 +149,7 @@ public class PreferencesView implements PreferencesPanel.PreferencesPanelChangeL
             });
             hbox.add(preferencesOkButton);
             hbox.add(Box.createHorizontalStrut(5));
-            JButton preferencesCancelButton = new JButton("Cancel");
+            JButton preferencesCancelButton = new JButton("Cancel", ImageUtil.newImageIcon("/org/jd/gui/images/close_active.gif"));
             Action preferencesCancelActionListener = new AbstractAction() {
 
                 private static final long serialVersionUID = 1L;

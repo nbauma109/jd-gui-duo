@@ -19,12 +19,14 @@ package org.jd.gui.service.preferencespanel;
 import org.jd.gui.security.SecureSession;
 import org.jd.gui.service.preferencespanel.secure.SecurePreferences;
 import org.jd.gui.spi.PreferencesPanel;
+import org.jd.gui.util.ImageUtil;
 
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.JPanel;
 import javax.swing.JComponent;
+import javax.swing.JButton;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.BorderLayout;
@@ -32,6 +34,7 @@ import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.security.GeneralSecurityException;
@@ -71,6 +74,7 @@ public final class NexusPreferencesProvider extends JPanel implements Preference
     private JTextField urlField;
     private JTextField userField;
     private JPasswordField passField;
+    private JButton clearButton;
 
     // State
     private Color errorBackground = new Color(255, 210, 210);
@@ -103,34 +107,69 @@ public final class NexusPreferencesProvider extends JPanel implements Preference
 
         int col = 0;
         // Row 0: base url
-        gc.gridx = col++; gc.gridy = 0; gc.weightx = 0; gc.fill = GridBagConstraints.NONE;
+        gc.gridx = col++;
+        gc.gridy = 0;
+        gc.weightx = 0;
+        gc.fill = GridBagConstraints.NONE;
         form.add(new JLabel("Base URL:"), gc);
-        gc.gridx = col++; gc.weightx = 1; gc.gridwidth = 4; gc.fill = GridBagConstraints.HORIZONTAL;
+        gc.gridx = col++;
+        gc.weightx = 1;
+        gc.gridwidth = 4;
+        gc.fill = GridBagConstraints.HORIZONTAL;
         form.add(urlField, gc);
-        gc.gridwidth = 1; gc.weightx = 0; gc.fill = GridBagConstraints.NONE;
+        gc.gridwidth = 1;
+        gc.weightx = 0;
+        gc.fill = GridBagConstraints.NONE;
 
         // Row 1: credentials
         col = 0;
-        gc.gridx = col++; gc.gridy = 1;
+        gc.gridx = col++;
+        gc.gridy = 1;
         form.add(new JLabel("Username:"), gc);
-        gc.gridx = col++; form.add(userField, gc);
-        gc.gridx = col++; form.add(new JLabel("Password:"), gc);
-        gc.gridx = col++; form.add(passField, gc);
+        gc.gridx = col++;
+        form.add(userField, gc);
+        gc.gridx = col++;
+        form.add(new JLabel("Password:"), gc);
+        gc.gridx = col++;
+        form.add(passField, gc);
 
         add(form, BorderLayout.CENTER);
+
+        // Buttons row (Clear)
+        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 2));
+        clearButton = new JButton("Clear", ImageUtil.newImageIcon("/org/jd/gui/images/close_active.gif"));
+        clearButton.addActionListener(this);
+        buttonsPanel.add(clearButton);
+        add(buttonsPanel, BorderLayout.SOUTH);
     }
 
     // PreferencesPanel
-    @Override public String getPreferencesGroupTitle() { return "Nexus Sonatype"; }
-    @Override public String getPreferencesPanelTitle() { return "Intranet artifact search supersedes proxy-based internet search"; }
-    @Override public JComponent getPanel() { return this; }
+    @Override
+    public String getPreferencesGroupTitle() {
+        return "Nexus Sonatype";
+    }
+
+    @Override
+    public String getPreferencesPanelTitle() {
+        return "Intranet artifact search supersedes proxy-based internet search";
+    }
+
+    @Override
+    public JComponent getPanel() {
+        return this;
+    }
 
     @Override
     public void init(Color errorBackgroundColor) {
-        if (errorBackgroundColor != null) this.errorBackground = errorBackgroundColor;
+        if (errorBackgroundColor != null) {
+            this.errorBackground = errorBackgroundColor;
+        }
     }
 
-    @Override public boolean isActivated() { return true; }
+    @Override
+    public boolean isActivated() {
+        return true;
+    }
 
     @Override
     public void loadPreferences(Map<String, String> preferences) {
@@ -216,7 +255,15 @@ public final class NexusPreferencesProvider extends JPanel implements Preference
     // ActionListener
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (listener != null) listener.preferencesPanelChanged(this);
+        Object source = e.getSource();
+        if (source == clearButton) {
+            // Clear all fields when the clear button is pressed
+            restoreDefaults();
+        }
+
+        if (listener != null) {
+            listener.preferencesPanelChanged(this);
+        }
     }
 
     @Override
@@ -228,30 +275,53 @@ public final class NexusPreferencesProvider extends JPanel implements Preference
     }
 
     // DocumentListener
-    @Override public void insertUpdate(DocumentEvent e) { fireChange(); }
-    @Override public void removeUpdate(DocumentEvent e) { fireChange(); }
-    @Override public void changedUpdate(DocumentEvent e) { fireChange(); }
+    @Override
+    public void insertUpdate(DocumentEvent e) {
+        fireChange();
+    }
+
+    @Override
+    public void removeUpdate(DocumentEvent e) {
+        fireChange();
+    }
+
+    @Override
+    public void changedUpdate(DocumentEvent e) {
+        fireChange();
+    }
+
     private void fireChange() {
         arePreferencesValid();
-        if (listener != null) listener.preferencesPanelChanged(this);
+        if (listener != null) {
+            listener.preferencesPanelChanged(this);
+        }
     }
 
     // Helpers
     private static boolean validateUrl(String url) {
-        if (url == null || url.trim().isEmpty()) return false;
+        if (url == null || url.trim().isEmpty()) {
+            return false;
+        }
         return url.matches("https?://.+");
     }
 
     private static boolean hasNonEmpty(Map<String, String> m, String k) {
-        String v = m.get(k); return v != null && !v.isEmpty();
+        String v = m.get(k);
+        return v != null && !v.isEmpty();
     }
 
-    private static boolean hasText(String s) { return s != null && !s.trim().isEmpty(); }
+    private static boolean hasText(String s) {
+        return s != null && !s.trim().isEmpty();
+    }
 
-    private static String nvl(String s) { return s == null ? "" : s; }
+    private static String nvl(String s) {
+        return s == null ? "" : s;
+    }
 
     private static void zero(char[] a) {
-        if (a == null) return;
+        if (a == null) {
+            return;
+        }
         Arrays.fill(a, '\0');
     }
 

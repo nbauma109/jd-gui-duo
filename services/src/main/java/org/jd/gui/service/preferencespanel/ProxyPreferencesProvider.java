@@ -19,23 +19,35 @@ package org.jd.gui.service.preferencespanel;
 import org.jd.gui.security.SecureSession;
 import org.jd.gui.service.preferencespanel.secure.SecurePreferences;
 import org.jd.gui.spi.PreferencesPanel;
+import org.jd.gui.util.ImageUtil;
+
+import com.github.markusbernhardt.proxy.ProxySearch;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.ProxySelector;
+import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.ProgressMonitor;
+import javax.swing.SwingWorker;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -54,7 +66,7 @@ import javax.swing.event.DocumentListener;
  * - We validate the port only when it is provided, and we allow it to be empty.
  *
  * New behavior with proxy-vole:
- * - If proxy fields are empty when we load preferences, we try to detect system proxy
+ * - If proxy fields are empty when we load preferences, we can detect system proxy
  *   settings with proxy-vole and use those as defaults. We do not overwrite values
  *   that the user has already provided.
  * - We only pre-fill Host and Port. We do not try to infer credentials from the system.
@@ -82,18 +94,22 @@ public final class ProxyPreferencesProvider extends JPanel implements Preference
     public static final String VAULT_PRESENT = "ProxyPreferencesProvider.vault.present";
 
     // User interface
-    private JTextField hostField;
-    private JTextField portField;        // Plain text field so we can allow clearing
-    private JTextField userField;
-    private JPasswordField passField;
+    private final JTextField hostField;
+    private final JTextField portField;        // Plain text field so we can allow clearing
+    private final JTextField userField;
+    private final JPasswordField passField;
+
+    private final JButton detectButton;
+    private final JButton clearButton;
 
     // State
     private Color errorBackground = new Color(255, 210, 210);
-    private Color hostDefaultBackground;
-    private Color portDefaultBackground;
-    private Color passDefaultBackground;
+    private final Color hostDefaultBackground;
+    private final Color portDefaultBackground;
+    private final Color passDefaultBackground;
 
     private transient PreferencesPanelChangeListener listener;
+    private transient ProgressMonitor detectProgressMonitor;
 
     public ProxyPreferencesProvider() {
         super(new BorderLayout());
@@ -125,32 +141,71 @@ public final class ProxyPreferencesProvider extends JPanel implements Preference
 
         int col = 0;
         // Row 0: host, port
-        gc.gridx = col++; gc.gridy = 0; form.add(new JLabel("Host:"), gc);
-        gc.gridx = col++;               form.add(hostField, gc);
-        gc.gridx = col++;               form.add(new JLabel("Port:"), gc);
-        gc.gridx = col++;               form.add(portField, gc);
+        gc.gridx = col++;
+        gc.gridy = 0;
+        form.add(new JLabel("Host:"), gc);
+        gc.gridx = col++;
+        form.add(hostField, gc);
+        gc.gridx = col++;
+        form.add(new JLabel("Port:"), gc);
+        gc.gridx = col++;
+        form.add(portField, gc);
 
         // Row 1: username, password
         col = 0;
-        gc.gridx = col++; gc.gridy = 1; form.add(new JLabel("Username:"), gc);
-        gc.gridx = col++;               form.add(userField, gc);
-        gc.gridx = col++;               form.add(new JLabel("Password:"), gc);
-        gc.gridx = col++;               form.add(passField, gc);
+        gc.gridx = col++;
+        gc.gridy = 1;
+        form.add(new JLabel("Username:"), gc);
+        gc.gridx = col++;
+        form.add(userField, gc);
+        gc.gridx = col++;
+        form.add(new JLabel("Password:"), gc);
+        gc.gridx = col++;
+        form.add(passField, gc);
 
         add(form, BorderLayout.CENTER);
+
+        // Buttons row
+        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 2));
+        detectButton = new JButton("Detect", ImageUtil.newImageIcon("/org/jd/gui/images/search_src.png"));
+        clearButton = new JButton("Clear", ImageUtil.newImageIcon("/org/jd/gui/images/close_active.gif"));
+
+        detectButton.addActionListener(this);
+        clearButton.addActionListener(this);
+
+        buttonsPanel.add(detectButton);
+        buttonsPanel.add(clearButton);
+
+        add(buttonsPanel, BorderLayout.SOUTH);
     }
 
     // --- PreferencesPanel --- //
-    @Override public String getPreferencesGroupTitle() { return "Proxy"; }
-    @Override public String getPreferencesPanelTitle() { return "Proxy for internet artifact search with maven.org"; }
-    @Override public JComponent getPanel() { return this; }
+    @Override
+    public String getPreferencesGroupTitle() {
+        return "Proxy";
+    }
+
+    @Override
+    public String getPreferencesPanelTitle() {
+        return "Proxy for internet artifact search with maven.org";
+    }
+
+    @Override
+    public JComponent getPanel() {
+        return this;
+    }
 
     @Override
     public void init(Color errorBackgroundColor) {
-        if (errorBackgroundColor != null) this.errorBackground = errorBackgroundColor;
+        if (errorBackgroundColor != null) {
+            this.errorBackground = errorBackgroundColor;
+        }
     }
 
-    @Override public boolean isActivated() { return true; }
+    @Override
+    public boolean isActivated() {
+        return true;
+    }
 
     @Override
     public void loadPreferences(Map<String, String> preferences) {
@@ -245,10 +300,26 @@ public final class ProxyPreferencesProvider extends JPanel implements Preference
         return hostOk && portOk && passOk;
     }
 
-    @Override public void addPreferencesChangeListener(PreferencesPanelChangeListener listener) { this.listener = listener; }
+    @Override
+    public void addPreferencesChangeListener(PreferencesPanelChangeListener listener) {
+        this.listener = listener;
+    }
 
-    // We do not have buttons, but we keep the contract and notify host when actions are triggered
-    @Override public void actionPerformed(ActionEvent e) { if (listener != null) listener.preferencesPanelChanged(this); }
+    // Buttons and general actions
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        Object source = e.getSource();
+
+        if (source == detectButton) {
+            onDetectProxy();
+        } else if (source == clearButton) {
+            restoreDefaults();
+        }
+
+        if (listener != null) {
+            listener.preferencesPanelChanged(this);
+        }
+    }
 
     @Override
     public void restoreDefaults() {
@@ -260,13 +331,142 @@ public final class ProxyPreferencesProvider extends JPanel implements Preference
     }
 
     // --- DocumentListener --- //
-    @Override public void insertUpdate(DocumentEvent e) { fireChange(); }
-    @Override public void removeUpdate(DocumentEvent e) { fireChange(); }
-    @Override public void changedUpdate(DocumentEvent e) { fireChange(); }
+    @Override
+    public void insertUpdate(DocumentEvent e) {
+        fireChange();
+    }
+
+    @Override
+    public void removeUpdate(DocumentEvent e) {
+        fireChange();
+    }
+
+    @Override
+    public void changedUpdate(DocumentEvent e) {
+        fireChange();
+    }
 
     private void fireChange() {
         arePreferencesValid();
-        if (listener != null) listener.preferencesPanelChanged(this);
+        if (listener != null) {
+            listener.preferencesPanelChanged(this);
+        }
+    }
+
+    // --- Detect with proxy-vole (background) --- //
+
+    /**
+     * We run proxy detection in a SwingWorker, with a ProgressMonitor
+     * that allows the user to cancel if the detection is slow.
+     *
+     * We only fill host and port, and we only fill them when the corresponding
+     * fields are currently empty.
+     */
+    private void onDetectProxy() {
+        // Avoid concurrent runs
+        if (detectProgressMonitor != null) {
+            return;
+        }
+
+        detectButton.setEnabled(false);
+        clearButton.setEnabled(false);
+
+        detectProgressMonitor = new ProgressMonitor(
+                this,
+                "Detecting proxy settings...",
+                "",
+                0,
+                100
+        );
+        detectProgressMonitor.setMillisToPopup(0);
+        detectProgressMonitor.setMillisToDecideToPopup(0);
+
+        SwingWorker<DetectedProxy, Void> worker = new SwingWorker<DetectedProxy, Void>() {
+            @Override
+            protected DetectedProxy doInBackground() {
+                setProgress(5);
+                try {
+                    ProxySearch proxySearch = ProxySearch.getDefaultProxySearch();
+                    ProxySelector selector = proxySearch.getProxySelector();
+                    if (selector == null) {
+                        return null;
+                    }
+
+                    URI uri = new URI("http://www.google.com");
+                    List<Proxy> proxies = selector.select(uri);
+                    if (proxies == null || proxies.isEmpty()) {
+                        return null;
+                    }
+
+                    for (Proxy proxy : proxies) {
+                        if (isCancelled()) {
+                            return null;
+                        }
+                        if (Proxy.Type.HTTP.equals(proxy.type()) && proxy.address() instanceof InetSocketAddress addr) {
+                            String host = addr.getHostString();
+                            int port = addr.getPort();
+                            if (host != null && !host.trim().isEmpty() && port > 0) {
+                                DetectedProxy detected = new DetectedProxy();
+                                detected.host = host;
+                                detected.port = String.valueOf(port);
+                                setProgress(90);
+                                return detected;
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {
+                    // We return null when detection fails
+                } finally {
+                    setProgress(100);
+                }
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    if (!isCancelled() && detectProgressMonitor != null && !detectProgressMonitor.isCanceled()) {
+                        DetectedProxy detected = get();
+                        if (detected != null) {
+                            // Only overwrite empty fields
+                            if (!hasText(hostField.getText())) {
+                                hostField.setText(detected.host);
+                            }
+                            if (!hasText(portField.getText())) {
+                                portField.setText(detected.port);
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {
+                    // We ignore and leave fields unchanged
+                } finally {
+                    if (detectProgressMonitor != null) {
+                        detectProgressMonitor.close();
+                        detectProgressMonitor = null;
+                    }
+                    detectButton.setEnabled(true);
+                    clearButton.setEnabled(true);
+                    arePreferencesValid();
+                }
+            }
+        };
+
+        worker.addPropertyChangeListener(evt -> {
+            if ("progress".equals(evt.getPropertyName()) && detectProgressMonitor != null) {
+                int value = (Integer) evt.getNewValue();
+                detectProgressMonitor.setProgress(value);
+            }
+            if (detectProgressMonitor != null && detectProgressMonitor.isCanceled() && !worker.isDone()) {
+                worker.cancel(true);
+            }
+        });
+
+        worker.execute();
+    }
+
+    private static final class DetectedProxy {
+        String host;
+        String port;
     }
 
     // --- Helpers --- //
@@ -282,7 +482,9 @@ public final class ProxyPreferencesProvider extends JPanel implements Preference
      * If provided, it must parse to an integer in the inclusive range [1, 65535].
      */
     private static boolean validatePortField(String s) {
-        if (s == null || s.trim().isEmpty()) return true;
+        if (s == null || s.trim().isEmpty()) {
+            return true;
+        }
         try {
             int p = Integer.parseInt(s.trim());
             return p >= 1 && p <= 65535;
@@ -292,14 +494,23 @@ public final class ProxyPreferencesProvider extends JPanel implements Preference
     }
 
     private static boolean hasNonEmpty(Map<String, String> m, String k) {
-        String v = m.get(k); return v != null && !v.isEmpty();
+        String v = m.get(k);
+        return v != null && !v.isEmpty();
     }
 
-    private static boolean hasText(String s) { return s != null && !s.trim().isEmpty(); }
+    private static boolean hasText(String s) {
+        return s != null && !s.trim().isEmpty();
+    }
 
-    private static String nvl(String s) { return s == null ? "" : s; }
+    private static String nvl(String s) {
+        return s == null ? "" : s;
+    }
 
-    private static void zero(char[] a) { if (a != null) Arrays.fill(a, '\0'); }
+    private static void zero(char[] a) {
+        if (a != null) {
+            Arrays.fill(a, '\0');
+        }
+    }
 
     @Override
     public boolean useCompactDisplay() {

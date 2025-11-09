@@ -141,12 +141,12 @@ public class OpenTypeHierarchyView {
             Box hbox = Box.createHorizontalBox();
             vbox.add(hbox);
             hbox.add(Box.createHorizontalGlue());
-            JButton openTypeHierarchyOpenButton = new JButton("Open");
+            JButton openTypeHierarchyOpenButton = new JButton("Open", ImageUtil.newImageIcon("/org/jd/gui/images/open_type.png"));
             hbox.add(openTypeHierarchyOpenButton);
             openTypeHierarchyOpenButton.setEnabled(false);
             openTypeHierarchyOpenButton.addActionListener(e -> onTypeSelected());
             hbox.add(Box.createHorizontalStrut(5));
-            JButton openTypeHierarchyCancelButton = new JButton("Cancel");
+            JButton openTypeHierarchyCancelButton = new JButton("Cancel", ImageUtil.newImageIcon("/org/jd/gui/images/close_active.gif"));
             hbox.add(openTypeHierarchyCancelButton);
             Action openTypeHierarchyCancelActionListener = new AbstractAction() {
 

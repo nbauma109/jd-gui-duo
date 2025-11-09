@@ -11,12 +11,13 @@ import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.TreeNodeExpandable;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
+import org.jd.gui.model.container.DelegatingFilterContainer;
 import org.jd.gui.spi.TreeNodeFactory;
+import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.function.TriConsumer;
 import org.jd.gui.util.swing.SwingUtil;
 import org.jd.gui.view.component.Tree;
 import org.jd.gui.view.renderer.TreeNodeRenderer;
-import org.jd.gui.model.container.DelegatingFilterContainer;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
@@ -304,7 +305,7 @@ public class SearchInConstantPoolsView<T extends DefaultMutableTreeNode & Contai
             };
             searchInConstantPoolsOpenButton.addActionListener(searchInConstantPoolsOpenActionListener);
             hbox.add(Box.createHorizontalStrut(5));
-            JButton searchInConstantPoolsCancelButton = new JButton("Cancel");
+            JButton searchInConstantPoolsCancelButton = new JButton("Cancel", ImageUtil.newImageIcon("/org/jd/gui/images/close_active.gif"));
             hbox.add(searchInConstantPoolsCancelButton);
             Action searchInConstantPoolsCancelActionListener = new AbstractAction() {
 

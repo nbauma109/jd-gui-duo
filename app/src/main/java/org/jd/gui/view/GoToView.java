@@ -9,6 +9,7 @@ package org.jd.gui.view;
 
 import org.jd.gui.api.feature.LineNumberNavigable;
 import org.jd.gui.model.configuration.Configuration;
+import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.decompiler.GuiPreferences;
 import org.jd.gui.util.swing.SwingUtil;
 
@@ -96,7 +97,7 @@ public class GoToView {
                 goToDialog.setVisible(false);
             });
             hbox.add(Box.createHorizontalStrut(5));
-            JButton goToCancelButton = new JButton("Cancel");
+            JButton goToCancelButton = new JButton("Cancel", ImageUtil.newImageIcon("/org/jd/gui/images/close_active.gif"));
             hbox.add(goToCancelButton);
             Action goToCancelActionListener = new AbstractAction() {
 

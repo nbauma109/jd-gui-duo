@@ -11,6 +11,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Type;
+import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.function.TriConsumer;
 import org.jd.gui.util.swing.SwingUtil;
 import org.jd.gui.view.bean.OpenTypeListCellBean;
@@ -175,12 +176,12 @@ public class OpenTypeView {
             hbox = Box.createHorizontalBox();
             vbox.add(hbox);
             hbox.add(Box.createHorizontalGlue());
-            JButton openTypeOpenButton = new JButton("Open");
+            JButton openTypeOpenButton = new JButton("Open", ImageUtil.newImageIcon("/org/jd/gui/images/open_type.png"));
             hbox.add(openTypeOpenButton);
             openTypeOpenButton.setEnabled(false);
             openTypeOpenButton.addActionListener(e -> onTypeSelected(selectedTypeCallback));
             hbox.add(Box.createHorizontalStrut(5));
-            JButton openTypeCancelButton = new JButton("Cancel");
+            JButton openTypeCancelButton = new JButton("Cancel", ImageUtil.newImageIcon("/org/jd/gui/images/close_active.gif"));
             hbox.add(openTypeCancelButton);
             Action openTypeCancelActionListener = new AbstractAction() {
 
