@@ -47,7 +47,7 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
     protected static final String MAVENORG_SEARCH_URL_PREFIX = "https://search.maven.org/solrsearch/select?q=1:%22";
     protected static final String MAVENORG_SEARCH_URL_SUFFIX = "%22&rows=20&wt=xml";
 
-    protected static final String MAVENORG_LOAD_URL_PREFIX = "https://search.maven.org/classic/remotecontent?filepath=";
+    protected static final String MAVENORG_LOAD_URL_PREFIX = "https://search.maven.org/remotecontent?filepath=";
     protected static final String MAVENORG_LOAD_URL_SUFFIX = "-sources.jar";
 
     protected Set<Container.Entry> failed = new HashSet<>();
