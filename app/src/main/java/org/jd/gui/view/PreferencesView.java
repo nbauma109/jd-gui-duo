@@ -184,7 +184,7 @@ public class PreferencesView implements PreferencesPanel.PreferencesPanelChangeL
 
             preferencesScrollPane.setPreferredSize(new Dimension(400, preferredHeight));
             if (PlatformService.getInstance().isMac()) {
-                preferencesDialog.setMinimumSize(new Dimension(500, 200));
+                preferencesDialog.setMinimumSize(new Dimension(540, 200));
             } else {
                 preferencesDialog.setMinimumSize(new Dimension(300, 200));
             }
