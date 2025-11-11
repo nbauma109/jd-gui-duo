@@ -24,7 +24,6 @@ import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.feature.UriOpenable;
 import org.jd.gui.model.configuration.Configuration;
 import org.jd.gui.model.history.History;
-import org.jd.gui.service.platform.PlatformService;
 import org.jd.gui.util.CustomMultiResolutionImage;
 import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.decompiler.GuiPreferences;
@@ -82,6 +81,8 @@ import javax.swing.text.Document;
 import static org.jd.gui.util.ImageUtil.newImageIcon;
 import static org.jd.gui.util.swing.SwingUtil.invokeLater;
 import static org.jd.gui.util.swing.SwingUtil.newAction;
+
+import de.cismet.custom.visualdiff.PlatformService;
 
 @SuppressWarnings("unchecked")
 public class MainView<T extends JComponent & UriGettable> implements UriOpenable, PreferencesChangeListener {

@@ -129,6 +129,7 @@ import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompile
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V1;
 
 import de.cismet.custom.visualdiff.DiffPanel;
+import de.cismet.custom.visualdiff.PlatformService;
 import jd.core.ClassUtil;
 import jd.core.DecompilationResult;
 import jd.core.preferences.Preferences;
@@ -510,9 +511,17 @@ public class MainController implements API {
             checkPreferencesChange(currentPage);
             mainView.preferencesChanged(getPreferences());
             if (Boolean.parseBoolean(getPreferences().getOrDefault("UIMainWindowPreferencesProvider.darkMode", "false"))) {
-            	configuration.setLookAndFeel("com.formdev.flatlaf.intellijthemes.FlatOneDarkIJTheme");
+                if (PlatformService.getInstance().isMac()) {
+                    configuration.setLookAndFeel("com.formdev.flatlaf.themes.FlatMacDarkLaf");
+                } else {
+                    configuration.setLookAndFeel("com.formdev.flatlaf.intellijthemes.FlatOneDarkIJTheme");
+                }
             } else {
-            	configuration.setLookAndFeel(ThemeUtil.getDefaultLookAndFeel());
+                if (PlatformService.getInstance().isMac()) {
+                    configuration.setLookAndFeel("com.formdev.flatlaf.themes.FlatMacLightLaf");
+                } else {
+                    configuration.setLookAndFeel(ThemeUtil.getDefaultLookAndFeel(getPreferences()));
+                }
             }
         });
     }

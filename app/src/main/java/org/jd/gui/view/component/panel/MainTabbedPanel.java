@@ -13,7 +13,6 @@ import org.jd.gui.api.feature.PageChangeable;
 import org.jd.gui.api.feature.PreferencesChangeListener;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.feature.UriOpenable;
-import org.jd.gui.service.platform.PlatformService;
 
 import java.awt.CardLayout;
 import java.awt.Color;
@@ -32,6 +31,8 @@ import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
+import de.cismet.custom.visualdiff.PlatformService;
 
 @SuppressWarnings("unchecked")
 public class MainTabbedPanel<T extends JComponent & UriGettable> extends TabbedPanel<T> implements UriOpenable, PageChangeListener {

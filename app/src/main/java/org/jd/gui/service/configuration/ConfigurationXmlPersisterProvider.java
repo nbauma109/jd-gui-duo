@@ -61,7 +61,6 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
         config.setMainWindowSize(new Dimension(w, h));
         config.setMainWindowMaximize(false);
 
-        config.setLookAndFeel(ThemeUtil.getDefaultLookAndFeel());
 
         File recentSaveDirectory = new File(System.getProperty("user.dir"));
 
@@ -152,6 +151,8 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
                     config.setMainWindowSize(new Dimension(w, h));
                     config.setMainWindowMaximize(maximize);
                 }
+
+                config.setLookAndFeel(ThemeUtil.getDefaultLookAndFeel(preferences));
 
                 reader.close();
             } catch (Exception e) {

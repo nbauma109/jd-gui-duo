@@ -12,7 +12,6 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.PreferencesChangeListener;
 import org.jd.gui.api.feature.UriGettable;
-import org.jd.gui.service.platform.PlatformService;
 import org.jd.gui.util.ImageUtil;
 
 import java.awt.BorderLayout;
@@ -48,6 +47,8 @@ import javax.swing.Timer;
 import javax.swing.ToolTipManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import de.cismet.custom.visualdiff.PlatformService;
 
 public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel implements PreferencesChangeListener {
 

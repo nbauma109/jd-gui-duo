@@ -7,7 +7,6 @@
 
 package org.jd.gui.service.preferencespanel;
 
-import org.jd.gui.service.platform.PlatformService;
 import org.jd.gui.spi.PreferencesPanel;
 
 import java.awt.Color;
@@ -17,6 +16,8 @@ import java.util.Map;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+
+import de.cismet.custom.visualdiff.PlatformService;
 
 /**
  * JTabbedPane.WRAP_TAB_LAYOUT is not supported by Aqua L&F.
