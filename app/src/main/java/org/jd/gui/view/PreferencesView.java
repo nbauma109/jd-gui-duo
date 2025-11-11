@@ -46,6 +46,8 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
+import de.cismet.custom.visualdiff.PlatformService;
+
 public class PreferencesView implements PreferencesPanel.PreferencesPanelChangeListener {
     private final Map<String, String> preferences;
     private final Collection<PreferencesPanel> panels;
@@ -181,7 +183,11 @@ public class PreferencesView implements PreferencesPanel.PreferencesPanelChangeL
             }
 
             preferencesScrollPane.setPreferredSize(new Dimension(400, preferredHeight));
-            preferencesDialog.setMinimumSize(new Dimension(300, 200));
+            if (PlatformService.getInstance().isMac()) {
+                preferencesDialog.setMinimumSize(new Dimension(500, 200));
+            } else {
+                preferencesDialog.setMinimumSize(new Dimension(300, 200));
+            }
 
             // Prepare to display
             preferencesDialog.pack();
