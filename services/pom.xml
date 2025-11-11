@@ -32,7 +32,7 @@
       <artifactId>rsyntaxtextarea</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.github.nbauma109</groupId>
+      <groupId>io.github.nbauma109</groupId>
       <artifactId>transformer-api</artifactId>
     </dependency>
     <dependency>

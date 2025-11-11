@@ -108,7 +108,7 @@
         <version>1.3.3</version>
       </dependency>
       <dependency>
-        <groupId>com.github.nbauma109</groupId>
+        <groupId>io.github.nbauma109</groupId>
         <artifactId>netbeans-visual-diff-standalone</artifactId>
         <version>${netbeans-visual-diff-standalone.version}</version>
       </dependency>
@@ -118,7 +118,7 @@
         <version>3.6.0</version>
       </dependency>
       <dependency>
-        <groupId>com.github.nbauma109</groupId>
+        <groupId>io.github.nbauma109</groupId>
         <artifactId>transformer-api</artifactId>
         <version>${transformer-api.version}</version>
       </dependency>
@@ -174,7 +174,7 @@
          • JD-Core V1
          • JADX
        ====================================================================== -->
-    <transformer-api.version>4.0.60</transformer-api.version>
+    <transformer-api.version>4.0.61</transformer-api.version>
     <!-- ======================================================================
          NetBeans Visual Diff Standalone — Diff Component for Swing
          ======================================================================
@@ -187,6 +187,6 @@
          • No need to start NetBeans platform
          • No restriction from NetBeans module system
        ====================================================================== -->
-    <netbeans-visual-diff-standalone.version>2.0.46</netbeans-visual-diff-standalone.version>
+    <netbeans-visual-diff-standalone.version>2.0.47</netbeans-visual-diff-standalone.version>
   </properties>
 </project>

@@ -64,7 +64,7 @@
       <artifactId>swingbits</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.github.nbauma109</groupId>
+      <groupId>io.github.nbauma109</groupId>
       <artifactId>netbeans-visual-diff-standalone</artifactId>
     </dependency>
     <dependency>
