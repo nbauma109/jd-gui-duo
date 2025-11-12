@@ -51,11 +51,12 @@ public class AboutView {
     private JDialog aboutDialog;
     private JButton aboutOkButton;
 
-    public AboutView(JFrame mainFrame) {
+    public AboutView(JFrame mainFrame, boolean darkMode) {
         // Build GUI
         SwingUtil.invokeLater(() -> {
             aboutDialog = new JDialog(mainFrame, "About Java Decompiler", false);
             aboutDialog.setResizable(false);
+            ImageUtil.addJDIconsToFrame(aboutDialog);
 
             JPanel panel = new JPanel();
             panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
@@ -66,8 +67,13 @@ public class AboutView {
             panel.add(vbox, BorderLayout.NORTH);
             JPanel subpanel = new JPanel();
             vbox.add(subpanel);
-            subpanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-            subpanel.setBackground(Color.WHITE);
+            if (darkMode) {
+                subpanel.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+                subpanel.setBackground(Color.BLACK);
+            } else {
+                subpanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+                subpanel.setBackground(Color.WHITE);
+            }
             subpanel.setLayout(new BorderLayout());
             JLabel logo = new JLabel(new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/jd_icon_64.png")));
             logo.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
@@ -128,7 +134,7 @@ public class AboutView {
             hbox.add(Box.createHorizontalGlue());
 
             hbox = Box.createHorizontalBox();
-            hbox.add(new JLabel("Copyright © 2008-2024 Emmanuel Dupuy and other contributors"));
+            hbox.add(new JLabel("Copyright © 2008-2025 Emmanuel Dupuy and other contributors"));
             hbox.add(Box.createHorizontalGlue());
             subvbox.add(hbox);
 

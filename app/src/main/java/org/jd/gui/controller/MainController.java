@@ -233,7 +233,7 @@ public class MainController implements API {
                 containerChangeListeners.add(searchInConstantPoolsController);
                 preferencesController = new PreferencesController(configuration, mainFrame, PreferencesPanelService.getInstance().getProviders());
                 selectLocationController = new SelectLocationController(MainController.this, mainFrame);
-                aboutController = new AboutController(mainFrame);
+                aboutController = new AboutController(mainFrame, Boolean.parseBoolean(getPreferences().getOrDefault("UIMainWindowPreferencesProvider.darkMode", "false")));
                 sourceLoaderService = new SourceLoaderService();
                 // Add listeners
                 mainFrame.addComponentListener(new MainFrameListener(configuration));
@@ -520,7 +520,7 @@ public class MainController implements API {
                 if (PlatformService.getInstance().isMac()) {
                     configuration.setLookAndFeel("com.formdev.flatlaf.themes.FlatMacLightLaf");
                 } else {
-                    configuration.setLookAndFeel(ThemeUtil.getDefaultLookAndFeel(getPreferences()));
+                    configuration.setLookAndFeel(ThemeUtil.getDefaultLookAndFeel());
                 }
             }
         });

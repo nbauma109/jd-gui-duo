@@ -1,6 +1,5 @@
 package org.jd.gui.util;
 
-import org.apache.commons.lang3.StringUtils;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.Theme;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
@@ -38,14 +37,7 @@ public class ThemeUtil {
 		return rSyntaxTextArea;
 	}
 
-	public static String getDefaultLookAndFeel(Map<String, String> preferences) {
-	    if (StringUtils.containsIgnoreCase(System.getProperty("os.name"), "mac")) {
-	        if (Boolean.parseBoolean(preferences.getOrDefault("UIMainWindowPreferencesProvider.darkMode", "false"))) {
-	            return "com.formdev.flatlaf.themes.FlatMacDarkLaf";
-	        } else {
-	            return "com.formdev.flatlaf.themes.FlatMacLightLaf";
-	        }
-	    }
+	public static String getDefaultLookAndFeel() {
 		return Optional.ofNullable(System.getProperty("swing.defaultlaf")).orElseGet(UIManager::getSystemLookAndFeelClassName);
 	}
 }

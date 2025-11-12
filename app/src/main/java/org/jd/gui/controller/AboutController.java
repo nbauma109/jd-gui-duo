@@ -14,9 +14,9 @@ import javax.swing.JFrame;
 public class AboutController {
     private final AboutView aboutView;
 
-    public AboutController(JFrame mainFrame) {
+    public AboutController(JFrame mainFrame, boolean darkMode) {
         // Create UI
-        aboutView = new AboutView(mainFrame);
+        aboutView = new AboutView(mainFrame, darkMode);
     }
 
     public void show() {

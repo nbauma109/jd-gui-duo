@@ -1,11 +1,11 @@
 package org.jd.gui.util;
 
 import java.awt.Image;
+import java.awt.Window;
 import java.io.IOException;
 import java.util.stream.Stream;
 
 import javax.swing.ImageIcon;
-import javax.swing.JFrame;
 
 public final class ImageUtil {
 
@@ -24,8 +24,8 @@ public final class ImageUtil {
         }
     }
 
-    public static void addJDIconsToFrame(JFrame frame) {
-        frame.setIconImages(Stream.of(32, 64, 128).map(ImageUtil::getAppIconPath).map(ImageUtil::getImage).toList());
+    public static void addJDIconsToFrame(Window window) {
+        window.setIconImages(Stream.of(32, 64, 128).map(ImageUtil::getAppIconPath).map(ImageUtil::getImage).toList());
     }
 
     public static String getAppIconPath(int size) {

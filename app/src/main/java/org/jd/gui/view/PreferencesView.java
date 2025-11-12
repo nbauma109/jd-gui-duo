@@ -7,6 +7,7 @@
 
 package org.jd.gui.view;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jd.gui.model.configuration.Configuration;
 import org.jd.gui.spi.PreferencesPanel;
 import org.jd.gui.util.ImageUtil;
@@ -45,8 +46,6 @@ import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
-
-import de.cismet.custom.visualdiff.PlatformService;
 
 public class PreferencesView implements PreferencesPanel.PreferencesPanelChangeListener {
     private final Map<String, String> preferences;
@@ -183,7 +182,7 @@ public class PreferencesView implements PreferencesPanel.PreferencesPanelChangeL
             }
 
             preferencesScrollPane.setPreferredSize(new Dimension(400, preferredHeight));
-            if (PlatformService.getInstance().isMac()) {
+            if (StringUtils.containsIgnoreCase(configuration.getLookAndFeel(), "flat")) {
                 preferencesDialog.setMinimumSize(new Dimension(540, 200));
             } else {
                 preferencesDialog.setMinimumSize(new Dimension(300, 200));
