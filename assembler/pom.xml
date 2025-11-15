@@ -13,8 +13,8 @@
   <packaging>pom</packaging>
 
   <properties>
-    <jre.builder.version>4.0.0</jre.builder.version>
-    <jre.version>21.0.6</jre.version>
+    <jre.builder.version>5.1.1</jre.builder.version>
+    <jre.version>25.0.1</jre.version>
     <app.icon.path>../app/src/main/resources/org/jd/gui/images/JDGUI.icns</app.icon.path>
   </properties>
 
@@ -54,10 +54,10 @@
               <goal>wget</goal>
             </goals>
             <configuration>
-              <url>https://github.com/nbauma109/jre-builder/releases/download/${jre.builder.version}/jre-${jre.builder.version}-${jre.version}-windows.zip</url>
+              <url>https://github.com/nbauma109/jre-builder/releases/download/${jre.builder.version}/jre-${jre.builder.version}-${jre.version}-windows-x64.zip</url>
               <unpack>true</unpack>
               <outputDirectory>${project.build.directory}/windows/jre</outputDirectory>
-              <sha512>1df09e495aa76e55928d93f17f6128b0b05d8de817404d71b71ffc3c70f1c7d044a74d38b046bc69e8d71b49fa066336f4f43bbc2d9cbd907e34a881b19e0a05</sha512>
+              <sha256>6ea6ab10cc09d6c3558eedea80cf93a0cd43dcd76418ee57ee0e499e5347316f</sha256>
             </configuration>
           </execution>
           <execution>
@@ -67,10 +67,10 @@
               <goal>wget</goal>
             </goals>
             <configuration>
-              <url>https://github.com/nbauma109/jre-builder/releases/download/${jre.builder.version}/jre-${jre.builder.version}-${jre.version}-linux.zip</url>
+              <url>https://github.com/nbauma109/jre-builder/releases/download/${jre.builder.version}/jre-${jre.builder.version}-${jre.version}-linux-x64.zip</url>
               <unpack>true</unpack>
               <outputDirectory>${project.build.directory}/linux/jre</outputDirectory>
-              <sha512>07cf8d488c3ab7febe1f046a745cc6d5ecf62ddbe323ddac533278c2b5bc2abbb9407de330d4fa4380c1cdd0617d02a83b7935fbd19f18e11c8be3f31ac77598</sha512>
+              <sha256>e629a56ca812be545835a7de2fbe7b308a300a189f26de6935512ffde33a76c7</sha256>
             </configuration>
           </execution>
           <execution>
@@ -80,10 +80,10 @@
               <goal>wget</goal>
             </goals>
             <configuration>
-              <url>https://github.com/nbauma109/jre-builder/releases/download/${jre.builder.version}/jre-${jre.builder.version}-${jre.version}-macos.zip</url>
+              <url>https://github.com/nbauma109/jre-builder/releases/download/${jre.builder.version}/jre-${jre.builder.version}-${jre.version}-macos-x64.zip</url>
               <unpack>true</unpack>
               <outputDirectory>${project.build.directory}/macos/jre</outputDirectory>
-              <sha512>8100c651e49263f8e4fed00f8823f962dcaadf93840671edec59539ee399526cf5bdc358cc6f34901d5f86d20ce40071d6707ee098a00e350d3ae5c828652bcc</sha512>
+              <sha256>463887053e5efd12a9f1fdf1cc25a09a163126b2160c203dd17beb364ba51103</sha256>
             </configuration>
           </execution>
         </executions>

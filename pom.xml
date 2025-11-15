@@ -157,8 +157,7 @@
   </dependencyManagement>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>21</maven.compiler.source>
-    <maven.compiler.target>21</maven.compiler.target>
+    <maven.compiler.release>25</maven.compiler.release>
     <main.class>org.jd.gui.App</main.class>
     <project.scm.id>github.com</project.scm.id>
     <flatlaf.version>3.6.2</flatlaf.version>
