@@ -1,79 +1,121 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE RSyntaxTheme SYSTEM "theme.dtd">
 
 <!--
-  Dark theme based off of Notepad++'s Obsidian theme.
-  See theme.dtd and org.fife.ui.rsyntaxtextarea.Theme for more information.
+    Visual Studio Code Dark Plus inspired theme for RSyntaxTextArea.
+
+    - Primitive types (DATA_TYPE) = emerald green
+    - Annotations (ANNOTATION) = emerald green
+    - All identifiers (IDENTIFIER: class names, locals, constants, object types) = sky blue
+    - Method names (FUNCTION) = yellow
+    - Brackets and parentheses (SEPARATOR) = magenta
+    - Keywords (RESERVED_WORD) = Visual Studio Code blue
 -->
+
 <RSyntaxTheme version="1.0">
 
   <!-- Omitting baseFont will use a system-appropriate monospaced. -->
   <baseFont size="12"/>
 
-  <!--  General editor colors. -->
-  <background color="293134" />
-  <caret color="c1cbc2" />
-  <selection useFG="false" bg="404E51" roundedEdges="false" />
-  <currentLineHighlight color="2F393C" fade="false" />
-  <marginLine fg="394448" />
-  <markAllHighlight color="6b8189" />
-  <!-- TODO: Fix me -->
-  <markOccurrencesHighlight color="5b7179" border="false" />
-  <matchedBracket fg="6A8088" bg="6b8189" highlightBoth="false" animate="true" />
-  <hyperlinks fg="a082bd" />
-  <secondaryLanguages>
-    <language index="1" bg="333344" />
-    <language index="2" bg="223322" />
-    <language index="3" bg="332222" />
-  </secondaryLanguages>
+    <!-- General editor colors -->
+    <background color="1e1e1e" />
+    <caret color="aeafad" />
+    <selection useFG="false" bg="264f78" roundedEdges="false" />
+    <currentLineHighlight color="262626" fade="false" />
+    <marginLine fg="404040" />
+    <markAllHighlight color="3a3d41" />
+    <markOccurrencesHighlight color="515c6a" border="false" />
+    <matchedBracket fg="ff00ff" bg="2a2a2a" highlightBoth="false" animate="true" />
+    <hyperlinks fg="3794ff" />
 
-  <!-- Gutter styling. -->
-  <gutterBorder color="81969A" />
-  <lineNumbers fg="81969A" currentFG="a9b7c6"/>
-  <foldIndicator fg="6A8088" armedFg="a9b7c6" iconBg="2f383c" iconArmedBg="3f484c" />
-  <iconRowHeader activeLineRange="3399ff" />
+    <secondaryLanguages>
+        <language index="1" bg="2a2d2e" />
+        <language index="2" bg="2d2a2e" />
+        <language index="3" bg="2e2a2a" />
+    </secondaryLanguages>
 
-  <!-- Syntax tokens. -->
-  <tokenStyles>
-    <style token="IDENTIFIER" fg="a9b7c6" />
-    <style token="RESERVED_WORD" fg="93C763" bold="true" />
-    <style token="RESERVED_WORD_2" fg="93C763" bold="true" />
-    <style token="ANNOTATION" fg="E8E2B7" />
-    <style token="COMMENT_DOCUMENTATION" fg="6C788C" />
-    <style token="COMMENT_EOL" fg="66747B" />
-    <style token="COMMENT_MULTILINE" fg="66747B" />
-    <style token="COMMENT_KEYWORD" fg="ae9fbf" />
-    <style token="COMMENT_MARKUP" fg="ae9fbf" />
-    <style token="FUNCTION" fg="E0E2E4" />
-    <style token="DATA_TYPE" fg="678CB1" bold="true" />
-    <style token="LITERAL_BOOLEAN" fg="93C763" bold="true" />
-    <style token="LITERAL_NUMBER_DECIMAL_INT" fg="FFCD22" />
-    <style token="LITERAL_NUMBER_FLOAT" fg="FFCD22" />
-    <style token="LITERAL_NUMBER_HEXADECIMAL" fg="FFCD22" />
-    <style token="LITERAL_STRING_DOUBLE_QUOTE" fg="EC7600" />
-    <style token="LITERAL_CHAR" fg="EC7600" />
-    <style token="LITERAL_BACKQUOTE" fg="EC7600" />
-    <style token="MARKUP_TAG_DELIMITER" fg="678CB1" />
-    <style token="MARKUP_TAG_NAME" fg="ABBFD3" bold="true" />
-    <style token="MARKUP_TAG_ATTRIBUTE" fg="B3B689" />
-    <style token="MARKUP_TAG_ATTRIBUTE_VALUE" fg="e1e2cf" />
-    <style token="MARKUP_COMMENT" fg="66747B" />
-    <style token="MARKUP_DTD" fg="A082BD" />
-    <style token="MARKUP_PROCESSING_INSTRUCTION" fg="A082BD" />
-    <style token="MARKUP_CDATA" fg="d5e6f0" />
-    <style token="MARKUP_CDATA_DELIMITER" fg="ae9fbf" />
-    <style token="MARKUP_ENTITY_REFERENCE" fg="678CB1" />
-    <style token="OPERATOR" fg="E8E2B7" />
-    <style token="PREPROCESSOR" fg="A082BD" />
-    <style token="REGEX" fg="d39745" />
-    <style token="SEPARATOR" fg="E8E2B7" />
-    <style token="VARIABLE" fg="ae9fbf" bold="true" />
-    <style token="WHITESPACE" fg="E0E2E4" />
+    <!-- Gutter styling -->
+    <gutterBackground color="1e1e1e" />
+    <gutterBorder color="454545" />
+    <lineNumbers fg="858585" currentFG="c6c6c6" />
+    <foldIndicator fg="858585" armedFg="c6c6c6"
+                   iconBg="1e1e1e" iconArmedBg="2e2e2e" />
+    <iconRowHeader activeLineRange="3794ff" />
 
-    <style token="ERROR_IDENTIFIER" fg="E0E2E4" bg="04790e" />
-    <style token="ERROR_NUMBER_FORMAT" fg="E0E2E4" bg="04790e" />
-    <style token="ERROR_STRING_DOUBLE" fg="E0E2E4" bg="04790e" />
-    <style token="ERROR_CHAR" fg="E0E2E4" bg="04790e" />
-  </tokenStyles>
+    <tokenStyles>
+
+        <!-- All identifiers: class names, locals, constants, object type names -->
+        <style token="IDENTIFIER" fg="9cdcfe" />
+
+        <!-- Keywords (for example public, static, return, class) -->
+        <style token="RESERVED_WORD" fg="569cd6" bold="true" />
+        <style token="RESERVED_WORD_2" fg="569cd6" bold="true" />
+
+        <!-- Annotations (for example @Deprecated) as types: emerald green -->
+        <style token="ANNOTATION" fg="4ec9b0" />
+
+        <!-- Comments -->
+        <style token="COMMENT_DOCUMENTATION" fg="6a9955" />
+        <style token="COMMENT_EOL" fg="6a9955" />
+        <style token="COMMENT_MULTILINE" fg="6a9955" />
+        <style token="COMMENT_KEYWORD" fg="6a9955" />
+        <style token="COMMENT_MARKUP" fg="6a9955" />
+
+        <!-- Method and function names -->
+        <style token="FUNCTION" fg="dcdcaa" />
+
+        <!-- Primitive and object data types that token makers tag as DATA_TYPE -->
+        <style token="DATA_TYPE" fg="4ec9b0" bold="true" />
+
+        <!-- Boolean literals -->
+        <style token="LITERAL_BOOLEAN" fg="4ec9b0" bold="true" />
+
+        <!-- Numeric literals -->
+        <style token="LITERAL_NUMBER_DECIMAL_INT" fg="b5cea8" />
+        <style token="LITERAL_NUMBER_FLOAT" fg="b5cea8" />
+        <style token="LITERAL_NUMBER_HEXADECIMAL" fg="b5cea8" />
+
+        <!-- Strings and characters -->
+        <style token="LITERAL_STRING_DOUBLE_QUOTE" fg="ce9178" />
+        <style token="LITERAL_CHAR" fg="ce9178" />
+        <style token="LITERAL_BACKQUOTE" fg="ce9178" />
+
+        <!-- Markup (for example XML, HTML) -->
+        <style token="MARKUP_TAG_DELIMITER" fg="808080" />
+        <style token="MARKUP_TAG_NAME" fg="569cd6" bold="true" />
+        <style token="MARKUP_TAG_ATTRIBUTE" fg="9cdcfe" />
+        <style token="MARKUP_TAG_ATTRIBUTE_VALUE" fg="ce9178" />
+        <style token="MARKUP_COMMENT" fg="6a9955" />
+        <style token="MARKUP_DTD" fg="c586c0" />
+        <style token="MARKUP_PROCESSING_INSTRUCTION" fg="c586c0" />
+        <style token="MARKUP_CDATA" fg="d4d4d4" />
+        <style token="MARKUP_CDATA_DELIMITER" fg="808080" />
+        <style token="MARKUP_ENTITY_REFERENCE" fg="4ec9b0" />
+
+        <!-- Operators -->
+        <style token="OPERATOR" fg="d4d4d4" />
+
+        <!-- Braces, parentheses, brackets, commas, semicolons -->
+        <style token="SEPARATOR" fg="c586c0" />
+
+        <!-- Preprocessor tokens -->
+        <style token="PREPROCESSOR" fg="c586c0" />
+
+        <!-- Regular expressions -->
+        <style token="REGEX" fg="d16969" />
+
+        <!-- Variable token (used by some non Java token makers) -->
+        <style token="VARIABLE" fg="9cdcfe" bold="true" />
+
+        <!-- Whitespace -->
+        <style token="WHITESPACE" fg="d4d4d4" />
+
+        <!-- Error tokens -->
+        <style token="ERROR_IDENTIFIER" fg="d4d4d4" bg="5a1e1e" />
+        <style token="ERROR_NUMBER_FORMAT" fg="d4d4d4" bg="5a1e1e" />
+        <style token="ERROR_STRING_DOUBLE" fg="d4d4d4" bg="5a1e1e" />
+        <style token="ERROR_CHAR" fg="d4d4d4" bg="5a1e1e" />
+
+    </tokenStyles>
 
 </RSyntaxTheme>
