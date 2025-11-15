@@ -7,7 +7,6 @@
 
 package org.jd.gui.view;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jd.gui.model.configuration.Configuration;
 import org.jd.gui.spi.PreferencesPanel;
 import org.jd.gui.util.ImageUtil;
@@ -176,17 +175,13 @@ public class PreferencesView implements PreferencesPanel.PreferencesPanelChangeL
             int taskBarHeight = scnMax.bottom + scnMax.top;
             int maxHeight = screenSize.height - taskBarHeight;
             int preferredHeight = preferencesPanels.getPreferredSize().height + 2;
+            int preferredWidth = preferencesPanels.getPreferredSize().width + 2;
 
             if (preferredHeight > maxHeight) {
                 preferredHeight = maxHeight;
             }
 
-            preferencesScrollPane.setPreferredSize(new Dimension(400, preferredHeight));
-            if (StringUtils.containsIgnoreCase(configuration.getLookAndFeel(), "flat")) {
-                preferencesDialog.setMinimumSize(new Dimension(540, 200));
-            } else {
-                preferencesDialog.setMinimumSize(new Dimension(300, 200));
-            }
+            preferencesScrollPane.setPreferredSize(new Dimension(preferredWidth, preferredHeight));
 
             // Prepare to display
             preferencesDialog.pack();
