@@ -24,7 +24,6 @@ import org.jd.gui.api.API;
 import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.loader.LoaderUtils;
 import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.netbeans.modules.editor.java.JavaKit;
 import org.oxbow.swingbits.list.CheckListRenderer;
 import org.oxbow.swingbits.table.filter.TableRowFilterSupport;
@@ -81,6 +80,8 @@ import jd.core.preferences.Preferences;
 public class CompareWindow {
 
     private static final Color YELLOW = new Color(255, 255, 200);
+    private static final Color DARK_GRAY = new Color(0x2A2A2A);
+
     /** Main window object */
     private JFrame mainWindow;
     /** Two files to compare */
@@ -168,13 +169,12 @@ public class CompareWindow {
                 if (!isRowSelected(row)) {
                     int modelRow = convertRowIndexToModel(row);
                     boolean isChange = ((EntryTableModel) getModel()).areDifferent(modelRow);
-                    c.setBackground(isChange ? YELLOW : getBackground());
+                    c.setBackground(isChange ? computeAlternateColor() : getBackground());
                 }
                 return c;
             }
         };
         table.setColumnControlVisible(true);
-        table.setHighlighters(HighlighterFactory.createSimpleStriping());
         table.setEditable(false);
         TableRowFilterSupport.forTable(table).actions(true).searchable(true).checkListRenderer(new CheckListRenderer()).apply();
         table.getColumnModel().getColumn(0).setPreferredWidth(300);
@@ -472,5 +472,9 @@ public class CompareWindow {
         if (f == null) return false;
         String name = f.getName().toLowerCase();
         return name.endsWith(".jar") || name.endsWith(".zip") || name.endsWith(".war") || name.endsWith(".ear");
+    }
+
+    private Color computeAlternateColor() {
+        return api.isDarkMode() ? DARK_GRAY : YELLOW;
     }
 }

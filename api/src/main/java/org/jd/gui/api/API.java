@@ -77,4 +77,6 @@ public interface API {
     File loadSourceFile(Container.Entry entry);
 
     void repaint();
+
+    boolean isDarkMode();
 }

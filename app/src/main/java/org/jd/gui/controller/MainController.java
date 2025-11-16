@@ -233,7 +233,7 @@ public class MainController implements API {
                 containerChangeListeners.add(searchInConstantPoolsController);
                 preferencesController = new PreferencesController(configuration, mainFrame, PreferencesPanelService.getInstance().getProviders());
                 selectLocationController = new SelectLocationController(MainController.this, mainFrame);
-                aboutController = new AboutController(mainFrame, Boolean.parseBoolean(getPreferences().getOrDefault("UIMainWindowPreferencesProvider.darkMode", "false")));
+                aboutController = new AboutController(mainFrame, isDarkMode());
                 sourceLoaderService = new SourceLoaderService();
                 // Add listeners
                 mainFrame.addComponentListener(new MainFrameListener(configuration));
@@ -510,7 +510,7 @@ public class MainController implements API {
         preferencesController.show(() -> {
             checkPreferencesChange(currentPage);
             mainView.preferencesChanged(getPreferences());
-            if (Boolean.parseBoolean(getPreferences().getOrDefault("UIMainWindowPreferencesProvider.darkMode", "false"))) {
+            if (isDarkMode()) {
                 if (PlatformService.getInstance().isMac()) {
                     configuration.setLookAndFeel("com.formdev.flatlaf.themes.FlatMacDarkLaf");
                 } else {
@@ -1192,5 +1192,10 @@ public class MainController implements API {
     @Override
     public void repaint() {
         mainView.repaint();
+    }
+
+    @Override
+    public boolean isDarkMode() {
+        return Boolean.parseBoolean(getPreferences().getOrDefault("UIMainWindowPreferencesProvider.darkMode", "false"));
     }
 }

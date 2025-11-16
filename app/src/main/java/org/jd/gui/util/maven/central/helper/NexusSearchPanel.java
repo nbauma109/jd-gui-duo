@@ -33,6 +33,7 @@ import org.oxbow.swingbits.list.CheckListRenderer;
 import org.oxbow.swingbits.table.filter.TableRowFilterSupport;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -160,27 +161,28 @@ public final class NexusSearchPanel extends JPanel {
         resultTable = new JXTable(tableModel);
         resultTable.setFillsViewportHeight(true);
         resultTable.setColumnControlVisible(true);
-        resultTable.setHighlighters(HighlighterFactory.createSimpleStriping());
+        if (api.isDarkMode()) {
+            resultTable.setHighlighters(HighlighterFactory.createAlternateStriping(new Color(0x1E1E1E), new Color(0x2A2A2A)));
+        } else {
+            resultTable.setHighlighters(HighlighterFactory.createSimpleStriping());
+        }
         TableRowFilterSupport.forTable(resultTable)
                 .actions(true)
                 .searchable(true)
                 .checkListRenderer(new CheckListRenderer())
                 .apply();
 
-        resultTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                if (e.getValueIsAdjusting()) {
-                    return;
-                }
-                int viewRow = resultTable.getSelectedRow();
-                if (viewRow >= 0) {
-                    int modelRow = resultTable.convertRowIndexToModel(viewRow);
-                    NexusArtifact artifact = tableModel.getArtifactAt(modelRow);
-                    updateSnippets(artifact);
-                } else {
-                    updateSnippets(null);
-                }
+        resultTable.getSelectionModel().addListSelectionListener(e -> {
+            if (e.getValueIsAdjusting()) {
+                return;
+            }
+            int viewRow = resultTable.getSelectedRow();
+            if (viewRow >= 0) {
+                int modelRow = resultTable.convertRowIndexToModel(viewRow);
+                NexusArtifact artifact = tableModel.getArtifactAt(modelRow);
+                updateSnippets(artifact);
+            } else {
+                updateSnippets(null);
             }
         });
 

@@ -6,9 +6,9 @@
 
     - Primitive types (DATA_TYPE) = emerald green
     - Annotations (ANNOTATION) = emerald green
-    - All identifiers (IDENTIFIER: class names, locals, constants, object types) = sky blue
-    - Method names (FUNCTION) = yellow
-    - Brackets and parentheses (SEPARATOR) = magenta
+    - All identifiers (IDENTIFIER: class names, locals, constants, object types) = Soft Blue Gray A9B7C6
+    - Method names (FUNCTION) = Soft Blue Gray A9B7C6
+    - Brackets and parentheses (SEPARATOR) = Soft Blue Gray A9B7C6
     - Keywords (RESERVED_WORD) = Visual Studio Code blue
 -->
 
@@ -45,7 +45,7 @@
     <tokenStyles>
 
         <!-- All identifiers: class names, locals, constants, object type names -->
-        <style token="IDENTIFIER" fg="9cdcfe" />
+        <style token="IDENTIFIER" fg="A9B7C6" />
 
         <!-- Keywords (for example public, static, return, class) -->
         <style token="RESERVED_WORD" fg="569cd6" bold="true" />
@@ -62,7 +62,7 @@
         <style token="COMMENT_MARKUP" fg="6a9955" />
 
         <!-- Method and function names -->
-        <style token="FUNCTION" fg="dcdcaa" />
+        <style token="FUNCTION" fg="A9B7C6" />
 
         <!-- Primitive and object data types that token makers tag as DATA_TYPE -->
         <style token="DATA_TYPE" fg="4ec9b0" bold="true" />
@@ -93,10 +93,10 @@
         <style token="MARKUP_ENTITY_REFERENCE" fg="4ec9b0" />
 
         <!-- Operators -->
-        <style token="OPERATOR" fg="d4d4d4" />
+        <style token="OPERATOR" fg="A9B7C6" />
 
         <!-- Braces, parentheses, brackets, commas, semicolons -->
-        <style token="SEPARATOR" fg="c586c0" />
+        <style token="SEPARATOR" fg="A9B7C6" />
 
         <!-- Preprocessor tokens -->
         <style token="PREPROCESSOR" fg="c586c0" />
