@@ -145,7 +145,7 @@
       <dependency>
         <groupId>net.sourceforge.plantuml</groupId>
         <artifactId>plantuml-mit</artifactId>
-        <version>1.2023.7</version>
+        <version>1.2023.9</version>
       </dependency>
       <dependency>
         <groupId>org.junit.jupiter</groupId>
