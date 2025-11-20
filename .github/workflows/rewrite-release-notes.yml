@@ -58,7 +58,7 @@ jobs:
 
     steps:
       - name: Checkout repository (contains Groovy script)
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
