@@ -1,0 +1,160 @@
+name: Spellcheck Autofix (typos only, first suggestion)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * 1"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  autofix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      # Pass 1: apply all unambiguous fixes
+      - name: Pass 1 — Apply typos safe fixes
+        uses: crate-ci/typos@v1
+        continue-on-error: true
+        with:
+          files: .
+          write_changes: true
+
+      - name: Show changes after Pass 1
+        run: |
+          git diff --stat || true
+
+      # Pass 2: apply first suggestion for remaining ambiguous cases
+      - name: Pass 2 — Apply first suggestion for remaining typos (bash only)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # typos-action leaves a ./typos binary in the workspace. Fall back to PATH if needed.
+          TYPOS_BIN="./typos"
+          if [ ! -x "$TYPOS_BIN" ]; then
+            TYPOS_BIN="typos"
+          fi
+
+          # Re-run typos to collect remaining diagnostics.
+          set +e
+          "$TYPOS_BIN" . > typos.out 2>&1
+          EXIT_CODE=$?
+          set -e
+          echo "typos exit code: $EXIT_CODE (ignored; we parse output)"
+
+          # Extract: path<TAB>line<TAB>col<TAB>typo<TAB>first_fix
+          # We rely on typos' human output, which looks like:
+          # error: `Lable` should be `Label`, `Ladle`, ...
+          #   ╭▸ ./path/file:57:30
+          awk '
+            BEGIN {
+              pending = 0
+              typo = ""
+              fix = ""
+            }
+            /^error: `[^`]+` should be `[^`]+`/ {
+              if (match($0, /^error: `([^`]+)` should be `([^`]+)`/, m)) {
+                typo = m[1]
+                fix  = m[2]   # first suggestion only
+                pending = 1
+              }
+              next
+            }
+            pending == 1 {
+              # Match location line containing the box-drawing arrow.
+              # Example: "╭▸ ./file:318:14"
+              if (match($0, /╭▸[[:space:]]+([^:]+):([0-9]+):([0-9]+)/, m2)) {
+                path = m2[1]
+                line = m2[2]
+                col  = m2[3]
+                printf "%s\t%s\t%s\t%s\t%s\n", path, line, col, typo, fix
+                pending = 0
+              }
+            }
+          ' typos.out > issues.tsv || true
+
+          if [ ! -s issues.tsv ]; then
+            echo "No remaining ambiguous typos."
+            exit 0
+          fi
+
+          # Sort by file, then line desc, col desc so we patch bottom-up per file.
+          sort -k1,1 -k2,2nr -k3,3nr issues.tsv > issues.sorted.tsv
+
+          apply_issue() {
+            local file="$1"
+            local line_no="$2"
+            local col_no="$3"
+            local typo="$4"
+            local fix="$5"
+
+            if [ ! -f "$file" ]; then
+              return 0
+            fi
+
+            local tmp
+            tmp="$(mktemp)"
+
+            awk -v ln="$line_no" -v col="$col_no" -v t="$typo" -v f="$fix" '
+              function replace_at_column(s, col0, t, f,    start, subline, pos, abspos, pre, post) {
+                start = col0
+                if (start < 0) {
+                  start = 0
+                }
+                subline = substr(s, start + 1)
+                pos = index(subline, t)
+                if (pos > 0) {
+                  abspos = start + pos
+                } else {
+                  abspos = index(s, t)
+                }
+                if (abspos <= 0) {
+                  return s
+                }
+                pre  = substr(s, 1, abspos - 1)
+                post = substr(s, abspos + length(t))
+                return pre f post
+              }
+
+              NR == ln {
+                col0 = col - 1
+                $0 = replace_at_column($0, col0, t, f)
+              }
+              { print }
+            ' "$file" > "$tmp"
+
+            mv "$tmp" "$file"
+          }
+
+          while IFS=$'\t' read -r file line col typo fix; do
+            echo "Applying first suggestion: $typo -> $fix at $file:$line:$col"
+            apply_issue "$file" "$line" "$col" "$typo" "$fix"
+          done < issues.sorted.tsv
+      - name: Clean up files
+        run: |
+          rm -f issues.sorted.tsv issues.tsv typos typos.out
+
+      - name: Show final diff
+        run: |
+          git diff --stat || true
+
+      - name: Pass 3 — Create pull request if changes exist
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          commit-message: "Fix typos"
+          title: "Fix typos"
+          body: |
+            Automated typo fixes using typos only.
+            Pass 1: typos safe auto-fixes (write mode)
+            Pass 2: first-suggestion fixes for remaining ambiguous cases (bash parser)
+          branch: "ci/typo-fixes"
+          delete-branch: true
