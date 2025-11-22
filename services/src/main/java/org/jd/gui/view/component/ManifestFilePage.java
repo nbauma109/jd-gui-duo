@@ -93,7 +93,7 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
 
         startLineIndex = text.indexOf("Premain-Class:");
         if (startLineIndex != -1) {
-            // Example: Premain-Class: packge.JavaAgent
+            // Example: Premain-Class: package.JavaAgent
             int startIndex = skipSeparators(text, startLineIndex + "Premain-Class:".length());
             int endIndex = searchEndIndexOfValue(text, startLineIndex, startIndex);
             String typeName = text.substring(startIndex, endIndex);

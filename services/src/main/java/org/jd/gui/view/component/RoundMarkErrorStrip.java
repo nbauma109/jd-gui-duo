@@ -376,7 +376,7 @@ public class RoundMarkErrorStrip extends JComponent {
                 m.addMouseListener(listener);
                 markerMap.put(key, m);
                 add(m);
-            } else if (!m.containsMarkedOccurence()) {
+            } else if (!m.containsMarkedOccurrence()) {
                 m.addNotice(notice);
             }
         }
@@ -692,7 +692,7 @@ public class RoundMarkErrorStrip extends JComponent {
             notices.add(notice);
         }
 
-        public boolean containsMarkedOccurence() {
+        public boolean containsMarkedOccurrence() {
             boolean result = false;
             for (int i=0; i<notices.size(); i++) {
                 if (notices.get(i) instanceof MarkedOccurrenceNotice) {
