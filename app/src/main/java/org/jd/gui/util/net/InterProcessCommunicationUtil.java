@@ -41,12 +41,12 @@ public final class InterProcessCommunicationUtil {
             synchronized (listener) {
                 while (true) {
                     try (Socket socket = listener.accept();
-                         ObjectInputStream ois = new ObjectInputStream(socket.getInputStream())) {
+                         ObjectInputStream is = new ObjectInputStream(socket.getInputStream())) {
                         // Receive args from another JD-GUI instance
-                        int length = ois.readInt();
+                        int length = is.readInt();
                         String[] args = new String[length];
                         for (int i = 0; i < args.length; i++) {
-                            args[i] = ois.readUTF();
+                            args[i] = is.readUTF();
                         }
                         consumer.accept(args);
                     } catch (IOException e) {

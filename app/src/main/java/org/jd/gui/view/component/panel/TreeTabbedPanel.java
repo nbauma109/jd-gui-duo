@@ -85,9 +85,9 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
             @Override
             public void treeExpanded(TreeExpansionEvent e) {
                 TreeNode node = (TreeNode)e.getPath().getLastPathComponent();
-                if (node instanceof TreeNodeExpandable tne) {
+                if (node instanceof TreeNodeExpandable the) {
                     int oldHashCode = createHashCode(node.children());
-                    tne.populateTreeNode(api);
+                    the.populateTreeNode(api);
                     int newHashCode = createHashCode(node.children());
                     if (oldHashCode != newHashCode) {
                         ((DefaultTreeModel)tree.getModel()).reload(node);
@@ -292,8 +292,8 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
 
     @SuppressWarnings("unchecked")
     protected DefaultMutableTreeNode searchTreeNode(URI uri, DefaultMutableTreeNode node) {
-        if (node instanceof TreeNodeExpandable tne) {
-            tne.populateTreeNode(api);
+        if (node instanceof TreeNodeExpandable the) {
+            the.populateTreeNode(api);
         }
 
         String u = uri.toString();

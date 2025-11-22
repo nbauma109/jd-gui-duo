@@ -376,7 +376,7 @@ public class RoundMarkErrorStrip extends JComponent {
                 m.addMouseListener(listener);
                 markerMap.put(key, m);
                 add(m);
-            } else if (!m.containsMarkedOccurence()) {
+            } else if (!m.containsMarkedOccurrence()) {
                 m.addNotice(notice);
             }
         }
@@ -692,7 +692,7 @@ public class RoundMarkErrorStrip extends JComponent {
             notices.add(notice);
         }
 
-        public boolean containsMarkedOccurence() {
+        public boolean containsMarkedOccurrence() {
             boolean result = false;
             for (int i=0; i<notices.size(); i++) {
                 if (notices.get(i) instanceof MarkedOccurrenceNotice) {
@@ -733,11 +733,11 @@ public class RoundMarkErrorStrip extends JComponent {
                 StringBuilder sb = new StringBuilder("<html>");
                 sb.append(msg.getString("MultipleMarkers"));
                 sb.append("<br>");
-                ParserNotice pn;
+                ParserNotice on;
                 for (int i=0; i<notices.size(); i++) {
-                    pn = notices.get(i);
+                    on = notices.get(i);
                     sb.append("&nbsp;&nbsp;&nbsp;- ");
-                    sb.append(pn.getMessage());
+                    sb.append(on.getMessage());
                     sb.append("<br>");
                 }
                 text = sb.toString();
@@ -747,15 +747,15 @@ public class RoundMarkErrorStrip extends JComponent {
         }
 
         protected void mouseClicked() {
-            ParserNotice pn = notices.get(0);
-            int offs = pn.getOffset();
-            int len = pn.getLength();
+            ParserNotice on = notices.get(0);
+            int offs = on.getOffset();
+            int len = on.getLength();
             if (offs>-1 && len>-1) { // These values are optional
                 textArea.setSelectionStart(offs);
                 textArea.setSelectionEnd(offs+len);
             }
             else {
-                int line = pn.getLine();
+                int line = on.getLine();
                 try {
                     offs = textArea.getLineStartOffset(line);
                     textArea.setCaretPosition(offs);

@@ -151,7 +151,7 @@
 			<key>WorkingDirectory</key>				<string>\$JAVAROOT</string>
 			<key>Properties</key>
 			<dict>
-				<key>apple.laf.useScreenMenuBar</key>
+				<key>apple.kaf.useScreenMenuBar</key>
 				<string>true</string>
 			</dict>
 			<key>VMOptions</key>					<string>-Xms512m</string>

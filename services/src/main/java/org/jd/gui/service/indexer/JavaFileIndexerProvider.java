@@ -178,8 +178,8 @@ public class JavaFileIndexerProvider extends AbstractIndexerProvider {
                 @SuppressWarnings("unchecked")
                 List<Type> superInterfaces = typeDeclaration.superInterfaceTypes();
                 String superQualifiedInterfaceName;
-                for (Type superInteface : superInterfaces) {
-                    superQualifiedInterfaceName = resolveInternalTypeName(superInteface);
+                for (Type superInterface : superInterfaces) {
+                    superQualifiedInterfaceName = resolveInternalTypeName(superInterface);
                     if (superQualifiedInterfaceName.charAt(0) != '*') {
                         superInternalTypeNameSet.add(superQualifiedInterfaceName);
                     }

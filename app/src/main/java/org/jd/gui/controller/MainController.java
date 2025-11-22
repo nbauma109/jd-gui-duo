@@ -512,13 +512,13 @@ public class MainController implements API {
             mainView.preferencesChanged(getPreferences());
             if (isDarkMode()) {
                 if (PlatformService.getInstance().isMac()) {
-                    configuration.setLookAndFeel("com.formdev.flatlaf.themes.FlatMacDarkLaf");
+                    configuration.setLookAndFeel("com.formdev.flatlaf.themes.FlatMacDarkKaf");
                 } else {
                     configuration.setLookAndFeel("com.formdev.flatlaf.intellijthemes.FlatOneDarkIJTheme");
                 }
             } else {
                 if (PlatformService.getInstance().isMac()) {
-                    configuration.setLookAndFeel("com.formdev.flatlaf.themes.FlatMacLightLaf");
+                    configuration.setLookAndFeel("com.formdev.flatlaf.themes.FlatMacLightKaf");
                 } else {
                     configuration.setLookAndFeel(ThemeUtil.getDefaultLookAndFeel());
                 }

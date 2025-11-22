@@ -15,7 +15,7 @@ import javax.swing.Icon;
 
 public class OpenTypeListCellBean {
     private final String label;
-    private final String packag;
+    private final String package;
     private final Icon icon;
     private final Collection<Container.Entry> entries;
     private final String typeName;
@@ -24,9 +24,9 @@ public class OpenTypeListCellBean {
         this(label, null, null, entries, typeName);
     }
 
-    public OpenTypeListCellBean(String label, String packag, Icon icon, Collection<Container.Entry> entries, String typeName) {
+    public OpenTypeListCellBean(String label, String package, Icon icon, Collection<Container.Entry> entries, String typeName) {
         this.label = label;
-        this.packag = packag;
+        this.package = package;
         this.icon = icon;
         this.entries = entries;
         this.typeName = typeName;
@@ -44,8 +44,8 @@ public class OpenTypeListCellBean {
         return label;
     }
 
-    public String getPackag() {
-        return packag;
+    public String getPackage() {
+        return package;
     }
 
     public Icon getIcon() {

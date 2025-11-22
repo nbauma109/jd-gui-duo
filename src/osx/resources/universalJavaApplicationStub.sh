@@ -200,7 +200,7 @@ else
 
 	# read the JVM Options
 	JVMOptions=`/usr/libexec/PlistBuddy -c "print :JVMOptions" "${InfoPlistFile}" 2> /dev/null | grep " -" | tr -d '\n' | sed 's/  */ /g' | xargs`
-	# replace occurances of $APP_ROOT with it's content
+	# replace occurrences of $APP_ROOT with it's content
 	JVMOptions=`eval "echo ${JVMOptions}"`
 
 	JVMClassPath="${JavaFolder}/*"
@@ -210,7 +210,7 @@ else
 
 	# read the JVM Arguments
 	JVMArguments=`/usr/libexec/PlistBuddy -c "print :JVMArguments" "${InfoPlistFile}" 2> /dev/null | tr -d '\n' | sed -E 's/Array \{ *(.*) *\}/\1/g' | sed 's/  */ /g' | xargs`
-	# replace occurances of $APP_ROOT with it's content
+	# replace occurrences of $APP_ROOT with it's content
 	JVMArguments=`eval "echo ${JVMArguments}"`
 fi
 

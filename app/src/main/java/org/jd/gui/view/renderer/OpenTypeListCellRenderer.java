@@ -69,7 +69,7 @@ public class OpenTypeListCellRenderer implements ListCellRenderer<OpenTypeListCe
             label.setText(value.getLabel());
             label.setIcon(value.getIcon());
 
-            info.setText(value.getPackag() != null ? " - "+value.getPackag() : "");
+            info.setText(value.getPackage() != null ? " - "+value.getPackage() : "");
 
             if (selected) {
                 label.setForeground(textSelectionColor);
