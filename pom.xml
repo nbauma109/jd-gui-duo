@@ -160,7 +160,7 @@
     <maven.compiler.release>25</maven.compiler.release>
     <main.class>org.jd.gui.App</main.class>
     <project.scm.id>github.com</project.scm.id>
-    <flatlaf.version>3.6.2</flatlaf.version>
+    <flatlaf.version>3.7</flatlaf.version>
     <!-- ======================================================================
          Transformer API — Unified Transformer Access Layer
          ======================================================================
