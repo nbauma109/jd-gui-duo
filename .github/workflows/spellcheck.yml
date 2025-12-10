@@ -147,7 +147,7 @@ jobs:
           git diff --stat || true
 
       - name: Pass 3 — Create pull request if changes exist
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Fix typos"
