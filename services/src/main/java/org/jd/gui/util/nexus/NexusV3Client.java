@@ -68,6 +68,9 @@ import jakarta.json.bind.JsonbBuilder;
  */
 final class NexusV3Client extends AbstractNexusClient implements NexusSearch {
 
+    private static final int READ_TIMEOUT = 30000;
+    private static final int CONNECTION_TIMEOUT = 30000;
+
     NexusV3Client(NexusConfig config) {
         super(config);
     }
@@ -76,7 +79,7 @@ final class NexusV3Client extends AbstractNexusClient implements NexusSearch {
     static boolean probe(NexusConfig cfg) {
         try {
             String url = trimTrailingSlash(cfg.baseUrl) + "/service/rest/v1/status";
-            String body = new NexusV3Client(cfg).get(url, 4000, 6000);
+            String body = new NexusV3Client(cfg).get(url, CONNECTION_TIMEOUT, READ_TIMEOUT);
             return body != null;
         } catch (Exception ignored) {
             return false;
@@ -86,14 +89,14 @@ final class NexusV3Client extends AbstractNexusClient implements NexusSearch {
     @Override
     public NexusSearchResult searchByKeyword(String keyword, int pageNo) throws Exception {
         String path = "/service/rest/v1/search?q=" + enc(keyword);
-        String body = get(buildUrl(config.baseUrl, path), 8000, 15000);
+        String body = get(buildUrl(config.baseUrl, path), CONNECTION_TIMEOUT, READ_TIMEOUT);
         return parseComponents(body);
     }
 
     @Override
     public NexusSearchResult searchBySha1(String sha1, int pageNo) throws Exception {
         String path = "/service/rest/v1/search/assets?sha1=" + enc(sha1);
-        String body = get(buildUrl(config.baseUrl, path), 8000, 15000);
+        String body = get(buildUrl(config.baseUrl, path), CONNECTION_TIMEOUT, READ_TIMEOUT);
         return parseAssets(body);
     }
 
@@ -120,7 +123,7 @@ final class NexusV3Client extends AbstractNexusClient implements NexusSearch {
             path.append("version=").append(enc(version.trim()));
         }
 
-        String body = get(buildUrl(config.baseUrl, path.toString()), 8000, 15000);
+        String body = get(buildUrl(config.baseUrl, path.toString()), CONNECTION_TIMEOUT, READ_TIMEOUT);
         NexusSearchResult nexusSearchResult = parseComponents(body);
         if (classifier != null) {
         	nexusSearchResult.artifacts().removeIf(a -> !classifier.equals(a.classifier()));
