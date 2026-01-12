@@ -80,7 +80,7 @@
       <dependency>
         <groupId>org.bidib.com.github.markusbernhardt</groupId>
         <artifactId>proxy-vole</artifactId>
-        <version>1.1.7</version>
+        <version>1.1.8</version>
       </dependency>
       <dependency>
         <groupId>org.eclipse</groupId>
