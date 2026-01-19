@@ -16,14 +16,18 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class ASTParserFactory {
 
-    private static final String DEFAULT_JDK_VERSION = JavaCore.VERSION_1_8;
+    private static final Pattern BUILD_JDK_VERSION = Pattern.compile("^(?:1\\.(\\d+)|(\\d+))(?:\\D.*)?$");
+    private static final String DEFAULT_JDK_VERSION = JavaCore.VERSION_25;
 
     private static final ASTParserFactory INSTANCE = new ASTParserFactory(false, false, false);
     private static final ASTParserFactory BINDING_INSTANCE = new ASTParserFactory(true, true, true);
@@ -116,58 +120,24 @@ public final class ASTParserFactory {
         return options;
     }
 
-    private static String resolveJDKVersion(String longVersion) {
-        if (longVersion.startsWith(JavaCore.VERSION_17)) {
-            return JavaCore.VERSION_17;
+    static String resolveJDKVersion(String longVersion) {
+        return Optional.ofNullable(longVersion)
+                .map(String::trim)
+                .filter(v -> !v.isEmpty())
+                .map(ASTParserFactory::resolveWithSingleRegex)
+                .orElse(DEFAULT_JDK_VERSION);
+    }
+
+    private static String resolveWithSingleRegex(String buildJdk) {
+        Matcher matcher = BUILD_JDK_VERSION.matcher(buildJdk);
+        if (!matcher.matches()) {
+            return DEFAULT_JDK_VERSION;
         }
-        if (longVersion.startsWith(JavaCore.VERSION_16)) {
-            return JavaCore.VERSION_16;
+
+        Optional<String> legacyMinor = Optional.ofNullable(matcher.group(1));
+        if (legacyMinor.isPresent()) {
+            return "1." + legacyMinor.get();
         }
-        if (longVersion.startsWith(JavaCore.VERSION_15)) {
-            return JavaCore.VERSION_15;
-        }
-        if (longVersion.startsWith(JavaCore.VERSION_14)) {
-            return JavaCore.VERSION_14;
-        }
-        if (longVersion.startsWith(JavaCore.VERSION_13)) {
-            return JavaCore.VERSION_13;
-        }
-        if (longVersion.startsWith(JavaCore.VERSION_12)) {
-            return JavaCore.VERSION_12;
-        }
-        if (longVersion.startsWith(JavaCore.VERSION_11)) {
-            return JavaCore.VERSION_11;
-        }
-        if (longVersion.startsWith(JavaCore.VERSION_10)) {
-            return JavaCore.VERSION_10;
-        }
-        if (longVersion.startsWith(JavaCore.VERSION_9)) {
-            return JavaCore.VERSION_9;
-        }
-        if (longVersion.startsWith(JavaCore.VERSION_1_8)) {
-            return JavaCore.VERSION_1_8;
-        }
-        if (longVersion.startsWith(JavaCore.VERSION_1_7)) {
-            return JavaCore.VERSION_1_7;
-        }
-        if (longVersion.startsWith(JavaCore.VERSION_1_6)) {
-            return JavaCore.VERSION_1_6;
-        }
-        if (longVersion.startsWith(JavaCore.VERSION_1_5)) {
-            return JavaCore.VERSION_1_5;
-        }
-        if (longVersion.startsWith(JavaCore.VERSION_1_4)) {
-            return JavaCore.VERSION_1_4;
-        }
-        if (longVersion.startsWith(JavaCore.VERSION_1_3)) {
-            return JavaCore.VERSION_1_3;
-        }
-        if (longVersion.startsWith(JavaCore.VERSION_1_2)) {
-            return JavaCore.VERSION_1_2;
-        }
-        if (longVersion.startsWith(JavaCore.VERSION_1_1)) {
-            return JavaCore.VERSION_1_1;
-        }
-        return DEFAULT_JDK_VERSION;
+        return matcher.group(2);
     }
 }
