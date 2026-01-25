@@ -29,7 +29,6 @@ import org.oxbow.swingbits.list.CheckListRenderer;
 import org.oxbow.swingbits.table.filter.TableRowFilterSupport;
 
 import com.heliosdecompiler.transformerapi.StandardTransformers;
-import com.heliosdecompiler.transformerapi.TransformationException;
 import com.heliosdecompiler.transformerapi.common.Loader;
 
 import java.awt.BorderLayout;
@@ -218,7 +217,7 @@ public class CompareWindow {
     }
 
     protected String getContent(File file, String entryPath)
-            throws IOException, TransformationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+            throws IOException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         if (entryPath.endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
             Map<String, String> preferences = api.getPreferences();
             preferences.put(Preferences.WRITE_LINE_NUMBERS, "false");

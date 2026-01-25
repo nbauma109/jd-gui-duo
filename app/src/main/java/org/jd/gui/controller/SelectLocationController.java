@@ -24,7 +24,6 @@ import org.jd.gui.view.SelectLocationView;
 import org.netbeans.modules.editor.java.JavaKit;
 
 import com.heliosdecompiler.transformerapi.StandardTransformers;
-import com.heliosdecompiler.transformerapi.TransformationException;
 import com.heliosdecompiler.transformerapi.common.Loader;
 
 import java.awt.Dimension;
@@ -132,7 +131,7 @@ public class SelectLocationController {
         }
     }
 
-    private String getContent(Container.Entry entry) throws IOException, TransformationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    private String getContent(Container.Entry entry) throws IOException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         if (entry.getPath().endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
             Map<String, String> preferences = api.getPreferences();
             preferences.put(Preferences.WRITE_LINE_NUMBERS, "false");
