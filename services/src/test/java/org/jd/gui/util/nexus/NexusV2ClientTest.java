@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Integration tests for NexusV2Client against the public Nexus 2 instance at
- * https://nexus.xwiki.org/nexus.
+ * https://repository.apache.org.
  *
  * These tests verify:
  *   - factory detection of version 2
@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Tag("integration")
 class NexusV2ClientTest {
 
-    private static final String NEXUS2_BASE = "https://nexus.xwiki.org/nexus";
+    private static final String NEXUS2_BASE = "https://repository.apache.org";
 
     private static final String COMMONS_LANG3_GROUP = "org.apache.commons";
     private static final String COMMONS_LANG3_ARTIFACT = "commons-lang3";
@@ -76,7 +76,7 @@ class NexusV2ClientTest {
     void keywordSearch_returnsArtifactsWithApiDownloadLinks() throws Exception {
         NexusV2Client client = newClient();
 
-        NexusSearchResult result = client.searchByKeyword("xwiki", 0);
+        NexusSearchResult result = client.searchByKeyword("commons-lang3", 0);
 
         assertNotNull(result);
         List<NexusArtifact> artifacts = result.artifacts();
