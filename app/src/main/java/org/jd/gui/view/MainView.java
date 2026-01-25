@@ -142,6 +142,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             ActionListener jdGuiIssuesActionListener,
             ActionListener jdCoreIssuesActionListener,
             ActionListener preferencesActionListener,
+            ActionListener securedPreferencesActionListener,
             ActionListener mavenCentralHelperActionListener,
             ActionListener aboutActionListener,
             Runnable panelClosedCallback,
@@ -259,6 +260,8 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             Action jdCoreIssuesActionAction = newAction("JD-Core issues", browser, "Open JD-Core issues page", jdCoreIssuesActionListener);
             Action preferencesAction = newAction("Preferences...", newImageIcon("/org/jd/gui/images/preferences.png"), true, "Open the preferences panel",
                     preferencesActionListener);
+            Action securedPreferencesAction = newAction("Secured Preferences...", newImageIcon("/org/jd/gui/images/secured_preferences.png"), true, "Open the secured preferences panel",
+                    securedPreferencesActionListener);
             Action mavenCentralHelperAction = newAction("Search maven central...", newImageIcon("/org/jd/gui/images/search_src.png"), true, "Search maven central",
             		mavenCentralHelperActionListener);
             Action aboutAction = newAction("About...", true, "About JD-GUI", aboutActionListener);
@@ -311,6 +314,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
                 menu.addSeparator();
             }
             menu.add(preferencesAction).setAccelerator(KeyStroke.getKeyStroke('P', menuShortcutKeyMask | InputEvent.SHIFT_DOWN_MASK));
+            menu.add(securedPreferencesAction);
             menu.add(mavenCentralHelperAction);
             menu.addSeparator();
             menu.add(aboutAction).setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));

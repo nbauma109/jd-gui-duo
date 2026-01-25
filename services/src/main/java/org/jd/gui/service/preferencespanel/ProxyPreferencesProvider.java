@@ -18,7 +18,7 @@ package org.jd.gui.service.preferencespanel;
 
 import org.jd.gui.security.SecureSession;
 import org.jd.gui.service.preferencespanel.secure.SecurePreferences;
-import org.jd.gui.spi.PreferencesPanel;
+import org.jd.gui.spi.SecuredPreferencesPanel;
 import org.jd.gui.util.ImageUtil;
 
 import com.github.markusbernhardt.proxy.ProxySearch;
@@ -82,7 +82,7 @@ import javax.swing.event.DocumentListener;
  *   automatically only when we need to decrypt or encrypt credentials.
  * - We trigger validation on each input change and provide field-specific feedback.
  */
-public final class ProxyPreferencesProvider extends JPanel implements PreferencesPanel, ActionListener, DocumentListener {
+public final class ProxyPreferencesProvider extends JPanel implements SecuredPreferencesPanel, ActionListener, DocumentListener {
 
     private static final long serialVersionUID = 1L;
 

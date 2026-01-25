@@ -48,7 +48,7 @@ import javax.swing.border.TitledBorder;
 
 public class PreferencesView implements PreferencesPanel.PreferencesPanelChangeListener {
     private final Map<String, String> preferences;
-    private final Collection<PreferencesPanel> panels;
+    private final Collection<? extends PreferencesPanel> panels;
     private final Map<PreferencesPanel, Boolean> valids = new HashMap<>();
 
     private JDialog preferencesDialog;
@@ -56,12 +56,12 @@ public class PreferencesView implements PreferencesPanel.PreferencesPanelChangeL
 
     private Runnable okCallback;
 
-    public PreferencesView(Configuration configuration, JFrame mainFrame, Collection<PreferencesPanel> panels) {
+    public PreferencesView(Configuration configuration, JFrame mainFrame, Collection<? extends PreferencesPanel> panels, String dialogTitle) {
         this.preferences = configuration.getPreferences();
         this.panels = panels;
         // Build GUI
         SwingUtil.invokeLater(() -> {
-            preferencesDialog = new JDialog(mainFrame, "Preferences", false);
+            preferencesDialog = new JDialog(mainFrame, dialogTitle, false);
 
             JPanel panel = new JPanel();
             panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));

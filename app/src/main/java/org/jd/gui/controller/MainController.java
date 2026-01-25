@@ -33,6 +33,7 @@ import org.jd.gui.service.indexer.IndexerService;
 import org.jd.gui.service.mainpanel.PanelFactoryService;
 import org.jd.gui.service.pastehandler.PasteHandlerService;
 import org.jd.gui.service.preferencespanel.PreferencesPanelService;
+import org.jd.gui.service.preferencespanel.SecuredPreferencesPanelService;
 import org.jd.gui.service.sourceloader.Artifact;
 import org.jd.gui.service.sourceloader.MavenOrgSourceLoaderProvider;
 import org.jd.gui.service.sourceloader.SourceLoaderService;
@@ -145,6 +146,7 @@ public class MainController implements API {
     private OpenTypeController openTypeController;
     private OpenTypeHierarchyController openTypeHierarchyController;
     private PreferencesController preferencesController;
+    private SecuredPreferencesController securedPreferencesController;
     private SearchInConstantPoolsController searchInConstantPoolsController;
     private SaveAllSourcesController saveAllSourcesController;
     private SelectLocationController selectLocationController;
@@ -189,6 +191,7 @@ public class MainController implements API {
                 e -> onJdGuiIssues(),
                 e -> onJdCoreIssues(),
                 e -> onPreferences(),
+                e -> onSecuredPreferences(),
                 e -> onMavenCentralSearch(),
                 e -> onAbout(),
                 this::panelClosed,
@@ -232,6 +235,7 @@ public class MainController implements API {
                 searchInConstantPoolsController = new SearchInConstantPoolsController(MainController.this, executor, mainFrame);
                 containerChangeListeners.add(searchInConstantPoolsController);
                 preferencesController = new PreferencesController(configuration, mainFrame, PreferencesPanelService.getInstance().getProviders());
+                securedPreferencesController = new SecuredPreferencesController(configuration, mainFrame, SecuredPreferencesPanelService.getInstance().getProviders());
                 selectLocationController = new SelectLocationController(MainController.this, mainFrame);
                 aboutController = new AboutController(mainFrame, isDarkMode());
                 sourceLoaderService = new SourceLoaderService();
@@ -523,6 +527,14 @@ public class MainController implements API {
                     configuration.setLookAndFeel(ThemeUtil.getDefaultLookAndFeel());
                 }
             }
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void onSecuredPreferences() {
+        securedPreferencesController.show(() -> {
+            checkPreferencesChange(currentPage);
+            mainView.preferencesChanged(getPreferences());
         });
     }
 

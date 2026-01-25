@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2026 GPLv3
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -8,19 +8,19 @@
 package org.jd.gui.controller;
 
 import org.jd.gui.model.configuration.Configuration;
-import org.jd.gui.spi.PreferencesPanel;
-import org.jd.gui.view.PreferencesView;
+import org.jd.gui.spi.SecuredPreferencesPanel;
+import org.jd.gui.view.SecuredPreferencesView;
 
 import java.util.Collection;
 
 import javax.swing.JFrame;
 
-public class PreferencesController {
-    private final PreferencesView preferencesView;
+public class SecuredPreferencesController {
+    private final SecuredPreferencesView preferencesView;
 
-    public PreferencesController(Configuration configuration, JFrame mainFrame, Collection<PreferencesPanel> panels) {
+    public SecuredPreferencesController(Configuration configuration, JFrame mainFrame, Collection<SecuredPreferencesPanel> panels) {
         // Create UI
-        preferencesView = new PreferencesView(configuration, mainFrame, panels, "Preferences");
+        preferencesView = new SecuredPreferencesView(configuration, mainFrame, panels);
     }
 
     public void show(Runnable okCallback) {

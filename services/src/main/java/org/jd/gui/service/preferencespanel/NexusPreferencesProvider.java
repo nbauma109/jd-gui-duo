@@ -18,7 +18,7 @@ package org.jd.gui.service.preferencespanel;
 
 import org.jd.gui.security.SecureSession;
 import org.jd.gui.service.preferencespanel.secure.SecurePreferences;
-import org.jd.gui.spi.PreferencesPanel;
+import org.jd.gui.spi.SecuredPreferencesPanel;
 import org.jd.gui.util.ImageUtil;
 
 import javax.swing.JLabel;
@@ -60,7 +60,7 @@ import java.util.Arrays;
  * - Maintain visual, behavioral, and architectural parity with the proxy panel.
  * - Keep the panel compact, similar to the original JD-GUI preference panels.
  */
-public final class NexusPreferencesProvider extends JPanel implements PreferencesPanel, ActionListener, DocumentListener {
+public final class NexusPreferencesProvider extends JPanel implements SecuredPreferencesPanel, ActionListener, DocumentListener {
 
     private static final long serialVersionUID = 1L;
 
