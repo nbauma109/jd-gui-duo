@@ -178,7 +178,7 @@
          • JD-Core V1
          • JADX
        ====================================================================== -->
-    <transformer-api.version>4.1.3</transformer-api.version>
+    <transformer-api.version>4.1.4</transformer-api.version>
     <!-- ======================================================================
          NetBeans Visual Diff Standalone — Diff Component for Swing
          ======================================================================
