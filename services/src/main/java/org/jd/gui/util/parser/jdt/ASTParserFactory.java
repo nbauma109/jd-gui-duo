@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -66,7 +67,7 @@ public final class ASTParserFactory {
         parser.setResolveBindings(resolveBindings);
         parser.setBindingsRecovery(bindingRecovery);
         parser.setStatementsRecovery(statementRecovery);
-        List<String> jdkClasspath = ClasspathUtil.getJDKClasspath();
+        List<String> jdkClasspath = getJDKClasspath();
         String[] classpathEntries = ClasspathUtil.createClasspathEntries(jarURI, jdkClasspath);
         boolean includeRunningVMBootclasspath = jdkClasspath.isEmpty();
         if (unitName.endsWith(".java")) {
@@ -89,6 +90,45 @@ public final class ASTParserFactory {
         parser.setCompilerOptions(options);
         return parser;
     }
+
+    public static List<String> getJDKClasspath() {
+        List<String> cpEntries = new ArrayList<>();
+
+        String javaHome = System.getenv("JAVA_HOME");
+        if (javaHome == null || javaHome.isBlank()) {
+            javaHome = System.getProperty("java.home");
+        }
+        if (javaHome == null || javaHome.isBlank()) {
+            return cpEntries;
+        }
+
+        File home = new File(javaHome);
+        if (!home.isDirectory()) {
+            return cpEntries;
+        }
+
+        // Java 9+ : JRT via jrt-fs.jar
+        File jrtFsJar = new File(home, "lib/jrt-fs.jar");
+        if (jrtFsJar.isFile()) {
+            cpEntries.add(jrtFsJar.getAbsolutePath());
+            return cpEntries;
+        }
+
+        // Java 8- : rt.jar (JDK layout vs JRE layout)
+        File rtJar = new File(home, "jre/lib/rt.jar");
+        if (rtJar.isFile()) {
+            cpEntries.add(rtJar.getAbsolutePath());
+            return cpEntries;
+        }
+
+        rtJar = new File(home, "lib/rt.jar");
+        if (rtJar.isFile()) {
+            cpEntries.add(rtJar.getAbsolutePath());
+        }
+
+        return cpEntries;
+    }
+
 
     private static String resolveJDKVersion(URI jarURI) {
         File file = new File(jarURI);
