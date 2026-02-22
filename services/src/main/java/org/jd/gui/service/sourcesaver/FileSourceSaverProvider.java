@@ -53,7 +53,7 @@ public class FileSourceSaverProvider extends AbstractSourceSaverProvider {
                 assert ExceptionUtil.printStackTrace(ee);
             }
         }
-        
+
         try {
             ProgressUtil.updateProgress(entry, getProgressFunction, setProgressFunction);
         } catch (IOException e) {

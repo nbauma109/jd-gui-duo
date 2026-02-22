@@ -34,7 +34,9 @@ public final class NexusConfig {
     public boolean isPresent() { return baseUrl != null; }
 
     private static String trimToNull(String s) {
-        if (s == null) return null;
+        if (s == null) {
+            return null;
+        }
         String t = s.trim();
         return t.isEmpty() ? null : t;
     }

@@ -66,7 +66,9 @@ abstract class AbstractNexusClient {
     }
 
     protected static String trimTrailingSlash(String base) {
-        if (base == null) return null;
+        if (base == null) {
+            return null;
+        }
         return base.endsWith("/") ? base.substring(0, base.length() - 1) : base;
     }
 

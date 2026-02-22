@@ -155,7 +155,7 @@ public class OpenTypeView {
                     }
                 }
             });
-            openTypeList.setModel(new DefaultListModel<OpenTypeListCellBean>());
+            openTypeList.setModel(new DefaultListModel<>());
             openTypeList.setCellRenderer(new OpenTypeListCellRenderer());
             openTypeList.addMouseListener(new MouseAdapter() {
                 @Override

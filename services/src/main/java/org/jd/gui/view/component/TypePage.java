@@ -50,7 +50,7 @@ public abstract class TypePage extends CustomLineNumbersPage
     private static final long serialVersionUID = 1L;
 
     private static final Pattern LINE_COMMENT_PATTERN = Pattern.compile("/\\*\s*(\\d+)\s*\\*/");
-    
+
     protected final transient API api;
     protected final transient Container.Entry entry;
     protected transient Collection<Future<Indexes>> collectionOfFutureIndexes = Collections.emptyList();
@@ -521,7 +521,7 @@ public abstract class TypePage extends CustomLineNumbersPage
         String unitName = entry.getPath();
         // 1st pass for declarations
         ASTParser astParser = ASTParserFactory.getInstance().newASTParser(source, unitName, jarURI);
-        astParser.createAST(null).accept(listener.getDeclarationListener());    
+        astParser.createAST(null).accept(listener.getDeclarationListener());
         listener.init();
         // 2nd pass for references
         ASTParser astParserWithBindings = ASTParserFactory.getInstanceWithBindings().newASTParser(source, unitName, jarURI);

@@ -27,7 +27,7 @@ public class TextPage extends AbstractTextPage implements ContentCopyable, Conte
 	public TextPage(API api) {
 		super(api);
 	}
-	
+
     // --- ContentCopyable --- //
     @Override
     public void copy() {

@@ -91,7 +91,7 @@ public class ClassFileDecompilerPreferencesProvider extends JPanel implements Pr
         decompilerPreferencesProviders.put(ENGINE_FERNFLOWER, new FernflowerDecompilerPreferencesProvider());
         decompilerPreferencesProviders.put(ENGINE_VINEFLOWER, new VineflowerDecompilerPreferencesProvider());
         decompilerPreferencesProviders.put(ENGINE_JADX, new JadxDecompilerPreferencesProvider());
-        
+
         decompileEngine.addActionListener(e -> jdCoreDecompilerPreferencesProvider.toggleOldOptions());
    }
 

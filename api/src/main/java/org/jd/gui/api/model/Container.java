@@ -19,7 +19,7 @@ public interface Container {
     default URI getRootUri() {
         return getRoot().getUri();
     }
-    
+
     /**
      * File or directory
      */

@@ -19,7 +19,7 @@ public final class Comparer {
 
     /**
      * Compare the two given files and return the results
-     * 
+     *
      * @param inFile1 first file
      * @param inFile2 second file
      * @return results of comparison
@@ -49,7 +49,7 @@ public final class Comparer {
 
     /**
      * Make entrydetails objects for each entry in the given file and put in list
-     * 
+     *
      * @param inList  list of entries so far
      * @param inFile  zip/jar file to search through
      * @param inIndex 0 for first file, 1 for second
@@ -87,7 +87,7 @@ public final class Comparer {
 
     /**
      * Look up the given name in the list
-     * 
+     *
      * @param inList list of EntryDetails objects
      * @param inName name to look up
      */
@@ -104,7 +104,7 @@ public final class Comparer {
 
     /**
      * Collect the CRC checksums of all relevant entries
-     * 
+     *
      * @param inResults results from preliminary check
      * @param inFile    file to read
      * @param inIndex   0 or 1

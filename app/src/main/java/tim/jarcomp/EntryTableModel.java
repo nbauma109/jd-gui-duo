@@ -25,7 +25,7 @@ public class EntryTableModel extends AbstractTableModel {
 
     /**
      * Reset the table with the given list
-     * 
+     *
      * @param inList list of EntryDetails objects
      */
     public void setEntryList(List<EntryDetails> inList) {
@@ -36,6 +36,7 @@ public class EntryTableModel extends AbstractTableModel {
     /**
      * @return number of columns in table
      */
+    @Override
     public int getColumnCount() {
         return 3;
         // TODO: Columns for size1, size2, status (as icon), size difference
@@ -69,6 +70,7 @@ public class EntryTableModel extends AbstractTableModel {
     /**
      * @return number of rows in the table
      */
+    @Override
     public int getRowCount() {
         if (entries == null) {
             return 0;
@@ -79,6 +81,7 @@ public class EntryTableModel extends AbstractTableModel {
     /**
      * @return object at specified row and column
      */
+    @Override
     public Object getValueAt(int inRowNum, int inColNum) {
         if (inRowNum >= 0 && inRowNum < getRowCount()) {
             EntryDetails entry = entries.get(inRowNum);
@@ -94,7 +97,7 @@ public class EntryTableModel extends AbstractTableModel {
 
     /**
      * Convert an entry status into text
-     * 
+     *
      * @param inStatus entry status
      * @return displayable text
      */
@@ -119,7 +122,7 @@ public class EntryTableModel extends AbstractTableModel {
         }
         return false;
     }
-    
+
     /**
      * @return true if specified row represents a difference that is not addition/deletion
      */

@@ -155,7 +155,9 @@ public final class SecurePreferences {
     }
 
     private static void zeroBytes(byte[] a) {
-        if (a == null) return;
+        if (a == null) {
+            return;
+        }
         for (int i = 0; i < a.length; i++) {
             a[i] = 0;
         }

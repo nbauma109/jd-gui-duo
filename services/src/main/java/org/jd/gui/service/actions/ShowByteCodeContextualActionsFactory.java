@@ -93,7 +93,7 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
             textArea.setCaretPosition(0);
             textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
             RTextScrollPane sp = new RTextScrollPane(textArea);
-            
+
             // Create a toolbar with searching options.
             JToolBar toolBar = new JToolBar();
             JTextField searchField = new JTextField(30);
@@ -113,7 +113,7 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
             nextButton.addActionListener(searchAction);
             prevButton.addActionListener(searchAction);
 
-            
+
             // Make Enter and Shift + Enter search forward and backward,
             // respectively, when the search field is focused.
             InputMap im = searchField.getInputMap();
@@ -150,7 +150,7 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
                     searchField.requestFocusInWindow();
                 }
             });
-            
+
             JFrame frame = new JFrame("Byte Code Viewer for " + method);
             java.awt.Container cp = frame.getContentPane();
             cp.add(toolBar, BorderLayout.NORTH);
@@ -162,7 +162,7 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
         }
 
         private static class AsciiTableByteCodeWriter extends ByteCodeWriter {
-            
+
             @Override
             protected void writeLineNumberTable(String linePrefix, StringBuilder sb, Code attributeCode) {
                 LineNumberTable lineNumberTable = attributeCode.getLineNumberTable();
@@ -222,7 +222,7 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
                 }
             }
         }
-        
+
         private static class SearchAction extends AbstractAction {
 
             private static final long serialVersionUID = 1L;
@@ -231,7 +231,7 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
             private JCheckBox regexCB;
             private JTextArea textArea;
             private JTextField searchField;
-            
+
             public SearchAction(JCheckBox matchCaseCB, JCheckBox regexCB, JTextArea textArea, JTextField searchField) {
                 this.matchCaseCB = matchCaseCB;
                 this.regexCB = regexCB;

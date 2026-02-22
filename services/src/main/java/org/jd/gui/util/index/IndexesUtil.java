@@ -23,7 +23,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public final class IndexesUtil {
 
     private IndexesUtil() {
-        super();
     }
 
     public static boolean containsInternalTypeName(Collection<Future<Indexes>> collectionOfFutureIndexes, String internalTypeName) {
@@ -83,7 +82,7 @@ public final class IndexesUtil {
 
         return entries;
     }
-    
+
     /*
      * https://jakewharton.com/calculating-zip-file-entry-true-impact/
      */

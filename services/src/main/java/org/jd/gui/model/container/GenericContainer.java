@@ -80,7 +80,7 @@ public class GenericContainer implements Container, Closeable {
         }
         return null;
     }
-    
+
     @Override
     public String getType() { return "generic"; }
     @Override
@@ -148,7 +148,7 @@ public class GenericContainer implements Container, Closeable {
         @Override
         public boolean isDirectory() {
             if (isDirectory == null) {
-                isDirectory = Boolean.valueOf(Files.isDirectory(fsPath));
+                isDirectory = Files.isDirectory(fsPath);
             }
             return isDirectory;
         }
@@ -171,7 +171,7 @@ public class GenericContainer implements Container, Closeable {
             ZipEntry zipEntry = zipFile.getEntry(strPath);
             return IndexesUtil.entryImpactBytes(zipEntry);
         }
-        
+
         @Override
         public InputStream getInputStream() {
             try {
@@ -221,20 +221,20 @@ public class GenericContainer implements Container, Closeable {
             try (TempFile tmpFile = new TempFile(suffix.toString())) {
                 Path tmpPath = Paths.get(tmpFile.toURI());
                 Files.copy(fsPath, tmpPath);
-    
+
                 @SuppressWarnings("all")
                 // Resource leak : The file system cannot be closed until the application is shutdown
                 FileSystem subFileSystem = FileSystems.newFileSystem(tmpPath, (ClassLoader)null);
-    
+
                 Iterator<Path> rootDirectories = subFileSystem.getRootDirectories().iterator();
-    
+
                 if (rootDirectories.hasNext()) {
                     Path rootPath = rootDirectories.next();
                     ContainerFactory containerFactory = api.getContainerFactory(rootPath);
-    
+
                     if (containerFactory != null) {
                         Container container = containerFactory.make(api, this, rootPath);
-    
+
                         if (container != null) {
                             return container.getRoot().getChildren();
                         }

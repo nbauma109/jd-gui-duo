@@ -327,11 +327,11 @@ public class MainController implements API {
                     diffFrame.setVisible(true);
                 } catch (Exception e) {
                     ExceptionUtil.printStackTrace(e);
-                }           
+                }
         	}
         }
     }
-    
+
     protected void onClose() {
         mainView.closeCurrentTab();
     }
@@ -535,12 +535,10 @@ public class MainController implements API {
                 } else {
                     configuration.setLookAndFeel("com.formdev.flatlaf.intellijthemes.FlatOneDarkIJTheme");
                 }
+            } else if (PlatformService.getInstance().isMac()) {
+                configuration.setLookAndFeel("com.formdev.flatlaf.themes.FlatMacLightLaf");
             } else {
-                if (PlatformService.getInstance().isMac()) {
-                    configuration.setLookAndFeel("com.formdev.flatlaf.themes.FlatMacLightLaf");
-                } else {
-                    configuration.setLookAndFeel(ThemeUtil.getDefaultLookAndFeel());
-                }
+                configuration.setLookAndFeel(ThemeUtil.getDefaultLookAndFeel());
             }
         });
     }
@@ -618,7 +616,7 @@ public class MainController implements API {
     	// Pass two files to start with, or instruct to prompt
     	window.startCompare(file1, file2);
     }
-    
+
     public void showGAVs(API api, Set<File> files, Map<File, String> sha1Map, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
         Set<Artifact> artifacts = new TreeSet<>();
         Set<Artifact> missingArtifacts = new TreeSet<>();
@@ -784,38 +782,37 @@ public class MainController implements API {
         String baseFileName = FilenameUtils.getBaseName(file.getName());
         ArtifactVersionMatcher artifactVersionMatcher = new ArtifactVersionMatcher();
         artifactVersionMatcher.parse(baseFileName);
-        if (file.exists()) {
-            try (JarFile jarFile = new JarFile(file)) {
-                Manifest manifest = jarFile.getManifest();
-                if (manifest == null) {
-                    String artifactId = artifactVersionMatcher.getArtifactId();
-                    String version = artifactVersionMatcher.getVersion();
-                    return new Artifact(artifactId, artifactId, version, file.getName(), false, false);
-                }
-                Attributes mainAttributes = manifest.getMainAttributes();
-                String groupId = mainAttributes.getValue("Implementation-Vendor-Id");
-                if (groupId == null) {
-                    groupId = mainAttributes.getValue("Bundle-SymbolicName");
-                }
-                if (groupId == null) {
-                    groupId = JarContainerEntryUtil.inferGroupFromFile(jarFile);
-                }
-                String version = mainAttributes.getValue("Implementation-Version");
-                if (version == null) {
-                    version = mainAttributes.getValue("Bundle-Version");
-                }
-                if (version == null) {
-                    version = artifactVersionMatcher.getVersion();
-                }
-                String artifactId = artifactVersionMatcher.getArtifactId();
-                return new Artifact(groupId, artifactId, version, file.getName(), false, false);
-            } catch (IOException e) {
-                assert ExceptionUtil.printStackTrace(e);
-            }
-        } else {
+        if (!file.exists()) {
             String artifactId = artifactVersionMatcher.getArtifactId();
             String version = artifactVersionMatcher.getVersion();
             return new Artifact("com.mycompany", artifactId, version, file.getName(), false, false);
+        }
+        try (JarFile jarFile = new JarFile(file)) {
+            Manifest manifest = jarFile.getManifest();
+            if (manifest == null) {
+                String artifactId = artifactVersionMatcher.getArtifactId();
+                String version = artifactVersionMatcher.getVersion();
+                return new Artifact(artifactId, artifactId, version, file.getName(), false, false);
+            }
+            Attributes mainAttributes = manifest.getMainAttributes();
+            String groupId = mainAttributes.getValue("Implementation-Vendor-Id");
+            if (groupId == null) {
+                groupId = mainAttributes.getValue("Bundle-SymbolicName");
+            }
+            if (groupId == null) {
+                groupId = JarContainerEntryUtil.inferGroupFromFile(jarFile);
+            }
+            String version = mainAttributes.getValue("Implementation-Version");
+            if (version == null) {
+                version = mainAttributes.getValue("Bundle-Version");
+            }
+            if (version == null) {
+                version = artifactVersionMatcher.getVersion();
+            }
+            String artifactId = artifactVersionMatcher.getArtifactId();
+            return new Artifact(groupId, artifactId, version, file.getName(), false, false);
+        } catch (IOException e) {
+            assert ExceptionUtil.printStackTrace(e);
         }
         return null;
     }

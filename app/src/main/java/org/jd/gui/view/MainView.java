@@ -104,7 +104,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     private JCheckBox findCaseSensitive;
     private Color findBackgroundColor;
     private Color findErrorBackgroundColor;
-    
+
     static {
         Enumeration<Object> keys = UIManager.getDefaults().keys();
         while (keys.hasMoreElements()) {

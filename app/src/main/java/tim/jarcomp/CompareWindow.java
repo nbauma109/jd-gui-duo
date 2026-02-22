@@ -292,12 +292,10 @@ public class CompareWindow {
         detailsDisplays[1].setContents(files[1], results, 1);
         if (results.getEntriesDifferent()) {
             statusLabel2.setText((archivesDifferent ? "and" : "but") + " the files have different contents");
+        } else if (results.isEntriesCRCChecked()) {
+            statusLabel2.setText((archivesDifferent ? "but" : "and") + " the files have exactly the same contents");
         } else {
-            if (results.isEntriesCRCChecked()) {
-                statusLabel2.setText((archivesDifferent ? "but" : "and") + " the files have exactly the same contents");
-            } else {
-                statusLabel2.setText((archivesDifferent ? "but" : "and") + " the files appear to have the same contents");
-            }
+            statusLabel2.setText((archivesDifferent ? "but" : "and") + " the files appear to have the same contents");
         }
         refreshButton.setEnabled(true);
     }
@@ -468,7 +466,9 @@ public class CompareWindow {
      * @return true if extension is jar, zip, war, or ear
      */
     private boolean isArchiveFile(File f) {
-        if (f == null) return false;
+        if (f == null) {
+            return false;
+        }
         String name = f.getName().toLowerCase();
         return name.endsWith(".jar") || name.endsWith(".zip") || name.endsWith(".war") || name.endsWith(".ear");
     }

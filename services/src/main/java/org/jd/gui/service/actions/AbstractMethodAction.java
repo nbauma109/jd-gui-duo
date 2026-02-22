@@ -58,7 +58,7 @@ public abstract class AbstractMethodAction extends AbstractAction {
                         method = MethodUtil.searchMethod(loader, typeMaker, internalTypeName, "<clinit>", "()V");
                     }
                     methodAction(api, method, internalTypeName);
-                    
+
                 } catch (IOException ex) {
                     assert ExceptionUtil.printStackTrace(ex);
                 }

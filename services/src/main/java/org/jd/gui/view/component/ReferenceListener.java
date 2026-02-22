@@ -192,8 +192,8 @@ public class ReferenceListener extends AbstractJavaListener {
         } else {
             descriptor = "()V";
         }
-        
-        
+
+
         ReferenceData refData = newReferenceData(internalTypeName, StringConstants.INSTANCE_CONSTRUCTOR, descriptor);
         addHyperlink(new HyperlinkReferenceData(position, node.getLength(), refData));
         return true;
@@ -253,7 +253,7 @@ public class ReferenceListener extends AbstractJavaListener {
             }
         }
     }
-    
+
     @Override
     public boolean visit(ArrayAccess node) {
         createLinkToVariable(node.getArray());

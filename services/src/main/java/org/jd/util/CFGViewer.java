@@ -34,7 +34,7 @@ public final class CFGViewer {
 
     private CFGViewer() {
     }
-    
+
     public static void showGraph(ControlFlowGraph cfg, String className) {
         try {
             SourceStringReader reader = new SourceStringReader(ControlFlowGraphPlantUMLWriter.write(cfg));

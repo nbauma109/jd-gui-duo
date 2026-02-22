@@ -76,7 +76,7 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
     public void saveContent(API api, Path rootPath, Path path, Container.Entry entry, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
 
         DecompilationResult decompiledResult = new DecompilationResult();
-        
+
         try {
             // Init preferences
             Map<String, String> preferences = api.getPreferences();
@@ -86,7 +86,7 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
 
             // Format internal name
             String entryInternalName = ClassUtil.getInternalName(entry.getPath());
-            
+
             String decompileEngine = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
             Loader apiLoader = LoaderUtils.createLoader(preferences, loader, entry);
             decompiledResult = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, decompileEngine);
@@ -99,9 +99,9 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
             decompiledResult.setDecompiledOutput(INTERNAL_ERROR);
             assert ExceptionUtil.printStackTrace(t);
         }
-        
+
         writeCodeToFile(path, decompiledResult.getDecompiledOutput());
-        
+
         try {
             ProgressUtil.updateProgress(entry, getProgressFunction, setProgressFunction);
             // update progress of inner classes that were filtered by PackageSourceSaverProvider

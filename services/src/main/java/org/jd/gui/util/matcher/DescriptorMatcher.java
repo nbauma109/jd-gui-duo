@@ -13,7 +13,6 @@ package org.jd.gui.util.matcher;
 public final class DescriptorMatcher {
 
     private DescriptorMatcher() {
-        super();
     }
 
     public static boolean matchFieldDescriptors(String d1, String d2) {

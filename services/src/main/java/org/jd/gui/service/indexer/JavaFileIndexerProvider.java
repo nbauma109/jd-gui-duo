@@ -39,7 +39,7 @@ import java.util.function.DoubleSupplier;
 
 /** Unsafe thread implementation of java file indexer. */
 public class JavaFileIndexerProvider extends AbstractIndexerProvider {
-    
+
     @Override
     public String[] getSelectors() {
         return appendSelectors("*:file:*.java");
@@ -62,14 +62,14 @@ public class JavaFileIndexerProvider extends AbstractIndexerProvider {
             addToIndexes(indexes, "methodReferences", listener.getMethodReferenceSet(), entry);
             addToIndexes(indexes, "fieldReferences", listener.getFieldReferenceSet(), entry);
             addToIndexes(indexes, "strings", listener.getStringSet(), entry);
-    
+
             // Populate map [super type name : [sub type name]]
             Map<String, Collection> index = indexes.getIndex("subTypeNames");
-    
+
             String typeName;
             for (Map.Entry<String, Set<String>> e : listener.getSuperTypeNamesMap().entrySet()) {
                 typeName = e.getKey();
-    
+
                 for (String superTypeName : e.getValue()) {
                     index.get(superTypeName).add(typeName);
                 }

@@ -68,7 +68,7 @@ public class CopyQualifiedNameContextualActionsFactory implements ContextualActi
 
                 if (type != null) {
                     String displayPackageName = type.getDisplayPackageName();
-                    if (!qualified) { 
+                    if (!qualified) {
                         displayPackageName = Utility.packageToPath(displayPackageName);
                     }
                     StringBuilder sb = new StringBuilder(displayPackageName);

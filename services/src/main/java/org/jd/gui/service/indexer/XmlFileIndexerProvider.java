@@ -121,7 +121,7 @@ public class XmlFileIndexerProvider extends AbstractIndexerProvider {
         }
 
         indexAll(entry, indexes, stringSet, typeReferenceSet);
-        
+
         try {
             ProgressUtil.updateProgress(entry, getProgressFunction, setProgressFunction);
         } catch (IOException e) {

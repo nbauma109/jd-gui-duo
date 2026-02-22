@@ -76,12 +76,12 @@ public final class MasterPasswordDialog extends JDialog {
     }
 
     private static String buildTitle(Mode mode) {
-        switch (mode) {
-            case SETUP: return "Set Master Password";
-            case UNLOCK: return "Unlock Secrets";
-            case CHANGE: return "Change Master Password";
-            default: return "Master Password";
-        }
+        return switch (mode) {
+            case SETUP -> "Set Master Password";
+            case UNLOCK -> "Unlock Secrets";
+            case CHANGE -> "Change Master Password";
+            default -> "Master Password";
+        };
     }
 
     private void buildUi() {
@@ -113,16 +113,14 @@ public final class MasterPasswordDialog extends JDialog {
             gc.gridx = 1;
             confirmField = new JPasswordField(24);
             panel.add(confirmField, gc);
-            gc.gridx = 0;
-            gc.gridy++;
         } else {
             panel.add(new JLabel("Master password:"), gc);
             gc.gridx = 1;
             passField = new JPasswordField(24);
             panel.add(passField, gc);
-            gc.gridx = 0;
-            gc.gridy++;
         }
+        gc.gridx = 0;
+        gc.gridy++;
 
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton ok = new JButton("OK");
@@ -189,13 +187,21 @@ public final class MasterPasswordDialog extends JDialog {
     }
 
     private void zeroSecrets() {
-        if (currentField != null) zero(currentField.getPassword());
-        if (passField != null) zero(passField.getPassword());
-        if (confirmField != null) zero(confirmField.getPassword());
+        if (currentField != null) {
+            zero(currentField.getPassword());
+        }
+        if (passField != null) {
+            zero(passField.getPassword());
+        }
+        if (confirmField != null) {
+            zero(confirmField.getPassword());
+        }
     }
 
     private static void zero(char[] a) {
-        if (a != null) Arrays.fill(a, '\0');
+        if (a != null) {
+            Arrays.fill(a, '\0');
+        }
     }
 
     private static void showError(String msg) {

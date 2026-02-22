@@ -98,7 +98,7 @@ public class AboutView {
             Attributes allAttributes = new Attributes();
             try {
                 Enumeration<URL> enumeration = AboutView.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
-                
+
                 while (enumeration.hasMoreElements()) {
                     try (InputStream is = enumeration.nextElement().openStream()) {
                         Attributes attributes = new Manifest(is).getMainAttributes();
@@ -110,7 +110,7 @@ public class AboutView {
             } catch (IOException e) {
                 assert ExceptionUtil.printStackTrace(e);
             }
-            
+
             subsubpanel.add(new JLabel("JD-GUI-DUO"));
             subsubpanel.add(new JLabel(VERSION + allAttributes.getValue("JD-GUI-Version")));
             if (allAttributes != null) {

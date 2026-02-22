@@ -52,7 +52,7 @@ public abstract class AbstractSwingWorker<T, V> extends SwingWorker<T, V> {
     protected void done() {
         progressMonitor.close();
     }
-    
+
     private static String getProgressMessage(int progress) {
         return String.format("Completed %d%%.%n", progress);
     }

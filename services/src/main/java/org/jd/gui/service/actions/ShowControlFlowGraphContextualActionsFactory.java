@@ -34,7 +34,7 @@ public class ShowControlFlowGraphContextualActionsFactory implements ContextualA
     public static final int MODE_GOTO_ONLY = 1;
     public static final int MODE_GOTO_AND_LOOP = 2;
     public static final int MODE_PRE_REDUCE = 3;
-    
+
     @Override
     public Collection<Action> make(API api, Container.Entry entry, String fragment) {
         Collection<Action> actions = new ArrayList<>();
@@ -57,7 +57,7 @@ public class ShowControlFlowGraphContextualActionsFactory implements ContextualA
         protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/net/sourceforge/plantuml/version/favicon.png"));
 
         private final transient ControlFlowGraphReducer controlFlowGraphReducer;
-        
+
         private int mode;
 
         public ShowControlFlowGraphAction(API api, Container.Entry entry, String fragment, ControlFlowGraphReducer controlFlowGraphReducer, int mode) {

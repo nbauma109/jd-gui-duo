@@ -44,13 +44,17 @@ public final class ProxyConfig {
     }
 
     public Proxy toJavaNetProxy() {
-        if (!isValid()) return Proxy.NO_PROXY;
+        if (!isValid()) {
+            return Proxy.NO_PROXY;
+        }
         int p = (port == null) ? 80 : port;
         return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, p));
     }
 
     public String basicAuthHeaderValue() {
-        if (username == null || password == null || password.length == 0) return null;
+        if (username == null || password == null || password.length == 0) {
+            return null;
+        }
         String creds = username + ":" + new String(password);
         String encoded = Base64.getEncoder().encodeToString(creds.getBytes(StandardCharsets.ISO_8859_1));
         // We do not keep the concatenated string around longer than needed

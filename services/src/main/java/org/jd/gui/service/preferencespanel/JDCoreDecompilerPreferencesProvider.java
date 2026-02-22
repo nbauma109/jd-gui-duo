@@ -36,7 +36,7 @@ public class JDCoreDecompilerPreferencesProvider extends JPanel implements Prefe
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         this.decompileEngine = decompileEngine;
-        
+
         writeLineNumbersCheckBox = new JCheckBox("Write original line numbers");
         writeMetadataCheckBox = new JCheckBox("Write metadata");
         escapeUnicodeCharactersCheckBox = new JCheckBox("Escape unicode characters");

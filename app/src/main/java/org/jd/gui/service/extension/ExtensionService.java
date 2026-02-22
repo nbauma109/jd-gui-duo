@@ -57,7 +57,7 @@ public class ExtensionService {
 
         return ExtensionService.class.getClassLoader();
     }
-    
+
     protected void searchJarAndMetaInf(List<URL> urls, File directory) throws Exception {
         File metaInf = new File(directory, "META-INF");
 

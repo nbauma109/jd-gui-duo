@@ -57,7 +57,7 @@ public class JarDetailsDisplay extends JPanel {
 
     /**
      * Set the contents of the display using the given compare results
-     * 
+     *
      * @param inFile    file object
      * @param inResults results of comparison
      * @param inIndex   0 or 1

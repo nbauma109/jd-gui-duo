@@ -133,25 +133,23 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
                 case '\r':
                     // CR followed by LF ?
                     if ((index-startLineIndex >= 70) && (index+1 < length) && (text.charAt(index+1) == ' ')) {
-                        // Multiline value
-                        startLineIndex = index+1;
                     } else if ((index-startLineIndex >= 70) && (index+2 < length) && (text.charAt(index+1) == '\n') && (text.charAt(index+2) == ' ')) {
                         // Multiline value
                         index++;
-                        startLineIndex = index+1;
                     } else {
                         // (End of file) or (single line value) => return end index
                         return index;
                     }
+                    // Multiline value
+                    startLineIndex = index+1;
                     break;
                 case '\n':
-                    if ((index-startLineIndex >= 70) && (index+1 < length) && (text.charAt(index+1) == ' ')) {
-                        // Multiline value
-                        startLineIndex = index+1;
-                    } else {
+                    if ((index-startLineIndex < 70) || (index+1 >= length) || (text.charAt(index+1) != ' ')) {
                         // (End of file) or (single line value) => return end index
                         return index;
                     }
+                    // Multiline value
+                    startLineIndex = index+1;
                     break;
             }
             index++;
@@ -201,6 +199,7 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
     public URI getUri() { return entry.getUri(); }
 
     // --- ContentSavable --- //
+    @Override
     public String getFileName() {
         String path = entry.getPath();
         int index = path.lastIndexOf('/');

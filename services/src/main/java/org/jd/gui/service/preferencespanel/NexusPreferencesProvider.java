@@ -241,7 +241,7 @@ public final class NexusPreferencesProvider extends JPanel implements SecuredPre
         // Rule: if username is filled, password must be filled. We highlight the password field only.
         boolean userProvided = hasText(userField.getText());
         boolean passProvided = passField.getPassword().length > 0;
-        boolean passOk = !(userProvided && !passProvided);
+        boolean passOk = (!userProvided || passProvided);
         passField.setBackground(passOk ? passDefaultBackground : errorBackground);
 
         return urlOk && passOk;

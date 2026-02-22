@@ -59,12 +59,12 @@ public class ClassFilePage extends TypePage {
     }
 
     public void decompile(Map<String, String> preferences) {
-        
+
         boolean realignmentLineNumbers = "true".equals(preferences.get(REALIGN_LINE_NUMBERS)) || "true".equals(preferences.get("StretchLines"));
         boolean removeUnnecessaryCasts = "true".equals(preferences.get(REMOVE_UNNECESSARY_CASTS));
 
         setShowMisalignment(realignmentLineNumbers);
-        
+
         // Init loader
         ContainerLoader loader = new ContainerLoader(entry);
         try {
@@ -74,13 +74,13 @@ public class ClassFilePage extends TypePage {
 
             // Format internal name
             String entryInternalName = ClassUtil.getInternalName(entry.getPath());
-            
+
             String engineName = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
             Loader apiLoader = LoaderUtils.createLoader(preferences, loader, entry);
             DecompilationResult decompilationResult = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, engineName);
             if (decompilationResult.getDecompiledOutput().contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
                 /*
-                 * Sometimes JD-Core v0 decompiles with success where JD-Core v1 fails. 
+                 * Sometimes JD-Core v0 decompiles with success where JD-Core v1 fails.
                  * In this case, patch JD-Core v0 method into JD-Core v1 method.
                  * It will appear with comment 'Patched from JD-Core V0'
                  */
@@ -109,9 +109,9 @@ public class ClassFilePage extends TypePage {
                 }
                 if (hyperlinks.isEmpty() || removeUnnecessaryCasts) {
                     /*
-                     * if hyperlinks are empty, it means the links are not supported by the decompiler, so the JAVA parser is called to 
+                     * if hyperlinks are empty, it means the links are not supported by the decompiler, so the JAVA parser is called to
                      * enable the links. Same thing in case 'Remove casts' options is activated, as it ruins the hyperlinks.
-                     * Avoid shifting positions for all of them by re-parsing the source code. 
+                     * Avoid shifting positions for all of them by re-parsing the source code.
                      */
                     if (removeUnnecessaryCasts) {
                         decompilationResult.setDecompiledOutput(new RemoveUnnecessaryCasts(entry).process(decompilationResult.getDecompiledOutput()));
@@ -146,7 +146,7 @@ public class ClassFilePage extends TypePage {
     public void save(API api, OutputStream os) {
 
         DecompilationResult decompilationResult = new DecompilationResult();
-        
+
         // Init loader
         ContainerLoader loader = new ContainerLoader(entry);
         try {

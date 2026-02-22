@@ -51,8 +51,8 @@ public class CompareResults extends EntryDetails {
      */
     public boolean getEntriesDifferent() {
         // Loop over all entries
-        for (int i = 0; i < entries.size(); i++) {
-            EntryDetails.EntryStatus status = entries.get(i).getStatus();
+        for (EntryDetails entry : entries) {
+            EntryDetails.EntryStatus status = entry.getStatus();
             if (status != EntryDetails.EntryStatus.EQUAL && status != EntryDetails.EntryStatus.SAME_SIZE) {
                 return true;
             }
@@ -65,8 +65,8 @@ public class CompareResults extends EntryDetails {
      */
     public boolean isEntriesCRCChecked() {
         // Loop over all entries
-        for (int i = 0; i < entries.size(); i++) {
-            if (entries.get(i).getStatus() == EntryDetails.EntryStatus.SAME_SIZE) {
+        for (EntryDetails entry : entries) {
+            if (entry.getStatus() == EntryDetails.EntryStatus.SAME_SIZE) {
                 return false;
             }
         }

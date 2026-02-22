@@ -18,8 +18,6 @@ package org.jd.gui.util.maven.central.helper;
 
 import org.jd.gui.api.API;
 import org.jd.gui.util.ImageUtil;
-import org.jd.gui.util.nexus.NexusSearch;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 

@@ -175,7 +175,7 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
                     index.get(superTypeName).add(typeName);
                 }
             }
-            
+
             ProgressUtil.updateProgress(entry, getProgressFunction, setProgressFunction);
 
         } catch (Exception e) {

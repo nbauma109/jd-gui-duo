@@ -24,7 +24,6 @@ import java.util.Map;
 public final class MethodPatcher {
 
     private MethodPatcher() {
-        super();
     }
 
     public static String patchCode(String sourceCodeV1, String sourceCodeV0, Container.Entry entry) {
@@ -32,7 +31,7 @@ public final class MethodPatcher {
         URI jarURI = entry.getContainer().getRoot().getParent().getUri();
         String unitName = entry.getPath();
         ASTParserFactory astParserFactory = ASTParserFactory.getInstanceWithBindings();
-        CompilationUnit compilationUnit = (CompilationUnit) astParserFactory.newASTParser(sourceCodeV1.toCharArray(), unitName, jarURI).createAST(null); 
+        CompilationUnit compilationUnit = (CompilationUnit) astParserFactory.newASTParser(sourceCodeV1.toCharArray(), unitName, jarURI).createAST(null);
         ASTRewrite rewriter = ASTRewrite.create(compilationUnit.getAST());
         Document document = new Document(sourceCodeV1);
         TextEdit textEdit = rewriter.rewriteAST(document, null);

@@ -294,7 +294,7 @@ public final class ProxyPreferencesProvider extends JPanel implements SecuredPre
         // If username is provided, password must be provided; highlight password only
         boolean userProvided = hasText(userField.getText());
         boolean passProvided = passField.getPassword().length > 0;
-        boolean passOk = !(userProvided && !passProvided);
+        boolean passOk = (!userProvided || passProvided);
         passField.setBackground(passOk ? passDefaultBackground : errorBackground);
 
         return hostOk && portOk && passOk;
@@ -381,7 +381,7 @@ public final class ProxyPreferencesProvider extends JPanel implements SecuredPre
         detectProgressMonitor.setMillisToPopup(0);
         detectProgressMonitor.setMillisToDecideToPopup(0);
 
-        SwingWorker<DetectedProxy, Void> worker = new SwingWorker<DetectedProxy, Void>() {
+        SwingWorker<DetectedProxy, Void> worker = new SwingWorker<>() {
             @Override
             protected DetectedProxy doInBackground() {
                 setProgress(5);

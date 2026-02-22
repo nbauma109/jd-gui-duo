@@ -16,7 +16,7 @@ public class GenericFileFilter extends FileFilter {
 
     /**
      * Constructor
-     * 
+     *
      * @param inDescription filter description
      * @param inSuffixes    array of allowed 3- and 4-character file suffixes
      */
@@ -27,8 +27,8 @@ public class GenericFileFilter extends FileFilter {
             fourCharSuffixes = new String[inSuffixes.length];
             int threeIndex = 0;
             int fourIndex = 0;
-            for (int i = 0; i < inSuffixes.length; i++) {
-                String suffix = inSuffixes[i];
+            for (String element : inSuffixes) {
+                String suffix = element;
                 if (suffix != null) {
                     suffix = suffix.trim().toLowerCase();
                     if (suffix.length() == 3) {
@@ -43,16 +43,17 @@ public class GenericFileFilter extends FileFilter {
 
     /**
      * Check whether to accept the specified file or not
-     * 
+     *
      * @see javax.swing.filechooser.FileFilter#accept(java.io.File)
      */
+    @Override
     public boolean accept(File inFile) {
         return inFile.isDirectory() || acceptFilename(inFile.getName());
     }
 
     /**
      * Check whether to accept the given filename
-     * 
+     *
      * @param inName name of file
      * @return true if accepted, false otherwise
      */
@@ -78,7 +79,7 @@ public class GenericFileFilter extends FileFilter {
 
     /**
      * Check whether to accept the given filename
-     * 
+     *
      * @param inSuffixToCheck   suffix to check
      * @param inAllowedSuffixes array of allowed suffixes
      * @return true if accepted, false otherwise
@@ -86,8 +87,8 @@ public class GenericFileFilter extends FileFilter {
     public boolean acceptFilename(String inSuffixToCheck, String[] inAllowedSuffixes) {
         if (inSuffixToCheck != null && inAllowedSuffixes != null) {
             // Loop over allowed suffixes
-            for (int i = 0; i < inAllowedSuffixes.length; i++) {
-                if (inAllowedSuffixes[i] != null && inSuffixToCheck.equals(inAllowedSuffixes[i])) {
+            for (String element : inAllowedSuffixes) {
+                if (element != null && inSuffixToCheck.equals(element)) {
                     return true;
                 }
             }
@@ -98,9 +99,10 @@ public class GenericFileFilter extends FileFilter {
 
     /**
      * Get description
-     * 
+     *
      * @see javax.swing.filechooser.FileFilter#getDescription()
      */
+    @Override
     public String getDescription() {
         return filterDesc;
     }

@@ -31,7 +31,6 @@ import jadx.core.utils.StringUtils;
 public final class JarContainerEntryUtil {
 
     private JarContainerEntryUtil() {
-        super();
     }
 
     public static Collection<Container.Entry> removeInnerTypeEntries(Map<Container.EntryPath, Container.Entry> entries) {
@@ -129,7 +128,7 @@ public final class JarContainerEntryUtil {
         }
         return group;
     }
-        
+
     private static String inferGroupFromFile(JarFile jarFile, String extension) {
         Set<String> possibleGroups = new HashSet<>();
         int minDepth = Integer.MAX_VALUE;

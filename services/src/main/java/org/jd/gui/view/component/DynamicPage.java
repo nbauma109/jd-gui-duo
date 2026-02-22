@@ -56,7 +56,7 @@ public class DynamicPage
         this.entry = entry;
 
         Map<String, String> preferences = api.getPreferences();
-        Integer currentHashcode = Integer.valueOf(preferences.hashCode());
+        Integer currentHashcode = preferences.hashCode();
         putClientProperty("preferences-hashCode", currentHashcode);
 
         String source = api.getSource(entry);

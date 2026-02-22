@@ -244,10 +244,8 @@ public final class NexusSearchPanel extends JPanel {
                     return;
                 }
                 int row = resultTable.rowAtPoint(e.getPoint());
-                if (row >= 0) {
-                    if (!resultTable.getSelectionModel().isSelectedIndex(row)) {
-                        resultTable.getSelectionModel().setSelectionInterval(row, row);
-                    }
+                if ((row >= 0) && !resultTable.getSelectionModel().isSelectedIndex(row)) {
+                    resultTable.getSelectionModel().setSelectionInterval(row, row);
                 }
                 int[] selected = resultTable.getSelectedRows();
                 if (selected.length == 2) {

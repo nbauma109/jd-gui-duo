@@ -3,7 +3,6 @@ package org.jd.gui.util;
 public final class Key {
 
     private Key() {
-        super();
     }
 
     public static String key(CharSequence internalName, CharSequence name, CharSequence descriptor) {

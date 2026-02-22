@@ -48,7 +48,7 @@ public class PropertyFileIndexerProvider extends AbstractIndexerProvider {
         }
 
         indexAll(entry, indexes, stringSet);
-        
+
         try {
             ProgressUtil.updateProgress(entry, getProgressFunction, setProgressFunction);
         } catch (IOException e) {

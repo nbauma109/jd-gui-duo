@@ -20,7 +20,6 @@ import java.nio.charset.StandardCharsets;
 public final class TextReader {
 
     private TextReader() {
-        super();
     }
 
     public static String getText(File file) {

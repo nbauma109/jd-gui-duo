@@ -209,7 +209,7 @@ public abstract class AbstractTypeFileTreeNodeFactoryProvider extends AbstractTr
             this.label = label;
             this.icon = icon;
         }
-        
+
         public String getLabel() {
             return label;
         }

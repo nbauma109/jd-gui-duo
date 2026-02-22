@@ -22,6 +22,7 @@ class SizeChange implements Comparable<SizeChange> {
     /**
      * compare two objects
      */
+    @Override
     public int compareTo(SizeChange inOther) {
         if (inOther.changed != changed) {
             return changed ? 1 : -1;
@@ -51,6 +52,7 @@ class SizeChange implements Comparable<SizeChange> {
     /**
      * @return value as a string for display
      */
+    @Override
     public String toString() {
         if (!changed) {
             return "";

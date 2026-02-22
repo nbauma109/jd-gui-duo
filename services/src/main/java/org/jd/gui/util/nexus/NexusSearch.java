@@ -47,7 +47,7 @@ public interface NexusSearch {
      * A null version means we search across versions.
      */
     NexusSearchResult searchByGav(String groupId, String artifactId, String version, String classifier, String packaging, int pageNo) throws Exception;
-    
+
     /**
      * We search by class name.
      * If fullyQualified is true, we treat the input as a fully qualified class name.
