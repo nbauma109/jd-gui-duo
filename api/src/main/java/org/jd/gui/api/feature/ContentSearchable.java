@@ -8,9 +8,12 @@
 package org.jd.gui.api.feature;
 
 public interface ContentSearchable {
-    boolean highlightText(String text, boolean caseSensitive);
+    boolean highlightText(String text, SearchType searchType);
 
-    void findNext(String text, boolean caseSensitive);
+    void findNext(String text, SearchType searchType);
 
-    void findPrevious(String text, boolean caseSensitive);
+    void findPrevious(String text, SearchType searchType);
+
+    record SearchType(boolean caseSensitive, boolean wholeWord, boolean regex) {
+    }
 }

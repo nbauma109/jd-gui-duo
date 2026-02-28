@@ -102,6 +102,8 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     private Box findPanel;
     private JComboBox<String> findComboBox;
     private JCheckBox findCaseSensitive;
+    private JCheckBox findWholeWord;
+    private JCheckBox findRegex;
     private Color findBackgroundColor;
     private Color findErrorBackgroundColor;
 
@@ -131,7 +133,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             ActionListener findActionListener,
             ActionListener findPreviousActionListener,
             ActionListener findNextActionListener,
-            ActionListener findCaseSensitiveActionListener,
+            ActionListener findWithOptionsActionListener,
             Runnable findCriteriaChangedCallback,
             ActionListener openTypeActionListener,
             ActionListener openTypeHierarchyActionListener,
@@ -218,10 +220,18 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
 
             findPanel.add(toolBar);
             findCaseSensitive = new JCheckBox();
-            findCaseSensitive.setAction(newAction("Case sensitive", true, findCaseSensitiveActionListener));
+            findCaseSensitive.setAction(newAction("Case sensitive", true, findWithOptionsActionListener));
             findPanel.add(findCaseSensitive);
-            findPanel.add(Box.createHorizontalGlue());
 
+            findWholeWord = new JCheckBox();
+            findWholeWord.setAction(newAction("Whole word", true, findWithOptionsActionListener));
+            findPanel.add(findWholeWord);
+            
+            findRegex = new JCheckBox();
+            findRegex.setAction(newAction("Regex", true, findWithOptionsActionListener));
+            findPanel.add(findRegex);
+            findPanel.add(Box.createHorizontalGlue());
+            
             IconButton findCloseButton = new IconButton(newAction(null, null, true, e -> findPanel.setVisible(false)));
             findCloseButton.setContentAreaFilled(false);
             findCloseButton.setIcon(newImageIcon("/org/jd/gui/images/close.gif"));
@@ -495,8 +505,8 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
         }
     }
 
-    public boolean getFindCaseSensitive() {
-        return findCaseSensitive.isSelected();
+    public ContentSearchable.SearchType getSearchType() {
+        return new ContentSearchable.SearchType(findCaseSensitive.isSelected(), findWholeWord.isSelected(), findRegex.isSelected());
     }
 
     public void updateHistoryActions() {

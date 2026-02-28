@@ -86,11 +86,11 @@ public class DynamicPage
 
     // --- ContentSearchable --- //
     @Override
-    public boolean highlightText(String text, boolean caseSensitive) { return page.highlightText(text, caseSensitive); }
+    public boolean highlightText(String text, SearchType searchType) { return page.highlightText(text, searchType); }
     @Override
-    public void findNext(String text, boolean caseSensitive) { page.findNext(text, caseSensitive); }
+    public void findNext(String text, SearchType searchType) { page.findNext(text, searchType); }
     @Override
-    public void findPrevious(String text, boolean caseSensitive) { page.findPrevious(text, caseSensitive); }
+    public void findPrevious(String text, SearchType searchType) { page.findPrevious(text, searchType); }
 
     // --- ContentSelectable --- //
     @Override
