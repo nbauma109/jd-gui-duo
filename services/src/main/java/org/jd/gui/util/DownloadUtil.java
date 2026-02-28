@@ -35,6 +35,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
 /**
@@ -87,13 +88,22 @@ public final class DownloadUtil {
             }
         }
 
-        return downloadToTemp(uri, proxyConfig);
+        return downloadToTemp(uri, proxyConfig, nexusConfig);
     }
 
     /**
      * We download using an optional explicit proxy configuration.
      */
     public static File downloadToTemp(URI uri, ProxyConfig proxyConfig) throws IOException {
+        return downloadToTemp(uri, proxyConfig, null);
+    }
+
+    /**
+     * We download using an optional explicit proxy configuration and
+     * optional Nexus credentials. Nexus credentials are only applied when
+     * the target URI belongs to the configured Nexus base URL.
+     */
+    public static File downloadToTemp(URI uri, ProxyConfig proxyConfig, NexusConfig nexusConfig) throws IOException {
         if (uri == null) {
             throw new IllegalArgumentException("URI must not be null");
         }
@@ -123,6 +133,10 @@ public final class DownloadUtil {
         conn.setInstanceFollowRedirects(true);
         if (proxyAuth != null) {
             conn.setRequestProperty("Proxy-Authorization", proxyAuth);
+        }
+        String nexusAuth = nexusBasicAuthHeaderValue(uri, nexusConfig);
+        if (nexusAuth != null) {
+            conn.setRequestProperty("Authorization", nexusAuth);
         }
 
         int code = conn.getResponseCode();
@@ -245,5 +259,86 @@ public final class DownloadUtil {
 
     private static String urlDecode(String s) {
         return URLDecoder.decode(s, StandardCharsets.UTF_8);
+    }
+
+    private static String nexusBasicAuthHeaderValue(URI targetUri, NexusConfig nexusConfig) {
+        if (targetUri == null || nexusConfig == null) {
+            return null;
+        }
+        if (!isUriUnderBaseUrl(targetUri, nexusConfig.baseUrl)) {
+            return null;
+        }
+        if (StringUtils.isBlank(nexusConfig.username)
+                || nexusConfig.password == null
+                || nexusConfig.password.length == 0) {
+            return null;
+        }
+
+        String creds = nexusConfig.username + ":" + new String(nexusConfig.password);
+        String enc = Base64.getEncoder().encodeToString(creds.getBytes(StandardCharsets.ISO_8859_1));
+        return "Basic " + enc;
+    }
+
+    private static boolean isUriUnderBaseUrl(URI targetUri, String baseUrl) {
+        if (targetUri == null || StringUtils.isBlank(baseUrl)) {
+            return false;
+        }
+
+        URI baseUri;
+        try {
+            baseUri = URI.create(baseUrl.trim());
+        } catch (Exception ignored) {
+            return false;
+        }
+
+        if (!sameIgnoreCase(baseUri.getScheme(), targetUri.getScheme())) {
+            return false;
+        }
+        if (!sameIgnoreCase(baseUri.getHost(), targetUri.getHost())) {
+            return false;
+        }
+        if (effectivePort(baseUri) != effectivePort(targetUri)) {
+            return false;
+        }
+
+        String basePath = normalizePath(baseUri.getPath());
+        String targetPath = normalizePath(targetUri.getPath());
+
+        if ("/".equals(basePath)) {
+            return true;
+        }
+        return targetPath.equals(basePath) || targetPath.startsWith(basePath + "/");
+    }
+
+    private static int effectivePort(URI uri) {
+        int explicit = uri.getPort();
+        if (explicit >= 0) {
+            return explicit;
+        }
+        if ("http".equalsIgnoreCase(uri.getScheme())) {
+            return 80;
+        }
+        if ("https".equalsIgnoreCase(uri.getScheme())) {
+            return 443;
+        }
+        return -1;
+    }
+
+    private static boolean sameIgnoreCase(String a, String b) {
+        if (a == null || b == null) {
+            return false;
+        }
+        return a.equalsIgnoreCase(b);
+    }
+
+    private static String normalizePath(String path) {
+        if (StringUtils.isBlank(path)) {
+            return "/";
+        }
+        String result = path.trim();
+        while (result.length() > 1 && result.endsWith("/")) {
+            result = result.substring(0, result.length() - 1);
+        }
+        return result;
     }
 }
