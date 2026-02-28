@@ -95,6 +95,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -210,6 +211,11 @@ public class MainController implements API {
             mainView.show(configuration.getMainWindowLocation(), configuration.getMainWindowSize(), configuration.isMainWindowMaximize());
             if (!files.isEmpty()) {
                 openFiles(files);
+            } else {
+                List<File> rememberedOpenFiles = getRememberedOpenFiles();
+                if (!rememberedOpenFiles.isEmpty()) {
+                    openFiles(rememberedOpenFiles);
+                }
             }
         });
 
@@ -849,6 +855,7 @@ public class MainController implements API {
                     mainView.updateRecentFilesMenu(configuration.getRecentFiles());
                 }
             }
+            SwingUtil.invokeLater(this::updateRememberedOpenFiles);
         } else {
             StringBuilder messages = new StringBuilder();
             int index = 0;
@@ -1032,6 +1039,7 @@ public class MainController implements API {
 
     protected void panelClosed() {
         SwingUtil.invokeLater(() -> {
+            updateRememberedOpenFiles();
             // Fire 'indexesChanged' event
             Collection<Future<Indexes>> collectionOfFutureIndexes = getCollectionOfFutureIndexes();
             for (IndexesChangeListener listener : containerChangeListeners) {
@@ -1041,6 +1049,57 @@ public class MainController implements API {
                 icl.indexesChanged(collectionOfFutureIndexes);
             }
         });
+    }
+
+    protected List<File> getRememberedOpenFiles() {
+        List<File> rememberedOpenFiles = configuration.getOpenFiles();
+
+        if (rememberedOpenFiles == null || rememberedOpenFiles.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Set<File> existingFiles = new LinkedHashSet<>();
+        for (File file : rememberedOpenFiles) {
+            if (file != null && file.exists()) {
+                existingFiles.add(file);
+            }
+        }
+        return new ArrayList<>(existingFiles);
+    }
+
+    protected void updateRememberedOpenFiles() {
+        if (mainView == null) {
+            return;
+        }
+
+        List<JComponent> mainPanels = mainView.getMainPanels();
+        List<File> openFiles = new ArrayList<>(mainPanels.size());
+        Set<File> deduplicatedOpenFiles = new LinkedHashSet<>();
+
+        // MainView.getMainPanels() currently returns tabs in reverse order.
+        for (int i = mainPanels.size() - 1; i >= 0; i--) {
+            JComponent panel = mainPanels.get(i);
+            if (panel instanceof UriGettable uriGettable) {
+                File file = toFile(uriGettable.getUri());
+                if (file != null && deduplicatedOpenFiles.add(file)) {
+                    openFiles.add(file);
+                }
+            }
+        }
+
+        configuration.setOpenFiles(openFiles);
+    }
+
+    protected static File toFile(URI uri) {
+        if (uri == null || !"file".equalsIgnoreCase(uri.getScheme())) {
+            return null;
+        }
+        try {
+            return new File(uri);
+        } catch (IllegalArgumentException e) {
+            assert ExceptionUtil.printStackTrace(e);
+        }
+        return null;
     }
 
     // --- API --- //
@@ -1097,6 +1156,7 @@ public class MainController implements API {
     @SuppressWarnings("unchecked")
     public <T extends JComponent & UriGettable> void addPanel(File file, String title, Supplier<Icon> iconSupplier, String tip, T component) {
         mainView.addMainPanel(title, iconSupplier, tip, component);
+        SwingUtil.invokeLater(this::updateRememberedOpenFiles);
 
         if (component instanceof ContentIndexable ci && file != null) {
             UIManager.put("ProgressMonitor.progressText", title);

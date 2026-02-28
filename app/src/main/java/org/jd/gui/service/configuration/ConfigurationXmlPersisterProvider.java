@@ -79,6 +79,7 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
                 String name = "";
                 Deque<String> names = new ArrayDeque<>();
                 List<File> recentFiles = new ArrayList<>();
+                List<File> openFiles = new ArrayList<>();
                 boolean maximize = false;
                 Map<String, String> preferences = config.getPreferences();
 
@@ -110,6 +111,12 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
                                     file = new File(reader.getText().trim());
                                     if (file.exists()) {
                                         config.setRecentLoadDirectory(file);
+                                    }
+                                    break;
+                                case "/configuration/openFilePaths/filePath":
+                                    file = new File(reader.getText().trim());
+                                    if (file.exists()) {
+                                        openFiles.add(file);
                                     }
                                     break;
                                 case "/configuration/recentDirectories/savePath":
@@ -145,6 +152,7 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
                     recentFiles = recentFiles.subList(0, Constants.MAX_RECENT_FILES);
                 }
                 config.setRecentFiles(recentFiles);
+                config.setOpenFiles(openFiles);
 
                 if (x >= 0 && y >= 0 && x + w < screenSize.width && y + h < screenSize.height) {
                     // Update preferences
@@ -234,6 +242,19 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
                 writer.writeCharacters(NEW_LINE_2_TABS);
                 writer.writeStartElement("filePath");
                     writer.writeCharacters(recentFile.getAbsolutePath());
+                writer.writeEndElement();
+            }
+
+            writer.writeCharacters("\n\t");
+            writer.writeEndElement();
+            writer.writeCharacters("\n\t");
+
+            writer.writeStartElement("openFilePaths");
+
+            for (File openFile : configuration.getOpenFiles()) {
+                writer.writeCharacters(NEW_LINE_2_TABS);
+                writer.writeStartElement("filePath");
+                    writer.writeCharacters(openFile.getAbsolutePath());
                 writer.writeEndElement();
             }
 

@@ -24,6 +24,7 @@ public class Configuration {
     private String lookAndFeel;
 
     private List<File> recentFiles = new ArrayList<>();
+    private List<File> openFiles = new ArrayList<>();
 
     private File recentLoadDirectory;
     private File recentSaveDirectory;
@@ -52,6 +53,10 @@ public class Configuration {
 
     public File getRecentLoadDirectory() {
         return recentLoadDirectory;
+    }
+
+    public List<File> getOpenFiles() {
+        return openFiles;
     }
 
     public File getRecentSaveDirectory() {
@@ -84,6 +89,10 @@ public class Configuration {
 
     public void setRecentLoadDirectory(File recentLoadDirectory) {
         this.recentLoadDirectory = recentLoadDirectory;
+    }
+
+    public void setOpenFiles(List<File> openFiles) {
+        this.openFiles = openFiles;
     }
 
     public void setRecentSaveDirectory(File recentSaveDirectory) {
