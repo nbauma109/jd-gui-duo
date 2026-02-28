@@ -11,6 +11,7 @@ public final class GuiPreferences {
 
     public static final String MAXIMUM_DEPTH_KEY        = "DirectoryIndexerPreferences.maximumDepth";
     public static final String FONT_SIZE_KEY            = "ViewerPreferences.fontSize";
+    public static final String TREE_NODE_FONT_SIZE_KEY  = "ViewerPreferences.treeNodeFontSize";
     public static final String ERROR_BACKGROUND_COLOR   = "JdGuiPreferences.errorBackgroundColor";
     public static final String DECOMPILE_ENGINE         = "ClassFileDecompilerPreferences.decompileEngine";
     public static final String SHOW_COMPILER_ERRORS     = "ClassFileDecompilerPreferences.showCompilerErrors";

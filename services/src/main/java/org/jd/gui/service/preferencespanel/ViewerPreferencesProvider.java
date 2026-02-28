@@ -12,11 +12,12 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil
 import org.jd.gui.spi.PreferencesPanel;
 import org.jd.gui.util.ThemeUtil;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.GridLayout;
 import java.util.Map;
 
 import javax.swing.JComponent;
+import javax.swing.JTree;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -24,6 +25,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import static org.jd.gui.util.decompiler.GuiPreferences.FONT_SIZE_KEY;
+import static org.jd.gui.util.decompiler.GuiPreferences.TREE_NODE_FONT_SIZE_KEY;
 
 public class ViewerPreferencesProvider extends JPanel implements PreferencesPanel, DocumentListener {
 
@@ -33,17 +35,24 @@ public class ViewerPreferencesProvider extends JPanel implements PreferencesPane
 
     protected transient PreferencesPanel.PreferencesPanelChangeListener listener;
     protected JTextField fontSizeTextField;
+    protected JTextField treeNodeFontSizeTextField;
     protected Color errorBackgroundColor = Color.RED;
     protected Color defaultBackgroundColor;
 
     public ViewerPreferencesProvider() {
-        super(new BorderLayout());
+        super(new GridLayout(2, 2, 6, 4));
 
-        add(new JLabel("Font size (" + MIN_VALUE + ".." + MAX_VALUE + "): "), BorderLayout.WEST);
+        add(new JLabel("Font Size Of Text Area (" + MIN_VALUE + ".." + MAX_VALUE + "): "));
 
         fontSizeTextField = new JTextField();
         fontSizeTextField.getDocument().addDocumentListener(this);
-        add(fontSizeTextField, BorderLayout.CENTER);
+        add(fontSizeTextField);
+
+        add(new JLabel("Font Size Of Tree Node (" + MIN_VALUE + ".." + MAX_VALUE + "): "));
+
+        treeNodeFontSizeTextField = new JTextField();
+        treeNodeFontSizeTextField.getDocument().addDocumentListener(this);
+        add(treeNodeFontSizeTextField);
 
         defaultBackgroundColor = fontSizeTextField.getBackground();
     }
@@ -67,6 +76,7 @@ public class ViewerPreferencesProvider extends JPanel implements PreferencesPane
     @Override
     public void loadPreferences(Map<String, String> preferences) {
         String fontSize = preferences.get(FONT_SIZE_KEY);
+        String treeNodeFontSize = preferences.get(TREE_NODE_FONT_SIZE_KEY);
 
         if (fontSize == null) {
             // Search default value for the current platform
@@ -74,20 +84,29 @@ public class ViewerPreferencesProvider extends JPanel implements PreferencesPane
 
             fontSize = String.valueOf(textArea.getFont().getSize());
         }
+        if (treeNodeFontSize == null) {
+            treeNodeFontSize = String.valueOf(new JTree().getFont().getSize());
+        }
 
         fontSizeTextField.setText(fontSize);
         fontSizeTextField.setCaretPosition(fontSizeTextField.getText().length());
+        treeNodeFontSizeTextField.setText(treeNodeFontSize);
+        treeNodeFontSizeTextField.setCaretPosition(treeNodeFontSizeTextField.getText().length());
     }
 
     @Override
     public void savePreferences(Map<String, String> preferences) {
         preferences.put(FONT_SIZE_KEY, fontSizeTextField.getText());
+        preferences.put(TREE_NODE_FONT_SIZE_KEY, treeNodeFontSizeTextField.getText());
     }
 
     @Override
     public boolean arePreferencesValid() {
+        return isValidFontSize(fontSizeTextField.getText()) && isValidFontSize(treeNodeFontSizeTextField.getText());
+    }
+
+    protected boolean isValidFontSize(String fontSize) {
         try {
-            String fontSize = fontSizeTextField.getText();
             if (fontSize != null && fontSize.matches("\\d+")) {
                 int i = Integer.parseInt(fontSize);
                 return i >= MIN_VALUE && i <= MAX_VALUE;
@@ -96,7 +115,6 @@ public class ViewerPreferencesProvider extends JPanel implements PreferencesPane
             assert ExceptionUtil.printStackTrace(e);
         }
         return false;
-
     }
 
     @Override
@@ -113,7 +131,8 @@ public class ViewerPreferencesProvider extends JPanel implements PreferencesPane
     public void changedUpdate(DocumentEvent e) { onTextChange(); }
 
     public void onTextChange() {
-        fontSizeTextField.setBackground(arePreferencesValid() ? defaultBackgroundColor : errorBackgroundColor);
+        fontSizeTextField.setBackground(isValidFontSize(fontSizeTextField.getText()) ? defaultBackgroundColor : errorBackgroundColor);
+        treeNodeFontSizeTextField.setBackground(isValidFontSize(treeNodeFontSizeTextField.getText()) ? defaultBackgroundColor : errorBackgroundColor);
 
         if (listener != null) {
             listener.preferencesPanelChanged(this);
@@ -123,6 +142,7 @@ public class ViewerPreferencesProvider extends JPanel implements PreferencesPane
     @Override
     public void restoreDefaults() {
         fontSizeTextField.setText("12");
+        treeNodeFontSizeTextField.setText(String.valueOf(new JTree().getFont().getSize()));
     }
 
     @Override

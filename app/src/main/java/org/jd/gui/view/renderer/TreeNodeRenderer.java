@@ -59,6 +59,7 @@ public class TreeNodeRenderer implements TreeCellRenderer {
 
     @Override
     public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+        label.setFont(tree.getFont());
         Object data = ((DefaultMutableTreeNode)value).getUserObject();
         if (data instanceof TreeNodeData tnd) {
             icon.setIcon(expanded && tnd.getOpenIcon() != null ? tnd.getOpenIcon() : tnd.getIcon());

@@ -25,8 +25,10 @@ import org.jd.gui.view.renderer.TreeNodeRenderer;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelListener;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -50,9 +52,13 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
+import static org.jd.gui.util.decompiler.GuiPreferences.TREE_NODE_FONT_SIZE_KEY;
+
 public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> extends JPanel implements UriGettable, UriOpenable, PageChangeable, PageClosable, PreferencesChangeListener {
 
     private static final long serialVersionUID = 1L;
+    private static final int MIN_TREE_NODE_FONT_SIZE = 2;
+    private static final int MAX_TREE_NODE_FONT_SIZE = 40;
     protected final transient API api;
     private final URI uri;
     protected final Tree tree;
@@ -63,11 +69,13 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
     private boolean updateTreeMenuEnabled = true;
     private boolean openUriEnabled = true;
     private boolean treeNodeChangedEnabled = true;
+    private transient Map<String, String> preferences;
 
     @SuppressWarnings("unchecked")
     public TreeTabbedPanel(API api, URI uri) {
         this.api = api;
         this.uri = uri;
+        this.preferences = api.getPreferences();
 
         tree = new Tree();
         tree.setShowsRootHandles(true);
@@ -131,10 +139,65 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
 
         setLayout(new BorderLayout());
 
-        JSplitPane splitter = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(tree), tabbedPanel);
+        JScrollPane treeScrollPane = new JScrollPane(tree);
+        final MouseWheelListener[] mouseWheelListeners = treeScrollPane.getMouseWheelListeners();
+        for (MouseWheelListener listener : mouseWheelListeners) {
+            treeScrollPane.removeMouseWheelListener(listener);
+        }
+        treeScrollPane.addMouseWheelListener(e -> {
+            if ((e.getModifiersEx() & (InputEvent.META_DOWN_MASK | InputEvent.CTRL_DOWN_MASK)) != 0) {
+                if (e.getWheelRotation() > 0) {
+                    updateTreeNodeFontSize(-1);
+                } else {
+                    updateTreeNodeFontSize(1);
+                }
+            } else {
+                for (MouseWheelListener listener : mouseWheelListeners) {
+                    listener.mouseWheelMoved(e);
+                }
+            }
+        });
+
+        applyTreeNodeFontSize(preferences);
+
+        JSplitPane splitter = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScrollPane, tabbedPanel);
         splitter.setResizeWeight(0.2);
 
         add(splitter, BorderLayout.CENTER);
+    }
+
+    protected void updateTreeNodeFontSize(int delta) {
+        int currentFontSize = tree.getFont().getSize();
+        int newFontSize = Math.max(MIN_TREE_NODE_FONT_SIZE, Math.min(MAX_TREE_NODE_FONT_SIZE, currentFontSize + delta));
+
+        if (newFontSize != currentFontSize) {
+            setTreeNodeFontSize(newFontSize);
+            if (preferences != null) {
+                preferences.put(TREE_NODE_FONT_SIZE_KEY, String.valueOf(newFontSize));
+            }
+        }
+    }
+
+    protected void setTreeNodeFontSize(int fontSize) {
+        tree.setFont(tree.getFont().deriveFont((float)fontSize));
+        tree.setRowHeight(0);
+        tree.fireVisibleDataPropertyChange();
+        tree.revalidate();
+        tree.repaint();
+    }
+
+    protected void applyTreeNodeFontSize(Map<String, String> preferences) {
+        String fontSize = preferences.get(TREE_NODE_FONT_SIZE_KEY);
+        if (fontSize != null) {
+            try {
+                int parsed = Integer.parseInt(fontSize);
+                int bounded = Math.max(MIN_TREE_NODE_FONT_SIZE, Math.min(MAX_TREE_NODE_FONT_SIZE, parsed));
+                setTreeNodeFontSize(bounded);
+            } catch (NumberFormatException e) {
+                assert ExceptionUtil.printStackTrace(e);
+            }
+        }
+        this.preferences = preferences;
     }
 
     protected static int createHashCode(@SuppressWarnings("all") Enumeration enumeration) {
@@ -352,6 +415,7 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
     @Override
     @SuppressWarnings("unchecked")
     public void preferencesChanged(Map<String, String> preferences) {
+        applyTreeNodeFontSize(preferences);
         tabbedPanel.preferencesChanged(preferences);
     }
 }
