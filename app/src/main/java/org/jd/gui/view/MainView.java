@@ -58,7 +58,6 @@ import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -68,6 +67,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
@@ -101,9 +101,9 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     private MainTabbedPanel mainTabbedPanel;
     private Box findPanel;
     private JComboBox<String> findComboBox;
-    private JCheckBox findCaseSensitive;
-    private JCheckBox findWholeWord;
-    private JCheckBox findRegex;
+    private JToggleButton findCaseSensitive;
+    private JToggleButton findWholeWord;
+    private JToggleButton findRegex;
     private Color findBackgroundColor;
     private Color findErrorBackgroundColor;
 
@@ -219,17 +219,15 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             toolBar.add(findPreviousButton);
 
             findPanel.add(toolBar);
-            findCaseSensitive = new JCheckBox();
-            findCaseSensitive.setAction(newAction("Case sensitive", true, findWithOptionsActionListener));
+            findCaseSensitive = createToggleIconButton(findWithOptionsActionListener, "/org/netbeans/modules/editor/search/resources/matchCase.png", "Match Case");
             findPanel.add(findCaseSensitive);
 
-            findWholeWord = new JCheckBox();
-            findWholeWord.setAction(newAction("Whole word", true, findWithOptionsActionListener));
+            findWholeWord = createToggleIconButton(findWithOptionsActionListener, "/org/netbeans/modules/editor/search/resources/wholeWord.png", "Whole word");
             findPanel.add(findWholeWord);
             
-            findRegex = new JCheckBox();
-            findRegex.setAction(newAction("Regex", true, findWithOptionsActionListener));
+            findRegex = createToggleIconButton(findWithOptionsActionListener, "/org/netbeans/modules/editor/search/resources/regexp.png", "Regex");
             findPanel.add(findRegex);
+
             findPanel.add(Box.createHorizontalGlue());
             
             IconButton findCloseButton = new IconButton(newAction(null, null, true, e -> findPanel.setVisible(false)));
@@ -429,6 +427,13 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             mainFrame.add(panel);
         });
     }
+
+	private JToggleButton createToggleIconButton(ActionListener actionListener, String iconPath, String tooltip) {
+		JToggleButton button = new JToggleButton();
+		button.setFocusPainted(false);
+		button.setAction(newAction(newImageIcon(iconPath), true, tooltip, actionListener));
+		return button;
+	}
 
     public void show(Point location, Dimension size, boolean maximize) {
         invokeLater(() -> {
