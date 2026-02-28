@@ -18,6 +18,8 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Locale;
 import java.util.function.Consumer;
 
@@ -113,9 +115,11 @@ public class QuickOutlineView {
 
                 @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    quickOutlineDialog.setVisible(false);
+                    closeDialog();
                 }
             });
+
+            installAutoCloseHandlers();
 
             quickOutlineDialog.pack();
             quickOutlineDialog.setLocationRelativeTo(mainFrame);
@@ -154,9 +158,24 @@ public class QuickOutlineView {
                 String fragment = cellBean.fragment();
                 if (fragment != null && !fragment.isEmpty()) {
                     selectedMemberCallback.accept(fragment);
-                    quickOutlineDialog.setVisible(false);
+                    closeDialog();
                 }
             }
+        }
+    }
+
+     private void installAutoCloseHandlers() {
+         quickOutlineDialog.addWindowFocusListener(new WindowAdapter() {
+             @Override
+             public void windowLostFocus(WindowEvent e) {
+                 closeDialog();
+             }
+         });
+     }
+
+     private void closeDialog() {
+        if (quickOutlineDialog != null && quickOutlineDialog.isVisible()) {
+            quickOutlineDialog.setVisible(false);
         }
     }
 
