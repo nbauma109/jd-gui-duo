@@ -224,12 +224,12 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
 
             findWholeWord = createToggleIconButton(findWithOptionsActionListener, "/org/netbeans/modules/editor/search/resources/wholeWord.png", "Whole word");
             findPanel.add(findWholeWord);
-            
+
             findRegex = createToggleIconButton(findWithOptionsActionListener, "/org/netbeans/modules/editor/search/resources/regexp.png", "Regex");
             findPanel.add(findRegex);
 
             findPanel.add(Box.createHorizontalGlue());
-            
+
             IconButton findCloseButton = new IconButton(newAction(null, null, true, e -> findPanel.setVisible(false)));
             findCloseButton.setContentAreaFilled(false);
             findCloseButton.setIcon(newImageIcon("/org/jd/gui/images/close.gif"));
