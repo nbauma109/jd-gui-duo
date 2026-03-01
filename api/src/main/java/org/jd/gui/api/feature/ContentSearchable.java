@@ -14,6 +14,6 @@ public interface ContentSearchable {
 
     void findPrevious(String text, SearchType searchType);
 
-    record SearchType(boolean caseSensitive, boolean wholeWord, boolean regex) {
+    record SearchType(boolean caseSensitive, boolean wholeWord, boolean regex, boolean markAll, boolean wrap) {
     }
 }

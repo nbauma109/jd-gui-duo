@@ -88,7 +88,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
                     textArea.setMarkAllHighlightColor(DOUBLE_CLICK_HIGHLIGHT_COLOR);
-                    SearchEngine.markAll(textArea, newSearchContext(textArea.getSelectedText(), true, true, true, false));
+                    SearchEngine.markAll(textArea, newSearchContext(textArea.getSelectedText(), true, true, true, false, true, false));
                 }
             }
         });
@@ -289,7 +289,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
             textArea.setMarkAllHighlightColor(SEARCH_HIGHLIGHT_COLOR);
             textArea.setCaretPosition(textArea.getSelectionStart());
 
-            SearchContext context = newSearchContext(text, searchType.caseSensitive(), searchType.wholeWord(), true, searchType.regex());
+            SearchContext context = newSearchContext(text, searchType.caseSensitive(), searchType.wholeWord(), true, searchType.regex(), searchType.markAll(), searchType.wrap());
             SearchResult result = SearchEngine.find(textArea, context);
 
             if (!result.wasFound()) {
@@ -307,7 +307,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
         if (text.length() > 1) {
             textArea.setMarkAllHighlightColor(SEARCH_HIGHLIGHT_COLOR);
 
-            SearchContext context = newSearchContext(text, searchType.caseSensitive(), searchType.wholeWord(), true, searchType.regex());
+            SearchContext context = newSearchContext(text, searchType.caseSensitive(), searchType.wholeWord(), true, searchType.regex(), searchType.markAll(), searchType.wrap());
             SearchResult result = SearchEngine.find(textArea, context);
 
             if (!result.wasFound()) {
@@ -322,7 +322,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
         if (text.length() > 1) {
             textArea.setMarkAllHighlightColor(SEARCH_HIGHLIGHT_COLOR);
 
-            SearchContext context = newSearchContext(text, searchType.caseSensitive(), searchType.wholeWord(), false, searchType.regex());
+            SearchContext context = newSearchContext(text, searchType.caseSensitive(), searchType.wholeWord(), false, searchType.regex(), searchType.markAll(), searchType.wrap());
             SearchResult result = SearchEngine.find(textArea, context);
 
             if (!result.wasFound()) {
@@ -332,9 +332,10 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
         }
     }
 
-    protected SearchContext newSearchContext(String searchFor, boolean matchCase, boolean wholeWord, boolean searchForward, boolean regexp) {
+    protected SearchContext newSearchContext(String searchFor, boolean matchCase, boolean wholeWord, boolean searchForward, boolean regexp, boolean markAll, boolean wrap) {
         SearchContext context = new SearchContext(searchFor, matchCase);
-        context.setMarkAll(true);
+        context.setMarkAll(markAll);
+        context.setSearchWrap(wrap);
         context.setWholeWord(wholeWord);
         context.setSearchForward(searchForward);
         context.setRegularExpression(regexp);
@@ -379,7 +380,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
 
                     // Highlight all
                     String searchFor = createRegExp(parameters.get("highlightPattern"));
-                    SearchContext context = newSearchContext(searchFor, true, false, true, true);
+                    SearchContext context = newSearchContext(searchFor, true, false, true, true, true, false);
                     SearchResult result = SearchEngine.find(textArea, context);
 
                     if (result.getMatchRange() != null) {

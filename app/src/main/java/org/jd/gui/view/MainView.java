@@ -67,7 +67,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
@@ -101,9 +100,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     private MainTabbedPanel mainTabbedPanel;
     private Box findPanel;
     private JComboBox<String> findComboBox;
-    private JToggleButton findCaseSensitive;
-    private JToggleButton findWholeWord;
-    private JToggleButton findRegex;
+    private SearchUIOptions searchUIOptions;
     private Color findBackgroundColor;
     private Color findErrorBackgroundColor;
 
@@ -219,14 +216,9 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             toolBar.add(findPreviousButton);
 
             findPanel.add(toolBar);
-            findCaseSensitive = createToggleIconButton(findWithOptionsActionListener, "/org/netbeans/modules/editor/search/resources/matchCase.png", "Match Case");
-            findPanel.add(findCaseSensitive);
-
-            findWholeWord = createToggleIconButton(findWithOptionsActionListener, "/org/netbeans/modules/editor/search/resources/wholeWord.png", "Whole word");
-            findPanel.add(findWholeWord);
             
-            findRegex = createToggleIconButton(findWithOptionsActionListener, "/org/netbeans/modules/editor/search/resources/regexp.png", "Regex");
-            findPanel.add(findRegex);
+            searchUIOptions = new SearchUIOptions(findWithOptionsActionListener);
+            searchUIOptions.attachTo(toolBar);
 
             findPanel.add(Box.createHorizontalGlue());
             
@@ -428,13 +420,6 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
         });
     }
 
-	private JToggleButton createToggleIconButton(ActionListener actionListener, String iconPath, String tooltip) {
-		JToggleButton button = new JToggleButton();
-		button.setFocusPainted(false);
-		button.setAction(newAction(newImageIcon(iconPath), true, tooltip, actionListener));
-		return button;
-	}
-
     public void show(Point location, Dimension size, boolean maximize) {
         invokeLater(() -> {
             // Set position, resize and show
@@ -511,7 +496,13 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     }
 
     public ContentSearchable.SearchType getSearchType() {
-        return new ContentSearchable.SearchType(findCaseSensitive.isSelected(), findWholeWord.isSelected(), findRegex.isSelected());
+        return new ContentSearchable.SearchType(
+            searchUIOptions.isMatchCaseButtonSelected(),
+            searchUIOptions.isWholeWordButtonSelected(),
+            searchUIOptions.isRegexButtonSelected(),
+            searchUIOptions.isMarkAllButtonSelected(),
+            searchUIOptions.isWrapButtonSelected()
+        );
     }
 
     public void updateHistoryActions() {

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2021-2026 Nicolas Baumann (@nbauma109).
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -28,6 +29,7 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.spi.ContextualActionsFactory;
 import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.ThemeUtil;
+import org.jd.gui.view.SearchUIOptions;
 
 import com.github.freva.asciitable.AsciiTable;
 import com.github.freva.asciitable.Column;
@@ -52,7 +54,6 @@ import javax.swing.ActionMap;
 import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -75,8 +76,8 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
         private static final long serialVersionUID = 1L;
 
         protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/classf_obj.png"));
-        protected static final ImageIcon NEXT_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/forward_nav.png"));
-        protected static final ImageIcon PREV_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/backward_nav.png"));
+        protected static final ImageIcon NEXT_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/next_nav.png"));
+        protected static final ImageIcon PREV_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/prev_nav.png"));
 
         public ShowByteCodeAction(API api, Container.Entry entry, String fragment) {
             super(api, entry, fragment);
@@ -98,18 +99,17 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
             JToolBar toolBar = new JToolBar();
             JTextField searchField = new JTextField(30);
             toolBar.add(searchField);
-            final JButton nextButton = new JButton("Find Next", NEXT_ICON);
+            final JButton nextButton = new JButton("Next", NEXT_ICON);
             nextButton.setActionCommand("FindNext");
-            JButton prevButton = new JButton("Find Previous", PREV_ICON);
+            JButton prevButton = new JButton("Previous", PREV_ICON);
             prevButton.setActionCommand("FindPrev");
-            toolBar.add(prevButton);
             toolBar.add(nextButton);
-            JCheckBox regexCB = new JCheckBox("Regex");
-            toolBar.add(regexCB);
-            JCheckBox matchCaseCB = new JCheckBox("Match Case");
-            toolBar.add(matchCaseCB);
+            toolBar.add(prevButton);
 
-            SearchAction searchAction = new SearchAction(matchCaseCB, regexCB, textArea, searchField);
+            SearchUIOptions searchUIOptions = new SearchUIOptions();
+            searchUIOptions.attachTo(toolBar);
+
+            SearchAction searchAction = new SearchAction(searchUIOptions, textArea, searchField);
             nextButton.addActionListener(searchAction);
             prevButton.addActionListener(searchAction);
 
@@ -227,14 +227,12 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
 
             private static final long serialVersionUID = 1L;
 
-            private JCheckBox matchCaseCB;
-            private JCheckBox regexCB;
-            private JTextArea textArea;
-            private JTextField searchField;
+            private final SearchUIOptions searchUIOptions;
+            private final JTextArea textArea;
+            private final JTextField searchField;
 
-            public SearchAction(JCheckBox matchCaseCB, JCheckBox regexCB, JTextArea textArea, JTextField searchField) {
-                this.matchCaseCB = matchCaseCB;
-                this.regexCB = regexCB;
+            public SearchAction(SearchUIOptions searchUIOptions, JTextArea textArea, JTextField searchField) {
+                this.searchUIOptions = searchUIOptions;
                 this.textArea = textArea;
                 this.searchField = searchField;
             }
@@ -253,11 +251,12 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
                     return;
                 }
                 context.setSearchFor(text);
-                context.setMatchCase(matchCaseCB.isSelected());
-                context.setRegularExpression(regexCB.isSelected());
+                context.setMatchCase(searchUIOptions.isMatchCaseButtonSelected());
+                context.setRegularExpression(searchUIOptions.isRegexButtonSelected());
                 context.setSearchForward(forward);
-                context.setWholeWord(false);
-
+                context.setWholeWord(searchUIOptions.isWholeWordButtonSelected());
+                context.setMarkAll(searchUIOptions.isMarkAllButtonSelected());
+                context.setSearchWrap(searchUIOptions.isWrapButtonSelected());
                 SearchEngine.find(textArea, context);
             }
         }
