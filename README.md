@@ -29,9 +29,11 @@ Looking for an Eclipse plugin ? Try [ECD++](https://github.com/nbauma109/ecd)
 
 # jd-gui-duo
 A 2-in-1 JAVA decompiler based on JD-CORE v0 and v1
- - [![image](https://user-images.githubusercontent.com/9403560/156565769-51264b92-4850-46c1-ad33-a4211a4c89ec.png)](https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/master-SNAPSHOT/jd-gui-duo-master-SNAPSHOT-windows.tar.xz) Windows
- - [![image](https://user-images.githubusercontent.com/9403560/156565769-51264b92-4850-46c1-ad33-a4211a4c89ec.png)](https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/master-SNAPSHOT/jd-gui-duo-master-SNAPSHOT-macos.tar.xz) MacOS
- - [![image](https://user-images.githubusercontent.com/9403560/156565769-51264b92-4850-46c1-ad33-a4211a4c89ec.png)](https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/master-SNAPSHOT/jd-gui-duo-master-SNAPSHOT-linux.tar.xz) Linux
+
+<a href="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/master-SNAPSHOT/jd-gui-duo-master-SNAPSHOT-windows.tar.xz"><img width="200" height="56" alt="image" src="https://github.com/user-attachments/assets/1099ca9f-bed7-43d6-b265-faf44110e2d9" /></a>
+<a href="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/master-SNAPSHOT/jd-gui-duo-master-SNAPSHOT-linux.tar.xz"><img width="200" height="56" alt="image" src="https://github.com/user-attachments/assets/d01a0c37-3657-4786-b50f-807802702b0c" /></a>
+<a href="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/master-SNAPSHOT/jd-gui-duo-master-SNAPSHOT-macos.tar.xz"><img width="200" height="56" alt="image" src="https://github.com/user-attachments/assets/48ddd9fc-843d-4475-89a7-69c92356e84b" /></a>
+
 
 
 Initially a duo of decompilers were supported (JD-Core v0 & v1), but now other decompilers are supported with the [transformer-api](https://github.com/nbauma109/transformer-api) project.
