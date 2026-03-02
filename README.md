@@ -30,11 +30,9 @@ Looking for an Eclipse plugin ? Try [ECD++](https://github.com/nbauma109/ecd)
 # jd-gui-duo
 A 2-in-1 JAVA decompiler based on JD-CORE v0 and v1
 
-<a href="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/master-SNAPSHOT/jd-gui-duo-master-SNAPSHOT-windows.tar.xz"><img width="200" height="56" alt="image" src="https://github.com/user-attachments/assets/1099ca9f-bed7-43d6-b265-faf44110e2d9" /></a>
-<a href="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/master-SNAPSHOT/jd-gui-duo-master-SNAPSHOT-linux.tar.xz"><img width="200" height="56" alt="image" src="https://github.com/user-attachments/assets/d01a0c37-3657-4786-b50f-807802702b0c" /></a>
-<a href="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/master-SNAPSHOT/jd-gui-duo-master-SNAPSHOT-macos.tar.xz"><img width="200" height="56" alt="image" src="https://github.com/user-attachments/assets/48ddd9fc-843d-4475-89a7-69c92356e84b" /></a>
-
-
+[![Windows](https://img.shields.io/badge/%E2%AC%87%20Download-Windows-2ea44f?style=for-the-badge&logo=jitpack&logoColor=white)](https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/master-SNAPSHOT/jd-gui-duo-master-SNAPSHOT-windows.tar.xz)
+[![macOS](https://img.shields.io/badge/%E2%AC%87%20Download-macOS-2ea44f?style=for-the-badge&logo=jitpack&logoColor=white)](https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/master-SNAPSHOT/jd-gui-duo-master-SNAPSHOT-macos.tar.xz)
+[![Linux](https://img.shields.io/badge/%E2%AC%87%20Download-Linux-2ea44f?style=for-the-badge&logo=jitpack&logoColor=white)](https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/master-SNAPSHOT/jd-gui-duo-master-SNAPSHOT-linux.tar.xz)
 
 Initially a duo of decompilers were supported (JD-Core v0 & v1), but now other decompilers are supported with the [transformer-api](https://github.com/nbauma109/transformer-api) project.
 JD-Core v0 and v1 are 2 different decompilers rather than 2 different versions of the same one. They use a different algorithm :
