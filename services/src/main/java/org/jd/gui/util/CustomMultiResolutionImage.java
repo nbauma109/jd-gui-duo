@@ -104,13 +104,13 @@ public class CustomMultiResolutionImage extends BaseMultiResolutionImage {
 
     private static int positiveRoundedDimension(double value) {
         long rounded = Math.round(value);
-        long clamped = Math.max(1L, Math.min(Integer.MAX_VALUE, rounded));
+        long clamped = Math.clamp(rounded, 1L, Integer.MAX_VALUE);
         return (int) clamped;
     }
 
     private static BufferedImage toBufferedImage(Image image) {
-        if (image instanceof BufferedImage) {
-            return (BufferedImage) image;
+        if (image instanceof BufferedImage im) {
+            return im;
         }
 
         int width = image.getWidth(null);
