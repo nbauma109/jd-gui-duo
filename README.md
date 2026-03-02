@@ -23,7 +23,7 @@ Downloads from Sourceforge :
 [![Download jd-gui-duo](https://img.shields.io/sourceforge/dm/jd-gui-duo.svg)](https://sourceforge.net/projects/jd-gui-duo/files/latest/download)
 
 [![Download jd-gui-duo](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/jd-gui-duo/files/latest/download)
-
+<a href="https://sourceforge.net/projects/jd-gui-duo/files/latest/download"><img alt="Download jd-gui-duo" src="https://a.fsdn.com/con/app/sf-download-button" width=138 height=24 srcset="https://a.fsdn.com/con/app/sf-download-button?button_size=2x 2x"></a>
 
 Looking for an Eclipse plugin ? Try [ECD++](https://github.com/nbauma109/ecd)
 
