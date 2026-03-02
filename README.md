@@ -15,7 +15,17 @@ Downloads from Jitpack :
 [![Jitpack Downloads](https://jitpack.io/v/nbauma109/jd-gui-duo/month.svg)](https://jitpack.io/#nbauma109/jd-gui-duo)
 [![Jitpack Downloads](https://jitpack.io/v/nbauma109/jd-gui-duo/week.svg)](https://jitpack.io/#nbauma109/jd-gui-duo)
 
-Looking for an Eclipse plugin ? Try [ECD](https://github.com/nbauma109/ecd)
+Downloads from Sourceforge :
+
+[![Download jd-gui-duo](https://img.shields.io/sourceforge/dt/jd-gui-duo.svg)](https://sourceforge.net/projects/jd-gui-duo/files/latest/download)
+[![Download jd-gui-duo](https://img.shields.io/sourceforge/dd/jd-gui-duo.svg)](https://sourceforge.net/projects/jd-gui-duo/files/latest/download)
+[![Download jd-gui-duo](https://img.shields.io/sourceforge/dw/jd-gui-duo.svg)](https://sourceforge.net/projects/jd-gui-duo/files/latest/download)
+[![Download jd-gui-duo](https://img.shields.io/sourceforge/dm/jd-gui-duo.svg)](https://sourceforge.net/projects/jd-gui-duo/files/latest/download)
+
+[![Download jd-gui-duo](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/jd-gui-duo/files/latest/download)
+
+
+Looking for an Eclipse plugin ? Try [ECD++](https://github.com/nbauma109/ecd)
 
 # jd-gui-duo
 A 2-in-1 JAVA decompiler based on JD-CORE v0 and v1
