@@ -20,7 +20,7 @@ public class CustomMultiResolutionImage extends BaseMultiResolutionImage {
 
     private static final int DEFAULT_IMAGE_COUNT = 8;
 
-    private static final double[] DEFAULT_SCALE_FACTORS = new double[] {
+    private static final double[] DEFAULT_SCALE_FACTORS = {
         1.0d, 1.25d, 1.5d, 1.75d, 2.0d, 2.5d, 3.0d, 4.0d
     };
 

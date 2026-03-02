@@ -216,12 +216,12 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             toolBar.add(findPreviousButton);
 
             findPanel.add(toolBar);
-            
+
             searchUIOptions = new SearchUIOptions(findWithOptionsActionListener);
             searchUIOptions.attachTo(toolBar);
 
             findPanel.add(Box.createHorizontalGlue());
-            
+
             IconButton findCloseButton = new IconButton(newAction(null, null, true, e -> findPanel.setVisible(false)));
             findCloseButton.setContentAreaFilled(false);
             findCloseButton.setIcon(newImageIcon("/org/jd/gui/images/close.gif"));
