@@ -1,0 +1,77 @@
+name: Update JitPack Download Links
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  update-download-links:
+    if: github.event.head_commit.message == '[maven-release-plugin] prepare for next development iteration'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Extract repository info
+        id: repo
+        run: |
+          OWNER="${GITHUB_REPOSITORY%%/*}"
+          REPO="${GITHUB_REPOSITORY##*/}"
+          echo "owner=$OWNER" >> $GITHUB_OUTPUT
+          echo "repo=$REPO" >> $GITHUB_OUTPUT
+
+      - name: Determine latest release version
+        id: version
+        run: |
+          TAG=$(git describe --tags --abbrev=0)
+          VERSION=${TAG#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Update download links
+        run: |
+          OWNER=${{ steps.repo.outputs.owner }}
+          REPO=${{ steps.repo.outputs.repo }}
+          VERSION=${{ steps.version.outputs.version }}
+
+          update_file() {
+            FILE="$1"
+            sed -E -i \
+              "s#https://jitpack.io/com/github/${OWNER}/${REPO}/${REPO}/[0-9]+\.[0-9]+\.[0-9]+/${REPO}-[0-9]+\.[0-9]+\.[0-9]+#https://jitpack.io/com/github/${OWNER}/${REPO}/${REPO}/${VERSION}/${REPO}-${VERSION}#g" \
+              "$FILE"
+          }
+
+          update_file README.md
+          update_file www/index.html
+
+      - name: Commit and push changes
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git add README.md www/index.html
+
+          if git diff --cached --quiet; then
+            echo "No changes detected"
+            exit 0
+          fi
+
+          git commit -m "Update jitpack download links for new release ${VERSION}"
+          git push
+
+      - name: Install Ruby and Neocities CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ruby-full
+          gem install neocities
+
+      - name: Deploy index.html to Neocities
+        env:
+          NEOCITIES_API_KEY: ${{ secrets.NEOCITIES_API_KEY }}
+        run: |
+          neocities upload www/index.html index.html --api-key "$NEOCITIES_API_KEY"
