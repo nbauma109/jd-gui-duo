@@ -188,7 +188,7 @@ exec "$JAVA" -ea \
               <goal>single</goal>
             </goals>
             <configuration>
-              <attach>false</attach>
+              <attach>true</attach>
               <appendAssemblyId>false</appendAssemblyId>
               <finalName>jd-gui-duo-windows-${project.version}</finalName>
               <descriptors>
@@ -203,7 +203,7 @@ exec "$JAVA" -ea \
               <goal>single</goal>
             </goals>
             <configuration>
-              <attach>false</attach>
+              <attach>true</attach>
               <appendAssemblyId>false</appendAssemblyId>
               <finalName>jd-gui-duo-linux-${project.version}</finalName>
               <descriptors>
@@ -218,99 +218,12 @@ exec "$JAVA" -ea \
               <goal>single</goal>
             </goals>
             <configuration>
-              <attach>false</attach>
+              <attach>true</attach>
               <appendAssemblyId>false</appendAssemblyId>
               <finalName>jd-gui-duo-macos-${project.version}</finalName>
               <descriptors>
                 <descriptor>assembly-macos.xml</descriptor>
               </descriptors>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>attach-platform-zips</id>
-            <phase>package</phase>
-            <goals>
-              <goal>attach-artifact</goal>
-            </goals>
-            <configuration>
-              <artifacts>
-                <artifact>
-                  <file>${project.build.directory}/jd-gui-duo-windows-${project.version}.tar.xz</file>
-                  <type>tar.xz</type>
-                  <classifier>windows</classifier>
-                </artifact>
-                <artifact>
-                  <file>${project.build.directory}/jd-gui-duo-linux-${project.version}.tar.xz</file>
-                  <type>tar.xz</type>
-                  <classifier>linux</classifier>
-                </artifact>
-                <artifact>
-                  <file>${project.build.directory}/jd-gui-duo-macos-${project.version}.tar.xz</file>
-                  <type>tar.xz</type>
-                  <classifier>macos</classifier>
-                </artifact>
-              </artifacts>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-install-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>default-install</id>
-            <phase>none</phase>
-          </execution>
-          <execution>
-            <id>install-windows-tar.xz</id>
-            <phase>install</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <file>${project.build.directory}/jd-gui-duo-windows-${project.version}.tar.xz</file>
-              <groupId>${project.groupId}</groupId>
-              <artifactId>${project.artifactId}</artifactId>
-              <version>${project.version}</version>
-              <classifier>windows</classifier>
-              <packaging>tar.xz</packaging>
-            </configuration>
-          </execution>
-          <execution>
-            <id>install-linux-tar.xz</id>
-            <phase>install</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <file>${project.build.directory}/jd-gui-duo-linux-${project.version}.tar.xz</file>
-              <groupId>${project.groupId}</groupId>
-              <artifactId>${project.artifactId}</artifactId>
-              <version>${project.version}</version>
-              <classifier>linux</classifier>
-              <packaging>tar.xz</packaging>
-            </configuration>
-          </execution>
-          <execution>
-            <id>install-macos-tar.xz</id>
-            <phase>install</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <file>${project.build.directory}/jd-gui-duo-macos-${project.version}.tar.xz</file>
-              <groupId>${project.groupId}</groupId>
-              <artifactId>${project.artifactId}</artifactId>
-              <version>${project.version}</version>
-              <classifier>macos</classifier>
-              <packaging>tar.xz</packaging>
             </configuration>
           </execution>
         </executions>
