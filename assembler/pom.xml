@@ -229,6 +229,61 @@ exec "$JAVA" -ea \
         </executions>
       </plugin>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>default-install</id>
+            <phase>none</phase>
+          </execution>
+          <execution>
+            <id>install-windows-tar.xz</id>
+            <phase>install</phase>
+            <goals>
+              <goal>install-file</goal>
+            </goals>
+            <configuration>
+              <file>${project.build.directory}/jd-gui-duo-windows-${project.version}.tar.xz</file>
+              <groupId>${project.groupId}</groupId>
+              <artifactId>${project.artifactId}</artifactId>
+              <version>${project.version}</version>
+              <classifier>windows</classifier>
+              <packaging>tar.xz</packaging>
+            </configuration>
+          </execution>
+          <execution>
+            <id>install-linux-tar.xz</id>
+            <phase>install</phase>
+            <goals>
+              <goal>install-file</goal>
+            </goals>
+            <configuration>
+              <file>${project.build.directory}/jd-gui-duo-linux-${project.version}.tar.xz</file>
+              <groupId>${project.groupId}</groupId>
+              <artifactId>${project.artifactId}</artifactId>
+              <version>${project.version}</version>
+              <classifier>linux</classifier>
+              <packaging>tar.xz</packaging>
+            </configuration>
+          </execution>
+          <execution>
+            <id>install-macos-tar.xz</id>
+            <phase>install</phase>
+            <goals>
+              <goal>install-file</goal>
+            </goals>
+            <configuration>
+              <file>${project.build.directory}/jd-gui-duo-macos-${project.version}.tar.xz</file>
+              <groupId>${project.groupId}</groupId>
+              <artifactId>${project.artifactId}</artifactId>
+              <version>${project.version}</version>
+              <classifier>macos</classifier>
+              <packaging>tar.xz</packaging>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>com.akathist.maven.plugins.launch4j</groupId>
         <artifactId>launch4j-maven-plugin</artifactId>
         <executions>
