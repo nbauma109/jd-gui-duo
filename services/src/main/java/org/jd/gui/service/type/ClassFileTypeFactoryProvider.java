@@ -305,7 +305,12 @@ public class ClassFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
         @Override
         public String getDisplayInnerTypeName() { return displayInnerTypeName; }
         @Override
-        public Icon getIcon() { return getTypeIcon(access); }
+        public Icon getIcon() {
+            if ("java/lang/Record".equals(superName)) {
+                return RECORD_ICONS[accessToIndex(access)];
+            }
+            return getTypeIcon(access);
+        }
         @Override
         public List<Type> getInnerTypes() { return innerTypes; }
         @Override

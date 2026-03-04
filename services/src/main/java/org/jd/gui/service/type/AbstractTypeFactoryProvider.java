@@ -403,6 +403,11 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
     protected static final ImageIcon PROTECTED_CLASS_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/class_protected_obj.png"));
     protected static final ImageIcon PRIVATE_CLASS_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/class_private_obj.png"));
 
+    protected static final ImageIcon RECORD_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/record_default_obj.png"));
+    protected static final ImageIcon PUBLIC_RECORD_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/record_obj.png"));
+    protected static final ImageIcon PROTECTED_RECORD_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/record_protected_obj.png"));
+    protected static final ImageIcon PRIVATE_RECORD_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/record_private_obj.png"));
+
     protected static final ImageIcon INTERFACE_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/int_default_obj.png"));
     protected static final ImageIcon PUBLIC_INTERFACE_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/int_obj.png"));
     protected static final ImageIcon PROTECTED_INTERFACE_ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/int_protected_obj.png"));
@@ -424,6 +429,8 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
     /** Default icon set. */
     protected static final ImageIcon[] DEFAULT_CLASS_ICONS = { CLASS_ICON, PUBLIC_CLASS_ICON, PROTECTED_CLASS_ICON, PRIVATE_CLASS_ICON };
 
+    protected static final ImageIcon[] DEFAULT_RECORD_ICONS = { RECORD_ICON, PUBLIC_RECORD_ICON, PROTECTED_RECORD_ICON, PRIVATE_RECORD_ICON };
+    
     protected static final ImageIcon[] DEFAULT_INTERFACE_ICONS = { INTERFACE_ICON, PUBLIC_INTERFACE_ICON, PROTECTED_INTERFACE_ICON, PRIVATE_INTERFACE_ICON };
 
     protected static final ImageIcon[] DEFAULT_FIELD_ICONS = { FIELD_ICON, PUBLIC_FIELD_ICON, PROTECTED_FIELD_ICON, PRIVATE_FIELD_ICON };
@@ -432,18 +439,21 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
 
     /** Add static icon set. */
     protected static final ImageIcon[] STATIC_CLASS_ICONS = mergeIcons(DEFAULT_CLASS_ICONS, STATIC_OVERLAY_ICON, 100, 0);
+    protected static final ImageIcon[] STATIC_RECORD_ICONS = mergeIcons(DEFAULT_RECORD_ICONS, STATIC_OVERLAY_ICON, 100, 0);
     protected static final ImageIcon[] STATIC_INTERFACE_ICONS = mergeIcons(DEFAULT_INTERFACE_ICONS, STATIC_OVERLAY_ICON, 100, 0);
     protected static final ImageIcon[] STATIC_FIELD_ICONS = mergeIcons(DEFAULT_FIELD_ICONS, STATIC_OVERLAY_ICON, 100, 0);
     protected static final ImageIcon[] STATIC_METHOD_ICONS = mergeIcons(DEFAULT_METHOD_ICONS, STATIC_OVERLAY_ICON, 100, 0);
 
     /** Add final icon set. */
     protected static final ImageIcon[] FINAL_STATIC_CLASS_ICONS = mergeIcons(STATIC_CLASS_ICONS, FINAL_OVERLAY_ICON, 0, 0);
+    protected static final ImageIcon[] FINAL_STATIC_RECORD_ICONS = mergeIcons(STATIC_RECORD_ICONS, FINAL_OVERLAY_ICON, 0, 0);
     protected static final ImageIcon[] FINAL_STATIC_INTERFACE_ICONS = mergeIcons(STATIC_INTERFACE_ICONS, FINAL_OVERLAY_ICON, 0, 0);
     protected static final ImageIcon[] FINAL_STATIC_FIELD_ICONS = mergeIcons(STATIC_FIELD_ICONS, FINAL_OVERLAY_ICON, 0, 0);
     protected static final ImageIcon[] FINAL_STATIC_METHOD_ICONS = mergeIcons(STATIC_METHOD_ICONS, FINAL_OVERLAY_ICON, 0, 0);
 
     /** Add abstract icon set. */
     protected static final ImageIcon[] CLASS_ICONS = mergeIcons(FINAL_STATIC_CLASS_ICONS, ABSTRACT_OVERLAY_ICON, 0, 100);
+    protected static final ImageIcon[] RECORD_ICONS = mergeIcons(FINAL_STATIC_RECORD_ICONS, ABSTRACT_OVERLAY_ICON, 0, 100);
     protected static final ImageIcon[] INTERFACE_ICONS = mergeIcons(FINAL_STATIC_INTERFACE_ICONS, ABSTRACT_OVERLAY_ICON, 0, 100);
     protected static final ImageIcon[] FIELD_ICONS = mergeIcons(FINAL_STATIC_FIELD_ICONS, ABSTRACT_OVERLAY_ICON, 0, 100);
     protected static final ImageIcon[] METHOD_ICONS = mergeIcons(FINAL_STATIC_METHOD_ICONS, ABSTRACT_OVERLAY_ICON, 0, 100);

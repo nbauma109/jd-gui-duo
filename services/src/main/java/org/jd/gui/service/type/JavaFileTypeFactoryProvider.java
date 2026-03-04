@@ -163,6 +163,9 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
 
         @Override
         public Icon getIcon() {
+            if ("java/lang/Record".equals(superName)) {
+                return RECORD_ICONS[accessToIndex(access)];
+            }
             return getTypeIcon(access);
         }
 
