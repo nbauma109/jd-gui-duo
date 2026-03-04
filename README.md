@@ -34,6 +34,33 @@ A 2-in-1 JAVA decompiler based on JD-CORE v0 and v1
 [![macOS](https://github.com/user-attachments/assets/68e1fe60-2dd9-4e7b-8ae0-13a3c95f0f08)](https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/2.0.106/jd-gui-duo-2.0.106-macos.tar.xz)
 [![Linux](https://github.com/user-attachments/assets/2f007b1d-b43b-4105-902b-680e592d27ea)](https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/2.0.106/jd-gui-duo-2.0.106-linux.tar.xz)
 
+
+<a href="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/2.0.106/jd-gui-duo-2.0.106-windows.tar.xz" target="_blank">
+  <img
+    src="assets/badges/jitpack-download-windows.svg"
+    width="200"
+    height="56"
+    alt="Download Windows archive">
+</a>
+<br>
+
+<a href="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/2.0.106/jd-gui-duo-2.0.106-linux.tar.xz" target="_blank">
+  <img
+    src="assets/badges/jitpack-download-linux.svg"
+    width="200"
+    height="56"
+    alt="Download Linux archive">
+</a>
+<br>
+
+<a href="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/2.0.106/jd-gui-duo-2.0.106-macos.tar.xz" target="_blank">
+  <img
+    src="assets/badges/jitpack-download-macos.svg"
+    width="200"
+    height="56"
+    alt="Download macOS archive">
+</a>
+
 Initially a duo of decompilers were supported (JD-Core v0 & v1), but now other decompilers are supported with the [transformer-api](https://github.com/nbauma109/transformer-api) project.
 JD-Core v0 and v1 are 2 different decompilers rather than 2 different versions of the same one. They use a different algorithm :
  - [JD-Core v0](https://github.com/nbauma109/jd-core-v0) uses byte code pattern matching like [JAD](http://www.kpdus.com/jad.html), the 1st Java decompiler
