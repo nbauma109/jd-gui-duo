@@ -496,7 +496,7 @@ public class MainController implements API {
             Desktop desktop = Desktop.getDesktop();
             if (desktop.isSupported(Desktop.Action.BROWSE)) {
                 try {
-                    desktop.browse(URI.create("https://javadecompiler.neocities.org"));
+                    desktop.browse(URI.create("https://javadecompiler.org"));
                 } catch (IOException e) {
                     assert ExceptionUtil.printStackTrace(e);
                 }
