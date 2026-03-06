@@ -30,7 +30,7 @@ Looking for an Eclipse plugin ? Try [ECD++](https://github.com/nbauma109/ecd)
 # jd-gui-duo
 A 2-in-1 JAVA decompiler based on JD-CORE v0 and v1
 
-<a href="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/2.0.106/jd-gui-duo-2.0.106-windows.tar.xz" target="_blank">
+<a href="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/2.0.106/jd-gui-duo-2.0.106-windows.tar.xz?cache=0" target="_blank">
   <img
     src="assets/badges/jitpack-download-windows.svg"
     width="200"
