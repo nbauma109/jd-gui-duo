@@ -8,6 +8,7 @@
 package org.jd.gui.view.component;
 
 import org.fife.ui.rsyntaxtextarea.DocumentRange;
+import org.fife.ui.rsyntaxtextarea.ErrorStrip;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaEditorKit;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -154,7 +155,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
         gutter.setFoldIndicatorForeground(gutter.getBorderColor());
 
         add(scrollPane, BorderLayout.CENTER);
-        add(new RoundMarkErrorStrip(textArea), BorderLayout.LINE_END);
+        add(new ErrorStrip(textArea), BorderLayout.LINE_END);
     }
 
     protected RSyntaxTextArea newSyntaxTextArea(API api) {
