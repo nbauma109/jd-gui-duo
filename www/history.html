@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>History of Java Decompilers | javadecompiler.org</title>
+    <meta name="description" content="A detailed history of Java decompilers, from Mocha and JAD to JD-GUI, CFR, Procyon, Fernflower, Vineflower, JADX, ECD and ECD++.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="index,follow">
+    <meta name="theme-color" content="#111111">
+
+    <link rel="canonical" href="https://javadecompiler.org/history.html">
+    <link rel="icon" type="image/png" href="https://github.com/nbauma109.png">
+    <link rel="stylesheet" href="style.css">
+
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="History of Java Decompilers">
+    <meta property="og:description" content="From early pioneers like JAD to JD-GUI, CFR, Procyon, Fernflower, Vineflower, JADX, ECD and ECD++.">
+    <meta property="og:url" content="https://javadecompiler.org/history.html">
+    <meta property="og:image" content="https://github.com/nbauma109.png">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="History of Java Decompilers">
+    <meta name="twitter:description" content="A detailed history of Java decompilers and their evolution across three decades.">
+    <meta name="twitter:image" content="https://github.com/nbauma109.png">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "History of Java Decompilers",
+      "author": {
+        "@type": "Person",
+        "name": "Nicolas Baumann",
+        "alternateName": "nbauma109",
+        "url": "https://github.com/nbauma109"
+      },
+      "publisher": {
+        "@type": "Person",
+        "name": "Nicolas Baumann"
+      },
+      "mainEntityOfPage": "https://javadecompiler.org/history.html"
+    }
+    </script>
+</head>
+<body>
+
+<header>
+    <div class="header-logo" aria-hidden="true">
+        <svg viewBox="0 0 16 16" role="img" focusable="false">
+            <path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8a8 8 0 005.47 7.59c.4.07.55-.17.55-.38
+            0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52
+            -.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07
+            -1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12
+            0 0 .67-.21 2.2.82a7.6 7.6 0 012-.27c.68 0 1.36.09 2 .27
+            1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15
+            0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48
+            0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8
+            c0-4.42-3.58-8-8-8z"/>
+        </svg>
+    </div>
+    <h1>History of Java Decompilers</h1>
+    <p>From early command-line pioneers to modern multi-engine desktop and IDE tooling</p>
+    <p><a class="github-button" href="./index.html">Back to home</a></p>
+</header>
+
+<main>
+
+<section>
+    <h2>Introduction</h2>
+    <p>
+        Java decompilation has a long and unusually rich history because Java bytecode preserves far more
+        structure than native machine code. A <i>.class</i> file retains symbolic references, method and field
+        metadata, exception tables, access flags and often line numbers. That made Java one of the first widely
+        used ecosystems where ordinary developers could reverse compiled binaries back into readable source-like
+        code without specialized reverse-engineering tools.
+    </p>
+    <p>
+        Over three decades, Java decompilers evolved from small standalone utilities into an ecosystem of
+        command-line tools, desktop browsers, IDE plugins, Android reverse-engineering suites and, more
+        recently, multi-engine platforms that compare several decompilers side by side. This history is not only
+        about user interfaces. It is also about algorithmic change: from early bytecode pattern matching, to
+        structural and control-flow reconstruction, to modern engines that try to recover high-level Java
+        constructs such as generics, annotations, lambdas, records and other contemporary syntax.
+    </p>
+</section>
+
+<section>
+    <h2>The first generation: proving Java could be reversed</h2>
+    <p>
+        One of the earliest public Java decompilers was
+        <a href="http://www.brouhaha.com/~eric/software/mocha/" target="_blank" rel="noopener noreferrer">Mocha</a>.
+        Tools like Mocha mattered because they proved very early that Java binaries were not opaque. Even if the
+        recovered source was imperfect, it was often readable enough to understand program behavior, inspect
+        libraries or recover lost code.
+    </p>
+    <p>
+        That insight shaped the whole field. Java compilation was never a true confidentiality boundary. Once
+        bytecode is shipped, a determined reader can often reconstruct an understandable approximation of the
+        original source. Decompilers became valuable not only for reverse engineering, but also for routine
+        development, debugging, learning and compatibility work.
+    </p>
+</section>
+
+<section>
+    <h2><a href="http://www.kpdus.com/jad.html" target="_blank" rel="noopener noreferrer">JAD</a> by Pavel Kouznetsov</h2>
+    <p>
+        The tool that defined the early practical era of Java decompilation was
+        <a href="http://www.kpdus.com/jad.html" target="_blank" rel="noopener noreferrer">JAD</a>, written by
+        <b>Pavel Kouznetsov</b>. For many developers in the late 1990s and 2000s, JAD was simply the Java
+        decompiler. It was fast, lightweight and extremely easy to use from the command line. When somebody
+        needed to inspect a third-party library, understand a vendor jar or recover code from an old build,
+        JAD was often the first tool they reached for.
+    </p>
+    <p>
+        JAD belongs to the older family of decompilers commonly described as relying heavily on bytecode pattern
+        matching and handcrafted reconstruction rules. That approach worked very well on the language
+        generations it targeted, which is one reason JAD became so widely adopted. It showed that useful Java
+        decompilation did not require a giant framework or heavyweight environment. A compact executable could
+        already solve a large class of real-world problems.
+    </p>
+    <p>
+        At the same time, JAD also illustrates the limits of that first generation. As Java grew more complex
+        with generics, annotations, enums and later Java 8 constructs, older reconstruction strategies became
+        harder to maintain. JAD remained a major reference point, but it also became the baseline from which
+        later analytical decompilers would distinguish themselves.
+    </p>
+</section>
+
+<section>
+    <h2>GUI frontends around JAD</h2>
+    <p>
+        JAD quickly inspired a layer of desktop frontends that made decompilation more accessible to users who
+        preferred browsing to command-line invocation. One of the best-known examples is
+        <a href="http://www.neshkov.com/dj.html" target="_blank" rel="noopener noreferrer">DJ Java Decompiler</a>,
+        generally associated with <b>Atanas Neshkov</b>. Tools like DJ wrapped the JAD engine in a graphical
+        shell with file browsing, archive navigation and source export features.
+    </p>
+    <p>
+        These GUIs are important because they changed the way decompilers were used. Decompilation stopped being
+        only a terminal operation and became a reading workflow. A user could open a jar, expand a package tree,
+        click a class and inspect source immediately. This pattern would later be perfected by
+        <a href="https://github.com/java-decompiler/jd-gui" target="_blank" rel="noopener noreferrer">JD-GUI</a>,
+        but the JAD ecosystem had already shown that the engine and the interface could evolve separately.
+    </p>
+    <p>
+        There were several such wrappers, shell integrations and IDE-side helpers in that era. Their significance
+        lies less in original decompilation theory than in usability. They helped normalize the idea that
+        decompilation was an ordinary developer activity rather than an exotic reverse-engineering act.
+    </p>
+</section>
+
+<section>
+    <h2>The <a href="https://web.archive.org/web/20130513040159/http://java.decompiler.free.fr/" target="_blank" rel="noopener noreferrer">JD project website</a> and the rise of JD</h2>
+    <p>
+        The next great milestone was the <b>JD</b> family created by
+        <a href="https://stackoverflow.com/users/37785/emmanuel-dupuy" target="_blank" rel="noopener noreferrer">Emmanuel Dupuy</a>,
+        also present on GitHub as
+        <a href="https://github.com/emmanue1" target="_blank" rel="noopener noreferrer">@emmanue1</a>. The old
+        project site, preserved through the
+        <a href="https://web.archive.org/web/20130513040159/http://java.decompiler.free.fr/" target="_blank" rel="noopener noreferrer">Wayback Machine</a>,
+        presented the Java Decompiler project as a suite centered on
+        <a href="https://github.com/java-decompiler/jd-core" target="_blank" rel="noopener noreferrer">JD-Core</a>,
+        <a href="https://github.com/java-decompiler/jd-gui" target="_blank" rel="noopener noreferrer">JD-GUI</a>
+        and
+        <a href="https://github.com/java-decompiler/jd-eclipse" target="_blank" rel="noopener noreferrer">JD-Eclipse</a>.
+        That site framed JD as a decompiler family for Java 5 and later bytecode and associated the project
+        with support for newer language features such as annotations, generics and enums.
+    </p>
+    <p>
+        This was a major shift from the JAD era. JD did not just offer another decompiler executable. It
+        presented a coherent ecosystem: a core library, a standalone browser and IDE integrations. It invited
+        developers to treat decompilation as a normal part of source exploration and debugging.
+    </p>
+</section>
+
+<section>
+    <h2>The JD chronology: three distinct generations</h2>
+    <p>
+        The history of the JD family is best understood in three distinct generations rather than as one
+        uninterrupted line.
+    </p>
+    <p>
+        The first generation was the earliest <b>JD-GUI</b> line, distributed as a <b>closed-source C++</b>
+        application in the <b>0.3.x</b> era. This phase established the recognizable JD-GUI user experience:
+        open an archive, browse packages, click a class and immediately read decompiled Java. Even though that
+        early code line was not open source, it is an essential part of the project’s identity and explains why
+        the JD name was already well known before the later public Java repositories appeared.
+    </p>
+    <p>
+        The second generation was an <b>open-source Java transcription</b> of that earlier line. This is the
+        phase that covered <b>JD-GUI up to version 1.4.2</b>. Algorithmically, it still belonged to the older
+        family of decompilers based on <b>bytecode pattern matching</b>, much closer in spirit to classic tools
+        such as <a href="https://varaneckas.com/jad/" target="_blank" rel="noopener noreferrer">JAD</a> than to
+        later analytical engines. This middle phase is crucial because it was open source on the GUI side while
+        the corresponding older core lineage was not yet publicly available in its full original form.
+    </p>
+    <p>
+        Much later, that earlier core history was clarified through the recovered
+        <a href="https://github.com/java-decompiler/jd-core/tree/branch-jd-core-v0" target="_blank" rel="noopener noreferrer">branch-jd-core-v0</a>
+        and then preserved more explicitly in
+        <a href="https://github.com/nbauma109/jd-core-v0" target="_blank" rel="noopener noreferrer">JD-Core v0</a>,
+        whose repository describes it as being built on top of Emmanuel Dupuy’s original version of jd-core and
+        as based on bytecode pattern matching.
+    </p>
+    <p>
+        The third generation began with <b>JD-GUI 1.4.3+</b>. This was not just another incremental release,
+        but a real algorithmic break. The older JAD-like pattern-matching approach gave way to a <b>new Java
+        analytical decompiler</b> based on <b>control-flow-graph reasoning</b>, much closer in spirit to later
+        analytical tools such as <a href="https://github.com/JetBrains/fernflower" target="_blank" rel="noopener noreferrer">Fernflower</a>.
+        This is the line that leads to the later public
+        <a href="https://github.com/java-decompiler/jd-core" target="_blank" rel="noopener noreferrer">JD-Core</a>
+        repository, which describes itself as “a JAVA decompiler written in JAVA.”
+    </p>
+    <p>
+        This three-step chronology matters because it explains a confusion that often appears in discussions of
+        JD. People remember one product name, <b>JD-GUI</b>, but that name spans three technically different
+        eras: first a closed-source native implementation, then an open-source Java transcription that still
+        followed the older pattern-matching school, and finally a new analytical core line. Without that
+        distinction, the evolution of the JD family looks much flatter than it really was.
+    </p>
+</section>
+
+<section>
+    <h2><a href="https://github.com/nbauma109/jd-core-v0" target="_blank" rel="noopener noreferrer">JD-Core v0</a> and <a href="https://github.com/java-decompiler/jd-core" target="_blank" rel="noopener noreferrer">JD-Core</a>: decompilation and native line realignment</h2>
+    <p>
+        The preservation of the older JD core as
+        <a href="https://github.com/nbauma109/jd-core-v0" target="_blank" rel="noopener noreferrer">JD-Core v0</a>
+        is valuable both technically and as a clarification of the JD family tree. It gives the earlier JD line a
+        proper identity instead of leaving it as a vague predecessor to the later public
+        <a href="https://github.com/java-decompiler/jd-core" target="_blank" rel="noopener noreferrer">JD-Core</a>.
+        It also makes the relationship to the wider field much clearer: JD-Core v0 belongs to the same broad
+        family of pattern-oriented reconstruction that made
+        <a href="https://varaneckas.com/jad/" target="_blank" rel="noopener noreferrer">JAD</a> so influential,
+        even though it is part of the JD lineage rather than the JAD lineage.
+    </p>
+    <p>
+        The later
+        <a href="https://github.com/java-decompiler/jd-core" target="_blank" rel="noopener noreferrer">JD-Core</a>
+        line represents the better-known modern public JD engine. In the broader history of Java decompilers,
+        this later line is important because it reflects the field’s movement away from predominantly local
+        bytecode templates toward more structural reasoning about control flow and reconstructed source shape.
+        The distinction between JD-Core v0 and the later JD-Core mirrors a larger transformation across the
+        whole ecosystem: as Java language features and compiler behavior became richer, decompilers had to
+        become better at inferring higher-level source structure instead of merely recognizing isolated bytecode
+        idioms.
+    </p>
+    <p>
+        One area where <a href="https://github.com/java-decompiler/jd-core" target="_blank" rel="noopener noreferrer">JD-Core</a>
+        remains especially distinctive is <b>line number realignment</b>. As Emmanuel Dupuy stated publicly, the
+        feature was already in the pipeline of the JD projects in 2011 and has existed internally in JD-Core for
+        years. Even in 2026, JD-Core remains unusual in possessing this realignment capability natively inside
+        the decompiler itself. Many decompilers can expose line number mappings or emit line numbers as
+        comments, but that is not the same thing as internally realigning the generated source so that method
+        bodies, branches and members are reorganized to match debugger expectations.
+    </p>
+    <p>
+        That distinction matters because proper realignment is more than shifting lines down with blank space.
+        It can require reordering members, reversing <i>if</i>/<i>else</i> layout when necessary, splitting
+        static initialization into more than one location and performing other structural adjustments that go far
+        beyond printing line comments. The existence of this feature inside JD-Core also helps explain why the JD
+        family remained important not only as a decompiler line, but as a source of debugger-oriented ideas that
+        later Eclipse tools would try to reproduce with post-processing.
+    </p>
+</section>
+
+<section>
+    <h2><a href="https://www.benf.org/other/cfr/" target="_blank" rel="noopener noreferrer">CFR</a> by Lee Benfield</h2>
+    <p>
+        <a href="https://www.benf.org/other/cfr/" target="_blank" rel="noopener noreferrer">CFR</a>, written by
+        <b>Lee Benfield</b>, occupies an important place in the modern history of Java decompilers because it
+        focused relentlessly on keeping up with newer Java language features while remaining highly portable.
+        The project homepage describes CFR as a Java decompiler written in Java 6 that can nevertheless
+        decompile a large range of newer Java constructs, including much of Java 9, 12 and 14, and even make a
+        reasonable attempt at class files produced by other JVM languages.
+    </p>
+    <p>
+        CFR became known less as an IDE-oriented decompiler and more as a tool for high-quality reconstruction of
+        modern bytecode. Its project site includes extensive notes on how compilers lower language features such
+        as enums, string switches, lambdas, records, pattern matching, dynamic constants and multi-release jars.
+        That body of work reflects CFR’s real identity: a decompiler closely tied to the details of modern
+        bytecode generation and resugaring.
+    </p>
+    <p>
+        The release history reinforces that picture. CFR’s changelog highlights continued work on records,
+        sealed classes, instance-of pattern matching, switch expressions, compiler-specific patterns from
+        <a href="https://projects.eclipse.org/projects/eclipse.jdt" target="_blank" rel="noopener noreferrer">ECJ</a>,
+        deobfuscation support and robustness against malformed or hostile bytecode. In practice, CFR became one
+        of the standard reference tools when developers wanted to see how well a modern Java construct could be
+        reconstructed back into readable source.
+    </p>
+    <p>
+        CFR is also a useful point of comparison in the specific area of line number realignment. There is a
+        public discussion about debug-friendly output in
+        <a href="https://github.com/leibnitz27/cfr/issues/73" target="_blank" rel="noopener noreferrer">issue #73</a>,
+        where line-preserving output is discussed in detail. That discussion helps place CFR accurately in the
+        ecosystem: it excels at language coverage, resilience and reconstruction quality, but it does not define
+        itself around native source realignment in the way
+        <a href="https://github.com/java-decompiler/jd-core" target="_blank" rel="noopener noreferrer">JD-Core</a>
+        does.
+    </p>
+</section>
+
+<section>
+    <h2><a href="https://github.com/mstrobel/procyon/wiki" target="_blank" rel="noopener noreferrer">Procyon</a> by Mike Strobel</h2>
+    <p>
+        <a href="https://github.com/mstrobel/procyon/wiki" target="_blank" rel="noopener noreferrer">Procyon</a>,
+        written by <b>Mike Strobel</b>, is distinctive because it was conceived as more than a standalone
+        decompiler. Its own wiki describes Procyon as a suite of Java metaprogramming tools with components for
+        reflection, expressions, compiler tools and decompilation. The decompiler is therefore part of a broader
+        framework for code analysis and generation rather than an isolated executable.
+    </p>
+    <p>
+        That broader design matters when placing Procyon in Java decompiler history. It belongs not only to the
+        line of tools that turn class files back into Java, but also to the tradition of reusable metadata and
+        bytecode-analysis libraries. The project documentation describes compiler tools for class metadata,
+        bytecode inspection, assembly disassembly and an optimization and decompiler framework inspired in part
+        by <a href="https://github.com/icsharpcode/ILSpy" target="_blank" rel="noopener noreferrer">ILSpy</a>
+        and <a href="https://www.mono-project.com/docs/tools+libraries/libraries/Mono.Cecil/" target="_blank" rel="noopener noreferrer">Mono.Cecil</a>.
+    </p>
+    <p>
+        On the decompiler side specifically, Procyon’s own
+        <a href="https://github.com/mstrobel/procyon/wiki/Java-Decompiler" target="_blank" rel="noopener noreferrer">Java Decompiler</a>
+        page states very clearly where it was intended to excel: Java 5 and newer features that older
+        decompilers often handled poorly. The project highlights enum declarations, enum and string switch
+        statements, annotations, local classes, lambdas and method references as notable strengths. It also
+        offers more than one view of the program, including standard Java output, raw bytecode output and a
+        bytecode AST view.
+    </p>
+    <p>
+        Procyon is also notable in the line-number discussion because it includes an experimental command-line
+        option,
+        <a href="https://github.com/mstrobel/procyon/blob/88a95fa93c58322393174f84543edc7a0a2ca44d/Procyon.Decompiler/src/main/java/com/strobel/decompiler/CommandLineOptions.java#L124" target="_blank" rel="noopener noreferrer">--stretch-lines</a>.
+        That option can move lines, but it is not the same thing as native structural realignment. It does not
+        solve the broader problems involved in reordering members, reversing branches when necessary, splitting
+        static blocks into separate locations or rebuilding source layout to follow original debug line flow. In
+        that respect, Procyon helps illustrate the difference between line stretching and deeper realignment.
+    </p>
+</section>
+
+<section>
+    <h2><a href="https://github.com/JetBrains/fernflower" target="_blank" rel="noopener noreferrer">Fernflower</a> by <a href="https://blog.jetbrains.com/idea/2024/11/in-memory-of-stiver/" target="_blank" rel="noopener noreferrer">Stiver</a></h2>
+    <p>
+        <a href="https://github.com/JetBrains/fernflower" target="_blank" rel="noopener noreferrer">Fernflower</a>
+        is one of the decisive turning points in Java decompiler history because it presented itself as an
+        analytical decompiler rather than a pattern-driven one. The
+        <a href="https://github.com/JetBrains/fernflower" target="_blank" rel="noopener noreferrer">JetBrains repository</a>
+        describes it as a decompiler from Java bytecode to Java used in
+        <a href="https://www.jetbrains.com/idea/" target="_blank" rel="noopener noreferrer">IntelliJ IDEA</a>,
+        and its README makes an even stronger historical claim: Fernflower is described there as the first
+        actually working analytical decompiler for Java.
+    </p>
+    <p>
+        JetBrains’ memorial article
+        <a href="https://blog.jetbrains.com/idea/2024/11/in-memory-of-stiver/" target="_blank" rel="noopener noreferrer">In Memory of Stiver</a>
+        explains the intellectual break more clearly. It says that Stiver began the project around 2008 after
+        concluding that older decompilers were fragile because they searched for specific bytecode patterns. To
+        overcome that, he built Fernflower around a control-flow graph in static single-assignment form,
+        allowing the decompiler to reason about semantics and reconstruct source structure more deeply.
+        JetBrains also credits this design with producing much better output than earlier tools and with
+        handling even some obfuscated code surprisingly well.
+    </p>
+    <p>
+        Fernflower then became important not only as an algorithmic milestone but also as a widely used practical
+        tool. JetBrains says it was integrated into IntelliJ IDEA in 2014, where it became the decompiler shown
+        while debugging or navigating class files. That combination of new analytical method and mass adoption
+        through a major IDE explains why Fernflower became such a central reference point for later Java
+        decompiler work.
+    </p>
+    <p>
+        Fernflower also represents a different answer to the line-mapping problem. Rather than realigning
+        decompiled source internally like
+        <a href="https://github.com/java-decompiler/jd-core" target="_blank" rel="noopener noreferrer">JD-Core</a>,
+        <a href="https://www.jetbrains.com/" target="_blank" rel="noopener noreferrer">JetBrains</a> chose to
+        make <a href="https://www.jetbrains.com/idea/" target="_blank" rel="noopener noreferrer">IntelliJ IDEA</a>
+        aware of the decompiler’s mapping. As JetBrains explains in the Stiver memorial, he helped provide a
+        transparent mapping between bytecode lines and decompiled source so that debugging could remain
+        seamless. That makes Fernflower important not only as a decompiler, but also as a debugger integration
+        strategy distinct from native realignment.
+    </p>
+</section>
+
+<section>
+    <h2><a href="https://github.com/Vineflower/vineflower" target="_blank" rel="noopener noreferrer">Vineflower</a>: continuation and modernization</h2>
+    <p>
+        <a href="https://github.com/Vineflower/vineflower" target="_blank" rel="noopener noreferrer">Vineflower</a>
+        is best understood as the modern actively maintained continuation of the Fernflower family. Its
+        repository describes it as a modern Java decompiler aiming to be as accurate as possible, with an
+        emphasis on output quality, and also as a modern general-purpose Java and JVM language decompiler focused
+        on quality, speed and usability.
+    </p>
+    <p>
+        The project also presents its lineage in a more nuanced way than a simple one-step fork. It explicitly
+        credits <a href="https://github.com/JetBrains/fernflower" target="_blank" rel="noopener noreferrer">Fernflower</a>,
+        <a href="https://github.com/MinecraftForge/ForgeFlower" target="_blank" rel="noopener noreferrer">ForgeFlower</a>,
+        Fabric’s fork of Fernflower and <a href="https://github.com/QuiltMC/quiltflower" target="_blank" rel="noopener noreferrer">Quiltflower</a>
+        as part of the ancestry, while thanking
+        <a href="https://blog.jetbrains.com/idea/2024/11/in-memory-of-stiver/" target="_blank" rel="noopener noreferrer">Stiver</a>
+        for creating Fernflower in the first place. That makes Vineflower significant as the current culmination
+        of a wider fork-and-maintenance tradition rather than only a rebranding of the original JetBrains
+        codebase.
+    </p>
+    <p>
+        Vineflower’s feature set shows what the modern stage of Java decompilation looks like. The repository
+        advertises support for current Java language features, including records, sealed classes, switch
+        expressions and pattern matching, alongside multithreaded decompilation, library use and command-line
+        use. It also notes that the
+        <a href="https://plugins.jetbrains.com/plugin/18032-vineflower-decompiler" target="_blank" rel="noopener noreferrer">IntelliJ IDEA plugin</a>
+        based on Vineflower replaces Fernflower in IDEA. Vineflower represents the maintenance-driven era of
+        decompilation: rapid language tracking, strong emphasis on readable output and integration into current
+        tooling.
+    </p>
+</section>
+
+<section>
+    <h2><a href="https://github.com/skylot/jadx" target="_blank" rel="noopener noreferrer">JADX</a> by <a href="https://github.com/skylot" target="_blank" rel="noopener noreferrer">skylot</a> and the Android turn</h2>
+    <p>
+        <a href="https://github.com/skylot/jadx" target="_blank" rel="noopener noreferrer">JADX</a>, created by
+        <a href="https://github.com/skylot" target="_blank" rel="noopener noreferrer">skylot</a>, broadened the
+        meaning of “Java decompiler” by moving deeply into the Android ecosystem. Instead of focusing only on
+        JVM <i>.class</i> files, JADX works with Android’s DEX and APK world.
+    </p>
+    <p>
+        That shift matters because it ties Java decompilation much more directly to security work, malware
+        analysis and mobile application reverse engineering. The field was no longer just about reading desktop
+        or server jars. It had become central to Android investigation as well.
+    </p>
+</section>
+
+<section>
+    <h2><a href="https://www.eclipse.org/community/eclipse_newsletter/2017/february/article8.php" target="_blank" rel="noopener noreferrer">Eclipse Class Decompiler</a> by Chen Chao</h2>
+    <p>
+        Another important branch in Java decompiler history is the Eclipse plugin line associated with
+        <a href="https://www.eclipse.org/community/eclipse_newsletter/2017/february/article8.php" target="_blank" rel="noopener noreferrer">Chen Chao</a>.
+        In his 2017 Eclipse Foundation newsletter article,
+        <a href="https://www.eclipse.org/community/eclipse_newsletter/2017/february/article8.php" target="_blank" rel="noopener noreferrer">The Features of Eclipse Class Decompiler</a>,
+        Chen Chao presented the plugin as an Eclipse integration that brings together
+        <a href="https://github.com/java-decompiler/jd-core" target="_blank" rel="noopener noreferrer">JD</a>,
+        <a href="http://www.kpdus.com/jad.html" target="_blank" rel="noopener noreferrer">JAD</a>,
+        <a href="https://github.com/JetBrains/fernflower" target="_blank" rel="noopener noreferrer">FernFlower</a>,
+        <a href="https://www.benf.org/other/cfr/" target="_blank" rel="noopener noreferrer">CFR</a> and
+        <a href="https://github.com/mstrobel/procyon/wiki" target="_blank" rel="noopener noreferrer">Procyon</a>
+        in one environment.
+    </p>
+    <p>
+        This is important for two reasons. First, it shows how central the IDE workflow had become:
+        decompilation was no longer only about opening jars in a standalone tool, but about debugging class files
+        directly inside <a href="https://eclipseide.org/" target="_blank" rel="noopener noreferrer">Eclipse</a>
+        without attached source. Second, it demonstrates that multi-engine integration was already becoming
+        desirable: users wanted different backends available behind one editor experience.
+    </p>
+    <p>
+        The same Eclipse article highlights several features that made the plugin popular in practice: direct
+        debugging of class files when debug attributes are present, line-number realignment, Javadoc support,
+        lambda handling and export of decompiled source. In other words,
+        <a href="https://github.com/ecd-plugin/ecd" target="_blank" rel="noopener noreferrer">ECD</a> was not
+        merely an adapter around a single backend; it was an attempt to turn decompilation into a practical
+        debugging tool for everyday Eclipse users.
+    </p>
+</section>
+
+<section>
+    <h2>The privacy controversy and the forking point</h2>
+    <p>
+        The Eclipse plugin story took an important turn in 2017. In
+        <a href="https://0x10f8.wordpress.com/2017/08/07/reverse-engineering-an-eclipse-plugin/" target="_blank" rel="noopener noreferrer">Reverse Engineering an Eclipse Plugin</a>,
+        a security analysis documented hidden behavior in the plugin distribution and described why users had
+        privacy and adware concerns.
+    </p>
+    <p>
+        That post became the pivot point for the next phase of the project’s history. It did not merely criticize
+        the plugin; it triggered a concrete cleanup effort in public. The associated pull request
+        <a href="https://github.com/cpupk/ecd/pull/1" target="_blank" rel="noopener noreferrer">Remove privacy-violating code fragments</a>
+        explicitly states that it removes code not required for the plugin’s functionality and addresses the
+        issues disclosed in that analysis.
+    </p>
+    <p>
+        This episode changed the identity of the Eclipse plugin line. The story is no longer just “a useful
+        Eclipse decompiler plugin by Chen Chao.” It is also a story about trust, code transparency and community
+        intervention to preserve the valuable parts of the tool while removing problematic behavior.
+    </p>
+</section>
+
+<section>
+    <h2>From Eclipse Class Decompiler to <a href="https://github.com/ecd-plugin/ecd" target="_blank" rel="noopener noreferrer">Enhanced Class Decompiler</a></h2>
+    <p>
+        The same 2017 reverse-engineering article notes that a cleaned fork of the plugin, stripped of the
+        hidden adware-related behavior, was later listed again as
+        <a href="https://github.com/ecd-plugin/ecd" target="_blank" rel="noopener noreferrer">Enhanced Class Decompiler</a>.
+        That re-listing marks the point where the Eclipse decompiler line was effectively reborn under a cleaner
+        trust model.
+    </p>
+    <p>
+        In other words, Enhanced Class Decompiler was not just a rename. It was the public sign that the useful
+        Eclipse-side decompilation workflow had survived the controversy and moved forward in a form users could
+        adopt again with more confidence.
+    </p>
+</section>
+
+<section>
+    <h2><a href="https://marketplace.eclipse.org/content/ecd-fork-enhanced-class-decompiler" target="_blank" rel="noopener noreferrer">ECD++</a> and debugger-oriented realignment after JD</h2>
+    <p>
+        <a href="https://marketplace.eclipse.org/content/ecd-fork-enhanced-class-decompiler" target="_blank" rel="noopener noreferrer">ECD++</a>
+        continues the Eclipse-side decompiler workflow in a modernized form. Instead of being tied to a narrow
+        single-engine model, it integrates multiple decompilers through
+        <a href="https://github.com/nbauma109/transformer-api" target="_blank" rel="noopener noreferrer">Transformer API</a>
+        and carries the Eclipse experience into the contemporary multi-engine era.
+    </p>
+    <p>
+        That makes <a href="https://marketplace.eclipse.org/content/ecd-fork-enhanced-class-decompiler" target="_blank" rel="noopener noreferrer">ECD++</a>
+        important in two ways. First, it preserves the original reason
+        <a href="https://github.com/ecd-plugin/ecd" target="_blank" rel="noopener noreferrer">ECD</a> mattered:
+        decompile and debug class files directly inside
+        <a href="https://eclipseide.org/" target="_blank" rel="noopener noreferrer">Eclipse</a> when source code
+        is missing. Second, it updates that model to reflect what the ecosystem has learned since
+        <a href="http://www.kpdus.com/jad.html" target="_blank" rel="noopener noreferrer">JAD</a>,
+        <a href="https://github.com/java-decompiler/jd-core" target="_blank" rel="noopener noreferrer">JD</a>,
+        <a href="https://www.benf.org/other/cfr/" target="_blank" rel="noopener noreferrer">CFR</a>,
+        <a href="https://github.com/mstrobel/procyon/wiki" target="_blank" rel="noopener noreferrer">Procyon</a>
+        and <a href="https://github.com/JetBrains/fernflower" target="_blank" rel="noopener noreferrer">Fernflower</a>:
+        no single backend is perfect on every input, so a modern decompiler workflow benefits from a unified
+        abstraction over several engines.
+    </p>
+    <p>
+        The line-number story is especially revealing here. In
+        <a href="https://github.com/ecd-plugin/ecd" target="_blank" rel="noopener noreferrer">Enhanced Class Decompiler</a>,
+        the realigner is a modified version of
+        <a href="https://mchr3k.github.io/jdeclipse-realign/" target="_blank" rel="noopener noreferrer">JD-Realign</a>,
+        and both rely on post-processing. That can work, but it is inherently less reliable than native
+        realignment inside the decompiler core itself. In practice, post-processed layouts can sometimes cut
+        pieces of code or compress many logical lines into one, which is why line-number support and true source
+        reconstruction remain separate problems.
+    </p>
+    <p>
+        <a href="https://marketplace.eclipse.org/content/ecd-fork-enhanced-class-decompiler" target="_blank" rel="noopener noreferrer">ECD++</a>
+        takes a different post-processing route. It uses a
+        <a href="https://javacc.github.io/javacc/" target="_blank" rel="noopener noreferrer">JavaCC</a> parser
+        to realign code from line number comments so that the technique can work across several decompilers.
+        That approach broadens compatibility, even if it remains a post-process rather than a native capability
+        inside each backend. <a href="https://marketplace.eclipse.org/content/ecd-fork-enhanced-class-decompiler" target="_blank" rel="noopener noreferrer">ECD++</a>
+        also connects back to the JD story through source realignment and parser work built around
+        <a href="https://github.com/nbauma109/jd-util" target="_blank" rel="noopener noreferrer">JD-Util</a>.
+        In that sense it is not just a forked Eclipse plugin, but part of a broader effort to tie JD-related
+        debugging ideas, modern backend orchestration and Eclipse integration into one coherent toolchain.
+    </p>
+</section>
+
+<section>
+    <h2><a href="https://github.com/nbauma109/transformer-api" target="_blank" rel="noopener noreferrer">Transformer API</a> and the platform era</h2>
+    <p>
+        The move from isolated decompiler engines to a shared backend layer is one of the clearest signs that
+        the field has matured. The
+        <a href="https://github.com/nbauma109/transformer-api" target="_blank" rel="noopener noreferrer">Transformer API</a>
+        reflects that modern reality directly by unifying access to multiple decompilers under one API.
+    </p>
+    <p>
+        Originally part of
+        <a href="https://github.com/helios-decompiler/standalone-app" target="_blank" rel="noopener noreferrer">Helios Decompiler</a>
+        by <a href="https://github.com/samczsun" target="_blank" rel="noopener noreferrer">samczsun</a>, this is
+        the platform era of Java decompilation. Earlier generations asked which decompiler to use. Modern
+        workflows increasingly ask which decompiler explains this bytecode best, and how to compare them
+        efficiently. A shared abstraction makes that comparison practical in desktop tools, IDE plugins and
+        automated workflows.
+    </p>
+</section>
+
+<section>
+    <h2><a href="https://github.com/nbauma109/jd-gui-duo" target="_blank" rel="noopener noreferrer">JD-GUI-DUO</a>: bringing the strands together</h2>
+    <p>
+        <a href="https://github.com/nbauma109/jd-gui-duo" target="_blank" rel="noopener noreferrer">JD-GUI-DUO</a>
+        brings several lines of this story together at once. It is built on top of the original
+        <a href="https://github.com/java-decompiler/jd-gui" target="_blank" rel="noopener noreferrer">JD-GUI</a>
+        experience, but extends that browsing model with both
+        <a href="https://github.com/nbauma109/jd-core-v0" target="_blank" rel="noopener noreferrer">JD-Core v0</a>
+        and <a href="https://github.com/java-decompiler/jd-core" target="_blank" rel="noopener noreferrer">JD-Core</a>,
+        while also supporting third-party engines through
+        <a href="https://github.com/nbauma109/transformer-api" target="_blank" rel="noopener noreferrer">Transformer API</a>.
+    </p>
+    <p>
+        In that sense, <a href="https://github.com/nbauma109/jd-gui-duo" target="_blank" rel="noopener noreferrer">JD-GUI-DUO</a>
+        is more than a new viewer. It preserves the familiar JD-GUI browsing style, acknowledges that JD has
+        more than one core lineage, and embraces the modern understanding that comparing several decompilers is
+        often the best way to understand a class.
+    </p>
+</section>
+
+<section>
+    <h2>Conclusion</h2>
+    <p>
+        The history of Java decompilers is not a simple replacement chain where one tool supersedes the previous
+        one. It is a layered history of shifting algorithms, interfaces and trust models. Early tools such as
+        <a href="http://www.brouhaha.com/~eric/software/mocha/" target="_blank" rel="noopener noreferrer">Mocha</a>
+        showed that Java bytecode could be reversed.
+        <a href="http://www.kpdus.com/jad.html" target="_blank" rel="noopener noreferrer">JAD</a> made that
+        practical. JAD frontends made it easier to browse.
+        <a href="https://github.com/java-decompiler/jd-gui" target="_blank" rel="noopener noreferrer">JD-GUI</a>
+        and <a href="https://github.com/java-decompiler/jd-core" target="_blank" rel="noopener noreferrer">JD-Core</a>
+        made decompilation mainstream through a recognizable project family and a polished GUI workflow. The
+        recovered old JD sources and
+        <a href="https://github.com/java-decompiler/jd-core/tree/branch-jd-core-v0" target="_blank" rel="noopener noreferrer">branch-jd-core-v0</a>
+        help distinguish the older JD core from the later public Java implementation. Modern engines such as
+        <a href="https://www.benf.org/other/cfr/" target="_blank" rel="noopener noreferrer">CFR</a>,
+        <a href="https://github.com/mstrobel/procyon/wiki" target="_blank" rel="noopener noreferrer">Procyon</a>,
+        <a href="https://github.com/JetBrains/fernflower" target="_blank" rel="noopener noreferrer">Fernflower</a>,
+        <a href="https://github.com/Vineflower/vineflower" target="_blank" rel="noopener noreferrer">Vineflower</a>
+        and <a href="https://github.com/skylot/jadx" target="_blank" rel="noopener noreferrer">JADX</a>
+        expanded both capability and scope.
+        <a href="https://github.com/ecd-plugin/ecd" target="_blank" rel="noopener noreferrer">Enhanced Class Decompiler</a>
+        showed how important IDE integration had become, and the 2017 privacy controversy around that plugin
+        eventually led to a cleaner continuation through
+        <a href="https://marketplace.eclipse.org/content/ecd-fork-enhanced-class-decompiler" target="_blank" rel="noopener noreferrer">ECD++</a>.
+    </p>
+    <p>
+        Today, the most interesting question is often no longer “Can Java be decompiled?” but “Which engine, or
+        combination of engines, best explains this bytecode?” That is the clearest sign that Java decompilation
+        has grown from a clever trick into a mature technical discipline.
+    </p>
+</section>
+
+</main>
+
+<footer>
+    <p>© Nicolas Baumann (nbauma109) | Open Source Projects</p>
+</footer>
+
+</body>
+</html>
