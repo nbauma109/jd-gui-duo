@@ -159,10 +159,10 @@
         project site, preserved through the
         <a href="https://web.archive.org/web/20130513040159/http://java.decompiler.free.fr/" target="_blank" rel="noopener noreferrer">Wayback Machine</a>,
         presented the Java Decompiler project as a suite centered on
-        <a href="https://github.com/java-decompiler/jd-core" target="_blank" rel="noopener noreferrer">JD-Core</a>,
-        <a href="https://github.com/java-decompiler/jd-gui" target="_blank" rel="noopener noreferrer">JD-GUI</a>
+        <a href="https://github.com/java-decompiler/jd-core" target="_blank" rel="noopener noreferrer">JD-Core</a> (last maintained: early 2020),
+        <a href="https://github.com/java-decompiler/jd-gui" target="_blank" rel="noopener noreferrer">JD-GUI</a> (last maintained: late 2019)
         and
-        <a href="https://github.com/java-decompiler/jd-eclipse" target="_blank" rel="noopener noreferrer">JD-Eclipse</a>.
+        <a href="https://github.com/java-decompiler/jd-eclipse" target="_blank" rel="noopener noreferrer">JD-Eclipse</a> (last maintained: mid 2019).
         That site framed JD as a decompiler family for Java 5 and later bytecode and associated the project
         with support for newer language features such as annotations, generics and enums.
     </p>
@@ -190,12 +190,12 @@
         The second generation was an <b>open-source Java transcription</b> of that earlier line. This is the
         phase that covered <b>JD-GUI up to version 1.4.2</b>. Algorithmically, it still belonged to the older
         family of decompilers based on <b>bytecode pattern matching</b>, much closer in spirit to classic tools
-        such as <a href="https://varaneckas.com/jad/" target="_blank" rel="noopener noreferrer">JAD</a> than to
+        such as <a href="http://www.kpdus.com/jad.html" target="_blank" rel="noopener noreferrer">JAD</a> than to
         later analytical engines. This middle phase is crucial because it was open source on the GUI side while
         the corresponding older core lineage was not yet publicly available in its full original form.
     </p>
     <p>
-        Much later, that earlier core history was clarified through the recovered
+        Much later, in mid 2021, that earlier core history was clarified through the recovered
         <a href="https://github.com/java-decompiler/jd-core/tree/branch-jd-core-v0" target="_blank" rel="noopener noreferrer">branch-jd-core-v0</a>
         and then preserved more explicitly in
         <a href="https://github.com/nbauma109/jd-core-v0" target="_blank" rel="noopener noreferrer">JD-Core v0</a>,
@@ -221,7 +221,7 @@
 </section>
 
 <section>
-    <h2><a href="https://github.com/nbauma109/jd-core-v0" target="_blank" rel="noopener noreferrer">JD-Core v0</a> and <a href="https://github.com/java-decompiler/jd-core" target="_blank" rel="noopener noreferrer">JD-Core</a>: decompilation and native line realignment</h2>
+    <h2>JD-Core <a href="https://github.com/nbauma109/jd-core-v0" target="_blank" rel="noopener noreferrer">v0</a> and <a href="https://github.com/java-decompiler/jd-core" target="_blank" rel="noopener noreferrer">v1</a>: decompilation and native line realignment</h2>
     <p>
         The preservation of the older JD core as
         <a href="https://github.com/nbauma109/jd-core-v0" target="_blank" rel="noopener noreferrer">JD-Core v0</a>
@@ -230,7 +230,7 @@
         <a href="https://github.com/java-decompiler/jd-core" target="_blank" rel="noopener noreferrer">JD-Core</a>.
         It also makes the relationship to the wider field much clearer: JD-Core v0 belongs to the same broad
         family of pattern-oriented reconstruction that made
-        <a href="https://varaneckas.com/jad/" target="_blank" rel="noopener noreferrer">JAD</a> so influential,
+        <a href="http://www.kpdus.com/jad.html" target="_blank" rel="noopener noreferrer">JAD</a> so influential,
         even though it is part of the JD lineage rather than the JAD lineage.
     </p>
     <p>
@@ -244,7 +244,19 @@
         become better at inferring higher-level source structure instead of merely recognizing isolated bytecode
         idioms.
     </p>
-    <p>
+     <p>
+        There is also a fork of the analytical line under
+        <a href="https://github.com/nbauma109/jd-core" target="_blank" rel="noopener noreferrer">nbauma109/jd-core</a>,
+        forked from the original
+        <a href="https://github.com/java-decompiler/jd-core" target="_blank" rel="noopener noreferrer">java-decompiler/jd-core</a>.
+        That fork is the analytical JD-Core line used by
+        <a href="https://github.com/nbauma109/jd-gui-duo" target="_blank" rel="noopener noreferrer">JD-GUI-DUO</a>
+        is still maintained and comes with bug fixes and improvements. This matters because the current
+        JD ecosystem is no longer just a matter of preserving the original public repositories. It also includes
+        actively maintained forks that carry the code forward in directions that are increasingly specific to
+        newer tooling.
+    </p>
+   <p>
         One area where <a href="https://github.com/java-decompiler/jd-core" target="_blank" rel="noopener noreferrer">JD-Core</a>
         remains especially distinctive is <b>line number realignment</b>. As Emmanuel Dupuy stated publicly, the
         feature was already in the pipeline of the JD projects in 2011 and has existed internally in JD-Core for
@@ -304,7 +316,7 @@
     <h2><a href="https://github.com/mstrobel/procyon/wiki" target="_blank" rel="noopener noreferrer">Procyon</a> by Mike Strobel</h2>
     <p>
         <a href="https://github.com/mstrobel/procyon/wiki" target="_blank" rel="noopener noreferrer">Procyon</a>,
-        written by <b>Mike Strobel</b>, is distinctive because it was conceived as more than a standalone
+        written by <b>Mike Strobel</b>  (last maintained: early 2022), is distinctive because it was conceived as more than a standalone
         decompiler. Its own wiki describes Procyon as a suite of Java metaprogramming tools with components for
         reflection, expressions, compiler tools and decompilation. The decompiler is therefore part of a broader
         framework for code analysis and generation rather than an isolated executable.
@@ -555,8 +567,9 @@
     <p>
         Originally part of
         <a href="https://github.com/helios-decompiler/standalone-app" target="_blank" rel="noopener noreferrer">Helios Decompiler</a>
-        by <a href="https://github.com/samczsun" target="_blank" rel="noopener noreferrer">samczsun</a>, this is
-        the platform era of Java decompilation. Earlier generations asked which decompiler to use. Modern
+        by <a href="https://github.com/samczsun" target="_blank" rel="noopener noreferrer">samczsun</a>
+        (last maintained late 2017, and early 2018 for <a href="https://github.com/helios-decompiler/transformer-api" target="_blank" rel="noopener noreferrer">transformer-api</a>),
+        this is the platform era of Java decompilation. Earlier generations asked which decompiler to use. Modern
         workflows increasingly ask which decompiler explains this bytecode best, and how to compare them
         efficiently. A shared abstraction makes that comparison practical in desktop tools, IDE plugins and
         automated workflows.
