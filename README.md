@@ -201,7 +201,12 @@ This option uses the same feature as Eclipse to cleanup unnecessary casts.
 Quick outline (CTRL+SHIFT+O) is a feature which was present in the C++ versions 0.3.x of jd-gui and is now present in jd-gui-duo.
 It now includes "filter as you type" feature.
 
-<img width="1916" height="1029" alt="image" src="https://github.com/user-attachments/assets/5bcb7e5c-3349-4dd5-9fdd-add2e0a14c12" />
+<img width="1178" height="995" alt="image" src="https://github.com/user-attachments/assets/709a7e8b-cee6-479f-92bb-7c909f4428c0" />
+
+jd-gui 0.3.6 :
+
+<img width="1080" height="967" alt="image" src="https://github.com/user-attachments/assets/e58b123a-f89c-47d5-a52c-76d6a8c8bfcd" />
+
 
 # Credits
 
