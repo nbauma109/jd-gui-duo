@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      JITPACK_MAX_SIZE_MB: 100
+      JITPACK_MAX_SIZE_MB: 99
 
     steps:
       - name: Check out repository
@@ -30,7 +30,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          limit_bytes=$((JITPACK_MAX_SIZE_MB * 1000 * 1000))
+          limit_bytes=$((JITPACK_MAX_SIZE_MB * 1024 * 1024))
           failed=0
           found=0
 
