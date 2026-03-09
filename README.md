@@ -28,7 +28,9 @@ Downloads from Sourceforge :
 Looking for an Eclipse plugin ? Try [ECD++](https://github.com/nbauma109/ecd)
 
 # jd-gui-duo
-A 2-in-1 JAVA decompiler based on JD-CORE v0 and v1
+A 2-in-1 JAVA decompiler based on JD-CORE v0 and v1.
+
+The binaries are built and hosted at jitpack.io (identifiable with rocket logo) and the download buttons below retrieve the distributions directly from Jitpack servers :
 
 <a href="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/2.0.106/jd-gui-duo-2.0.106-windows.tar.xz?cache=0" target="_blank">
   <img
