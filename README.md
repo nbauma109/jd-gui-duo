@@ -39,7 +39,6 @@ The binaries are built and hosted at jitpack.io (identifiable with rocket logo) 
     height="56"
     alt="Download Windows archive">
 </a>
-<br>
 
 <a href="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/2.0.106/jd-gui-duo-2.0.106-linux.tar.xz" target="_blank">
   <img
@@ -48,7 +47,6 @@ The binaries are built and hosted at jitpack.io (identifiable with rocket logo) 
     height="56"
     alt="Download Linux archive">
 </a>
-<br>
 
 <a href="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/2.0.106/jd-gui-duo-2.0.106-macos.tar.xz" target="_blank">
   <img
@@ -57,7 +55,6 @@ The binaries are built and hosted at jitpack.io (identifiable with rocket logo) 
     height="56"
     alt="Download macOS archive">
 </a>
-<br>
 
 Initially a duo of decompilers were supported (JD-Core v0 & v1), but now other decompilers are supported with the [transformer-api](https://github.com/nbauma109/transformer-api) project.
 JD-Core v0 and v1 are 2 different decompilers rather than 2 different versions of the same one. They use a different algorithm :
