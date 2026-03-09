@@ -30,7 +30,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          limit_bytes=$((JITPACK_MAX_SIZE_MB * 1024 * 1024))
+          limit_bytes=$((JITPACK_MAX_SIZE_MB * 1000 * 1000))
           failed=0
           found=0
 
