@@ -203,8 +203,7 @@ It now includes "filter as you type" feature.
 
 <img width="1178" height="995" alt="image" src="https://github.com/user-attachments/assets/709a7e8b-cee6-479f-92bb-7c909f4428c0" />
 
-
-For memory, jd-gui 0.3.6 :
+### For memory, jd-gui 0.3.6 :
 
 <img width="1080" height="967" alt="image" src="https://github.com/user-attachments/assets/e58b123a-f89c-47d5-a52c-76d6a8c8bfcd" />
 
