@@ -13,7 +13,6 @@ import org.jd.gui.spi.PreferencesPanel;
 import com.beust.jcommander.Parameter;
 import com.strobel.decompiler.CommandLineOptions;
 
-import java.awt.Color;
 import java.awt.GridLayout;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -137,21 +136,6 @@ public class ProcyonDecompilerPreferencesProvider extends JPanel implements Pref
     @Override
     public String getPreferencesPanelTitle() {
         return "Class file";
-    }
-
-    @Override
-    public JComponent getPanel() {
-        return this;
-    }
-
-    @Override
-    public void init(Color errorBackgroundColor) {
-        // nothing to do
-    }
-
-    @Override
-    public boolean isActivated() {
-        return true;
     }
 
     @Override

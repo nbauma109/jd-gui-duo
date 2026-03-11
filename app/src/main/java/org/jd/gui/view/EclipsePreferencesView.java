@@ -8,18 +8,18 @@
 package org.jd.gui.view;
 
 import org.jd.gui.model.configuration.Configuration;
-import org.jd.gui.spi.SecuredPreferencesPanel;
+import org.jd.gui.spi.EclipsePreferencesPanel;
 
 import java.util.Collection;
 
 import javax.swing.JFrame;
 
-public class SecuredPreferencesView extends PreferencesView {
+public class EclipsePreferencesView extends PreferencesView {
 
-    public SecuredPreferencesView(
+    public EclipsePreferencesView(
             Configuration configuration,
             JFrame mainFrame,
-            Collection<SecuredPreferencesPanel> panels) {
-        super(configuration, mainFrame, panels, "Secured Preferences");
+            Collection<EclipsePreferencesPanel> panels) {
+        super(configuration, mainFrame, panels, "Eclipse Preferences");
     }
 }

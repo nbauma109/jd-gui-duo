@@ -9,12 +9,10 @@ package org.jd.gui.service.preferencespanel;
 
 import org.jd.gui.spi.PreferencesPanel;
 
-import java.awt.Color;
 import java.awt.GridLayout;
 import java.util.Map;
 
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import de.cismet.custom.visualdiff.PlatformService;
@@ -43,13 +41,6 @@ public class UISingleInstancePreferencesProvider extends JPanel implements Prefe
     public String getPreferencesGroupTitle() { return "User Interface"; }
     @Override
     public String getPreferencesPanelTitle() { return "Main window"; }
-    @Override
-    public JComponent getPanel() { return this; }
-
-    @Override
-    public void init(Color errorBackgroundColor) {
-        // nothing to do
-    }
 
     @Override
     public boolean isActivated() { return !PlatformService.getInstance().isMac(); }

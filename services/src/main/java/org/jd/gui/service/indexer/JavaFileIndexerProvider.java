@@ -50,7 +50,7 @@ public class JavaFileIndexerProvider extends AbstractIndexerProvider {
     public void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
         try {
             Listener listener = new Listener(entry);
-            ASTParserFactory.getInstance().newASTParser(entry).createAST(null).accept(listener);
+            ASTParserFactory.getInstance().newASTParser(api, entry).createAST(null).accept(listener);
 
             // Append sets to indexes
             addToIndexes(indexes, "typeDeclarations", listener.getTypeDeclarationSet(), entry);

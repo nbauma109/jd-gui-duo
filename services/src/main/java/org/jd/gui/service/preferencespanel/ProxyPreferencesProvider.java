@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
@@ -191,20 +190,10 @@ public final class ProxyPreferencesProvider extends JPanel implements SecuredPre
     }
 
     @Override
-    public JComponent getPanel() {
-        return this;
-    }
-
-    @Override
     public void init(Color errorBackgroundColor) {
         if (errorBackgroundColor != null) {
             this.errorBackground = errorBackgroundColor;
         }
-    }
-
-    @Override
-    public boolean isActivated() {
-        return true;
     }
 
     @Override

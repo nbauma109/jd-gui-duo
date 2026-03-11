@@ -7,10 +7,6 @@
 
 package org.jd.gui.service.preferencespanel;
 
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
-import org.jd.gui.spi.PreferencesPanel;
-
-import java.awt.Color;
 import java.awt.GridLayout;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -24,6 +20,9 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.spi.PreferencesPanel;
 
 import jadx.api.JadxArgs;
 
@@ -98,21 +97,6 @@ public class JadxDecompilerPreferencesProvider extends JPanel implements Prefere
     @Override
     public String getPreferencesPanelTitle() {
         return "Class file";
-    }
-
-    @Override
-    public JComponent getPanel() {
-        return this;
-    }
-
-    @Override
-    public void init(Color errorBackgroundColor) {
-        // nothing to do
-    }
-
-    @Override
-    public boolean isActivated() {
-        return true;
     }
 
     @Override

@@ -16,7 +16,6 @@ import java.awt.Color;
 import java.awt.GridLayout;
 import java.util.Map;
 
-import javax.swing.JComponent;
 import javax.swing.JTree;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -62,16 +61,11 @@ public class ViewerPreferencesProvider extends JPanel implements PreferencesPane
     public String getPreferencesGroupTitle() { return "Viewer"; }
     @Override
     public String getPreferencesPanelTitle() { return "Appearance"; }
-    @Override
-    public JComponent getPanel() { return this; }
 
     @Override
     public void init(Color errorBackgroundColor) {
         this.errorBackgroundColor = errorBackgroundColor;
     }
-
-    @Override
-    public boolean isActivated() { return true; }
 
     @Override
     public void loadPreferences(Map<String, String> preferences) {

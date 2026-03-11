@@ -7,5 +7,5 @@
 
 package org.jd.gui.spi;
 
-public interface SecuredPreferencesPanel extends PreferencesPanel {
+public interface EclipsePreferencesPanel extends PreferencesPanel {
 }

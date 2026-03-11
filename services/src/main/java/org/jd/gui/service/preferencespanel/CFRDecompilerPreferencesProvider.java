@@ -19,7 +19,6 @@ import com.strobel.reflection.MethodInfo;
 import com.strobel.reflection.Type;
 import com.strobel.reflection.TypeList;
 
-import java.awt.Color;
 import java.awt.GridLayout;
 import java.util.HashMap;
 import java.util.Map;
@@ -107,21 +106,6 @@ public class CFRDecompilerPreferencesProvider extends JPanel implements Preferen
     @Override
     public String getPreferencesPanelTitle() {
         return "Class file";
-    }
-
-    @Override
-    public JComponent getPanel() {
-        return this;
-    }
-
-    @Override
-    public void init(Color errorBackgroundColor) {
-        // nothing to do
-    }
-
-    @Override
-    public boolean isActivated() {
-        return true;
     }
 
     @Override

@@ -92,7 +92,7 @@ public class ClassFileSourceSaverProvider extends AbstractSourceSaverProvider {
             decompiledResult = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, decompileEngine);
             if (decompiledResult.getDecompiledOutput().contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
                 DecompilationResult sourceCodeV0 = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, ENGINE_JD_CORE_V0);
-                decompiledResult.setDecompiledOutput(MethodPatcher.patchCode(decompiledResult.getDecompiledOutput(), sourceCodeV0.getDecompiledOutput(), entry));
+                decompiledResult.setDecompiledOutput(MethodPatcher.patchCode(api, decompiledResult.getDecompiledOutput(), sourceCodeV0.getDecompiledOutput(), entry));
             }
 
         } catch (Exception t) {

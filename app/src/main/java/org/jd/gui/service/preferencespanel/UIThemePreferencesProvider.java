@@ -9,12 +9,10 @@ package org.jd.gui.service.preferencespanel;
 
 import org.jd.gui.spi.PreferencesPanel;
 
-import java.awt.Color;
 import java.awt.GridLayout;
 import java.util.Map;
 
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 public class UIThemePreferencesProvider extends JPanel implements PreferencesPanel {
@@ -38,14 +36,6 @@ public class UIThemePreferencesProvider extends JPanel implements PreferencesPan
     public String getPreferencesGroupTitle() { return "User Interface"; }
     @Override
     public String getPreferencesPanelTitle() { return "Theme"; }
-    @Override
-    public JComponent getPanel() { return this; }
-
-    @Override
-    public void init(Color errorBackgroundColor) {}
-
-    @Override
-    public boolean isActivated() { return true; }
 
     @Override
     public void loadPreferences(Map<String, String> preferences) {

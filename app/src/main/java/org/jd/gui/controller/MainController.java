@@ -32,6 +32,7 @@ import org.jd.gui.service.fileloader.FileLoaderService;
 import org.jd.gui.service.indexer.IndexerService;
 import org.jd.gui.service.mainpanel.PanelFactoryService;
 import org.jd.gui.service.pastehandler.PasteHandlerService;
+import org.jd.gui.service.preferencespanel.EclipsePreferencesPanelService;
 import org.jd.gui.service.preferencespanel.PreferencesPanelService;
 import org.jd.gui.service.preferencespanel.SecuredPreferencesPanelService;
 import org.jd.gui.service.sourceloader.Artifact;
@@ -149,6 +150,7 @@ public class MainController implements API {
     private QuickOutlineController quickOutlineController;
     private PreferencesController preferencesController;
     private SecuredPreferencesController securedPreferencesController;
+    private EclipsePreferencesController eclipsePreferencesController;
     private SearchInConstantPoolsController searchInConstantPoolsController;
     private SaveAllSourcesController saveAllSourcesController;
     private SelectLocationController selectLocationController;
@@ -195,6 +197,7 @@ public class MainController implements API {
                 e -> onJdCoreIssues(),
                 e -> onPreferences(),
                 e -> onSecuredPreferences(),
+                e -> onEclipsePreferences(),
                 e -> onMavenCentralSearch(),
                 e -> onAbout(),
                 this::panelClosed,
@@ -245,6 +248,7 @@ public class MainController implements API {
                 containerChangeListeners.add(searchInConstantPoolsController);
                 preferencesController = new PreferencesController(configuration, mainFrame, PreferencesPanelService.getInstance().getProviders());
                 securedPreferencesController = new SecuredPreferencesController(configuration, mainFrame, SecuredPreferencesPanelService.getInstance().getProviders());
+                eclipsePreferencesController = new EclipsePreferencesController(configuration, mainFrame, EclipsePreferencesPanelService.getInstance().getProviders());
                 selectLocationController = new SelectLocationController(MainController.this, mainFrame);
                 aboutController = new AboutController(mainFrame, isDarkMode());
                 sourceLoaderService = new SourceLoaderService();
@@ -552,6 +556,14 @@ public class MainController implements API {
     @SuppressWarnings("unchecked")
     protected void onSecuredPreferences() {
         securedPreferencesController.show(() -> {
+            checkPreferencesChange(currentPage);
+            mainView.preferencesChanged(getPreferences());
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void onEclipsePreferences() {
+        eclipsePreferencesController.show(() -> {
             checkPreferencesChange(currentPage);
             mainView.preferencesChanged(getPreferences());
         });

@@ -2,14 +2,12 @@ package org.jd.gui.service.preferencespanel;
 
 import org.jd.gui.spi.PreferencesPanel;
 
-import java.awt.Color;
 import java.awt.GridLayout;
 import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V0;
@@ -92,20 +90,6 @@ public class JDCoreDecompilerPreferencesProvider extends JPanel implements Prefe
     @Override
     public String getPreferencesPanelTitle() {
         return "Class file";
-    }
-
-    @Override
-    public JComponent getPanel() {
-        return this;
-    }
-
-    @Override
-    public void init(Color errorBackgroundColor) {
-    }
-
-    @Override
-    public boolean isActivated() {
-        return true;
     }
 
     @Override

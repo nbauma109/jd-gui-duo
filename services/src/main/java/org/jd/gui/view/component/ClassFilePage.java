@@ -85,9 +85,9 @@ public class ClassFilePage extends TypePage {
                  * It will appear with comment 'Patched from JD-Core V0'
                  */
                 DecompilationResult sourceCodeV0 = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, ENGINE_JD_CORE_V0);
-                String patchedCode = MethodPatcher.patchCode(decompilationResult.getDecompiledOutput(), sourceCodeV0.getDecompiledOutput(), entry);
+                String patchedCode = MethodPatcher.patchCode(api, decompilationResult.getDecompiledOutput(), sourceCodeV0.getDecompiledOutput(), entry);
                 if (removeUnnecessaryCasts) {
-                    patchedCode = new RemoveUnnecessaryCasts(entry).process(patchedCode);
+                    patchedCode = new RemoveUnnecessaryCasts(api, entry).process(patchedCode);
                 }
                 parseAndSetText(patchedCode);
             } else {
@@ -114,7 +114,7 @@ public class ClassFilePage extends TypePage {
                      * Avoid shifting positions for all of them by re-parsing the source code.
                      */
                     if (removeUnnecessaryCasts) {
-                        decompilationResult.setDecompiledOutput(new RemoveUnnecessaryCasts(entry).process(decompilationResult.getDecompiledOutput()));
+                        decompilationResult.setDecompiledOutput(new RemoveUnnecessaryCasts(api, entry).process(decompilationResult.getDecompiledOutput()));
                     }
                     parseAndSetText(decompilationResult.getDecompiledOutput());
                 } else {
@@ -161,7 +161,7 @@ public class ClassFilePage extends TypePage {
             decompilationResult = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, decompileEngine);
             if (decompilationResult.getDecompiledOutput().contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
                 DecompilationResult sourceCodeV0 = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, ENGINE_JD_CORE_V0);
-                decompilationResult.setDecompiledOutput(MethodPatcher.patchCode(decompilationResult.getDecompiledOutput(), sourceCodeV0.getDecompiledOutput(), entry));
+                decompilationResult.setDecompiledOutput(MethodPatcher.patchCode(api, decompilationResult.getDecompiledOutput(), sourceCodeV0.getDecompiledOutput(), entry));
             }
         } catch (Exception t) {
             assert ExceptionUtil.printStackTrace(t);
