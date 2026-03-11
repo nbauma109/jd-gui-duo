@@ -122,7 +122,7 @@ public final class ASTParserFactory {
     private static Map<String, String> getOptions(API api) {
         Map<String, String> options = JavaCore.getOptions();
         options.put(CORE_ENCODING, StandardCharsets.UTF_8.name());
-        options.put(COMPILER_COMPLIANCE, api.getPreferences().getOrDefault(COMPILER_SOURCE, JavaCore.latestSupportedJavaVersion()));
+        options.put(COMPILER_COMPLIANCE, api.getPreferences().getOrDefault(COMPILER_COMPLIANCE, JavaCore.latestSupportedJavaVersion()));
         options.put(COMPILER_SOURCE, api.getPreferences().getOrDefault(COMPILER_SOURCE, JavaCore.latestSupportedJavaVersion()));
         return options;
     }
