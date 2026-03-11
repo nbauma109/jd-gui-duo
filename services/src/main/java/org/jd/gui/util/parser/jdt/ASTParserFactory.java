@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -64,9 +65,16 @@ public final class ASTParserFactory {
         parser.setResolveBindings(resolveBindings);
         parser.setBindingsRecovery(bindingRecovery);
         parser.setStatementsRecovery(statementRecovery);
-        List<String> jdkClassPath = getJDKClasspath(api.getPreferences().get(JRE_SYSTEM_LIBRARY_PATH));
+        List<String> jdkClassPath;
+        boolean includeRunningVMBootclasspath;
+        if (!"false".equals(api.getPreferences().get(INCLUDE_RUNNING_VM_BOOT_CLASSPATH))) {
+            includeRunningVMBootclasspath = true;
+            jdkClassPath = Collections.emptyList();
+        } else {
+            includeRunningVMBootclasspath = false;
+            jdkClassPath = getJDKClasspath(api.getPreferences().get(JRE_SYSTEM_LIBRARY_PATH));
+        }
         String[] classpathEntries = ClasspathUtil.createClasspathEntries(jarURI, jdkClassPath);
-        boolean includeRunningVMBootclasspath = !"false".equals(api.getPreferences().get(INCLUDE_RUNNING_VM_BOOT_CLASSPATH));
         if (unitName.endsWith(".java")) {
             String[] sourcepathEntries = { jarURI.getPath() };
             String[] encodings = { StandardCharsets.UTF_8.name() };
