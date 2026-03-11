@@ -1,5 +1,9 @@
 package org.jd.gui.util;
 
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -13,25 +17,22 @@ import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeWriter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.util.parser.jdt.ASTParserFactory;
 import org.jd.util.Range;
-
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
 
 public final class MethodPatcher {
 
     private MethodPatcher() {
     }
 
-    public static String patchCode(String sourceCodeV1, String sourceCodeV0, Container.Entry entry) {
+    public static String patchCode(API api, String sourceCodeV1, String sourceCodeV0, Container.Entry entry) {
         Map<String, Range> methodKeyPositionRanges = new HashMap<>();
         URI jarURI = entry.getContainer().getRoot().getParent().getUri();
         String unitName = entry.getPath();
         ASTParserFactory astParserFactory = ASTParserFactory.getInstanceWithBindings();
-        CompilationUnit compilationUnit = (CompilationUnit) astParserFactory.newASTParser(sourceCodeV1.toCharArray(), unitName, jarURI).createAST(null);
+        CompilationUnit compilationUnit = (CompilationUnit) astParserFactory.newASTParser(api, sourceCodeV1.toCharArray(), unitName, jarURI).createAST(null);
         ASTRewrite rewriter = ASTRewrite.create(compilationUnit.getAST());
         Document document = new Document(sourceCodeV1);
         TextEdit textEdit = rewriter.rewriteAST(document, null);
@@ -54,7 +55,7 @@ public final class MethodPatcher {
                 return super.visit(node);
             }
         });
-        astParserFactory.newASTParser(sourceCodeV0.toCharArray(), unitName, jarURI).createAST(null).accept(new ASTVisitor() {
+        astParserFactory.newASTParser(api, sourceCodeV0.toCharArray(), unitName, jarURI).createAST(null).accept(new ASTVisitor() {
 
             @Override
             public boolean visit(MethodDeclaration node) {

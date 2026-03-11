@@ -8,22 +8,22 @@
 package org.jd.gui.controller;
 
 import org.jd.gui.model.configuration.Configuration;
-import org.jd.gui.spi.SecuredPreferencesPanel;
-import org.jd.gui.view.SecuredPreferencesView;
+import org.jd.gui.spi.EclipsePreferencesPanel;
+import org.jd.gui.view.EclipsePreferencesView;
 
 import java.util.Collection;
 
 import javax.swing.JFrame;
 
-public class SecuredPreferencesController {
-    private final SecuredPreferencesView preferencesView;
+public class EclipsePreferencesController {
+    private final EclipsePreferencesView preferencesView;
 
-    public SecuredPreferencesController(
+    public EclipsePreferencesController(
             Configuration configuration,
             JFrame mainFrame,
-            Collection<SecuredPreferencesPanel> panels) {
+            Collection<EclipsePreferencesPanel> panels) {
         // Create UI
-        preferencesView = new SecuredPreferencesView(configuration, mainFrame, panels);
+        preferencesView = new EclipsePreferencesView(configuration, mainFrame, panels);
     }
 
     public void show(Runnable okCallback) {

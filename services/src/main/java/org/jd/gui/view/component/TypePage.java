@@ -520,11 +520,11 @@ public abstract class TypePage extends CustomLineNumbersPage
         URI jarURI = entry.getContainer().getRoot().getParent().getUri();
         String unitName = entry.getPath();
         // 1st pass for declarations
-        ASTParser astParser = ASTParserFactory.getInstance().newASTParser(source, unitName, jarURI);
+        ASTParser astParser = ASTParserFactory.getInstance().newASTParser(api, source, unitName, jarURI);
         astParser.createAST(null).accept(listener.getDeclarationListener());
         listener.init();
         // 2nd pass for references
-        ASTParser astParserWithBindings = ASTParserFactory.getInstanceWithBindings().newASTParser(source, unitName, jarURI);
+        ASTParser astParserWithBindings = ASTParserFactory.getInstanceWithBindings().newASTParser(api, source, unitName, jarURI);
         ASTNode astNode = astParserWithBindings.createAST(null);
         astNode.accept(listener);
         // Display

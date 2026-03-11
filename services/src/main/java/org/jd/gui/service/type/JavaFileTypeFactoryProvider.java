@@ -48,7 +48,7 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
 
     @Override
     public Collection<Type> make(API api, Container.Entry entry) {
-        Listener listener = getListener(entry);
+        Listener listener = getListener(api, entry);
 
         if (listener == null) {
             return Collections.emptyList();
@@ -58,7 +58,7 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
 
     @Override
     public Type make(API api, Container.Entry entry, String fragment) {
-        Listener listener = getListener(entry);
+        Listener listener = getListener(api, entry);
 
         if (listener == null) {
             return null;
@@ -77,7 +77,7 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
         return listener.getMainType();
     }
 
-    protected Listener getListener(Container.Entry entry) {
+    protected Listener getListener(API api, Container.Entry entry) {
         URI key = entry.getUri();
 
         if (cache.containsKey(key)) {
@@ -87,7 +87,7 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
 
         try {
             listener = new Listener(entry);
-            ASTParserFactory.getInstance().newASTParser(entry).createAST(null).accept(listener);
+            ASTParserFactory.getInstance().newASTParser(api, entry).createAST(null).accept(listener);
         } catch (IOException e) {
             assert ExceptionUtil.printStackTrace(e);
             listener = null;
