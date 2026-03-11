@@ -44,6 +44,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.JavaCore;
 import org.jd.gui.spi.EclipsePreferencesPanel;
 import org.jd.gui.spi.PreferencesPanel;
+import org.jd.gui.util.JavaHomeResolver;
 
 public class EclipsePreferencesProvider extends JPanel implements EclipsePreferencesPanel {
 
@@ -53,8 +54,6 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
     private static final String DEFAULT_JAVA_VERSION = JavaCore.latestSupportedJavaVersion();
     private static final String MINIMUM_JAVA_VERSION = JavaCore.VERSION_1_8;
     private static final List<String> JAVA_VERSIONS = createJavaVersions();
-    private static final String RELEASE = "release";
-
     protected JCheckBox showCompilerErrorsCheckBox;
     protected JCheckBox showCompilerWarningsCheckBox;
     protected JCheckBox showCompilerInfoCheckBox;
@@ -286,8 +285,8 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
             return;
         }
 
-        String selectedPath = selectedFile.getAbsolutePath();
-        if (!isValidJrePath(selectedPath)) {
+        File javaHome = JavaHomeResolver.normalizeJavaHome(selectedFile);
+        if (javaHome == null) {
             JOptionPane.showMessageDialog(
                 this,
                 "The selected directory is not a valid JRE or JDK home.",
@@ -297,7 +296,7 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
             return;
         }
 
-        jreSystemLibraryPathTextField.setText(selectedPath);
+        jreSystemLibraryPathTextField.setText(javaHome.getAbsolutePath());
         updateVersionSelections();
         firePreferencesChanged();
     }
@@ -365,26 +364,7 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
     }
 
     private File findReleaseFile(File selectedDirectory) {
-        if (selectedDirectory == null || !selectedDirectory.isDirectory()) {
-            return null;
-        }
-
-        File directReleaseFile = new File(selectedDirectory, RELEASE);
-        if (directReleaseFile.isFile()) {
-            return directReleaseFile;
-        }
-
-        File parentDirectory = selectedDirectory.getParentFile();
-        if (parentDirectory == null) {
-            return null;
-        }
-
-        File parentReleaseFile = new File(parentDirectory, RELEASE);
-        if (parentReleaseFile.isFile()) {
-            return parentReleaseFile;
-        }
-
-        return null;
+        return JavaHomeResolver.findReleaseFile(selectedDirectory);
     }
 
     private String normalizeJavaVersion(String version) {
@@ -468,7 +448,7 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
         advancedClassLookupCheckBox.setSelected("true".equals(preferences.get(ADVANCED_CLASS_LOOKUP)));
         removeUnnecessaryCastsCheckBox.setSelected("true".equals(preferences.get(REMOVE_UNNECESSARY_CASTS)));
         includeRunningVMBootClasspathCheckBox.setSelected(!"false".equals(preferences.get(INCLUDE_RUNNING_VM_BOOT_CLASSPATH)));
-        jreSystemLibraryPathTextField.setText(preferences.get(JRE_SYSTEM_LIBRARY_PATH));
+        jreSystemLibraryPathTextField.setText(normalizeJrePath(preferences.get(JRE_SYSTEM_LIBRARY_PATH)));
         setSelectedVersion(sourceComboBox, preferences.getOrDefault(JavaCore.COMPILER_SOURCE, JavaCore.latestSupportedJavaVersion()));
         setSelectedVersion(complianceComboBox, preferences.getOrDefault(JavaCore.COMPILER_COMPLIANCE, JavaCore.latestSupportedJavaVersion()));
         updateJreSystemLibraryState();
@@ -487,7 +467,7 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
         preferences.put(ADVANCED_CLASS_LOOKUP, Boolean.toString(advancedClassLookupCheckBox.isSelected()));
         preferences.put(REMOVE_UNNECESSARY_CASTS, Boolean.toString(removeUnnecessaryCastsCheckBox.isSelected()));
         preferences.put(INCLUDE_RUNNING_VM_BOOT_CLASSPATH, Boolean.toString(includeRunningVMBootClasspathCheckBox.isSelected()));
-        preferences.put(JRE_SYSTEM_LIBRARY_PATH, jreSystemLibraryPathTextField.getText());
+        preferences.put(JRE_SYSTEM_LIBRARY_PATH, normalizeJrePath(jreSystemLibraryPathTextField.getText()));
         preferences.put(JavaCore.COMPILER_SOURCE, (String) sourceComboBox.getSelectedItem());
         preferences.put(JavaCore.COMPILER_COMPLIANCE, (String) complianceComboBox.getSelectedItem());
     }
@@ -526,5 +506,23 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
     @Override
     public boolean useCompactDisplay() {
         return true;
+    }
+
+    private String normalizeJrePath(String path) {
+        if (path == null) {
+            return null;
+        }
+
+        String trimmedPath = path.trim();
+        if (trimmedPath.isEmpty()) {
+            return trimmedPath;
+        }
+
+        File javaHome = JavaHomeResolver.normalizeJavaHome(new File(trimmedPath));
+        if (javaHome != null) {
+            return javaHome.getAbsolutePath();
+        }
+
+        return trimmedPath;
     }
 }

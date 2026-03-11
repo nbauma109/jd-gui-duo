@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2021-2026 Nicolas Baumann (@nbauma109)
+ * This project is distributed under the GPLv3 license.
+ * This is a Copyleft license that gives the user the right to use,
+ * copy and modify the code freely for non-commercial purposes.
+ */
+
 package org.jd.gui.util.parser.jdt;
 
 import org.apache.commons.lang3.StringUtils;
@@ -7,6 +14,7 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
+import org.jd.gui.util.JavaHomeResolver;
 import org.jd.gui.util.decompiler.ContainerLoader;
 
 import com.heliosdecompiler.transformerapi.common.ClasspathUtil;
@@ -100,9 +108,14 @@ public final class ASTParserFactory {
             return cpEntries;
         }
 
-        File home = new File(javaHome);
+        File home = new File(javaHome.trim());
         if (!home.isDirectory()) {
             return cpEntries;
+        }
+
+        File normalizedHome = JavaHomeResolver.normalizeJavaHome(home);
+        if (normalizedHome != null) {
+            home = normalizedHome;
         }
 
         // Java 9+ : JRT via jrt-fs.jar (must be a real file path, not "jrt:/")
