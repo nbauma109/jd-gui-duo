@@ -11,7 +11,6 @@ import org.jd.gui.spi.PreferencesPanel;
 import org.jd.gui.util.ImageUtil;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.GridLayout;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +20,6 @@ import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -110,21 +108,6 @@ public class ClassFileDecompilerPreferencesProvider extends JPanel implements Pr
     @Override
     public String getPreferencesPanelTitle() {
         return "Class file";
-    }
-
-    @Override
-    public JComponent getPanel() {
-        return this;
-    }
-
-    @Override
-    public void init(Color errorBackgroundColor) {
-        // nothing to do
-    }
-
-    @Override
-    public boolean isActivated() {
-        return true;
     }
 
     @Override

@@ -14,7 +14,6 @@ import org.jetbrains.java.decompiler.main.extern.IFernflowerPreferences;
 import com.strobel.reflection.FieldInfo;
 import com.strobel.reflection.Type;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.util.EnumSet;
@@ -94,21 +93,6 @@ public class FernflowerDecompilerPreferencesProvider extends JPanel implements P
     @Override
     public String getPreferencesPanelTitle() {
         return "Class file";
-    }
-
-    @Override
-    public JComponent getPanel() {
-        return this;
-    }
-
-    @Override
-    public void init(Color errorBackgroundColor) {
-        // nothing to do
-    }
-
-    @Override
-    public boolean isActivated() {
-        return true;
     }
 
     @Override

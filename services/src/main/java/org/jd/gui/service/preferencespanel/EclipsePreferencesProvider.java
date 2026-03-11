@@ -15,7 +15,6 @@ import static org.jd.gui.util.decompiler.GuiPreferences.SHOW_COMPILER_ERRORS;
 import static org.jd.gui.util.decompiler.GuiPreferences.SHOW_COMPILER_INFO;
 import static org.jd.gui.util.decompiler.GuiPreferences.SHOW_COMPILER_WARNINGS;
 
-import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -434,21 +433,6 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
     @Override
     public String getPreferencesPanelTitle() {
         return "Compiler";
-    }
-
-    @Override
-    public JComponent getPanel() {
-        return this;
-    }
-
-    @Override
-    public void init(Color errorBackgroundColor) {
-        // nothing to do
-    }
-
-    @Override
-    public boolean isActivated() {
-        return true;
     }
 
     @Override

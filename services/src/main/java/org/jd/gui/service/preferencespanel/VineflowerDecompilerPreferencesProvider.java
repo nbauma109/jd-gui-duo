@@ -13,7 +13,6 @@ import org.vineflower.java.decompiler.main.Init;
 import org.vineflower.java.decompiler.main.extern.IFernflowerLogger.Severity;
 import org.vineflower.java.decompiler.main.extern.IFernflowerPreferences;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.util.Arrays;
@@ -106,21 +105,6 @@ public class VineflowerDecompilerPreferencesProvider extends JPanel implements P
     @Override
     public String getPreferencesPanelTitle() {
         return "Class file";
-    }
-
-    @Override
-    public JComponent getPanel() {
-        return this;
-    }
-
-    @Override
-    public void init(Color errorBackgroundColor) {
-        // nothing to do
-    }
-
-    @Override
-    public boolean isActivated() {
-        return true;
     }
 
     @Override

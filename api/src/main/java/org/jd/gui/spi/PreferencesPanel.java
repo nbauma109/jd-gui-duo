@@ -20,11 +20,11 @@ public interface PreferencesPanel {
 
     String getPreferencesPanelTitle();
 
-    JComponent getPanel();
+    default JComponent getPanel() { return (JComponent) this; }
 
-    void init(Color errorBackgroundColor);
+    default void init(Color errorBackgroundColor) {}
 
-    boolean isActivated();
+    default boolean isActivated() { return true; }
 
     void loadPreferences(Map<String, String> preferences);
 

@@ -14,7 +14,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.util.Map;
 
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -50,16 +49,11 @@ public class DirectoryIndexerPreferencesProvider extends JPanel implements Prefe
     public String getPreferencesGroupTitle() { return "Indexer"; }
     @Override
     public String getPreferencesPanelTitle() { return "Directory exploration"; }
-    @Override
-    public JComponent getPanel() { return this; }
 
     @Override
     public void init(Color errorBackgroundColor) {
         this.errorBackgroundColor = errorBackgroundColor;
     }
-
-    @Override
-    public boolean isActivated() { return true; }
 
     @Override
     public void loadPreferences(Map<String, String> preferences) {

@@ -96,16 +96,11 @@ public class MavenOrgSourceLoaderPreferencesProvider extends JPanel implements P
     public String getPreferencesGroupTitle() { return "Source loader"; }
     @Override
     public String getPreferencesPanelTitle() { return "maven.org"; }
-    @Override
-    public JComponent getPanel() { return this; }
 
     @Override
     public void init(Color errorBackgroundColor) {
         this.errorBackgroundColor = errorBackgroundColor;
     }
-
-    @Override
-    public boolean isActivated() { return true; }
 
     @Override
     public void loadPreferences(Map<String, String> preferences) {

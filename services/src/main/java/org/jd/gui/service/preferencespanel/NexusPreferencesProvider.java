@@ -25,7 +25,6 @@ import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.JPanel;
-import javax.swing.JComponent;
 import javax.swing.JButton;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -155,20 +154,10 @@ public final class NexusPreferencesProvider extends JPanel implements SecuredPre
     }
 
     @Override
-    public JComponent getPanel() {
-        return this;
-    }
-
-    @Override
     public void init(Color errorBackgroundColor) {
         if (errorBackgroundColor != null) {
             this.errorBackground = errorBackgroundColor;
         }
-    }
-
-    @Override
-    public boolean isActivated() {
-        return true;
     }
 
     @Override
