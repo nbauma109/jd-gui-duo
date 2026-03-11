@@ -339,7 +339,7 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
         try (FileInputStream inputStream = new FileInputStream(releaseFile)) {
             properties.load(inputStream);
             return normalizeJavaVersion(properties.getProperty("JAVA_VERSION"));
-        } catch (IOException ex) {
+        } catch (IOException _) {
             return UNKNOWN_VERSION;
         }
     }
