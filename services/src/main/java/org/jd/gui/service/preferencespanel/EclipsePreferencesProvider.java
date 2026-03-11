@@ -47,12 +47,14 @@ import org.jd.gui.spi.PreferencesPanel;
 
 public class EclipsePreferencesProvider extends JPanel implements EclipsePreferencesPanel {
 
+
     private static final long serialVersionUID = 1L;
 
     private static final String UNKNOWN_VERSION = "";
     private static final String DEFAULT_JAVA_VERSION = JavaCore.latestSupportedJavaVersion();
     private static final String MINIMUM_JAVA_VERSION = JavaCore.VERSION_1_8;
     private static final List<String> JAVA_VERSIONS = createJavaVersions();
+    private static final String RELEASE = "release";
 
     protected JCheckBox showCompilerErrorsCheckBox;
     protected JCheckBox showCompilerWarningsCheckBox;
@@ -368,7 +370,7 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
             return null;
         }
 
-        File directReleaseFile = new File(selectedDirectory, "release");
+        File directReleaseFile = new File(selectedDirectory, RELEASE);
         if (directReleaseFile.isFile()) {
             return directReleaseFile;
         }
@@ -378,7 +380,7 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
             return null;
         }
 
-        File parentReleaseFile = new File(parentDirectory, "release");
+        File parentReleaseFile = new File(parentDirectory, RELEASE);
         if (parentReleaseFile.isFile()) {
             return parentReleaseFile;
         }
@@ -391,7 +393,7 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
             return null;
         }
 
-        File directReleaseFile = new File(selectedDirectory, "release");
+        File directReleaseFile = new File(selectedDirectory, RELEASE);
         if (directReleaseFile.isFile()) {
             return directReleaseFile;
         }
