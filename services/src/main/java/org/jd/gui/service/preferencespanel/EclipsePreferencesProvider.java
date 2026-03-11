@@ -47,7 +47,6 @@ import org.jd.gui.spi.PreferencesPanel;
 
 public class EclipsePreferencesProvider extends JPanel implements EclipsePreferencesPanel {
 
-
     private static final long serialVersionUID = 1L;
 
     private static final String UNKNOWN_VERSION = "";
@@ -388,19 +387,6 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
         return null;
     }
 
-    private File findJavaHomeReleaseFile(File selectedDirectory) {
-        if (selectedDirectory == null || !selectedDirectory.isDirectory()) {
-            return null;
-        }
-
-        File directReleaseFile = new File(selectedDirectory, RELEASE);
-        if (directReleaseFile.isFile()) {
-            return directReleaseFile;
-        }
-
-        return null;
-    }
-
     private String normalizeJavaVersion(String version) {
         if (version == null) {
             return UNKNOWN_VERSION;
@@ -446,7 +432,7 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
         }
 
         File selectedDirectory = new File(path.trim());
-        return findJavaHomeReleaseFile(selectedDirectory) != null;
+        return findReleaseFile(selectedDirectory) != null;
     }
 
     private void handleJrePathChanged() {
