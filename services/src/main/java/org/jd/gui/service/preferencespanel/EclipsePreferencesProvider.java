@@ -68,6 +68,9 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
     protected JLabel complianceLabel;
     protected JComboBox<String> complianceComboBox;
 
+    private final List<PreferencesPanelChangeListener> preferencesChangeListeners =
+            new ArrayList<>();
+
     public EclipsePreferencesProvider() {
         super(new GridBagLayout());
 
@@ -81,9 +84,9 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
         jreSystemLibraryPathTextField = new JTextField();
         jreSystemLibraryPathButton = createFolderButton();
         sourceLabel = new JLabel("Source");
-        sourceComboBox = new JComboBox<String>(JAVA_VERSIONS.toArray(new String[JAVA_VERSIONS.size()]));
+        sourceComboBox = new JComboBox<>(JAVA_VERSIONS.toArray(new String[JAVA_VERSIONS.size()]));
         complianceLabel = new JLabel("Compliance");
-        complianceComboBox = new JComboBox<String>(JAVA_VERSIONS.toArray(new String[JAVA_VERSIONS.size()]));
+        complianceComboBox = new JComboBox<>(JAVA_VERSIONS.toArray(new String[JAVA_VERSIONS.size()]));
 
         jreSystemLibraryPathTextField.setColumns(40);
         sourceComboBox.setPrototypeDisplayValue(DEFAULT_JAVA_VERSION);
@@ -95,26 +98,41 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
         addSingleVersionRow(complianceLabel, complianceComboBox, 3);
         addVerticalGlue(4);
 
-        includeRunningVMBootClasspathCheckBox.addActionListener(e -> updateJreSystemLibraryState());
-        sourceComboBox.addActionListener(e -> limitSelectionToCurrentJre(sourceComboBox));
-        complianceComboBox.addActionListener(e -> limitSelectionToCurrentJre(complianceComboBox));
-        jreSystemLibraryPathButton.addActionListener(e -> chooseJreSystemLibraryPath());
+        includeRunningVMBootClasspathCheckBox.addActionListener(_ -> {
+            updateJreSystemLibraryState();
+            firePreferencesChanged();
+        });
+        sourceComboBox.addActionListener(_ -> {
+            limitSelectionToCurrentJre(sourceComboBox);
+            firePreferencesChanged();
+        });
+        complianceComboBox.addActionListener(_ -> {
+            limitSelectionToCurrentJre(complianceComboBox);
+            firePreferencesChanged();
+        });
+        jreSystemLibraryPathButton.addActionListener(_ -> chooseJreSystemLibraryPath());
         jreSystemLibraryPathTextField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent event) {
-                updateVersionSelections();
+                handleJrePathChanged();
             }
 
             @Override
             public void removeUpdate(DocumentEvent event) {
-                updateVersionSelections();
+                handleJrePathChanged();
             }
 
             @Override
             public void changedUpdate(DocumentEvent event) {
-                updateVersionSelections();
+                handleJrePathChanged();
             }
         });
+
+        addPreferenceChangeListener(showCompilerErrorsCheckBox);
+        addPreferenceChangeListener(showCompilerWarningsCheckBox);
+        addPreferenceChangeListener(showCompilerInfoCheckBox);
+        addPreferenceChangeListener(advancedClassLookupCheckBox);
+        addPreferenceChangeListener(removeUnnecessaryCastsCheckBox);
 
         includeRunningVMBootClasspathCheckBox.setSelected(true);
         sourceComboBox.setSelectedItem(DEFAULT_JAVA_VERSION);
@@ -125,7 +143,7 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
     }
 
     private static List<String> createJavaVersions() {
-        List<String> supportedVersions = new ArrayList<String>();
+        List<String> supportedVersions = new ArrayList<>();
         List<String> allVersions = JavaCore.getAllVersions();
 
         for (String version : allVersions) {
@@ -280,6 +298,7 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
 
         jreSystemLibraryPathTextField.setText(selectedPath);
         updateVersionSelections();
+        firePreferencesChanged();
     }
 
     private void updateJreSystemLibraryState() {
@@ -306,7 +325,7 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
         }
 
         String selectedVersion = (String) comboBox.getSelectedItem();
-        if ((selectedVersion != null) && (JavaCore.compareJavaVersions(selectedVersion, maximumVersion) > 0)) {
+        if (selectedVersion != null && JavaCore.compareJavaVersions(selectedVersion, maximumVersion) > 0) {
             comboBox.setSelectedItem(maximumVersion);
         }
     }
@@ -367,6 +386,19 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
         return null;
     }
 
+    private File findJavaHomeReleaseFile(File selectedDirectory) {
+        if (selectedDirectory == null || !selectedDirectory.isDirectory()) {
+            return null;
+        }
+
+        File directReleaseFile = new File(selectedDirectory, "release");
+        if (directReleaseFile.isFile()) {
+            return directReleaseFile;
+        }
+
+        return null;
+    }
+
     private String normalizeJavaVersion(String version) {
         if (version == null) {
             return UNKNOWN_VERSION;
@@ -412,7 +444,22 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
         }
 
         File selectedDirectory = new File(path.trim());
-        return findReleaseFile(selectedDirectory) != null;
+        return findJavaHomeReleaseFile(selectedDirectory) != null;
+    }
+
+    private void handleJrePathChanged() {
+        updateVersionSelections();
+        firePreferencesChanged();
+    }
+
+    private void addPreferenceChangeListener(JCheckBox checkBox) {
+        checkBox.addActionListener(_ -> firePreferencesChanged());
+    }
+
+    private void firePreferencesChanged() {
+        for (PreferencesPanel.PreferencesPanelChangeListener listener : preferencesChangeListeners) {
+            listener.preferencesPanelChanged(this);
+        }
     }
 
     @Override
@@ -468,7 +515,9 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
 
     @Override
     public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {
-        // nothing to do
+        if (listener != null) {
+            preferencesChangeListeners.add(listener);
+        }
     }
 
     @Override
@@ -483,6 +532,7 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
         sourceComboBox.setSelectedItem(DEFAULT_JAVA_VERSION);
         complianceComboBox.setSelectedItem(DEFAULT_JAVA_VERSION);
         updateJreSystemLibraryState();
+        firePreferencesChanged();
     }
 
     @Override
