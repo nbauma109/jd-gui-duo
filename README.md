@@ -30,6 +30,13 @@ Looking for an Eclipse plugin ? Try [ECD++](https://github.com/nbauma109/ecd)
 # jd-gui-duo
 A 2-in-1 JAVA decompiler based on JD-CORE v0 and v1.
 
+Initially a duo of decompilers were supported (JD-Core v0 & v1), but now other decompilers are supported with the [transformer-api](https://github.com/nbauma109/transformer-api) project.
+JD-Core v0 and v1 are 2 different decompilers rather than 2 different versions of the same one. They use a different algorithm :
+ - [JD-Core v0](https://github.com/nbauma109/jd-core-v0) uses byte code pattern matching like [JAD](http://www.kpdus.com/jad.html), the 1st Java decompiler
+ - [JD-Core v1](https://github.com/nbauma109/jd-core) uses an analytical algorithm like [Fernflower](https://github.com/fesh0r/fernflower), the 1st analytical decompiler
+
+This project is built on top of original [JD-GUI](https://github.com/java-decompiler/jd-gui) written by [Emmanuel Dupuy](https://github.com/emmanue1).
+
 The binaries are built and hosted at jitpack.io (identifiable with rocket logo) and the download buttons below retrieve the distributions directly from Jitpack servers :
 
 <a href="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/2.0.106/jd-gui-duo-2.0.106-windows.tar.xz?cache=0" target="_blank">
@@ -55,13 +62,6 @@ The binaries are built and hosted at jitpack.io (identifiable with rocket logo) 
     height="56"
     alt="Download macOS archive">
 </a>
-
-Initially a duo of decompilers were supported (JD-Core v0 & v1), but now other decompilers are supported with the [transformer-api](https://github.com/nbauma109/transformer-api) project.
-JD-Core v0 and v1 are 2 different decompilers rather than 2 different versions of the same one. They use a different algorithm :
- - [JD-Core v0](https://github.com/nbauma109/jd-core-v0) uses byte code pattern matching like [JAD](http://www.kpdus.com/jad.html), the 1st Java decompiler
- - [JD-Core v1](https://github.com/nbauma109/jd-core) uses an analytical algorithm like [Fernflower](https://github.com/fesh0r/fernflower), the 1st analytical decompiler
-
-This project is built on top of original [JD-GUI](https://github.com/java-decompiler/jd-gui) written by [Emmanuel Dupuy](https://github.com/emmanue1).
 
 # Feature tour
 
