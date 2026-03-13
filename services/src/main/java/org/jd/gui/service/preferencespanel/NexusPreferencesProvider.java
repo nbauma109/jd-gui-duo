@@ -175,7 +175,7 @@ public final class NexusPreferencesProvider extends JPanel implements SecuredPre
                     if (hasNonEmpty(preferences, NEXUS_PASS_ENC)) {
                         passField.setText(SecurePreferences.decrypt(master, preferences.get(NEXUS_PASS_ENC)));
                     }
-                } catch (GeneralSecurityException ex) {
+                } catch (GeneralSecurityException _) {
                     // We keep fields blank on failure
                 } finally {
                     Arrays.fill(master, '\0');
@@ -199,7 +199,7 @@ public final class NexusPreferencesProvider extends JPanel implements SecuredPre
                     preferences.put(NEXUS_USER_ENC, SecurePreferences.encrypt(master, nvl(userField.getText())));
                     preferences.put(NEXUS_PASS_ENC, SecurePreferences.encrypt(master, new String(passField.getPassword())));
                     preferences.put(VAULT_PRESENT, "true");
-                } catch (GeneralSecurityException ex) {
+                } catch (GeneralSecurityException _) {
                     // We do not write clear text on failure
                 } finally {
                     zero(passField.getPassword());

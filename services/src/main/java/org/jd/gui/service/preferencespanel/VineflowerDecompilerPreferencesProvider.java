@@ -58,9 +58,7 @@ public class VineflowerDecompilerPreferencesProvider extends JPanel implements P
 
             components.put(option.id(), component);
             JLabel label = new JLabel(option.name());
-            if (option.description() != null) {
-                label.setToolTipText(option.description());
-            }
+            label.setToolTipText(option.description());
             label.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
 
             add(label);

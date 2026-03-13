@@ -59,7 +59,7 @@ class NexusV3ClientTest {
     }
 
     @Test
-    void factoryDetectsNexusV3() throws Exception {
+    void factoryDetectsNexusV3() {
         NexusConfig config = new NexusConfig(NEXUS3_BASE, null, null);
         NexusSearch search = NexusSearchFactory.create(config);
 

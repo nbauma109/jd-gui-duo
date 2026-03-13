@@ -62,7 +62,7 @@ abstract class AbstractNexusClient {
 
     protected static String enc(String s) {
         try { return java.net.URLEncoder.encode(s, StandardCharsets.UTF_8.name()); }
-        catch (Exception e) { return s; }
+        catch (Exception _) { return s; }
     }
 
     protected static String trimTrailingSlash(String base) {

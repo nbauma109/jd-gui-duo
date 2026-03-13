@@ -287,7 +287,7 @@ public final class DownloadUtil {
         URI baseUri;
         try {
             baseUri = URI.create(baseUrl.trim());
-        } catch (Exception ignored) {
+        } catch (Exception _) {
             return false;
         }
 

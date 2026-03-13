@@ -61,7 +61,7 @@ final class NexusV2Client extends AbstractNexusClient implements NexusSearch {
             String url = trimTrailingSlash(cfg.baseUrl) + "/service/local/status";
             String body = new NexusV2Client(cfg).get(url, 4000, 6000);
             return body != null && body.contains("<status>");
-        } catch (Exception ignored) {
+        } catch (Exception _) {
             return false;
         }
     }
@@ -203,7 +203,7 @@ final class NexusV2Client extends AbstractNexusClient implements NexusSearch {
                     }
                 }
             }
-        } catch (Exception ignored) {
+        } catch (Exception _) {
         }
         return new NexusSearchResult(list);
     }

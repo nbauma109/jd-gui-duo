@@ -149,7 +149,7 @@ public class GoToView {
                                 goToOkButton.setEnabled(false);
                                 showErrorMessage("Line number not found");
                             }
-                        } catch (NumberFormatException e) {
+                        } catch (NumberFormatException _) {
                             goToOkButton.setEnabled(false);
                             showErrorMessage("Not a number");
                         }

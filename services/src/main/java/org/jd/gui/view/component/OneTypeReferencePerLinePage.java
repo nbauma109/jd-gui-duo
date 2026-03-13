@@ -73,7 +73,7 @@ public class OneTypeReferencePerLinePage extends TypeReferencePage implements Ur
     }
 
     @Override
-    protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return ((TypeHyperlinkData)hyperlinkData).isEnabled(); }
+    protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return hyperlinkData.isEnabled(); }
 
     @Override
     protected void openHyperlink(int x, int y, HyperlinkData hyperlinkData) {

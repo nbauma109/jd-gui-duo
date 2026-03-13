@@ -80,7 +80,7 @@ public final class NexusConfigHelper {
                             Arrays.fill(tmp, '\0');
                         }
                     }
-                } catch (GeneralSecurityException ignored) {
+                } catch (GeneralSecurityException _) {
                     // Any decryption error is treated as "no credentials"
                     username = null;
                     password = null;

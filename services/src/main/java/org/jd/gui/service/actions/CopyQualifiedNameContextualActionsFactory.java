@@ -73,7 +73,7 @@ public class CopyQualifiedNameContextualActionsFactory implements ContextualActi
                     }
                     StringBuilder sb = new StringBuilder(displayPackageName);
 
-                    if (sb.length() > 0) {
+                    if (!sb.isEmpty()) {
                         sb.append(qualified ? '.' : '/');
                     }
 

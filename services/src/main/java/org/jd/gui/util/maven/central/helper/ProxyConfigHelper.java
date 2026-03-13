@@ -54,7 +54,7 @@ public final class ProxyConfigHelper {
                 if (p >= 1 && p <= 65535) {
                     port = p;
                 }
-            } catch (NumberFormatException ignored) {
+            } catch (NumberFormatException _) {
             }
         }
 
@@ -81,7 +81,7 @@ public final class ProxyConfigHelper {
                             password = passPlain.toCharArray();
                         }
                     }
-                } catch (GeneralSecurityException ignored) {
+                } catch (GeneralSecurityException _) {
                     username = null;
                     password = null;
                 } finally {

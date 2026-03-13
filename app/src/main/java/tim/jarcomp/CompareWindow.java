@@ -450,7 +450,7 @@ public class CompareWindow {
                     }
                     field.setText(f.getAbsolutePath());
                     return true;
-                } catch (Exception ex) {
+                } catch (Exception _) {
                     JOptionPane.showMessageDialog(parentFrame, "Could not import the dropped file.", "Error", JOptionPane.ERROR_MESSAGE);
                     return false;
                 }

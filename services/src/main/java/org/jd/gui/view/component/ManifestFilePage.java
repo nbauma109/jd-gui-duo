@@ -301,7 +301,7 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
                 currentPart.append(currentToken);
             }
         }
-        if (currentPart.length() > 0) {
+        if (!currentPart.isEmpty()) {
             valueParts.add(currentPart.toString());
         }
         return StringUtils.join(valueParts, ",\n  ");

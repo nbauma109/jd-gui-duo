@@ -74,7 +74,7 @@ public class XmlFilePage extends TypeReferencePage implements UriGettable, Index
     public String getSyntaxStyle() { return SyntaxConstants.SYNTAX_STYLE_XML; }
 
     @Override
-    protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return ((TypeHyperlinkData)hyperlinkData).isEnabled(); }
+    protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return hyperlinkData.isEnabled(); }
 
     @Override
     protected void openHyperlink(int x, int y, HyperlinkData hyperlinkData) {

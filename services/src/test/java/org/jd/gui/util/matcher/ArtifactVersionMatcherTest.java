@@ -25,7 +25,7 @@ public class ArtifactVersionMatcherTest {
     private ArtifactVersionMatcher artifactVersionMatcher;
 
     @Test
-    public void testArtifactVersion() throws Exception {
+    public void testArtifactVersion() {
         checkArtifactVersion("xbean-spring-3.11.1", "xbean-spring", "3.11.1");
         checkArtifactVersion("adapter-rxjava2-2.7.1", "adapter-rxjava2", "2.7.1");
         checkArtifactVersion("antlr4-runtime-4.5.3", "antlr4-runtime", "4.5.3");

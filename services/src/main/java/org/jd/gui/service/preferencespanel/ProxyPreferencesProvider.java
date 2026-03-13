@@ -214,7 +214,7 @@ public final class ProxyPreferencesProvider extends JPanel implements SecuredPre
                     if (hasNonEmpty(preferences, PROXY_PASS_ENC)) {
                         passField.setText(SecurePreferences.decrypt(master, preferences.get(PROXY_PASS_ENC)));
                     }
-                } catch (GeneralSecurityException ignored) {
+                } catch (GeneralSecurityException _) {
                     // We keep fields blank on failure
                 } finally {
                     Arrays.fill(master, '\0');
@@ -242,7 +242,7 @@ public final class ProxyPreferencesProvider extends JPanel implements SecuredPre
                     preferences.put(PROXY_USER_ENC, SecurePreferences.encrypt(master, nvl(userField.getText())));
                     preferences.put(PROXY_PASS_ENC, SecurePreferences.encrypt(master, new String(passField.getPassword())));
                     preferences.put(VAULT_PRESENT, "true");
-                } catch (GeneralSecurityException ignored) {
+                } catch (GeneralSecurityException _) {
                     // We never write clear text on failure
                 } finally {
                     zero(passField.getPassword());
@@ -403,7 +403,7 @@ public final class ProxyPreferencesProvider extends JPanel implements SecuredPre
                             }
                         }
                     }
-                } catch (Exception ignored) {
+                } catch (Exception _) {
                     // We return null when detection fails
                 } finally {
                     setProgress(100);
@@ -426,7 +426,7 @@ public final class ProxyPreferencesProvider extends JPanel implements SecuredPre
                             }
                         }
                     }
-                } catch (Exception ignored) {
+                } catch (Exception _) {
                     // We ignore and leave fields unchanged
                 } finally {
                     if (detectProgressMonitor != null) {
@@ -477,7 +477,7 @@ public final class ProxyPreferencesProvider extends JPanel implements SecuredPre
         try {
             int p = Integer.parseInt(s.trim());
             return p >= 1 && p <= 65535;
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException _) {
             return false;
         }
     }

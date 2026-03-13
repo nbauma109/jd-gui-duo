@@ -59,8 +59,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
 /**
@@ -720,7 +718,7 @@ public final class NexusSearchPanel extends JPanel {
         mavenArea.setText(buildMavenSnippet(g, a, v, c, p));
         gradleArea.setText(buildGradleSnippet(g, a, v, c, p));
         ivyArea.setText(buildIvySnippet(g, a, v, c, p));
-        sbtArea.setText(buildSbtSnippet(g, a, v, c, p));
+        sbtArea.setText(buildSbtSnippet(g, a, v, c));
         leinArea.setText(buildLeinSnippet(g, a, v, c, p));
         grapeArea.setText(buildGrapeSnippet(g, a, v, c, p));
         buildrArea.setText(buildBuildrSnippet(g, a, v, c, p));
@@ -810,7 +808,7 @@ public final class NexusSearchPanel extends JPanel {
         return sb.toString();
     }
 
-    private static String buildSbtSnippet(String g, String a, String v, String c, String p) {
+    private static String buildSbtSnippet(String g, String a, String v, String c) {
         StringBuilder sb = new StringBuilder();
         sb.append("libraryDependencies += \"").append(g).append("\" % \"").append(a).append("\" % \"").append(v).append("\"");
         if (StringUtils.isNotBlank(c)) {

@@ -81,7 +81,7 @@ final class NexusV3Client extends AbstractNexusClient implements NexusSearch {
             String url = trimTrailingSlash(cfg.baseUrl) + "/service/rest/v1/status";
             String body = new NexusV3Client(cfg).get(url, CONNECTION_TIMEOUT, READ_TIMEOUT);
             return body != null;
-        } catch (Exception ignored) {
+        } catch (Exception _) {
             return false;
         }
     }
@@ -161,7 +161,7 @@ final class NexusV3Client extends AbstractNexusClient implements NexusSearch {
                     }
                 }
             }
-        } catch (Exception ignored) {
+        } catch (Exception _) {
         }
 
         return new NexusSearchResult(list);
@@ -184,7 +184,7 @@ final class NexusV3Client extends AbstractNexusClient implements NexusSearch {
                     list.add(artifact);
                 }
             }
-        } catch (Exception ignored) {
+        } catch (Exception _) {
         }
 
         return new NexusSearchResult(list);
@@ -211,7 +211,7 @@ final class NexusV3Client extends AbstractNexusClient implements NexusSearch {
         if (StringUtils.isNotBlank(lastModified)) {
             try {
                 versionDate = OffsetDateTime.parse(lastModified.trim()).toLocalDate();
-            } catch (DateTimeParseException ignored) {
+            } catch (DateTimeParseException _) {
                 // leave null
             }
         }
