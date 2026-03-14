@@ -89,8 +89,8 @@ public class EclipsePreferencesProvider extends JPanel implements EclipsePrefere
         complianceComboBox = new JComboBox<>(JAVA_VERSIONS.toArray(new String[JAVA_VERSIONS.size()]));
 
         jreSystemLibraryPathTextField.setColumns(40);
-        sourceComboBox.setPrototypeDisplayValue(DEFAULT_JAVA_VERSION);
-        complianceComboBox.setPrototypeDisplayValue(DEFAULT_JAVA_VERSION);
+        sourceComboBox.setPrototypeDisplayValue(MINIMUM_JAVA_VERSION);
+        complianceComboBox.setPrototypeDisplayValue(MINIMUM_JAVA_VERSION);
 
         addCheckBoxColumns(0);
         addJreSystemLibraryRow(1);
