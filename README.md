@@ -69,89 +69,111 @@ The binaries are built and hosted at jitpack.io (identifiable with rocket logo) 
 
 After opening a jar file, click 'Open Type' to decompile a class (tip: use $ to match the end of the class name)
 
-![image](https://user-images.githubusercontent.com/9403560/169690563-32909189-d748-4978-a2c7-acc5da2cadf4.png)
+![image](https://javadecompiler.org/jd-gui-duo/open-type.png)
 
 # Outline tree
 
 Use the outline tree to select decompiled methods :
 
-![image](https://user-images.githubusercontent.com/9403560/169690314-24cc1cad-9beb-44c4-b9fe-e9bc909054e2.png)
+![image](https://javadecompiler.org/jd-gui-duo/outline-tree.png)
 
 ## Maven central
 
 In the Help -> Preferences menu, use search source code on [Maven Central](https://search.maven.org/) if you want to show the original source code, if it's available :
 
-![image](https://user-images.githubusercontent.com/9403560/169690664-6a3e1a40-dda9-4f3f-9eac-515a24ae9e65.png)
+![image](https://javadecompiler.org/jd-gui-duo/maven-central.png)
 
-![image](https://user-images.githubusercontent.com/9403560/169690709-3d191968-69bf-4323-acd2-387541012a5d.png)
+![image](https://javadecompiler.org/jd-gui-duo/source-code-view.png)
+
+## Maven central search and secured preferences
+
+It is possible to do a maven central search behind a proxy or with a private Nexus repository.
+
+Configure settings in Help -> Secured preferences.
+
+![image](https://javadecompiler.org/jd-gui-duo/secured-preferences.png)
+
+![image](https://javadecompiler.org/jd-gui-duo/secured-preferences-panel.png)
+
+These preferences are protected by a master password that you choose after saving and which will be requested each time you re-open this panel.
+
+You can do a maven search, with or without such settings, depending on when you need them or not :
+
+![image](https://javadecompiler.org/jd-gui-duo/search-maven-central.png)
+
+![image](https://javadecompiler.org/jd-gui-duo/repository-search.png)
+
 
 ## Search
 
 Use the search button to do a search for methods, string constants,...
 
-![image](https://user-images.githubusercontent.com/9403560/169690812-1cde4346-0d08-41d9-b321-280a81727a31.png)
+![image](https://javadecompiler.org/jd-gui-duo/search.png)
 
 ## Decompile all classes
 
 Use File -> Save All Sources to decompile all sources into a sources jar (choose a destination directory where you have rights)
 
-![image](https://user-images.githubusercontent.com/9403560/169691065-a7a56b8c-5949-412f-a855-816eff1aca71.png)
+![image](https://javadecompiler.org/jd-gui-duo/save-all.png)
 
 ## Keyboard shortcuts
 
  - CTRL+F Find text
+
+![image](https://javadecompiler.org/jd-gui-duo/find-text.png)
+ 
  - CTRL+L Goto line
 
-![image](https://user-images.githubusercontent.com/9403560/169691345-622a15dc-8ef8-4470-9ebb-1d5f86f126b2.png)
+![image](https://javadecompiler.org/jd-gui-duo/goto-line.png)
 
 ## Show byte code
 
 Right-click on a method of the outline tree and select 'Show Byte Code' in the context menu.
 
-![image](https://user-images.githubusercontent.com/9403560/169691669-8672828a-3cc0-4622-a083-4f36159b9463.png)
+![image](https://javadecompiler.org/jd-gui-duo/show-bytecode.png)
 
-![image](https://user-images.githubusercontent.com/9403560/169691698-65e13ee6-5cde-41d5-b924-58f1a36abda7.png)
+![image](https://javadecompiler.org/jd-gui-duo/bytecode-view.png)
 
 To get a visual of the control flow graph that is used by JD-Core v1 for each of the decompilation steps, select one of the menus 'Show Control Flow Graph ...'.
 The graph is built by [plantuml](https://plantuml.com/).
 
-![image](https://user-images.githubusercontent.com/9403560/169707683-bfbf0aed-78f1-4f70-91bb-0a4d98ed08ba.png)
+![image](https://javadecompiler.org/jd-gui-duo/show-cfg.png)
 
-![image](https://user-images.githubusercontent.com/9403560/169707573-9cc0d318-e6c3-47b0-8f37-eb70df1e0b3e.png)
+![image](https://javadecompiler.org/jd-gui-duo/cfg.png)
 
 
 ## Method patching
 
 Sometimes JD-Core v1 fails to decompile a method. In this case, method will be patched from JD-Core v0 if possible and the comment 'Patched from JD-Core v0' will appear :
 
-![image](https://user-images.githubusercontent.com/9403560/169692097-4f96d304-4bac-4596-a3bf-076ae49b8670.png)
+![image](https://javadecompiler.org/jd-gui-duo/method-patching.png)
 
 
 ## Comparison
 
 A modified version of [JarComp](https://activityworkshop.net/software/jarcomp/index.html) is used to compare the jars and netbeans diff module for class comparison (see https://github.com/nbauma109/netbeans-visual-diff-standalone).
 
-![image](https://user-images.githubusercontent.com/9403560/169692577-1d14cacc-71b0-458c-ad5c-a8686ae2fb95.png)
+![image](https://javadecompiler.org/jd-gui-duo/compare.png)
 
 Select the 2 files to compare or drag and drop files into the inputs :
 
-<img width="588" height="208" alt="image" src="https://github.com/user-attachments/assets/d3c9ebc1-1135-4854-8334-c09405fcf301" />
+![image](https://javadecompiler.org/jd-gui-duo/select-files.png)
 
 The differences in size and CRC checksums are shown :
 
-![image](https://user-images.githubusercontent.com/9403560/169694899-a4f57fcf-95aa-4481-8351-99827d544625.png)
+![image](https://javadecompiler.org/jd-gui-duo/jar-comparer.png)
 
 Double-click on the row you want to compare :
 
-![image](https://user-images.githubusercontent.com/9403560/169694362-3c760435-6a4a-46c3-8944-941cea481033.png)
+![image](https://javadecompiler.org/jd-gui-duo/visual-diff.png)
 
 Or alternatively, if the 2 jars are opened, you can open the type you want to compare :
 
-![image](https://user-images.githubusercontent.com/9403560/169694513-8e8ebf31-c0c9-4235-879d-94b2dc5799e8.png)
+![image](https://javadecompiler.org/jd-gui-duo/compare-popup.png)
 
 If you select no, you will be asked select which file you want to open
 
-![image](https://user-images.githubusercontent.com/9403560/169694563-ac77422d-3a1b-416a-92ba-c916206bbfbd.png)
+![image](https://javadecompiler.org/jd-gui-duo/select-location.png)
 
 ## Hyperlinks
 
@@ -161,24 +183,42 @@ The navigable links are shown as underlined portions of text. Single click navig
 
 Choose another decompiler in the preferences window and the class will be decompiled with the newly selected decompiler as soon as you press OK.
 
-![image](https://user-images.githubusercontent.com/9403560/169696132-fe35d1b2-b0e3-48a3-9023-831d6fcf49fe.png)
+![image](https://javadecompiler.org/jd-gui-duo/help-preferences.png)
+
+![image](https://javadecompiler.org/jd-gui-duo/select-decompiler.png)
+
+Click Configure button to choose decompiler settings (each decompiler has a its own panel) :
+
+![image](https://javadecompiler.org/jd-gui-duo/configure-decompiler.png)
 
 ## Compiler
 
-Compiler reports errors and warnings. Choose whether you want to report them in the preferences page.
+Compiler reports errors and warnings. Choose whether you want to report them in the Eclipse preferences page.
 
-![image](https://user-images.githubusercontent.com/9403560/169695981-73198acd-7962-47ba-a540-23a872a6a862.png)
+![image](https://javadecompiler.org/jd-gui-duo/help-eclipse-preferences.png)
 
-![image](https://user-images.githubusercontent.com/9403560/169695797-2a97058e-1768-42aa-8cd4-34cd1f2f2043.png)
+![image](https://javadecompiler.org/jd-gui-duo/show-error-warn-info.png)
+
+![image](https://javadecompiler.org/jd-gui-duo/warning.png)
 
 ## Advanced class lookup
 
 When this option is selected, the jars located in the same directory and the jmods (or rt.jar) of JAVA_HOME will be used by decompilers for better type resolution.
 Currently, the decompilers supporting this are CFR, JD-Core v1, Procyon.
-This option applies to the Eclipse AST parser too, to provide better hyperlinks.
 For optimal results, setup your JAVA_HOME to the same JDK that was used to build the jar you want to decompile (if any doubt, check the META-INF/MANIFEST.MF inside the jar).
 The running JRE of jd-gui-duo does not interfere.
 This option does not support jars in war.
+
+## JRE System Library
+
+This option applies to the Eclipse AST parser, which is used in various contexts to provide :
+  - hyperlinks to navigate into source files (*.java)
+  - indexing for search into source files (*.java)
+  - compiler errors and warnings in decompiled sources (*.class) and in sources (*.java)
+By default, it uses the running VM of jd-gui-duo, but you can choose another JRE system library by unticking "Include running VM boot classpath".
+You can also choose a compatible Source and Compliance.
+
+![image](https://javadecompiler.org/jd-gui-duo/eclipse-preferences-panel.png)
 
 ## Realign line numbers
 
@@ -186,7 +226,9 @@ This is a known option from the original JD-GUI that enables to align code for d
 As of now, this is only supported by JD-Core v0 and v1.
 If the code is misaligned, the numbers will appear in red.
 
-![image](https://user-images.githubusercontent.com/9403560/169709845-e9da03fe-5fce-4014-aa4d-56c288f0d864.png)
+![image](https://javadecompiler.org/jd-gui-duo/realign.png)
+
+![image](https://javadecompiler.org/jd-gui-duo/misaligned.png)
 
 ## Remove unnecessary casts
 
@@ -194,18 +236,18 @@ This option uses the same feature as Eclipse to cleanup unnecessary casts.
 
 ## Dark mode
 
-<img width="1235" height="794" alt="image" src="https://github.com/user-attachments/assets/d548b96a-3999-4afe-ad75-7011c9f94254" />
+![image](https://javadecompiler.org/jd-gui-duo/dark-mode.png)
 
 ## Quick outline
 
 Quick outline (CTRL+SHIFT+O) is a feature which was present in the C++ versions 0.3.x of jd-gui and is now present in jd-gui-duo.
 It now includes "filter as you type" feature.
 
-<img width="1178" height="995" alt="image" src="https://github.com/user-attachments/assets/709a7e8b-cee6-479f-92bb-7c909f4428c0" />
+![image](https://javadecompiler.org/jd-gui-duo/quick-outline.png)
 
 ### For memory, jd-gui 0.3.6 :
 
-<img width="1080" height="967" alt="image" src="https://github.com/user-attachments/assets/e58b123a-f89c-47d5-a52c-76d6a8c8bfcd" />
+![image](https://javadecompiler.org/jd-gui-duo/quick-outline-old.png)
 
 
 # Credits
