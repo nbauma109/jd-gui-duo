@@ -214,7 +214,7 @@ This option does not support jars in war.
 This option applies to the Eclipse AST parser, which is used in various contexts to provide :
   - hyperlinks to navigate into source files (*.java)
   - indexing for search into source files (*.java)
-  - compiler errors and warnings in decompiled sources (*.class) and in sources (*.java)
+  - compiler errors and warnings in decompiled sources (\*.class) and in sources (\*.java)
 
 By default, it uses the running VM of jd-gui-duo, but you can choose another JRE system library by unticking "Include running VM boot classpath".
 You can also choose a compatible Source and Compliance.
