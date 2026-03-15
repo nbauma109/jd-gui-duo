@@ -187,7 +187,7 @@ Choose another decompiler in the preferences window and the class will be decomp
 
 ![image](https://javadecompiler.org/jd-gui-duo/select-decompiler.png)
 
-Click Configure button to choose decompiler settings (each decompiler has a its own panel) :
+Click Configure button to choose decompiler settings (each decompiler has a different panel of its own) :
 
 ![image](https://javadecompiler.org/jd-gui-duo/configure-decompiler.png)
 
