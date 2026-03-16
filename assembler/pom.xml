@@ -16,6 +16,7 @@
     <jre.builder.version>5.1.1</jre.builder.version>
     <jre.version>25.0.1</jre.version>
     <app.icon.path>../app/src/main/resources/org/jd/gui/images/JDGUI.icns</app.icon.path>
+    <windows.sfx.stub>${project.basedir}/src/main/sfx/windows/7zsd.sfx</windows.sfx.stub>
   </properties>
 
   <build>
@@ -106,6 +107,7 @@
           </execution>
         </executions>
       </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
@@ -126,20 +128,16 @@
                 <mkdir dir="${app.dir}/Contents/lib" />
                 <mkdir dir="${app.dir}/Contents/runtime" />
 
-                <!-- icon -->
                 <copy file="${app.icon.path}" tofile="${app.dir}/Contents/Resources/JDGUI.icns" overwrite="true" />
 
-                <!-- JRE into app -->
                 <copy todir="${app.dir}/Contents/runtime">
                   <fileset dir="${project.build.directory}/macos/jre" />
                 </copy>
 
-                <!-- libraries -->
                 <copy todir="${app.dir}/Contents/lib">
                   <fileset dir="${project.build.directory}/lib" />
                 </copy>
 
-                <!-- Info.plist -->
                 <echo file="${app.dir}/Contents/Info.plist"><![CDATA[
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -155,7 +153,6 @@
 </dict></plist>
 ]]></echo>
 
-                <!-- native launcher -->
                 <echo file="${app.dir}/Contents/MacOS/jd-gui-duo"><![CDATA[
 #!/usr/bin/env bash
 APP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
@@ -175,8 +172,52 @@ exec "$JAVA" -ea \
               </target>
             </configuration>
           </execution>
+
+          <execution>
+            <id>build-windows-sfx</id>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <property name="windows.payload.dir" value="${project.build.directory}/jd-gui-duo-windows-${project.version}" />
+                <property name="windows.archive.7z" value="${project.build.directory}/jd-gui-duo-windows-${project.version}.7z" />
+                <property name="windows.sfx.config" value="${project.build.directory}/windows-sfx-config.txt" />
+                <property name="windows.sfx.exe" value="${project.build.directory}/jd-gui-duo-windows-${project.version}.exe" />
+
+                <echo file="${windows.sfx.config}"><![CDATA[
+;!@Install@!UTF-8!
+Title="JD-GUI Duo ${project.version}"
+RunProgram="jd-gui-duo-${project.version}.exe"
+;!@InstallEnd@!
+]]></echo>
+
+                <exec executable="7z" failonerror="true">
+                  <arg value="a" />
+                  <arg value="-t7z" />
+                  <arg value="-mx=9" />
+                  <arg value="-m0=LZMA2" />
+                  <arg value="-md=256m" />
+                  <arg value="-mfb=273" />
+                  <arg value="-ms=on" />
+                  <arg value="${windows.archive.7z}" />
+                  <arg value="${windows.payload.dir}\*" />
+                </exec>
+
+                <concat destfile="${windows.sfx.exe}" binary="true">
+                  <filelist dir="/">
+                    <file name="${windows.sfx.stub}" />
+                    <file name="${windows.sfx.config}" />
+                    <file name="${windows.archive.7z}" />
+                  </filelist>
+                </concat>
+              </target>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -196,6 +237,26 @@ exec "$JAVA" -ea \
               </descriptors>
             </configuration>
           </execution>
+
+          <execution>
+            <id>assemble-windows-dir</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <attach>false</attach>
+              <appendAssemblyId>false</appendAssemblyId>
+              <finalName>jd-gui-duo-windows-${project.version}</finalName>
+              <formats>
+                <format>dir</format>
+              </formats>
+              <descriptors>
+                <descriptor>assembly-windows.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+
           <execution>
             <id>assemble-linux</id>
             <phase>package</phase>
@@ -228,6 +289,7 @@ exec "$JAVA" -ea \
           </execution>
         </executions>
       </plugin>
+
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
@@ -246,6 +308,11 @@ exec "$JAVA" -ea \
                   <classifier>windows</classifier>
                 </artifact>
                 <artifact>
+                  <file>${project.build.directory}/jd-gui-duo-windows-${project.version}.exe</file>
+                  <type>exe</type>
+                  <classifier>windows-sfx</classifier>
+                </artifact>
+                <artifact>
                   <file>${project.build.directory}/jd-gui-duo-linux-${project.version}.tar.xz</file>
                   <type>tar.xz</type>
                   <classifier>linux</classifier>
@@ -260,6 +327,7 @@ exec "$JAVA" -ea \
           </execution>
         </executions>
       </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-install-plugin</artifactId>
@@ -281,6 +349,21 @@ exec "$JAVA" -ea \
               <version>${project.version}</version>
               <classifier>windows</classifier>
               <packaging>tar.xz</packaging>
+            </configuration>
+          </execution>
+          <execution>
+            <id>install-windows-sfx-exe</id>
+            <phase>install</phase>
+            <goals>
+              <goal>install-file</goal>
+            </goals>
+            <configuration>
+              <file>${project.build.directory}/jd-gui-duo-windows-${project.version}.exe</file>
+              <groupId>${project.groupId}</groupId>
+              <artifactId>${project.artifactId}</artifactId>
+              <version>${project.version}</version>
+              <classifier>windows-sfx</classifier>
+              <packaging>exe</packaging>
             </configuration>
           </execution>
           <execution>
@@ -315,6 +398,7 @@ exec "$JAVA" -ea \
           </execution>
         </executions>
       </plugin>
+
       <plugin>
         <groupId>com.akathist.maven.plugins.launch4j</groupId>
         <artifactId>launch4j-maven-plugin</artifactId>
