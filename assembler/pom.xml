@@ -189,7 +189,7 @@ exec "$JAVA" -ea \
 
           <execution>
             <id>build-windows-sfx</id>
-            <phase>package</phase>
+            <phase>verify</phase>
             <goals>
               <goal>run</goal>
             </goals>
@@ -216,6 +216,9 @@ exec "$JAVA" -ea \
 
                 <chmod file="${sevenzip.bin}" perm="0755" />
 
+                <available file="${windows.payload.dir}" type="dir" property="windows.payload.dir.exists" />
+                <fail unless="windows.payload.dir.exists" message="Missing Windows payload directory: ${windows.payload.dir}" />
+
                 <echo file="${windows.sfx.config}"><![CDATA[
 ;!@Install@!UTF-8!
 Title="JD-GUI Duo ${project.version}"
@@ -223,7 +226,7 @@ RunProgram="jd-gui-duo-${project.version}.exe"
 ;!@InstallEnd@!
 ]]></echo>
 
-                <exec executable="${sevenzip.bin}" failonerror="true">
+                <exec executable="${sevenzip.bin}" dir="${windows.payload.dir}" failonerror="true">
                   <arg value="a" />
                   <arg value="-t7z" />
                   <arg value="-mx=9" />
@@ -232,7 +235,7 @@ RunProgram="jd-gui-duo-${project.version}.exe"
                   <arg value="-mfb=273" />
                   <arg value="-ms=on" />
                   <arg value="${windows.archive.7z}" />
-                  <arg value="${windows.payload.dir}/" />
+                  <arg value="." />
                 </exec>
 
                 <concat destfile="${windows.sfx.exe}" binary="true">
@@ -327,7 +330,7 @@ RunProgram="jd-gui-duo-${project.version}.exe"
         <executions>
           <execution>
             <id>attach-platform-zips</id>
-            <phase>package</phase>
+            <phase>verify</phase>
             <goals>
               <goal>attach-artifact</goal>
             </goals>
