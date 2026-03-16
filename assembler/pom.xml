@@ -97,8 +97,8 @@
             </goals>
             <configuration>
               <url>https://www.7-zip.org/a/${sevenzip.linux.archive}</url>
-              <unpack>true</unpack>
               <outputDirectory>${project.build.directory}/tools/7zip</outputDirectory>
+              <outputFileName>${sevenzip.linux.archive}</outputFileName>
             </configuration>
           </execution>
         </executions>
@@ -199,9 +199,14 @@ exec "$JAVA" -ea \
                 <property name="windows.archive.7z" value="${project.build.directory}/jd-gui-duo-windows-${project.version}.7z" />
                 <property name="windows.sfx.config" value="${project.build.directory}/windows-sfx-config.txt" />
                 <property name="windows.sfx.exe" value="${project.build.directory}/jd-gui-duo-windows-${project.version}.exe" />
-                <property name="sevenzip.home" value="${project.build.directory}/tools/7zip/${sevenzip.linux.dir}" />
+
+                <property name="sevenzip.root" value="${project.build.directory}/tools/7zip" />
+                <property name="sevenzip.archive" value="${sevenzip.root}/${sevenzip.linux.archive}" />
+                <property name="sevenzip.home" value="${sevenzip.root}/${sevenzip.linux.dir}" />
                 <property name="sevenzip.bin" value="${sevenzip.home}/7zz" />
 
+                <mkdir dir="${sevenzip.home}" />
+                <untar src="${sevenzip.archive}" dest="${sevenzip.home}" compression="xz" />
                 <chmod file="${sevenzip.bin}" perm="0755" />
 
                 <echo file="${windows.sfx.config}"><![CDATA[
