@@ -206,7 +206,14 @@ exec "$JAVA" -ea \
                 <property name="sevenzip.bin" value="${sevenzip.home}/7zz" />
 
                 <mkdir dir="${sevenzip.home}" />
-                <untar src="${sevenzip.archive}" dest="${sevenzip.home}" compression="xz" />
+
+                <exec executable="tar" failonerror="true">
+                  <arg value="-xJf" />
+                  <arg value="${sevenzip.archive}" />
+                  <arg value="-C" />
+                  <arg value="${sevenzip.home}" />
+                </exec>
+
                 <chmod file="${sevenzip.bin}" perm="0755" />
 
                 <echo file="${windows.sfx.config}"><![CDATA[
