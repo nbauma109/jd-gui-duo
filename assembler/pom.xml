@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -17,8 +19,7 @@
     <jre.version>25.0.1</jre.version>
     <app.icon.path>../app/src/main/resources/org/jd/gui/images/JDGUI.icns</app.icon.path>
     <windows.sfx.stub>${project.basedir}/src/main/sfx/windows/7zsd.sfx</windows.sfx.stub>
-    <sevenzip.linux.archive>7z2600-linux-x64.tar.xz</sevenzip.linux.archive>
-    <sevenzip.linux.dir>7z2600-linux-x64</sevenzip.linux.dir>
+    <sevenzip.root>${project.build.directory}/tools/7zip</sevenzip.root>
   </properties>
 
   <build>
@@ -87,18 +88,6 @@
               <unpack>true</unpack>
               <outputDirectory>${project.build.directory}/macos/jre</outputDirectory>
               <sha256>463887053e5efd12a9f1fdf1cc25a09a163126b2160c203dd17beb364ba51103</sha256>
-            </configuration>
-          </execution>
-          <execution>
-            <id>download-7zip-linux</id>
-            <phase>package</phase>
-            <goals>
-              <goal>wget</goal>
-            </goals>
-            <configuration>
-              <url>https://www.7-zip.org/a/${sevenzip.linux.archive}</url>
-              <outputDirectory>${project.build.directory}/tools/7zip</outputDirectory>
-              <outputFileName>${sevenzip.linux.archive}</outputFileName>
             </configuration>
           </execution>
         </executions>
@@ -186,68 +175,6 @@ exec "$JAVA" -ea \
               </target>
             </configuration>
           </execution>
-
-          <execution>
-            <id>build-windows-sfx</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <property name="windows.payload.dir" value="${project.build.directory}/jd-gui-duo-windows-${project.version}" />
-                <property name="windows.archive.7z" value="${project.build.directory}/jd-gui-duo-windows-${project.version}.7z" />
-                <property name="windows.sfx.config" value="${project.build.directory}/windows-sfx-config.txt" />
-                <property name="windows.sfx.exe" value="${project.build.directory}/jd-gui-duo-windows-${project.version}.exe" />
-
-                <property name="sevenzip.root" value="${project.build.directory}/tools/7zip" />
-                <property name="sevenzip.archive" value="${sevenzip.root}/${sevenzip.linux.archive}" />
-                <property name="sevenzip.home" value="${sevenzip.root}/${sevenzip.linux.dir}" />
-                <property name="sevenzip.bin" value="${sevenzip.home}/7zz" />
-
-                <mkdir dir="${sevenzip.home}" />
-
-                <exec executable="tar" failonerror="true">
-                  <arg value="-xJf" />
-                  <arg value="${sevenzip.archive}" />
-                  <arg value="-C" />
-                  <arg value="${sevenzip.home}" />
-                </exec>
-
-                <chmod file="${sevenzip.bin}" perm="0755" />
-
-                <available file="${windows.payload.dir}" type="dir" property="windows.payload.dir.exists" />
-                <fail unless="windows.payload.dir.exists" message="Missing Windows payload directory: ${windows.payload.dir}" />
-
-                <echo file="${windows.sfx.config}"><![CDATA[
-;!@Install@!UTF-8!
-Title="JD-GUI Duo ${project.version}"
-RunProgram="jd-gui-duo-${project.version}.exe"
-;!@InstallEnd@!
-]]></echo>
-
-                <exec executable="${sevenzip.bin}" dir="${windows.payload.dir}" failonerror="true">
-                  <arg value="a" />
-                  <arg value="-t7z" />
-                  <arg value="-mx=9" />
-                  <arg value="-m0=LZMA2" />
-                  <arg value="-md=256m" />
-                  <arg value="-mfb=273" />
-                  <arg value="-ms=on" />
-                  <arg value="${windows.archive.7z}" />
-                  <arg value="." />
-                </exec>
-
-                <concat destfile="${windows.sfx.exe}" binary="true">
-                  <filelist dir="/">
-                    <file name="${windows.sfx.stub}" />
-                    <file name="${windows.sfx.config}" />
-                    <file name="${windows.archive.7z}" />
-                  </filelist>
-                </concat>
-              </target>
-            </configuration>
-          </execution>
         </executions>
       </plugin>
 
@@ -329,7 +256,7 @@ RunProgram="jd-gui-duo-${project.version}.exe"
         <artifactId>build-helper-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>attach-platform-zips</id>
+            <id>attach-platform-artifacts</id>
             <phase>verify</phase>
             <goals>
               <goal>attach-artifact</goal>
@@ -469,6 +396,209 @@ RunProgram="jd-gui-duo-${project.version}.exe"
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>host-linux</id>
+      <activation>
+        <os>
+          <family>unix</family>
+        </os>
+      </activation>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.googlecode.maven-download-plugin</groupId>
+            <artifactId>download-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>download-7zip-host-linux</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>wget</goal>
+                </goals>
+                <configuration>
+                  <url>https://www.7-zip.org/a/7z2600-linux-x64.tar.xz</url>
+                  <outputDirectory>${sevenzip.root}</outputDirectory>
+                  <outputFileName>7z2600-linux-x64.tar.xz</outputFileName>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>3.2.0</version>
+            <executions>
+              <execution>
+                <id>build-windows-sfx-linux-host</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <property name="windows.payload.dir" value="${project.build.directory}/jd-gui-duo-windows-${project.version}" />
+                    <property name="windows.archive.7z" value="${project.build.directory}/jd-gui-duo-windows-${project.version}.7z" />
+                    <property name="windows.sfx.config" value="${project.build.directory}/windows-sfx-config.txt" />
+                    <property name="windows.sfx.exe" value="${project.build.directory}/jd-gui-duo-windows-${project.version}.exe" />
+
+                    <property name="sevenzip.archive" value="${sevenzip.root}/7z2600-linux-x64.tar.xz" />
+                    <property name="sevenzip.home" value="${sevenzip.root}/7z2600-linux-x64" />
+                    <property name="sevenzip.bin" value="${sevenzip.home}/7zz" />
+
+                    <mkdir dir="${sevenzip.home}" />
+
+                    <exec executable="tar" failonerror="true">
+                      <arg value="-xJf" />
+                      <arg value="${sevenzip.archive}" />
+                      <arg value="-C" />
+                      <arg value="${sevenzip.home}" />
+                    </exec>
+
+                    <chmod file="${sevenzip.bin}" perm="0755" />
+
+                    <available file="${windows.payload.dir}" type="dir" property="windows.payload.dir.exists" />
+                    <fail unless="windows.payload.dir.exists" message="Missing Windows payload directory: ${windows.payload.dir}" />
+
+                    <echo file="${windows.sfx.config}"><![CDATA[
+;!@Install@!UTF-8!
+Title="JD-GUI Duo ${project.version}"
+RunProgram="jd-gui-duo-${project.version}.exe"
+;!@InstallEnd@!
+]]></echo>
+
+                    <exec executable="${sevenzip.bin}" dir="${windows.payload.dir}" failonerror="true">
+                      <arg value="a" />
+                      <arg value="-t7z" />
+                      <arg value="-mx=9" />
+                      <arg value="-m0=LZMA2" />
+                      <arg value="-md=256m" />
+                      <arg value="-mfb=273" />
+                      <arg value="-ms=on" />
+                      <arg value="${windows.archive.7z}" />
+                      <arg value="." />
+                    </exec>
+
+                    <concat destfile="${windows.sfx.exe}" binary="true">
+                      <filelist dir="/">
+                        <file name="${windows.sfx.stub}" />
+                        <file name="${windows.sfx.config}" />
+                        <file name="${windows.archive.7z}" />
+                      </filelist>
+                    </concat>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>host-windows</id>
+      <activation>
+        <os>
+          <family>windows</family>
+        </os>
+      </activation>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.googlecode.maven-download-plugin</groupId>
+            <artifactId>download-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>download-7zip-host-windows</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>wget</goal>
+                </goals>
+                <configuration>
+                  <url>https://www.7-zip.org/a/7z2600-extra.7z</url>
+                  <outputDirectory>${sevenzip.root}</outputDirectory>
+                  <outputFileName>7z2600-extra.7z</outputFileName>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>3.2.0</version>
+            <executions>
+              <execution>
+                <id>build-windows-sfx-windows-host</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <property name="windows.payload.dir" value="${project.build.directory}/jd-gui-duo-windows-${project.version}" />
+                    <property name="windows.archive.7z" value="${project.build.directory}/jd-gui-duo-windows-${project.version}.7z" />
+                    <property name="windows.sfx.config" value="${project.build.directory}/windows-sfx-config.txt" />
+                    <property name="windows.sfx.exe" value="${project.build.directory}/jd-gui-duo-windows-${project.version}.exe" />
+
+                    <property name="sevenzip.archive" value="${sevenzip.root}/7z2600-extra.7z" />
+                    <property name="sevenzip.home" value="${sevenzip.root}/7z2600-extra" />
+                    <property name="sevenzip.unpacker" value="${sevenzip.home}/7zr.exe" />
+                    <property name="sevenzip.bin" value="${sevenzip.home}/7z.exe" />
+
+                    <mkdir dir="${sevenzip.home}" />
+
+                    <exec executable="powershell" failonerror="true">
+                      <arg value="-NoProfile" />
+                      <arg value="-Command" />
+                      <arg value="&amp; { Expand-Archive -LiteralPath '${sevenzip.archive}' -DestinationPath '${sevenzip.home}' -Force }" />
+                    </exec>
+
+                    <available file="${sevenzip.bin}" property="sevenzip.bin.exists" />
+                    <fail unless="sevenzip.bin.exists" message="Missing Windows 7-Zip binary: ${sevenzip.bin}" />
+
+                    <available file="${windows.payload.dir}" type="dir" property="windows.payload.dir.exists" />
+                    <fail unless="windows.payload.dir.exists" message="Missing Windows payload directory: ${windows.payload.dir}" />
+
+                    <echo file="${windows.sfx.config}"><![CDATA[
+;!@Install@!UTF-8!
+Title="JD-GUI Duo ${project.version}"
+RunProgram="jd-gui-duo-${project.version}.exe"
+;!@InstallEnd@!
+]]></echo>
+
+                    <exec executable="${sevenzip.bin}" dir="${windows.payload.dir}" failonerror="true">
+                      <arg value="a" />
+                      <arg value="-t7z" />
+                      <arg value="-mx=9" />
+                      <arg value="-m0=LZMA2" />
+                      <arg value="-md=256m" />
+                      <arg value="-mfb=273" />
+                      <arg value="-ms=on" />
+                      <arg value="${windows.archive.7z}" />
+                      <arg value="." />
+                    </exec>
+
+                    <concat destfile="${windows.sfx.exe}" binary="true">
+                      <filelist dir="/">
+                        <file name="${windows.sfx.stub}" />
+                        <file name="${windows.sfx.config}" />
+                        <file name="${windows.archive.7z}" />
+                      </filelist>
+                    </concat>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
   <dependencies>
     <dependency>
