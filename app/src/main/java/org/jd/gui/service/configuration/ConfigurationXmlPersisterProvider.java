@@ -35,7 +35,15 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
+import static org.jd.gui.util.decompiler.GuiPreferences.DEFAULT_SELECTED_WORD_HIGHLIGHT_COLOR;
+import static org.jd.gui.util.decompiler.GuiPreferences.DEFAULT_SELECTED_WORD_HIGHLIGHT_ENABLED;
+import static org.jd.gui.util.decompiler.GuiPreferences.DEFAULT_SEARCH_HIGHLIGHT_COLOR;
+import static org.jd.gui.util.decompiler.GuiPreferences.DEFAULT_SELECTION_HIGHLIGHT_COLOR;
 import static org.jd.gui.util.decompiler.GuiPreferences.ERROR_BACKGROUND_COLOR;
+import static org.jd.gui.util.decompiler.GuiPreferences.SEARCH_HIGHLIGHT_COLOR;
+import static org.jd.gui.util.decompiler.GuiPreferences.SELECTION_HIGHLIGHT_COLOR;
+import static org.jd.gui.util.decompiler.GuiPreferences.SELECTED_WORD_HIGHLIGHT_COLOR;
+import static org.jd.gui.util.decompiler.GuiPreferences.SELECTED_WORD_HIGHLIGHT_ENABLED;
 
 import de.cismet.custom.visualdiff.ConfigFileUtil;
 
@@ -169,6 +177,18 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
 
         if (! config.getPreferences().containsKey(ERROR_BACKGROUND_COLOR)) {
             config.getPreferences().put(ERROR_BACKGROUND_COLOR, "0xFF6666");
+        }
+        if (! config.getPreferences().containsKey(SELECTED_WORD_HIGHLIGHT_ENABLED)) {
+            config.getPreferences().put(SELECTED_WORD_HIGHLIGHT_ENABLED, DEFAULT_SELECTED_WORD_HIGHLIGHT_ENABLED);
+        }
+        if (! config.getPreferences().containsKey(SELECTED_WORD_HIGHLIGHT_COLOR)) {
+            config.getPreferences().put(SELECTED_WORD_HIGHLIGHT_COLOR, DEFAULT_SELECTED_WORD_HIGHLIGHT_COLOR);
+        }
+        if (! config.getPreferences().containsKey(SEARCH_HIGHLIGHT_COLOR)) {
+            config.getPreferences().put(SEARCH_HIGHLIGHT_COLOR, DEFAULT_SEARCH_HIGHLIGHT_COLOR);
+        }
+        if (! config.getPreferences().containsKey(SELECTION_HIGHLIGHT_COLOR)) {
+            config.getPreferences().put(SELECTION_HIGHLIGHT_COLOR, DEFAULT_SELECTION_HIGHLIGHT_COLOR);
         }
 
         config.getPreferences().put(JD_CORE_VERSION, getJdCoreVersion());

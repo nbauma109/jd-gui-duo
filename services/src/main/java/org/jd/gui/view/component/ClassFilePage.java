@@ -27,16 +27,27 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V0;
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V1;
+import static jd.core.preferences.Preferences.DISPLAY_DEFAULT_CONSTRUCTOR;
+import static jd.core.preferences.Preferences.ESCAPE_UNICODE_CHARACTERS;
+import static jd.core.preferences.Preferences.OMIT_THIS_PREFIX;
 import static jd.core.preferences.Preferences.REALIGN_LINE_NUMBERS;
+import static jd.core.preferences.Preferences.WRITE_LINE_NUMBERS;
+import static jd.core.preferences.Preferences.WRITE_METADATA;
 import static org.jd.gui.util.decompiler.GuiPreferences.DECOMPILE_ENGINE;
+import static org.jd.gui.util.decompiler.GuiPreferences.ERROR_BACKGROUND_COLOR;
 import static org.jd.gui.util.decompiler.GuiPreferences.REMOVE_UNNECESSARY_CASTS;
+import static org.jd.gui.util.decompiler.GuiPreferences.SHOW_COMPILER_ERRORS;
+import static org.jd.gui.util.decompiler.GuiPreferences.SHOW_COMPILER_INFO;
+import static org.jd.gui.util.decompiler.GuiPreferences.SHOW_COMPILER_WARNINGS;
 
 import jd.core.ClassUtil;
 import jd.core.DecompilationResult;
@@ -46,8 +57,26 @@ public class ClassFilePage extends TypePage {
     private static final String INTERNAL_ERROR = "// INTERNAL ERROR //";
 
     private static final long serialVersionUID = 1L;
+    private static final List<String> DECOMPILE_RELEVANT_PREFERENCES = List.of(
+        DECOMPILE_ENGINE,
+        REMOVE_UNNECESSARY_CASTS,
+        WRITE_LINE_NUMBERS,
+        WRITE_METADATA,
+        ESCAPE_UNICODE_CHARACTERS,
+        REALIGN_LINE_NUMBERS,
+        OMIT_THIS_PREFIX,
+        DISPLAY_DEFAULT_CONSTRUCTOR,
+        "StretchLines"
+    );
+    private static final List<String> PARSER_RELEVANT_PREFERENCES = List.of(
+        SHOW_COMPILER_ERRORS,
+        SHOW_COMPILER_WARNINGS,
+        SHOW_COMPILER_INFO
+    );
 
     private int maximumLineNumber = -1;
+    private int lastDecompilePreferencesHash;
+    private int lastParserPreferencesHash;
 
     public ClassFilePage(API api, Container.Entry entry) {
         super(api, entry);
@@ -56,6 +85,8 @@ public class ClassFilePage extends TypePage {
         setErrorForeground(Color.decode(preferences.get(GuiPreferences.ERROR_BACKGROUND_COLOR)));
         // Display source
         decompile(preferences);
+        lastDecompilePreferencesHash = computePreferencesHash(preferences, DECOMPILE_RELEVANT_PREFERENCES);
+        lastParserPreferencesHash = computePreferencesHash(preferences, PARSER_RELEVANT_PREFERENCES);
     }
 
     public void decompile(Map<String, String> preferences) {
@@ -202,14 +233,41 @@ public class ClassFilePage extends TypePage {
     // --- PreferencesChangeListener --- //
     @Override
     public void preferencesChanged(Map<String, String> preferences) {
-        DefaultCaret caret = (DefaultCaret) textArea.getCaret();
-        int updatePolicy = caret.getUpdatePolicy();
+        setErrorForeground(Color.decode(preferences.get(ERROR_BACKGROUND_COLOR)));
 
-        caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
-        decompile(preferences);
-        caret.setUpdatePolicy(updatePolicy);
+        int decompilePreferencesHash = computePreferencesHash(preferences, DECOMPILE_RELEVANT_PREFERENCES);
+        int parserPreferencesHash = computePreferencesHash(preferences, PARSER_RELEVANT_PREFERENCES);
+        boolean decompileRequired = decompilePreferencesHash != lastDecompilePreferencesHash;
+        boolean parserRefreshRequired = parserPreferencesHash != lastParserPreferencesHash;
+
+        if (decompileRequired) {
+            DefaultCaret caret = (DefaultCaret) textArea.getCaret();
+            int updatePolicy = caret.getUpdatePolicy();
+
+            caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+            decompile(preferences);
+            caret.setUpdatePolicy(updatePolicy);
+
+            lastDecompilePreferencesHash = decompilePreferencesHash;
+            lastParserPreferencesHash = parserPreferencesHash;
+        } else if (parserRefreshRequired) {
+            textArea.forceReparsing(astParser);
+            lastParserPreferencesHash = parserPreferencesHash;
+        }
 
         super.preferencesChanged(preferences);
-        indexesChanged(collectionOfFutureIndexes);
+        if (decompileRequired) {
+            indexesChanged(collectionOfFutureIndexes);
+        }
+    }
+
+    static int computePreferencesHash(Map<String, String> preferences, List<String> keys) {
+        int hash = 1;
+
+        for (String key : keys) {
+            hash = 31 * hash + Objects.toString(preferences.get(key), "").hashCode();
+        }
+
+        return hash;
     }
 }

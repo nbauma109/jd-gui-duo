@@ -54,27 +54,39 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
 
 import static org.jd.gui.util.decompiler.GuiPreferences.FONT_SIZE_KEY;
+import static org.jd.gui.util.decompiler.GuiPreferences.DEFAULT_SELECTED_WORD_HIGHLIGHT_COLOR;
+import static org.jd.gui.util.decompiler.GuiPreferences.DEFAULT_SELECTED_WORD_HIGHLIGHT_ENABLED;
+import static org.jd.gui.util.decompiler.GuiPreferences.DEFAULT_SEARCH_HIGHLIGHT_COLOR;
+import static org.jd.gui.util.decompiler.GuiPreferences.DEFAULT_SELECTION_HIGHLIGHT_COLOR;
+import static org.jd.gui.util.decompiler.GuiPreferences.SEARCH_HIGHLIGHT_COLOR;
+import static org.jd.gui.util.decompiler.GuiPreferences.SELECTION_HIGHLIGHT_COLOR;
+import static org.jd.gui.util.decompiler.GuiPreferences.SELECTED_WORD_HIGHLIGHT_COLOR;
+import static org.jd.gui.util.decompiler.GuiPreferences.SELECTED_WORD_HIGHLIGHT_ENABLED;
 
 public class AbstractTextPage extends JPanel implements LineNumberNavigable, ContentSearchable, UriOpenable, PreferencesChangeListener {
 
     private static final long serialVersionUID = 1L;
 
-    protected static final Color DOUBLE_CLICK_HIGHLIGHT_COLOR = new Color(0x66ff66);
-    protected static final Color SEARCH_HIGHLIGHT_COLOR = new Color(0xffff66);
-    protected static final Color SELECT_HIGHLIGHT_COLOR = new Color(0xF49810);
+    protected static final Color DEFAULT_DOUBLE_CLICK_HIGHLIGHT_COLOR = Color.decode(DEFAULT_SELECTED_WORD_HIGHLIGHT_COLOR);
+    protected static final Color DEFAULT_SEARCH_HIGHLIGHT = Color.decode(DEFAULT_SEARCH_HIGHLIGHT_COLOR);
+    protected static final Color DEFAULT_SELECTION_HIGHLIGHT = Color.decode(DEFAULT_SELECTION_HIGHLIGHT_COLOR);
 
     protected static final RSyntaxTextAreaEditorKit.DecreaseFontSizeAction DECREASE_FONT_SIZE_ACTION = new RSyntaxTextAreaEditorKit.DecreaseFontSizeAction();
     protected static final RSyntaxTextAreaEditorKit.IncreaseFontSizeAction INCREASE_FONT_SIZE_ACTION = new RSyntaxTextAreaEditorKit.IncreaseFontSizeAction();
 
     protected final RSyntaxTextArea textArea;
     protected final RTextScrollPane scrollPane;
+    protected final ErrorStrip errorStrip;
 
     private Map<String, String> preferences;
+    private boolean selectedWordHighlightActive;
+    private boolean selectedWordHighlightEnabled;
 
     public AbstractTextPage(API api) {
         super(new BorderLayout());
 
         preferences = api.getPreferences();
+        selectedWordHighlightEnabled = isSelectedWordHighlightEnabled(preferences);
 
         textArea = newSyntaxTextArea(api);
         textArea.setSyntaxEditingStyle(getSyntaxStyle());
@@ -88,8 +100,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
-                    textArea.setMarkAllHighlightColor(DOUBLE_CLICK_HIGHLIGHT_COLOR);
-                    SearchEngine.markAll(textArea, newSearchContext(textArea.getSelectedText(), true, true, true, false, true, false));
+                    highlightSelectedWordOccurrences(textArea.getSelectedText());
                 }
             }
         });
@@ -154,8 +165,11 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
         gutter.setFoldIndicatorStyle(FoldIndicatorStyle.CLASSIC);
         gutter.setFoldIndicatorForeground(gutter.getBorderColor());
 
+        errorStrip = new ErrorStrip(textArea);
+        errorStrip.setShowMarkAll(selectedWordHighlightEnabled);
+
         add(scrollPane, BorderLayout.CENTER);
-        add(new ErrorStrip(textArea), BorderLayout.LINE_END);
+        add(errorStrip, BorderLayout.LINE_END);
     }
 
     protected RSyntaxTextArea newSyntaxTextArea(API api) {
@@ -287,7 +301,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
     @Override
     public boolean highlightText(String text, SearchType searchType) {
         if (text.length() > 1) {
-            textArea.setMarkAllHighlightColor(SEARCH_HIGHLIGHT_COLOR);
+            setSearchHighlightColor();
             textArea.setCaretPosition(textArea.getSelectionStart());
 
             SearchContext context = newSearchContext(text, searchType.caseSensitive(), searchType.wholeWord(), true, searchType.regex(), searchType.markAll(), searchType.wrap());
@@ -306,7 +320,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
     @Override
     public void findNext(String text, SearchType searchType) {
         if (text.length() > 1) {
-            textArea.setMarkAllHighlightColor(SEARCH_HIGHLIGHT_COLOR);
+            setSearchHighlightColor();
 
             SearchContext context = newSearchContext(text, searchType.caseSensitive(), searchType.wholeWord(), true, searchType.regex(), searchType.markAll(), searchType.wrap());
             SearchResult result = SearchEngine.find(textArea, context);
@@ -321,7 +335,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
     @Override
     public void findPrevious(String text, SearchType searchType) {
         if (text.length() > 1) {
-            textArea.setMarkAllHighlightColor(SEARCH_HIGHLIGHT_COLOR);
+            setSearchHighlightColor();
 
             SearchContext context = newSearchContext(text, searchType.caseSensitive(), searchType.wholeWord(), false, searchType.regex(), searchType.markAll(), searchType.wrap());
             SearchResult result = SearchEngine.find(textArea, context);
@@ -376,7 +390,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
                 String highlightFlags = parameters.get("highlightFlags");
 
                 if (highlightFlags.indexOf('s') != -1 && parameters.containsKey("highlightPattern")) {
-                    textArea.setMarkAllHighlightColor(SELECT_HIGHLIGHT_COLOR);
+                    setSelectionHighlightColor();
                     textArea.setCaretPosition(0);
 
                     // Highlight all
@@ -455,6 +469,10 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
     // --- PreferencesChangeListener --- //
     @Override
     public void preferencesChanged(Map<String, String> preferences) {
+        this.preferences = preferences;
+        boolean enabled = isSelectedWordHighlightEnabled(preferences);
+        errorStrip.setShowMarkAll(enabled);
+
         String fontSize = preferences.get(FONT_SIZE_KEY);
 
         if (fontSize != null) {
@@ -465,6 +483,74 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
             }
         }
 
-        this.preferences = preferences;
+        if (!enabled && selectedWordHighlightActive) {
+            clearActiveHighlights();
+        } else if (enabled && (!selectedWordHighlightEnabled || selectedWordHighlightActive)) {
+            highlightSelectedWordOccurrences(textArea.getSelectedText());
+        }
+
+        selectedWordHighlightEnabled = enabled;
+    }
+
+    protected void highlightSelectedWordOccurrences(String selectedText) {
+        selectedWordHighlightActive = false;
+
+        if (!isSelectedWordHighlightEnabled() || selectedText == null || selectedText.isBlank()) {
+            return;
+        }
+
+        textArea.setMarkAllHighlightColor(getSelectedWordHighlightColor());
+        SearchEngine.markAll(textArea, newSearchContext(selectedText, true, true, true, false, true, false));
+        selectedWordHighlightActive = true;
+    }
+
+    protected void clearActiveHighlights() {
+        selectedWordHighlightActive = false;
+        textArea.clearMarkAllHighlights();
+    }
+
+    protected void setSelectionHighlightColor() {
+        selectedWordHighlightActive = false;
+        textArea.setMarkAllHighlightColor(getSelectionHighlightColor());
+    }
+
+    protected void setSearchHighlightColor() {
+        selectedWordHighlightActive = false;
+        textArea.setMarkAllHighlightColor(getSearchHighlightColor());
+    }
+
+    protected boolean isSelectedWordHighlightEnabled() {
+        return isSelectedWordHighlightEnabled(preferences);
+    }
+
+    protected boolean isSelectedWordHighlightEnabled(Map<String, String> preferences) {
+        return Boolean.parseBoolean(
+            preferences.getOrDefault(SELECTED_WORD_HIGHLIGHT_ENABLED, DEFAULT_SELECTED_WORD_HIGHLIGHT_ENABLED)
+        );
+    }
+
+    protected Color getSelectedWordHighlightColor() {
+        return decodeColor(preferences.get(SELECTED_WORD_HIGHLIGHT_COLOR), DEFAULT_DOUBLE_CLICK_HIGHLIGHT_COLOR);
+    }
+
+    protected Color getSearchHighlightColor() {
+        return decodeColor(preferences.get(SEARCH_HIGHLIGHT_COLOR), DEFAULT_SEARCH_HIGHLIGHT);
+    }
+
+    protected Color getSelectionHighlightColor() {
+        return decodeColor(preferences.get(SELECTION_HIGHLIGHT_COLOR), DEFAULT_SELECTION_HIGHLIGHT);
+    }
+
+    protected static Color decodeColor(String value, Color fallbackColor) {
+        if (value == null || value.isBlank()) {
+            return fallbackColor;
+        }
+
+        try {
+            return Color.decode(value);
+        } catch (NumberFormatException e) {
+            assert ExceptionUtil.printStackTrace(e);
+            return fallbackColor;
+        }
     }
 }

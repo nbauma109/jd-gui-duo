@@ -57,6 +57,7 @@ import org.jd.gui.util.TempFile;
 import org.jd.gui.util.ThemeUtil;
 import org.jd.gui.util.ZOutputStream;
 import org.jd.gui.util.container.JarContainerEntryUtil;
+import org.jd.gui.util.decompiler.GuiPreferences;
 import org.jd.gui.util.decompiler.ContainerLoader;
 import org.jd.gui.util.loader.LoaderUtils;
 import org.jd.gui.util.matcher.ArtifactVersionMatcher;
@@ -199,6 +200,7 @@ public class MainController implements API {
                 e -> onSecuredPreferences(),
                 e -> onEclipsePreferences(),
                 e -> onMavenCentralSearch(),
+                this::onToggleHighlightChanged,
                 e -> onAbout(),
                 this::panelClosed,
                 this::onCurrentPageChanged,
@@ -573,6 +575,12 @@ public class MainController implements API {
 		NexusSearchFrame nexusSearchFrame = new NexusSearchFrame(this);
 		nexusSearchFrame.setVisible(true);
 	}
+
+    protected void onToggleHighlightChanged(boolean enabled) {
+        configuration.getPreferences().put(GuiPreferences.SELECTED_WORD_HIGHLIGHT_ENABLED, Boolean.toString(enabled));
+        checkPreferencesChange(currentPage);
+        mainView.preferencesChanged(getPreferences());
+    }
 
     protected void onAbout() {
         aboutController.show();

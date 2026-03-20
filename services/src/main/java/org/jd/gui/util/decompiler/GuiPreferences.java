@@ -13,6 +13,14 @@ public final class GuiPreferences {
     public static final String MAXIMUM_DEPTH_KEY                 = "DirectoryIndexerPreferences.maximumDepth";
     public static final String FONT_SIZE_KEY                     = "ViewerPreferences.fontSize";
     public static final String TREE_NODE_FONT_SIZE_KEY           = "ViewerPreferences.treeNodeFontSize";
+    public static final String SELECTED_WORD_HIGHLIGHT_ENABLED   = "ViewerPreferences.selectedWordHighlight.enabled";
+    public static final String SELECTED_WORD_HIGHLIGHT_COLOR     = "ViewerPreferences.selectedWordHighlight.color";
+    public static final String SEARCH_HIGHLIGHT_COLOR            = "ViewerPreferences.searchHighlight.color";
+    public static final String SELECTION_HIGHLIGHT_COLOR         = "ViewerPreferences.selectionHighlight.color";
+    public static final String DEFAULT_SELECTED_WORD_HIGHLIGHT_ENABLED = Boolean.TRUE.toString();
+    public static final String DEFAULT_SELECTED_WORD_HIGHLIGHT_COLOR   = "0x66FF66";
+    public static final String DEFAULT_SEARCH_HIGHLIGHT_COLOR          = "0xFFFF66";
+    public static final String DEFAULT_SELECTION_HIGHLIGHT_COLOR       = "0xF49810";
     public static final String ERROR_BACKGROUND_COLOR            = "JdGuiPreferences.errorBackgroundColor";
     public static final String DECOMPILE_ENGINE                  = "ClassFileDecompilerPreferences.decompileEngine";
     public static final String SHOW_COMPILER_ERRORS              = "ClassFileDecompilerPreferences.showCompilerErrors";

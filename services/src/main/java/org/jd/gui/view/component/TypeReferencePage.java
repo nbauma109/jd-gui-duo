@@ -38,7 +38,7 @@ public abstract class TypeReferencePage extends HyperlinkPage {
         List<DocumentRange> ranges = new ArrayList<>();
         String query = uri.getQuery();
 
-        textArea.clearMarkAllHighlights();
+        clearActiveHighlights();
 
         if (query != null) {
             Map<String, String> parameters = parseQuery(query);
@@ -98,7 +98,7 @@ public abstract class TypeReferencePage extends HyperlinkPage {
         }
 
         if (!ranges.isEmpty()) {
-            textArea.setMarkAllHighlightColor(SELECT_HIGHLIGHT_COLOR);
+            setSelectionHighlightColor();
             textArea.markAll(ranges);
             Collections.sort(ranges);
             setCaretPositionAndCenter(ranges.get(0));
