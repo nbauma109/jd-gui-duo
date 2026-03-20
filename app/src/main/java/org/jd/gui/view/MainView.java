@@ -52,9 +52,12 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import javax.swing.AbstractAction;
+import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -67,6 +70,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
@@ -96,6 +100,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     private Action quickOutlineAction;
     private Action backwardAction;
     private Action forwardAction;
+    private Action toggleHighlightAction;
     @SuppressWarnings("all")
     private MainTabbedPanel mainTabbedPanel;
     private Box findPanel;
@@ -146,6 +151,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             ActionListener securedPreferencesActionListener,
             ActionListener eclipsePreferencesActionListener,
             ActionListener mavenCentralHelperActionListener,
+            Consumer<Boolean> toggleHighlightChangedCallback,
             ActionListener aboutActionListener,
             Runnable panelClosedCallback,
             Consumer<T> currentPageChangedCallback,
@@ -270,6 +276,20 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
                     eclipsePreferencesActionListener);
             Action mavenCentralHelperAction = newAction("Search maven central...", newImageIcon("/org/jd/gui/images/search_src.png"), true, "Search maven central",
             		mavenCentralHelperActionListener);
+            toggleHighlightAction = new AbstractAction("Toggle Highlight", newImageIcon("/org/jd/gui/images/mark_occurrences.png")) {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    boolean selected = e.getSource() instanceof AbstractButton button
+                        ? button.isSelected()
+                        : !Boolean.TRUE.equals(getValue(Action.SELECTED_KEY));
+                    putValue(Action.SELECTED_KEY, selected);
+                    toggleHighlightChangedCallback.accept(selected);
+                }
+            };
+            toggleHighlightAction.putValue(Action.SHORT_DESCRIPTION, "Toggle selected word highlight");
+            toggleHighlightAction.putValue(Action.SELECTED_KEY, isSelectedWordHighlightEnabled(configuration.getPreferences()));
             Action aboutAction = newAction("About...", true, "About JD-GUI", aboutActionListener);
 
             // Menu //
@@ -313,6 +333,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             menu = new JMenu("Search");
             menuBar.add(menu);
             menu.add(searchAction).setAccelerator(KeyStroke.getKeyStroke('S', menuShortcutKeyMask | InputEvent.SHIFT_DOWN_MASK));
+            menu.add(new JCheckBoxMenuItem(toggleHighlightAction));
             menu = new JMenu("Help");
             menuBar.add(menu);
             if (browser) {
@@ -339,6 +360,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             toolBar.addSeparator();
             toolBar.add(new IconButton(openTypeAction));
             toolBar.add(new IconButton(searchAction));
+            toolBar.add(newToolbarToggleButton(toggleHighlightAction));
             toolBar.addSeparator();
             toolBar.add(new IconButton(backwardAction));
             toolBar.add(new IconButton(forwardAction));
@@ -547,11 +569,29 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     // --- PreferencesChangeListener --- //
     @Override
     public void preferencesChanged(Map<String, String> preferences) {
+        if (toggleHighlightAction != null) {
+            toggleHighlightAction.putValue(Action.SELECTED_KEY, isSelectedWordHighlightEnabled(preferences));
+        }
         mainTabbedPanel.preferencesChanged(preferences);
         repaint();
     }
 
     public void repaint() {
         mainFrame.repaint();
+    }
+
+    private static boolean isSelectedWordHighlightEnabled(Map<String, String> preferences) {
+        return Boolean.parseBoolean(preferences.getOrDefault(
+            GuiPreferences.SELECTED_WORD_HIGHLIGHT_ENABLED,
+            GuiPreferences.DEFAULT_SELECTED_WORD_HIGHLIGHT_ENABLED
+        ));
+    }
+
+    private static JToggleButton newToolbarToggleButton(Action action) {
+        JToggleButton button = new JToggleButton(action);
+        button.setText(null);
+        button.setFocusPainted(false);
+        button.setHideActionText(true);
+        return button;
     }
 }

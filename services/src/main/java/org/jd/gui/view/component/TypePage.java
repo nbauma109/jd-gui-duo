@@ -56,6 +56,7 @@ public abstract class TypePage extends CustomLineNumbersPage
     protected transient Collection<Future<Indexes>> collectionOfFutureIndexes = Collections.emptyList();
 
     protected final transient ReferenceListener listener;
+    protected final transient RSyntaxASTParser astParser;
 
     protected TypePage(API api, Container.Entry entry) {
     	super(api);
@@ -65,7 +66,8 @@ public abstract class TypePage extends CustomLineNumbersPage
         this.entry = entry;
         this.listener = new ReferenceListener(entry);
         this.listener.setHyperlinks(hyperlinks);
-        this.textArea.addParser(new RSyntaxASTParser(entry, api));
+        this.astParser = new RSyntaxASTParser(entry, api);
+        this.textArea.addParser(astParser);
     }
 
     @Override
@@ -138,7 +140,7 @@ public abstract class TypePage extends CustomLineNumbersPage
         String fragment = uri.getFragment();
         String query = uri.getQuery();
 
-        textArea.clearMarkAllHighlights();
+        clearActiveHighlights();
 
         if (fragment != null) {
             matchFragmentAndAddDocumentRange(fragment, listener.getDeclarations(), ranges);
@@ -177,7 +179,7 @@ public abstract class TypePage extends CustomLineNumbersPage
         }
 
         if (!ranges.isEmpty()) {
-            textArea.setMarkAllHighlightColor(SELECT_HIGHLIGHT_COLOR);
+            setSelectionHighlightColor();
             textArea.markAll(ranges);
             Collections.sort(ranges);
             setCaretPositionAndCenter(ranges.get(0));

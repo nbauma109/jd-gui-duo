@@ -162,7 +162,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
         String fragment = uri.getFragment();
         String query = uri.getQuery();
 
-        textArea.clearMarkAllHighlights();
+        clearActiveHighlights();
 
         if (fragment != null && listener.getDeclarations().size() == 1) {
             DeclarationData declaration = listener.getDeclarations().entrySet().iterator().next().getValue();
@@ -215,7 +215,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
         }
 
         if (!ranges.isEmpty()) {
-            textArea.setMarkAllHighlightColor(SELECT_HIGHLIGHT_COLOR);
+            setSelectionHighlightColor();
             textArea.markAll(ranges);
             Collections.sort(ranges);
             setCaretPositionAndCenter(ranges.get(0));

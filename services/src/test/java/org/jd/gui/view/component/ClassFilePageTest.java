@@ -5,9 +5,11 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.TreeMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import jd.core.links.DeclarationData;
@@ -143,5 +145,43 @@ public class ClassFilePageTest {
 
         assertTrue(ClassFilePage.matchScope("Test", "Test"));
         assertTrue(ClassFilePage.matchScope("*/Test", "Test"));
+    }
+
+    @Test
+    public void testComputePreferencesHashIgnoresIrrelevantViewerPreferences() {
+        HashMap<String, String> preferences = new HashMap<>();
+        preferences.put("ClassFileDecompilerPreferences.decompileEngine", "jd-core");
+        preferences.put("ViewerPreferences.selectedWordHighlight.enabled", "true");
+        preferences.put("ViewerPreferences.selectedWordHighlight.color", "0x66FF66");
+
+        int hash1 = ClassFilePage.computePreferencesHash(preferences, List.of("ClassFileDecompilerPreferences.decompileEngine"));
+
+        preferences.put("ViewerPreferences.selectedWordHighlight.enabled", "false");
+        preferences.put("ViewerPreferences.selectedWordHighlight.color", "0x112233");
+
+        int hash2 = ClassFilePage.computePreferencesHash(preferences, List.of("ClassFileDecompilerPreferences.decompileEngine"));
+
+        assertEquals(hash1, hash2);
+    }
+
+    @Test
+    public void testComputePreferencesHashTracksRelevantDecompilerPreferences() {
+        HashMap<String, String> preferences = new HashMap<>();
+        preferences.put("ClassFileDecompilerPreferences.decompileEngine", "jd-core");
+        preferences.put("ClassFileDecompilerPreferences.removeUnnecessaryCasts", "false");
+
+        int hash1 = ClassFilePage.computePreferencesHash(preferences, List.of(
+            "ClassFileDecompilerPreferences.decompileEngine",
+            "ClassFileDecompilerPreferences.removeUnnecessaryCasts"
+        ));
+
+        preferences.put("ClassFileDecompilerPreferences.removeUnnecessaryCasts", "true");
+
+        int hash2 = ClassFilePage.computePreferencesHash(preferences, List.of(
+            "ClassFileDecompilerPreferences.decompileEngine",
+            "ClassFileDecompilerPreferences.removeUnnecessaryCasts"
+        ));
+
+        assertNotEquals(hash1, hash2);
     }
 }
