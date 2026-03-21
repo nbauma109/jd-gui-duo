@@ -38,6 +38,12 @@
     <dependency>
       <groupId>de.femtopedia.dex2jar</groupId>
       <artifactId>dex-tools</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>de.femtopedia.dex2jar</groupId>
+          <artifactId>dex-writer</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jdt</groupId>
