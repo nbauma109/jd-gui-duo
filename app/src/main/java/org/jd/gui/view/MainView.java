@@ -56,6 +56,7 @@ import java.util.function.Supplier;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
 import javax.swing.Action;
+import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JCheckBoxMenuItem;
@@ -70,9 +71,12 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JRootPane;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.InputMap;
+import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.border.Border;
@@ -91,12 +95,14 @@ import de.cismet.custom.visualdiff.PlatformService;
 public class MainView<T extends JComponent & UriGettable> implements UriOpenable, PreferencesChangeListener {
 
     private static final String JAVA_DECOMPILER = "Java Decompiler";
+    private static final String EXIT_ACTION_KEY = "MainView.exit";
     private final History history;
     private final Consumer<File> openFilesCallback;
     private final EnumMap<Binding, Action> keyBindingActions = new EnumMap<>(Binding.class);
     private JFrame mainFrame;
     private final JMenu recentFiles = new JMenu("Recent Files");
     private Action closeAction;
+    private Action exitAction;
     private Action openTypeAction;
     private Action quickOutlineAction;
     private Action backwardAction;
@@ -114,6 +120,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     private AbstractButton findPreviousButton;
     private Runnable findNextShortcutAction;
     private Runnable findPreviousShortcutAction;
+    private KeyStroke installedExitKeyStroke;
 
     static {
         Enumeration<Object> keys = UIManager.getDefaults().keys();
@@ -258,7 +265,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             closeAction = newAction("Close", false, closeActionListener);
             Action saveAction = newAction("Save", newImageIcon("/org/jd/gui/images/save.png"), false, saveActionListener);
             Action saveAllSourcesAction = newAction("Save All Sources", newImageIcon("/org/jd/gui/images/save_all.png"), false, saveAllSourcesActionListener);
-            Action exitAction = newAction("Exit", true, "Quit this program", exitActionListener);
+            exitAction = newAction("Exit", true, "Quit this program", exitActionListener);
             Action copyAction = newAction("Copy", newImageIcon("/org/jd/gui/images/copy.png"), false, copyActionListener);
             Action pasteAction = newAction("Paste Log", newImageIcon("/org/jd/gui/images/paste.png"), true, pasteActionListener);
             Action selectAllAction = newAction("Select all", false, selectAllActionListener);
@@ -317,6 +324,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             registerKeyBinding(Binding.PREFERENCES, preferencesAction);
             registerKeyBinding(Binding.ABOUT, aboutAction);
             applyConfiguredKeyBindings(configuration.getPreferences());
+            updateExitShortcutBinding(configuration.getPreferences());
 
             // Menu //
             JMenuBar menuBar = new JMenuBar();
@@ -610,6 +618,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             toggleHighlightAction.putValue(Action.SELECTED_KEY, isSelectedWordHighlightEnabled(preferences));
         }
         applyConfiguredKeyBindings(preferences);
+        updateExitShortcutBinding(preferences);
         updateFindBindings(preferences);
         mainTabbedPanel.preferencesChanged(preferences);
         repaint();
@@ -640,6 +649,26 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
 
     private void applyConfiguredKeyBindings(Map<String, String> preferences) {
         KeyBindings.apply(preferences, keyBindingActions);
+    }
+
+    private void updateExitShortcutBinding(Map<String, String> preferences) {
+        if ((mainFrame == null) || (exitAction == null) || !PlatformService.getInstance().isMac()) {
+            return;
+        }
+
+        JRootPane rootPane = mainFrame.getRootPane();
+        InputMap inputMap = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = rootPane.getActionMap();
+
+        if (installedExitKeyStroke != null) {
+            inputMap.remove(installedExitKeyStroke);
+        }
+
+        installedExitKeyStroke = KeyBindings.getConfiguredKeyStroke(preferences, Binding.EXIT);
+        if (installedExitKeyStroke != null) {
+            inputMap.put(installedExitKeyStroke, EXIT_ACTION_KEY);
+        }
+        actionMap.put(EXIT_ACTION_KEY, exitAction);
     }
 
     private void updateFindBindings(Map<String, String> preferences) {

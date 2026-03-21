@@ -252,7 +252,9 @@ public class MainController implements API {
                 searchInConstantPoolsController = new SearchInConstantPoolsController(MainController.this, executor, mainFrame);
                 containerChangeListeners.add(searchInConstantPoolsController);
                 preferencesController = new PreferencesController(configuration, mainFrame, PreferencesPanelService.getInstance().getProviders());
-                keyBindingsController = new KeyBindingsController(configuration, mainFrame);
+                if (keyBindingsController == null) {
+                    keyBindingsController = new KeyBindingsController(configuration, mainFrame);
+                }
                 securedPreferencesController = new SecuredPreferencesController(configuration, mainFrame, SecuredPreferencesPanelService.getInstance().getProviders());
                 eclipsePreferencesController = new EclipsePreferencesController(configuration, mainFrame, EclipsePreferencesPanelService.getInstance().getProviders());
                 selectLocationController = new SelectLocationController(MainController.this, mainFrame);
@@ -567,6 +569,13 @@ public class MainController implements API {
     }
 
     protected void onKeyBindings() {
+        if (keyBindingsController == null) {
+            JFrame mainFrame = mainView != null ? mainView.getMainFrame() : null;
+            if (mainFrame == null) {
+                return;
+            }
+            keyBindingsController = new KeyBindingsController(configuration, mainFrame);
+        }
         keyBindingsController.show(() -> mainView.preferencesChanged(getPreferences()));
     }
 
