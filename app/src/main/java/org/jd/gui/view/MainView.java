@@ -26,6 +26,8 @@ import org.jd.gui.model.configuration.Configuration;
 import org.jd.gui.model.history.History;
 import org.jd.gui.util.CustomMultiResolutionImage;
 import org.jd.gui.util.ImageUtil;
+import org.jd.gui.util.KeyBindings;
+import org.jd.gui.util.KeyBindings.Binding;
 import org.jd.gui.util.decompiler.GuiPreferences;
 import org.jd.gui.util.swing.SwingUtil;
 import org.jd.gui.view.component.DynamicPage;
@@ -39,13 +41,12 @@ import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Point;
-import java.awt.Toolkit;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.net.URI;
+import java.util.EnumMap;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +73,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.border.Border;
@@ -93,6 +93,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     private static final String JAVA_DECOMPILER = "Java Decompiler";
     private final History history;
     private final Consumer<File> openFilesCallback;
+    private final EnumMap<Binding, Action> keyBindingActions = new EnumMap<>(Binding.class);
     private JFrame mainFrame;
     private final JMenu recentFiles = new JMenu("Recent Files");
     private Action closeAction;
@@ -108,6 +109,11 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     private SearchUIOptions searchUIOptions;
     private Color findBackgroundColor;
     private Color findErrorBackgroundColor;
+    private JTextField findEditor;
+    private AbstractButton findNextButton;
+    private AbstractButton findPreviousButton;
+    private Runnable findNextShortcutAction;
+    private Runnable findPreviousShortcutAction;
 
     static {
         Enumeration<Object> keys = UIManager.getDefaults().keys();
@@ -147,6 +153,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             ActionListener jdWebSiteActionListener,
             ActionListener jdGuiIssuesActionListener,
             ActionListener jdCoreIssuesActionListener,
+            ActionListener keyBindingsActionListener,
             ActionListener preferencesActionListener,
             ActionListener securedPreferencesActionListener,
             ActionListener eclipsePreferencesActionListener,
@@ -172,35 +179,19 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             findPanel.add(new JLabel("Find: "));
             findComboBox = new JComboBox<>();
             findComboBox.setEditable(true);
-            JTextField editorComponent = getFindEditor();
-            editorComponent.addKeyListener(new KeyAdapter() {
+            findEditor = getFindEditor();
+            findEditor.addKeyListener(new KeyAdapter() {
                 @Override
-                public void keyReleased(KeyEvent e) {
-                    switch (e.getKeyCode()) {
-                    case KeyEvent.VK_ESCAPE:
+                public void keyPressed(KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                         findPanel.setVisible(false);
-                        break;
-                    case KeyEvent.VK_ENTER:
-                        String str = getFindText();
-                        if (str.length() > 1) {
-                            int index = ((DefaultComboBoxModel<String>) findComboBox.getModel()).getIndexOf(str);
-                            if (index != -1) {
-                                findComboBox.removeItemAt(index);
-                            }
-                            findComboBox.insertItemAt(str, 0);
-                            findComboBox.setSelectedIndex(0);
-                            findNextAction.actionPerformed(null);
-                        }
-                        break;
-                    default:
-                        break;
                     }
                 }
             });
-            SearchUIOptions.configureIncrementalSearchField(editorComponent);
-            SearchUIOptions.installCriteriaListener(editorComponent, findCriteriaChangedCallback);
-            editorComponent.setOpaque(true);
-            this.findBackgroundColor = editorComponent.getBackground();
+            SearchUIOptions.configureIncrementalSearchField(findEditor, configuration.getPreferences());
+            SearchUIOptions.installCriteriaListener(findEditor, findCriteriaChangedCallback);
+            findEditor.setOpaque(true);
+            this.findBackgroundColor = findEditor.getBackground();
             findComboBox.setBackground(this.findBackgroundColor);
             this.findErrorBackgroundColor = Color.decode(configuration.getPreferences().get(GuiPreferences.ERROR_BACKGROUND_COLOR));
 
@@ -210,21 +201,36 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             toolBar.setFloatable(false);
             toolBar.setRollover(true);
 
-            IconButton findNextButton = new IconButton(SearchUIOptions.getFindNextLabel(), newAction(newImageIcon("/org/jd/gui/images/next_nav.png"), true, findNextActionListener));
-            SearchUIOptions.configureFindButton(findNextButton);
+            findNextButton = new IconButton(SearchUIOptions.getFindNextLabel(), newAction(newImageIcon("/org/jd/gui/images/next_nav.png"), true, findNextActionListener));
+            SearchUIOptions.configureFindButton(findNextButton, configuration.getPreferences());
             toolBar.add(findNextButton);
 
             toolBar.add(Box.createHorizontalStrut(5));
 
-            IconButton findPreviousButton = new IconButton(SearchUIOptions.getFindPreviousLabel(), newAction(newImageIcon("/org/jd/gui/images/prev_nav.png"), true, findPreviousActionListener));
-            SearchUIOptions.configureFindButton(findPreviousButton);
+            findPreviousButton = new IconButton(SearchUIOptions.getFindPreviousLabel(), newAction(newImageIcon("/org/jd/gui/images/prev_nav.png"), true, findPreviousActionListener));
+            SearchUIOptions.configureFindButton(findPreviousButton, configuration.getPreferences());
             toolBar.add(findPreviousButton);
 
             findPanel.add(toolBar);
 
-            searchUIOptions = new SearchUIOptions(findWithOptionsActionListener);
+            searchUIOptions = new SearchUIOptions(configuration.getPreferences(), findWithOptionsActionListener);
             searchUIOptions.attachTo(toolBar);
-            searchUIOptions.bindOptionKeyStrokes(editorComponent);
+            searchUIOptions.bindOptionKeyStrokes(findEditor, configuration.getPreferences());
+
+            findNextShortcutAction = () -> {
+                String str = getFindText();
+                if (str.length() > 1) {
+                    int index = ((DefaultComboBoxModel<String>) findComboBox.getModel()).getIndexOf(str);
+                    if (index != -1) {
+                        findComboBox.removeItemAt(index);
+                    }
+                    findComboBox.insertItemAt(str, 0);
+                    findComboBox.setSelectedIndex(0);
+                    findNextAction.actionPerformed(null);
+                }
+            };
+            findPreviousShortcutAction = () -> findPreviousActionListener.actionPerformed(null);
+            SearchUIOptions.bindSearchNavigationKeyStrokes(findEditor, configuration.getPreferences(), findNextShortcutAction, findPreviousShortcutAction);
 
             findPanel.add(Box.createHorizontalGlue());
 
@@ -267,6 +273,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             Action jdWebSiteAction = newAction("JD Web site", newImageIcon("/org/jd/gui/images/github.png"), browser, "Open JD Web site", jdWebSiteActionListener);
             Action jdGuiIssuesActionAction = newAction("JD-GUI issues", browser, "Open JD-GUI issues page", jdGuiIssuesActionListener);
             Action jdCoreIssuesActionAction = newAction("JD-Core issues", browser, "Open JD-Core issues page", jdCoreIssuesActionListener);
+            Action keyBindingsAction = newAction("Key Bindings...", newImageIcon("/org/jd/gui/images/key_bindings.png"), true, "Open the key bindings window", keyBindingsActionListener);
             Action preferencesAction = newAction("Preferences...", newImageIcon("/org/jd/gui/images/preferences.png"), true, "Open the preferences panel",
                     preferencesActionListener);
             Action securedPreferencesAction = newAction("Secured Preferences...", newImageIcon("/org/jd/gui/images/secured_preferences.png"), true, "Open the secured preferences panel",
@@ -291,47 +298,66 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             toggleHighlightAction.putValue(Action.SELECTED_KEY, isSelectedWordHighlightEnabled(configuration.getPreferences()));
             Action aboutAction = newAction("About...", true, "About JD-GUI", aboutActionListener);
 
+            registerKeyBinding(Binding.OPEN_FILE, openAction);
+            registerKeyBinding(Binding.CLOSE, closeAction);
+            registerKeyBinding(Binding.SAVE, saveAction);
+            registerKeyBinding(Binding.SAVE_ALL_SOURCES, saveAllSourcesAction);
+            registerKeyBinding(Binding.EXIT, exitAction);
+            registerKeyBinding(Binding.COPY, copyAction);
+            registerKeyBinding(Binding.PASTE_LOG, pasteAction);
+            registerKeyBinding(Binding.SELECT_ALL, selectAllAction);
+            registerKeyBinding(Binding.FIND, findAction);
+            registerKeyBinding(Binding.OPEN_TYPE, openTypeAction);
+            registerKeyBinding(Binding.OPEN_TYPE_HIERARCHY, openTypeHierarchyAction);
+            registerKeyBinding(Binding.QUICK_OUTLINE, quickOutlineAction);
+            registerKeyBinding(Binding.GO_TO_LINE, goToAction);
+            registerKeyBinding(Binding.BACK, backwardAction);
+            registerKeyBinding(Binding.FORWARD, forwardAction);
+            registerKeyBinding(Binding.SEARCH, searchAction);
+            registerKeyBinding(Binding.PREFERENCES, preferencesAction);
+            registerKeyBinding(Binding.ABOUT, aboutAction);
+            applyConfiguredKeyBindings(configuration.getPreferences());
+
             // Menu //
-            int menuShortcutKeyMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
             JMenuBar menuBar = new JMenuBar();
             JMenu menu = new JMenu("File");
             menuBar.add(menu);
-            menu.add(openAction).setAccelerator(KeyStroke.getKeyStroke('O', menuShortcutKeyMask));
+            menu.add(openAction);
             menu.add(compareAction);
             menu.add(compareJDAction);
             menu.addSeparator();
-            menu.add(closeAction).setAccelerator(KeyStroke.getKeyStroke('W', menuShortcutKeyMask));
+            menu.add(closeAction);
             menu.addSeparator();
-            menu.add(saveAction).setAccelerator(KeyStroke.getKeyStroke('S', menuShortcutKeyMask));
-            menu.add(saveAllSourcesAction).setAccelerator(KeyStroke.getKeyStroke('S', menuShortcutKeyMask | InputEvent.ALT_DOWN_MASK));
+            menu.add(saveAction);
+            menu.add(saveAllSourcesAction);
             menu.addSeparator();
             menu.add(recentFiles);
             if (!PlatformService.getInstance().isMac()) {
                 menu.addSeparator();
-                menu.add(exitAction).setAccelerator(KeyStroke.getKeyStroke('X', InputEvent.ALT_DOWN_MASK));
+                menu.add(exitAction);
             }
             menu = new JMenu("Edit");
             menuBar.add(menu);
-            menu.add(copyAction).setAccelerator(KeyStroke.getKeyStroke('C', menuShortcutKeyMask));
-            menu.add(pasteAction).setAccelerator(KeyStroke.getKeyStroke('V', menuShortcutKeyMask));
+            menu.add(copyAction);
+            menu.add(pasteAction);
             menu.addSeparator();
-            menu.add(selectAllAction).setAccelerator(KeyStroke.getKeyStroke('A', menuShortcutKeyMask));
+            menu.add(selectAllAction);
             menu.addSeparator();
-            menu.add(findAction).setAccelerator(KeyStroke.getKeyStroke('F', menuShortcutKeyMask));
+            menu.add(findAction);
             menu = new JMenu("Navigation");
             menuBar.add(menu);
-            menu.add(openTypeAction).setAccelerator(KeyStroke.getKeyStroke('T', menuShortcutKeyMask));
-            menu.add(openTypeHierarchyAction).setAccelerator(KeyStroke.getKeyStroke('H', menuShortcutKeyMask));
+            menu.add(openTypeAction);
+            menu.add(openTypeHierarchyAction);
             menu.addSeparator();
-            menu.add(quickOutlineAction).setAccelerator(KeyStroke.getKeyStroke('O', menuShortcutKeyMask | InputEvent.SHIFT_DOWN_MASK));
+            menu.add(quickOutlineAction);
             menu.addSeparator();
-            menu.add(goToAction).setAccelerator(KeyStroke.getKeyStroke('L', menuShortcutKeyMask));
+            menu.add(goToAction);
             menu.addSeparator();
-            menu.add(backwardAction).setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, InputEvent.ALT_DOWN_MASK));
-            menu.add(forwardAction).setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, InputEvent.ALT_DOWN_MASK));
+            menu.add(backwardAction);
+            menu.add(forwardAction);
             menu = new JMenu("Search");
             menuBar.add(menu);
-            menu.add(searchAction).setAccelerator(KeyStroke.getKeyStroke('S', menuShortcutKeyMask | InputEvent.SHIFT_DOWN_MASK));
+            menu.add(searchAction);
             menu.add(new JCheckBoxMenuItem(toggleHighlightAction));
             menu = new JMenu("Help");
             menuBar.add(menu);
@@ -341,12 +367,13 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
                 menu.add(jdCoreIssuesActionAction);
                 menu.addSeparator();
             }
-            menu.add(preferencesAction).setAccelerator(KeyStroke.getKeyStroke('P', menuShortcutKeyMask | InputEvent.SHIFT_DOWN_MASK));
+            menu.add(keyBindingsAction);
+            menu.add(preferencesAction);
             menu.add(securedPreferencesAction);
             menu.add(eclipsePreferencesAction);
             menu.add(mavenCentralHelperAction);
             menu.addSeparator();
-            menu.add(aboutAction).setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
+            menu.add(aboutAction);
             mainFrame.setJMenuBar(menuBar);
 
             // Icon bar //
@@ -582,6 +609,8 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
         if (toggleHighlightAction != null) {
             toggleHighlightAction.putValue(Action.SELECTED_KEY, isSelectedWordHighlightEnabled(preferences));
         }
+        applyConfiguredKeyBindings(preferences);
+        updateFindBindings(preferences);
         mainTabbedPanel.preferencesChanged(preferences);
         repaint();
     }
@@ -603,5 +632,26 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
         button.setFocusPainted(false);
         button.setHideActionText(true);
         return button;
+    }
+
+    private void registerKeyBinding(Binding binding, Action action) {
+        keyBindingActions.put(binding, action);
+    }
+
+    private void applyConfiguredKeyBindings(Map<String, String> preferences) {
+        KeyBindings.apply(preferences, keyBindingActions);
+    }
+
+    private void updateFindBindings(Map<String, String> preferences) {
+        if (findEditor == null) {
+            return;
+        }
+
+        SearchUIOptions.configureIncrementalSearchField(findEditor, preferences);
+        SearchUIOptions.configureFindButton(findNextButton, preferences);
+        SearchUIOptions.configureFindButton(findPreviousButton, preferences);
+        searchUIOptions.refreshTooltips(preferences);
+        searchUIOptions.bindOptionKeyStrokes(findEditor, preferences);
+        SearchUIOptions.bindSearchNavigationKeyStrokes(findEditor, preferences, findNextShortcutAction, findPreviousShortcutAction);
     }
 }

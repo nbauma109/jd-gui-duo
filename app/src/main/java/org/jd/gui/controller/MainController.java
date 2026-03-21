@@ -151,6 +151,7 @@ public class MainController implements API {
     private OpenTypeHierarchyController openTypeHierarchyController;
     private QuickOutlineController quickOutlineController;
     private PreferencesController preferencesController;
+    private KeyBindingsController keyBindingsController;
     private SecuredPreferencesController securedPreferencesController;
     private EclipsePreferencesController eclipsePreferencesController;
     private SearchInConstantPoolsController searchInConstantPoolsController;
@@ -197,6 +198,7 @@ public class MainController implements API {
                 e -> onJdWebSite(),
                 e -> onJdGuiIssues(),
                 e -> onJdCoreIssues(),
+                e -> onKeyBindings(),
                 e -> onPreferences(),
                 e -> onSecuredPreferences(),
                 e -> onEclipsePreferences(),
@@ -250,6 +252,7 @@ public class MainController implements API {
                 searchInConstantPoolsController = new SearchInConstantPoolsController(MainController.this, executor, mainFrame);
                 containerChangeListeners.add(searchInConstantPoolsController);
                 preferencesController = new PreferencesController(configuration, mainFrame, PreferencesPanelService.getInstance().getProviders());
+                keyBindingsController = new KeyBindingsController(configuration, mainFrame);
                 securedPreferencesController = new SecuredPreferencesController(configuration, mainFrame, SecuredPreferencesPanelService.getInstance().getProviders());
                 eclipsePreferencesController = new EclipsePreferencesController(configuration, mainFrame, EclipsePreferencesPanelService.getInstance().getProviders());
                 selectLocationController = new SelectLocationController(MainController.this, mainFrame);
@@ -561,6 +564,10 @@ public class MainController implements API {
                 configuration.setLookAndFeel(ThemeUtil.getDefaultLookAndFeel());
             }
         });
+    }
+
+    protected void onKeyBindings() {
+        keyBindingsController.show(() -> mainView.preferencesChanged(getPreferences()));
     }
 
     @SuppressWarnings("unchecked")

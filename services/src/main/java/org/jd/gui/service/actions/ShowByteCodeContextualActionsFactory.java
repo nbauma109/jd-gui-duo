@@ -104,20 +104,20 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
             // Create a toolbar with searching options.
             JToolBar toolBar = new JToolBar();
             JTextField searchField = new JTextField(30);
-            SearchUIOptions.configureIncrementalSearchField(searchField);
+            SearchUIOptions.configureIncrementalSearchField(searchField, api.getPreferences());
             toolBar.add(searchField);
             final JButton nextButton = new JButton(SearchUIOptions.getFindNextLabel(), NEXT_ICON);
             nextButton.setActionCommand("FindNext");
-            SearchUIOptions.configureFindButton(nextButton);
+            SearchUIOptions.configureFindButton(nextButton, api.getPreferences());
             JButton prevButton = new JButton(SearchUIOptions.getFindPreviousLabel(), PREV_ICON);
             prevButton.setActionCommand("FindPrev");
-            SearchUIOptions.configureFindButton(prevButton);
+            SearchUIOptions.configureFindButton(prevButton, api.getPreferences());
             toolBar.add(nextButton);
             toolBar.add(prevButton);
 
-            SearchUIOptions searchUIOptions = new SearchUIOptions();
+            SearchUIOptions searchUIOptions = new SearchUIOptions(api.getPreferences(), null);
             searchUIOptions.attachTo(toolBar);
-            searchUIOptions.bindOptionKeyStrokes(searchField);
+            searchUIOptions.bindOptionKeyStrokes(searchField, api.getPreferences());
 
             SearchAction searchAction = new SearchAction(searchUIOptions, textArea, searchField);
             nextButton.addActionListener(searchAction);
@@ -128,34 +128,12 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
             SearchUIOptions.installCriteriaListener(searchField, updateSearchFeedback);
             searchUIOptions.addOptionsChangeListener(_ -> updateSearchFeedback.run());
 
-
-            // Make Enter and Shift + Enter search forward and backward,
-            // respectively, when the search field is focused.
-            InputMap im = searchField.getInputMap();
-            ActionMap am = searchField.getActionMap();
-            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "searchForward");
-            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.SHIFT_DOWN_MASK), "searchBackward");
-            am.put("searchForward", new AbstractAction() {
-                private static final long serialVersionUID = 1L;
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    nextButton.doClick(0);
-                }
-            });
-            am.put("searchBackward", new AbstractAction() {
-                private static final long serialVersionUID = 1L;
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    prevButton.doClick(0);
-                }
-            });
+            SearchUIOptions.bindSearchNavigationKeyStrokes(searchField, api.getPreferences(), () -> nextButton.doClick(0), () -> prevButton.doClick(0));
 
             // Make Ctrl+F/Cmd+F focus the search field
             int defaultMod = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
-            im = textArea.getInputMap();
-            am = textArea.getActionMap();
+            InputMap im = textArea.getInputMap();
+            ActionMap am = textArea.getActionMap();
             im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F, defaultMod), "doSearch");
             am.put("doSearch", new AbstractAction() {
                 private static final long serialVersionUID = 1L;
