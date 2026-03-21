@@ -34,6 +34,8 @@ import java.util.Objects;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 
+import org.eclipse.jdt.core.JavaCore;
+
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V0;
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V1;
 import static jd.core.preferences.Preferences.DISPLAY_DEFAULT_CONSTRUCTOR;
@@ -44,6 +46,9 @@ import static jd.core.preferences.Preferences.WRITE_LINE_NUMBERS;
 import static jd.core.preferences.Preferences.WRITE_METADATA;
 import static org.jd.gui.util.decompiler.GuiPreferences.DECOMPILE_ENGINE;
 import static org.jd.gui.util.decompiler.GuiPreferences.ERROR_BACKGROUND_COLOR;
+import static org.jd.gui.util.decompiler.GuiPreferences.ADVANCED_CLASS_LOOKUP;
+import static org.jd.gui.util.decompiler.GuiPreferences.INCLUDE_RUNNING_VM_BOOT_CLASSPATH;
+import static org.jd.gui.util.decompiler.GuiPreferences.JRE_SYSTEM_LIBRARY_PATH;
 import static org.jd.gui.util.decompiler.GuiPreferences.REMOVE_UNNECESSARY_CASTS;
 import static org.jd.gui.util.decompiler.GuiPreferences.SHOW_COMPILER_ERRORS;
 import static org.jd.gui.util.decompiler.GuiPreferences.SHOW_COMPILER_INFO;
@@ -66,12 +71,17 @@ public class ClassFilePage extends TypePage {
         REALIGN_LINE_NUMBERS,
         OMIT_THIS_PREFIX,
         DISPLAY_DEFAULT_CONSTRUCTOR,
+        ADVANCED_CLASS_LOOKUP,
         "StretchLines"
     );
     private static final List<String> PARSER_RELEVANT_PREFERENCES = List.of(
         SHOW_COMPILER_ERRORS,
         SHOW_COMPILER_WARNINGS,
-        SHOW_COMPILER_INFO
+        SHOW_COMPILER_INFO,
+        INCLUDE_RUNNING_VM_BOOT_CLASSPATH,
+        JRE_SYSTEM_LIBRARY_PATH,
+        JavaCore.COMPILER_SOURCE,
+        JavaCore.COMPILER_COMPLIANCE
     );
 
     private int maximumLineNumber = -1;
