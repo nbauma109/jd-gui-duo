@@ -637,9 +637,8 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
 
     private static JToggleButton newToolbarToggleButton(Action action) {
         JToggleButton button = new JToggleButton(action);
-        button.setText(null);
+        button.setText("Mark All");
         button.setFocusPainted(false);
-        button.setHideActionText(true);
         return button;
     }
 
