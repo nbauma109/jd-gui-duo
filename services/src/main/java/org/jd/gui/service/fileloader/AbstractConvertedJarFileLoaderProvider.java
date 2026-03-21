@@ -9,18 +9,12 @@ package org.jd.gui.service.fileloader;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
+import org.jd.gui.model.container.ConvertedJarContainer;
 import org.jd.gui.util.conversion.DexToJarConversionKit;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystemNotFoundException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.util.Collections;
-import java.util.Iterator;
+import java.util.Map;
 
 public abstract class AbstractConvertedJarFileLoaderProvider extends AbstractFileLoaderProvider {
 
@@ -28,24 +22,11 @@ public abstract class AbstractConvertedJarFileLoaderProvider extends AbstractFil
     @SuppressWarnings("all")
     public boolean load(API api, File file) {
         try {
-            File convertedJar = DexToJarConversionKit.getOrCreate(file);
-            URI fileUri = convertedJar.toURI();
-            URI jarUri = new URI("jar:" + fileUri.getScheme(), fileUri.getHost(), fileUri.getPath() + "!/", null);
-
-            FileSystem fileSystem;
-            try {
-                fileSystem = FileSystems.getFileSystem(jarUri);
-            } catch (FileSystemNotFoundException e) {
-                fileSystem = FileSystems.newFileSystem(jarUri, Collections.emptyMap());
-            }
-
-            if (fileSystem != null) {
-                Iterator<Path> rootDirectories = fileSystem.getRootDirectories().iterator();
-                if (rootDirectories.hasNext()) {
-                    return load(api, file, rootDirectories.next()) != null;
-                }
-            }
-        } catch (URISyntaxException | IOException e) {
+            Map<String, byte[]> classFiles = DexToJarConversionKit.getOrCreate(file);
+            ContainerEntry parentEntry = new ContainerEntry(file);
+            ConvertedJarContainer container = new ConvertedJarContainer(parentEntry, classFiles);
+            return load(api, file, container, parentEntry) != null;
+        } catch (IOException e) {
             assert ExceptionUtil.printStackTrace(e);
         }
 

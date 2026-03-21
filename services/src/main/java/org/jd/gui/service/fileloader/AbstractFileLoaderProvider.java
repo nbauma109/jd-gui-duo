@@ -40,23 +40,29 @@ public abstract class AbstractFileLoaderProvider implements FileLoader {
             Container container = containerFactory.make(api, parentEntry, rootPath);
 
             if (container != null) {
-                parentEntry.setChildren(container.getRoot().getChildren());
+                return load(api, file, container, parentEntry);
+            }
+        }
 
-                PanelFactory panelFactory = api.getMainPanelFactory(container);
+        return null;
+    }
 
-                if (panelFactory != null) {
-                    T mainPanel = panelFactory.make(api, container);
+    protected <T extends JComponent & UriGettable> T load(API api, File file, Container container, ContainerEntry parentEntry) {
+        parentEntry.setChildren(container.getRoot().getChildren());
 
-                    if (mainPanel != null) {
-                        TreeNodeFactory treeNodeFactory = api.getTreeNodeFactory(parentEntry);
-                        Object data = treeNodeFactory != null ? treeNodeFactory.make(api, parentEntry).getUserObject() : null;
-                        Icon icon = data instanceof TreeNodeData tnd ? tnd.getIcon() : null;
-                        String location = file.getPath();
+        PanelFactory panelFactory = api.getMainPanelFactory(container);
 
-                        api.addPanel(file, file.getName(), () -> icon, "Location: " + location, mainPanel);
-                        return mainPanel;
-                    }
-                }
+        if (panelFactory != null) {
+            T mainPanel = panelFactory.make(api, container);
+
+            if (mainPanel != null) {
+                TreeNodeFactory treeNodeFactory = api.getTreeNodeFactory(parentEntry);
+                Object data = treeNodeFactory != null ? treeNodeFactory.make(api, parentEntry).getUserObject() : null;
+                Icon icon = data instanceof TreeNodeData tnd ? tnd.getIcon() : null;
+                String location = file.getPath();
+
+                api.addPanel(file, file.getName(), () -> icon, "Location: " + location, mainPanel);
+                return mainPanel;
             }
         }
 
@@ -113,7 +119,7 @@ public abstract class AbstractFileLoaderProvider implements FileLoader {
             }
         }
 
-        private void setChildren(Map<Container.EntryPath, Container.Entry> children) {
+        protected void setChildren(Map<Container.EntryPath, Container.Entry> children) {
             this.children = children;
         }
     }
