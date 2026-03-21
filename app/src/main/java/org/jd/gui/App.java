@@ -15,15 +15,20 @@ import org.jd.gui.service.configuration.ConfigurationPersisterService;
 import org.jd.gui.util.net.InterProcessCommunicationUtil;
 
 import java.io.File;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 public class App {
     protected static final String SINGLE_INSTANCE = "UIMainWindowPreferencesProvider.singleInstance";
+    private static final Logger LOGGER = Logger.getLogger(App.class.getName());
 
     protected static MainController controller;
 
@@ -82,14 +87,66 @@ public class App {
             return Collections.emptyList();
         }
         List<File> files = new ArrayList<>(paths.length);
-        for (String path : paths) {
-            // disable tree traversal
-            if (path.contains("..")) {
-                System.err.println(".. in path is disabled");
-            } else {
-                files.add(new File(path));
+        for (String rawPath : paths) {
+            File validatedFile = validatePath(rawPath);
+
+            if (validatedFile != null) {
+                files.add(validatedFile);
             }
         }
         return files;
+    }
+
+    protected static File validatePath(String rawPath) {
+        if (rawPath == null) {
+            return null;
+        }
+
+        String trimmedPath = rawPath.trim();
+
+        if (trimmedPath.isEmpty()) {
+            return null;
+        }
+
+        if (containsControlCharacter(trimmedPath)) {
+            LOGGER.warning(() -> "Rejected path containing control characters: " + trimmedPath);
+            return null;
+        }
+
+        try {
+            Path candidate = Paths.get(trimmedPath);
+
+            if (containsParentDirectorySegment(candidate)) {
+                LOGGER.warning(() -> "Rejected path containing parent-directory navigation: " + trimmedPath);
+                return null;
+            }
+
+            return candidate.toAbsolutePath().normalize().toFile();
+        } catch (InvalidPathException _) {
+            LOGGER.warning(() -> "Rejected invalid path: " + trimmedPath);
+            return null;
+        }
+    }
+
+    private static boolean containsControlCharacter(String value) {
+        for (int i = 0; i < value.length(); i++) {
+            char ch = value.charAt(i);
+
+            if (Character.isISOControl(ch)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean containsParentDirectorySegment(Path path) {
+        for (Path part : path) {
+            if ("..".equals(part.toString())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

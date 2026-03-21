@@ -36,6 +36,16 @@
       <artifactId>transformer-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>de.femtopedia.dex2jar</groupId>
+      <artifactId>dex-tools</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>de.femtopedia.dex2jar</groupId>
+          <artifactId>d2j-external</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.jdt</groupId>
       <artifactId>org.eclipse.jdt.core.manipulation</artifactId>
       <exclusions>

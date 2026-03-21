@@ -35,10 +35,15 @@ public class ZipFileTreeNodeFactoryProvider extends DirectoryTreeNodeFactoryProv
         int lastSlashIndex = entry.getPath().lastIndexOf("/");
         String label = entry.getPath().substring(lastSlashIndex + 1);
         String location = new File(entry.getUri()).getPath();
-        T node = (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
+        T node = (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, getIcon()));
         // Add dummy node
         node.add(new DefaultMutableTreeNode());
         return node;
+    }
+
+    @Override
+    public ImageIcon getIcon() {
+        return ICON;
     }
 
     protected class TreeNode extends DirectoryTreeNodeFactoryProvider.TreeNode {

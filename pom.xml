@@ -128,6 +128,11 @@
         <version>${transformer-api.version}</version>
       </dependency>
       <dependency>
+        <groupId>de.femtopedia.dex2jar</groupId>
+        <artifactId>dex-tools</artifactId>
+        <version>${dex2jar.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.eclipse.jdt</groupId>
         <artifactId>org.eclipse.jdt.core.manipulation</artifactId>
         <version>1.24.0</version>
@@ -179,6 +184,7 @@
          • JADX
        ====================================================================== -->
     <transformer-api.version>4.2.2</transformer-api.version>
+    <dex2jar.version>2.4.33</dex2jar.version>
     <!-- ======================================================================
          NetBeans Visual Diff Standalone — Diff Component for Swing
          ======================================================================
@@ -191,6 +197,6 @@
          • No need to start NetBeans platform
          • No restriction from NetBeans module system
        ====================================================================== -->
-    <netbeans-visual-diff-standalone.version>2.0.51</netbeans-visual-diff-standalone.version>
+    <netbeans-visual-diff-standalone.version>2.0.52</netbeans-visual-diff-standalone.version>
   </properties>
 </project>

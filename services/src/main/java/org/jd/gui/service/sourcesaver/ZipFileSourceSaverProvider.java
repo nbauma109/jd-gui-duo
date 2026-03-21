@@ -26,7 +26,7 @@ import java.util.function.DoubleSupplier;
 public class ZipFileSourceSaverProvider extends DirectorySourceSaverProvider {
 
     @Override
-    public String[] getSelectors() { return appendSelectors("*:file:*.zip", "*:file:*.jar", "*:file:*.war", "*:file:*.ear", "*:file:*.aar", "*:file:*.jmod", "*:file:*.kar"); }
+    public String[] getSelectors() { return appendSelectors("*:file:*.zip", "*:file:*.jar", "*:file:*.war", "*:file:*.ear", "*:file:*.aar", "*:file:*.apk", "*:file:*.dex", "*:file:*.jmod", "*:file:*.kar"); }
 
     @Override
     public void save(API api, Path rootPath, Container.Entry entry, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
