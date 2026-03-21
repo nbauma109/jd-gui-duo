@@ -24,6 +24,7 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContentSearchable;
 import org.jd.gui.api.feature.LineNumberNavigable;
 import org.jd.gui.api.feature.PreferencesChangeListener;
+import org.jd.gui.api.feature.SelectedTextGettable;
 import org.jd.gui.api.feature.UriOpenable;
 import org.jd.gui.util.ThemeUtil;
 
@@ -63,7 +64,7 @@ import static org.jd.gui.util.decompiler.GuiPreferences.SELECTION_HIGHLIGHT_COLO
 import static org.jd.gui.util.decompiler.GuiPreferences.SELECTED_WORD_HIGHLIGHT_COLOR;
 import static org.jd.gui.util.decompiler.GuiPreferences.SELECTED_WORD_HIGHLIGHT_ENABLED;
 
-public class AbstractTextPage extends JPanel implements LineNumberNavigable, ContentSearchable, UriOpenable, PreferencesChangeListener {
+public class AbstractTextPage extends JPanel implements LineNumberNavigable, ContentSearchable, SelectedTextGettable, UriOpenable, PreferencesChangeListener {
 
     private static final long serialVersionUID = 1L;
 
@@ -178,6 +179,11 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
 
     public String getText() {
         return textArea.getText();
+    }
+
+    @Override
+    public String getSelectedText() {
+        return textArea.getSelectedText();
     }
 
     public JScrollPane getScrollPane() {

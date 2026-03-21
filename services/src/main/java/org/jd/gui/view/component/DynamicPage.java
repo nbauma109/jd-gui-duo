@@ -15,6 +15,7 @@ import org.jd.gui.api.feature.ContentSelectable;
 import org.jd.gui.api.feature.FocusedTypeGettable;
 import org.jd.gui.api.feature.LineNumberNavigable;
 import org.jd.gui.api.feature.PreferencesChangeListener;
+import org.jd.gui.api.feature.SelectedTextGettable;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.feature.UriOpenable;
 import org.jd.gui.api.model.Container;
@@ -38,7 +39,8 @@ import javax.swing.SwingUtilities;
 public class DynamicPage
         extends JPanel
         implements ContentCopyable, ContentSavable, ContentSearchable, ContentSelectable, FocusedTypeGettable,
-                   IndexesChangeListener, LineNumberNavigable, PreferencesChangeListener, UriGettable, UriOpenable,
+                   IndexesChangeListener, LineNumberNavigable, PreferencesChangeListener, SelectedTextGettable,
+                   UriGettable, UriOpenable,
                    API.LoadSourceListener
 {
 
@@ -95,6 +97,9 @@ public class DynamicPage
     // --- ContentSelectable --- //
     @Override
     public void selectAll() { page.selectAll(); }
+
+    @Override
+    public String getSelectedText() { return page.getSelectedText(); }
 
     // --- FocusedTypeGettable --- //
     @Override

@@ -19,6 +19,7 @@ import org.jd.gui.api.feature.FocusedTypeGettable;
 import org.jd.gui.api.feature.IndexesChangeListener;
 import org.jd.gui.api.feature.LineNumberNavigable;
 import org.jd.gui.api.feature.PreferencesChangeListener;
+import org.jd.gui.api.feature.SelectedTextGettable;
 import org.jd.gui.api.feature.SourcesSavable;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
@@ -442,8 +443,15 @@ public class MainController implements API {
     }
 
     protected void onFind() {
-        if (currentPage instanceof ContentSearchable) {
-            mainView.showFindPanel();
+        if (currentPage instanceof ContentSearchable cs) {
+            String selectedText = (currentPage instanceof SelectedTextGettable stg) ? stg.getSelectedText() : null;
+
+            if (selectedText != null && !selectedText.isEmpty()) {
+                mainView.showFindPanel(selectedText);
+                mainView.setFindBackgroundColor(cs.highlightText(selectedText, mainView.getSearchType()));
+            } else {
+                mainView.showFindPanel();
+            }
         }
     }
 

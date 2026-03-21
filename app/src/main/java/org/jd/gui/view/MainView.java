@@ -166,16 +166,14 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
             // Find panel //
-            Action findNextAction = newAction("Next", newImageIcon("/org/jd/gui/images/next_nav.png"), true, findNextActionListener);
+            Action findNextAction = newAction(SearchUIOptions.getFindNextLabel(), newImageIcon("/org/jd/gui/images/next_nav.png"), true, findNextActionListener);
             findPanel = Box.createHorizontalBox();
             findPanel.setVisible(false);
             findPanel.add(new JLabel("Find: "));
             findComboBox = new JComboBox<>();
             findComboBox.setEditable(true);
-            JComponent editorComponent = (JComponent) findComboBox.getEditor().getEditorComponent();
+            JTextField editorComponent = getFindEditor();
             editorComponent.addKeyListener(new KeyAdapter() {
-                protected String lastStr = "";
-
                 @Override
                 public void keyReleased(KeyEvent e) {
                     switch (e.getKeyCode()) {
@@ -195,14 +193,12 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
                         }
                         break;
                     default:
-                        str = getFindText();
-                        if (!lastStr.equals(str)) {
-                            findCriteriaChangedCallback.run();
-                            lastStr = str;
-                        }
+                        break;
                     }
                 }
             });
+            SearchUIOptions.configureIncrementalSearchField(editorComponent);
+            SearchUIOptions.installCriteriaListener(editorComponent, findCriteriaChangedCallback);
             editorComponent.setOpaque(true);
             this.findBackgroundColor = editorComponent.getBackground();
             findComboBox.setBackground(this.findBackgroundColor);
@@ -214,18 +210,21 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             toolBar.setFloatable(false);
             toolBar.setRollover(true);
 
-            IconButton findNextButton = new IconButton("Next", newAction(newImageIcon("/org/jd/gui/images/next_nav.png"), true, findNextActionListener));
+            IconButton findNextButton = new IconButton(SearchUIOptions.getFindNextLabel(), newAction(newImageIcon("/org/jd/gui/images/next_nav.png"), true, findNextActionListener));
+            SearchUIOptions.configureFindButton(findNextButton);
             toolBar.add(findNextButton);
 
             toolBar.add(Box.createHorizontalStrut(5));
 
-            IconButton findPreviousButton = new IconButton("Previous", newAction(newImageIcon("/org/jd/gui/images/prev_nav.png"), true, findPreviousActionListener));
+            IconButton findPreviousButton = new IconButton(SearchUIOptions.getFindPreviousLabel(), newAction(newImageIcon("/org/jd/gui/images/prev_nav.png"), true, findPreviousActionListener));
+            SearchUIOptions.configureFindButton(findPreviousButton);
             toolBar.add(findPreviousButton);
 
             findPanel.add(toolBar);
 
             searchUIOptions = new SearchUIOptions(findWithOptionsActionListener);
             searchUIOptions.attachTo(toolBar);
+            searchUIOptions.bindOptionKeyStrokes(editorComponent);
 
             findPanel.add(Box.createHorizontalGlue());
 
@@ -461,11 +460,18 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     }
 
     public void showFindPanel() {
+        showFindPanel(null);
+    }
+
+    public void showFindPanel(String initialText) {
         invokeLater(() -> {
+            JTextField editor = getFindEditor();
             findPanel.setVisible(true);
-            findComboBox.requestFocus();
-            // Selects previously searched term
-            findComboBox.getEditor().selectAll();
+            if (initialText != null) {
+                editor.setText(initialText);
+            }
+            editor.requestFocusInWindow();
+            editor.selectAll();
         });
     }
 
@@ -511,7 +517,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     }
 
     public String getFindText() {
-        Document doc = ((JTextField) findComboBox.getEditor().getEditorComponent()).getDocument();
+        Document doc = getFindEditor().getDocument();
 
         try {
             return doc.getText(0, doc.getLength());
@@ -536,6 +542,10 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             backwardAction.setEnabled(history.canBackward());
             forwardAction.setEnabled(history.canForward());
         });
+    }
+
+    private JTextField getFindEditor() {
+        return (JTextField)findComboBox.getEditor().getEditorComponent();
     }
 
     // --- Utils --- //
