@@ -7,26 +7,9 @@
 
 package org.jd.gui.service.fileloader;
 
-import org.jd.gui.api.API;
+public class DexFileLoaderProvider extends AbstractAndroidFileLoaderProvider {
 
-import java.io.File;
-
-public class DexFileLoaderProvider extends AbstractConvertedJarFileLoaderProvider {
-    protected static final String[] EXTENSIONS = { "dex" };
-
-    @Override
-    public String[] getExtensions() {
-        return EXTENSIONS;
+    public DexFileLoaderProvider() {
+        super("dex", "Android dex files (*.dex)");
     }
-
-    @Override
-    public String getDescription() {
-        return "Android dex files (*.dex)";
-    }
-
-    @Override
-    public boolean accept(API api, File file) {
-        return file.exists() && file.isFile() && file.canRead() && file.getName().toLowerCase().endsWith(".dex");
-    }
-
 }

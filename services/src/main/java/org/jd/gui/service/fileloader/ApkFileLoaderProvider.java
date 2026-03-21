@@ -7,26 +7,9 @@
 
 package org.jd.gui.service.fileloader;
 
-import org.jd.gui.api.API;
+public class ApkFileLoaderProvider extends AbstractAndroidFileLoaderProvider {
 
-import java.io.File;
-
-public class ApkFileLoaderProvider extends AbstractConvertedJarFileLoaderProvider {
-    protected static final String[] EXTENSIONS = { "apk" };
-
-    @Override
-    public String[] getExtensions() {
-        return EXTENSIONS;
+    public ApkFileLoaderProvider() {
+        super("apk", "Android package files (*.apk)");
     }
-
-    @Override
-    public String getDescription() {
-        return "Android package files (*.apk)";
-    }
-
-    @Override
-    public boolean accept(API api, File file) {
-        return file.exists() && file.isFile() && file.canRead() && file.getName().toLowerCase().endsWith(".apk");
-    }
-
 }

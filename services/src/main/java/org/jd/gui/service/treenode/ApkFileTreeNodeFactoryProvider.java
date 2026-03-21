@@ -7,17 +7,9 @@
 
 package org.jd.gui.service.treenode;
 
-import org.jd.gui.api.API;
-import org.jd.gui.api.feature.ContainerEntryGettable;
-import org.jd.gui.api.feature.UriGettable;
-import org.jd.gui.api.model.Container;
 import org.jd.gui.util.ImageUtil;
-import org.jd.gui.view.data.TreeNodeBean;
-
-import java.io.File;
 
 import javax.swing.ImageIcon;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 public class ApkFileTreeNodeFactoryProvider extends ZipFileTreeNodeFactoryProvider {
 
@@ -29,13 +21,7 @@ public class ApkFileTreeNodeFactoryProvider extends ZipFileTreeNodeFactoryProvid
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <T extends DefaultMutableTreeNode & ContainerEntryGettable & UriGettable> T make(API api, Container.Entry entry) {
-        int lastSlashIndex = entry.getPath().lastIndexOf("/");
-        String label = entry.getPath().substring(lastSlashIndex + 1);
-        String location = new File(entry.getUri()).getPath();
-        T node = (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, ICON));
-        node.add(new DefaultMutableTreeNode());
-        return node;
+    public ImageIcon getIcon() {
+        return ICON;
     }
 }
