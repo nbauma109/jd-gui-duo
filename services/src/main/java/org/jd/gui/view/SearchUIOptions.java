@@ -55,11 +55,11 @@ public final class SearchUIOptions {
 
     public SearchUIOptions(Map<String, String> preferences, ActionListener findWithOptionsActionListener) {
         this.preferences = preferences != null ? preferences : Map.of();
-        this.matchCaseButton = createToggleIconButton("matchCase.png", getOptionTooltip("TT_MatchCase", "Match case", "C"));
-        this.wholeWordButton = createToggleIconButton("wholeWord.png", getOptionTooltip("TT_WholeWords", "Whole word", "O"));
-        this.regexButton = createToggleIconButton("regexp.png", getOptionTooltip("TT_Regexp", "Regular expression", "G"));
-        this.markAllButton = createToggleIconButton("highlight.png", getOptionTooltip("TT_Highlight", "Highlight matches", "H"));
-        this.wrapButton = createToggleIconButton("wrapAround.png", getOptionTooltip("TT_WrapAround", "Wrap Around", "U"));
+        this.matchCaseButton = createToggleIconButton("matchCase.png", getOptionTooltip("TT_MatchCase", "Match case"));
+        this.wholeWordButton = createToggleIconButton("wholeWord.png", getOptionTooltip("TT_WholeWords", "Whole word"));
+        this.regexButton = createToggleIconButton("regexp.png", getOptionTooltip("TT_Regexp", "Regular expression"));
+        this.markAllButton = createToggleIconButton("highlight.png", getOptionTooltip("TT_Highlight", "Highlight matches"));
+        this.wrapButton = createToggleIconButton("wrapAround.png", getOptionTooltip("TT_WrapAround", "Wrap Around"));
         refreshTooltips(this.preferences);
         addOptionsChangeListener(findWithOptionsActionListener);
     }
@@ -200,7 +200,7 @@ public final class SearchUIOptions {
         }
     }
 
-    private String getOptionTooltip(String key, String label, String keySuffix) {
+    private String getOptionTooltip(String key, String label) {
         return getMessage(key, label);
     }
 

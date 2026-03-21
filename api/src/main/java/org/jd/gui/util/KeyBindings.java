@@ -16,36 +16,38 @@ import javax.swing.Action;
 import javax.swing.KeyStroke;
 
 public final class KeyBindings {
+    private static final String MAIN_WINDOW = "Main Window";
+    private static final String INCREMENTAL_SEARCH = "Incremental Search";
 
     private KeyBindings() {
     }
 
     public enum Binding {
-        OPEN_FILE("Main Window", "UIKeyBindingsPreferencesProvider.openFile", "Open File...", menuShortcut(KeyEvent.VK_O)),
-        CLOSE("Main Window", "UIKeyBindingsPreferencesProvider.close", "Close", menuShortcut(KeyEvent.VK_W)),
-        SAVE("Main Window", "UIKeyBindingsPreferencesProvider.save", "Save", menuShortcut(KeyEvent.VK_S)),
-        SAVE_ALL_SOURCES("Main Window", "UIKeyBindingsPreferencesProvider.saveAllSources", "Save All Sources", menuShortcut(KeyEvent.VK_S, InputEvent.ALT_DOWN_MASK)),
-        EXIT("Main Window", "UIKeyBindingsPreferencesProvider.exit", "Exit", shortcut(KeyEvent.VK_X, InputEvent.ALT_DOWN_MASK)),
-        COPY("Main Window", "UIKeyBindingsPreferencesProvider.copy", "Copy", menuShortcut(KeyEvent.VK_C)),
-        PASTE_LOG("Main Window", "UIKeyBindingsPreferencesProvider.pasteLog", "Paste Log", menuShortcut(KeyEvent.VK_V)),
-        SELECT_ALL("Main Window", "UIKeyBindingsPreferencesProvider.selectAll", "Select All", menuShortcut(KeyEvent.VK_A)),
-        FIND("Main Window", "UIKeyBindingsPreferencesProvider.find", "Find...", menuShortcut(KeyEvent.VK_F)),
-        OPEN_TYPE("Main Window", "UIKeyBindingsPreferencesProvider.openType", "Open Type...", menuShortcut(KeyEvent.VK_T)),
-        OPEN_TYPE_HIERARCHY("Main Window", "UIKeyBindingsPreferencesProvider.openTypeHierarchy", "Open Type Hierarchy...", menuShortcut(KeyEvent.VK_H)),
-        QUICK_OUTLINE("Main Window", "UIKeyBindingsPreferencesProvider.quickOutline", "Quick Outline...", menuShortcut(KeyEvent.VK_O, InputEvent.SHIFT_DOWN_MASK)),
-        GO_TO_LINE("Main Window", "UIKeyBindingsPreferencesProvider.goToLine", "Go to Line...", menuShortcut(KeyEvent.VK_L)),
-        BACK("Main Window", "UIKeyBindingsPreferencesProvider.back", "Back", shortcut(KeyEvent.VK_LEFT, InputEvent.ALT_DOWN_MASK)),
-        FORWARD("Main Window", "UIKeyBindingsPreferencesProvider.forward", "Forward", shortcut(KeyEvent.VK_RIGHT, InputEvent.ALT_DOWN_MASK)),
-        SEARCH("Main Window", "UIKeyBindingsPreferencesProvider.search", "Search...", menuShortcut(KeyEvent.VK_S, InputEvent.SHIFT_DOWN_MASK)),
-        PREFERENCES("Main Window", "UIKeyBindingsPreferencesProvider.preferences", "Preferences...", menuShortcut(KeyEvent.VK_P, InputEvent.SHIFT_DOWN_MASK)),
-        ABOUT("Main Window", "UIKeyBindingsPreferencesProvider.about", "About...", shortcut(KeyEvent.VK_F1, 0)),
-        FIND_NEXT("Incremental Search", "UIKeyBindingsPreferencesProvider.findNext", "Find Next", shortcut(KeyEvent.VK_ENTER, 0)),
-        FIND_PREVIOUS("Incremental Search", "UIKeyBindingsPreferencesProvider.findPrevious", "Find Previous", shortcut(KeyEvent.VK_ENTER, InputEvent.SHIFT_DOWN_MASK)),
-        FIND_MATCH_CASE("Incremental Search", "UIKeyBindingsPreferencesProvider.findMatchCase", "Toggle Match Case", searchOptionShortcut(KeyEvent.VK_C)),
-        FIND_WHOLE_WORD("Incremental Search", "UIKeyBindingsPreferencesProvider.findWholeWord", "Toggle Whole Word", searchOptionShortcut(KeyEvent.VK_O)),
-        FIND_REGEX("Incremental Search", "UIKeyBindingsPreferencesProvider.findRegex", "Toggle Regular Expression", searchOptionShortcut(KeyEvent.VK_G)),
-        FIND_HIGHLIGHT("Incremental Search", "UIKeyBindingsPreferencesProvider.findHighlight", "Toggle Highlight Matches", searchOptionShortcut(KeyEvent.VK_H)),
-        FIND_WRAP_AROUND("Incremental Search", "UIKeyBindingsPreferencesProvider.findWrapAround", "Toggle Wrap Around", searchOptionShortcut(KeyEvent.VK_U));
+        OPEN_FILE(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.openFile", "Open File...", menuShortcut(KeyEvent.VK_O)),
+        CLOSE(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.close", "Close", menuShortcut(KeyEvent.VK_W)),
+        SAVE(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.save", "Save", menuShortcut(KeyEvent.VK_S)),
+        SAVE_ALL_SOURCES(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.saveAllSources", "Save All Sources", menuShortcut(KeyEvent.VK_S, InputEvent.ALT_DOWN_MASK)),
+        EXIT(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.exit", "Exit", shortcut(KeyEvent.VK_X, InputEvent.ALT_DOWN_MASK)),
+        COPY(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.copy", "Copy", menuShortcut(KeyEvent.VK_C)),
+        PASTE_LOG(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.pasteLog", "Paste Log", menuShortcut(KeyEvent.VK_V)),
+        SELECT_ALL(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.selectAll", "Select All", menuShortcut(KeyEvent.VK_A)),
+        FIND(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.find", "Find...", menuShortcut(KeyEvent.VK_F)),
+        OPEN_TYPE(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.openType", "Open Type...", menuShortcut(KeyEvent.VK_T)),
+        OPEN_TYPE_HIERARCHY(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.openTypeHierarchy", "Open Type Hierarchy...", menuShortcut(KeyEvent.VK_H)),
+        QUICK_OUTLINE(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.quickOutline", "Quick Outline...", menuShortcut(KeyEvent.VK_O, InputEvent.SHIFT_DOWN_MASK)),
+        GO_TO_LINE(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.goToLine", "Go to Line...", menuShortcut(KeyEvent.VK_L)),
+        BACK(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.back", "Back", shortcut(KeyEvent.VK_LEFT, InputEvent.ALT_DOWN_MASK)),
+        FORWARD(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.forward", "Forward", shortcut(KeyEvent.VK_RIGHT, InputEvent.ALT_DOWN_MASK)),
+        SEARCH(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.search", "Search...", menuShortcut(KeyEvent.VK_S, InputEvent.SHIFT_DOWN_MASK)),
+        PREFERENCES(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.preferences", "Preferences...", menuShortcut(KeyEvent.VK_P, InputEvent.SHIFT_DOWN_MASK)),
+        ABOUT(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.about", "About...", shortcut(KeyEvent.VK_F1, 0)),
+        FIND_NEXT(INCREMENTAL_SEARCH, "UIKeyBindingsPreferencesProvider.findNext", "Find Next", shortcut(KeyEvent.VK_ENTER, 0)),
+        FIND_PREVIOUS(INCREMENTAL_SEARCH, "UIKeyBindingsPreferencesProvider.findPrevious", "Find Previous", shortcut(KeyEvent.VK_ENTER, InputEvent.SHIFT_DOWN_MASK)),
+        FIND_MATCH_CASE(INCREMENTAL_SEARCH, "UIKeyBindingsPreferencesProvider.findMatchCase", "Toggle Match Case", searchOptionShortcut(KeyEvent.VK_C)),
+        FIND_WHOLE_WORD(INCREMENTAL_SEARCH, "UIKeyBindingsPreferencesProvider.findWholeWord", "Toggle Whole Word", searchOptionShortcut(KeyEvent.VK_O)),
+        FIND_REGEX(INCREMENTAL_SEARCH, "UIKeyBindingsPreferencesProvider.findRegex", "Toggle Regular Expression", searchOptionShortcut(KeyEvent.VK_G)),
+        FIND_HIGHLIGHT(INCREMENTAL_SEARCH, "UIKeyBindingsPreferencesProvider.findHighlight", "Toggle Highlight Matches", searchOptionShortcut(KeyEvent.VK_H)),
+        FIND_WRAP_AROUND(INCREMENTAL_SEARCH, "UIKeyBindingsPreferencesProvider.findWrapAround", "Toggle Wrap Around", searchOptionShortcut(KeyEvent.VK_U));
 
         private final String sectionTitle;
         private final String preferenceKey;

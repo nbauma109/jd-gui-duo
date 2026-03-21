@@ -41,6 +41,7 @@ import javax.swing.table.TableCellEditor;
 public class UIKeyBindingsPreferencesProvider extends JPanel implements PreferencesPanel {
 
     private static final long serialVersionUID = 1L;
+    private static final String CLEAR_SHORTCUT_ACTION = "clearShortcut";
     private static final int CONTEXT_COLUMN = 0;
     private static final int ACTION_COLUMN = 1;
     private static final int SHORTCUT_COLUMN = 2;
@@ -194,9 +195,9 @@ public class UIKeyBindingsPreferencesProvider extends JPanel implements Preferen
 
     private void installClearShortcutAction() {
         InputMap inputMap = shortcutTable.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "clearShortcut");
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0), "clearShortcut");
-        shortcutTable.getActionMap().put("clearShortcut", new AbstractAction() {
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), CLEAR_SHORTCUT_ACTION);
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0), CLEAR_SHORTCUT_ACTION);
+        shortcutTable.getActionMap().put(CLEAR_SHORTCUT_ACTION, new AbstractAction() {
             private static final long serialVersionUID = 1L;
 
             @Override
