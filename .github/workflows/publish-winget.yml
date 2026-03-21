@@ -23,15 +23,13 @@ jobs:
     runs-on: windows-latest
     env:
       GH_TOKEN: ${{ github.token }}
-      WINGET_CREATE_GITHUB_TOKEN: ${{ secrets.WINGET_CREATE_GITHUB_TOKEN }}
+      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
       WINGET_PACKAGE_IDENTIFIER: ${{ vars.WINGET_PACKAGE_IDENTIFIER }}
       WINGET_PACKAGE_NAME: JD-GUI Duo
       WINGET_PUBLISHER: Nicolas Baumann
       WINGET_MONIKER: jd-gui-duo
       WINGET_SHORT_DESCRIPTION: A 2-in-1 Java decompiler based on JD-Core v0 and v1
     steps:
-      - uses: actions/checkout@v6
-
       - name: Resolve release context
         id: release
         shell: pwsh
@@ -55,6 +53,10 @@ jobs:
           "version=$version" >> $env:GITHUB_OUTPUT
           "package_identifier=$packageIdentifier" >> $env:GITHUB_OUTPUT
 
+      - uses: actions/checkout@v6
+        with:
+          ref: refs/tags/${{ steps.release.outputs.tag }}
+
       - name: Download Windows release archive
         shell: pwsh
         run: |
@@ -68,19 +70,30 @@ jobs:
         id: zip
         shell: pwsh
         run: |
-          $archive = Get-ChildItem dist -Filter *.tar.xz | Select-Object -First 1
-          if ($null -eq $archive) {
-            throw "No Windows archive matching *windows*.tar.xz was found."
-          }
-
           $zipName = "jd-gui-duo-windows-${{ steps.release.outputs.version }}.zip"
           $zipPath = Join-Path $PWD "dist\$zipName"
+          $existingAsset = gh release view "${{ steps.release.outputs.tag }}" `
+            --repo "${{ github.repository }}" `
+            --json assets `
+            --jq ".assets[] | select(.name == `"$zipName`") | .name"
 
-          .\packaging\windows\build-portable-zip.ps1 `
-            -InputArchive $archive.FullName `
-            -OutputZip $zipPath
+          if ([string]::IsNullOrWhiteSpace($existingAsset)) {
+            $archive = Get-ChildItem dist -Filter *.tar.xz | Select-Object -First 1
+            if ($null -eq $archive) {
+              throw "No Windows archive matching *windows*.tar.xz was found."
+            }
 
-          gh release upload "${{ steps.release.outputs.tag }}" $zipPath --repo "${{ github.repository }}" --clobber
+            .\packaging\windows\build-portable-zip.ps1 `
+              -InputArchive $archive.FullName `
+              -OutputZip $zipPath
+
+            gh release upload "${{ steps.release.outputs.tag }}" $zipPath --repo "${{ github.repository }}"
+          } else {
+            gh release download "${{ steps.release.outputs.tag }}" `
+              --repo "${{ github.repository }}" `
+              --pattern $zipName `
+              --dir dist
+          }
 
           $sha256 = (Get-FileHash -Algorithm SHA256 $zipPath).Hash.ToUpperInvariant()
           $url = "https://github.com/${{ github.repository }}/releases/download/${{ steps.release.outputs.tag }}/$zipName"
@@ -123,13 +136,13 @@ jobs:
           path: dist/winget
 
       - name: Install .NET runtime for wingetcreate
-        if: ${{ env.WINGET_CREATE_GITHUB_TOKEN != '' }}
+        if: ${{ env.PAT_TOKEN != '' }}
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: "6.0.x"
 
       - name: Submit WinGet manifest PR
-        if: ${{ env.WINGET_CREATE_GITHUB_TOKEN != '' }}
+        if: ${{ env.PAT_TOKEN != '' }}
         shell: pwsh
         run: |
           Invoke-WebRequest https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
@@ -144,7 +157,7 @@ jobs:
 
           .\wingetcreate.exe submit `
             $manifestPath `
-            -t $env:WINGET_CREATE_GITHUB_TOKEN
+            -t $env:PAT_TOKEN
 
       - name: Write summary
         shell: pwsh
@@ -156,8 +169,8 @@ jobs:
             "- Portable installer asset: `${{ steps.zip.outputs.zip_name }}`"
           )
 
-          if ([string]::IsNullOrWhiteSpace($env:WINGET_CREATE_GITHUB_TOKEN)) {
-            $lines += "- No `WINGET_CREATE_GITHUB_TOKEN` secret was configured, so the workflow generated the manifests but did not submit a PR."
+          if ([string]::IsNullOrWhiteSpace($env:PAT_TOKEN)) {
+            $lines += "- No `PAT_TOKEN` secret was configured, so the workflow generated the manifests but did not submit a PR."
           } else {
             $lines += "- `wingetcreate submit` was invoked to open or update a PR in `microsoft/winget-pkgs`."
           }

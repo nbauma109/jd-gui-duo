@@ -24,8 +24,6 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@v6
-
       - name: Resolve release context
         id: release
         shell: bash
@@ -46,6 +44,10 @@ jobs:
             echo "version=${version}"
           } >> "${GITHUB_OUTPUT}"
 
+      - uses: actions/checkout@v6
+        with:
+          ref: refs/tags/${{ steps.release.outputs.tag }}
+
       - name: Download macOS release archive
         shell: bash
         run: |
@@ -61,17 +63,28 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          archive_path="$(find dist -maxdepth 1 -type f -name '*.tar.xz' -print | head -n 1)"
-          if [[ -z "${archive_path}" ]]; then
-            echo "No macOS archive matching *macos*.tar.xz was found." >&2
-            exit 1
-          fi
-
           zip_name="jd-gui-duo-macos-${{ steps.release.outputs.version }}.zip"
           zip_path="${PWD}/dist/${zip_name}"
+          existing_asset="$(gh release view "${{ steps.release.outputs.tag }}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --json assets \
+            --jq ".assets[] | select(.name == \"${zip_name}\") | .name")"
 
-          ./packaging/macos/build-app-zip.sh "${archive_path}" "${zip_path}"
-          gh release upload "${{ steps.release.outputs.tag }}" "${zip_path}" --repo "${GITHUB_REPOSITORY}" --clobber
+          if [[ -z "${existing_asset}" ]]; then
+            archive_path="$(find dist -maxdepth 1 -type f -name '*.tar.xz' -print | head -n 1)"
+            if [[ -z "${archive_path}" ]]; then
+              echo "No macOS archive matching *macos*.tar.xz was found." >&2
+              exit 1
+            fi
+
+            ./packaging/macos/build-app-zip.sh "${archive_path}" "${zip_path}"
+            gh release upload "${{ steps.release.outputs.tag }}" "${zip_path}" --repo "${GITHUB_REPOSITORY}"
+          else
+            gh release download "${{ steps.release.outputs.tag }}" \
+              --repo "${GITHUB_REPOSITORY}" \
+              --pattern "${zip_name}" \
+              --dir dist
+          fi
 
           sha256="$(shasum -a 256 "${zip_path}" | awk '{print $1}')"
           asset_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${{ steps.release.outputs.tag }}/${zip_name}"

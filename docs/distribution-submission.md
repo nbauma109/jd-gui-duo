@@ -29,17 +29,13 @@ The WinGet workflow:
 - converts the Windows portable bundle into a `.zip` asset that WinGet can consume
 - generates official WinGet manifests
 - uploads those manifests as a workflow artifact
-- submits them with `wingetcreate submit` when a token is configured
-
-Optional secret for automatic submission:
-
-- `WINGET_CREATE_GITHUB_TOKEN`
+- submits them with `wingetcreate submit` when `PAT_TOKEN` is configured
 
 Optional variable:
 
 - `WINGET_PACKAGE_IDENTIFIER` (defaults to `Nbauma109.JDGUIDuo`)
 
-If the token is not configured, the workflow still prepares the manifests for manual submission to `microsoft/winget-pkgs`.
+If `PAT_TOKEN` is not configured, the workflow still prepares the manifests for manual submission to `microsoft/winget-pkgs`.
 
 ## macOS
 

@@ -29,8 +29,6 @@ jobs:
       PACKAGE_TITLE: JD-GUI Duo
       PACKAGE_SUMMARY: A 2-in-1 Java decompiler based on JD-Core v0 and v1
     steps:
-      - uses: actions/checkout@v6
-
       - name: Resolve release context
         id: release
         shell: pwsh
@@ -46,6 +44,10 @@ jobs:
           $version = $tag -replace '^v', ''
           "tag=$tag" >> $env:GITHUB_OUTPUT
           "version=$version" >> $env:GITHUB_OUTPUT
+
+      - uses: actions/checkout@v6
+        with:
+          ref: refs/tags/${{ steps.release.outputs.tag }}
 
       - name: Ensure Chocolatey credentials are configured
         shell: pwsh
@@ -67,19 +69,30 @@ jobs:
         id: asset
         shell: pwsh
         run: |
-          $archive = Get-ChildItem dist -Filter *.tar.xz | Select-Object -First 1
-          if ($null -eq $archive) {
-            throw "No Windows archive matching *windows*.tar.xz was found."
-          }
-
           $zipName = "jd-gui-duo-windows-${{ steps.release.outputs.version }}.zip"
           $zipPath = Join-Path $PWD "dist\$zipName"
+          $existingAsset = gh release view "${{ steps.release.outputs.tag }}" `
+            --repo "${{ github.repository }}" `
+            --json assets `
+            --jq ".assets[] | select(.name == `"$zipName`") | .name"
 
-          .\packaging\windows\build-portable-zip.ps1 `
-            -InputArchive $archive.FullName `
-            -OutputZip $zipPath
+          if ([string]::IsNullOrWhiteSpace($existingAsset)) {
+            $archive = Get-ChildItem dist -Filter *.tar.xz | Select-Object -First 1
+            if ($null -eq $archive) {
+              throw "No Windows archive matching *windows*.tar.xz was found."
+            }
 
-          gh release upload "${{ steps.release.outputs.tag }}" $zipPath --repo "${{ github.repository }}" --clobber
+            .\packaging\windows\build-portable-zip.ps1 `
+              -InputArchive $archive.FullName `
+              -OutputZip $zipPath
+
+            gh release upload "${{ steps.release.outputs.tag }}" $zipPath --repo "${{ github.repository }}"
+          } else {
+            gh release download "${{ steps.release.outputs.tag }}" `
+              --repo "${{ github.repository }}" `
+              --pattern $zipName `
+              --dir dist
+          }
 
           $hash = (Get-FileHash -Algorithm SHA256 $zipPath).Hash.ToUpperInvariant()
           $downloadUrl = "https://github.com/${{ github.repository }}/releases/download/${{ steps.release.outputs.tag }}/$zipName"
