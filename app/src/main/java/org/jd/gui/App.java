@@ -21,12 +21,14 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 public class App {
     protected static final String SINGLE_INSTANCE = "UIMainWindowPreferencesProvider.singleInstance";
+    private static final Logger LOGGER = Logger.getLogger(App.class.getName());
 
     protected static MainController controller;
 
@@ -107,7 +109,7 @@ public class App {
         }
 
         if (containsControlCharacter(trimmedPath)) {
-            System.err.println("Rejected path containing control characters: " + trimmedPath);
+            LOGGER.warning(() -> "Rejected path containing control characters: " + trimmedPath);
             return null;
         }
 
@@ -115,13 +117,13 @@ public class App {
             Path candidate = Paths.get(trimmedPath);
 
             if (containsParentDirectorySegment(candidate)) {
-                System.err.println("Rejected path containing parent-directory navigation: " + trimmedPath);
+                LOGGER.warning(() -> "Rejected path containing parent-directory navigation: " + trimmedPath);
                 return null;
             }
 
             return candidate.toAbsolutePath().normalize().toFile();
-        } catch (InvalidPathException e) {
-            System.err.println("Rejected invalid path: " + trimmedPath);
+        } catch (InvalidPathException _) {
+            LOGGER.warning(() -> "Rejected invalid path: " + trimmedPath);
             return null;
         }
     }

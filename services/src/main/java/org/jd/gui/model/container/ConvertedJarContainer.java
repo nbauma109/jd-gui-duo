@@ -55,7 +55,7 @@ public class ConvertedJarContainer implements Container {
             StringBuilder packagePath = new StringBuilder();
             String[] segments = path.substring(0, lastSlash).split("/");
             for (String segment : segments) {
-                if (packagePath.length() > 0) {
+                if (!packagePath.isEmpty()) {
                     packagePath.append('/');
                 }
                 packagePath.append(segment);

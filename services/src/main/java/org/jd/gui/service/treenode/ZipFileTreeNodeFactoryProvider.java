@@ -41,6 +41,7 @@ public class ZipFileTreeNodeFactoryProvider extends DirectoryTreeNodeFactoryProv
         return node;
     }
 
+    @Override
     public ImageIcon getIcon() {
         return ICON;
     }
