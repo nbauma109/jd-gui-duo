@@ -1,5 +1,7 @@
 org.jd.gui.service.fileloader.AarFileLoaderProvider
+org.jd.gui.service.fileloader.ApkFileLoaderProvider
 org.jd.gui.service.fileloader.ClassFileLoaderProvider
+org.jd.gui.service.fileloader.DexFileLoaderProvider
 org.jd.gui.service.fileloader.EarFileLoaderProvider
 org.jd.gui.service.fileloader.JarFileLoaderProvider
 org.jd.gui.service.fileloader.JavaFileLoaderProvider

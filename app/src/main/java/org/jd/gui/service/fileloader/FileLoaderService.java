@@ -13,6 +13,7 @@ import org.jd.gui.spi.FileLoader;
 import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class FileLoaderService {
@@ -35,7 +36,10 @@ public class FileLoaderService {
     public FileLoader get(File file) {
         String name = file.getName();
         int lastDot = name.lastIndexOf('.');
-        String extension = name.substring(lastDot+1);
+        if (lastDot == -1 || lastDot == name.length() - 1) {
+            return null;
+        }
+        String extension = name.substring(lastDot + 1).toLowerCase(Locale.ROOT);
         return mapProviders.get(extension);
     }
 

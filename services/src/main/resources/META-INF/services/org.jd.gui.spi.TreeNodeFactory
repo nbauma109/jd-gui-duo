@@ -1,4 +1,5 @@
 org.jd.gui.service.treenode.ClassesDirectoryTreeNodeFactoryProvider
+org.jd.gui.service.treenode.ApkFileTreeNodeFactoryProvider
 org.jd.gui.service.treenode.ClassFileTreeNodeFactoryProvider
 org.jd.gui.service.treenode.CssFileTreeNodeFactoryProvider
 org.jd.gui.service.treenode.DirectoryTreeNodeFactoryProvider

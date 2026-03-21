@@ -19,7 +19,7 @@ import java.util.function.DoubleSupplier;
 public class ZipFileIndexerProvider extends AbstractIndexerProvider {
 
     @Override
-    public String[] getSelectors() { return appendSelectors("*:file:*.zip", "*:file:*.jar", "*:file:*.war", "*:file:*.ear", "*:file:*.aar", "*:file:*.kar"); }
+    public String[] getSelectors() { return appendSelectors("*:file:*.zip", "*:file:*.jar", "*:file:*.war", "*:file:*.ear", "*:file:*.aar", "*:file:*.apk", "*:file:*.dex", "*:file:*.kar"); }
 
     @Override
     public void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
