@@ -28,6 +28,8 @@ import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.spi.ContextualActionsFactory;
 import org.jd.gui.util.ImageUtil;
+import org.jd.gui.util.KeyBindings;
+import org.jd.gui.util.KeyBindings.Binding;
 import org.jd.gui.util.ThemeUtil;
 import org.jd.gui.util.decompiler.GuiPreferences;
 import org.jd.gui.view.SearchUIOptions;
@@ -130,11 +132,13 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
 
             SearchUIOptions.bindSearchNavigationKeyStrokes(searchField, api.getPreferences(), () -> nextButton.doClick(0), () -> prevButton.doClick(0));
 
-            // Make Ctrl+F/Cmd+F focus the search field
-            int defaultMod = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
+            // Honor the same configurable Find shortcut used by the main window.
             InputMap im = textArea.getInputMap();
             ActionMap am = textArea.getActionMap();
-            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F, defaultMod), "doSearch");
+            KeyStroke findKeyStroke = KeyBindings.getConfiguredKeyStroke(api.getPreferences(), Binding.FIND);
+            if (findKeyStroke != null) {
+                im.put(findKeyStroke, "doSearch");
+            }
             am.put("doSearch", new AbstractAction() {
                 private static final long serialVersionUID = 1L;
 
