@@ -1,0 +1,119 @@
+name: Prepare Homebrew cask
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to prepare
+        required: true
+        type: string
+
+concurrency:
+  group: prepare-homebrew-cask-${{ github.event.release.tag_name || github.event.inputs.tag }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  prepare-homebrew-cask:
+    runs-on: macos-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Resolve release context
+        id: release
+        shell: bash
+        env:
+          INPUT_TAG: ${{ github.event.inputs.tag }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          tag="${RELEASE_TAG:-${INPUT_TAG:-}}"
+          if [[ -z "${tag}" ]]; then
+            echo "A release tag is required." >&2
+            exit 1
+          fi
+
+          version="${tag#v}"
+          {
+            echo "tag=${tag}"
+            echo "version=${version}"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Download macOS release archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          gh release download "${{ steps.release.outputs.tag }}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --pattern "*macos*.tar.xz" \
+            --dir dist
+
+      - name: Build macOS app zip
+        id: zip
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive_path="$(find dist -maxdepth 1 -type f -name '*.tar.xz' -print | head -n 1)"
+          if [[ -z "${archive_path}" ]]; then
+            echo "No macOS archive matching *macos*.tar.xz was found." >&2
+            exit 1
+          fi
+
+          zip_name="jd-gui-duo-macos-${{ steps.release.outputs.version }}.zip"
+          zip_path="${PWD}/dist/${zip_name}"
+
+          ./packaging/macos/build-app-zip.sh "${archive_path}" "${zip_path}"
+          gh release upload "${{ steps.release.outputs.tag }}" "${zip_path}" --repo "${GITHUB_REPOSITORY}" --clobber
+
+          sha256="$(shasum -a 256 "${zip_path}" | awk '{print $1}')"
+          asset_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${{ steps.release.outputs.tag }}/${zip_name}"
+
+          {
+            echo "zip_name=${zip_name}"
+            echo "zip_url=${asset_url}"
+            echo "zip_sha256=${sha256}"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Generate cask
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist/homebrew
+          sed \
+            -e "s|__VERSION__|${{ steps.release.outputs.version }}|g" \
+            -e "s|__SHA256__|${{ steps.zip.outputs.zip_sha256 }}|g" \
+            -e "s|__URL__|${{ steps.zip.outputs.zip_url }}|g" \
+            -e "s|__REPOSITORY__|${GITHUB_REPOSITORY}|g" \
+            packaging/homebrew/jd-gui-duo.rb.in > dist/homebrew/jd-gui-duo.rb
+
+      - name: Audit cask
+        shell: bash
+        run: |
+          set -euo pipefail
+          brew style dist/homebrew/jd-gui-duo.rb
+          HOMEBREW_NO_INSTALL_FROM_API=1 brew audit --new --cask --strict dist/homebrew/jd-gui-duo.rb
+
+      - name: Upload Homebrew cask artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: homebrew-cask-${{ steps.release.outputs.version }}
+          path: dist/homebrew
+
+      - name: Write summary
+        shell: bash
+        run: |
+          {
+            echo '## Homebrew'
+            echo
+            echo '- Generated a cask file suitable for a PR to `homebrew/homebrew-cask`.'
+            echo '- Uploaded a macOS zip release asset because the official cask flow is happier with a single app archive than a custom tarball layout.'
+            echo '- Manual PR submission is still required.'
+          } >> "${GITHUB_STEP_SUMMARY}"
