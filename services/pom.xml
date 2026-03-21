@@ -41,7 +41,7 @@
       <exclusions>
         <exclusion>
           <groupId>de.femtopedia.dex2jar</groupId>
-          <artifactId>dex-writer</artifactId>
+          <artifactId>d2j-external</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
