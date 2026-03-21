@@ -29,6 +29,7 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.spi.ContextualActionsFactory;
 import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.ThemeUtil;
+import org.jd.gui.util.decompiler.GuiPreferences;
 import org.jd.gui.view.SearchUIOptions;
 
 import com.github.freva.asciitable.AsciiTable;
@@ -36,6 +37,7 @@ import com.github.freva.asciitable.Column;
 import com.github.freva.asciitable.ColumnData;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -59,6 +61,9 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
+
+import static org.jd.gui.util.decompiler.GuiPreferences.DEFAULT_SEARCH_HIGHLIGHT_COLOR;
+import static org.jd.gui.util.decompiler.GuiPreferences.SEARCH_HIGHLIGHT_COLOR;
 
 public class ShowByteCodeContextualActionsFactory implements ContextualActionsFactory { // NO_UCD (unused code)
 
@@ -93,25 +98,35 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
             RSyntaxTextArea textArea = ThemeUtil.applyTheme(api, new RSyntaxTextArea(byteCode));
             textArea.setCaretPosition(0);
             textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
+            textArea.setMarkAllHighlightColor(getSearchHighlightColor(api));
             RTextScrollPane sp = new RTextScrollPane(textArea);
 
             // Create a toolbar with searching options.
             JToolBar toolBar = new JToolBar();
             JTextField searchField = new JTextField(30);
+            SearchUIOptions.configureIncrementalSearchField(searchField);
             toolBar.add(searchField);
-            final JButton nextButton = new JButton("Next", NEXT_ICON);
+            final JButton nextButton = new JButton(SearchUIOptions.getFindNextLabel(), NEXT_ICON);
             nextButton.setActionCommand("FindNext");
-            JButton prevButton = new JButton("Previous", PREV_ICON);
+            SearchUIOptions.configureFindButton(nextButton);
+            JButton prevButton = new JButton(SearchUIOptions.getFindPreviousLabel(), PREV_ICON);
             prevButton.setActionCommand("FindPrev");
+            SearchUIOptions.configureFindButton(prevButton);
             toolBar.add(nextButton);
             toolBar.add(prevButton);
 
             SearchUIOptions searchUIOptions = new SearchUIOptions();
             searchUIOptions.attachTo(toolBar);
+            searchUIOptions.bindOptionKeyStrokes(searchField);
 
             SearchAction searchAction = new SearchAction(searchUIOptions, textArea, searchField);
             nextButton.addActionListener(searchAction);
             prevButton.addActionListener(searchAction);
+            Color searchBackgroundColor = searchField.getBackground();
+            Color searchErrorBackgroundColor = Color.decode(api.getPreferences().get(GuiPreferences.ERROR_BACKGROUND_COLOR));
+            Runnable updateSearchFeedback = () -> searchField.setBackground(searchAction.highlightText() ? searchBackgroundColor : searchErrorBackgroundColor);
+            SearchUIOptions.installCriteriaListener(searchField, updateSearchFeedback);
+            searchUIOptions.addOptionsChangeListener(_ -> updateSearchFeedback.run());
 
 
             // Make Enter and Shift + Enter search forward and backward,
@@ -147,7 +162,12 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
+                    String selectedText = textArea.getSelectedText();
+                    if (selectedText != null && !selectedText.isEmpty()) {
+                        searchField.setText(selectedText);
+                    }
                     searchField.requestFocusInWindow();
+                    searchField.selectAll();
                 }
             });
 
@@ -159,6 +179,16 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
             frame.setSize(screenSize.width / 2, screenSize.height / 2);
             ImageUtil.addJDIconsToFrame(frame);
             frame.setVisible(true);
+        }
+
+        private Color getSearchHighlightColor(API api) {
+            String configuredColor = api.getPreferences().get(SEARCH_HIGHLIGHT_COLOR);
+
+            try {
+                return Color.decode(configuredColor != null ? configuredColor : DEFAULT_SEARCH_HIGHLIGHT_COLOR);
+            } catch (RuntimeException e) {
+                return Color.decode(DEFAULT_SEARCH_HIGHLIGHT_COLOR);
+            }
         }
 
         private static class AsciiTableByteCodeWriter extends ByteCodeWriter {
@@ -239,17 +269,42 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
 
             @Override
             public void actionPerformed(ActionEvent e) {
-
                 // "FindNext" => search forward, "FindPrev" => search backward
                 String command = e.getActionCommand();
                 boolean forward = "FindNext".equals(command);
+                search(forward);
+            }
 
-                // Create an object defining our search parameters.
-                SearchContext context = new SearchContext();
+            public boolean highlightText() {
+                String text = searchField.getText();
+
+                if (text.isEmpty()) {
+                    return true;
+                }
+
+                textArea.setCaretPosition(textArea.getSelectionStart());
+                SearchContext context = createSearchContext(text, true);
+                boolean found = SearchEngine.find(textArea, context).wasFound();
+
+                if (!found) {
+                    textArea.setCaretPosition(0);
+                    found = SearchEngine.find(textArea, context).wasFound();
+                }
+
+                return found;
+            }
+
+            private void search(boolean forward) {
                 String text = searchField.getText();
                 if (text.isEmpty()) {
                     return;
                 }
+
+                SearchEngine.find(textArea, createSearchContext(text, forward));
+            }
+
+            private SearchContext createSearchContext(String text, boolean forward) {
+                SearchContext context = new SearchContext();
                 context.setSearchFor(text);
                 context.setMatchCase(searchUIOptions.isMatchCaseButtonSelected());
                 context.setRegularExpression(searchUIOptions.isRegexButtonSelected());
@@ -257,7 +312,7 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
                 context.setWholeWord(searchUIOptions.isWholeWordButtonSelected());
                 context.setMarkAll(searchUIOptions.isMarkAllButtonSelected());
                 context.setSearchWrap(searchUIOptions.isWrapButtonSelected());
-                SearchEngine.find(textArea, context);
+                return context;
             }
         }
     }
