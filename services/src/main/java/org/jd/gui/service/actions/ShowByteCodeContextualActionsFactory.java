@@ -41,10 +41,9 @@ import com.github.freva.asciitable.ColumnData;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -264,6 +263,11 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
                     return true;
                 }
 
+                int caretPosition = textArea.getCaretPosition();
+                int selectionStart = textArea.getSelectionStart();
+                int selectionEnd = textArea.getSelectionEnd();
+                Rectangle visibleRect = textArea.getVisibleRect();
+
                 textArea.setCaretPosition(textArea.getSelectionStart());
                 SearchContext context = createSearchContext(text, true);
                 boolean found = SearchEngine.find(textArea, context).wasFound();
@@ -271,6 +275,10 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
                 if (!found) {
                     textArea.setCaretPosition(0);
                     found = SearchEngine.find(textArea, context).wasFound();
+                }
+
+                if (!found) {
+                    restorePosition(caretPosition, selectionStart, selectionEnd, visibleRect);
                 }
 
                 return found;
@@ -295,6 +303,16 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
                 context.setMarkAll(searchUIOptions.isMarkAllButtonSelected());
                 context.setSearchWrap(searchUIOptions.isWrapButtonSelected());
                 return context;
+            }
+
+            private void restorePosition(int caretPosition, int selectionStart, int selectionEnd, Rectangle visibleRect) {
+                if (selectionStart != selectionEnd) {
+                    textArea.setCaretPosition(selectionStart);
+                    textArea.moveCaretPosition(selectionEnd);
+                } else {
+                    textArea.setCaretPosition(caretPosition);
+                }
+                textArea.scrollRectToVisible(visibleRect);
             }
         }
     }
