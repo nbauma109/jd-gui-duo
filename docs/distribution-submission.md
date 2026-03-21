@@ -47,5 +47,15 @@ It:
 - generates a cask file
 - runs `brew style` and `brew audit --new --cask --strict`
 - uploads the audited cask as a workflow artifact
+- if `PAT_TOKEN` is configured, pushes `Casks/jd-gui-duo.rb` to a branch in your `homebrew-cask` fork
 
-Manual PR submission to `homebrew/homebrew-cask` is still required.
+Optional variables:
+
+- `HOMEBREW_CASK_FORK_REPOSITORY` (defaults to `<owner>/homebrew-cask`)
+- `HOMEBREW_CASK_FORK_BRANCH` (defaults to `jd-gui-duo`)
+
+Ready-to-click PR link with the default settings:
+
+- [Open Homebrew Cask PR](https://github.com/Homebrew/homebrew-cask/compare/main...nbauma109:jd-gui-duo?expand=1)
+
+If you override `HOMEBREW_CASK_FORK_REPOSITORY` or `HOMEBREW_CASK_FORK_BRANCH`, the workflow summary prints the exact compare URL for that run.
