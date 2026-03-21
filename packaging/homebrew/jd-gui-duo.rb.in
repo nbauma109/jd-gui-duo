@@ -1,0 +1,14 @@
+cask "jd-gui-duo" do
+  version "__VERSION__"
+  sha256 "__SHA256__"
+
+  url "__URL__",
+      verified: "github.com/__REPOSITORY__/"
+  name "JD-GUI Duo"
+  desc "A 2-in-1 Java decompiler based on JD-Core v0 and v1"
+  homepage "https://github.com/__REPOSITORY__"
+
+  depends_on macos: ">= :big_sur"
+
+  app "jd-gui-duo.app"
+end

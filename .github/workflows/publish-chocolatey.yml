@@ -1,0 +1,185 @@
+name: Publish Chocolatey package
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to publish
+        required: true
+        type: string
+
+concurrency:
+  group: publish-chocolatey-${{ github.event.release.tag_name || github.event.inputs.tag }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  publish-chocolatey:
+    runs-on: windows-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CHOCO_API_KEY: ${{ secrets.CHOCO_API_KEY }}
+      CHOCO_SOURCE_URL: ${{ vars.CHOCO_SOURCE_URL }}
+      PACKAGE_ID: jd-gui-duo
+      PACKAGE_TITLE: JD-GUI Duo
+      PACKAGE_SUMMARY: A 2-in-1 Java decompiler based on JD-Core v0 and v1
+    steps:
+      - name: Resolve release context
+        id: release
+        shell: pwsh
+        env:
+          INPUT_TAG: ${{ github.event.inputs.tag }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          $tag = if ($env:RELEASE_TAG) { $env:RELEASE_TAG } else { $env:INPUT_TAG }
+          if ([string]::IsNullOrWhiteSpace($tag)) {
+            throw "A release tag is required."
+          }
+
+          $version = $tag -replace '^v', ''
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - uses: actions/checkout@v6
+        with:
+          ref: refs/tags/${{ steps.release.outputs.tag }}
+
+      - name: Ensure Chocolatey credentials are configured
+        shell: pwsh
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:CHOCO_API_KEY)) {
+            throw "Missing CHOCO_API_KEY secret."
+          }
+
+      - name: Download Windows release archive
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          gh release download "${{ steps.release.outputs.tag }}" `
+            --repo "${{ github.repository }}" `
+            --pattern "*windows*.tar.xz" `
+            --dir dist
+
+      - name: Build portable Windows zip
+        id: asset
+        shell: pwsh
+        run: |
+          $zipName = "jd-gui-duo-windows-${{ steps.release.outputs.version }}.zip"
+          $zipPath = Join-Path $PWD "dist\$zipName"
+          $existingAsset = gh release view "${{ steps.release.outputs.tag }}" `
+            --repo "${{ github.repository }}" `
+            --json assets `
+            --jq ".assets[] | select(.name == `"$zipName`") | .name"
+
+          if ([string]::IsNullOrWhiteSpace($existingAsset)) {
+            $archive = Get-ChildItem dist -Filter *.tar.xz | Select-Object -First 1
+            if ($null -eq $archive) {
+              throw "No Windows archive matching *windows*.tar.xz was found."
+            }
+
+            .\packaging\windows\build-portable-zip.ps1 `
+              -InputArchive $archive.FullName `
+              -OutputZip $zipPath
+
+            gh release upload "${{ steps.release.outputs.tag }}" $zipPath --repo "${{ github.repository }}"
+          } else {
+            gh release download "${{ steps.release.outputs.tag }}" `
+              --repo "${{ github.repository }}" `
+              --pattern $zipName `
+              --dir dist
+          }
+
+          $hash = (Get-FileHash -Algorithm SHA256 $zipPath).Hash.ToUpperInvariant()
+          $downloadUrl = "https://github.com/${{ github.repository }}/releases/download/${{ steps.release.outputs.tag }}/$zipName"
+
+          "asset_name=$zipName" >> $env:GITHUB_OUTPUT
+          "asset_url=$downloadUrl" >> $env:GITHUB_OUTPUT
+          "asset_sha256=$hash" >> $env:GITHUB_OUTPUT
+
+      - name: Generate Chocolatey package
+        shell: pwsh
+        run: |
+          $packageRoot = Join-Path $PWD "out\${env:PACKAGE_ID}"
+          $toolsDir = Join-Path $packageRoot "tools"
+          New-Item -ItemType Directory -Force -Path $toolsDir | Out-Null
+
+          $nuspec = @(
+            '<?xml version="1.0"?>'
+            '<package>'
+            '  <metadata>'
+            "    <id>${env:PACKAGE_ID}</id>"
+            '    <version>${{ steps.release.outputs.version }}</version>'
+            "    <title>${env:PACKAGE_TITLE}</title>"
+            '    <authors>${{ github.repository_owner }}</authors>'
+            '    <projectUrl>https://github.com/${{ github.repository }}</projectUrl>'
+            '    <packageSourceUrl>https://github.com/${{ github.repository }}</packageSourceUrl>'
+            '    <licenseUrl>https://github.com/${{ github.repository }}/blob/${{ steps.release.outputs.tag }}/LICENSE</licenseUrl>'
+            '    <requireLicenseAcceptance>false</requireLicenseAcceptance>'
+            '    <tags>java decompiler jd-gui jd-core</tags>'
+            "    <summary>${env:PACKAGE_SUMMARY}</summary>"
+            "    <description>${env:PACKAGE_SUMMARY}</description>"
+            '    <releaseNotes>https://github.com/${{ github.repository }}/releases/tag/${{ steps.release.outputs.tag }}</releaseNotes>'
+            '  </metadata>'
+            '</package>'
+          )
+          [string]::Join([Environment]::NewLine, $nuspec) |
+            Set-Content -Path (Join-Path $packageRoot "${env:PACKAGE_ID}.nuspec")
+
+          $installScript = @(
+            '$ErrorActionPreference = ''Stop'''
+            ''
+            '$packageName = ''${env:PACKAGE_ID}'''
+            '$toolsDir = Split-Path -Parent $MyInvocation.MyCommand.Definition'
+            '$archiveUrl = ''${{ steps.asset.outputs.asset_url }}'''
+            '$checksum = ''${{ steps.asset.outputs.asset_sha256 }}'''
+            ''
+            'Get-ChildItem -Path $toolsDir -Force |'
+            '  Where-Object { $_.Name -notin @(''chocolateyinstall.ps1'', ''chocolateyuninstall.ps1'') } |'
+            '  Remove-Item -Recurse -Force'
+            ''
+            'Install-ChocolateyZipPackage `'
+            '  -PackageName $packageName `'
+            '  -Url64bit $archiveUrl `'
+            '  -UnzipLocation $toolsDir `'
+            '  -Checksum64 $checksum `'
+            '  -ChecksumType64 ''sha256'''
+          )
+          [string]::Join([Environment]::NewLine, $installScript) |
+            Set-Content -Path (Join-Path $toolsDir "chocolateyinstall.ps1")
+
+          $uninstallScript = @(
+            '$ErrorActionPreference = ''Stop'''
+            ''
+            '$toolsDir = Split-Path -Parent $MyInvocation.MyCommand.Definition'
+            'Get-ChildItem -Path $toolsDir -Force |'
+            '  Where-Object { $_.Name -notin @(''chocolateyinstall.ps1'', ''chocolateyuninstall.ps1'') } |'
+            '  Remove-Item -Recurse -Force'
+          )
+          [string]::Join([Environment]::NewLine, $uninstallScript) |
+            Set-Content -Path (Join-Path $toolsDir "chocolateyuninstall.ps1")
+
+          choco pack (Join-Path $packageRoot "${env:PACKAGE_ID}.nuspec") --outputdirectory out
+
+      - name: Push Chocolatey package
+        shell: pwsh
+        run: |
+          $source = if ([string]::IsNullOrWhiteSpace($env:CHOCO_SOURCE_URL)) {
+            "https://push.chocolatey.org/"
+          } else {
+            $env:CHOCO_SOURCE_URL
+          }
+
+          $package = Get-ChildItem out -Filter *.nupkg |
+            Where-Object { $_.Name -notlike "*.symbols.nupkg" } |
+            Select-Object -First 1
+
+          if ($null -eq $package) {
+            throw "No Chocolatey package was generated."
+          }
+
+          choco push $package.FullName --api-key $env:CHOCO_API_KEY --source $source

@@ -1,0 +1,178 @@
+name: Submit WinGet manifest
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to publish
+        required: true
+        type: string
+
+concurrency:
+  group: publish-winget-${{ github.event.release.tag_name || github.event.inputs.tag }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  submit-winget:
+    runs-on: windows-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+      WINGET_PACKAGE_IDENTIFIER: ${{ vars.WINGET_PACKAGE_IDENTIFIER }}
+      WINGET_PACKAGE_NAME: JD-GUI Duo
+      WINGET_PUBLISHER: Nicolas Baumann
+      WINGET_MONIKER: jd-gui-duo
+      WINGET_SHORT_DESCRIPTION: A 2-in-1 Java decompiler based on JD-Core v0 and v1
+    steps:
+      - name: Resolve release context
+        id: release
+        shell: pwsh
+        env:
+          INPUT_TAG: ${{ github.event.inputs.tag }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          $tag = if ($env:RELEASE_TAG) { $env:RELEASE_TAG } else { $env:INPUT_TAG }
+          if ([string]::IsNullOrWhiteSpace($tag)) {
+            throw "A release tag is required."
+          }
+
+          $version = $tag -replace '^v', ''
+          $packageIdentifier = if ([string]::IsNullOrWhiteSpace($env:WINGET_PACKAGE_IDENTIFIER)) {
+            'Nbauma109.JDGUIDuo'
+          } else {
+            $env:WINGET_PACKAGE_IDENTIFIER
+          }
+
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "package_identifier=$packageIdentifier" >> $env:GITHUB_OUTPUT
+
+      - uses: actions/checkout@v6
+        with:
+          ref: refs/tags/${{ steps.release.outputs.tag }}
+
+      - name: Download Windows release archive
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          gh release download "${{ steps.release.outputs.tag }}" `
+            --repo "${{ github.repository }}" `
+            --pattern "*windows*.tar.xz" `
+            --dir dist
+
+      - name: Build portable Windows zip
+        id: zip
+        shell: pwsh
+        run: |
+          $zipName = "jd-gui-duo-windows-${{ steps.release.outputs.version }}.zip"
+          $zipPath = Join-Path $PWD "dist\$zipName"
+          $existingAsset = gh release view "${{ steps.release.outputs.tag }}" `
+            --repo "${{ github.repository }}" `
+            --json assets `
+            --jq ".assets[] | select(.name == `"$zipName`") | .name"
+
+          if ([string]::IsNullOrWhiteSpace($existingAsset)) {
+            $archive = Get-ChildItem dist -Filter *.tar.xz | Select-Object -First 1
+            if ($null -eq $archive) {
+              throw "No Windows archive matching *windows*.tar.xz was found."
+            }
+
+            .\packaging\windows\build-portable-zip.ps1 `
+              -InputArchive $archive.FullName `
+              -OutputZip $zipPath
+
+            gh release upload "${{ steps.release.outputs.tag }}" $zipPath --repo "${{ github.repository }}"
+          } else {
+            gh release download "${{ steps.release.outputs.tag }}" `
+              --repo "${{ github.repository }}" `
+              --pattern $zipName `
+              --dir dist
+          }
+
+          $sha256 = (Get-FileHash -Algorithm SHA256 $zipPath).Hash.ToUpperInvariant()
+          $url = "https://github.com/${{ github.repository }}/releases/download/${{ steps.release.outputs.tag }}/$zipName"
+
+          "zip_name=$zipName" >> $env:GITHUB_OUTPUT
+          "zip_url=$url" >> $env:GITHUB_OUTPUT
+          "zip_sha256=$sha256" >> $env:GITHUB_OUTPUT
+
+      - name: Generate WinGet manifests
+        shell: pwsh
+        run: |
+          $publisherUrl = "https://github.com/${{ github.repository }}"
+          $supportUrl = "$publisherUrl/issues"
+          $licenseUrl = "$publisherUrl/blob/${{ steps.release.outputs.tag }}/LICENSE"
+          $releaseNotesUrl = "$publisherUrl/releases/tag/${{ steps.release.outputs.tag }}"
+
+          .\packaging\windows\render-winget-manifests.ps1 `
+            -PackageIdentifier "${{ steps.release.outputs.package_identifier }}" `
+            -PackageName "${env:WINGET_PACKAGE_NAME}" `
+            -PackageVersion "${{ steps.release.outputs.version }}" `
+            -Publisher "${env:WINGET_PUBLISHER}" `
+            -PublisherUrl $publisherUrl `
+            -PublisherSupportUrl $supportUrl `
+            -License "GPL-3.0-only" `
+            -LicenseUrl $licenseUrl `
+            -ShortDescription "${env:WINGET_SHORT_DESCRIPTION}" `
+            -Description "${env:WINGET_SHORT_DESCRIPTION}" `
+            -Moniker "${env:WINGET_MONIKER}" `
+            -ReleaseNotesUrl $releaseNotesUrl `
+            -InstallerUrl "${{ steps.zip.outputs.zip_url }}" `
+            -InstallerSha256 "${{ steps.zip.outputs.zip_sha256 }}" `
+            -PortableFile "jd-gui-duo-${{ steps.release.outputs.version }}.exe" `
+            -PortableCommandAlias "jd-gui-duo" `
+            -OutputRoot (Join-Path $PWD "dist\winget")
+
+      - name: Upload WinGet manifest artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: winget-manifests-${{ steps.release.outputs.version }}
+          path: dist/winget
+
+      - name: Install .NET runtime for wingetcreate
+        if: ${{ env.PAT_TOKEN != '' }}
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "6.0.x"
+
+      - name: Submit WinGet manifest PR
+        if: ${{ env.PAT_TOKEN != '' }}
+        shell: pwsh
+        run: |
+          Invoke-WebRequest https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
+          $packageIdentifier = "${{ steps.release.outputs.package_identifier }}"
+          $relativeManifestPath = "dist\winget\manifests\{0}\{1}\${{ steps.release.outputs.version }}" -f `
+            $packageIdentifier.Substring(0, 1).ToLowerInvariant(), `
+            ($packageIdentifier -replace '\.', '\')
+          $manifestPath = Join-Path $PWD $relativeManifestPath
+          if (-not (Test-Path $manifestPath)) {
+            throw "Generated WinGet manifest path not found."
+          }
+
+          .\wingetcreate.exe submit `
+            $manifestPath `
+            -t $env:PAT_TOKEN
+
+      - name: Write summary
+        shell: pwsh
+        run: |
+          $lines = @(
+            "## WinGet",
+            "",
+            "- Generated manifest package id: `${{ steps.release.outputs.package_identifier }}`",
+            "- Portable installer asset: `${{ steps.zip.outputs.zip_name }}`"
+          )
+
+          if ([string]::IsNullOrWhiteSpace($env:PAT_TOKEN)) {
+            $lines += "- No `PAT_TOKEN` secret was configured, so the workflow generated the manifests but did not submit a PR."
+          } else {
+            $lines += "- `wingetcreate submit` was invoked to open or update a PR in `microsoft/winget-pkgs`."
+          }
+
+          [string]::Join([Environment]::NewLine, $lines) | Add-Content -Path $env:GITHUB_STEP_SUMMARY
