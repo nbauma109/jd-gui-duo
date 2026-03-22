@@ -17,7 +17,9 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.StringLiteral;
@@ -75,10 +77,23 @@ public class ReferenceListener extends AbstractJavaListener {
 
     @Override
     public boolean visit(ImportDeclaration node) {
+        if (node.isOnDemand()) {
+            return true;
+        }
+
         int position = node.getName().getStartPosition();
-        String internalTypeName = nameToString(node.getName());
-        ReferenceData refData = newReferenceData(internalTypeName, null, null, null);
-        addHyperlink(new HyperlinkReferenceData(position, internalTypeName.length(), refData));
+        String internalTypeName = resolveInternalTypeName(node.getName().resolveBinding() instanceof ITypeBinding typeBinding
+                ? typeBinding
+                : null);
+
+        if (internalTypeName == null && !node.isStatic()) {
+            internalTypeName = resolveInternalTypeName(node.getName());
+        }
+
+        if (internalTypeName != null) {
+            ReferenceData refData = newReferenceData(internalTypeName, null, null, null);
+            addHyperlink(new HyperlinkReferenceData(position, internalTypeName.length(), refData));
+        }
         return true;
     }
 
@@ -118,16 +133,46 @@ public class ReferenceListener extends AbstractJavaListener {
     /** --- Add references --- */
     @Override
     public boolean visit(SimpleType node) {
-        Name name = node.getName();
-        String internalTypeName = resolveInternalTypeName(node);
-        int position = node.getStartPosition();
-        ReferenceData refData = newReferenceData(internalTypeName, null, null);
-        addHyperlink(new HyperlinkReferenceData(position, name.getLength(), refData));
+        addTypeHyperlink(node.getStartPosition(), node.getName().getLength(), resolveInternalTypeName(node));
         return true;
     }
 
     @Override
+    public boolean visit(QualifiedType node) {
+        addTypeHyperlink(node.getStartPosition(), node.getLength(), resolveInternalTypeName(node));
+        return false;
+    }
+
+    @Override
+    public boolean visit(NameQualifiedType node) {
+        addTypeHyperlink(node.getStartPosition(), node.getLength(), resolveInternalTypeName(node));
+        return false;
+    }
+
+    private void addTypeHyperlink(int position, int length, String internalTypeName) {
+        ReferenceData refData = newReferenceData(internalTypeName, null, null);
+        addHyperlink(new HyperlinkReferenceData(position, length, refData));
+    }
+
+    @Override
     public boolean visit(QualifiedName node) {
+        ITypeBinding resolvedTypeBinding = node.resolveTypeBinding();
+        if (resolvedTypeBinding != null) {
+            String internalTypeName = resolveInternalTypeName(resolvedTypeBinding);
+            if (internalTypeName != null) {
+                Name qualifier = node.getQualifier();
+                if (qualifier instanceof SimpleName subjectName) {
+                    String qualifierInternalTypeName = nameToInternalTypeName.get(subjectName.getIdentifier());
+                    if (qualifierInternalTypeName != null) {
+                        ReferenceData qualifierRefData = newReferenceData(qualifierInternalTypeName, null, null);
+                        addHyperlink(new HyperlinkReferenceData(subjectName.getStartPosition(), subjectName.getLength(), qualifierRefData));
+                    }
+                }
+                addTypeHyperlink(node.getName().getStartPosition(), node.getName().getLength(), internalTypeName);
+                return false;
+            }
+        }
+
         SimpleName fieldNameNode = node.getName();
         String fieldName = fieldNameNode.getIdentifier();
         Name qualifier = node.getQualifier();
