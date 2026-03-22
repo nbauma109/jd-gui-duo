@@ -7,6 +7,7 @@
 
 package org.jd.gui.util.parser.jdt.core;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
@@ -115,6 +116,16 @@ public abstract class AbstractJavaListener extends ASTVisitor {
         exitTypeDeclaration();
     }
 
+    /**
+     * Converts a JDT type node into a source-style slash-separated name.
+     * Nested source types remain slash-separated here and are converted later by
+     * {@link #resolveQualifiedTypeName(String)}.
+     *
+     * @param type the JDT type node, for example {@code SimpleType("String")} or
+     *        {@code QualifiedType("Evaluator.Id")}
+     * @return a source-style slash-separated type name, for example {@code "String"},
+     *         {@code "Evaluator/Id"}, or {@code "org/jsoup/select/Evaluator/Id"}
+     */
     protected static String typeToString(Type type) {
         if (type instanceof ArrayType arrayType) {
             return typeToString(arrayType.getElementType());
@@ -137,6 +148,13 @@ public abstract class AbstractJavaListener extends ASTVisitor {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Resolves a JDT name to an internal JVM type name.
+     *
+     * @param name the JDT name, for example {@code "Integer"} or {@code "Evaluator.Id"}
+     * @return the internal JVM type name, for example {@code "java/lang/Integer"} or
+     *         {@code "org/jsoup/select/Evaluator$Id"}
+     */
     protected String resolveInternalTypeName(Name name) {
         IBinding binding = name.resolveBinding();
         String internalTypeName = binding instanceof ITypeBinding typeBinding
@@ -145,6 +163,14 @@ public abstract class AbstractJavaListener extends ASTVisitor {
         return internalTypeName != null ? internalTypeName : resolveQualifiedTypeName(nameToString(name));
     }
 
+    /**
+     * Resolves a JDT type node to an internal JVM type name.
+     *
+     * @param type the JDT type node, for example {@code SimpleType("Validate")},
+     *        {@code QualifiedType("Evaluator.Id")}, or {@code ParameterizedType("List<Element>")}
+     * @return the internal JVM type name, for example {@code "org/jsoup/helper/Validate"},
+     *         {@code "org/jsoup/select/Evaluator$Id"}, or {@code "java/util/List"}
+     */
     protected String resolveInternalTypeName(Type type) {
         String internalTypeName = resolveInternalTypeName(type.resolveBinding());
         if (internalTypeName != null) {
@@ -225,6 +251,16 @@ public abstract class AbstractJavaListener extends ASTVisitor {
         return StringConstants.JAVA_LANG_OBJECT;
     }
 
+    /**
+     * Resolves a JDT binding to an internal JVM type name.
+     *
+     * @param typeBinding the JDT binding to resolve
+     * @return the internal JVM type name, for example
+     *         {@code "org/jsoup/select/Evaluator$Id"} from binary name
+     *         {@code "org.jsoup.select.Evaluator$Id"}, or
+     *         {@code "java/util/Map$Entry"} from binding key {@code "Ljava/util/Map$Entry;"};
+     *         {@code null} if the binding cannot be resolved
+     */
     protected String resolveInternalTypeName(ITypeBinding typeBinding) {
         if (typeBinding == null) {
             return null;
@@ -253,6 +289,14 @@ public abstract class AbstractJavaListener extends ASTVisitor {
         return null;
     }
 
+    /**
+     * Converts a source-style slash-separated type name into an internal JVM type name.
+     *
+     * @param sourceTypeName the source-style slash-separated type name, for example
+     *        {@code "Evaluator/Id"} or {@code "org/jsoup/select/Evaluator/Id"}
+     * @return the internal JVM type name, for example
+     *         {@code "org/jsoup/select/Evaluator$Id"} or {@code "java/util/Map$Entry"}
+     */
     String resolveQualifiedTypeName(String sourceTypeName) {
         String cachedTypeName = typeNameCache.get(sourceTypeName);
         if (cachedTypeName != null) {
@@ -283,9 +327,20 @@ public abstract class AbstractJavaListener extends ASTVisitor {
         return resolvedTypeName;
     }
 
+    /**
+     * Resolves a source-style slash-separated type path against an optional package prefix.
+     *
+     * @param segments the source-style type path split on {@code '/'}, for example
+     *        {@code ["Evaluator", "Id"]} or
+     *        {@code ["org", "jsoup", "select", "Evaluator", "Id"]}
+     * @param packagePrefix the current package in internal form, for example
+     *        {@code "org/jsoup/select"}, or {@code null} to resolve from the root
+     * @return the internal JVM type name if a matching top-level type is found, for example
+     *         {@code "org/jsoup/select/Evaluator$Id"}; {@code null} otherwise
+     */
     private String resolveQualifiedTypeName(String[] segments, String packagePrefix) {
         for (int typeSegmentIndex = segments.length - 1; typeSegmentIndex >= 0; typeSegmentIndex--) {
-            String topLevelTypeName = joinSegments(segments, 0, typeSegmentIndex + 1, '/');
+            String topLevelTypeName = StringUtils.join(segments, '/', 0, typeSegmentIndex + 1);
             if (packagePrefix != null) {
                 topLevelTypeName = packagePrefix + '/' + topLevelTypeName;
             }
@@ -310,23 +365,9 @@ public abstract class AbstractJavaListener extends ASTVisitor {
         return sb.toString();
     }
 
-    private static String joinSegments(String[] segments, int startIndex, int endIndex, char separator) {
-        StringBuilder sb = new StringBuilder();
-
-        for (int i = startIndex; i < endIndex; i++) {
-            if (i > startIndex) {
-                sb.append(separator);
-            }
-            sb.append(segments[i]);
-        }
-
-        return sb.toString();
-    }
-
     private boolean containsTopLevelType(String internalTypeName) {
         return containsEntryPath(internalTypeName + ".java")
-            || containsEntryPath(internalTypeName + StringConstants.CLASS_FILE_SUFFIX)
-            || getClass().getClassLoader().getResource(internalTypeName + StringConstants.CLASS_FILE_SUFFIX) != null;
+            || containsEntryPath(internalTypeName + StringConstants.CLASS_FILE_SUFFIX);
     }
 
     private boolean containsEntryPath(String path) {
