@@ -36,6 +36,8 @@ jobs:
         env:
           INPUT_TAG: ${{ github.event.inputs.tag }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_REF_VALUE: ${{ github.ref }}
         run: |
           $tag = if ($env:RELEASE_TAG) { $env:RELEASE_TAG } else { $env:INPUT_TAG }
           if ([string]::IsNullOrWhiteSpace($tag)) {
@@ -48,16 +50,40 @@ jobs:
           } else {
             $env:WINGET_PACKAGE_IDENTIFIER
           }
+          $checkoutRef = if ($env:GITHUB_EVENT_NAME -eq 'workflow_dispatch') {
+            $env:GITHUB_REF_VALUE
+          } else {
+            "refs/tags/$tag"
+          }
 
           "tag=$tag" >> $env:GITHUB_OUTPUT
           "version=$version" >> $env:GITHUB_OUTPUT
           "package_identifier=$packageIdentifier" >> $env:GITHUB_OUTPUT
+          "checkout_ref=$checkoutRef" >> $env:GITHUB_OUTPUT
 
       - uses: actions/checkout@v6
         with:
-          ref: refs/tags/${{ steps.release.outputs.tag }}
+          ref: ${{ steps.release.outputs.checkout_ref }}
+
+      - name: Resolve Windows installer asset
+        id: installer_asset
+        shell: pwsh
+        run: |
+          $assetName = "jd-gui-duo-windows-${{ steps.release.outputs.version }}-setup.exe"
+          $existingAsset = gh release view "${{ steps.release.outputs.tag }}" `
+            --repo "${{ github.repository }}" `
+            --json assets `
+            --jq ".assets[] | select(.name == `"$assetName`") | .name"
+
+          "asset_name=$assetName" >> $env:GITHUB_OUTPUT
+          if ([string]::IsNullOrWhiteSpace($existingAsset)) {
+            "exists=false" >> $env:GITHUB_OUTPUT
+          } else {
+            "exists=true" >> $env:GITHUB_OUTPUT
+          }
 
       - name: Download Windows release archive
+        if: ${{ steps.installer_asset.outputs.exists != 'true' }}
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path dist | Out-Null
@@ -66,49 +92,70 @@ jobs:
             --pattern "*windows*.tar.xz" `
             --dir dist
 
-      - name: Build portable Windows zip
-        id: zip
+      - name: Install Inno Setup
+        if: ${{ steps.installer_asset.outputs.exists != 'true' }}
+        shell: pwsh
+        run: choco install innosetup --no-progress -y
+
+      - name: Ensure Windows installer asset
+        id: installer
         shell: pwsh
         run: |
-          $zipName = "jd-gui-duo-windows-${{ steps.release.outputs.version }}.zip"
-          $zipPath = Join-Path $PWD "dist\$zipName"
-          $existingAsset = gh release view "${{ steps.release.outputs.tag }}" `
-            --repo "${{ github.repository }}" `
-            --json assets `
-            --jq ".assets[] | select(.name == `"$zipName`") | .name"
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          $assetName = "${{ steps.installer_asset.outputs.asset_name }}"
+          $installerPath = Join-Path $PWD "dist\$assetName"
 
-          if ([string]::IsNullOrWhiteSpace($existingAsset)) {
+          if ("${{ steps.installer_asset.outputs.exists }}" -ne 'true') {
             $archive = Get-ChildItem dist -Filter *.tar.xz | Select-Object -First 1
             if ($null -eq $archive) {
               throw "No Windows archive matching *windows*.tar.xz was found."
             }
 
-            .\packaging\windows\build-portable-zip.ps1 `
+            .\packaging\windows\build-installer.ps1 `
               -InputArchive $archive.FullName `
-              -OutputZip $zipPath
+              -OutputInstaller $installerPath `
+              -AppVersion "${{ steps.release.outputs.version }}"
 
-            gh release upload "${{ steps.release.outputs.tag }}" $zipPath --repo "${{ github.repository }}"
+            for ($attempt = 1; $attempt -le 6; $attempt++) {
+              gh release upload "${{ steps.release.outputs.tag }}" $installerPath --repo "${{ github.repository }}"
+              if ($LASTEXITCODE -eq 0) {
+                break
+              }
+
+              if ($attempt -eq 6) {
+                throw "Failed to upload $assetName after multiple attempts."
+              }
+
+              Start-Sleep -Seconds (5 * $attempt)
+            }
           } else {
             gh release download "${{ steps.release.outputs.tag }}" `
               --repo "${{ github.repository }}" `
-              --pattern $zipName `
+              --pattern $assetName `
               --dir dist
           }
 
-          $sha256 = (Get-FileHash -Algorithm SHA256 $zipPath).Hash.ToUpperInvariant()
-          $url = "https://github.com/${{ github.repository }}/releases/download/${{ steps.release.outputs.tag }}/$zipName"
+          $sha256 = (Get-FileHash -Algorithm SHA256 $installerPath).Hash.ToUpperInvariant()
+          $url = "https://github.com/${{ github.repository }}/releases/download/${{ steps.release.outputs.tag }}/$assetName"
 
-          "zip_name=$zipName" >> $env:GITHUB_OUTPUT
-          "zip_url=$url" >> $env:GITHUB_OUTPUT
-          "zip_sha256=$sha256" >> $env:GITHUB_OUTPUT
+          "asset_name=$assetName" >> $env:GITHUB_OUTPUT
+          "asset_url=$url" >> $env:GITHUB_OUTPUT
+          "asset_sha256=$sha256" >> $env:GITHUB_OUTPUT
 
       - name: Generate WinGet manifests
+        id: manifests
         shell: pwsh
         run: |
+          $ErrorActionPreference = 'Stop'
           $publisherUrl = "https://github.com/${{ github.repository }}"
           $supportUrl = "$publisherUrl/issues"
           $licenseUrl = "$publisherUrl/blob/${{ steps.release.outputs.tag }}/LICENSE"
           $releaseNotesUrl = "$publisherUrl/releases/tag/${{ steps.release.outputs.tag }}"
+          $manifestRoot = Join-Path $PWD "dist\winget"
+          $manifestPath = Join-Path $manifestRoot ("manifests\{0}\{1}\${{ steps.release.outputs.version }}" -f `
+            "${{ steps.release.outputs.package_identifier }}".Substring(0, 1).ToLowerInvariant(), `
+            ("${{ steps.release.outputs.package_identifier }}" -replace '\.', '\'))
 
           .\packaging\windows\render-winget-manifests.ps1 `
             -PackageIdentifier "${{ steps.release.outputs.package_identifier }}" `
@@ -123,11 +170,39 @@ jobs:
             -Description "${env:WINGET_SHORT_DESCRIPTION}" `
             -Moniker "${env:WINGET_MONIKER}" `
             -ReleaseNotesUrl $releaseNotesUrl `
-            -InstallerUrl "${{ steps.zip.outputs.zip_url }}" `
-            -InstallerSha256 "${{ steps.zip.outputs.zip_sha256 }}" `
-            -PortableFile "jd-gui-duo-${{ steps.release.outputs.version }}.exe" `
-            -PortableCommandAlias "jd-gui-duo" `
-            -OutputRoot (Join-Path $PWD "dist\winget")
+            -InstallerUrl "${{ steps.installer.outputs.asset_url }}" `
+            -InstallerSha256 "${{ steps.installer.outputs.asset_sha256 }}" `
+            -InstallerType "inno" `
+            -OutputRoot $manifestRoot
+
+          "manifest_path=$manifestPath" >> $env:GITHUB_OUTPUT
+
+      - name: Validate WinGet manifest
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $previousNativeCommandPreference = $PSNativeCommandUseErrorActionPreference
+          $PSNativeCommandUseErrorActionPreference = $false
+
+          try {
+            $validationOutput = & winget validate --manifest "${{ steps.manifests.outputs.manifest_path }}" 2>&1
+            $validationExitCode = $LASTEXITCODE
+          } finally {
+            $PSNativeCommandUseErrorActionPreference = $previousNativeCommandPreference
+          }
+
+          $validationText = ($validationOutput | ForEach-Object { "$_" }) -join [Environment]::NewLine
+          $validationText | Write-Host
+
+          if ($validationText -match 'Manifest Error:' -or $validationText -match 'Manifest validation succeeded:\s*False') {
+            throw "winget validate reported manifest errors."
+          }
+
+          if ($validationExitCode -ne 0 -and $validationText -notmatch 'Manifest validation succeeded with warnings\.') {
+            throw "winget validate exited with code $validationExitCode."
+          }
+
+          $global:LASTEXITCODE = 0
 
       - name: Upload WinGet manifest artifact
         uses: actions/upload-artifact@v4
@@ -145,12 +220,9 @@ jobs:
         if: ${{ env.PAT_TOKEN != '' }}
         shell: pwsh
         run: |
+          $ErrorActionPreference = 'Stop'
           Invoke-WebRequest https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
-          $packageIdentifier = "${{ steps.release.outputs.package_identifier }}"
-          $relativeManifestPath = "dist\winget\manifests\{0}\{1}\${{ steps.release.outputs.version }}" -f `
-            $packageIdentifier.Substring(0, 1).ToLowerInvariant(), `
-            ($packageIdentifier -replace '\.', '\')
-          $manifestPath = Join-Path $PWD $relativeManifestPath
+          $manifestPath = "${{ steps.manifests.outputs.manifest_path }}"
           if (-not (Test-Path $manifestPath)) {
             throw "Generated WinGet manifest path not found."
           }
@@ -165,8 +237,9 @@ jobs:
           $lines = @(
             "## WinGet",
             "",
-            "- Generated manifest package id: `${{ steps.release.outputs.package_identifier }}`",
-            "- Portable installer asset: `${{ steps.zip.outputs.zip_name }}`"
+            "- Generated manifest package id: ${{ steps.release.outputs.package_identifier }}",
+            "- Windows installer asset: ${{ steps.installer.outputs.asset_name }}",
+            "- Validated with: winget validate --manifest ${{ steps.manifests.outputs.manifest_path }}"
           )
 
           if ([string]::IsNullOrWhiteSpace($env:PAT_TOKEN)) {

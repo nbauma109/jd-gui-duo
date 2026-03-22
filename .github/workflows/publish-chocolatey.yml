@@ -35,6 +35,8 @@ jobs:
         env:
           INPUT_TAG: ${{ github.event.inputs.tag }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_REF_VALUE: ${{ github.ref }}
         run: |
           $tag = if ($env:RELEASE_TAG) { $env:RELEASE_TAG } else { $env:INPUT_TAG }
           if ([string]::IsNullOrWhiteSpace($tag)) {
@@ -42,12 +44,18 @@ jobs:
           }
 
           $version = $tag -replace '^v', ''
+          $checkoutRef = if ($env:GITHUB_EVENT_NAME -eq 'workflow_dispatch') {
+            $env:GITHUB_REF_VALUE
+          } else {
+            "refs/tags/$tag"
+          }
           "tag=$tag" >> $env:GITHUB_OUTPUT
           "version=$version" >> $env:GITHUB_OUTPUT
+          "checkout_ref=$checkoutRef" >> $env:GITHUB_OUTPUT
 
       - uses: actions/checkout@v6
         with:
-          ref: refs/tags/${{ steps.release.outputs.tag }}
+          ref: ${{ steps.release.outputs.checkout_ref }}
 
       - name: Ensure Chocolatey credentials are configured
         shell: pwsh
@@ -69,6 +77,7 @@ jobs:
         id: asset
         shell: pwsh
         run: |
+          $ErrorActionPreference = 'Stop'
           $zipName = "jd-gui-duo-windows-${{ steps.release.outputs.version }}.zip"
           $zipPath = Join-Path $PWD "dist\$zipName"
           $existingAsset = gh release view "${{ steps.release.outputs.tag }}" `
@@ -86,7 +95,18 @@ jobs:
               -InputArchive $archive.FullName `
               -OutputZip $zipPath
 
-            gh release upload "${{ steps.release.outputs.tag }}" $zipPath --repo "${{ github.repository }}"
+            for ($attempt = 1; $attempt -le 6; $attempt++) {
+              gh release upload "${{ steps.release.outputs.tag }}" $zipPath --repo "${{ github.repository }}"
+              if ($LASTEXITCODE -eq 0) {
+                break
+              }
+
+              if ($attempt -eq 6) {
+                throw "Failed to upload $zipName after multiple attempts."
+              }
+
+              Start-Sleep -Seconds (5 * $attempt)
+            }
           } else {
             gh release download "${{ steps.release.outputs.tag }}" `
               --repo "${{ github.repository }}" `

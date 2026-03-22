@@ -42,10 +42,8 @@ param(
     [string]$InstallerSha256,
 
     [Parameter(Mandatory = $true)]
-    [string]$PortableFile,
-
-    [Parameter(Mandatory = $true)]
-    [string]$PortableCommandAlias,
+    [ValidateSet('inno')]
+    [string]$InstallerType,
 
     [Parameter(Mandatory = $true)]
     [string]$OutputRoot
@@ -54,6 +52,20 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $manifestVersion = '1.12.0'
+
+function Write-ManifestFile {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path,
+
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [string[]]$Lines
+    )
+
+    [string]::Join([Environment]::NewLine, $Lines) |
+        Set-Content -Path $Path -Encoding utf8BOM
+}
 $parts = $PackageIdentifier.Split('.')
 $manifestDir = Join-Path $OutputRoot ('manifests\' + $PackageIdentifier.Substring(0, 1).ToLowerInvariant())
 foreach ($part in $parts) {
@@ -63,16 +75,21 @@ $manifestDir = Join-Path $manifestDir $PackageVersion
 New-Item -ItemType Directory -Force -Path $manifestDir | Out-Null
 
 $versionManifest = @(
+    "# Created using repo automation"
+    "# yaml-language-server: `$schema=https://aka.ms/winget-manifest.version.$manifestVersion.schema.json"
+    ''
     "PackageIdentifier: $PackageIdentifier"
     "PackageVersion: $PackageVersion"
     "DefaultLocale: en-US"
     "ManifestType: version"
     "ManifestVersion: $manifestVersion"
 )
-[string]::Join([Environment]::NewLine, $versionManifest) |
-    Set-Content -Path (Join-Path $manifestDir "$PackageIdentifier.yaml")
+Write-ManifestFile -Path (Join-Path $manifestDir "$PackageIdentifier.yaml") -Lines $versionManifest
 
 $defaultLocaleManifest = @(
+    "# Created using repo automation"
+    "# yaml-language-server: `$schema=https://aka.ms/winget-manifest.defaultLocale.$manifestVersion.schema.json"
+    ''
     "PackageIdentifier: $PackageIdentifier"
     "PackageVersion: $PackageVersion"
     "PackageLocale: en-US"
@@ -94,23 +111,28 @@ $defaultLocaleManifest = @(
     "ManifestType: defaultLocale"
     "ManifestVersion: $manifestVersion"
 )
-[string]::Join([Environment]::NewLine, $defaultLocaleManifest) |
-    Set-Content -Path (Join-Path $manifestDir "$PackageIdentifier.locale.en-US.yaml")
+Write-ManifestFile -Path (Join-Path $manifestDir "$PackageIdentifier.locale.en-US.yaml") -Lines $defaultLocaleManifest
 
 $installerManifest = @(
+    "# Created using repo automation"
+    "# yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.$manifestVersion.schema.json"
+    ''
     "PackageIdentifier: $PackageIdentifier"
     "PackageVersion: $PackageVersion"
-    "InstallerType: zip"
-    "NestedInstallerType: portable"
+    "InstallerType: $InstallerType"
+    "InstallModes:"
+    "  - interactive"
+    "  - silent"
+    "  - silentWithProgress"
     "Installers:"
     "  - Architecture: x64"
+    "    Scope: machine"
     "    InstallerUrl: $InstallerUrl"
     "    InstallerSha256: $InstallerSha256"
-    "    NestedInstallerFiles:"
-    "      - RelativeFilePath: $PortableFile"
-    "        PortableCommandAlias: $PortableCommandAlias"
+    "    InstallerSwitches:"
+    "      Silent: /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-"
+    "      SilentWithProgress: /SILENT /SUPPRESSMSGBOXES /NORESTART /SP-"
     "ManifestType: installer"
     "ManifestVersion: $manifestVersion"
 )
-[string]::Join([Environment]::NewLine, $installerManifest) |
-    Set-Content -Path (Join-Path $manifestDir "$PackageIdentifier.installer.yaml")
+Write-ManifestFile -Path (Join-Path $manifestDir "$PackageIdentifier.installer.yaml") -Lines $installerManifest

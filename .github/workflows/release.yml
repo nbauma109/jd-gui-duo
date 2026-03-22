@@ -4,26 +4,89 @@ on:
   push:
     tags:
       - "*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to build and publish assets for
+        required: true
+        type: string
 
 jobs:
   tagged-release:
     name: "Github Release"
     runs-on: "windows-latest"
+    env:
+      GH_TOKEN: ${{ github.token }}
 
     steps:
+    - name: Resolve version
+      id: release
+      shell: pwsh
+      run: |
+        $tag = if ("${{ github.event_name }}" -eq "workflow_dispatch") { "${{ github.event.inputs.tag }}" } else { "${{ github.ref_name }}" }
+        if ([string]::IsNullOrWhiteSpace($tag)) {
+          throw "A release tag is required."
+        }
+
+        $version = $tag -replace '^v', ''
+        $checkoutRef = if ("${{ github.event_name }}" -eq "workflow_dispatch") { "${{ github.ref }}" } else { "refs/tags/$tag" }
+
+        "tag=$tag" >> $env:GITHUB_OUTPUT
+        "value=$version" >> $env:GITHUB_OUTPUT
+        "checkout_ref=$checkoutRef" >> $env:GITHUB_OUTPUT
+
     - uses: actions/checkout@v6
+      with:
+        ref: ${{ steps.release.outputs.checkout_ref }}
+    - name: Download existing Windows archive for manual runs
+      if: ${{ github.event_name == 'workflow_dispatch' }}
+      shell: pwsh
+      run: |
+        New-Item -ItemType Directory -Force -Path assembler\target | Out-Null
+        gh release download "${{ steps.release.outputs.tag }}" `
+          --repo "${{ github.repository }}" `
+          --pattern "*windows*.tar.xz" `
+          --dir assembler\target
     - name: Set up JDK 25
+      if: ${{ github.event_name != 'workflow_dispatch' }}
       uses: actions/setup-java@v5
       with:
         java-version: '25'
         distribution: 'temurin'
         cache: maven
     - name: Build with Maven
+      if: ${{ github.event_name != 'workflow_dispatch' }}
       run: mvn --no-transfer-progress -B package
+    - name: Install Inno Setup
+      shell: pwsh
+      run: choco install innosetup --no-progress -y
+    - name: Build Windows installer
+      shell: pwsh
+      run: |
+        $archive = Get-ChildItem assembler\target -Filter *windows*.tar.xz | Select-Object -First 1
+        if ($null -eq $archive) {
+          throw "No Windows archive matching *windows*.tar.xz was found in assembler\\target."
+        }
+
+        .\packaging\windows\build-installer.ps1 `
+          -InputArchive $archive.FullName `
+          -OutputInstaller "assembler\target\jd-gui-duo-windows-${{ steps.release.outputs.value }}-setup.exe" `
+          -AppVersion "${{ steps.release.outputs.value }}"
+    - name: Upload installer asset for manual runs
+      if: ${{ github.event_name == 'workflow_dispatch' }}
+      shell: pwsh
+      run: |
+        gh release upload "${{ steps.release.outputs.tag }}" `
+          "assembler\target\jd-gui-duo-windows-${{ steps.release.outputs.value }}-setup.exe" `
+          --repo "${{ github.repository }}" `
+          --clobber
     - name: Create release
+      if: ${{ github.event_name != 'workflow_dispatch' }}
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.PAT_TOKEN }}"
         prerelease: false
+        automatic_release_tag: "${{ steps.release.outputs.tag }}"
         files: |
           **/jd-*.tar.xz
+          **/jd-gui-duo-windows-*-setup.exe

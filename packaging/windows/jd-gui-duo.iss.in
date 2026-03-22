@@ -1,0 +1,39 @@
+[Setup]
+AppId=com.github.nbauma109.jd-gui-duo
+AppName=JD-GUI Duo
+AppVersion=__APP_VERSION__
+AppVerName=JD-GUI Duo __APP_VERSION__
+AppPublisher=Nicolas Baumann
+AppPublisherURL=https://github.com/nbauma109/jd-gui-duo
+AppSupportURL=https://github.com/nbauma109/jd-gui-duo/issues
+AppUpdatesURL=https://github.com/nbauma109/jd-gui-duo/releases
+DefaultDirName={autopf}\JD-GUI Duo
+DefaultGroupName=JD-GUI Duo
+DisableProgramGroupPage=yes
+PrivilegesRequired=admin
+ArchitecturesAllowed=x64compatible
+ArchitecturesInstallIn64BitMode=x64compatible
+WizardStyle=modern
+Compression=lzma2
+SolidCompression=yes
+OutputDir=__OUTPUT_DIR__
+OutputBaseFilename=__OUTPUT_BASENAME__
+SetupIconFile=__SETUP_ICON_FILE__
+UninstallDisplayIcon={app}\__APP_EXE__
+ChangesAssociations=no
+
+[Languages]
+Name: "english"; MessagesFile: "compiler:Default.isl"
+
+[Tasks]
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+
+[Files]
+Source: "__SOURCE_DIR__\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+[Icons]
+Name: "{autoprograms}\JD-GUI Duo"; Filename: "{app}\__APP_EXE__"
+Name: "{autodesktop}\JD-GUI Duo"; Filename: "{app}\__APP_EXE__"; Tasks: desktopicon
+
+[Run]
+Filename: "{app}\__APP_EXE__"; Description: "{cm:LaunchProgram,JD-GUI Duo}"; Flags: nowait postinstall skipifsilent
