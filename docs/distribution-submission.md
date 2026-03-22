@@ -28,7 +28,6 @@ The WinGet workflow:
 - uses a Windows installer `.exe` asset built from the existing Windows application bundle
 - generates official WinGet manifests using the 1.12 schema
 - validates them with `winget validate --manifest <path>`
-- tests them with `winget install --manifest <path>`
 - uploads those manifests as a workflow artifact
 - submits them with `wingetcreate submit` when `PAT_TOKEN` is configured
 
