@@ -7,12 +7,15 @@
 
 package org.jd.gui.util.parser.jdt.core;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
@@ -66,10 +69,14 @@ public abstract class AbstractJavaListener extends ASTVisitor {
 
     @Override
     public boolean visit(ImportDeclaration node) {
+        if (node.isOnDemand()) {
+            return true;
+        }
+
         Name name = node.getName();
         if (name instanceof QualifiedName qualifiedName) {
             String simpleName = qualifiedName.getName().getIdentifier();
-            String internalTypeName = nameToString(name);
+            String internalTypeName = resolveInternalTypeName(name);
             nameToInternalTypeName.put(simpleName, internalTypeName);
         }
         return true;
@@ -109,6 +116,16 @@ public abstract class AbstractJavaListener extends ASTVisitor {
         exitTypeDeclaration();
     }
 
+    /**
+     * Converts a JDT type node into a source-style slash-separated name.
+     * Nested source types remain slash-separated here and are converted later by
+     * {@link #resolveQualifiedTypeName(String)}.
+     *
+     * @param type the JDT type node, for example {@code SimpleType("String")} or
+     *        {@code QualifiedType("Evaluator.Id")}
+     * @return a source-style slash-separated type name, for example {@code "String"},
+     *         {@code "Evaluator/Id"}, or {@code "org/jsoup/select/Evaluator/Id"}
+     */
     protected static String typeToString(Type type) {
         if (type instanceof ArrayType arrayType) {
             return typeToString(arrayType.getElementType());
@@ -131,7 +148,35 @@ public abstract class AbstractJavaListener extends ASTVisitor {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Resolves a JDT name to an internal JVM type name.
+     *
+     * @param name the JDT name, for example {@code "Integer"} or {@code "Evaluator.Id"}
+     * @return the internal JVM type name, for example {@code "java/lang/Integer"} or
+     *         {@code "org/jsoup/select/Evaluator$Id"}
+     */
+    protected String resolveInternalTypeName(Name name) {
+        IBinding binding = name.resolveBinding();
+        String internalTypeName = binding instanceof ITypeBinding typeBinding
+                ? resolveInternalTypeName(typeBinding)
+                : null;
+        return internalTypeName != null ? internalTypeName : resolveQualifiedTypeName(nameToString(name));
+    }
+
+    /**
+     * Resolves a JDT type node to an internal JVM type name.
+     *
+     * @param type the JDT type node, for example {@code SimpleType("Validate")},
+     *        {@code QualifiedType("Evaluator.Id")}, or {@code ParameterizedType("List<Element>")}
+     * @return the internal JVM type name, for example {@code "org/jsoup/helper/Validate"},
+     *         {@code "org/jsoup/select/Evaluator$Id"}, or {@code "java/util/List"}
+     */
     protected String resolveInternalTypeName(Type type) {
+        String internalTypeName = resolveInternalTypeName(type.resolveBinding());
+        if (internalTypeName != null) {
+            return internalTypeName;
+        }
+
         if (type instanceof ArrayType arrayType) {
             return resolveInternalTypeName(arrayType.getElementType());
         }
@@ -139,12 +184,10 @@ public abstract class AbstractJavaListener extends ASTVisitor {
             return resolveInternalTypeName(parameterizedType.getType());
         }
         if (type instanceof QualifiedType qualifiedType) {
-            Type qualifierType = qualifiedType.getQualifier();
-            String qualifiedIdentifier = qualifiedType.getName().getIdentifier();
-            return String.join("/", resolveInternalTypeName(qualifierType), qualifiedIdentifier);
+            return resolveQualifiedTypeName(typeToString(qualifiedType));
         }
         if (type instanceof NameQualifiedType nameQualifiedType) {
-            return nameToString(nameQualifiedType.getName());
+            return resolveQualifiedTypeName(typeToString(nameQualifiedType));
         }
         if (type instanceof SimpleType simpleType) {
             Name simpleTypeName = simpleType.getName();
@@ -203,10 +246,154 @@ public abstract class AbstractJavaListener extends ASTVisitor {
                 return qualifiedName;
 
             }
-            // Qualified type name -> Nothing to do
-            return nameToString(simpleTypeName);
+            return resolveQualifiedTypeName(nameToString(simpleTypeName));
         }
         return StringConstants.JAVA_LANG_OBJECT;
+    }
+
+    /**
+     * Resolves a JDT binding to an internal JVM type name.
+     *
+     * @param typeBinding the JDT binding to resolve
+     * @return the internal JVM type name, for example
+     *         {@code "org/jsoup/select/Evaluator$Id"} from binary name
+     *         {@code "org.jsoup.select.Evaluator$Id"}, or
+     *         {@code "java/util/Map$Entry"} from binding key {@code "Ljava/util/Map$Entry;"};
+     *         {@code null} if the binding cannot be resolved
+     */
+    protected String resolveInternalTypeName(ITypeBinding typeBinding) {
+        if (typeBinding == null) {
+            return null;
+        }
+
+        ITypeBinding candidate = typeBinding.getErasure();
+
+        while (candidate != null && candidate.isArray()) {
+            candidate = candidate.getElementType();
+        }
+
+        if (candidate == null) {
+            return null;
+        }
+
+        String binaryName = candidate.getBinaryName();
+        if (binaryName != null) {
+            return binaryName.replace('.', '/');
+        }
+
+        String key = candidate.getKey();
+        if (key != null && key.length() > 2 && key.charAt(0) == 'L' && key.charAt(key.length() - 1) == ';') {
+            return key.substring(1, key.length() - 1);
+        }
+
+        return null;
+    }
+
+    /**
+     * Converts a source-style slash-separated type name into an internal JVM type name.
+     *
+     * @param sourceTypeName the source-style slash-separated type name, for example
+     *        {@code "Evaluator/Id"} or {@code "org/jsoup/select/Evaluator/Id"}
+     * @return the internal JVM type name, for example
+     *         {@code "org/jsoup/select/Evaluator$Id"} or {@code "java/util/Map$Entry"}
+     */
+    String resolveQualifiedTypeName(String sourceTypeName) {
+        String cachedTypeName = typeNameCache.get(sourceTypeName);
+        if (cachedTypeName != null) {
+            return cachedTypeName;
+        }
+
+        String[] segments = sourceTypeName.split("/");
+        String knownTypeName = nameToInternalTypeName.get(segments[0]);
+
+        if (knownTypeName != null) {
+            String resolvedTypeName = appendNestedTypeSuffix(knownTypeName, segments, 1);
+            typeNameCache.put(sourceTypeName, resolvedTypeName);
+            return resolvedTypeName;
+        }
+
+        String resolvedTypeName = null;
+        if (!packageName.isEmpty()) {
+            resolvedTypeName = resolveQualifiedTypeName(segments, packageName);
+        }
+        if (resolvedTypeName == null) {
+            resolvedTypeName = resolveQualifiedTypeName(segments, null);
+        }
+        if (resolvedTypeName == null) {
+            resolvedTypeName = sourceTypeName;
+        }
+
+        typeNameCache.put(sourceTypeName, resolvedTypeName);
+        return resolvedTypeName;
+    }
+
+    /**
+     * Resolves a source-style slash-separated type path against an optional package prefix.
+     *
+     * @param segments the source-style type path split on {@code '/'}, for example
+     *        {@code ["Evaluator", "Id"]} or
+     *        {@code ["org", "jsoup", "select", "Evaluator", "Id"]}
+     * @param packagePrefix the current package in internal form, for example
+     *        {@code "org/jsoup/select"}, or {@code null} to resolve from the root
+     * @return the internal JVM type name if a matching top-level type is found, for example
+     *         {@code "org/jsoup/select/Evaluator$Id"}; {@code null} otherwise
+     */
+    private String resolveQualifiedTypeName(String[] segments, String packagePrefix) {
+        for (int typeSegmentIndex = segments.length - 1; typeSegmentIndex >= 0; typeSegmentIndex--) {
+            String topLevelTypeName = StringUtils.join(segments, '/', 0, typeSegmentIndex + 1);
+            if (packagePrefix != null) {
+                topLevelTypeName = packagePrefix + '/' + topLevelTypeName;
+            }
+
+            if (containsTopLevelType(topLevelTypeName)) {
+                return appendNestedTypeSuffix(topLevelTypeName, segments, typeSegmentIndex + 1);
+            }
+        }
+
+        return null;
+    }
+
+    private static String appendNestedTypeSuffix(String topLevelTypeName, String[] segments, int startIndex) {
+        if (startIndex >= segments.length) {
+            return topLevelTypeName;
+        }
+
+        StringBuilder sb = new StringBuilder(topLevelTypeName);
+        for (int i = startIndex; i < segments.length; i++) {
+            sb.append('$').append(segments[i]);
+        }
+        return sb.toString();
+    }
+
+    private boolean containsTopLevelType(String internalTypeName) {
+        return containsEntryPath(internalTypeName + ".java")
+            || containsEntryPath(internalTypeName + StringConstants.CLASS_FILE_SUFFIX);
+    }
+
+    private boolean containsEntryPath(String path) {
+        Container container = entry.getContainer();
+        if (container == null) {
+            return false;
+        }
+
+        Container.Entry root = container.getRoot();
+        return root != null && containsEntryPath(root, path);
+    }
+
+    private boolean containsEntryPath(Container.Entry parentEntry, String path) {
+        for (Container.Entry child : parentEntry.getChildren().values()) {
+            String childPath = child.getPath();
+
+            if (path.equals(childPath)) {
+                return true;
+            }
+            if (child.isDirectory() && path.startsWith(childPath + '/')
+                    && containsEntryPath(child, path)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public PrimitiveType getPrimitiveTypeContext(Type type) {

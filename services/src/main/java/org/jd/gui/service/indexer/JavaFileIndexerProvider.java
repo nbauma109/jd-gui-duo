@@ -12,7 +12,9 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.Type;
@@ -215,6 +217,24 @@ public class JavaFileIndexerProvider extends AbstractIndexerProvider {
                 typeReferenceSet.add(internalTypeName);
             }
             return true;
+        }
+
+        @Override
+        public boolean visit(QualifiedType node) {
+            addTypeReference(resolveInternalTypeName(node));
+            return false;
+        }
+
+        @Override
+        public boolean visit(NameQualifiedType node) {
+            addTypeReference(resolveInternalTypeName(node));
+            return false;
+        }
+
+        private void addTypeReference(String internalTypeName) {
+            if (internalTypeName.charAt(0) != '*') {
+                typeReferenceSet.add(internalTypeName);
+            }
         }
 
         @Override
