@@ -37,7 +37,7 @@ JD-Core v0 and v1 are 2 different decompilers rather than 2 different versions o
 
 This project is built on top of original [JD-GUI](https://github.com/java-decompiler/jd-gui) written by [Emmanuel Dupuy](https://github.com/emmanue1).
 
-The binaries are built and hosted at jitpack.io (identifiable with rocket logo) and the download buttons below retrieve the distributions directly from Jitpack servers :
+The binaries are built and hosted at [jitpack.io](https://jitpack.io/p/nbauma109/jd-gui-duo) (identifiable with rocket logo) and the download buttons below retrieve the distributions directly from Jitpack servers :
 
 <a href="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/2.0.108/jd-gui-duo-2.0.108-windows.tar.xz?" target="_blank">
   <img
