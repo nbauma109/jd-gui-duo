@@ -92,7 +92,8 @@ public final class ArchiveContainer implements Container {
             return new URI(rootUri.getScheme(), rootUri.getHost(), rootUri.getPath() + path, null);
         } catch (URISyntaxException e) {
             assert ExceptionUtil.printStackTrace(e);
-            return URI.create(rootUri.toString() + path);
+            // Fallback to a safe URI to avoid IllegalArgumentException from URI.create(...)
+            return rootUri;
         }
     }
 
