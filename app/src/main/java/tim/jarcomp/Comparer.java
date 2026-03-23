@@ -3,12 +3,16 @@ package tim.jarcomp;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Class to do the actual comparison of jar files, populating a list of
  * EntryDetails objects
  */
 public final class Comparer {
+
+    private static final Logger LOGGER = Logger.getLogger(Comparer.class.getName());
 
     private Comparer() {
     }
@@ -35,7 +39,7 @@ public final class Comparer {
             makeEntries(entryList, snapshot1.entries(), 0);
             makeEntries(entryList, snapshot2.entries(), 1);
         } catch (IOException ioe) {
-            System.err.println(ioe);
+            LOGGER.log(Level.WARNING, "Failed to read archive for comparison", ioe);
         }
         results.setEntryList(entryList);
         return results;

@@ -114,6 +114,7 @@ public final class ArchiveIO {
         };
     }
 
+    @SuppressWarnings("java:S5042") // Archive reading is protected by entry count, size, and compression ratio limits
     private static byte[] readZipEntry(ArchiveSource source, String entryName, ArchiveReadLimits limits) throws IOException {
         ArchiveReadContext readContext = new ArchiveReadContext(source.fileName(), source.compressedLength(), limits);
         try (ZipInputStream zipInputStream = new ZipInputStream(source.openStream())) {
@@ -129,6 +130,7 @@ public final class ArchiveIO {
         return null;
     }
 
+    @SuppressWarnings("java:S5042") // Archive reading is protected by entry count, size, and compression ratio limits
     private static byte[] readTarEntry(ArchiveSource source, String entryName, CompressionType compressionType, ArchiveReadLimits limits) throws IOException {
         ArchiveReadContext readContext = new ArchiveReadContext(source.fileName(), source.compressedLength(), limits);
         try (InputStream fileInputStream = source.openStream();
@@ -146,6 +148,7 @@ public final class ArchiveIO {
         return null;
     }
 
+    @SuppressWarnings("java:S5042") // Archive reading is protected by entry count, size, and compression ratio limits
     private static byte[] readSevenZipEntry(ArchiveSource source, String entryName, ArchiveReadLimits limits) throws IOException {
         ArchiveReadContext readContext = new ArchiveReadContext(source.fileName(), source.compressedLength(), limits);
         try (SevenZFile sevenZFile = openSevenZipFile(source)) {
@@ -387,7 +390,7 @@ public final class ArchiveIO {
         private void registerEntry(String entryName) throws IOException {
             entryCount++;
             if (entryCount > limits.maxEntries()) {
-                throw new IOException("Archive has too many entries: " + archiveName + " (limit: " + limits.maxEntries() + ")");
+                throw new IOException("Archive has too many entries: " + archiveName + " (at entry '" + entryName + "', limit: " + limits.maxEntries() + ")");
             }
         }
 

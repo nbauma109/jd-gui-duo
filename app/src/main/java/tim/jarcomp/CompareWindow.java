@@ -36,6 +36,7 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -202,7 +203,7 @@ public class CompareWindow {
                             diffFrame.setLocation((int) Math.round(screenSize.getWidth() / 6.0), (int) Math.round(screenSize.getHeight() / 6.0));
                             diffFrame.setSize((int) Math.round(screenSize.getWidth() / 1.5), (int) Math.round(screenSize.getHeight() / 1.5));
                             diffFrame.setVisible(true);
-                        } catch (Exception ex) {
+                        } catch (IOException | IllegalAccessException | InvocationTargetException ex) {
                             assert ExceptionUtil.printStackTrace(ex);
                         }
                     }
@@ -216,7 +217,7 @@ public class CompareWindow {
     }
 
     protected String getContent(File file, String entryPath)
-            throws IOException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+            throws IOException, IllegalAccessException, InvocationTargetException {
         if (entryPath.endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
             Map<String, String> preferences = api.getPreferences();
             preferences.put(Preferences.WRITE_LINE_NUMBERS, "false");
@@ -449,7 +450,7 @@ public class CompareWindow {
                     }
                     field.setText(f.getAbsolutePath());
                     return true;
-                } catch (Exception _) {
+                } catch (UnsupportedFlavorException | IOException _) {
                     JOptionPane.showMessageDialog(parentFrame, "Could not import the dropped file.", "Error", JOptionPane.ERROR_MESSAGE);
                     return false;
                 }
