@@ -18,7 +18,7 @@ public class GenericFileFilter extends FileFilter {
      * Constructor
      *
      * @param inDescription filter description
-     * @param inSuffixes    array of allowed 3- and 4-character file suffixes
+     * @param inSuffixes    array of allowed file suffixes (e.g. {@code jar}, {@code tar.gz})
      */
     public GenericFileFilter(String inDescription, String[] inSuffixes) {
         filterDesc = inDescription;
