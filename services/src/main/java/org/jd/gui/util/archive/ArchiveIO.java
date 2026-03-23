@@ -127,7 +127,7 @@ public final class ArchiveIO {
                     byte[] bytes = entry.isDirectory()
                         ? EMPTY_BYTES
                         : readEntryBytes(zipInputStream, readContext, entryName, entry.getCompressedSize());
-                    entries.put(entryName, new ArchiveItem(entry.isDirectory(), bytes, compressedLength(entry.getSize(), bytes.length)));
+                    entries.put(entryName, new ArchiveItem(entry.isDirectory(), bytes, entry.getCompressedSize()));
                 }
             }
         }
@@ -152,7 +152,7 @@ public final class ArchiveIO {
                     byte[] bytes = entry.isDirectory()
                         ? EMPTY_BYTES
                         : readEntryBytes(tarInputStream, readContext, entryName, UNKNOWN_COMPRESSED_LENGTH);
-                    entries.put(entryName, new ArchiveItem(entry.isDirectory(), bytes, compressedLength(entry.getSize(), bytes.length)));
+                    entries.put(entryName, new ArchiveItem(entry.isDirectory(), bytes, UNKNOWN_COMPRESSED_LENGTH));
                 }
             }
         }
@@ -180,7 +180,7 @@ public final class ArchiveIO {
                             bytes = readEntryBytes(inputStream, readContext, entryName, UNKNOWN_COMPRESSED_LENGTH);
                         }
                     }
-                    entries.put(entryName, new ArchiveItem(entry.isDirectory(), bytes, compressedLength(entry.getSize(), bytes.length)));
+                    entries.put(entryName, new ArchiveItem(entry.isDirectory(), bytes, UNKNOWN_COMPRESSED_LENGTH));
                 }
             }
         }
@@ -203,10 +203,6 @@ public final class ArchiveIO {
             case BZIP2 -> new BZip2CompressorInputStream(inputStream);
             case XZ -> new XZCompressorInputStream(inputStream);
         };
-    }
-
-    private static long compressedLength(long archiveLength, int defaultLength) {
-        return archiveLength == UNKNOWN_COMPRESSED_LENGTH ? defaultLength : archiveLength;
     }
 
     private static byte[] readEntryBytes(
@@ -249,6 +245,10 @@ public final class ArchiveIO {
     public record ArchiveItem(boolean directory, byte[] bytes, long compressedLength) {
         public long length() {
             return bytes.length;
+        }
+
+        public long compressedLength() {
+            return compressedLength == UNKNOWN_COMPRESSED_LENGTH ? bytes.length : compressedLength;
         }
     }
 
