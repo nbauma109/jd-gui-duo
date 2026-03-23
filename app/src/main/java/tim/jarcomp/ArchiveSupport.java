@@ -47,11 +47,11 @@ final class ArchiveSupport {
     }
 
     static byte[] readEntryBytes(File file, String entryPath) throws IOException {
-        ArchiveIO.ArchiveItem entry = ArchiveIO.readArchive(file).entries().get(entryPath);
-        if (entry == null || entry.directory()) {
+        byte[] bytes = ArchiveIO.readEntry(file, entryPath);
+        if (bytes == null) {
             throw new IOException("Entry not found in archive: " + entryPath);
         }
-        return entry.bytes();
+        return bytes;
     }
 
     static Loader createClassLoader(File file) throws IOException {
