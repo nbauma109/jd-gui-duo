@@ -62,6 +62,11 @@ public final class ArchiveIO {
     private static final byte[] EMPTY_BYTES = new byte[0];
     private static final long UNKNOWN_COMPRESSED_LENGTH = -1L;
 
+    /** Maximum number of entries allowed in a single archive (protects against zip bombs). */
+    private static final int MAX_ENTRIES = 100_000;
+    /** Maximum total uncompressed size in bytes allowed across all entries (protects against zip bombs). */
+    private static final long MAX_TOTAL_SIZE = 500L * 1024 * 1024; // 500 MB
+
     private ArchiveIO() {
     }
 
@@ -108,14 +113,26 @@ public final class ArchiveIO {
     private static ArchiveSnapshot readZipArchive(ArchiveSource source) throws IOException {
         Map<String, ArchiveItem> entries = new LinkedHashMap<>();
         int entryCount = 0;
+        long totalSize = 0L;
 
         try (ZipInputStream zipInputStream = new ZipInputStream(source.openStream())) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
                 entryCount++;
+                if (entryCount > MAX_ENTRIES) {
+                    throw new IOException("Archive contains too many entries (limit: " + MAX_ENTRIES + ")");
+                }
                 String entryName = normalizeEntryName(entry.getName(), entry.isDirectory());
                 if (!entryName.isEmpty()) {
+                    long declaredSize = entry.getSize();
+                    if (declaredSize > 0 && totalSize + declaredSize > MAX_TOTAL_SIZE) {
+                        throw new IOException("Archive uncompressed size exceeds limit of " + MAX_TOTAL_SIZE + " bytes");
+                    }
                     byte[] bytes = entry.isDirectory() ? EMPTY_BYTES : IOUtils.toByteArray(zipInputStream);
+                    totalSize += bytes.length;
+                    if (totalSize > MAX_TOTAL_SIZE) {
+                        throw new IOException("Archive uncompressed size exceeds limit of " + MAX_TOTAL_SIZE + " bytes");
+                    }
                     entries.put(entryName, new ArchiveItem(entry.isDirectory(), bytes, compressedLength(entry.getSize(), bytes.length)));
                 }
             }
@@ -127,6 +144,7 @@ public final class ArchiveIO {
     private static ArchiveSnapshot readTarArchive(ArchiveSource source, CompressionType compressionType) throws IOException {
         Map<String, ArchiveItem> entries = new LinkedHashMap<>();
         int entryCount = 0;
+        long totalSize = 0L;
 
         try (InputStream fileInputStream = source.openStream();
              InputStream archiveInputStream = wrapCompressedInputStream(fileInputStream, compressionType);
@@ -134,9 +152,20 @@ public final class ArchiveIO {
             TarArchiveEntry entry;
             while ((entry = tarInputStream.getNextEntry()) != null) {
                 entryCount++;
+                if (entryCount > MAX_ENTRIES) {
+                    throw new IOException("Archive contains too many entries (limit: " + MAX_ENTRIES + ")");
+                }
                 String entryName = normalizeEntryName(entry.getName(), entry.isDirectory());
                 if (!entryName.isEmpty()) {
+                    long declaredSize = entry.getSize();
+                    if (declaredSize > 0 && totalSize + declaredSize > MAX_TOTAL_SIZE) {
+                        throw new IOException("Archive uncompressed size exceeds limit of " + MAX_TOTAL_SIZE + " bytes");
+                    }
                     byte[] bytes = entry.isDirectory() ? EMPTY_BYTES : IOUtils.toByteArray(tarInputStream);
+                    totalSize += bytes.length;
+                    if (totalSize > MAX_TOTAL_SIZE) {
+                        throw new IOException("Archive uncompressed size exceeds limit of " + MAX_TOTAL_SIZE + " bytes");
+                    }
                     entries.put(entryName, new ArchiveItem(entry.isDirectory(), bytes, compressedLength(entry.getSize(), bytes.length)));
                 }
             }
@@ -148,13 +177,21 @@ public final class ArchiveIO {
     private static ArchiveSnapshot readSevenZipArchive(ArchiveSource source) throws IOException {
         Map<String, ArchiveItem> entries = new LinkedHashMap<>();
         int entryCount = 0;
+        long totalSize = 0L;
 
         try (SevenZFile sevenZFile = openSevenZipFile(source)) {
             SevenZArchiveEntry entry;
             while ((entry = sevenZFile.getNextEntry()) != null) {
                 entryCount++;
+                if (entryCount > MAX_ENTRIES) {
+                    throw new IOException("Archive contains too many entries (limit: " + MAX_ENTRIES + ")");
+                }
                 String entryName = normalizeEntryName(entry.getName(), entry.isDirectory());
                 if (!entryName.isEmpty()) {
+                    long declaredSize = entry.getSize();
+                    if (declaredSize > 0 && totalSize + declaredSize > MAX_TOTAL_SIZE) {
+                        throw new IOException("Archive uncompressed size exceeds limit of " + MAX_TOTAL_SIZE + " bytes");
+                    }
                     byte[] bytes;
                     if (entry.isDirectory()) {
                         bytes = EMPTY_BYTES;
@@ -162,6 +199,10 @@ public final class ArchiveIO {
                         try (InputStream inputStream = sevenZFile.getInputStream(entry)) {
                             bytes = IOUtils.toByteArray(inputStream);
                         }
+                    }
+                    totalSize += bytes.length;
+                    if (totalSize > MAX_TOTAL_SIZE) {
+                        throw new IOException("Archive uncompressed size exceeds limit of " + MAX_TOTAL_SIZE + " bytes");
                     }
                     entries.put(entryName, new ArchiveItem(entry.isDirectory(), bytes, compressedLength(entry.getSize(), bytes.length)));
                 }
@@ -201,6 +242,13 @@ public final class ArchiveIO {
 
         while (directory && normalized.endsWith(ENTRY_SEPARATOR)) {
             normalized = normalized.substring(0, normalized.length() - 1);
+        }
+
+        // Reject entries that contain path traversal sequences to prevent Zip Slip
+        for (String segment : normalized.split("/", -1)) {
+            if ("..".equals(segment)) {
+                return "";
+            }
         }
 
         return normalized;
