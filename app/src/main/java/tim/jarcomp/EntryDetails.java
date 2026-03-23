@@ -13,6 +13,8 @@ public class EntryDetails {
     private long[] sizes = new long[2];
     /** CRC checksums in both archives */
     private long[] crcCheckSums = new long[2];
+    /** Track whether CRCs were explicitly computed, even if the value is zero */
+    private boolean[] crcChecked = new boolean[2];
     /** SizeChange */
     private SizeChange sizeChange = new SizeChange();
 
@@ -88,6 +90,7 @@ public class EntryDetails {
     public void setCRCChecksum(int inIndex, long inCRCChecksum) {
         if (inIndex == 0 || inIndex == 1) {
             crcCheckSums[inIndex] = inCRCChecksum;
+            crcChecked[inIndex] = true;
             sizeChange.update(sizes[1] - sizes[0], isChanged());
         }
     }
@@ -96,7 +99,7 @@ public class EntryDetails {
      * @return true if CRC checksums have been generated for this entry
      */
     public boolean isCRCChecked() {
-        return (crcCheckSums[0] != 0 && crcCheckSums[1] != 0);
+        return crcChecked[0] && crcChecked[1];
     }
 
     /**

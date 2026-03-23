@@ -1,6 +1,8 @@
 package tim.jarcomp;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Locale;
 import javax.swing.filechooser.FileFilter;
 
 /**
@@ -9,10 +11,8 @@ import javax.swing.filechooser.FileFilter;
 public class GenericFileFilter extends FileFilter {
     /** Filter description for display */
     private String filterDesc;
-    /** Array of allowed three-character suffixes */
-    private String[] threeCharSuffixes;
-    /** Array of allowed four-character suffixes */
-    private String[] fourCharSuffixes;
+    /** Array of allowed suffixes */
+    private String[] suffixes;
 
     /**
      * Constructor
@@ -23,21 +23,11 @@ public class GenericFileFilter extends FileFilter {
     public GenericFileFilter(String inDescription, String[] inSuffixes) {
         filterDesc = inDescription;
         if (inSuffixes != null && inSuffixes.length > 0) {
-            threeCharSuffixes = new String[inSuffixes.length];
-            fourCharSuffixes = new String[inSuffixes.length];
-            int threeIndex = 0;
-            int fourIndex = 0;
-            for (String element : inSuffixes) {
-                String suffix = element;
-                if (suffix != null) {
-                    suffix = suffix.trim().toLowerCase();
-                    if (suffix.length() == 3) {
-                        threeCharSuffixes[threeIndex++] = suffix;
-                    } else if (suffix.length() == 4) {
-                        fourCharSuffixes[fourIndex++] = suffix;
-                    }
-                }
-            }
+            suffixes = Arrays.stream(inSuffixes)
+                .filter(java.util.Objects::nonNull)
+                .map(String::trim)
+                .map(suffix -> suffix.toLowerCase(Locale.ROOT))
+                .toArray(String[]::new);
         }
     }
 
@@ -58,18 +48,11 @@ public class GenericFileFilter extends FileFilter {
      * @return true if accepted, false otherwise
      */
     public boolean acceptFilename(String inName) {
-        if (inName != null) {
-            int nameLen = inName.length();
-            if (nameLen > 4) {
-                // Check for three character suffixes
-                char currChar = inName.charAt(nameLen - 4);
-                if (currChar == '.') {
-                    return acceptFilename(inName.substring(nameLen - 3).toLowerCase(), threeCharSuffixes);
-                }
-                // check for four character suffixes
-                currChar = inName.charAt(nameLen - 5);
-                if (currChar == '.') {
-                    return acceptFilename(inName.substring(nameLen - 4).toLowerCase(), fourCharSuffixes);
+        if (inName != null && suffixes != null) {
+            String lowerCaseName = inName.toLowerCase(Locale.ROOT);
+            for (String suffix : suffixes) {
+                if (lowerCaseName.endsWith("." + suffix)) {
+                    return true;
                 }
             }
         }
