@@ -1,3 +1,4 @@
+org.jd.gui.service.fileloader.ArchiveFileLoaderProvider
 org.jd.gui.service.fileloader.AarFileLoaderProvider
 org.jd.gui.service.fileloader.ApkFileLoaderProvider
 org.jd.gui.service.fileloader.ClassFileLoaderProvider

@@ -34,13 +34,20 @@ public class FileLoaderService {
     }
 
     public FileLoader get(File file) {
-        String name = file.getName();
-        int lastDot = name.lastIndexOf('.');
-        if (lastDot == -1 || lastDot == name.length() - 1) {
+        String name = file.getName().toLowerCase(Locale.ROOT);
+        if (name.isEmpty()) {
             return null;
         }
-        String extension = name.substring(lastDot + 1).toLowerCase(Locale.ROOT);
-        return mapProviders.get(extension);
+        FileLoader matchedLoader = null;
+        int matchedLength = -1;
+        for (Map.Entry<String, FileLoader> entry : mapProviders.entrySet()) {
+            String extension = entry.getKey().toLowerCase(Locale.ROOT);
+            if (name.endsWith("." + extension) && extension.length() > matchedLength) {
+                matchedLoader = entry.getValue();
+                matchedLength = extension.length();
+            }
+        }
+        return matchedLoader;
     }
 
     public Map<String, FileLoader> getMapProviders() {

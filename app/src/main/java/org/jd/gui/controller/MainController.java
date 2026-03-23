@@ -127,7 +127,6 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 import javax.swing.TransferHandler;
 import javax.swing.UIManager;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V0;
@@ -139,6 +138,7 @@ import jd.core.ClassUtil;
 import jd.core.DecompilationResult;
 import jd.core.preferences.Preferences;
 import tim.jarcomp.CompareWindow;
+import tim.jarcomp.GenericFileFilter;
 
 public class MainController implements API {
     private static final String INDEXES = "indexes";
@@ -265,7 +265,7 @@ public class MainController implements API {
                 // Set drag and drop (DnD) files transfer handler
                 mainFrame.setTransferHandler(new FilesTransferHandler());
                 // Background class loading
-                new JFileChooser().addChoosableFileFilter(new FileNameExtensionFilter("", "dummy"));
+                new JFileChooser().addChoosableFileFilter(new GenericFileFilter("", new String[]{"dummy"}));
                 FileSystemView.getFileSystemView().isFileSystemRoot(new File("dummy"));
                 @SuppressWarnings({ "rawtypes", "unused" })
                 JLayer layer = new JLayer();
@@ -297,11 +297,11 @@ public class MainController implements API {
         JFileChooser chooser = new JFileChooser();
 
         chooser.removeChoosableFileFilter(chooser.getFileFilter());
-        chooser.addChoosableFileFilter(new FileNameExtensionFilter("All files (" + description + ")", array));
+        chooser.addChoosableFileFilter(new GenericFileFilter("All files (" + description + ")", array));
 
         for (String extension : extensions) {
             FileLoader loader = loaders.get(extension);
-            chooser.addChoosableFileFilter(new FileNameExtensionFilter(loader.getDescription(), loader.getExtensions()));
+            chooser.addChoosableFileFilter(new GenericFileFilter(loader.getDescription(), loader.getExtensions()));
         }
 
         chooser.setCurrentDirectory(configuration.getRecentLoadDirectory());

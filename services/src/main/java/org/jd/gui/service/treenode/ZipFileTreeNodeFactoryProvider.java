@@ -26,7 +26,7 @@ public class ZipFileTreeNodeFactoryProvider extends DirectoryTreeNodeFactoryProv
 
     @Override
     public String[] getSelectors() {
-        return appendSelectors("*:file:*.zip", "*:file:*.aar");
+        return appendSelectors("*:file:*.zip", "*:file:*.aar", "*:file:*.tar.gz", "*:file:*.tar.bz2", "*:file:*.tar.xz", "*:file:*.7z");
     }
 
     @Override
