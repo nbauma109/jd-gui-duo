@@ -102,7 +102,13 @@ public final class ArchiveContainer implements Container {
             return new URI(parentUri.getScheme(), parentUri.getHost(), parentUri.getPath() + ARCHIVE_SUFFIX, null);
         } catch (URISyntaxException e) {
             assert ExceptionUtil.printStackTrace(e);
-            return URI.create(parentUri.toString() + ARCHIVE_SUFFIX);
+            try {
+                return URI.create(parentUri.toString() + ARCHIVE_SUFFIX);
+            } catch (IllegalArgumentException ex) {
+                assert ExceptionUtil.printStackTrace(ex);
+                // Fallback to a safe URI to avoid propagating IllegalArgumentException
+                return parentUri;
+            }
         }
     }
 

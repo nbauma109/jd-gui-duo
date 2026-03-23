@@ -42,6 +42,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -92,6 +93,9 @@ public class CompareWindow {
     private JFileChooser fileChooser;
     /** Refresh button to repeat comparison */
     private JButton refreshButton;
+    /** Cache of class loaders keyed by archive file, cleared on each new comparison.
+     *  Accessed only from the Swing EDT (mouse listener and button handlers). */
+    private final Map<File, org.jd.core.v1.api.loader.Loader> loaderCache = new HashMap<>();
 
     private API api;
 
@@ -217,7 +221,11 @@ public class CompareWindow {
             Map<String, String> preferences = api.getPreferences();
             preferences.put(Preferences.WRITE_LINE_NUMBERS, "false");
             preferences.put(Preferences.REALIGN_LINE_NUMBERS, "false");
-            org.jd.core.v1.api.loader.Loader archiveLoader = ArchiveSupport.createClassLoader(file);
+            org.jd.core.v1.api.loader.Loader archiveLoader = loaderCache.get(file);
+            if (archiveLoader == null) {
+                archiveLoader = ArchiveSupport.createClassLoader(file);
+                loaderCache.put(file, archiveLoader);
+            }
             String decompileEngine = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
             Loader apiLoader = LoaderUtils.createLoader(preferences, archiveLoader, file.toURI());
             String entryInternalName = ClassUtil.getInternalName(entryPath);
@@ -241,8 +249,9 @@ public class CompareWindow {
      * @param inFile2 second file
      */
     public void startCompare(File inFile1, File inFile2) {
-        // Clear table model
+        // Clear table model and loader cache for the new comparison
         tableModel.reset();
+        loaderCache.clear();
 
         if (inFile1 == null || inFile2 == null) {
 	        // Open the unified selection dialog

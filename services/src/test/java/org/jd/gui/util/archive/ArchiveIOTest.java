@@ -152,6 +152,44 @@ class ArchiveIOTest {
         assertArrayEquals("second content".getBytes(StandardCharsets.UTF_8), result);
     }
 
+    @Test
+    void zipEntryReportsRealCompressedLength() throws IOException {
+        // Highly repetitive content that deflate will reduce significantly
+        int contentSize = 1000;
+        byte[] archiveBytes = writeZipArchive("data.txt", "A".repeat(contentSize));
+
+        ArchiveIO.ArchiveSnapshot snapshot = ArchiveIO.readArchive("sample.zip", archiveBytes);
+
+        ArchiveIO.ArchiveItem item = snapshot.entries().get("data.txt");
+        // compressedLength() must report the real compressed size, not the uncompressed size
+        assertTrue(item.compressedLength() > 0, "compressedLength() must be positive");
+        assertTrue(item.compressedLength() < item.length(), "compressedLength() must be less than uncompressed length for highly repetitive content");
+    }
+
+    @Test
+    void tarEntryFallsBackToUncompressedLengthWhenCompressedSizeUnknown() throws IOException {
+        Path archive = tempDir.resolve("sample.tar.xz");
+        writeTarXzArchive(archive, "docs/readme.txt", "hello tar");
+
+        ArchiveIO.ArchiveSnapshot snapshot = ArchiveIO.readArchive(archive.toFile());
+
+        ArchiveIO.ArchiveItem item = snapshot.entries().get("docs/readme.txt");
+        // TAR has no per-entry compressed size; compressedLength() must fall back to length()
+        assertEquals(item.length(), item.compressedLength());
+    }
+
+    @Test
+    void sevenZipEntryFallsBackToUncompressedLengthWhenCompressedSizeUnknown() throws IOException {
+        Path archive = tempDir.resolve("sample.7z");
+        writeSevenZipArchive(archive, "pkg/data.txt", "hello 7z");
+
+        ArchiveIO.ArchiveSnapshot snapshot = ArchiveIO.readArchive("sample.7z", Files.readAllBytes(archive));
+
+        ArchiveIO.ArchiveItem item = snapshot.entries().get("pkg/data.txt");
+        // 7z has no per-entry compressed size; compressedLength() must fall back to length()
+        assertEquals(item.length(), item.compressedLength());
+    }
+
     private static void writeTarXzArchive(Path archive, String entryName, String contents) throws IOException {
         byte[] bytes = contents.getBytes(StandardCharsets.UTF_8);
         try (OutputStream fileOutputStream = Files.newOutputStream(archive);
