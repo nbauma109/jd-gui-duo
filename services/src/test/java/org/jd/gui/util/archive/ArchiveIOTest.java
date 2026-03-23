@@ -17,7 +17,9 @@ import java.nio.file.Path;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -106,6 +108,48 @@ class ArchiveIOTest {
         );
 
         assertTrue(exception.getMessage().contains("maximum uncompressed size"));
+    }
+
+    @Test
+    void readEntryReadsTargetEntryFromZip() throws IOException {
+        byte[] archiveBytes = writeZipArchiveWithTwoEntries("first.txt", "first content", "second.txt", "second content");
+        Path archive = tempDir.resolve("sample.zip");
+        Files.write(archive, archiveBytes);
+
+        byte[] result = ArchiveIO.readEntry(archive.toFile(), "second.txt");
+
+        assertArrayEquals("second content".getBytes(StandardCharsets.UTF_8), result);
+    }
+
+    @Test
+    void readEntryReturnsNullForMissingEntryInZip() throws IOException {
+        byte[] archiveBytes = writeZipArchive("only.txt", "content");
+        Path archive = tempDir.resolve("sample.zip");
+        Files.write(archive, archiveBytes);
+
+        byte[] result = ArchiveIO.readEntry(archive.toFile(), "missing.txt");
+
+        assertNull(result);
+    }
+
+    @Test
+    void readEntryReadsTargetEntryFromTarXz() throws IOException {
+        Path archive = tempDir.resolve("sample.tar.xz");
+        writeTarXzArchiveWithTwoEntries(archive, "first.txt", "first content", "second.txt", "second content");
+
+        byte[] result = ArchiveIO.readEntry(archive.toFile(), "second.txt");
+
+        assertArrayEquals("second content".getBytes(StandardCharsets.UTF_8), result);
+    }
+
+    @Test
+    void readEntryReadsTargetEntryFromSevenZip() throws IOException {
+        Path archive = tempDir.resolve("sample.7z");
+        writeSevenZipArchiveWithTwoEntries(archive, "first.txt", "first content", "second.txt", "second content");
+
+        byte[] result = ArchiveIO.readEntry(archive.toFile(), "second.txt");
+
+        assertArrayEquals("second content".getBytes(StandardCharsets.UTF_8), result);
     }
 
     @Test
@@ -198,5 +242,59 @@ class ArchiveIOTest {
             }
         }
         return outputStream.toByteArray();
+    }
+
+    private static byte[] writeZipArchiveWithTwoEntries(String name1, String contents1, String name2, String contents2) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
+            ZipEntry entry1 = new ZipEntry(name1);
+            zipOutputStream.putNextEntry(entry1);
+            zipOutputStream.write(contents1.getBytes(StandardCharsets.UTF_8));
+            zipOutputStream.closeEntry();
+            ZipEntry entry2 = new ZipEntry(name2);
+            zipOutputStream.putNextEntry(entry2);
+            zipOutputStream.write(contents2.getBytes(StandardCharsets.UTF_8));
+            zipOutputStream.closeEntry();
+        }
+        return outputStream.toByteArray();
+    }
+
+    private static void writeTarXzArchiveWithTwoEntries(Path archive, String name1, String contents1, String name2, String contents2) throws IOException {
+        try (OutputStream fileOutputStream = Files.newOutputStream(archive);
+             XZCompressorOutputStream xzOutputStream = new XZCompressorOutputStream(fileOutputStream);
+             TarArchiveOutputStream tarOutputStream = new TarArchiveOutputStream(xzOutputStream)) {
+            byte[] bytes1 = contents1.getBytes(StandardCharsets.UTF_8);
+            TarArchiveEntry entry1 = new TarArchiveEntry(name1);
+            entry1.setSize(bytes1.length);
+            tarOutputStream.putArchiveEntry(entry1);
+            tarOutputStream.write(bytes1);
+            tarOutputStream.closeArchiveEntry();
+            byte[] bytes2 = contents2.getBytes(StandardCharsets.UTF_8);
+            TarArchiveEntry entry2 = new TarArchiveEntry(name2);
+            entry2.setSize(bytes2.length);
+            tarOutputStream.putArchiveEntry(entry2);
+            tarOutputStream.write(bytes2);
+            tarOutputStream.closeArchiveEntry();
+            tarOutputStream.finish();
+        }
+    }
+
+    private static void writeSevenZipArchiveWithTwoEntries(Path archive, String name1, String contents1, String name2, String contents2) throws IOException {
+        try (SevenZOutputFile sevenZOutputFile = new SevenZOutputFile(archive.toFile())) {
+            byte[] bytes1 = contents1.getBytes(StandardCharsets.UTF_8);
+            SevenZArchiveEntry entry1 = new SevenZArchiveEntry();
+            entry1.setName(name1);
+            entry1.setSize(bytes1.length);
+            sevenZOutputFile.putArchiveEntry(entry1);
+            sevenZOutputFile.write(bytes1);
+            sevenZOutputFile.closeArchiveEntry();
+            byte[] bytes2 = contents2.getBytes(StandardCharsets.UTF_8);
+            SevenZArchiveEntry entry2 = new SevenZArchiveEntry();
+            entry2.setName(name2);
+            entry2.setSize(bytes2.length);
+            sevenZOutputFile.putArchiveEntry(entry2);
+            sevenZOutputFile.write(bytes2);
+            sevenZOutputFile.closeArchiveEntry();
+        }
     }
 }

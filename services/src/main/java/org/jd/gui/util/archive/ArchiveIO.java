@@ -99,6 +99,70 @@ public final class ArchiveIO {
         };
     }
 
+    public static byte[] readEntry(File file, String entryName) throws IOException {
+        return readEntry(new FileSource(file), entryName, DEFAULT_READ_LIMITS);
+    }
+
+    private static byte[] readEntry(ArchiveSource source, String entryName, ArchiveReadLimits limits) throws IOException {
+        ArchiveFormat format = ArchiveFormat.fromFileName(source.fileName());
+        return switch (format.kind()) {
+            case ZIP -> readZipEntry(source, entryName, limits);
+            case TAR_GZ -> readTarEntry(source, entryName, CompressionType.GZIP, limits);
+            case TAR_BZ2 -> readTarEntry(source, entryName, CompressionType.BZIP2, limits);
+            case TAR_XZ -> readTarEntry(source, entryName, CompressionType.XZ, limits);
+            case SEVEN_Z -> readSevenZipEntry(source, entryName, limits);
+        };
+    }
+
+    private static byte[] readZipEntry(ArchiveSource source, String entryName, ArchiveReadLimits limits) throws IOException {
+        ArchiveReadContext readContext = new ArchiveReadContext(source.fileName(), source.compressedLength(), limits);
+        try (ZipInputStream zipInputStream = new ZipInputStream(source.openStream())) {
+            ZipEntry entry;
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+                readContext.registerEntry(entry.getName());
+                String normalizedName = normalizeEntryName(entry.getName(), entry.isDirectory());
+                if (!entry.isDirectory() && entryName.equals(normalizedName)) {
+                    return readEntryBytes(zipInputStream, readContext, normalizedName, entry.getCompressedSize());
+                }
+            }
+        }
+        return null;
+    }
+
+    private static byte[] readTarEntry(ArchiveSource source, String entryName, CompressionType compressionType, ArchiveReadLimits limits) throws IOException {
+        ArchiveReadContext readContext = new ArchiveReadContext(source.fileName(), source.compressedLength(), limits);
+        try (InputStream fileInputStream = source.openStream();
+             InputStream archiveInputStream = wrapCompressedInputStream(fileInputStream, compressionType);
+             TarArchiveInputStream tarInputStream = new TarArchiveInputStream(archiveInputStream)) {
+            TarArchiveEntry entry;
+            while ((entry = tarInputStream.getNextEntry()) != null) {
+                readContext.registerEntry(entry.getName());
+                String normalizedName = normalizeEntryName(entry.getName(), entry.isDirectory());
+                if (!entry.isDirectory() && entryName.equals(normalizedName)) {
+                    return readEntryBytes(tarInputStream, readContext, normalizedName, UNKNOWN_COMPRESSED_LENGTH);
+                }
+            }
+        }
+        return null;
+    }
+
+    private static byte[] readSevenZipEntry(ArchiveSource source, String entryName, ArchiveReadLimits limits) throws IOException {
+        ArchiveReadContext readContext = new ArchiveReadContext(source.fileName(), source.compressedLength(), limits);
+        try (SevenZFile sevenZFile = openSevenZipFile(source)) {
+            SevenZArchiveEntry entry;
+            while ((entry = sevenZFile.getNextEntry()) != null) {
+                readContext.registerEntry(entry.getName());
+                String normalizedName = normalizeEntryName(entry.getName(), entry.isDirectory());
+                if (!entry.isDirectory() && entryName.equals(normalizedName)) {
+                    try (InputStream inputStream = sevenZFile.getInputStream(entry)) {
+                        return readEntryBytes(inputStream, readContext, normalizedName, UNKNOWN_COMPRESSED_LENGTH);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     private static boolean hasSupportedExtension(String fileName, String[] extensions) {
         if (fileName == null) {
             return false;
