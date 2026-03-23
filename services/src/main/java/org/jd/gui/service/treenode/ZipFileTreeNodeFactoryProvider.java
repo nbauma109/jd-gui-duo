@@ -12,6 +12,7 @@ import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.spi.TreeNodeFactory;
+import org.jd.gui.util.archive.ArchiveIO;
 import org.jd.gui.util.ImageUtil;
 import org.jd.gui.view.data.TreeNodeBean;
 
@@ -26,7 +27,14 @@ public class ZipFileTreeNodeFactoryProvider extends DirectoryTreeNodeFactoryProv
 
     @Override
     public String[] getSelectors() {
-        return appendSelectors("*:file:*.zip", "*:file:*.aar", "*:file:*.tar.gz", "*:file:*.tar.bz2", "*:file:*.tar.xz", "*:file:*.7z");
+        return appendSelectors(
+            "*:file:*." + ArchiveIO.EXTENSION_ZIP,
+            "*:file:*.aar",
+            "*:file:*." + ArchiveIO.EXTENSION_TAR_GZ,
+            "*:file:*." + ArchiveIO.EXTENSION_TAR_BZ2,
+            "*:file:*." + ArchiveIO.EXTENSION_TAR_XZ,
+            "*:file:*." + ArchiveIO.EXTENSION_SEVEN_Z
+        );
     }
 
     @Override

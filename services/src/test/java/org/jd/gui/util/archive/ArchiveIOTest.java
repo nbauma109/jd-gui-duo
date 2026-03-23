@@ -17,37 +17,42 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ArchiveExtractionTest {
+class ArchiveIOTest {
 
     @TempDir
     Path tempDir;
 
     @Test
-    void extractsTarXzArchives() throws IOException {
+    void readsTarXzArchivesFromFile() throws IOException {
         Path archive = tempDir.resolve("sample.tar.xz");
         writeTarXzArchive(archive, "docs/readme.txt", "hello tar");
 
-        Path extractedRoot = ArchiveExtraction.extractToTemporaryDirectory(archive);
+        ArchiveIO.ArchiveSnapshot snapshot = ArchiveIO.readArchive(archive.toFile());
 
-        assertEquals("hello tar", Files.readString(extractedRoot.resolve("docs/readme.txt")));
+        assertEquals(1, snapshot.entries().size());
+        assertEquals("hello tar", new String(snapshot.entries().get("docs/readme.txt").bytes(), StandardCharsets.UTF_8));
     }
 
     @Test
-    void extractsSevenZipArchives() throws IOException {
+    void readsSevenZipArchivesFromMemory() throws IOException {
         Path archive = tempDir.resolve("sample.7z");
         writeSevenZipArchive(archive, "pkg/data.txt", "hello 7z");
 
-        Path extractedRoot = ArchiveExtraction.extractToTemporaryDirectory(archive);
+        ArchiveIO.ArchiveSnapshot snapshot = ArchiveIO.readArchive("sample.7z", Files.readAllBytes(archive));
 
-        assertEquals("hello 7z", Files.readString(extractedRoot.resolve("pkg/data.txt")));
+        assertEquals(1, snapshot.entries().size());
+        assertEquals("hello 7z", new String(snapshot.entries().get("pkg/data.txt").bytes(), StandardCharsets.UTF_8));
     }
 
     @Test
-    void recognizesMultipartArchiveExtensions() {
-        assertTrue(ArchiveExtraction.hasSupportedExtension("sample.tar.gz"));
-        assertTrue(ArchiveExtraction.hasSupportedExtension("sample.tar.bz2"));
-        assertTrue(ArchiveExtraction.hasSupportedExtension("sample.tar.xz"));
-        assertTrue(ArchiveExtraction.hasSupportedExtension("sample.7z"));
+    void recognizesSupportedArchiveExtensions() {
+        assertTrue(ArchiveIO.hasSupportedArchiveExtension("sample.jar"));
+        assertTrue(ArchiveIO.hasSupportedArchiveExtension("sample.tar.gz"));
+        assertTrue(ArchiveIO.hasSupportedArchiveExtension("sample.tar.bz2"));
+        assertTrue(ArchiveIO.hasSupportedArchiveExtension("sample.tar.xz"));
+        assertTrue(ArchiveIO.hasSupportedArchiveExtension("sample.7z"));
+        assertTrue(ArchiveIO.hasSupportedOpenArchiveExtension("sample.tar.xz"));
+        assertTrue(ArchiveIO.hasSupportedOpenArchiveExtension("sample.7z"));
     }
 
     private static void writeTarXzArchive(Path archive, String entryName, String contents) throws IOException {
@@ -66,10 +71,10 @@ class ArchiveExtractionTest {
 
     private static void writeSevenZipArchive(Path archive, String entryName, String contents) throws IOException {
         byte[] bytes = contents.getBytes(StandardCharsets.UTF_8);
-        Path sourceFile = Files.createTempFile(archive.getParent(), "entry", ".bin");
-        Files.write(sourceFile, bytes);
         try (SevenZOutputFile sevenZOutputFile = new SevenZOutputFile(archive.toFile())) {
-            SevenZArchiveEntry entry = sevenZOutputFile.createArchiveEntry(sourceFile.toFile(), entryName);
+            SevenZArchiveEntry entry = new SevenZArchiveEntry();
+            entry.setName(entryName);
+            entry.setSize(bytes.length);
             sevenZOutputFile.putArchiveEntry(entry);
             sevenZOutputFile.write(bytes);
             sevenZOutputFile.closeArchiveEntry();

@@ -83,10 +83,10 @@ class ComparerArchiveSupportTest {
 
     private static void writeSevenZipArchive(Path archive, String entryName, String contents) throws IOException {
         byte[] bytes = contents.getBytes(StandardCharsets.UTF_8);
-        Path sourceFile = Files.createTempFile(archive.getParent(), "entry", ".bin");
-        Files.write(sourceFile, bytes);
         try (SevenZOutputFile sevenZOutputFile = new SevenZOutputFile(archive.toFile())) {
-            SevenZArchiveEntry entry = sevenZOutputFile.createArchiveEntry(sourceFile.toFile(), entryName);
+            SevenZArchiveEntry entry = new SevenZArchiveEntry();
+            entry.setName(entryName);
+            entry.setSize(bytes.length);
             sevenZOutputFile.putArchiveEntry(entry);
             sevenZOutputFile.write(bytes);
             sevenZOutputFile.closeArchiveEntry();
