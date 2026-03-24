@@ -16,7 +16,6 @@
  ******************************************************************************/
 package tim.jarcomp;
 
-import org.apache.commons.io.IOUtils;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.core.v1.util.ZipLoader;
@@ -43,12 +42,10 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipFile;
 
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -222,6 +219,8 @@ public class CompareWindow {
             Map<String, String> preferences = api.getPreferences();
             preferences.put(Preferences.WRITE_LINE_NUMBERS, "false");
             preferences.put(Preferences.REALIGN_LINE_NUMBERS, "false");
+
+            // For class files, we need to load via ArchiveSupport to handle decompilation
             try (FileInputStream in = new FileInputStream(file)) {
                 ZipLoader zipLoader = new ZipLoader(in);
                 String decompileEngine = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
@@ -231,9 +230,14 @@ public class CompareWindow {
                 return decompilationResult.getDecompiledOutput();
             }
         }
-        try (ZipFile zipFile = new ZipFile(file);
-             InputStream in = zipFile.getInputStream(zipFile.getEntry(entryPath))) {
-            return IOUtils.toString(in, StandardCharsets.UTF_8);
+
+        // For non-class files, use ArchiveReader to support all formats
+        try (ArchiveReader reader = new ArchiveReader(file)) {
+            byte[] content = reader.getEntryContent(entryPath);
+            if (content == null) {
+                return "";
+            }
+            return new String(content, StandardCharsets.UTF_8);
         }
     }
 

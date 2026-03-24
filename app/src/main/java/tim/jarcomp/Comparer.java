@@ -70,7 +70,7 @@ public final class Comparer {
                 if (details == null) {
                     details = new EntryDetails();
                     details.setName(name);
-                    if (!name.endsWith("/") && !name.contains("$")) {
+                    if (!archiveEntry.isDirectory() && !name.contains("$")) {
                         inList.add(details);
                     }
                 }

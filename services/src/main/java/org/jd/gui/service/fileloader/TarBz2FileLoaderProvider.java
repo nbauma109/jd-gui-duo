@@ -29,7 +29,7 @@ public class TarBz2FileLoaderProvider extends AbstractFileLoaderProvider {
     public String[] getExtensions() { return EXTENSIONS; }
 
     @Override
-    public String getDescription() { return "Tar BZ2 archives (*.tar.bz2, *.tbz2)"; }
+    public String getDescription() { return "Tar BZ2 archives (*.tar.bz2, *.tbz2, *.tar.bz)"; }
 
     @Override
     public boolean accept(API api, File file) {

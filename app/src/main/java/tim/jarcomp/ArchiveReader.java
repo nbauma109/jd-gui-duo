@@ -9,9 +9,11 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -117,6 +119,85 @@ public class ArchiveReader implements AutoCloseable {
                 ));
             }
         }
+    }
+
+    /**
+     * Get the content of a specific entry as a byte array
+     *
+     * @param entryPath path of the entry in the archive
+     * @return byte array containing the entry content, or null if not found
+     * @throws IOException if an error occurs reading the archive
+     */
+    public byte[] getEntryContent(String entryPath) throws IOException {
+        switch (type) {
+            case ZIP:
+                ZipEntry zipEntry = zipFile.getEntry(entryPath);
+                if (zipEntry == null || zipEntry.isDirectory()) {
+                    return null;
+                }
+                try (InputStream is = zipFile.getInputStream(zipEntry)) {
+                    return readAllBytes(is);
+                }
+
+            case TAR_GZ:
+                return readTarEntryContent(new GzipCompressorInputStream(
+                    new BufferedInputStream(new FileInputStream(file))), entryPath);
+
+            case TAR_XZ:
+                return readTarEntryContent(new XZCompressorInputStream(
+                    new BufferedInputStream(new FileInputStream(file))), entryPath);
+
+            case TAR_BZ2:
+                return readTarEntryContent(new BZip2CompressorInputStream(
+                    new BufferedInputStream(new FileInputStream(file))), entryPath);
+
+            case SEVEN_ZIP:
+                return readSevenZEntryContent(entryPath);
+
+            default:
+                return null;
+        }
+    }
+
+    private byte[] readTarEntryContent(InputStream compressorStream, String entryPath) throws IOException {
+        try (TarArchiveInputStream tis = new TarArchiveInputStream(compressorStream)) {
+            TarArchiveEntry entry;
+            while ((entry = tis.getNextEntry()) != null) {
+                if (entry.getName().equals(entryPath) && !entry.isDirectory()) {
+                    return readAllBytes(tis);
+                }
+            }
+        }
+        return null;
+    }
+
+    private byte[] readSevenZEntryContent(String entryPath) throws IOException {
+        // Need to re-open the 7z file to read content
+        try (SevenZFile sz = SevenZFile.builder().setFile(file).get()) {
+            SevenZArchiveEntry entry;
+            while ((entry = sz.getNextEntry()) != null) {
+                if (entry.getName().equals(entryPath) && !entry.isDirectory()) {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    byte[] buffer = new byte[8192];
+                    int bytesRead;
+                    while ((bytesRead = sz.read(buffer)) != -1) {
+                        baos.write(buffer, 0, bytesRead);
+                    }
+                    return baos.toByteArray();
+                }
+            }
+        }
+        return null;
+    }
+
+    private byte[] readAllBytes(InputStream is) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buffer = new byte[8192];
+        int bytesRead;
+        while ((bytesRead = is.read(buffer)) != -1) {
+            baos.write(buffer, 0, bytesRead);
+        }
+        return baos.toByteArray();
     }
 
     @Override
