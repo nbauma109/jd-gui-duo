@@ -22,8 +22,12 @@ org.jd.gui.service.treenode.MetainfServiceFileTreeNodeFactoryProvider
 org.jd.gui.service.treenode.ModuleInfoFileTreeNodeFactoryProvider
 org.jd.gui.service.treenode.PackageTreeNodeFactoryProvider
 org.jd.gui.service.treenode.PropertiesFileTreeNodeFactoryProvider
+org.jd.gui.service.treenode.SevenZipFileTreeNodeFactoryProvider
 org.jd.gui.service.treenode.SqlFileTreeNodeFactoryProvider
 org.jd.gui.service.treenode.SpiFileTreeNodeFactoryProvider
+org.jd.gui.service.treenode.TarBz2FileTreeNodeFactoryProvider
+org.jd.gui.service.treenode.TarGzFileTreeNodeFactoryProvider
+org.jd.gui.service.treenode.TarXzFileTreeNodeFactoryProvider
 org.jd.gui.service.treenode.TextFileTreeNodeFactoryProvider
 org.jd.gui.service.treenode.WarFileTreeNodeFactoryProvider
 org.jd.gui.service.treenode.WarPackageTreeNodeFactoryProvider
