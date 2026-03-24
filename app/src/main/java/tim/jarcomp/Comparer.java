@@ -3,16 +3,16 @@ package tim.jarcomp;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Class to do the actual comparison of jar files, populating a list of
  * EntryDetails objects
  */
 public final class Comparer {
+
+    private static final Logger LOGGER = Logger.getLogger(Comparer.class.getName());
 
     private Comparer() {
     }
@@ -31,17 +31,17 @@ public final class Comparer {
         results.setSize(1, inFile2.length());
         // Make empty list
         ArrayList<EntryDetails> entryList = new ArrayList<>();
-        // load first file, make entrydetails object for each one
-        final int numFiles1 = makeEntries(entryList, inFile1, 0);
-        results.setNumFiles(0, numFiles1);
-        // load second file, try to find entrydetails for each file or make new one
-        final int numFiles2 = makeEntries(entryList, inFile2, 1);
-        results.setNumFiles(1, numFiles2);
+        try {
+            ArchiveSupport.ArchiveSnapshot snapshot1 = ArchiveSupport.readSnapshot(inFile1);
+            ArchiveSupport.ArchiveSnapshot snapshot2 = ArchiveSupport.readSnapshot(inFile2);
+            results.setNumFiles(0, snapshot1.entryCount());
+            results.setNumFiles(1, snapshot2.entryCount());
+            makeEntries(entryList, snapshot1.entries(), 0);
+            makeEntries(entryList, snapshot2.entries(), 1);
+        } catch (IOException ioe) {
+            LOGGER.log(Level.WARNING, "Failed to read archive for comparison", ioe);
+        }
         results.setEntryList(entryList);
-
-        // Check CRC checksums as it's necessary
-        collectCRCChecksums(results, inFile1, 0);
-        collectCRCChecksums(results, inFile2, 1);
         return results;
     }
 
@@ -51,38 +51,25 @@ public final class Comparer {
      * Make entrydetails objects for each entry in the given file and put in list
      *
      * @param inList  list of entries so far
-     * @param inFile  zip/jar file to search through
+     * @param entries archive entries to search through
      * @param inIndex 0 for first file, 1 for second
-     * @return number of files found
      */
-    private static int makeEntries(ArrayList<EntryDetails> inList, File inFile, int inIndex) {
+    private static void makeEntries(ArrayList<EntryDetails> inList, java.util.Map<String, ArchiveSupport.ArchiveEntryData> entries, int inIndex) {
         boolean checkList = (!inList.isEmpty());
-        int numFiles = 0;
-        try (ZipFile zip = new ZipFile(inFile)) {
-            Enumeration<?> zipEntries = zip.entries();
-            while (zipEntries.hasMoreElements()) {
-                ZipEntry ze = (ZipEntry) zipEntries.nextElement();
-                numFiles++;
-                String name = ze.getName();
-                EntryDetails details = null;
-                if (checkList) {
-                    details = getEntryFromList(inList, name);
-                }
-                // Construct new details object if necessary
-                if (details == null) {
-                    details = new EntryDetails();
-                    details.setName(name);
-                    if (!name.endsWith("/") && !name.contains("$")) {
-                        inList.add(details);
-                    }
-                }
-                // set size
-                details.setSize(inIndex, ze.getSize());
+        for (java.util.Map.Entry<String, ArchiveSupport.ArchiveEntryData> archiveEntry : entries.entrySet()) {
+            String name = archiveEntry.getKey();
+            EntryDetails details = null;
+            if (checkList) {
+                details = getEntryFromList(inList, name);
             }
-        } catch (IOException ioe) {
-            System.err.println(ioe);
+            if (details == null) {
+                details = new EntryDetails();
+                details.setName(name);
+                inList.add(details);
+            }
+            details.setSize(inIndex, archiveEntry.getValue().size());
+            details.setCRCChecksum(inIndex, archiveEntry.getValue().checksum());
         }
-        return numFiles;
     }
 
     /**
@@ -100,31 +87,5 @@ public final class Comparer {
             }
         }
         return null;
-    }
-
-    /**
-     * Collect the CRC checksums of all relevant entries
-     *
-     * @param inResults results from preliminary check
-     * @param inFile    file to read
-     * @param inIndex   0 or 1
-     */
-    private static void collectCRCChecksums(CompareResults inResults, File inFile, int inIndex) {
-        List<EntryDetails> list = inResults.getEntryList();
-        try (ZipFile zip = new ZipFile(inFile)) {
-            for (EntryDetails entry : list) {
-                if (entry.getStatus() == EntryDetails.EntryStatus.SAME_SIZE) {
-                    // Must be present in both archives if size is the same
-                    ZipEntry zipEntry = zip.getEntry(entry.getName());
-                    if (zipEntry == null) {
-                        System.err.println("zipEntry for " + entry.getName() + " shouldn't be null!");
-                    } else {
-                        entry.setCRCChecksum(inIndex, zipEntry.getCrc());
-                    }
-                }
-            }
-        } catch (Exception e) {
-            System.err.println(e);
-        }
     }
 }

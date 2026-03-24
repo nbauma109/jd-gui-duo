@@ -18,6 +18,8 @@ import java.util.Map;
 
 public class FileLoaderService {
     protected static final FileLoaderService FILE_LOADER_SERVICE = new FileLoaderService();
+    private static final String EXTENSION_PREFIX = ".";
+    private static final int NO_MATCH = -1;
 
     public static FileLoaderService getInstance() { return FILE_LOADER_SERVICE; }
 
@@ -34,13 +36,20 @@ public class FileLoaderService {
     }
 
     public FileLoader get(File file) {
-        String name = file.getName();
-        int lastDot = name.lastIndexOf('.');
-        if (lastDot == -1 || lastDot == name.length() - 1) {
+        String name = file.getName().toLowerCase(Locale.ROOT);
+        if (name.isEmpty()) {
             return null;
         }
-        String extension = name.substring(lastDot + 1).toLowerCase(Locale.ROOT);
-        return mapProviders.get(extension);
+        FileLoader matchedLoader = null;
+        int matchedLength = NO_MATCH;
+        for (Map.Entry<String, FileLoader> entry : mapProviders.entrySet()) {
+            String extension = entry.getKey().toLowerCase(Locale.ROOT);
+            if (name.endsWith(EXTENSION_PREFIX + extension) && extension.length() > matchedLength) {
+                matchedLoader = entry.getValue();
+                matchedLength = extension.length();
+            }
+        }
+        return matchedLoader;
     }
 
     public Map<String, FileLoader> getMapProviders() {
