@@ -15,12 +15,18 @@ import org.jd.gui.service.configuration.ConfigurationPersisterService;
 import org.jd.gui.util.net.InterProcessCommunicationUtil;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
@@ -34,7 +40,9 @@ public class App {
 
     public static void main(String[] args) {
         if (checkHelpFlag(args)) {
-            JOptionPane.showMessageDialog(null, "Usage: jd-gui [option] [input-file] ...\n\nOption:\n -h Show this help message and exit", Constants.APP_NAME, JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Usage: jd-gui [option] [input-file] ...\n\nOption:\n -h         Show this help message and exit\n --version  Show version information and exit", Constants.APP_NAME, JOptionPane.INFORMATION_MESSAGE);
+        } else if (checkVersionFlag(args)) {
+            JOptionPane.showMessageDialog(null, Constants.APP_NAME + " " + getVersion(), Constants.APP_NAME, JOptionPane.INFORMATION_MESSAGE);
         } else {
             // Load preferences
             ConfigurationPersister persister = ConfigurationPersisterService.getInstance().get();
@@ -82,12 +90,46 @@ public class App {
         return false;
     }
 
+    protected static boolean checkVersionFlag(String[] args) {
+        if (args != null) {
+            for (String arg : args) {
+                if ("--version".equals(arg) || "-v".equals(arg)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    protected static String getVersion() {
+        try {
+            Enumeration<URL> enumeration = App.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
+            while (enumeration.hasMoreElements()) {
+                try (InputStream is = enumeration.nextElement().openStream()) {
+                    Attributes attributes = new Manifest(is).getMainAttributes();
+                    if (attributes != null) {
+                        String version = attributes.getValue("JD-GUI-Version");
+                        if (version != null) {
+                            return version;
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            assert ExceptionUtil.printStackTrace(e);
+        }
+        return "Unknown";
+    }
+
     protected static List<File> newList(String[] paths) {
         if (paths == null) {
             return Collections.emptyList();
         }
         List<File> files = new ArrayList<>(paths.length);
         for (String rawPath : paths) {
+            if (rawPath != null && rawPath.startsWith("-")) {
+                continue;
+            }
             File validatedFile = validatePath(rawPath);
 
             if (validatedFile != null) {
