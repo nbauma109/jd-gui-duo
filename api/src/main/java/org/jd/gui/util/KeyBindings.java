@@ -167,7 +167,7 @@ public final class KeyBindings {
     }
 
     private static DefaultShortcutProvider shortcut(int keyCode, int modifiers) {
-        return _ -> KeyStroke.getKeyStroke(keyCode, modifiers);
+        return unused -> KeyStroke.getKeyStroke(keyCode, modifiers);
     }
 
     private static boolean isMac() {

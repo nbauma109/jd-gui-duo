@@ -318,8 +318,8 @@ public class CompareWindow {
         if (fileChooser == null) {
             fileChooser = new JFileChooser();
             fileChooser.setFileFilter(new GenericFileFilter(
-                    "Jar, Zip, War, and Ear archives",
-                    new String[]{"jar", "zip", "war", "ear"}
+                    "Archive files",
+                    new String[]{"jar", "zip", "war", "ear", "tar.gz", "tgz", "tar.xz", "txz", "tar.bz2", "tbz2", "7z"}
             ));
             // Start in user home directory
             File home = new File(System.getProperty("user.home"));
@@ -343,7 +343,7 @@ public class CompareWindow {
             if (fileChooser.showOpenDialog(parentFrame) == JFileChooser.APPROVE_OPTION) {
                 File chosen = fileChooser.getSelectedFile();
                 if (!isArchiveFile(chosen)) {
-                    JOptionPane.showMessageDialog(parentFrame, "Please choose a .jar, .zip, .war, or .ear file.", "Invalid File Type", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(parentFrame, "Please choose a valid archive file.", "Invalid File Type", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 field1.setText(chosen.getAbsolutePath());
@@ -367,7 +367,7 @@ public class CompareWindow {
             if (fileChooser.showOpenDialog(parentFrame) == JFileChooser.APPROVE_OPTION) {
                 File chosen = fileChooser.getSelectedFile();
                 if (!isArchiveFile(chosen)) {
-                    JOptionPane.showMessageDialog(parentFrame, "Please choose a .jar, .zip, .war, or .ear file.", "Invalid File Type", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(parentFrame, "Please choose a valid archive file.", "Invalid File Type", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 field2.setText(chosen.getAbsolutePath());
@@ -394,11 +394,11 @@ public class CompareWindow {
             File file2 = field2.getText().isEmpty() ? null : new File(field2.getText());
 
             if (file1 == null || !file1.exists() || !file1.canRead() || !isArchiveFile(file1)) {
-                JOptionPane.showMessageDialog(parentFrame, "First file is invalid. Please select a readable .jar, .zip, .war, or .ear file.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(parentFrame, "First file is invalid. Please select a readable archive file.", "Error", JOptionPane.ERROR_MESSAGE);
                 return null;
             }
             if (file2 == null || !file2.exists() || !file2.canRead() || !isArchiveFile(file2)) {
-                JOptionPane.showMessageDialog(parentFrame, "Second file is invalid. Please select a readable .jar, .zip, .war, or .ear file.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(parentFrame, "Second file is invalid. Please select a readable archive file.", "Error", JOptionPane.ERROR_MESSAGE);
                 return null;
             }
             if (file1.equals(file2)) {
@@ -463,14 +463,18 @@ public class CompareWindow {
      * Check if a file has an allowed archive extension.
      *
      * @param f file to check
-     * @return true if extension is jar, zip, war, or ear
+     * @return true if extension is jar, zip, war, ear, tar.gz, tgz, tar.xz, txz, tar.bz2, tbz2, or 7z
      */
     private boolean isArchiveFile(File f) {
         if (f == null) {
             return false;
         }
         String name = f.getName().toLowerCase();
-        return name.endsWith(".jar") || name.endsWith(".zip") || name.endsWith(".war") || name.endsWith(".ear");
+        return name.endsWith(".jar") || name.endsWith(".zip") || name.endsWith(".war") || name.endsWith(".ear")
+            || name.endsWith(".tar.gz") || name.endsWith(".tgz")
+            || name.endsWith(".tar.xz") || name.endsWith(".txz")
+            || name.endsWith(".tar.bz2") || name.endsWith(".tbz2") || name.endsWith(".tar.bz")
+            || name.endsWith(".7z");
     }
 
     private Color computeAlternateColor() {
