@@ -19,6 +19,7 @@ package tim.jarcomp;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
+import org.jd.gui.api.model.ArchiveFormat;
 import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.loader.LoaderUtils;
 import org.jdesktop.swingx.JXTable;
@@ -75,6 +76,16 @@ public class CompareWindow {
 
     private static final Color YELLOW = new Color(255, 255, 200);
     private static final Color DARK_GRAY = new Color(0x2A2A2A);
+    private static final ArchiveFormat[] COMPARE_ARCHIVE_FORMATS = {
+        ArchiveFormat.JAR,
+        ArchiveFormat.ZIP,
+        ArchiveFormat.WAR,
+        ArchiveFormat.EAR,
+        ArchiveFormat.TAR_GZ,
+        ArchiveFormat.TAR_XZ,
+        ArchiveFormat.TAR_BZ2,
+        ArchiveFormat.SEVEN_ZIP
+    };
 
     /** Main window object */
     private JFrame mainWindow;
@@ -337,7 +348,7 @@ public class CompareWindow {
 
     /**
      * Show a dialog with two file selectors and return the selected files.
-     * The text fields are wide and accept drag and drop of .jar, .zip, .war, or .ear files.
+     * The text fields are wide and accept drag and drop of supported archive files.
      *
      * @param parentFrame parent frame for the dialog
      * @param default1    optional default file for the first selector
@@ -354,7 +365,7 @@ public class CompareWindow {
             fileChooser = new JFileChooser();
             fileChooser.setFileFilter(new GenericFileFilter(
                     "Archive files",
-                    new String[]{"jar", "zip", "war", "ear", "tar.gz", "tgz", "tar.xz", "txz", "tar.bz", "tar.bz2", "tbz2", "7z"}
+                    ArchiveFormat.extensionsOf(COMPARE_ARCHIVE_FORMATS)
             ));
             // Start in user home directory
             File home = new File(System.getProperty("user.home"));
@@ -374,16 +385,7 @@ public class CompareWindow {
         configureFileDrop(field1, parentFrame);
 
         JButton button1 = new JButton(new ImageIcon(getClass().getResource("/org/jd/gui/images/open.png")));
-        button1.addActionListener(e -> {
-            if (fileChooser.showOpenDialog(parentFrame) == JFileChooser.APPROVE_OPTION) {
-                File chosen = fileChooser.getSelectedFile();
-                if (!isArchiveFile(chosen)) {
-                    JOptionPane.showMessageDialog(parentFrame, "Please choose a valid archive file.", "Invalid File Type", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                field1.setText(chosen.getAbsolutePath());
-            }
-        });
+        button1.addActionListener(e -> chooseArchiveFile(parentFrame, field1));
         filePanel1.add(field1, BorderLayout.CENTER);
         filePanel1.add(button1, BorderLayout.EAST);
 
@@ -398,16 +400,7 @@ public class CompareWindow {
         configureFileDrop(field2, parentFrame);
 
         JButton button2 = new JButton(new ImageIcon(getClass().getResource("/org/jd/gui/images/open.png")));
-        button2.addActionListener(e -> {
-            if (fileChooser.showOpenDialog(parentFrame) == JFileChooser.APPROVE_OPTION) {
-                File chosen = fileChooser.getSelectedFile();
-                if (!isArchiveFile(chosen)) {
-                    JOptionPane.showMessageDialog(parentFrame, "Please choose a valid archive file.", "Invalid File Type", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                field2.setText(chosen.getAbsolutePath());
-            }
-        });
+        button2.addActionListener(e -> chooseArchiveFile(parentFrame, field2));
         filePanel2.add(field2, BorderLayout.CENTER);
         filePanel2.add(button2, BorderLayout.EAST);
 
@@ -425,15 +418,10 @@ public class CompareWindow {
         );
 
         if (result == JOptionPane.OK_OPTION) {
-            File file1 = field1.getText().isEmpty() ? null : new File(field1.getText());
-            File file2 = field2.getText().isEmpty() ? null : new File(field2.getText());
+            File file1 = validateSelectedArchive(parentFrame, field1.getText(), "First");
+            File file2 = validateSelectedArchive(parentFrame, field2.getText(), "Second");
 
-            if (file1 == null || !file1.exists() || !file1.canRead() || !isArchiveFile(file1)) {
-                JOptionPane.showMessageDialog(parentFrame, "First file is invalid. Please select a readable archive file.", "Error", JOptionPane.ERROR_MESSAGE);
-                return null;
-            }
-            if (file2 == null || !file2.exists() || !file2.canRead() || !isArchiveFile(file2)) {
-                JOptionPane.showMessageDialog(parentFrame, "Second file is invalid. Please select a readable archive file.", "Error", JOptionPane.ERROR_MESSAGE);
+            if ((file1 == null) || (file2 == null)) {
                 return null;
             }
             if (file1.equals(file2)) {
@@ -444,6 +432,28 @@ public class CompareWindow {
         }
 
         return null;
+    }
+
+    private void chooseArchiveFile(JFrame parentFrame, JTextField field) {
+        if (fileChooser.showOpenDialog(parentFrame) == JFileChooser.APPROVE_OPTION) {
+            File chosen = fileChooser.getSelectedFile();
+            if (!isArchiveFile(chosen)) {
+                JOptionPane.showMessageDialog(parentFrame, "Please choose a valid archive file.", "Invalid File Type", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            field.setText(chosen.getAbsolutePath());
+        }
+    }
+
+    private File validateSelectedArchive(JFrame parentFrame, String path, String label) {
+        File file = path.isEmpty() ? null : new File(path);
+
+        if (file == null || !file.exists() || !file.canRead() || !isArchiveFile(file)) {
+            JOptionPane.showMessageDialog(parentFrame, label + " file is invalid. Please select a readable archive file.", "Error", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+
+        return file;
     }
 
     /**
@@ -480,7 +490,7 @@ public class CompareWindow {
                         return false;
                     }
                     if (!isArchiveFile(f)) {
-                        JOptionPane.showMessageDialog(parentFrame, "Please drop a .jar, .zip, .war, or .ear file.", "Invalid File Type", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(parentFrame, "Please drop a supported archive file.", "Invalid File Type", JOptionPane.ERROR_MESSAGE);
                         return false;
                     }
                     field.setText(f.getAbsolutePath());
@@ -498,18 +508,10 @@ public class CompareWindow {
      * Check if a file has an allowed archive extension.
      *
      * @param f file to check
-     * @return true if extension is jar, zip, war, ear, tar.gz, tgz, tar.xz, txz, tar.bz2, tbz2, or 7z
+     * @return true if the file matches one of the supported archive formats
      */
     private boolean isArchiveFile(File f) {
-        if (f == null) {
-            return false;
-        }
-        String name = f.getName().toLowerCase();
-        return name.endsWith(".jar") || name.endsWith(".zip") || name.endsWith(".war") || name.endsWith(".ear")
-            || name.endsWith(".tar.gz") || name.endsWith(".tgz")
-            || name.endsWith(".tar.xz") || name.endsWith(".txz")
-            || name.endsWith(".tar.bz2") || name.endsWith(".tbz2") || name.endsWith(".tar.bz")
-            || name.endsWith(".7z");
+        return f != null && ArchiveFormat.matchesAny(f.getName(), COMPARE_ARCHIVE_FORMATS);
     }
 
     private Color computeAlternateColor() {

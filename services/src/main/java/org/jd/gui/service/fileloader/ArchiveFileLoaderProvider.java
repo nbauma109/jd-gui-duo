@@ -9,9 +9,11 @@ package org.jd.gui.service.fileloader;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
+import org.jd.gui.api.model.ArchiveFormat;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
@@ -19,36 +21,42 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Iterator;
 
-/**
- * Abstract base class for archive file loader providers that use NIO FileSystem.
- * Eliminates code duplication across tar.gz, tar.xz, tar.bz2, and 7z loaders.
- */
-public abstract class AbstractArchiveFileLoaderProvider extends AbstractFileLoaderProvider {
+public class ArchiveFileLoaderProvider extends AbstractFileLoaderProvider {
+    private static final ArchiveFormat[] SUPPORTED_FORMATS = {
+        ArchiveFormat.TAR_GZ,
+        ArchiveFormat.TAR_XZ,
+        ArchiveFormat.TAR_BZ2,
+        ArchiveFormat.SEVEN_ZIP
+    };
+    private static final String[] EXTENSIONS = ArchiveFormat.extensionsOf(SUPPORTED_FORMATS);
+    private static final String DESCRIPTION = "Archive files (*.tar.gz, *.tgz, *.tar.xz, *.txz, *.tar.bz2, *.tbz2, *.tar.bz, *.7z)";
+
+    @Override
+    public String[] getExtensions() {
+        return EXTENSIONS;
+    }
+
+    @Override
+    public String getDescription() {
+        return DESCRIPTION;
+    }
 
     @Override
     public boolean accept(API api, File file) {
-        if (!file.exists() || !file.isFile() || !file.canRead()) {
-            return false;
-        }
-        String name = file.getName().toLowerCase();
-        for (String ext : getExtensions()) {
-            if (name.endsWith("." + ext)) {
-                return true;
-            }
-        }
-        return false;
+        return file.exists() && file.isFile() && file.canRead() && ArchiveFormat.matchesAny(file.getName(), SUPPORTED_FORMATS);
     }
 
     @Override
     public boolean load(API api, File file) {
         try {
+            URI uri = URI.create("smartnio:" + file.toURI());
             FileSystem fileSystem;
 
             try {
-                fileSystem = FileSystems.getFileSystem(file.toPath());
+                fileSystem = FileSystems.getFileSystem(uri);
             } catch (FileSystemNotFoundException e) {
                 // Resource leak : file system cannot be closed until the application is closed
-                fileSystem = FileSystems.newFileSystem(file.toPath(), Collections.emptyMap());
+                fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
             }
 
             if (fileSystem != null) {

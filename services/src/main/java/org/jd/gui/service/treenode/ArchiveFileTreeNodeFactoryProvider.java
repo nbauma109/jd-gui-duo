@@ -10,6 +10,7 @@ package org.jd.gui.service.treenode;
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.ContainerEntryGettable;
 import org.jd.gui.api.feature.UriGettable;
+import org.jd.gui.api.model.ArchiveFormat;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.spi.TreeNodeFactory;
 import org.jd.gui.util.ImageUtil;
@@ -20,13 +21,19 @@ import java.io.File;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-/**
- * Abstract base class for archive tree node factory providers.
- * Eliminates code duplication across tar.gz, tar.xz, tar.bz2, and 7z tree node factories.
- */
-public abstract class AbstractArchiveFileTreeNodeFactoryProvider extends DirectoryTreeNodeFactoryProvider {
+public class ArchiveFileTreeNodeFactoryProvider extends DirectoryTreeNodeFactoryProvider {
+    private static final ArchiveFormat[] SUPPORTED_FORMATS = {
+        ArchiveFormat.TAR_GZ,
+        ArchiveFormat.TAR_XZ,
+        ArchiveFormat.TAR_BZ2,
+        ArchiveFormat.SEVEN_ZIP
+    };
+    private static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/zip_obj.png"));
 
-    protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/zip_obj.png"));
+    @Override
+    public String[] getSelectors() {
+        return appendSelectors(ArchiveFormat.selectorsOf(SUPPORTED_FORMATS));
+    }
 
     @Override
     @SuppressWarnings("unchecked")
@@ -35,7 +42,6 @@ public abstract class AbstractArchiveFileTreeNodeFactoryProvider extends Directo
         String label = entry.getPath().substring(lastSlashIndex + 1);
         String location = new File(entry.getUri()).getPath();
         T node = (T) new TreeNode(entry, new TreeNodeBean(label, "Location: " + location, getIcon()));
-        // Add dummy node
         node.add(new DefaultMutableTreeNode());
         return node;
     }
@@ -46,23 +52,21 @@ public abstract class AbstractArchiveFileTreeNodeFactoryProvider extends Directo
     }
 
     protected class TreeNode extends DirectoryTreeNodeFactoryProvider.TreeNode {
-
         private static final long serialVersionUID = 1L;
 
         public TreeNode(Container.Entry entry, Object userObject) {
             super(entry, userObject);
         }
 
-        // --- TreeNodeExpandable --- //
         @Override
         public void populateTreeNode(API api) {
             if (!initialized) {
                 removeAllChildren();
 
-                for (Container.Entry e : getChildren()) {
-                    TreeNodeFactory factory = api.getTreeNodeFactory(e);
+                for (Container.Entry child : getChildren()) {
+                    TreeNodeFactory factory = api.getTreeNodeFactory(child);
                     if (factory != null) {
-                        add(factory.make(api, e));
+                        add(factory.make(api, child));
                     }
                 }
 

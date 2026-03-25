@@ -7,6 +7,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
+import org.jd.gui.api.model.ArchiveFormat;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -26,81 +27,59 @@ import java.util.zip.ZipFile;
 public class ArchiveReader implements AutoCloseable {
 
     private final File file;
-    private final ArchiveType type;
+    private final ArchiveFormat type;
     private ZipFile zipFile;
     private SevenZFile sevenZFile;
-
-    public enum ArchiveType {
-        ZIP, TAR_GZ, TAR_XZ, TAR_BZ2, SEVEN_ZIP
-    }
 
     public ArchiveReader(File file) throws IOException {
         this.file = file;
         this.type = detectType(file);
 
-        if (type == ArchiveType.ZIP) {
+        if (type == ArchiveFormat.ZIP) {
             zipFile = new ZipFile(file);
-        } else if (type == ArchiveType.SEVEN_ZIP) {
+        } else if (type == ArchiveFormat.SEVEN_ZIP) {
             sevenZFile = SevenZFile.builder().setFile(file).get();
         }
     }
 
-    private static ArchiveType detectType(File file) {
-        String name = file.getName().toLowerCase();
-        if (name.endsWith(".tar.gz") || name.endsWith(".tgz")) {
-            return ArchiveType.TAR_GZ;
-        } else if (name.endsWith(".tar.xz") || name.endsWith(".txz")) {
-            return ArchiveType.TAR_XZ;
-        } else if (name.endsWith(".tar.bz2") || name.endsWith(".tbz2") || name.endsWith(".tar.bz")) {
-            return ArchiveType.TAR_BZ2;
-        } else if (name.endsWith(".7z")) {
-            return ArchiveType.SEVEN_ZIP;
-        } else {
-            return ArchiveType.ZIP;
+    private static ArchiveFormat detectType(File file) {
+        if (ArchiveFormat.TAR_GZ.matches(file.getName())) {
+            return ArchiveFormat.TAR_GZ;
         }
+        if (ArchiveFormat.TAR_XZ.matches(file.getName())) {
+            return ArchiveFormat.TAR_XZ;
+        }
+        if (ArchiveFormat.TAR_BZ2.matches(file.getName())) {
+            return ArchiveFormat.TAR_BZ2;
+        }
+        if (ArchiveFormat.SEVEN_ZIP.matches(file.getName())) {
+            return ArchiveFormat.SEVEN_ZIP;
+        }
+        return ArchiveFormat.ZIP;
     }
 
     public List<ArchiveEntryInfo> getEntries() throws IOException {
         List<ArchiveEntryInfo> entries = new ArrayList<>();
 
-        switch (type) {
-            case ZIP:
-                zipFile.stream().forEach(zipEntry -> {
-                    entries.add(new ArchiveEntryInfo(
-                        zipEntry.getName(),
-                        zipEntry.getSize(),
-                        zipEntry.getCrc(),
-                        zipEntry.isDirectory()
-                    ));
-                });
-                break;
-
-            case TAR_GZ:
-                readTarEntries(entries, new GzipCompressorInputStream(
-                    new BufferedInputStream(new FileInputStream(file))));
-                break;
-
-            case TAR_XZ:
-                readTarEntries(entries, new XZCompressorInputStream(
-                    new BufferedInputStream(new FileInputStream(file))));
-                break;
-
-            case TAR_BZ2:
-                readTarEntries(entries, new BZip2CompressorInputStream(
-                    new BufferedInputStream(new FileInputStream(file))));
-                break;
-
-            case SEVEN_ZIP:
-                SevenZArchiveEntry entry;
-                while ((entry = sevenZFile.getNextEntry()) != null) {
-                    entries.add(new ArchiveEntryInfo(
-                        entry.getName(),
-                        entry.getSize(),
-                        entry.getCrcValue(),
-                        entry.isDirectory()
-                    ));
-                }
-                break;
+        if (type == ArchiveFormat.ZIP) {
+            zipFile.stream().forEach(zipEntry -> entries.add(new ArchiveEntryInfo(
+                zipEntry.getName(),
+                zipEntry.getSize(),
+                zipEntry.getCrc(),
+                zipEntry.isDirectory()
+            )));
+        } else if (type == ArchiveFormat.SEVEN_ZIP) {
+            SevenZArchiveEntry entry;
+            while ((entry = sevenZFile.getNextEntry()) != null) {
+                entries.add(new ArchiveEntryInfo(
+                    entry.getName(),
+                    entry.getSize(),
+                    entry.getCrcValue(),
+                    entry.isDirectory()
+                ));
+            }
+        } else {
+            readTarEntries(entries, openCompressorStream());
         }
 
         return entries;
@@ -140,33 +119,36 @@ public class ArchiveReader implements AutoCloseable {
      * @throws IOException if an error occurs reading the archive
      */
     public byte[] getEntryContent(String entryPath) throws IOException {
-        switch (type) {
-            case ZIP:
-                ZipEntry zipEntry = zipFile.getEntry(entryPath);
-                if (zipEntry == null || zipEntry.isDirectory()) {
-                    return null;
-                }
-                try (InputStream is = zipFile.getInputStream(zipEntry)) {
-                    return readAllBytes(is);
-                }
-
-            case TAR_GZ:
-                return readTarEntryContent(new GzipCompressorInputStream(
-                    new BufferedInputStream(new FileInputStream(file))), entryPath);
-
-            case TAR_XZ:
-                return readTarEntryContent(new XZCompressorInputStream(
-                    new BufferedInputStream(new FileInputStream(file))), entryPath);
-
-            case TAR_BZ2:
-                return readTarEntryContent(new BZip2CompressorInputStream(
-                    new BufferedInputStream(new FileInputStream(file))), entryPath);
-
-            case SEVEN_ZIP:
-                return readSevenZEntryContent(entryPath);
-
-            default:
+        if (type == ArchiveFormat.ZIP) {
+            ZipEntry zipEntry = zipFile.getEntry(entryPath);
+            if (zipEntry == null || zipEntry.isDirectory()) {
                 return null;
+            }
+            try (InputStream is = zipFile.getInputStream(zipEntry)) {
+                return readAllBytes(is);
+            }
+        }
+
+        if (type == ArchiveFormat.SEVEN_ZIP) {
+            return readSevenZEntryContent(entryPath);
+        }
+
+        return readTarEntryContent(openCompressorStream(), entryPath);
+    }
+
+    private InputStream openCompressorStream() throws IOException {
+        BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file));
+
+        try {
+            return switch (type) {
+                case TAR_GZ -> new GzipCompressorInputStream(inputStream);
+                case TAR_XZ -> new XZCompressorInputStream(inputStream);
+                case TAR_BZ2 -> new BZip2CompressorInputStream(inputStream);
+                default -> throw new IllegalStateException("Unsupported tar archive format: " + type);
+            };
+        } catch (IOException | RuntimeException e) {
+            inputStream.close();
+            throw e;
         }
     }
 
