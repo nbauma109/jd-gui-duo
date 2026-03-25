@@ -76,6 +76,7 @@ public class CompareWindow {
 
     private static final Color YELLOW = new Color(255, 255, 200);
     private static final Color DARK_GRAY = new Color(0x2A2A2A);
+    private static final String ERROR_TITLE = "Error";
     private static final ArchiveFormat[] COMPARE_ARCHIVE_FORMATS = {
         ArchiveFormat.JAR,
         ArchiveFormat.ZIP,
@@ -267,8 +268,8 @@ public class CompareWindow {
                 if (!path.endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
                     path = internalName + StringConstants.CLASS_FILE_SUFFIX;
                 }
-                return reader.getEntryContent(path) != null;
-            } catch (IOException e) {
+                return reader.getEntryContent(path).length > 0;
+            } catch (IOException _) {
                 return false;
             }
         }
@@ -425,7 +426,7 @@ public class CompareWindow {
                 return null;
             }
             if (file1.equals(file2)) {
-                JOptionPane.showMessageDialog(parentFrame, "The two files are the same. Please select different files.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(parentFrame, "The two files are the same. Please select different files.", ERROR_TITLE, JOptionPane.ERROR_MESSAGE);
                 return null;
             }
             return new File[]{file1, file2};
@@ -449,7 +450,7 @@ public class CompareWindow {
         File file = path.isEmpty() ? null : new File(path);
 
         if (file == null || !file.exists() || !file.canRead() || !isArchiveFile(file)) {
-            JOptionPane.showMessageDialog(parentFrame, label + " file is invalid. Please select a readable archive file.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(parentFrame, label + " file is invalid. Please select a readable archive file.", ERROR_TITLE, JOptionPane.ERROR_MESSAGE);
             return null;
         }
 
@@ -496,7 +497,7 @@ public class CompareWindow {
                     field.setText(f.getAbsolutePath());
                     return true;
                 } catch (Exception _) {
-                    JOptionPane.showMessageDialog(parentFrame, "Could not import the dropped file.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(parentFrame, "Could not import the dropped file.", ERROR_TITLE, JOptionPane.ERROR_MESSAGE);
                     return false;
                 }
             }

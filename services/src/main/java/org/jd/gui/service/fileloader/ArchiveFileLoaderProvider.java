@@ -49,16 +49,7 @@ public class ArchiveFileLoaderProvider extends AbstractFileLoaderProvider {
     @Override
     public boolean load(API api, File file) {
         try {
-            URI uri = URI.create("smartnio:" + file.toURI());
-            FileSystem fileSystem;
-
-            try {
-                fileSystem = FileSystems.getFileSystem(uri);
-            } catch (FileSystemNotFoundException e) {
-                // Resource leak : file system cannot be closed until the application is closed
-                fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
-            }
-
+            FileSystem fileSystem = openFileSystem(file);
             if (fileSystem != null) {
                 Iterator<Path> rootDirectories = fileSystem.getRootDirectories().iterator();
                 if (rootDirectories.hasNext()) {
@@ -70,5 +61,16 @@ public class ArchiveFileLoaderProvider extends AbstractFileLoaderProvider {
         }
 
         return false;
+    }
+
+    private FileSystem openFileSystem(File file) throws IOException {
+        URI uri = URI.create("smartnio:" + file.toURI());
+
+        try {
+            return FileSystems.getFileSystem(uri);
+        } catch (FileSystemNotFoundException _) {
+            // Resource leak : file system cannot be closed until the application is closed
+            return FileSystems.newFileSystem(uri, Collections.emptyMap());
+        }
     }
 }

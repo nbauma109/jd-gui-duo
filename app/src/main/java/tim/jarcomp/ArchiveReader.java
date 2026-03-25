@@ -25,6 +25,7 @@ import java.util.zip.ZipFile;
  * Helper class to read entries from different archive formats
  */
 public class ArchiveReader implements AutoCloseable {
+    private static final byte[] EMPTY_CONTENT = new byte[0];
 
     private final File file;
     private final ArchiveFormat type;
@@ -59,34 +60,46 @@ public class ArchiveReader implements AutoCloseable {
     }
 
     public List<ArchiveEntryInfo> getEntries() throws IOException {
+        return switch (type) {
+            case ZIP -> readZipEntries();
+            case SEVEN_ZIP -> readSevenZipEntries();
+            case TAR_GZ, TAR_XZ, TAR_BZ2 -> readTarEntries();
+            default -> throw new IllegalStateException("Unsupported archive format: " + type);
+        };
+    }
+
+    private List<ArchiveEntryInfo> readZipEntries() {
         List<ArchiveEntryInfo> entries = new ArrayList<>();
-
-        if (type == ArchiveFormat.ZIP) {
-            zipFile.stream().forEach(zipEntry -> entries.add(new ArchiveEntryInfo(
-                zipEntry.getName(),
-                zipEntry.getSize(),
-                zipEntry.getCrc(),
-                zipEntry.isDirectory()
-            )));
-        } else if (type == ArchiveFormat.SEVEN_ZIP) {
-            SevenZArchiveEntry entry;
-            while ((entry = sevenZFile.getNextEntry()) != null) {
-                entries.add(new ArchiveEntryInfo(
-                    entry.getName(),
-                    entry.getSize(),
-                    entry.getCrcValue(),
-                    entry.isDirectory()
-                ));
-            }
-        } else {
-            readTarEntries(entries, openCompressorStream());
-        }
-
+        zipFile.stream().forEach(zipEntry -> entries.add(new ArchiveEntryInfo(
+            zipEntry.getName(),
+            zipEntry.getSize(),
+            zipEntry.getCrc(),
+            zipEntry.isDirectory()
+        )));
         return entries;
     }
 
-    private void readTarEntries(List<ArchiveEntryInfo> entries, java.io.InputStream compressorStream)
-            throws IOException {
+    private List<ArchiveEntryInfo> readSevenZipEntries() throws IOException {
+        List<ArchiveEntryInfo> entries = new ArrayList<>();
+        SevenZArchiveEntry entry;
+        while ((entry = sevenZFile.getNextEntry()) != null) {
+            entries.add(new ArchiveEntryInfo(
+                entry.getName(),
+                entry.getSize(),
+                entry.getCrcValue(),
+                entry.isDirectory()
+            ));
+        }
+        return entries;
+    }
+
+    private List<ArchiveEntryInfo> readTarEntries() throws IOException {
+        List<ArchiveEntryInfo> entries = new ArrayList<>();
+        readTarEntries(entries, openCompressorStream());
+        return entries;
+    }
+
+    private void readTarEntries(List<ArchiveEntryInfo> entries, InputStream compressorStream) throws IOException {
         try (TarArchiveInputStream tis = new TarArchiveInputStream(compressorStream)) {
             TarArchiveEntry entry;
             while ((entry = tis.getNextEntry()) != null) {
@@ -122,7 +135,7 @@ public class ArchiveReader implements AutoCloseable {
         if (type == ArchiveFormat.ZIP) {
             ZipEntry zipEntry = zipFile.getEntry(entryPath);
             if (zipEntry == null || zipEntry.isDirectory()) {
-                return null;
+                return EMPTY_CONTENT;
             }
             try (InputStream is = zipFile.getInputStream(zipEntry)) {
                 return readAllBytes(is);
@@ -161,7 +174,7 @@ public class ArchiveReader implements AutoCloseable {
                 }
             }
         }
-        return null;
+        return EMPTY_CONTENT;
     }
 
     private byte[] readSevenZEntryContent(String entryPath) throws IOException {
@@ -180,7 +193,7 @@ public class ArchiveReader implements AutoCloseable {
                 }
             }
         }
-        return null;
+        return EMPTY_CONTENT;
     }
 
     private byte[] readAllBytes(InputStream is) throws IOException {

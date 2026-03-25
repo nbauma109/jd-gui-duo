@@ -8,6 +8,8 @@
 package org.jd.gui.api.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -24,11 +26,11 @@ public enum ArchiveFormat {
     private final String[] extensions;
 
     ArchiveFormat(String... extensions) {
-        this.extensions = extensions;
+        this.extensions = Arrays.copyOf(extensions, extensions.length);
     }
 
     public String[] getExtensions() {
-        return extensions.clone();
+        return Arrays.copyOf(extensions, extensions.length);
     }
 
     public boolean matches(String fileName) {
@@ -67,9 +69,7 @@ public enum ArchiveFormat {
         if (formats != null) {
             for (ArchiveFormat format : formats) {
                 if (format != null) {
-                    for (String extension : format.extensions) {
-                        extensions.add(extension);
-                    }
+                    Collections.addAll(extensions, format.extensions);
                 }
             }
         }

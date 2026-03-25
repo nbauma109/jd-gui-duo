@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import tim.jarcomp.ArchiveReader.ArchiveEntryInfo;
 
@@ -14,6 +16,7 @@ import tim.jarcomp.ArchiveReader.ArchiveEntryInfo;
  * EntryDetails objects
  */
 public final class Comparer {
+    private static final Logger LOGGER = Logger.getLogger(Comparer.class.getName());
 
     private Comparer() {
     }
@@ -80,7 +83,7 @@ public final class Comparer {
                 details.setSize(inIndex, archiveEntry.getSize());
             }
         } catch (IOException ioe) {
-            System.err.println(ioe);
+            LOGGER.log(Level.WARNING, "Failed to read archive entries from " + inFile, ioe);
         }
         return numFiles;
     }
@@ -124,30 +127,14 @@ public final class Comparer {
                     // Must be present in both archives if size is the same
                     ArchiveEntryInfo archiveEntry = entryMap.get(entry.getName());
                     if (archiveEntry == null) {
-                        System.err.println("archiveEntry for " + entry.getName() + " shouldn't be null!");
+                        LOGGER.warning("archiveEntry for " + entry.getName() + " shouldn't be null!");
                     } else {
                         entry.setCRCChecksum(inIndex, archiveEntry.getCrc());
                     }
                 }
             }
         } catch (Exception e) {
-            System.err.println(e);
+            LOGGER.log(Level.WARNING, "Failed to collect CRC checksums from " + inFile, e);
         }
-    }
-
-    /**
-     * Find an entry by name in the list
-     *
-     * @param entries list of archive entries
-     * @param name    name to find
-     * @return entry info or null if not found
-     */
-    private static ArchiveEntryInfo findEntry(List<ArchiveEntryInfo> entries, String name) {
-        for (ArchiveEntryInfo entry : entries) {
-            if (entry.getName().equals(name)) {
-                return entry;
-            }
-        }
-        return null;
     }
 }
