@@ -18,7 +18,6 @@ package tim.jarcomp;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;
-import org.jd.core.v1.util.ZipLoader;
 import org.jd.gui.api.API;
 import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.loader.LoaderUtils;
@@ -40,7 +39,6 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
@@ -220,11 +218,11 @@ public class CompareWindow {
             preferences.put(Preferences.WRITE_LINE_NUMBERS, "false");
             preferences.put(Preferences.REALIGN_LINE_NUMBERS, "false");
 
-            // For class files, we need to load via ArchiveSupport to handle decompilation
-            try (FileInputStream in = new FileInputStream(file)) {
-                ZipLoader zipLoader = new ZipLoader(in);
+            // Create a loader using ArchiveReader to support all archive formats
+            try (ArchiveReader reader = new ArchiveReader(file)) {
+                ArchiveReaderLoader archiveLoader = new ArchiveReaderLoader(reader);
                 String decompileEngine = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
-                Loader apiLoader = LoaderUtils.createLoader(preferences, zipLoader, file.toURI());
+                Loader apiLoader = LoaderUtils.createLoader(preferences, archiveLoader, file.toURI());
                 String entryInternalName = ClassUtil.getInternalName(entryPath);
                 DecompilationResult decompilationResult = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, decompileEngine);
                 return decompilationResult.getDecompiledOutput();
@@ -238,6 +236,39 @@ public class CompareWindow {
                 return "";
             }
             return new String(content, StandardCharsets.UTF_8);
+        }
+    }
+
+    /**
+     * Loader implementation that uses ArchiveReader to load class files from any supported archive format
+     */
+    private static class ArchiveReaderLoader implements org.jd.core.v1.api.loader.Loader {
+        private final ArchiveReader reader;
+
+        public ArchiveReaderLoader(ArchiveReader reader) {
+            this.reader = reader;
+        }
+
+        @Override
+        public boolean canLoad(String internalName) {
+            try {
+                String path = internalName;
+                if (!path.endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
+                    path = internalName + StringConstants.CLASS_FILE_SUFFIX;
+                }
+                return reader.getEntryContent(path) != null;
+            } catch (IOException e) {
+                return false;
+            }
+        }
+
+        @Override
+        public byte[] load(String internalName) throws IOException {
+            String path = internalName;
+            if (!path.endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
+                path = internalName + StringConstants.CLASS_FILE_SUFFIX;
+            }
+            return reader.getEntryContent(path);
         }
     }
 
@@ -323,7 +354,7 @@ public class CompareWindow {
             fileChooser = new JFileChooser();
             fileChooser.setFileFilter(new GenericFileFilter(
                     "Archive files",
-                    new String[]{"jar", "zip", "war", "ear", "tar.gz", "tgz", "tar.xz", "txz", "tar.bz2", "tbz2", "7z"}
+                    new String[]{"jar", "zip", "war", "ear", "tar.gz", "tgz", "tar.xz", "txz", "tar.bz", "tar.bz2", "tbz2", "7z"}
             ));
             // Start in user home directory
             File home = new File(System.getProperty("user.home"));

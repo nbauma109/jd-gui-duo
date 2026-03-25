@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -110,11 +111,21 @@ public class ArchiveReader implements AutoCloseable {
         try (TarArchiveInputStream tis = new TarArchiveInputStream(compressorStream)) {
             TarArchiveEntry entry;
             while ((entry = tis.getNextEntry()) != null) {
-                // TAR doesn't have CRC, so we use 0
+                long crc = 0;
+                if (!entry.isDirectory()) {
+                    // Compute CRC32 for non-directory entries
+                    CRC32 crc32 = new CRC32();
+                    byte[] buffer = new byte[8192];
+                    int bytesRead;
+                    while ((bytesRead = tis.read(buffer)) != -1) {
+                        crc32.update(buffer, 0, bytesRead);
+                    }
+                    crc = crc32.getValue();
+                }
                 entries.add(new ArchiveEntryInfo(
                     entry.getName(),
                     entry.getSize(),
-                    0,
+                    crc,
                     entry.isDirectory()
                 ));
             }

@@ -3,7 +3,9 @@ package tim.jarcomp;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import tim.jarcomp.ArchiveReader.ArchiveEntryInfo;
 
@@ -111,10 +113,16 @@ public final class Comparer {
         List<EntryDetails> list = inResults.getEntryList();
         try (ArchiveReader reader = new ArchiveReader(inFile)) {
             List<ArchiveEntryInfo> entries = reader.getEntries();
+            // Build a map for O(1) lookups instead of O(n) linear search
+            Map<String, ArchiveEntryInfo> entryMap = new HashMap<>();
+            for (ArchiveEntryInfo entry : entries) {
+                entryMap.put(entry.getName(), entry);
+            }
+
             for (EntryDetails entry : list) {
                 if (entry.getStatus() == EntryDetails.EntryStatus.SAME_SIZE) {
                     // Must be present in both archives if size is the same
-                    ArchiveEntryInfo archiveEntry = findEntry(entries, entry.getName());
+                    ArchiveEntryInfo archiveEntry = entryMap.get(entry.getName());
                     if (archiveEntry == null) {
                         System.err.println("archiveEntry for " + entry.getName() + " shouldn't be null!");
                     } else {
