@@ -83,7 +83,7 @@ public final class Comparer {
                 details.setSize(inIndex, archiveEntry.getSize());
             }
         } catch (IOException ioe) {
-            LOGGER.log(Level.WARNING, "Failed to read archive entries from " + inFile, ioe);
+            LOGGER.log(Level.WARNING, ioe, () -> "Failed to read archive entries from " + inFile);
         }
         return numFiles;
     }
@@ -127,14 +127,14 @@ public final class Comparer {
                     // Must be present in both archives if size is the same
                     ArchiveEntryInfo archiveEntry = entryMap.get(entry.getName());
                     if (archiveEntry == null) {
-                        LOGGER.warning("archiveEntry for " + entry.getName() + " shouldn't be null!");
+                        LOGGER.warning(() -> "archiveEntry for " + entry.getName() + " shouldn't be null!");
                     } else {
                         entry.setCRCChecksum(inIndex, archiveEntry.getCrc());
                     }
                 }
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Failed to collect CRC checksums from " + inFile, e);
+            LOGGER.log(Level.WARNING, e, () -> "Failed to collect CRC checksums from " + inFile);
         }
     }
 }
