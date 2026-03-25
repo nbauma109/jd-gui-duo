@@ -7,20 +7,16 @@
 
 package org.jd.gui.service.fileloader;
 
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.util.Comparator;
+import java.util.Collections;
+import java.util.Iterator;
 
 public class TarGzFileLoaderProvider extends AbstractFileLoaderProvider {
     protected static final String[] EXTENSIONS = { "tar.gz", "tgz" };
@@ -42,78 +38,19 @@ public class TarGzFileLoaderProvider extends AbstractFileLoaderProvider {
 
     @Override
     public boolean load(API api, File file) {
-        Path tempDir = null;
         try {
-            // Create temporary directory
-            tempDir = Files.createTempDirectory("jd-gui-tar-gz-");
+            FileSystem fileSystem = FileSystems.newFileSystem(file.toPath(), Collections.emptyMap());
 
-            // Extract tar.gz to temp directory
-            try (FileInputStream fis = new FileInputStream(file);
-                 BufferedInputStream bis = new BufferedInputStream(fis);
-                 GzipCompressorInputStream gzis = new GzipCompressorInputStream(bis);
-                 TarArchiveInputStream tis = new TarArchiveInputStream(gzis)) {
-
-                TarArchiveEntry entry;
-                while ((entry = tis.getNextEntry()) != null) {
-                    Path extractPath = tempDir.resolve(entry.getName());
-
-                    if (entry.isDirectory()) {
-                        Files.createDirectories(extractPath);
-                    } else {
-                        Files.createDirectories(extractPath.getParent());
-                        try (FileOutputStream fos = new FileOutputStream(extractPath.toFile())) {
-                            byte[] buffer = new byte[8192];
-                            int bytesRead;
-                            while ((bytesRead = tis.read(buffer)) != -1) {
-                                fos.write(buffer, 0, bytesRead);
-                            }
-                        }
-                    }
+            if (fileSystem != null) {
+                Iterator<Path> rootDirectories = fileSystem.getRootDirectories().iterator();
+                if (rootDirectories.hasNext()) {
+                    return load(api, file, rootDirectories.next()) != null;
                 }
             }
-
-            // Load the extracted directory
-            boolean result = load(api, file, tempDir) != null;
-
-            // Clean up temp directory on JVM exit
-            final Path finalTempDir = tempDir;
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                try {
-                    Files.walk(finalTempDir)
-                        .sorted(Comparator.reverseOrder())
-                        .forEach(path -> {
-                            try {
-                                Files.delete(path);
-                            } catch (IOException e) {
-                                // Ignore cleanup errors
-                            }
-                        });
-                } catch (IOException e) {
-                    // Ignore cleanup errors
-                }
-            }));
-
-            return result;
         } catch (IOException e) {
             assert ExceptionUtil.printStackTrace(e);
-            // Clean up temp directory on error
-            if (tempDir != null) {
-                try {
-                    final Path finalTempDir = tempDir;
-                    Files.walk(finalTempDir)
-                        .sorted(Comparator.reverseOrder())
-                        .forEach(path -> {
-                            try {
-                                Files.delete(path);
-                            } catch (IOException ex) {
-                                // Ignore cleanup errors
-                            }
-                        });
-                } catch (IOException ex) {
-                    // Ignore cleanup errors
-                }
-            }
-            return false;
         }
+
+        return false;
     }
 }

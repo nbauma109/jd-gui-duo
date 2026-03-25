@@ -145,6 +145,11 @@
       <artifactId>commons-compress</artifactId>
     </dependency>
     <dependency>
+      <groupId>io.github.nbauma109</groupId>
+      <artifactId>smart-nio</artifactId>
+      <version>0.1.1</version>
+    </dependency>
+    <dependency>
       <groupId>org.tukaani</groupId>
       <artifactId>xz</artifactId>
     </dependency>
