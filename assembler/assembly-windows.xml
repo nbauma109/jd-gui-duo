@@ -15,6 +15,9 @@
         <include>jre/**</include>
         <include>jd-gui-duo-*.exe</include>
       </includes>
+      <excludes>
+        <exclude>jre/**/simengine.exe</exclude>
+      </excludes>
     </fileSet>
     <fileSet>
       <directory>${project.build.directory}</directory>
