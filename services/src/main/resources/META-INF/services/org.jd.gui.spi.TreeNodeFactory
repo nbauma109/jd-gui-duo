@@ -6,6 +6,7 @@ org.jd.gui.service.treenode.DirectoryTreeNodeFactoryProvider
 org.jd.gui.service.treenode.DtdFileTreeNodeFactoryProvider
 org.jd.gui.service.treenode.EarFileTreeNodeFactoryProvider
 org.jd.gui.service.treenode.EjbJarXmlFileTreeNodeFactoryProvider
+org.jd.gui.service.treenode.ArchiveFileTreeNodeFactoryProvider
 org.jd.gui.service.treenode.FileTreeNodeFactoryProvider
 org.jd.gui.service.treenode.HtmlFileTreeNodeFactoryProvider
 org.jd.gui.service.treenode.JarFileTreeNodeFactoryProvider

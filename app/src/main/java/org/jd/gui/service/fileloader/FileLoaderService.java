@@ -39,6 +39,18 @@ public class FileLoaderService {
         if (lastDot == -1 || lastDot == name.length() - 1) {
             return null;
         }
+
+        // Try multi-part extensions first (e.g., .tar.gz, .tar.xz, .tar.bz2)
+        int secondLastDot = name.lastIndexOf('.', lastDot - 1);
+        if (secondLastDot != -1) {
+            String multiPartExtension = name.substring(secondLastDot + 1).toLowerCase(Locale.ROOT);
+            FileLoader loader = mapProviders.get(multiPartExtension);
+            if (loader != null) {
+                return loader;
+            }
+        }
+
+        // Fall back to single-part extension
         String extension = name.substring(lastDot + 1).toLowerCase(Locale.ROOT);
         return mapProviders.get(extension);
     }
