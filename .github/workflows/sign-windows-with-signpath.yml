@@ -65,9 +65,17 @@ jobs:
             throw "Missing SIGNPATH_PROJECT_SLUG repository variable."
           }
 
-      - uses: actions/checkout@v6
+      - name: Checkout workflow tools
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          path: workflow-tools
+
+      - name: Checkout source ref
+        uses: actions/checkout@v6
         with:
           ref: ${{ steps.context.outputs.checkout_ref }}
+          path: source
 
       - name: Set up JDK 25
         uses: actions/setup-java@v5
@@ -78,6 +86,7 @@ jobs:
 
       - name: Build with Maven
         shell: pwsh
+        working-directory: source
         run: mvn --no-transfer-progress -B package
 
       - name: Install Inno Setup
@@ -90,20 +99,26 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $workspace = $env:GITHUB_WORKSPACE
+          $sourceRoot = Join-Path $workspace 'source'
+          $toolsRoot = Join-Path $workspace 'workflow-tools'
 
-          $appExecutable = Get-ChildItem (Join-Path $workspace 'assembler\target\windows') -Filter 'jd-gui-duo-*.exe' | Select-Object -First 1
+          $appExecutable = Get-ChildItem (Join-Path $sourceRoot 'assembler\target\windows') -Filter 'jd-gui-duo-*.exe' | Select-Object -First 1
           if ($null -eq $appExecutable) {
             throw "No application executable matching jd-gui-duo-*.exe was found in assembler\target\windows."
           }
 
           $version = $appExecutable.BaseName.Substring('jd-gui-duo-'.Length)
-          $archive = Get-ChildItem (Join-Path $workspace 'assembler\target') -Filter 'jd-gui-duo-windows-*.tar.xz' | Select-Object -First 1
+          $archive = Get-ChildItem (Join-Path $sourceRoot 'assembler\target') -Filter 'jd-gui-duo-windows-*.tar.xz' | Select-Object -First 1
           if ($null -eq $archive) {
             throw "No Windows archive matching jd-gui-duo-windows-*.tar.xz was found in assembler\target."
           }
 
-          $installerPath = Join-Path $workspace "assembler\target\jd-gui-duo-windows-$version-setup.exe"
-          $buildInstallerScript = Join-Path $workspace 'packaging\windows\build-installer.ps1'
+          $installerPath = Join-Path $sourceRoot "assembler\target\jd-gui-duo-windows-$version-setup.exe"
+          $buildInstallerScript = Join-Path $toolsRoot 'packaging\windows\build-installer.ps1'
+          if (-not (Test-Path $buildInstallerScript)) {
+            throw "The workflow helper script was not found at $buildInstallerScript."
+          }
+
           & $buildInstallerScript `
             -InputArchive $archive.FullName `
             -OutputInstaller $installerPath `
