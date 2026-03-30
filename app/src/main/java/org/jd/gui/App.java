@@ -36,14 +36,22 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 public class App {
-    protected static final String SINGLE_INSTANCE = "UIMainWindowPreferencesProvider.singleInstance";
+
+	protected static final String SINGLE_INSTANCE = "UIMainWindowPreferencesProvider.singleInstance";
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class.getName());
+
+    private static final String HELP = """
+		Usage: jd-gui-duo [option] [input-file] ...
+
+		Option:
+		 --help/-h         Show this help message and exit
+		 --version/-v      Show version information and exit""";
 
     protected static MainController controller;
 
     public static void main(String[] args) {
         if (checkFlag(args, "--help", "-h")) {
-            showUserMessage(buildHelpMessage());
+            showUserMessage(HELP);
         } else if (checkFlag(args, "--version", "-v")) {
             showUserMessage(buildVersionMessage());
         } else {
@@ -100,15 +108,6 @@ public class App {
 
     protected static boolean checkVersionFlag(String[] args) {
         return checkFlag(args, "--version", "-v");
-    }
-
-    protected static String buildHelpMessage() {
-        return """
-			Usage: jd-gui-duo [option] [input-file] ...
-
-			Option:
-			 --help/-h         Show this help message and exit
-			 --version/-v      Show version information and exit""";
     }
 
     protected static String buildVersionMessage() {
