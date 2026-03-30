@@ -59,6 +59,19 @@ class AppTest {
     }
 
     @Test
+    void buildHelpMessage_mentionsSupportedFlags() {
+        String helpMessage = App.buildHelpMessage();
+
+        assertTrue(helpMessage.contains("--help/-h"));
+        assertTrue(helpMessage.contains("--version/-v"));
+    }
+
+    @Test
+    void buildVersionMessage_startsWithAppName() {
+        assertTrue(App.buildVersionMessage().startsWith(Constants.APP_NAME + " "));
+    }
+
+    @Test
     void newList_skipsFlagArguments() {
         List<File> files = App.newList(new String[]{"--version", "-v", "-h"});
         assertTrue(files.isEmpty());

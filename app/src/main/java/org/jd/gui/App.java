@@ -7,16 +7,20 @@
 
 package org.jd.gui;
 
+import org.apache.commons.lang3.Strings;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.controller.MainController;
 import org.jd.gui.model.configuration.Configuration;
 import org.jd.gui.service.configuration.ConfigurationPersister;
 import org.jd.gui.service.configuration.ConfigurationPersisterService;
 import org.jd.gui.util.net.InterProcessCommunicationUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.awt.GraphicsEnvironment;
 import java.net.URL;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -27,22 +31,21 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
-import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 public class App {
     protected static final String SINGLE_INSTANCE = "UIMainWindowPreferencesProvider.singleInstance";
-    private static final Logger LOGGER = Logger.getLogger(App.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(App.class.getName());
 
     protected static MainController controller;
 
     public static void main(String[] args) {
-        if (checkHelpFlag(args)) {
-            JOptionPane.showMessageDialog(null, "Usage: jd-gui [option] [input-file] ...\n\nOption:\n -h         Show this help message and exit\n --version  Show version information and exit", Constants.APP_NAME, JOptionPane.INFORMATION_MESSAGE);
-        } else if (checkVersionFlag(args)) {
-            JOptionPane.showMessageDialog(null, Constants.APP_NAME + " " + getVersion(), Constants.APP_NAME, JOptionPane.INFORMATION_MESSAGE);
+        if (checkFlag(args, "--help", "-h")) {
+            showUserMessage(buildHelpMessage());
+        } else if (checkFlag(args, "--version", "-v")) {
+            showUserMessage(buildVersionMessage());
         } else {
             // Load preferences
             ConfigurationPersister persister = ConfigurationPersisterService.getInstance().get();
@@ -79,10 +82,10 @@ public class App {
         }
     }
 
-    protected static boolean checkHelpFlag(String[] args) {
+    protected static boolean checkFlag(String[] args, String... switches) {
         if (args != null) {
             for (String arg : args) {
-                if ("-h".equals(arg)) {
+                if (Strings.CS.equalsAny(arg, switches)) {
                     return true;
                 }
             }
@@ -90,15 +93,33 @@ public class App {
         return false;
     }
 
+
+    protected static boolean checkHelpFlag(String[] args) {
+        return checkFlag(args, "--help", "-h");
+    }
+
     protected static boolean checkVersionFlag(String[] args) {
-        if (args != null) {
-            for (String arg : args) {
-                if ("--version".equals(arg) || "-v".equals(arg)) {
-                    return true;
-                }
-            }
+        return checkFlag(args, "--version", "-v");
+    }
+
+    protected static String buildHelpMessage() {
+        return "Usage: jd-gui-duo [option] [input-file] ...\n\n"
+            + "Option:\n"
+            + " --help/-h         Show this help message and exit\n"
+            + " --version/-v      Show version information and exit";
+    }
+
+    protected static String buildVersionMessage() {
+        return Constants.APP_NAME + " " + getVersion();
+    }
+
+    protected static void showUserMessage(String message) {
+        if (System.console() != null || GraphicsEnvironment.isHeadless()) {
+            LOGGER.info("{}", message);
+            return;
         }
-        return false;
+
+        JOptionPane.showMessageDialog(null, message, Constants.APP_NAME, JOptionPane.INFORMATION_MESSAGE);
     }
 
     protected static String getVersion() {
@@ -151,7 +172,7 @@ public class App {
         }
 
         if (containsControlCharacter(trimmedPath)) {
-            LOGGER.warning(() -> "Rejected path containing control characters: " + trimmedPath);
+            LOGGER.warn("Rejected path containing control characters: {}",  trimmedPath);
             return null;
         }
 
@@ -159,13 +180,13 @@ public class App {
             Path candidate = Paths.get(trimmedPath);
 
             if (containsParentDirectorySegment(candidate)) {
-                LOGGER.warning(() -> "Rejected path containing parent-directory navigation: " + trimmedPath);
+                LOGGER.warn("Rejected path containing parent-directory navigation: {}",  trimmedPath);
                 return null;
             }
 
             return candidate.toAbsolutePath().normalize().toFile();
         } catch (InvalidPathException _) {
-            LOGGER.warning(() -> "Rejected invalid path: " + trimmedPath);
+            LOGGER.warn("Rejected invalid path: {}", trimmedPath);
             return null;
         }
     }

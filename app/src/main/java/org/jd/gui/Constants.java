@@ -12,7 +12,7 @@ public final class Constants {
     private Constants() {
     }
 
-    public static final String APP_NAME = "JD-GUI";
+    public static final String APP_NAME = "JD-GUI-DUO";
 
     public static final int DEFAULT_WIDTH = 600;
     public static final int DEFAULT_HEIGHT = 400;
