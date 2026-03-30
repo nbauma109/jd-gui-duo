@@ -142,7 +142,7 @@ public class AboutView {
             hbox.add(new JLabel("© 2021-2026 Nicolas Baumann (@nbauma109) et al."));
             hbox.add(Box.createHorizontalGlue());
             subvbox.add(hbox);
-            
+
             vbox.add(Box.createVerticalStrut(10));
 
             hbox = Box.createHorizontalBox();
