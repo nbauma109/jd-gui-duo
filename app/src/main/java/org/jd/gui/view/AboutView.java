@@ -134,10 +134,15 @@ public class AboutView {
             hbox.add(Box.createHorizontalGlue());
 
             hbox = Box.createHorizontalBox();
-            hbox.add(new JLabel("Copyright © 2008-2025 Emmanuel Dupuy and other contributors"));
+            hbox.add(new JLabel("© 2008-2019 Emmanuel Dupuy (@emannue1) et al."));
             hbox.add(Box.createHorizontalGlue());
             subvbox.add(hbox);
 
+            hbox = Box.createHorizontalBox();
+            hbox.add(new JLabel("© 2021-2026 Nicolas Baumann (@nbauma109) et al."));
+            hbox.add(Box.createHorizontalGlue());
+            subvbox.add(hbox);
+            
             vbox.add(Box.createVerticalStrut(10));
 
             hbox = Box.createHorizontalBox();
