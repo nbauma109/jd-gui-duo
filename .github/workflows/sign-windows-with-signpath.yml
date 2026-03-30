@@ -1,0 +1,164 @@
+name: Sign Windows executables with SignPath
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref to build and sign (tag or branch). Defaults to the ref used to start the workflow.
+        required: false
+        type: string
+      signing_policy_slug:
+        description: SignPath signing policy slug. Keep test-signing until the workflow has been validated.
+        required: true
+        default: test-signing
+        type: string
+      artifact_configuration_slug:
+        description: SignPath artifact configuration slug.
+        required: true
+        default: windows-executables
+        type: string
+
+concurrency:
+  group: signpath-windows-${{ github.event.inputs.ref || github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  sign-windows-executables:
+    runs-on: windows-latest
+
+    steps:
+      - name: Resolve checkout ref
+        id: context
+        shell: pwsh
+        env:
+          INPUT_REF: ${{ github.event.inputs.ref }}
+          GITHUB_REF_VALUE: ${{ github.ref }}
+        run: |
+          $checkoutRef = if ([string]::IsNullOrWhiteSpace($env:INPUT_REF)) {
+            $env:GITHUB_REF_VALUE
+          } else {
+            $env:INPUT_REF
+          }
+
+          "checkout_ref=$checkoutRef" >> $env:GITHUB_OUTPUT
+
+      - name: Validate SignPath configuration
+        shell: pwsh
+        env:
+          SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          SIGNPATH_PROJECT_SLUG: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:SIGNPATH_API_TOKEN)) {
+            throw "Missing SIGNPATH_API_TOKEN secret."
+          }
+
+          if ([string]::IsNullOrWhiteSpace($env:SIGNPATH_ORGANIZATION_ID)) {
+            throw "Missing SIGNPATH_ORGANIZATION_ID repository variable."
+          }
+
+          if ([string]::IsNullOrWhiteSpace($env:SIGNPATH_PROJECT_SLUG)) {
+            throw "Missing SIGNPATH_PROJECT_SLUG repository variable."
+          }
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.context.outputs.checkout_ref }}
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          java-version: "25"
+          distribution: temurin
+          cache: maven
+
+      - name: Build with Maven
+        shell: pwsh
+        run: mvn --no-transfer-progress -B package
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --no-progress -y
+
+      - name: Build unsigned Windows executables
+        id: artifacts
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $appExecutable = Get-ChildItem assembler\target\windows -Filter 'jd-gui-duo-*.exe' | Select-Object -First 1
+          if ($null -eq $appExecutable) {
+            throw "No application executable matching jd-gui-duo-*.exe was found in assembler\target\windows."
+          }
+
+          $version = $appExecutable.BaseName.Substring('jd-gui-duo-'.Length)
+          $archive = Get-ChildItem assembler\target -Filter 'jd-gui-duo-windows-*.tar.xz' | Select-Object -First 1
+          if ($null -eq $archive) {
+            throw "No Windows archive matching jd-gui-duo-windows-*.tar.xz was found in assembler\target."
+          }
+
+          $installerPath = Join-Path $PWD "assembler\target\jd-gui-duo-windows-$version-setup.exe"
+          .\packaging\windows\build-installer.ps1 `
+            -InputArchive $archive.FullName `
+            -OutputInstaller $installerPath `
+            -AppVersion $version
+
+          if (-not (Test-Path $installerPath)) {
+            throw "The installer was not created at $installerPath."
+          }
+
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "app_executable=$($appExecutable.FullName)" >> $env:GITHUB_OUTPUT
+          "installer_executable=$installerPath" >> $env:GITHUB_OUTPUT
+
+      - name: Upload unsigned executables
+        id: upload_unsigned
+        uses: actions/upload-artifact@v7
+        with:
+          name: unsigned-windows-executables-${{ steps.artifacts.outputs.version }}
+          path: |
+            ${{ steps.artifacts.outputs.app_executable }}
+            ${{ steps.artifacts.outputs.installer_executable }}
+          if-no-files-found: error
+
+      - name: Submit SignPath signing request
+        id: signpath
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ github.event.inputs.signing_policy_slug }}
+          artifact-configuration-slug: ${{ github.event.inputs.artifact_configuration_slug }}
+          github-artifact-id: ${{ steps.upload_unsigned.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: dist/signed
+          parameters: |
+            version: ${{ toJSON(steps.artifacts.outputs.version) }}
+
+      - name: Upload signed executables
+        uses: actions/upload-artifact@v7
+        with:
+          name: signed-windows-executables-${{ steps.artifacts.outputs.version }}
+          path: dist/signed
+          if-no-files-found: error
+
+      - name: Write summary
+        shell: pwsh
+        run: |
+          $lines = @(
+            "## SignPath",
+            "",
+            "- Ref: ${{ steps.context.outputs.checkout_ref }}",
+            "- Version: ${{ steps.artifacts.outputs.version }}",
+            "- Signing policy: ${{ github.event.inputs.signing_policy_slug }}",
+            "- Artifact configuration: ${{ github.event.inputs.artifact_configuration_slug }}",
+            "- Signing request: ${{ steps.signpath.outputs.signing-request-web-url }}",
+            "- Signed files artifact: signed-windows-executables-${{ steps.artifacts.outputs.version }}"
+          )
+
+          [string]::Join([Environment]::NewLine, $lines) | Add-Content -Path $env:GITHUB_STEP_SUMMARY
