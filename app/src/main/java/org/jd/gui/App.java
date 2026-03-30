@@ -40,7 +40,7 @@ public class App {
 	protected static final String SINGLE_INSTANCE = "UIMainWindowPreferencesProvider.singleInstance";
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class.getName());
 
-    private static final String HELP = """
+    static final String HELP = """
 		Usage: jd-gui-duo [option] [input-file] ...
 
 		Option:

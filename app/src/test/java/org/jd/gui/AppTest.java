@@ -60,7 +60,7 @@ class AppTest {
 
     @Test
     void buildHelpMessage_mentionsSupportedFlags() {
-        String helpMessage = App.buildHelpMessage();
+        String helpMessage = App.HELP;
 
         assertTrue(helpMessage.contains("--help/-h"));
         assertTrue(helpMessage.contains("--version/-v"));
