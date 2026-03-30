@@ -89,20 +89,22 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
+          $workspace = $env:GITHUB_WORKSPACE
 
-          $appExecutable = Get-ChildItem assembler\target\windows -Filter 'jd-gui-duo-*.exe' | Select-Object -First 1
+          $appExecutable = Get-ChildItem (Join-Path $workspace 'assembler\target\windows') -Filter 'jd-gui-duo-*.exe' | Select-Object -First 1
           if ($null -eq $appExecutable) {
             throw "No application executable matching jd-gui-duo-*.exe was found in assembler\target\windows."
           }
 
           $version = $appExecutable.BaseName.Substring('jd-gui-duo-'.Length)
-          $archive = Get-ChildItem assembler\target -Filter 'jd-gui-duo-windows-*.tar.xz' | Select-Object -First 1
+          $archive = Get-ChildItem (Join-Path $workspace 'assembler\target') -Filter 'jd-gui-duo-windows-*.tar.xz' | Select-Object -First 1
           if ($null -eq $archive) {
             throw "No Windows archive matching jd-gui-duo-windows-*.tar.xz was found in assembler\target."
           }
 
-          $installerPath = Join-Path $PWD "assembler\target\jd-gui-duo-windows-$version-setup.exe"
-          .\packaging\windows\build-installer.ps1 `
+          $installerPath = Join-Path $workspace "assembler\target\jd-gui-duo-windows-$version-setup.exe"
+          $buildInstallerScript = Join-Path $workspace 'packaging\windows\build-installer.ps1'
+          & $buildInstallerScript `
             -InputArchive $archive.FullName `
             -OutputInstaller $installerPath `
             -AppVersion $version
