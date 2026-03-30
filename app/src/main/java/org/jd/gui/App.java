@@ -103,10 +103,12 @@ public class App {
     }
 
     protected static String buildHelpMessage() {
-        return "Usage: jd-gui-duo [option] [input-file] ...\n\n"
-            + "Option:\n"
-            + " --help/-h         Show this help message and exit\n"
-            + " --version/-v      Show version information and exit";
+        return """
+			Usage: jd-gui-duo [option] [input-file] ...
+
+			Option:
+			 --help/-h         Show this help message and exit
+			 --version/-v      Show version information and exit""";
     }
 
     protected static String buildVersionMessage() {
