@@ -12,11 +12,6 @@ on:
         required: true
         default: test-signing
         type: string
-      artifact_configuration_slug:
-        description: SignPath artifact configuration slug.
-        required: true
-        default: windows-executables
-        type: string
 
 concurrency:
   group: signpath-windows-${{ github.event.inputs.ref || github.ref }}
@@ -150,7 +145,6 @@ jobs:
           organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
           project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
           signing-policy-slug: ${{ github.event.inputs.signing_policy_slug }}
-          artifact-configuration-slug: ${{ github.event.inputs.artifact_configuration_slug }}
           github-artifact-id: ${{ steps.upload_unsigned.outputs.artifact-id }}
           wait-for-completion: true
           output-artifact-directory: dist/signed
