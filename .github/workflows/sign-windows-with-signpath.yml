@@ -167,7 +167,6 @@ jobs:
             "- Ref: ${{ steps.context.outputs.checkout_ref }}",
             "- Version: ${{ steps.artifacts.outputs.version }}",
             "- Signing policy: ${{ github.event.inputs.signing_policy_slug }}",
-            "- Artifact configuration: ${{ github.event.inputs.artifact_configuration_slug }}",
             "- Signing request: ${{ steps.signpath.outputs.signing-request-web-url }}",
             "- Signed files artifact: signed-windows-executables-${{ steps.artifacts.outputs.version }}"
           )
