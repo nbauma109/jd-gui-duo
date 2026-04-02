@@ -3,7 +3,7 @@ name: Submit WinGet manifest
 on:
   release:
     types:
-      - published
+      - released
   workflow_dispatch:
     inputs:
       tag:
