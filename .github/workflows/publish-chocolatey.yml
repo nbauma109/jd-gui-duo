@@ -136,11 +136,16 @@ jobs:
             '    <version>${{ steps.release.outputs.version }}</version>'
             "    <title>${env:PACKAGE_TITLE}</title>"
             '    <authors>${{ github.repository_owner }}</authors>'
+            '    <owners>${{ github.repository_owner }}</owners>'
             '    <projectUrl>https://github.com/${{ github.repository }}</projectUrl>'
             '    <packageSourceUrl>https://github.com/${{ github.repository }}</packageSourceUrl>'
             '    <licenseUrl>https://github.com/${{ github.repository }}/blob/${{ steps.release.outputs.tag }}/LICENSE</licenseUrl>'
+            '    <license type="expression">GPL-3.0-only</license>'
             '    <requireLicenseAcceptance>false</requireLicenseAcceptance>'
-            '    <tags>java decompiler jd-gui jd-core</tags>'
+            '    <copyright>Copyright (C) ${{ github.repository_owner }}</copyright>'
+            '    <docsUrl>https://github.com/${{ github.repository }}#readme</docsUrl>'
+            '    <bugTrackerUrl>https://github.com/${{ github.repository }}/issues</bugTrackerUrl>'
+            '    <tags>java decompiler jd-gui jd-core portable windows</tags>'
             "    <summary>${env:PACKAGE_SUMMARY}</summary>"
             "    <description>${env:PACKAGE_SUMMARY}</description>"
             '    <releaseNotes>https://github.com/${{ github.repository }}/releases/tag/${{ steps.release.outputs.tag }}</releaseNotes>'
@@ -202,4 +207,15 @@ jobs:
             throw "No Chocolatey package was generated."
           }
 
-          choco push $package.FullName --api-key $env:CHOCO_API_KEY --source $source
+          Write-Host "Pushing package: $($package.Name)"
+          Write-Host "Source: $source"
+
+          choco push $package.FullName `
+            --api-key $env:CHOCO_API_KEY `
+            --source $source `
+            --debug `
+            --verbose
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "Chocolatey push failed (exit code $LASTEXITCODE). Verify that CHOCO_API_KEY is valid and has permission to publish package ID '${env:PACKAGE_ID}' to $source."
+          }
