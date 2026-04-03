@@ -143,6 +143,7 @@ jobs:
             '    <requireLicenseAcceptance>false</requireLicenseAcceptance>'
             '    <copyright>Copyright (C) ${{ github.repository_owner }}</copyright>'
             '    <docsUrl>https://github.com/${{ github.repository }}#readme</docsUrl>'
+            '    <iconUrl>https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/master/app/src/main/resources/org/jd/gui/images/jd_icon_128.png</iconUrl>'
             '    <bugTrackerUrl>https://github.com/${{ github.repository }}/issues</bugTrackerUrl>'
             '    <tags>java decompiler jd-gui jd-core portable windows</tags>'
             "    <summary>${env:PACKAGE_SUMMARY}</summary>"
