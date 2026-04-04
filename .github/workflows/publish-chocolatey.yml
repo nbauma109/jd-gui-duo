@@ -207,4 +207,15 @@ jobs:
             throw "No Chocolatey package was generated."
           }
 
-          choco push $package.FullName --api-key $env:CHOCO_API_KEY --source $source
+          Write-Host "Pushing package: $($package.Name)"
+          Write-Host "Source: $source"
+
+          choco push $package.FullName `
+            --api-key $env:CHOCO_API_KEY `
+            --source $source `
+            --debug `
+            --verbose
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "Chocolatey push failed (exit code $LASTEXITCODE). Verify that CHOCO_API_KEY is valid and has permission to publish package ID '${env:PACKAGE_ID}' to $source."
+          }
