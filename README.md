@@ -24,14 +24,6 @@ Downloads from Sourceforge :
 
 [![Download jd-gui-duo](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/jd-gui-duo/files/latest/download)
 
-<!-- Begin  Tag -->
-<div class="sf-root" data-id="3961310" data-badge="oss-rising-star-white" data-metadata="achievement=oss-rising-star" style="width:125px">
-    <a href="https://sourceforge.net/projects/jd-gui-duo/" target="_blank">jd-gui-duo</a>
-</div>
-<script>(function () {var sc=document.createElement('script');sc.async=true;sc.src='https://b.sf-syn.com/badge_js?sf_id=3961310';var p=document.getElementsByTagName('script')[0];p.parentNode.insertBefore(sc, p);})();
-</script>
-<!-- End  Tag -->
-
 Looking for an Eclipse plugin ? Try [ECD++](https://github.com/nbauma109/ecd)
 
 # jd-gui-duo
