@@ -14,7 +14,7 @@
 
   <properties>
     <jre.builder.version>5.1.2</jre.builder.version>
-    <jre.version>25.0.1</jre.version>
+    <jre.version>25.0.2</jre.version>
     <app.icon.path>../app/src/main/resources/org/jd/gui/images/JDGUI.icns</app.icon.path>
   </properties>
 
