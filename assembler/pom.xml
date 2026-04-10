@@ -57,7 +57,7 @@
               <url>https://github.com/nbauma109/jre-builder/releases/download/${jre.builder.version}/jre-${jre.builder.version}-${jre.version}-windows-x64.zip</url>
               <unpack>true</unpack>
               <outputDirectory>${project.build.directory}/windows/jre</outputDirectory>
-              <sha256>6ea6ab10cc09d6c3558eedea80cf93a0cd43dcd76418ee57ee0e499e5347316f</sha256>
+              <sha256>sha256:f4c0543b56275a8152d1b5fd2a38bfeae6334c73ed61247ea5b62e3311b1779f</sha256>
             </configuration>
           </execution>
           <execution>
@@ -70,7 +70,7 @@
               <url>https://github.com/nbauma109/jre-builder/releases/download/${jre.builder.version}/jre-${jre.builder.version}-${jre.version}-linux-x64.zip</url>
               <unpack>true</unpack>
               <outputDirectory>${project.build.directory}/linux/jre</outputDirectory>
-              <sha256>e629a56ca812be545835a7de2fbe7b308a300a189f26de6935512ffde33a76c7</sha256>
+              <sha256>sha256:4f8c8be3dd4466fc34402119fc11fbe6693b9707c6b267953d71ac80d6284a10</sha256>
             </configuration>
           </execution>
           <execution>
@@ -83,7 +83,7 @@
               <url>https://github.com/nbauma109/jre-builder/releases/download/${jre.builder.version}/jre-${jre.builder.version}-${jre.version}-macos-x64.zip</url>
               <unpack>true</unpack>
               <outputDirectory>${project.build.directory}/macos/jre</outputDirectory>
-              <sha256>463887053e5efd12a9f1fdf1cc25a09a163126b2160c203dd17beb364ba51103</sha256>
+              <sha256>sha256:294776e7307b8fa091413da2b1e8a3f557e041518bb3c7a61e00fec06bfe6ff1</sha256>
             </configuration>
           </execution>
         </executions>
