@@ -23,7 +23,7 @@ jobs:
     steps:
       - name: Find releases whose body contains a line exactly "## Commits"
         id: find
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             // Retrieve all releases (paginate) and filter for those whose body contains
@@ -80,7 +80,7 @@ jobs:
 
       - name: Fetch release body and confirm guard condition
         id: fetch
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const re = /^## Commits$/m; // exact line match, case-sensitive
@@ -106,7 +106,7 @@ jobs:
 
       - name: Update release body
         if: steps.fetch.outputs.should_format == 'true'
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const fs = require('fs');
