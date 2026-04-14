@@ -3,8 +3,40 @@
      height="56"
      viewBox="0 0 200 56">
 
+  <defs>
+    <linearGradient id="badgeBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4A4A4A"/>
+      <stop offset="45%" stop-color="#232323"/>
+      <stop offset="100%" stop-color="#070707"/>
+    </linearGradient>
+    <radialGradient id="badgeSheen" cx="22%" cy="0%" r="95%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.24"/>
+      <stop offset="55%" stop-color="#FFFFFF" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="badgeGloss" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.34"/>
+      <stop offset="48%" stop-color="#FFFFFF" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="badgeShadow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.30"/>
+    </linearGradient>
+    <linearGradient id="badgeStroke" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.08"/>
+    </linearGradient>
+  </defs>
+
   <!-- Background -->
-  <rect x="0" y="0" width="200" height="56" rx="8" fill="#000000"/>
+  <rect x="0" y="0" width="200" height="56" rx="8" fill="url(#badgeBg)"/>
+  <rect x="0" y="0" width="200" height="56" rx="8" fill="url(#badgeSheen)"/>
+  <path d="M8 0H192A8 8 0 0 1 200 8V24H0V8A8 8 0 0 1 8 0Z"
+        fill="url(#badgeGloss)"/>
+  <path d="M0 30H200V48A8 8 0 0 1 192 56H8A8 8 0 0 1 0 48V30Z"
+        fill="url(#badgeShadow)"/>
+  <rect x="1" y="1" width="198" height="54" rx="7" fill="none" stroke="url(#badgeStroke)"/>
 
   <!-- JitPack logo (simplified scaled) -->
   <g transform="translate(12,8) scale(0.08)">
