@@ -46,15 +46,18 @@ h2 {
 }
 
 .github-button {
-    display: inline-block;
-    text-decoration: none;
-    line-height: 0;
-}
-
-.github-button img {
     display: block;
     width: 200px;
     height: 56px;
+    background-image: url("https://raw.githubusercontent.com/nbauma109/jd-gui-duo/refs/heads/master/assets/badges/github-view.svg");
+    background-repeat: no-repeat;
+    background-size: 200px 56px;
+    background-position: 0 0;
+    text-decoration: none;
+    text-indent: -9999px;
+    overflow: hidden;
+    white-space: nowrap;
+    line-height: 0;
 }
 
 .download-buttons {
