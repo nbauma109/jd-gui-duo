@@ -280,18 +280,17 @@ It now includes "filter as you type" feature.
 
 ![image](https://javadecompiler.org/jd-gui-duo/quick-outline.png)
 
-## Session restore
-
-When JD-GUI-DUO starts without explicit input files, it can reopen the files remembered from the previous session.
-
-### Single instance
-
-On non-macOS platforms, there is also a single-instance preference for the main window. When enabled, opening files in a second launch forwards them to the already running window instead of creating another application instance.
-
 ### For memory, jd-gui 0.3.6 :
 
 ![image](https://javadecompiler.org/jd-gui-duo/quick-outline-old.png)
 
+## Session restore
+
+When JD-GUI-DUO starts without explicit input files, it can reopen the files remembered from the previous session.
+
+## Single instance
+
+On non-macOS platforms, there is also a single-instance preference for the main window. When enabled, opening files in a second launch forwards them to the already running window instead of creating another application instance.
 
 # Credits
 
