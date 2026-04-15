@@ -60,6 +60,27 @@ h2 {
     line-height: 0;
 }
 
+.home-button {
+    display: inline-block;
+    min-width: 180px;
+    padding: 12px 24px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-radius: 999px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+    text-decoration: none;
+    font-weight: 600;
+    line-height: 1.2;
+    box-sizing: border-box;
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.home-button:hover {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.55);
+    transform: translateY(-1px);
+}
+
 .download-buttons {
   display: flex;
   gap: 8px;
