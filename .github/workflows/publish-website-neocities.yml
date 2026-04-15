@@ -1,0 +1,82 @@
+name: Publish website to Neocities
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref to publish. Defaults to the ref used to start the workflow.
+        required: false
+        type: string
+      cleanup:
+        description: Delete remote files on Neocities that do not exist under www/
+        required: true
+        default: false
+        type: boolean
+
+concurrency:
+  group: publish-website-neocities-${{ github.event.inputs.ref || github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish-website:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Resolve checkout ref
+        id: context
+        shell: bash
+        env:
+          INPUT_REF: ${{ github.event.inputs.ref }}
+          GITHUB_REF_VALUE: ${{ github.ref }}
+        run: |
+          if [ -n "$INPUT_REF" ]; then
+            echo "checkout_ref=$INPUT_REF" >> "$GITHUB_OUTPUT"
+          else
+            echo "checkout_ref=$GITHUB_REF_VALUE" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Validate Neocities configuration
+        shell: bash
+        env:
+          NEOCITIES_API_KEY: ${{ secrets.NEOCITIES_API_KEY }}
+        run: |
+          if [ -z "$NEOCITIES_API_KEY" ]; then
+            echo "Missing NEOCITIES_API_KEY secret." >&2
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.context.outputs.checkout_ref }}
+
+      - name: Verify website directory exists
+        shell: bash
+        run: |
+          if [ ! -d "www" ]; then
+            echo "The website directory 'www' was not found." >&2
+            exit 1
+          fi
+
+      - name: Deploy www to Neocities
+        uses: bcomnes/deploy-to-neocities@v3
+        with:
+          api_key: ${{ secrets.NEOCITIES_API_KEY }}
+          dist_dir: www
+          cleanup: ${{ github.event.inputs.cleanup }}
+          preview_before_deploy: true
+          neocities_supporter: false
+
+      - name: Write summary
+        shell: bash
+        run: |
+          {
+            echo "## Neocities publish"
+            echo
+            echo "- Ref: ${{ steps.context.outputs.checkout_ref }}"
+            echo "- Directory: \`www\`"
+            echo "- Cleanup enabled: \`${{ github.event.inputs.cleanup }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
