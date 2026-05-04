@@ -1,5 +1,5 @@
 /*******************************************************************************
- * 
+ *
  * © 2022-2026 Nicolas Baumann (@nbauma109)
  *
  * This program is free software: you can redistribute it and/or modify
