@@ -103,11 +103,11 @@ public class EntryTableModel extends AbstractTableModel {
      */
     private static String getText(EntryStatus inStatus) {
         return switch (inStatus) {
-            case ADDED -> "Added";
+            case ADDED -> "Right only";
             case CHANGED_SIZE -> "Changed size";
             case CHANGED_SUM -> "Changed sum";
             case EQUAL -> "=";
-            case REMOVED -> "Removed";
+            case REMOVED -> "Left only";
             case SAME_SIZE -> "Same size";
             default -> inStatus.toString();
         };
