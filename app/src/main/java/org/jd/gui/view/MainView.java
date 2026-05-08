@@ -85,6 +85,8 @@ import javax.swing.WindowConstants;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
@@ -342,10 +344,21 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             menu.add(saveAction);
             menu.add(saveAllSourcesAction);
             menu.addSeparator();
-            recentFiles.addMenuListener(new javax.swing.event.MenuListener() {
-                @Override public void menuSelected(javax.swing.event.MenuEvent e) { refreshRecentFilesCheckmarks(); }
-                @Override public void menuDeselected(javax.swing.event.MenuEvent e) {}
-                @Override public void menuCanceled(javax.swing.event.MenuEvent e) {}
+            recentFiles.addMenuListener(new MenuListener() {
+                @Override
+                public void menuSelected(MenuEvent e) {
+                    refreshRecentFilesCheckmarks();
+                }
+
+                @Override
+                public void menuDeselected(MenuEvent e) {
+                    // checkmarks only need refreshing on open
+                }
+
+                @Override
+                public void menuCanceled(MenuEvent e) {
+                    // checkmarks only need refreshing on open
+                }
             });
             menu.add(recentFiles);
             if (!PlatformService.getInstance().isMac()) {
@@ -553,11 +566,9 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
 
             Set<URI> openUris = new HashSet<>();
             for (T panel : getMainPanels()) {
-                if (panel instanceof UriGettable uriGettable) {
-                    URI uri = uriGettable.getUri();
-                    if (uri != null) {
-                        openUris.add(uri);
-                    }
+                URI uri = panel.getUri();
+                if (uri != null) {
+                    openUris.add(uri);
                 }
             }
 
@@ -574,11 +585,9 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     private void refreshRecentFilesCheckmarks() {
         Set<URI> openUris = new HashSet<>();
         for (T panel : getMainPanels()) {
-            if (panel instanceof UriGettable uriGettable) {
-                URI uri = uriGettable.getUri();
-                if (uri != null) {
-                    openUris.add(uri);
-                }
+            URI uri = panel.getUri();
+            if (uri != null) {
+                openUris.add(uri);
             }
         }
         for (Component comp : recentFiles.getMenuComponents()) {

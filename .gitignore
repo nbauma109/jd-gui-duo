@@ -44,3 +44,6 @@ build/
 *.dmp
 javacore.*.txt
 
+# AI
+.claude/
+

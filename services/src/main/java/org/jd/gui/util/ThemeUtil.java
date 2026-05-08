@@ -59,9 +59,20 @@ public class ThemeUtil {
     private static final int JAVA_MAJOR_VERSION = Runtime.version().feature();
 
     private static final Icon ZERO_WIDTH_ICON = new Icon() {
-        @Override public void paintIcon(Component c, Graphics g, int x, int y) {}
-        @Override public int getIconWidth() { return 0; }
-        @Override public int getIconHeight() { return 0; }
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            // zero-width spacer — nothing to paint
+        }
+
+        @Override
+        public int getIconWidth() {
+            return 0;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return 0;
+        }
     };
 
     public static String getDefaultLookAndFeel() {
@@ -85,7 +96,7 @@ public class ThemeUtil {
             return;
         }
         LookAndFeel laf = UIManager.getLookAndFeel();
-        if (laf == null || !laf.getClass().getName().contains("Windows")) {
+        if (laf == null || !"Windows".equals(laf.getID())) {
             return;
         }
         // "MenuItem" covers JMenuItem; "Menu" covers JMenu (submenu items in a popup).
