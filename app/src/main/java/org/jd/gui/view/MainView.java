@@ -49,8 +49,10 @@ import java.io.File;
 import java.net.URI;
 import java.util.EnumMap;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -83,6 +85,8 @@ import javax.swing.WindowConstants;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
@@ -340,6 +344,22 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             menu.add(saveAction);
             menu.add(saveAllSourcesAction);
             menu.addSeparator();
+            recentFiles.addMenuListener(new MenuListener() {
+                @Override
+                public void menuSelected(MenuEvent e) {
+                    refreshRecentFilesCheckmarks();
+                }
+
+                @Override
+                public void menuDeselected(MenuEvent e) {
+                    // checkmarks only need refreshing on open
+                }
+
+                @Override
+                public void menuCanceled(MenuEvent e) {
+                    // checkmarks only need refreshing on open
+                }
+            });
             menu.add(recentFiles);
             if (!PlatformService.getInstance().isMac()) {
                 menu.addSeparator();
@@ -544,12 +564,40 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
         invokeLater(() -> {
             recentFiles.removeAll();
 
+            Set<URI> openUris = new HashSet<>();
+            for (T panel : getMainPanels()) {
+                URI uri = panel.getUri();
+                if (uri != null) {
+                    openUris.add(uri);
+                }
+            }
+
             for (File file : files) {
-                JMenuItem menuItem = new JMenuItem(reduceRecentFilePath(file.getAbsolutePath()));
+                JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(reduceRecentFilePath(file.getAbsolutePath()));
+                menuItem.putClientProperty("recentFile", file);
+                menuItem.setSelected(openUris.contains(file.toURI()));
                 menuItem.addActionListener(e -> openFilesCallback.accept(file));
                 recentFiles.add(menuItem);
             }
         });
+    }
+
+    private void refreshRecentFilesCheckmarks() {
+        Set<URI> openUris = new HashSet<>();
+        for (T panel : getMainPanels()) {
+            URI uri = panel.getUri();
+            if (uri != null) {
+                openUris.add(uri);
+            }
+        }
+        for (Component comp : recentFiles.getMenuComponents()) {
+            if (comp instanceof JCheckBoxMenuItem item) {
+                File f = (File) item.getClientProperty("recentFile");
+                if (f != null) {
+                    item.setSelected(openUris.contains(f.toURI()));
+                }
+            }
+        }
     }
 
     public String getFindText() {

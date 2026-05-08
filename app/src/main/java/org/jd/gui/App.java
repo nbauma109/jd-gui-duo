@@ -14,6 +14,7 @@ import org.jd.gui.controller.MainController;
 import org.jd.gui.model.configuration.Configuration;
 import org.jd.gui.service.configuration.ConfigurationPersister;
 import org.jd.gui.service.configuration.ConfigurationPersisterService;
+import org.jd.gui.util.ThemeUtil;
 import org.jd.gui.util.net.InterProcessCommunicationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,6 +85,7 @@ public class App {
                     assert ExceptionUtil.printStackTrace(ee);
                 }
            }
+            ThemeUtil.applyMenuItemPaddingFix();
 
             // Create main controller and show main frame
             controller = new MainController(configuration);
