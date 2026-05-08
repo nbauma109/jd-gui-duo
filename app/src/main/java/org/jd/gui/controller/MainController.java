@@ -182,7 +182,7 @@ public class MainController implements API {
                 e -> onClose(),
                 e -> onSaveSource(),
                 e -> onSaveAllSources(),
-                e -> System.exit(0),
+                e -> onExit(),
                 e -> onCopy(),
                 e -> onPaste(),
                 e -> onSelectAll(),
@@ -357,6 +357,11 @@ public class MainController implements API {
                 }
         	}
         }
+    }
+
+    protected void onExit() {
+        updateRememberedOpenFiles();
+        System.exit(0);
     }
 
     protected void onClose() {
