@@ -15,6 +15,8 @@ jobs:
   tagged-release:
     name: "Github Release"
     runs-on: "windows-latest"
+    permissions:
+      contents: write
     env:
       GH_TOKEN: ${{ github.token }}
 
@@ -84,9 +86,21 @@ jobs:
       if: ${{ github.event_name != 'workflow_dispatch' }}
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
-        repo_token: "${{ secrets.PAT_TOKEN }}"
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
         prerelease: false
         automatic_release_tag: "${{ steps.release.outputs.tag }}"
         files: |
           **/jd-*.tar.xz
           **/jd-gui-duo-windows-*-setup.exe
+    - name: Trigger downstream workflows
+      if: ${{ github.event_name != 'workflow_dispatch' }}
+      shell: pwsh
+      env:
+        GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+      run: |
+        $tag = "${{ steps.release.outputs.tag }}"
+        $repo = "${{ github.repository }}"
+
+        gh workflow run rewrite-release-notes.yml --repo $repo
+        gh workflow run publish-winget.yml --repo $repo --ref $tag --field tag=$tag
+        gh workflow run publish-chocolatey.yml --repo $repo --ref $tag --field tag=$tag
