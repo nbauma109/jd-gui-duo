@@ -220,6 +220,12 @@ public class MainController implements API {
         SwingUtil.invokeLater(() -> {
             // Show main frame
             mainView.show(configuration.getMainWindowLocation(), configuration.getMainWindowSize(), configuration.isMainWindowMaximize());
+            mainView.getMainFrame().addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    updateRememberedOpenFiles();
+                }
+            });
             if (!files.isEmpty()) {
                 openFiles(files);
             } else {
@@ -265,12 +271,6 @@ public class MainController implements API {
                 sourceLoaderService = new SourceLoaderService();
                 // Add listeners
                 mainFrame.addComponentListener(new MainFrameListener(configuration));
-                mainFrame.addWindowListener(new WindowAdapter() {
-                    @Override
-                    public void windowClosing(WindowEvent e) {
-                        updateRememberedOpenFiles();
-                    }
-                });
                 // Set drag and drop (DnD) files transfer handler
                 mainFrame.setTransferHandler(new FilesTransferHandler());
                 // Background class loading
