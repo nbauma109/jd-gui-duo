@@ -86,6 +86,8 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -263,6 +265,12 @@ public class MainController implements API {
                 sourceLoaderService = new SourceLoaderService();
                 // Add listeners
                 mainFrame.addComponentListener(new MainFrameListener(configuration));
+                mainFrame.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent e) {
+                        updateRememberedOpenFiles();
+                    }
+                });
                 // Set drag and drop (DnD) files transfer handler
                 mainFrame.setTransferHandler(new FilesTransferHandler());
                 // Background class loading
