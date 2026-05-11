@@ -314,3 +314,12 @@ Fernflower|Jetbrains|https://github.com/JetBrains/intellij-community/tree/master
 Vineflower|Vineflower|https://github.com/Vineflower/vineflower|Apache v2
 JADX|Skylot|https://github.com/skylot/jadx|Apache v2
 JD-GUI|Emmanuel Dupuy|https://github.com/java-decompiler/jd-gui|GPL v3
+
+## Sponsors
+
+<table>
+  <tr>
+    <td><img src="https://raw.githubusercontent.com/SignPath/docs-product/main/docs/assets/signpath-logo.svg" alt="SignPath logo" width="200"></td>
+    <td>Free code signing on Windows provided by <a href="https://signpath.io/">SignPath.io</a>, certificate by <a href="https://signpath.org/">SignPath Foundation</a></td>
+  </tr>
+</table>
