@@ -10,7 +10,7 @@ on:
       signing_policy_slug:
         description: SignPath signing policy slug. Keep test-signing until the workflow has been validated.
         required: true
-        default: test-signing
+        default: release-signing
         type: string
 
 concurrency:
