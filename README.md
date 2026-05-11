@@ -33,10 +33,6 @@ Downloads from Sourceforge :
 
 Looking for an Eclipse plugin ? Try [ECD++](https://github.com/nbauma109/ecd)
 
-## Sponsors
-
-Free code signing on Windows provided by [SignPath.io](https://signpath.io/), certificate by [SignPath Foundation](https://signpath.org/)
-
 # jd-gui-duo
 A 2-in-1 JAVA decompiler based on JD-CORE v0 and v1.
 
@@ -318,3 +314,9 @@ Fernflower|Jetbrains|https://github.com/JetBrains/intellij-community/tree/master
 Vineflower|Vineflower|https://github.com/Vineflower/vineflower|Apache v2
 JADX|Skylot|https://github.com/skylot/jadx|Apache v2
 JD-GUI|Emmanuel Dupuy|https://github.com/java-decompiler/jd-gui|GPL v3
+
+## Sponsors
+
+| | |
+| --- | --- |
+| <img src="https://raw.githubusercontent.com/SignPath/docs-product/2f87751d7e1a649d66e9b19dfcd81a54be5668e1/docs/assets/favicon-50x50.png" alt="SignPath logo" width="32"> | Free code signing on Windows provided by [SignPath.io](https://signpath.io/), certificate by [SignPath Foundation](https://signpath.org/) |
