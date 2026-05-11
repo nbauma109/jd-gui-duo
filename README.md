@@ -319,7 +319,7 @@ JD-GUI|Emmanuel Dupuy|https://github.com/java-decompiler/jd-gui|GPL v3
 
 <table>
   <tr>
-    <td><img src="https://github.com/user-attachments/assets/28381d2c-c792-4e49-ab6c-75ad81e9c5dd" alt="SignPath logo" width="32"></td>
+    <td><img src="https://raw.githubusercontent.com/SignPath/docs-product/main/docs/assets/signpath-logo.svg" alt="SignPath logo" width="96"></td>
     <td>Free code signing on Windows provided by <a href="https://signpath.io/">SignPath.io</a>, certificate by <a href="https://signpath.org/">SignPath Foundation</a></td>
   </tr>
 </table>
