@@ -317,6 +317,9 @@ JD-GUI|Emmanuel Dupuy|https://github.com/java-decompiler/jd-gui|GPL v3
 
 ## Sponsors
 
-| | |
-| --- | --- |
-| <img src="https://raw.githubusercontent.com/SignPath/docs-product/2f87751d7e1a649d66e9b19dfcd81a54be5668e1/docs/assets/favicon-50x50.png" alt="SignPath logo" width="32"> | Free code signing on Windows provided by [SignPath.io](https://signpath.io/), certificate by [SignPath Foundation](https://signpath.org/) |
+<table>
+  <tr>
+    <td><img src="https://raw.githubusercontent.com/SignPath/docs-product/2f87751d7e1a649d66e9b19dfcd81a54be5668e1/docs/assets/favicon-50x50.png" alt="SignPath logo" width="32"></td>
+    <td>Free code signing on Windows provided by <a href="https://signpath.io/">SignPath.io</a>, certificate by <a href="https://signpath.org/">SignPath Foundation</a></td>
+  </tr>
+</table>
