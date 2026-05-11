@@ -33,6 +33,10 @@ Downloads from Sourceforge :
 
 Looking for an Eclipse plugin ? Try [ECD++](https://github.com/nbauma109/ecd)
 
+## Sponsors
+
+Free code signing on Windows provided by [SignPath.io](https://signpath.io/), certificate by [SignPath Foundation](https://signpath.org/)
+
 # jd-gui-duo
 A 2-in-1 JAVA decompiler based on JD-CORE v0 and v1.
 
