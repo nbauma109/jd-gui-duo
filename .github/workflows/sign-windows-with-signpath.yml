@@ -82,6 +82,8 @@ jobs:
       - name: Build with Maven
         shell: pwsh
         working-directory: source
+        env:
+          SOURCE_DATE_EPOCH: 1704067200
         run: mvn --no-transfer-progress -B package
 
       - name: Install Inno Setup
