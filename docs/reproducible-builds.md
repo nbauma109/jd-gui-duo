@@ -51,17 +51,18 @@ Changed the exe and JAR references to remove version numbers in `assembler/pom.x
 <configuration>
   <outfile>${project.build.directory}/windows/jd-gui-duo.exe</outfile>
   <dontWrapJar>true</dontWrapJar>
-  <jar>${project.build.directory}/lib/jd-gui-duo-app.jar</jar>
+  <jar>lib/jd-gui-duo-app.jar</jar>
   ...
 </configuration>
 ```
 
 The exe is now always named `jd-gui-duo.exe` (no version) and references `jd-gui-duo-app.jar` (no version).
 
-**Important**: `dontWrapJar=true` tells Launch4j to NOT embed the JAR inside the exe. Instead, the exe remains a small launcher that references the external JAR file. This ensures:
+**Important**: `dontWrapJar=true` tells Launch4j to NOT embed the JAR inside the exe. Instead, the exe remains a small launcher that references the external JAR file. The `<jar>` path is a runtime-relative path (relative to the exe location), not a build path. This ensures:
 - The exe file is very small (~200 KB) and completely stable
 - Only the external JAR file changes between versions
 - The exe hash never changes, even when the application code is updated
+- The launcher correctly finds the JAR at `lib/jd-gui-duo-app.jar` relative to the exe location when users run the distributed application
 
 ### 4. JAR Copy Step
 
