@@ -17,20 +17,7 @@ This caused the Windows SmartScreen reputation score to reset with each release,
 
 We implemented a **version-agnostic exe with fixed timestamps** to maintain the same file hash across all releases:
 
-### 1. Maven Reproducible Builds Property
-
-Added `project.build.outputTimestamp` to the root `pom.xml`:
-
-```xml
-<properties>
-  <!-- Fixed timestamp for reproducible builds -->
-  <project.build.outputTimestamp>2024-01-01T00:00:00Z</project.build.outputTimestamp>
-</properties>
-```
-
-This property ensures that all Maven-generated artifacts (JARs, etc.) use a consistent timestamp, as documented in the [Maven Reproducible Builds Guide](https://maven.apache.org/guides/mini/guide-reproducible-builds.html).
-
-### 2. Launch4j Reproducible Builds with SOURCE_DATE_EPOCH
+### 1. Launch4j Reproducible Builds with SOURCE_DATE_EPOCH
 
 The Launch4j Maven plugin (version 2.7.0+) supports reproducible builds through the `SOURCE_DATE_EPOCH` environment variable. This is the standard approach recommended by the [Reproducible Builds project](https://reproducible-builds.org/docs/source-date-epoch/).
 
@@ -61,7 +48,7 @@ mvn clean package
 
 This ensures the PE (Portable Executable) header timestamp in the generated `.exe` file is fixed to the specified date, making the executable hash stable across builds when the content is unchanged.
 
-### 3. Version-Agnostic Filenames
+### 2. Version-Agnostic Filenames
 
 Changed the exe and JAR references to remove version numbers in `assembler/pom.xml`:
 
@@ -82,7 +69,7 @@ The exe is now always named `jd-gui-duo.exe` (no version) and references `jd-gui
 - The exe hash never changes, even when the application code is updated
 - The launcher correctly finds the JAR at `lib/jd-gui-duo-app.jar` relative to the exe location when users run the distributed application
 
-### 4. JAR Copy Step
+### 3. JAR Copy Step
 
 Added a Maven Ant task to copy the versioned JAR to a version-agnostic name:
 
