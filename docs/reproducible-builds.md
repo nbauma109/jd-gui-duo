@@ -30,18 +30,36 @@ Added `project.build.outputTimestamp` to the root `pom.xml`:
 
 This property ensures that all Maven-generated artifacts (JARs, etc.) use a consistent timestamp, as documented in the [Maven Reproducible Builds Guide](https://maven.apache.org/guides/mini/guide-reproducible-builds.html).
 
-### 2. Launch4j Fixed Timestamp
+### 2. Launch4j Reproducible Builds with SOURCE_DATE_EPOCH
 
-Added a `timestamp` configuration to the Launch4j plugin in `assembler/pom.xml`:
+The Launch4j Maven plugin (version 2.7.0+) supports reproducible builds through the `SOURCE_DATE_EPOCH` environment variable. This is the standard approach recommended by the [Reproducible Builds project](https://reproducible-builds.org/docs/source-date-epoch/).
 
-```xml
-<configuration>
-  <!-- Fixed timestamp for reproducible builds -->
-  <timestamp>2024-01-01T00:00:00Z</timestamp>
-</configuration>
+#### Setting SOURCE_DATE_EPOCH
+
+The `SOURCE_DATE_EPOCH` environment variable should be set to a Unix timestamp (seconds since 1970-01-01 00:00:00 UTC). For this project, we use `1704067200`, which corresponds to `2024-01-01T00:00:00Z`.
+
+In GitHub Actions workflows (`.github/workflows/release.yml` and `.github/workflows/maven.yml`):
+
+```yaml
+- name: Build with Maven
+  env:
+    SOURCE_DATE_EPOCH: 1704067200
+  run: mvn --no-transfer-progress -B package
 ```
 
-This sets a fixed timestamp in the PE header of the generated `.exe` file, ensuring the executable hash remains stable across builds when the content is unchanged.
+For local builds, set the environment variable before running Maven:
+
+```bash
+# On Linux/macOS
+export SOURCE_DATE_EPOCH=1704067200
+mvn clean package
+
+# On Windows (PowerShell)
+$env:SOURCE_DATE_EPOCH=1704067200
+mvn clean package
+```
+
+This ensures the PE (Portable Executable) header timestamp in the generated `.exe` file is fixed to the specified date, making the executable hash stable across builds when the content is unchanged.
 
 ### 3. Version-Agnostic Filenames
 
@@ -98,8 +116,10 @@ This ensures the version-agnostic JAR name exists for the exe to reference.
 
 To verify that builds are reproducible for the same version:
 
-1. Build the project twice from the same commit:
+1. Build the project twice from the same commit with SOURCE_DATE_EPOCH set:
    ```bash
+   # On Linux/macOS
+   export SOURCE_DATE_EPOCH=1704067200
    mvn clean package
    sha256sum assembler/target/windows/jd-gui-duo.exe > build1.sha256
 
@@ -115,8 +135,10 @@ To verify that builds are reproducible for the same version:
 
 To verify the exe stays the same across versions:
 
-1. Build version A:
+1. Build version A with SOURCE_DATE_EPOCH set:
    ```bash
+   # On Linux/macOS
+   export SOURCE_DATE_EPOCH=1704067200
    mvn clean package
    sha256sum assembler/target/windows/jd-gui-duo.exe > versionA.sha256
    ```
@@ -162,7 +184,7 @@ The exe is approximately 200 KB and never changes. Only the external JAR file co
 
 ### Launch4j Version
 
-This project uses Launch4j Maven plugin version 2.7.0, which supports the `timestamp` configuration parameter. Earlier versions may not support this feature.
+This project uses Launch4j Maven plugin version 2.7.0, which supports reproducible builds via the `SOURCE_DATE_EPOCH` environment variable. This is the standard mechanism for achieving deterministic timestamps in build outputs, as documented in the [Reproducible Builds specifications](https://reproducible-builds.org/docs/source-date-epoch/).
 
 ## References
 

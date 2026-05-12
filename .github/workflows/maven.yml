@@ -37,4 +37,6 @@ jobs:
         git config --global user.email "git@github.com"
         git config --global user.name "git"
     - name: Release with Maven
+      env:
+        SOURCE_DATE_EPOCH: 1704067200
       run: mvn --no-transfer-progress -B -Dusername=git release:clean release:prepare release:perform
