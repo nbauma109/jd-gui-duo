@@ -166,6 +166,8 @@
     <main.class>org.jd.gui.App</main.class>
     <project.scm.id>github.com</project.scm.id>
     <flatlaf.version>3.7.1</flatlaf.version>
+    <!-- Fixed timestamp for reproducible builds -->
+    <project.build.outputTimestamp>2024-01-01T00:00:00Z</project.build.outputTimestamp>
     <!-- ======================================================================
          Transformer API — Unified Transformer Access Layer
          ======================================================================

@@ -345,6 +345,8 @@ exec "$JAVA" -ea \
                 </opts>
               </jre>
               <icon>${project.parent.basedir}/src/launch4j/resources/images/jd-gui.ico</icon>
+              <!-- Fixed timestamp for reproducible builds -->
+              <timestamp>2024-01-01T00:00:00Z</timestamp>
             </configuration>
           </execution>
         </executions>
