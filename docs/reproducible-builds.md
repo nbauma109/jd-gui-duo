@@ -1,16 +1,21 @@
-# Reproducible Builds for Stable Windows Executable
+# Version-Agnostic Windows Executable for Stable SmartScreen Reputation
 
 ## Problem Statement
 
-SmartScreen uses file hashes to identify trusted applications. Previously, every release generated a different `.exe` file hash, even when the source code was identical. This caused the Windows SmartScreen reputation score to reset with each release, resulting in security warnings for users.
+SmartScreen uses file hashes to identify trusted applications. Previously, every release generated a different `.exe` file hash due to:
+1. Version numbers embedded in the executable filename and JAR references
+2. Timestamps changing with each build
 
-## Root Cause
+This caused the Windows SmartScreen reputation score to reset with each release, resulting in security warnings for users.
 
-The Launch4j Maven plugin, which wraps Java applications into Windows executables, was embedding timestamps and other build-specific metadata into the PE (Portable Executable) header of the `.exe` file. This caused the file hash to change between builds even when the source code and dependencies remained unchanged.
+## Root Causes
+
+1. **Version-specific filenames**: The exe was named `jd-gui-duo-${version}.exe` and referenced `jd-gui-duo-app-${version}.jar`, causing the exe to be different for each version
+2. **Dynamic timestamps**: The Launch4j Maven plugin was embedding build-time timestamps into the PE (Portable Executable) header
 
 ## Solution
 
-We implemented **reproducible builds** by configuring fixed timestamps in both Maven and the Launch4j plugin:
+We implemented a **version-agnostic exe with fixed timestamps** to maintain the same file hash across all releases:
 
 ### 1. Maven Reproducible Builds Property
 
@@ -38,29 +43,91 @@ Added a `timestamp` configuration to the Launch4j plugin in `assembler/pom.xml`:
 
 This sets a fixed timestamp in the PE header of the generated `.exe` file, ensuring the executable hash remains stable across builds when the content is unchanged.
 
+### 3. Version-Agnostic Filenames
+
+Changed the exe and JAR references to remove version numbers in `assembler/pom.xml`:
+
+```xml
+<configuration>
+  <outfile>${project.build.directory}/windows/jd-gui-duo.exe</outfile>
+  <jar>${project.build.directory}/lib/jd-gui-duo-app.jar</jar>
+  ...
+</configuration>
+```
+
+The exe is now always named `jd-gui-duo.exe` (no version) and references `jd-gui-duo-app.jar` (no version).
+
+### 4. JAR Copy Step
+
+Added a Maven Ant task to copy the versioned JAR to a version-agnostic name:
+
+```xml
+<execution>
+  <id>copy-version-agnostic-jar</id>
+  <phase>prepare-package</phase>
+  <configuration>
+    <target>
+      <copy file="${project.build.directory}/lib/jd-gui-duo-app-${project.version}.jar"
+            tofile="${project.build.directory}/lib/jd-gui-duo-app.jar"
+            overwrite="true" />
+    </target>
+  </configuration>
+</execution>
+```
+
+This ensures the version-agnostic JAR name exists for the exe to reference.
+
 ## Benefits
 
-1. **Stable File Hash**: The `.exe` file will have the same hash across multiple builds if the source code and dependencies are unchanged
-2. **SmartScreen Reputation**: Windows SmartScreen reputation score will persist across releases
-3. **Reduced Security Warnings**: Users will see fewer security warnings after the application builds trust
+1. **Stable File Hash Across Versions**: The exe wrapper (`jd-gui-duo.exe`) remains byte-for-byte identical across different versions (v2.0.112, v2.0.113, etc.)
+2. **SmartScreen Reputation Preserved**: Windows SmartScreen reputation accumulates across all releases since the exe hash never changes
+3. **Reduced Security Warnings**: Users experience fewer security warnings as the application maintains its trust score
 4. **Better Security**: Stable hashes make it easier to verify official releases and detect tampering
+5. **Only JAR Content Changes**: Version updates only change the JAR file content, not the exe wrapper
 
 ## Verification
 
-To verify that builds are reproducible:
+### Test 1: Reproducible Builds (Same Version)
+
+To verify that builds are reproducible for the same version:
 
 1. Build the project twice from the same commit:
    ```bash
    mvn clean package
-   sha256sum assembler/target/windows/jd-gui-duo-*.exe > build1.sha256
+   sha256sum assembler/target/windows/jd-gui-duo.exe > build1.sha256
 
    mvn clean package
-   sha256sum assembler/target/windows/jd-gui-duo-*.exe > build2.sha256
+   sha256sum assembler/target/windows/jd-gui-duo.exe > build2.sha256
 
    diff build1.sha256 build2.sha256
    ```
 
 2. If the hashes match (no output from `diff`), the builds are reproducible
+
+### Test 2: Version-Agnostic Exe (Different Versions)
+
+To verify the exe stays the same across versions:
+
+1. Build version A:
+   ```bash
+   mvn clean package
+   sha256sum assembler/target/windows/jd-gui-duo.exe > versionA.sha256
+   ```
+
+2. Update version in pom.xml to version B
+
+3. Build version B:
+   ```bash
+   mvn clean package
+   sha256sum assembler/target/windows/jd-gui-duo.exe > versionB.sha256
+   ```
+
+4. Compare hashes:
+   ```bash
+   diff versionA.sha256 versionB.sha256
+   ```
+
+5. The hashes should be **identical** (no output from `diff`), proving the exe doesn't change between versions
 
 ## Technical Details
 
@@ -75,6 +142,16 @@ The timestamp `2024-01-01T00:00:00Z` was chosen as:
 
 The PE (Portable Executable) header is the Windows executable format specification. The timestamp field in the PE header is traditionally set to the build time. By fixing this timestamp, we ensure the PE header (and thus the file hash) remains consistent.
 
+### Version-Agnostic Design
+
+The exe wrapper acts as a launcher that:
+- Has a fixed name: `jd-gui-duo.exe`
+- References a fixed JAR name: `jd-gui-duo-app.jar`
+- Contains only launcher code and configuration (no version-specific data)
+- Remains identical across all versions
+
+Only the JAR content changes between versions, while the exe wrapper stays the same.
+
 ### Launch4j Version
 
 This project uses Launch4j Maven plugin version 2.7.0, which supports the `timestamp` configuration parameter. Earlier versions may not support this feature.
@@ -88,6 +165,16 @@ This project uses Launch4j Maven plugin version 2.7.0, which supports the `times
 
 ## Notes
 
-- The installer `.exe` file (generated by Inno Setup) is **not** affected by these changes and continues to have dynamic timestamps
-- Only the application `.exe` file (jd-gui-duo-*.exe) uses reproducible builds
+- The installer `.exe` file (generated by Inno Setup) **continues to have version numbers** in its filename (`jd-gui-duo-windows-${version}-setup.exe`) and has dynamic timestamps, as it's a different file for each release
+- Only the application `.exe` file (`jd-gui-duo.exe`) is version-agnostic and uses reproducible builds
 - Code signing (via SignPath) is applied after the `.exe` is generated and does not affect reproducibility
+- The versioned JAR (`jd-gui-duo-app-${version}.jar`) is still created and packaged; the version-agnostic name (`jd-gui-duo-app.jar`) is a copy used only by the exe wrapper
+
+## Impact on Releases
+
+When releasing a new version:
+1. The application exe (`jd-gui-duo.exe`) remains **identical** to previous releases
+2. The JAR content is updated with new features/fixes
+3. Windows SmartScreen sees the same trusted exe file
+4. Users experience no security warnings
+5. The tar.xz distribution archive name still includes the version for clarity
