@@ -343,6 +343,7 @@ exec "$JAVA" -ea \
             <configuration>
               <headerType>gui</headerType>
               <outfile>${project.build.directory}/windows/jd-gui-duo.exe</outfile>
+              <dontWrapJar>true</dontWrapJar>
               <jar>${project.build.directory}/lib/jd-gui-duo-app.jar</jar>
               <classPath>
                 <mainClass>${main.class}</mainClass>
