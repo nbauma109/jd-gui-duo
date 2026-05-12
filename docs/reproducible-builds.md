@@ -50,12 +50,18 @@ Changed the exe and JAR references to remove version numbers in `assembler/pom.x
 ```xml
 <configuration>
   <outfile>${project.build.directory}/windows/jd-gui-duo.exe</outfile>
+  <dontWrapJar>true</dontWrapJar>
   <jar>${project.build.directory}/lib/jd-gui-duo-app.jar</jar>
   ...
 </configuration>
 ```
 
 The exe is now always named `jd-gui-duo.exe` (no version) and references `jd-gui-duo-app.jar` (no version).
+
+**Important**: `dontWrapJar=true` tells Launch4j to NOT embed the JAR inside the exe. Instead, the exe remains a small launcher that references the external JAR file. This ensures:
+- The exe file is very small (~200 KB) and completely stable
+- Only the external JAR file changes between versions
+- The exe hash never changes, even when the application code is updated
 
 ### 4. JAR Copy Step
 
@@ -144,13 +150,14 @@ The PE (Portable Executable) header is the Windows executable format specificati
 
 ### Version-Agnostic Design
 
-The exe wrapper acts as a launcher that:
+The exe wrapper acts as a small, stable launcher that:
 - Has a fixed name: `jd-gui-duo.exe`
 - References a fixed JAR name: `jd-gui-duo-app.jar`
-- Contains only launcher code and configuration (no version-specific data)
+- Does NOT embed the JAR (`dontWrapJar=true`) - the exe is just a lightweight launcher
+- Contains only launcher code and configuration (no version-specific data or application code)
 - Remains identical across all versions
 
-Only the JAR content changes between versions, while the exe wrapper stays the same.
+The exe is approximately 200 KB and never changes. Only the external JAR file content changes between versions, while the exe wrapper stays byte-for-byte identical.
 
 ### Launch4j Version
 
