@@ -2,196 +2,104 @@
 
 ## Problem Statement
 
-SmartScreen uses file hashes to identify trusted applications. Previously, every release generated a different `.exe` file hash due to:
-1. Version numbers embedded in the executable filename and JAR references
-2. Timestamps changing with each build
+SmartScreen uses file hashes to identify trusted applications. Previously, every release generated
+a different `.exe` file hash due to:
 
-This caused the Windows SmartScreen reputation score to reset with each release, resulting in security warnings for users.
+1. Version numbers embedded in the filename and JAR references
+2. Timestamps written into the binary by the native toolchain at build time
+
+This caused the Windows SmartScreen reputation score to reset with each release, resulting in
+security warnings for users.
 
 ## Root Causes
 
-1. **Version-specific filenames**: The exe was named `jd-gui-duo-${version}.exe` and referenced `jd-gui-duo-app-${version}.jar`, causing the exe to be different for each version
-2. **Dynamic timestamps**: The Launch4j Maven plugin was embedding build-time timestamps into the PE (Portable Executable) header
+| Source | What changed | Why |
+|---|---|---|
+| Versioned filename | `jd-gui-duo-${version}.exe` | Obvious content difference |
+| Versioned JAR reference | `jd-gui-duo-app-${version}.jar` embedded in exe | Obvious content difference |
+| PE COFF `TimeDateStamp` | Changes every build | `ld.exe` (bundled MinGW linker) stamps current second |
+| `.rsrc` section – every `IMAGE_RESOURCE_DIRECTORY.TimeDateStamp` | Changes every build | `windres.exe` (bundled resource compiler) stamps current second in every resource directory node |
+| PE Optional Header `CheckSum` | Changes every build | Derived from file content; changes whenever the resource timestamps change |
+
+> **Note**: Neither `SOURCE_DATE_EPOCH` nor `project.build.outputTimestamp` help here.
+> The launch4j Maven plugin (2.7.0) has no code that reads either variable — the timestamps
+> are written directly by the native `ld.exe` / `windres.exe` binaries it unpacks and calls.
 
 ## Solution
 
-We implemented a **version-agnostic exe with fixed timestamps** to maintain the same file hash across all releases:
+### 1. Version-Agnostic Filenames
 
-### 1. Launch4j Reproducible Builds with SOURCE_DATE_EPOCH
-
-The Launch4j Maven plugin (version 2.7.0+) supports reproducible builds through the `SOURCE_DATE_EPOCH` environment variable. This is the standard approach recommended by the [Reproducible Builds project](https://reproducible-builds.org/docs/source-date-epoch/).
-
-#### Setting SOURCE_DATE_EPOCH
-
-The `SOURCE_DATE_EPOCH` environment variable should be set to a Unix timestamp (seconds since 1970-01-01 00:00:00 UTC). For this project, we use `1704067200`, which corresponds to `2024-01-01T00:00:00Z`.
-
-In GitHub Actions workflows (`.github/workflows/release.yml` and `.github/workflows/maven.yml`):
-
-```yaml
-- name: Build with Maven
-  env:
-    SOURCE_DATE_EPOCH: 1704067200
-  run: mvn --no-transfer-progress -B package
-```
-
-For local builds, set the environment variable before running Maven:
-
-```bash
-# On Linux/macOS
-export SOURCE_DATE_EPOCH=1704067200
-mvn clean package
-
-# On Windows (PowerShell)
-$env:SOURCE_DATE_EPOCH=1704067200
-mvn clean package
-```
-
-This ensures the PE (Portable Executable) header timestamp in the generated `.exe` file is fixed to the specified date, making the executable hash stable across builds when the content is unchanged.
-
-### 2. Version-Agnostic Filenames
-
-Changed the exe and JAR references to remove version numbers in `assembler/pom.xml`:
+The exe and JAR references in `assembler/pom.xml` use fixed names with no version numbers:
 
 ```xml
-<configuration>
-  <outfile>${project.build.directory}/windows/jd-gui-duo.exe</outfile>
-  <dontWrapJar>true</dontWrapJar>
-  <jar>lib/jd-gui-duo-app.jar</jar>
-  ...
-</configuration>
+<outfile>${project.build.directory}/windows/jd-gui-duo.exe</outfile>
+<dontWrapJar>true</dontWrapJar>
+<jar>lib/jd-gui-duo-app.jar</jar>
 ```
 
-The exe is now always named `jd-gui-duo.exe` (no version) and references `jd-gui-duo-app.jar` (no version).
+`dontWrapJar=true` means the JAR is **not** embedded inside the exe. The exe is a small
+launcher (~200 KB) that locates `lib/jd-gui-duo-app.jar` at runtime relative to its own
+directory. Only the JAR changes between versions; the exe wrapper stays the same.
 
-**Important**: `dontWrapJar=true` tells Launch4j to NOT embed the JAR inside the exe. Instead, the exe remains a small launcher that references the external JAR file. The `<jar>` path is a runtime-relative path (relative to the exe location), not a build path. This ensures:
-- The exe file is very small (~200 KB) and completely stable
-- Only the external JAR file changes between versions
-- The exe hash never changes, even when the application code is updated
-- The launcher correctly finds the JAR at `lib/jd-gui-duo-app.jar` relative to the exe location when users run the distributed application
+### 2. JAR Copy Step
 
-### 3. JAR Copy Step
-
-Added a Maven Ant task to copy the versioned JAR to a version-agnostic name:
+A Maven Ant task copies the versioned JAR to a version-agnostic name and removes the
+versioned original so only one copy lands in the distribution:
 
 ```xml
-<execution>
-  <id>copy-version-agnostic-jar</id>
-  <phase>prepare-package</phase>
-  <configuration>
-    <target>
-      <copy file="${project.build.directory}/lib/jd-gui-duo-app-${project.version}.jar"
-            tofile="${project.build.directory}/lib/jd-gui-duo-app.jar"
-            overwrite="true" />
-    </target>
-  </configuration>
-</execution>
+<copy file="${project.build.directory}/lib/jd-gui-duo-app-${project.version}.jar"
+      tofile="${project.build.directory}/lib/jd-gui-duo-app.jar"
+      overwrite="true" />
+<delete file="${project.build.directory}/lib/jd-gui-duo-app-${project.version}.jar" />
 ```
 
-This ensures the version-agnostic JAR name exists for the exe to reference.
+### 3. Post-Build PE Timestamp Patch (`FixPeTimestamp.java`)
 
-## Benefits
+After launch4j generates the exe (in the `prepare-package` phase), a second Ant task in the
+`package` phase runs `assembler/src/scripts/FixPeTimestamp.java` via the Java 11+ single-file
+source launcher. This script neutralises every build-time timestamp in the binary:
 
-1. **Stable File Hash Across Versions**: The exe wrapper (`jd-gui-duo.exe`) remains byte-for-byte identical across different versions (v2.0.112, v2.0.113, etc.)
-2. **SmartScreen Reputation Preserved**: Windows SmartScreen reputation accumulates across all releases since the exe hash never changes
-3. **Reduced Security Warnings**: Users experience fewer security warnings as the application maintains its trust score
-4. **Better Security**: Stable hashes make it easier to verify official releases and detect tampering
-5. **Only JAR Content Changes**: Version updates only change the JAR file content, not the exe wrapper
+| Field | Offset | Action |
+|---|---|---|
+| COFF `TimeDateStamp` | `e_lfanew + 8` | Set to fixed epoch `1704067200` (2024-01-01) |
+| Every `IMAGE_RESOURCE_DIRECTORY.TimeDateStamp` in `.rsrc` | BFS-traversed | Zeroed |
+| Optional Header `CheckSum` | `optHdr + 64` | Zeroed (not validated by Windows for user-mode apps) |
+
+The script runs before `maven-assembly-plugin` packages the tar.xz, so the archive always
+contains the fully-patched exe.
 
 ## Verification
 
-### Test 1: Reproducible Builds (Same Version)
+Build twice from the same commit and compare hashes:
 
-To verify that builds are reproducible for the same version:
+```bash
+mvn clean package
+sha256sum assembler/target/windows/jd-gui-duo.exe > build1.sha256
 
-1. Build the project twice from the same commit with SOURCE_DATE_EPOCH set:
-   ```bash
-   # On Linux/macOS
-   export SOURCE_DATE_EPOCH=1704067200
-   mvn clean package
-   sha256sum assembler/target/windows/jd-gui-duo.exe > build1.sha256
+mvn clean package
+sha256sum assembler/target/windows/jd-gui-duo.exe > build2.sha256
 
-   mvn clean package
-   sha256sum assembler/target/windows/jd-gui-duo.exe > build2.sha256
+diff build1.sha256 build2.sha256   # no output = identical
+```
 
-   diff build1.sha256 build2.sha256
-   ```
-
-2. If the hashes match (no output from `diff`), the builds are reproducible
-
-### Test 2: Version-Agnostic Exe (Different Versions)
-
-To verify the exe stays the same across versions:
-
-1. Build version A with SOURCE_DATE_EPOCH set:
-   ```bash
-   # On Linux/macOS
-   export SOURCE_DATE_EPOCH=1704067200
-   mvn clean package
-   sha256sum assembler/target/windows/jd-gui-duo.exe > versionA.sha256
-   ```
-
-2. Update version in pom.xml to version B
-
-3. Build version B:
-   ```bash
-   mvn clean package
-   sha256sum assembler/target/windows/jd-gui-duo.exe > versionB.sha256
-   ```
-
-4. Compare hashes:
-   ```bash
-   diff versionA.sha256 versionB.sha256
-   ```
-
-5. The hashes should be **identical** (no output from `diff`), proving the exe doesn't change between versions
-
-## Technical Details
-
-### Timestamp Value Choice
-
-The timestamp `2024-01-01T00:00:00Z` was chosen as:
-- It's a recent date that's valid for all modern systems
-- It's easy to remember and recognize
-- It uses UTC timezone (indicated by the `Z` suffix) for consistency
-
-### PE Header
-
-The PE (Portable Executable) header is the Windows executable format specification. The timestamp field in the PE header is traditionally set to the build time. By fixing this timestamp, we ensure the PE header (and thus the file hash) remains consistent.
-
-### Version-Agnostic Design
-
-The exe wrapper acts as a small, stable launcher that:
-- Has a fixed name: `jd-gui-duo.exe`
-- References a fixed JAR name: `jd-gui-duo-app.jar`
-- Does NOT embed the JAR (`dontWrapJar=true`) - the exe is just a lightweight launcher
-- Contains only launcher code and configuration (no version-specific data or application code)
-- Remains identical across all versions
-
-The exe is approximately 200 KB and never changes. Only the external JAR file content changes between versions, while the exe wrapper stays byte-for-byte identical.
-
-### Launch4j Version
-
-This project uses Launch4j Maven plugin version 2.7.0, which supports reproducible builds via the `SOURCE_DATE_EPOCH` environment variable. This is the standard mechanism for achieving deterministic timestamps in build outputs, as documented in the [Reproducible Builds specifications](https://reproducible-builds.org/docs/source-date-epoch/).
-
-## References
-
-- [Maven Reproducible Builds](https://maven.apache.org/guides/mini/guide-reproducible-builds.html)
-- [Launch4j Maven Plugin](https://github.com/lukaszlenart/launch4j-maven-plugin)
-- [Reproducible Builds Project](https://reproducible-builds.org/)
-- [Windows PE Format](https://learn.microsoft.com/en-us/windows/win32/debug/pe-format)
+The exe also stays identical across different application versions (v2.0.112 → v2.0.113, etc.)
+because it contains no version-specific data.
 
 ## Notes
 
-- The installer `.exe` file (generated by Inno Setup) **continues to have version numbers** in its filename (`jd-gui-duo-windows-${version}-setup.exe`) and has dynamic timestamps, as it's a different file for each release
-- Only the application `.exe` file (`jd-gui-duo.exe`) is version-agnostic and uses reproducible builds
-- Code signing (via SignPath) is applied after the `.exe` is generated and does not affect reproducibility
-- The versioned JAR (`jd-gui-duo-app-${version}.jar`) is still created and packaged; the version-agnostic name (`jd-gui-duo-app.jar`) is a copy used only by the exe wrapper
+- The **installer** (`jd-gui-duo-windows-${version}-setup.exe`, built by Inno Setup) still
+  carries a version-specific name and dynamic timestamps — it is a per-release artifact by design.
+- The **tar.xz archives** carry real build-time timestamps on their entries (no artificial
+  normalisation). Only the exe reproducibility matters for SmartScreen.
+- Code signing via SignPath is applied after the exe is generated and does not affect
+  reproducibility.
+- The versioned JAR (`jd-gui-duo-app-${version}.jar`) exists inside the fat-jar assembly but
+  is removed from `lib/` after the version-agnostic copy is made; the distribution contains
+  only `jd-gui-duo-app.jar`.
 
-## Impact on Releases
+## References
 
-When releasing a new version:
-1. The application exe (`jd-gui-duo.exe`) remains **identical** to previous releases
-2. The JAR content is updated with new features/fixes
-3. Windows SmartScreen sees the same trusted exe file
-4. Users experience no security warnings
-5. The tar.xz distribution archive name still includes the version for clarity
+- [Windows PE Format – COFF Header](https://learn.microsoft.com/en-us/windows/win32/debug/pe-format)
+- [Windows PE Format – Resource Directory](https://learn.microsoft.com/en-us/windows/win32/debug/pe-format#the-rsrc-section)
+- [Launch4j Maven Plugin](https://github.com/orphan-oss/launch4j-maven-plugin)
+- [Reproducible Builds Project](https://reproducible-builds.org/)
