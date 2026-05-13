@@ -97,12 +97,20 @@ jobs:
           $sourceRoot = Join-Path $workspace 'source'
           $toolsRoot = Join-Path $workspace 'workflow-tools'
 
-          $appExecutable = Get-ChildItem (Join-Path $sourceRoot 'assembler\target\windows') -Filter 'jd-gui-duo-*.exe' | Select-Object -First 1
-          if ($null -eq $appExecutable) {
-            throw "No application executable matching jd-gui-duo-*.exe was found in assembler\target\windows."
+          # Extract version from pom.xml instead of exe filename
+          $pomPath = Join-Path $sourceRoot 'pom.xml'
+          [xml]$pom = Get-Content $pomPath
+          $version = $pom.project.version
+          if ([string]::IsNullOrWhiteSpace($version)) {
+            throw "Could not extract version from pom.xml."
           }
 
-          $version = $appExecutable.BaseName.Substring('jd-gui-duo-'.Length)
+          # Look for the version-agnostic exe filename
+          $appExecutable = Get-ChildItem (Join-Path $sourceRoot 'assembler\target\windows') -Filter 'jd-gui-duo.exe' | Select-Object -First 1
+          if ($null -eq $appExecutable) {
+            throw "No application executable 'jd-gui-duo.exe' was found in assembler\target\windows."
+          }
+
           $archive = Get-ChildItem (Join-Path $sourceRoot 'assembler\target') -Filter 'jd-gui-duo-windows-*.tar.xz' | Select-Object -First 1
           if ($null -eq $archive) {
             throw "No Windows archive matching jd-gui-duo-windows-*.tar.xz was found in assembler\target."

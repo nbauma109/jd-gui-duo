@@ -13,7 +13,7 @@
       <outputDirectory>/</outputDirectory>
       <includes>
         <include>jre/**</include>
-        <include>jd-gui-duo-*.exe</include>
+        <include>jd-gui-duo.exe</include>
       </includes>
     </fileSet>
     <fileSet>

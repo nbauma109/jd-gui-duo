@@ -112,6 +112,40 @@
         <version>3.2.0</version>
         <executions>
           <execution>
+            <id>copy-version-agnostic-jar</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <!-- Copy versioned JAR to version-agnostic name for stable exe -->
+                <copy file="${project.build.directory}/lib/jd-gui-duo-app-${project.version}.jar"
+                      tofile="${project.build.directory}/lib/jd-gui-duo-app.jar"
+                      overwrite="true" />
+                <delete file="${project.build.directory}/lib/jd-gui-duo-app-${project.version}.jar" />
+              </target>
+            </configuration>
+          </execution>
+          <execution>
+            <id>fix-pe-timestamp</id>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <!-- Overwrite the PE COFF TimeDateStamp with a fixed epoch so the
+                     exe hash is identical across builds -->
+                <exec executable="${java.home}/bin/java" failonerror="true">
+                  <arg value="${project.basedir}/src/scripts/FixPeTimestamp.java"/>
+                  <arg value="${project.build.directory}/windows/jd-gui-duo.exe"/>
+                  <arg value="1704067200"/>
+                </exec>
+              </target>
+            </configuration>
+          </execution>
+          <execution>
             <id>build-macos-app-bundle</id>
             <phase>package</phase>
             <goals>
@@ -327,8 +361,9 @@ exec "$JAVA" -ea \
             </goals>
             <configuration>
               <headerType>gui</headerType>
-              <outfile>${project.build.directory}/windows/jd-gui-duo-${project.version}.exe</outfile>
-              <jar>${project.build.directory}/lib/jd-gui-duo-app-${project.version}.jar</jar>
+              <outfile>${project.build.directory}/windows/jd-gui-duo.exe</outfile>
+              <dontWrapJar>true</dontWrapJar>
+              <jar>lib/jd-gui-duo-app.jar</jar>
               <classPath>
                 <mainClass>${main.class}</mainClass>
                 <addDependencies>false</addDependencies>
@@ -345,6 +380,10 @@ exec "$JAVA" -ea \
                 </opts>
               </jre>
               <icon>${project.parent.basedir}/src/launch4j/resources/images/jd-gui.ico</icon>
+              <!-- Prevent auto-generated VERSIONINFO (FileVersion, Copyright, etc.)
+                   from embedding ${project.version} and the current year into the
+                   exe bytes, which would change the hash on every release. -->
+              <disableVersionInfoDefaults>true</disableVersionInfoDefaults>
             </configuration>
           </execution>
         </executions>

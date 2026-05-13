@@ -55,7 +55,7 @@ try {
 
     tar.exe -xf $InputArchive -C $stagingDir
 
-    $appExecutableName = "jd-gui-duo-$AppVersion.exe"
+    $appExecutableName = "jd-gui-duo.exe"
     $appExecutablePath = Join-Path $stagingDir $appExecutableName
     if (-not (Test-Path $appExecutablePath)) {
         throw "Expected application executable '$appExecutableName' was not found in the extracted Windows bundle."
