@@ -123,6 +123,25 @@
                 <copy file="${project.build.directory}/lib/jd-gui-duo-app-${project.version}.jar"
                       tofile="${project.build.directory}/lib/jd-gui-duo-app.jar"
                       overwrite="true" />
+                <delete file="${project.build.directory}/lib/jd-gui-duo-app-${project.version}.jar" />
+              </target>
+            </configuration>
+          </execution>
+          <execution>
+            <id>fix-pe-timestamp</id>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <!-- Overwrite the PE COFF TimeDateStamp with a fixed epoch so the
+                     exe hash is identical across builds -->
+                <exec executable="${java.home}/bin/java" failonerror="true">
+                  <arg value="${project.basedir}/src/scripts/FixPeTimestamp.java"/>
+                  <arg value="${project.build.directory}/windows/jd-gui-duo.exe"/>
+                  <arg value="1704067200"/>
+                </exec>
               </target>
             </configuration>
           </execution>

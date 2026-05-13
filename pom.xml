@@ -5,6 +5,11 @@
   <version>2.0.112-SNAPSHOT</version>
   <packaging>pom</packaging>
   <description>A 2-in-1 JAVA decompiler based on JD-CORE v0 and v1</description>
+  <inceptionYear>2021</inceptionYear>
+  <organization>
+    <name>Nicolas Baumann</name>
+    <url>https://github.com/nbauma109</url>
+  </organization>
   <modules>
     <module>api</module>
     <module>services</module>
