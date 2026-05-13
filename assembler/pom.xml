@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.github.nbauma109</groupId>
     <artifactId>jd-gui-duo-parent</artifactId>
-    <version>2.0.112-SNAPSHOT</version>
+    <version>2.0.112</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -120,9 +120,7 @@
             <configuration>
               <target>
                 <!-- Copy versioned JAR to version-agnostic name for stable exe -->
-                <copy file="${project.build.directory}/lib/jd-gui-duo-app-${project.version}.jar"
-                      tofile="${project.build.directory}/lib/jd-gui-duo-app.jar"
-                      overwrite="true" />
+                <copy file="${project.build.directory}/lib/jd-gui-duo-app-${project.version}.jar" tofile="${project.build.directory}/lib/jd-gui-duo-app.jar" overwrite="true" />
                 <delete file="${project.build.directory}/lib/jd-gui-duo-app-${project.version}.jar" />
               </target>
             </configuration>
@@ -138,9 +136,9 @@
                 <!-- Overwrite the PE COFF TimeDateStamp with a fixed epoch so the
                      exe hash is identical across builds -->
                 <exec executable="${java.home}/bin/java" failonerror="true">
-                  <arg value="${project.basedir}/src/scripts/FixPeTimestamp.java"/>
-                  <arg value="${project.build.directory}/windows/jd-gui-duo.exe"/>
-                  <arg value="1704067200"/>
+                  <arg value="${project.basedir}/src/scripts/FixPeTimestamp.java" />
+                  <arg value="${project.build.directory}/windows/jd-gui-duo.exe" />
+                  <arg value="1704067200" />
                 </exec>
               </target>
             </configuration>
