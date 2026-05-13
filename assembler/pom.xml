@@ -380,6 +380,10 @@ exec "$JAVA" -ea \
                 </opts>
               </jre>
               <icon>${project.parent.basedir}/src/launch4j/resources/images/jd-gui.ico</icon>
+              <!-- Prevent auto-generated VERSIONINFO (FileVersion, Copyright, etc.)
+                   from embedding ${project.version} and the current year into the
+                   exe bytes, which would change the hash on every release. -->
+              <disableVersionInfoDefaults>true</disableVersionInfoDefaults>
             </configuration>
           </execution>
         </executions>
