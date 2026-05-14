@@ -17,10 +17,10 @@ jobs:
         with:
           feed-url: https://github.com/${{ github.repository }}/releases.atom
           since: 1
-          since-unit: hour
+          since-unit: day
           limit: 1
           message: |
-            🎉 New release of JD-GUI Duo is out!
+            🎉 New release of ${{ github.event.repository.name }} is out!
             {url}
             #Java #JavaDecompiler #OpenSource #ReverseEngineering
           twitter-api-consumer-key: ${{ secrets.TWITTER_API_CONSUMER_KEY }}
