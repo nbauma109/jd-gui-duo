@@ -117,8 +117,8 @@ API posting cost:
 
 Get it from Dev.to:
 
-1. Open https://dev.to/settings/account
-2. Create/copy an API key in the Dev.to API key section.
+1. Open https://dev.to/settings/extensions
+2. In **DEV API Keys**, create or copy your API key.
 3. Save it as `DEVTO_API_KEY`.
 
 API posting cost:
