@@ -15,8 +15,6 @@ jobs:
         uses: tgagor/action-crosspost@9523ff489bc74e1a9849c5d3071b6bcbad40042d # v1.6.3
         with:
           feed-url: https://github.com/${{ github.repository }}/releases.atom
-          since: 7
-          since-unit: day
           limit: 1
           filter-urls: |
             /releases/tag/${{ github.event.release.tag_name }}
