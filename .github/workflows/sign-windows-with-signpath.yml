@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: Git ref to build and sign (tag or branch). Defaults to the ref used to start the workflow.
+        description: Git ref to build and sign. Use refs/tags/<tag> for release-signing; branches are only for non-production signing.
         required: false
         type: string
       signing_policy_slug:
@@ -37,16 +37,14 @@ jobs:
           if ($env:SIGNING_POLICY_SLUG -eq 'release-signing') {
             if ([string]::IsNullOrWhiteSpace($env:INPUT_REF)) {
               if ($env:GITHUB_REF_VALUE -notmatch '^refs/tags/') {
-                throw "Release signing requires an explicit tag ref or tag input."
+                throw "Release signing requires an explicit refs/tags/<tag> ref."
               }
 
               $checkoutRef = $env:GITHUB_REF_VALUE
             } elseif ($env:INPUT_REF -match '^refs/tags/') {
               $checkoutRef = $env:INPUT_REF
-            } elseif ($env:INPUT_REF -match '^refs/') {
-              throw "Release signing requires a tag ref, not '$($env:INPUT_REF)'."
             } else {
-              $checkoutRef = "refs/tags/$($env:INPUT_REF)"
+              throw "Release signing requires refs/tags/<tag>, not '$($env:INPUT_REF)'."
             }
           } else {
             $checkoutRef = if ([string]::IsNullOrWhiteSpace($env:INPUT_REF)) {
@@ -190,10 +188,14 @@ jobs:
       - name: Build installer with signed app executable
         id: signed_bundle
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           $ErrorActionPreference = 'Stop'
 
           $version = "${{ steps.artifacts.outputs.version }}"
+          $repo = "${{ github.repository }}"
+          $releaseTag = "${{ steps.release_ref.outputs.release_tag }}"
           $toolsRoot = Join-Path $env:GITHUB_WORKSPACE 'workflow-tools'
           $buildInstallerScript = Join-Path $toolsRoot 'packaging\windows\build-installer.ps1'
           $replaceAppExecutableScript = Join-Path $toolsRoot 'packaging\windows\replace-app-executable.ps1'
@@ -215,16 +217,37 @@ jobs:
           }
           New-Item -ItemType Directory -Force -Path $bundleRoot | Out-Null
 
+          $inputArchivePath = "${{ steps.artifacts.outputs.windows_archive }}"
+          if ("${{ github.event.inputs.signing_policy_slug }}" -eq 'release-signing') {
+            if ([string]::IsNullOrWhiteSpace($releaseTag)) {
+              throw "Validated release tag output is missing."
+            }
+
+            $releaseInputRoot = Join-Path $bundleRoot 'release-input'
+            New-Item -ItemType Directory -Force -Path $releaseInputRoot | Out-Null
+            $releaseArchiveName = "jd-gui-duo-windows-$version.tar.xz"
+            gh release download $releaseTag --repo $repo --pattern $releaseArchiveName --dir $releaseInputRoot
+            if ($LASTEXITCODE -ne 0) {
+              throw "Failed to download release archive '$releaseArchiveName'."
+            }
+
+            $inputArchivePath = Join-Path $releaseInputRoot $releaseArchiveName
+            if (-not (Test-Path $inputArchivePath)) {
+              throw "Downloaded release archive was not found at $inputArchivePath."
+            }
+          }
+
           $extractRoot = Join-Path $bundleRoot 'windows'
           New-Item -ItemType Directory -Force -Path $extractRoot | Out-Null
-          tar -xf "${{ steps.artifacts.outputs.windows_archive }}" -C $extractRoot
+          tar -xf $inputArchivePath -C $extractRoot
           if ($LASTEXITCODE -ne 0) {
-            throw "Failed to extract ${{ steps.artifacts.outputs.windows_archive }}."
+            throw "Failed to extract $inputArchivePath."
           }
 
           & $replaceAppExecutableScript -Root $extractRoot -SignedExecutable $signedAppExecutables[0].FullName
 
           $signedArchivePath = Join-Path $bundleRoot "jd-gui-duo-windows-$version.tar.xz"
+          $inputArchiveHash = (Get-FileHash -Algorithm SHA256 $inputArchivePath).Hash
           $tarEntries = @(Get-ChildItem $extractRoot -Force | ForEach-Object { $_.Name })
           if ($tarEntries.Count -eq 0) {
             throw "No entries were found after extracting the Windows archive."
@@ -244,7 +267,7 @@ jobs:
             throw "The installer was not created at $unsignedInstallerPath."
           }
 
-          "signed_windows_archive=$signedArchivePath" >> $env:GITHUB_OUTPUT
+          "input_archive_sha256=$inputArchiveHash" >> $env:GITHUB_OUTPUT
           "unsigned_installer_executable=$unsignedInstallerPath" >> $env:GITHUB_OUTPUT
 
       - name: Upload installer signing input
@@ -338,10 +361,17 @@ jobs:
             }
           }
 
+          $originalTarXzAssetPath = Join-Path $releaseAssetRoot $tarXzAssetName
+          $expectedInputArchiveHash = "${{ steps.signed_bundle.outputs.input_archive_sha256 }}"
+          $actualInputArchiveHash = (Get-FileHash -Algorithm SHA256 $originalTarXzAssetPath).Hash
+          if ($actualInputArchiveHash -ne $expectedInputArchiveHash) {
+            throw "Release archive '$tarXzAssetName' changed after the installer was built. Expected=$expectedInputArchiveHash Actual=$actualInputArchiveHash"
+          }
+
           $setupAssetPath = Join-Path $releaseAssetRoot $setupAssetName
           Copy-Item $signedInstallerExecutables[0].FullName $setupAssetPath -Force
 
-          $tarXzAssetPath = Join-Path $releaseAssetRoot $tarXzAssetName
+          $tarXzAssetPath = $originalTarXzAssetPath
           $tarXzExtractRoot = Join-Path $releaseAssetRoot 'tarxz'
           if (Test-Path $tarXzExtractRoot) {
             Remove-Item -Recurse -Force $tarXzExtractRoot
