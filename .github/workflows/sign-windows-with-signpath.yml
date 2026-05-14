@@ -65,12 +65,14 @@ jobs:
         with:
           ref: ${{ github.sha }}
           path: workflow-tools
+          persist-credentials: false
 
       - name: Checkout source ref
         uses: actions/checkout@v6
         with:
           ref: ${{ steps.context.outputs.checkout_ref }}
           path: source
+          persist-credentials: false
 
       - name: Set up JDK 25
         uses: actions/setup-java@v5
@@ -88,14 +90,13 @@ jobs:
         shell: pwsh
         run: choco install innosetup --no-progress -y
 
-      - name: Build unsigned Windows executables
+      - name: Build unsigned Windows bundle
         id: artifacts
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
           $workspace = $env:GITHUB_WORKSPACE
           $sourceRoot = Join-Path $workspace 'source'
-          $toolsRoot = Join-Path $workspace 'workflow-tools'
 
           # Extract version from pom.xml instead of exe filename
           $pomPath = Join-Path $sourceRoot 'pom.xml'
@@ -116,46 +117,123 @@ jobs:
             throw "No Windows archive matching jd-gui-duo-windows-*.tar.xz was found in assembler\target."
           }
 
-          $installerPath = Join-Path $sourceRoot "assembler\target\jd-gui-duo-windows-$version-setup.exe"
-          $buildInstallerScript = Join-Path $toolsRoot 'packaging\windows\build-installer.ps1'
-          if (-not (Test-Path $buildInstallerScript)) {
-            throw "The workflow helper script was not found at $buildInstallerScript."
-          }
-
-          & $buildInstallerScript `
-            -InputArchive $archive.FullName `
-            -OutputInstaller $installerPath `
-            -AppVersion $version
-
-          if (-not (Test-Path $installerPath)) {
-            throw "The installer was not created at $installerPath."
-          }
-
           "version=$version" >> $env:GITHUB_OUTPUT
           "app_executable=$($appExecutable.FullName)" >> $env:GITHUB_OUTPUT
-          "installer_executable=$installerPath" >> $env:GITHUB_OUTPUT
+          "windows_archive=$($archive.FullName)" >> $env:GITHUB_OUTPUT
 
-      - name: Upload unsigned executables
-        id: upload_unsigned
+      - name: Upload unsigned app executable
+        id: upload_unsigned_app
         uses: actions/upload-artifact@v7
         with:
-          name: unsigned-windows-executables-${{ steps.artifacts.outputs.version }}
-          path: |
-            ${{ steps.artifacts.outputs.app_executable }}
-            ${{ steps.artifacts.outputs.installer_executable }}
+          name: unsigned-windows-app-executable-${{ steps.artifacts.outputs.version }}
+          path: ${{ steps.artifacts.outputs.app_executable }}
           if-no-files-found: error
 
-      - name: Submit SignPath signing request
-        id: signpath
+      - name: Submit SignPath app signing request
+        id: sign_app
         uses: signpath/github-action-submit-signing-request@v2
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
           project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
           signing-policy-slug: ${{ github.event.inputs.signing_policy_slug }}
-          github-artifact-id: ${{ steps.upload_unsigned.outputs.artifact-id }}
+          github-artifact-id: ${{ steps.upload_unsigned_app.outputs.artifact-id }}
           wait-for-completion: true
-          output-artifact-directory: dist/signed
+          output-artifact-directory: dist/signed-app
+          parameters: |
+            version: ${{ toJSON(steps.artifacts.outputs.version) }}
+
+      - name: Build installer with signed app executable
+        id: signed_bundle
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $version = "${{ steps.artifacts.outputs.version }}"
+          $toolsRoot = Join-Path $env:GITHUB_WORKSPACE 'workflow-tools'
+          $buildInstallerScript = Join-Path $toolsRoot 'packaging\windows\build-installer.ps1'
+          if (-not (Test-Path $buildInstallerScript)) {
+            throw "The installer helper script was not found at $buildInstallerScript."
+          }
+
+          $signedAppExecutables = @(Get-ChildItem 'dist\signed-app' -Recurse -File -Filter 'jd-gui-duo.exe')
+          if ($signedAppExecutables.Count -ne 1) {
+            throw "Expected exactly one signed jd-gui-duo.exe in dist\signed-app, found $($signedAppExecutables.Count)."
+          }
+
+          function Replace-AppExecutable {
+            param(
+              [Parameter(Mandatory = $true)][string]$Root,
+              [Parameter(Mandatory = $true)][string]$SignedExecutable
+            )
+
+            $targets = @(Get-ChildItem $Root -Recurse -File -Filter 'jd-gui-duo.exe')
+            if ($targets.Count -eq 0) {
+              throw "No jd-gui-duo.exe was found under $Root."
+            }
+
+            foreach ($target in $targets) {
+              Copy-Item $SignedExecutable $target.FullName -Force
+            }
+          }
+
+          $bundleRoot = Join-Path $PWD 'dist\signed-bundle'
+          if (Test-Path $bundleRoot) {
+            Remove-Item -Recurse -Force $bundleRoot
+          }
+          New-Item -ItemType Directory -Force -Path $bundleRoot | Out-Null
+
+          $extractRoot = Join-Path $bundleRoot 'windows'
+          New-Item -ItemType Directory -Force -Path $extractRoot | Out-Null
+          tar -xf "${{ steps.artifacts.outputs.windows_archive }}" -C $extractRoot
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to extract ${{ steps.artifacts.outputs.windows_archive }}."
+          }
+
+          Replace-AppExecutable -Root $extractRoot -SignedExecutable $signedAppExecutables[0].FullName
+
+          $signedArchivePath = Join-Path $bundleRoot "jd-gui-duo-windows-$version.tar.xz"
+          $tarEntries = @(Get-ChildItem $extractRoot -Force | ForEach-Object { $_.Name })
+          if ($tarEntries.Count -eq 0) {
+            throw "No entries were found after extracting the Windows archive."
+          }
+          tar -cJf $signedArchivePath -C $extractRoot @tarEntries
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to rebuild jd-gui-duo-windows-$version.tar.xz with the signed app executable."
+          }
+
+          $unsignedInstallerPath = Join-Path $bundleRoot "jd-gui-duo-windows-$version-setup.exe"
+          & $buildInstallerScript `
+            -InputArchive $signedArchivePath `
+            -OutputInstaller $unsignedInstallerPath `
+            -AppVersion $version
+
+          if (-not (Test-Path $unsignedInstallerPath)) {
+            throw "The installer was not created at $unsignedInstallerPath."
+          }
+
+          "signed_windows_archive=$signedArchivePath" >> $env:GITHUB_OUTPUT
+          "unsigned_installer_executable=$unsignedInstallerPath" >> $env:GITHUB_OUTPUT
+
+      - name: Upload unsigned installer executable
+        id: upload_unsigned_installer
+        uses: actions/upload-artifact@v7
+        with:
+          name: unsigned-windows-installer-executable-${{ steps.artifacts.outputs.version }}
+          path: ${{ steps.signed_bundle.outputs.unsigned_installer_executable }}
+          if-no-files-found: error
+
+      - name: Submit SignPath installer signing request
+        id: sign_installer
+        uses: signpath/github-action-submit-signing-request@v2
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ github.event.inputs.signing_policy_slug }}
+          github-artifact-id: ${{ steps.upload_unsigned_installer.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: dist/signed-installer
           parameters: |
             version: ${{ toJSON(steps.artifacts.outputs.version) }}
 
@@ -163,16 +241,20 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: signed-windows-executables-${{ steps.artifacts.outputs.version }}
-          path: dist/signed
+          path: |
+            dist/signed-app
+            dist/signed-installer
           if-no-files-found: error
 
       - name: Download published signed executables
+        if: ${{ github.event.inputs.signing_policy_slug == 'release-signing' }}
         uses: actions/download-artifact@v7
         with:
           name: signed-windows-executables-${{ steps.artifacts.outputs.version }}
           path: dist/published-signed
 
       - name: Update release Windows assets
+        if: ${{ github.event.inputs.signing_policy_slug == 'release-signing' }}
         id: update_release
         shell: pwsh
         env:
@@ -324,10 +406,16 @@ jobs:
             "- Ref: ${{ steps.context.outputs.checkout_ref }}",
             "- Version: ${{ steps.artifacts.outputs.version }}",
             "- Signing policy: ${{ github.event.inputs.signing_policy_slug }}",
-            "- Signing request: ${{ steps.signpath.outputs.signing-request-web-url }}",
-            "- Signed files artifact: signed-windows-executables-${{ steps.artifacts.outputs.version }}",
-            "- Updated release: ${{ steps.update_release.outputs.release_tag }}",
-            "- Triggered package publishers: publish-chocolatey.yml, publish-winget.yml"
+            "- App signing request: ${{ steps.sign_app.outputs.signing-request-web-url }}",
+            "- Installer signing request: ${{ steps.sign_installer.outputs.signing-request-web-url }}",
+            "- Signed files artifact: signed-windows-executables-${{ steps.artifacts.outputs.version }}"
           )
+
+          if ("${{ github.event.inputs.signing_policy_slug }}" -eq 'release-signing') {
+            $lines += "- Updated release: ${{ steps.update_release.outputs.release_tag }}"
+            $lines += "- Triggered package publishers: publish-chocolatey.yml, publish-winget.yml"
+          } else {
+            $lines += "- Release update: skipped for non-production signing policy"
+          }
 
           [string]::Join([Environment]::NewLine, $lines) | Add-Content -Path $env:GITHUB_STEP_SUMMARY
