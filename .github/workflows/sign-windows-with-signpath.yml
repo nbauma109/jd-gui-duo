@@ -121,6 +121,32 @@ jobs:
           "app_executable=$($appExecutable.FullName)" >> $env:GITHUB_OUTPUT
           "windows_archive=$($archive.FullName)" >> $env:GITHUB_OUTPUT
 
+      - name: Validate release signing ref
+        if: ${{ github.event.inputs.signing_policy_slug == 'release-signing' }}
+        id: release_ref
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $version = "${{ steps.artifacts.outputs.version }}"
+          $checkoutRef = "${{ steps.context.outputs.checkout_ref }}"
+          $repo = "${{ github.repository }}"
+          $expectedReleaseRefs = @("refs/tags/v$version", "refs/tags/$version")
+
+          if ($expectedReleaseRefs -notcontains $checkoutRef) {
+            throw "Ref '$checkoutRef' is not an explicit release tag ref matching version '$version'. Refuse to release-sign unless the workflow is built from 'refs/tags/$version' or 'refs/tags/v$version'."
+          }
+
+          $releaseTag = $checkoutRef -replace '^refs/tags/', ''
+          gh release view $releaseTag --repo $repo 1>$null 2>$null
+          if ($LASTEXITCODE -ne 0) {
+            throw "No GitHub release exists for validated tag '$releaseTag' in repository '$repo'."
+          }
+
+          "release_tag=$releaseTag" >> $env:GITHUB_OUTPUT
+
       - name: Upload app signing input
         id: upload_app_signing_input
         uses: actions/upload-artifact@v7
@@ -260,7 +286,7 @@ jobs:
 
           $version = "${{ steps.artifacts.outputs.version }}"
           $repo = "${{ github.repository }}"
-          $checkoutRef = "${{ steps.context.outputs.checkout_ref }}"
+          $releaseTag = "${{ steps.release_ref.outputs.release_tag }}"
           $toolsRoot = Join-Path $env:GITHUB_WORKSPACE 'workflow-tools'
           $portableZipScript = Join-Path $toolsRoot 'packaging\windows\build-portable-zip.ps1'
 
@@ -282,21 +308,8 @@ jobs:
             throw "Expected exactly one signed $setupAssetName in dist\signed-installer, found $($signedInstallerExecutables.Count)."
           }
 
-          $expectedReleaseTags = @("v$version", $version)
-          $releaseTag = $null
-          if ($checkoutRef -match '^refs/tags/(.+)$') {
-            $releaseTag = $Matches[1]
-          } elseif ($expectedReleaseTags -contains $checkoutRef) {
-            $releaseTag = $checkoutRef
-          }
-
-          if ([string]::IsNullOrWhiteSpace($releaseTag) -or $expectedReleaseTags -notcontains $releaseTag) {
-            throw "Ref '$checkoutRef' is not a release tag matching version '$version'. Refuse to upload assets unless the workflow is built from tag '$version' or 'v$version'."
-          }
-
-          gh release view $releaseTag --repo $repo 1>$null 2>$null
-          if ($LASTEXITCODE -ne 0) {
-            throw "No GitHub release exists for validated tag '$releaseTag' in repository '$repo'."
+          if ([string]::IsNullOrWhiteSpace($releaseTag)) {
+            throw "Validated release tag output is missing."
           }
 
           $release = gh release view $releaseTag --repo $repo --json assets | ConvertFrom-Json
