@@ -51,11 +51,15 @@ jobs:
               throw "Test signing requires a branch input."
             }
 
-            if ($env:INPUT_REF -match '^refs/tags/') {
-              throw "Test signing expects a branch, not tag '$($env:INPUT_REF)'."
-            }
+            if ($env:INPUT_REF -match '^refs/') {
+              if ($env:INPUT_REF -notmatch '^refs/heads/') {
+                throw "Test signing expects a branch ref under refs/heads/, not '$($env:INPUT_REF)'."
+              }
 
-            $checkoutRef = $env:INPUT_REF
+              $checkoutRef = $env:INPUT_REF
+            } else {
+              $checkoutRef = "refs/heads/$($env:INPUT_REF)"
+            }
           }
 
           "checkout_ref=$checkoutRef" >> $env:GITHUB_OUTPUT
@@ -193,7 +197,7 @@ jobs:
         id: signed_bundle
         shell: pwsh
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.event.inputs.signing_policy_slug == 'release-signing' && github.token || '' }}
         run: |
           $ErrorActionPreference = 'Stop'
 
