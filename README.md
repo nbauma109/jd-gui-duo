@@ -69,6 +69,14 @@ The binaries are built and hosted at [jitpack.io](https://jitpack.io/p/nbauma109
     alt="Download macOS archive">
 </a>
 
+Windows users can also install with WinGet:
+
+```powershell
+winget install --id Nbauma109.JDGUIDuo
+```
+
+This installs the latest stable release from the default WinGet source.
+
 # Feature tour
 
 ## Supported formats
