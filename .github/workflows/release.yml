@@ -102,5 +102,3 @@ jobs:
         $repo = "${{ github.repository }}"
 
         gh workflow run rewrite-release-notes.yml --repo $repo
-        gh workflow run publish-winget.yml --repo $repo --ref $tag --field tag=$tag
-        gh workflow run publish-chocolatey.yml --repo $repo --ref $tag --field tag=$tag
