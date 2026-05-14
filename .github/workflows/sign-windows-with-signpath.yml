@@ -142,8 +142,7 @@ jobs:
           github-artifact-id: ${{ steps.upload_app_signing_input.outputs.artifact-id }}
           wait-for-completion: true
           output-artifact-directory: dist/signed-app
-          parameters: |
-            version: ${{ toJSON(steps.artifacts.outputs.version) }}
+          skip-decompress: true
 
       - name: Build installer with signed app executable
         id: signed_bundle
@@ -238,8 +237,17 @@ jobs:
           github-artifact-id: ${{ steps.upload_installer_signing_input.outputs.artifact-id }}
           wait-for-completion: true
           output-artifact-directory: dist/signed-installer
-          parameters: |
-            version: ${{ toJSON(steps.artifacts.outputs.version) }}
+          skip-decompress: true
+
+      - name: Upload signed Windows outputs
+        if: ${{ github.event.inputs.signing_policy_slug != 'release-signing' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: signed-windows-outputs-${{ steps.artifacts.outputs.version }}
+          path: |
+            dist/signed-app
+            dist/signed-installer
+          if-no-files-found: error
 
       - name: Update release Windows assets
         if: ${{ github.event.inputs.signing_policy_slug == 'release-signing' }}
