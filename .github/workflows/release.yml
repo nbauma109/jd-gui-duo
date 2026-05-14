@@ -102,3 +102,4 @@ jobs:
         $repo = "${{ github.repository }}"
 
         gh workflow run rewrite-release-notes.yml --repo $repo
+        gh workflow run crosspost.yml --repo $repo -f tag=$tag

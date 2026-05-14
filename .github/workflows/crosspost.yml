@@ -1,0 +1,36 @@
+name: "Crosspost Release to Social Media"
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to crosspost (for dispatches from release workflow)
+        required: true
+        type: string
+
+jobs:
+  crosspost:
+    name: "Crosspost to Social Media"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Crosspost to Bluesky, Mastodon, and Dev.to
+        uses: tgagor/action-crosspost@9523ff489bc74e1a9849c5d3071b6bcbad40042d # v1.6.3
+        with:
+          feed-url: https://github.com/${{ github.repository }}/releases.atom
+          limit: 1
+          filter-urls: |
+            /releases/tag/${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.event.release.tag_name }}
+          message: |
+            🎉 New release of ${{ github.event.repository.name }} is out!
+            {url}
+            #Java #JavaDecompiler #OpenSource #ReverseEngineering
+          bluesky-host: bsky.social
+          bluesky-identifier: ${{ secrets.BLUESKY_IDENTIFIER }}
+          bluesky-password: ${{ secrets.BLUESKY_PASSWORD }}
+          mastodon-access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
+          mastodon-host: ${{ secrets.MASTODON_HOST }}
+          devto-api-key: ${{ secrets.DEVTO_API_KEY }}
