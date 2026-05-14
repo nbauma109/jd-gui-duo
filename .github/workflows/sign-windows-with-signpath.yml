@@ -97,7 +97,6 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $workspace = $env:GITHUB_WORKSPACE
           $sourceRoot = Join-Path $workspace 'source'
-          $toolsRoot = Join-Path $workspace 'workflow-tools'
 
           # Extract version from pom.xml instead of exe filename
           $pomPath = Join-Path $sourceRoot 'pom.xml'
@@ -118,48 +117,16 @@ jobs:
             throw "No Windows archive matching jd-gui-duo-windows-*.tar.xz was found in assembler\target."
           }
 
-          $installerPath = Join-Path $sourceRoot "assembler\target\jd-gui-duo-windows-$version-setup.exe"
-          $buildInstallerScript = Join-Path $toolsRoot 'packaging\windows\build-installer.ps1'
-          if (-not (Test-Path $buildInstallerScript)) {
-            throw "The installer helper script was not found at $buildInstallerScript."
-          }
-
-          & $buildInstallerScript `
-            -InputArchive $archive.FullName `
-            -OutputInstaller $installerPath `
-            -AppVersion $version
-
-          if (-not (Test-Path $installerPath)) {
-            throw "The installer was not created at $installerPath."
-          }
-
           "version=$version" >> $env:GITHUB_OUTPUT
           "app_executable=$($appExecutable.FullName)" >> $env:GITHUB_OUTPUT
           "windows_archive=$($archive.FullName)" >> $env:GITHUB_OUTPUT
-          "initial_installer_executable=$installerPath" >> $env:GITHUB_OUTPUT
-
-      - name: Prepare app signing input
-        id: app_signing_input
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $inputRoot = Join-Path $PWD 'dist\signing-input\app'
-          if (Test-Path $inputRoot) {
-            Remove-Item -Recurse -Force $inputRoot
-          }
-          New-Item -ItemType Directory -Force -Path $inputRoot | Out-Null
-
-          Copy-Item "${{ steps.artifacts.outputs.app_executable }}" (Join-Path $inputRoot 'jd-gui-duo.exe') -Force
-          Copy-Item "${{ steps.artifacts.outputs.initial_installer_executable }}" (Join-Path $inputRoot "jd-gui-duo-windows-${{ steps.artifacts.outputs.version }}-setup.exe") -Force
-
-          "path=$inputRoot" >> $env:GITHUB_OUTPUT
 
       - name: Upload app signing input
         id: upload_app_signing_input
         uses: actions/upload-artifact@v7
         with:
           name: unsigned-windows-app-signing-input-${{ steps.artifacts.outputs.version }}
-          path: ${{ steps.app_signing_input.outputs.path }}/*
+          path: ${{ steps.artifacts.outputs.app_executable }}
           if-no-files-found: error
 
       - name: Submit SignPath app signing request
@@ -170,6 +137,7 @@ jobs:
           organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
           project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
           signing-policy-slug: ${{ github.event.inputs.signing_policy_slug }}
+          artifact-configuration-slug: jd-gui-duo.exe
           github-artifact-id: ${{ steps.upload_app_signing_input.outputs.artifact-id }}
           wait-for-completion: true
           output-artifact-directory: dist/signed-app
@@ -248,33 +216,12 @@ jobs:
           "signed_windows_archive=$signedArchivePath" >> $env:GITHUB_OUTPUT
           "unsigned_installer_executable=$unsignedInstallerPath" >> $env:GITHUB_OUTPUT
 
-      - name: Prepare installer signing input
-        id: installer_signing_input
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $inputRoot = Join-Path $PWD 'dist\signing-input\installer'
-          if (Test-Path $inputRoot) {
-            Remove-Item -Recurse -Force $inputRoot
-          }
-          New-Item -ItemType Directory -Force -Path $inputRoot | Out-Null
-
-          $signedAppExecutables = @(Get-ChildItem 'dist\signed-app' -Recurse -File -Filter 'jd-gui-duo.exe')
-          if ($signedAppExecutables.Count -ne 1) {
-            throw "Expected exactly one signed jd-gui-duo.exe in dist\signed-app, found $($signedAppExecutables.Count)."
-          }
-
-          Copy-Item $signedAppExecutables[0].FullName (Join-Path $inputRoot 'jd-gui-duo.exe') -Force
-          Copy-Item "${{ steps.signed_bundle.outputs.unsigned_installer_executable }}" (Join-Path $inputRoot "jd-gui-duo-windows-${{ steps.artifacts.outputs.version }}-setup.exe") -Force
-
-          "path=$inputRoot" >> $env:GITHUB_OUTPUT
-
       - name: Upload installer signing input
         id: upload_installer_signing_input
         uses: actions/upload-artifact@v7
         with:
           name: unsigned-windows-installer-signing-input-${{ steps.artifacts.outputs.version }}
-          path: ${{ steps.installer_signing_input.outputs.path }}/*
+          path: ${{ steps.signed_bundle.outputs.unsigned_installer_executable }}
           if-no-files-found: error
 
       - name: Submit SignPath installer signing request
@@ -285,17 +232,47 @@ jobs:
           organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
           project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
           signing-policy-slug: ${{ github.event.inputs.signing_policy_slug }}
+          artifact-configuration-slug: installer
           github-artifact-id: ${{ steps.upload_installer_signing_input.outputs.artifact-id }}
           wait-for-completion: true
           output-artifact-directory: dist/signed-installer
           parameters: |
             version: ${{ toJSON(steps.artifacts.outputs.version) }}
 
+      - name: Prepare signed executables artifact
+        id: signed_executables
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $version = "${{ steps.artifacts.outputs.version }}"
+          $outputRoot = Join-Path $PWD 'dist\signed-executables'
+          if (Test-Path $outputRoot) {
+            Remove-Item -Recurse -Force $outputRoot
+          }
+          New-Item -ItemType Directory -Force -Path $outputRoot | Out-Null
+
+          $signedAppExecutables = @(Get-ChildItem 'dist\signed-app' -Recurse -File -Filter 'jd-gui-duo.exe')
+          if ($signedAppExecutables.Count -ne 1) {
+            throw "Expected exactly one signed jd-gui-duo.exe in dist\signed-app, found $($signedAppExecutables.Count)."
+          }
+
+          $setupAssetName = "jd-gui-duo-windows-$version-setup.exe"
+          $signedInstallerExecutables = @(Get-ChildItem 'dist\signed-installer' -Recurse -File -Filter $setupAssetName)
+          if ($signedInstallerExecutables.Count -ne 1) {
+            throw "Expected exactly one signed $setupAssetName in dist\signed-installer, found $($signedInstallerExecutables.Count)."
+          }
+
+          Copy-Item $signedAppExecutables[0].FullName (Join-Path $outputRoot 'jd-gui-duo.exe') -Force
+          Copy-Item $signedInstallerExecutables[0].FullName (Join-Path $outputRoot $setupAssetName) -Force
+
+          "path=$outputRoot" >> $env:GITHUB_OUTPUT
+
       - name: Upload signed executables
         uses: actions/upload-artifact@v7
         with:
           name: signed-windows-executables-${{ steps.artifacts.outputs.version }}
-          path: dist/signed-installer
+          path: ${{ steps.signed_executables.outputs.path }}/*
           if-no-files-found: error
 
       - name: Download published signed executables
@@ -339,31 +316,21 @@ jobs:
             throw "Expected exactly one signed $setupAssetName in $signedRoot, found $($signedInstallerExecutables.Count)."
           }
 
-          $candidateTags = [System.Collections.Generic.List[string]]::new()
-          if ($checkoutRef -match '^refs/tags/(.+)$') {
-            $candidateTags.Add($Matches[1])
-          }
-          if (-not [string]::IsNullOrWhiteSpace($checkoutRef) -and -not $checkoutRef.Contains('/')) {
-            $candidateTags.Add($checkoutRef)
-          }
-          $candidateTags.Add("v$version")
-          $candidateTags.Add($version)
-
+          $expectedReleaseTags = @("v$version", $version)
           $releaseTag = $null
-          foreach ($candidateTag in ($candidateTags | Select-Object -Unique)) {
-            if ([string]::IsNullOrWhiteSpace($candidateTag)) {
-              continue
-            }
-
-            gh release view $candidateTag --repo $repo 1>$null 2>$null
-            if ($LASTEXITCODE -eq 0) {
-              $releaseTag = $candidateTag
-              break
-            }
+          if ($checkoutRef -match '^refs/tags/(.+)$') {
+            $releaseTag = $Matches[1]
+          } elseif ($expectedReleaseTags -contains $checkoutRef) {
+            $releaseTag = $checkoutRef
           }
 
-          if ([string]::IsNullOrWhiteSpace($releaseTag)) {
-            throw "No GitHub release was found for checkout ref '$checkoutRef' or version '$version'."
+          if ([string]::IsNullOrWhiteSpace($releaseTag) -or $expectedReleaseTags -notcontains $releaseTag) {
+            throw "Ref '$checkoutRef' is not a release tag matching version '$version'. Refuse to upload assets unless the workflow is built from tag '$version' or 'v$version'."
+          }
+
+          gh release view $releaseTag --repo $repo 1>$null 2>$null
+          if ($LASTEXITCODE -ne 0) {
+            throw "No GitHub release exists for validated tag '$releaseTag' in repository '$repo'."
           }
 
           $release = gh release view $releaseTag --repo $repo --json assets | ConvertFrom-Json

@@ -1,9 +1,6 @@
 name: Submit WinGet manifest
 
 on:
-  release:
-    types:
-      - released
   workflow_dispatch:
     inputs:
       tag:
@@ -12,7 +9,7 @@ on:
         type: string
 
 concurrency:
-  group: publish-winget-${{ github.event.release.tag_name || github.event.inputs.tag }}
+  group: publish-winget-${{ github.event.inputs.tag }}
   cancel-in-progress: false
 
 permissions:
@@ -35,11 +32,8 @@ jobs:
         shell: pwsh
         env:
           INPUT_TAG: ${{ github.event.inputs.tag }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
-          GITHUB_EVENT_NAME: ${{ github.event_name }}
-          GITHUB_REF_VALUE: ${{ github.ref }}
         run: |
-          $tag = if ($env:RELEASE_TAG) { $env:RELEASE_TAG } else { $env:INPUT_TAG }
+          $tag = $env:INPUT_TAG
           if ([string]::IsNullOrWhiteSpace($tag)) {
             throw "A release tag is required."
           }
@@ -50,11 +44,7 @@ jobs:
           } else {
             $env:WINGET_PACKAGE_IDENTIFIER
           }
-          $checkoutRef = if ($env:GITHUB_EVENT_NAME -eq 'workflow_dispatch') {
-            $env:GITHUB_REF_VALUE
-          } else {
-            "refs/tags/$tag"
-          }
+          $checkoutRef = "refs/tags/$tag"
 
           "tag=$tag" >> $env:GITHUB_OUTPUT
           "version=$version" >> $env:GITHUB_OUTPUT
