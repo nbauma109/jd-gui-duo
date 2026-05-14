@@ -70,7 +70,7 @@ jobs:
           article = json.load(sys.stdin)
           og_image = os.environ['OG_IMAGE']
           body = article.get('body_markdown') or ''
-          body = re.sub(r'\n*!\[[^\]]*\]\(data:[^)]+\)\n*', '\n', body).strip()
+          body = re.sub(r'\n*!\[[^\]]*\]\(data:[^)]+\)\n*', '\n', body).strip()  # alt text is always a temp filename (no brackets)
           print(json.dumps({'article': {'main_image': og_image, 'body_markdown': body}}))
           PYEOF
 
@@ -86,9 +86,10 @@ jobs:
 
           # Find the dev.to article that contains the release URL in its body.
           # The release URL is unique per release, so contains() gives a precise match.
+          # Using per_page=10 to cover cases where multiple articles were recently published.
           ARTICLE_ID=$(curl -fsSL \
             -H "api-key: ${DEVTO_API_KEY}" \
-            "https://dev.to/api/articles/me/published?per_page=5" \
+            "https://dev.to/api/articles/me/published?per_page=10" \
             | jq -r --arg url "$RELEASE_URL" \
               '[.[] | select((.body_markdown // "") | contains($url)) | .id | tostring] | .[0] // ""')
 
