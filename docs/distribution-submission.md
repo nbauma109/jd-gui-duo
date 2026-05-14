@@ -68,7 +68,12 @@ API posting cost (as of 2026-05):
 
 ### Bluesky
 
-- `BLUESKY_IDENTIFIER` (usually your handle, for example `yourname.bsky.social`)
+- `BLUESKY_IDENTIFIER` — your Bluesky handle, i.e. the last segment of your profile URL.  
+  Look at your profile URL:
+  - `https://bsky.app/profile/yourname.bsky.social` → set to `yourname.bsky.social`
+  - `https://bsky.app/profile/javadecompiler.org` → set to `javadecompiler.org`  
+  
+  In short: use the part that comes after `https://bsky.app/profile/`, whether it is a `.bsky.social` subdomain or a custom domain.
 - `BLUESKY_PASSWORD` (recommended: an app password, not your main account password)
 
 Create an app password in Bluesky:
