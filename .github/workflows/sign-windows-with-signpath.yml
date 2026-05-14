@@ -241,49 +241,6 @@ jobs:
           parameters: |
             version: ${{ toJSON(steps.artifacts.outputs.version) }}
 
-      - name: Prepare signed executables artifact
-        id: signed_executables
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-
-          $version = "${{ steps.artifacts.outputs.version }}"
-          $outputRoot = Join-Path $PWD 'dist\signed-executables'
-          if (Test-Path $outputRoot) {
-            Remove-Item -Recurse -Force $outputRoot
-          }
-          New-Item -ItemType Directory -Force -Path $outputRoot | Out-Null
-
-          $signedAppExecutables = @(Get-ChildItem 'dist\signed-app' -Recurse -File -Filter 'jd-gui-duo.exe')
-          if ($signedAppExecutables.Count -ne 1) {
-            throw "Expected exactly one signed jd-gui-duo.exe in dist\signed-app, found $($signedAppExecutables.Count)."
-          }
-
-          $setupAssetName = "jd-gui-duo-windows-$version-setup.exe"
-          $signedInstallerExecutables = @(Get-ChildItem 'dist\signed-installer' -Recurse -File -Filter $setupAssetName)
-          if ($signedInstallerExecutables.Count -ne 1) {
-            throw "Expected exactly one signed $setupAssetName in dist\signed-installer, found $($signedInstallerExecutables.Count)."
-          }
-
-          Copy-Item $signedAppExecutables[0].FullName (Join-Path $outputRoot 'jd-gui-duo.exe') -Force
-          Copy-Item $signedInstallerExecutables[0].FullName (Join-Path $outputRoot $setupAssetName) -Force
-
-          "path=$outputRoot" >> $env:GITHUB_OUTPUT
-
-      - name: Upload signed executables
-        uses: actions/upload-artifact@v7
-        with:
-          name: signed-windows-executables-${{ steps.artifacts.outputs.version }}
-          path: ${{ steps.signed_executables.outputs.path }}/*
-          if-no-files-found: error
-
-      - name: Download published signed executables
-        if: ${{ github.event.inputs.signing_policy_slug == 'release-signing' }}
-        uses: actions/download-artifact@v7
-        with:
-          name: signed-windows-executables-${{ steps.artifacts.outputs.version }}
-          path: dist/published-signed
-
       - name: Update release Windows assets
         if: ${{ github.event.inputs.signing_policy_slug == 'release-signing' }}
         id: update_release
@@ -296,7 +253,6 @@ jobs:
           $version = "${{ steps.artifacts.outputs.version }}"
           $repo = "${{ github.repository }}"
           $checkoutRef = "${{ steps.context.outputs.checkout_ref }}"
-          $signedRoot = Resolve-Path 'dist\published-signed'
           $toolsRoot = Join-Path $env:GITHUB_WORKSPACE 'workflow-tools'
           $portableZipScript = Join-Path $toolsRoot 'packaging\windows\build-portable-zip.ps1'
 
@@ -308,14 +264,14 @@ jobs:
             throw "The portable zip helper script was not found at $portableZipScript."
           }
 
-          $signedAppExecutables = @(Get-ChildItem $signedRoot -Recurse -File -Filter 'jd-gui-duo.exe')
+          $signedAppExecutables = @(Get-ChildItem 'dist\signed-app' -Recurse -File -Filter 'jd-gui-duo.exe')
           if ($signedAppExecutables.Count -ne 1) {
-            throw "Expected exactly one signed jd-gui-duo.exe in $signedRoot, found $($signedAppExecutables.Count)."
+            throw "Expected exactly one signed jd-gui-duo.exe in dist\signed-app, found $($signedAppExecutables.Count)."
           }
 
-          $signedInstallerExecutables = @(Get-ChildItem $signedRoot -Recurse -File -Filter $setupAssetName)
+          $signedInstallerExecutables = @(Get-ChildItem 'dist\signed-installer' -Recurse -File -Filter $setupAssetName)
           if ($signedInstallerExecutables.Count -ne 1) {
-            throw "Expected exactly one signed $setupAssetName in $signedRoot, found $($signedInstallerExecutables.Count)."
+            throw "Expected exactly one signed $setupAssetName in dist\signed-installer, found $($signedInstallerExecutables.Count)."
           }
 
           $expectedReleaseTags = @("v$version", $version)
@@ -428,8 +384,7 @@ jobs:
             "- Version: ${{ steps.artifacts.outputs.version }}",
             "- Signing policy: ${{ github.event.inputs.signing_policy_slug }}",
             "- App signing request: ${{ steps.sign_app.outputs.signing-request-web-url }}",
-            "- Installer signing request: ${{ steps.sign_installer.outputs.signing-request-web-url }}",
-            "- Signed files artifact: signed-windows-executables-${{ steps.artifacts.outputs.version }}"
+            "- Installer signing request: ${{ steps.sign_installer.outputs.signing-request-web-url }}"
           )
 
           if ("${{ github.event.inputs.signing_policy_slug }}" -eq 'release-signing') {
