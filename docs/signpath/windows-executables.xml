@@ -4,7 +4,7 @@
     <parameter name="version" required="true" />
   </parameters>
   <zip-file>
-    <pe-file path="jd-gui-duo.exe">
+    <pe-file path="windows/jd-gui-duo.exe">
       <authenticode-sign />
     </pe-file>
     <pe-file path="jd-gui-duo-windows-${version}-setup.exe">
