@@ -4,17 +4,20 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: Git ref to build and sign. Use refs/tags/<tag> for release-signing; branches are only for non-production signing.
-        required: false
+        description: Tag for release-signing; branch for test-signing.
+        required: true
         type: string
       signing_policy_slug:
-        description: SignPath signing policy slug. Keep test-signing until the workflow has been validated.
+        description: SignPath signing policy slug.
         required: true
         default: release-signing
-        type: string
+        type: choice
+        options:
+          - test-signing
+          - release-signing
 
 concurrency:
-  group: signpath-windows-${{ github.event.inputs.ref || github.ref }}
+  group: signpath-windows-${{ github.event.inputs.signing_policy_slug }}-${{ github.event.inputs.ref }}
   cancel-in-progress: false
 
 permissions:
@@ -31,27 +34,28 @@ jobs:
         shell: pwsh
         env:
           INPUT_REF: ${{ github.event.inputs.ref }}
-          GITHUB_REF_VALUE: ${{ github.ref }}
           SIGNING_POLICY_SLUG: ${{ github.event.inputs.signing_policy_slug }}
         run: |
           if ($env:SIGNING_POLICY_SLUG -eq 'release-signing') {
             if ([string]::IsNullOrWhiteSpace($env:INPUT_REF)) {
-              if ($env:GITHUB_REF_VALUE -notmatch '^refs/tags/') {
-                throw "Release signing requires an explicit refs/tags/<tag> ref."
-              }
+              throw "Release signing requires a tag input."
+            }
 
-              $checkoutRef = $env:GITHUB_REF_VALUE
-            } elseif ($env:INPUT_REF -match '^refs/tags/') {
-              $checkoutRef = $env:INPUT_REF
-            } else {
-              throw "Release signing requires refs/tags/<tag>, not '$($env:INPUT_REF)'."
+            if ($env:INPUT_REF -match '^refs/') {
+              throw "Release signing expects a tag name, not '$($env:INPUT_REF)'."
             }
+
+            $checkoutRef = "refs/tags/$($env:INPUT_REF)"
           } else {
-            $checkoutRef = if ([string]::IsNullOrWhiteSpace($env:INPUT_REF)) {
-              $env:GITHUB_REF_VALUE
-            } else {
-              $env:INPUT_REF
+            if ([string]::IsNullOrWhiteSpace($env:INPUT_REF)) {
+              throw "Test signing requires a branch input."
             }
+
+            if ($env:INPUT_REF -match '^refs/tags/') {
+              throw "Test signing expects a branch, not tag '$($env:INPUT_REF)'."
+            }
+
+            $checkoutRef = $env:INPUT_REF
           }
 
           "checkout_ref=$checkoutRef" >> $env:GITHUB_OUTPUT
@@ -151,7 +155,7 @@ jobs:
           $expectedReleaseRefs = @("refs/tags/v$version", "refs/tags/$version")
 
           if ($expectedReleaseRefs -notcontains $checkoutRef) {
-            throw "Ref '$checkoutRef' is not an explicit release tag ref matching version '$version'. Refuse to release-sign unless the workflow is built from 'refs/tags/$version' or 'refs/tags/v$version'."
+            throw "Tag input resolves to '$checkoutRef', which does not match version '$version'. Expected '$version' or 'v$version'."
           }
 
           $releaseTag = $checkoutRef -replace '^refs/tags/', ''
