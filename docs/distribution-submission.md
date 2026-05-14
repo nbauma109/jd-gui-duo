@@ -43,29 +43,6 @@ On `workflow_dispatch`, the workflow uses the branch selected in the GitHub UI f
 
 The release pipeline dispatches `.github/workflows/crosspost.yml` after creating a release. Configure the following repository secrets in **GitHub → Settings → Secrets and variables → Actions**.
 
-### X (Twitter)
-
-- `TWITTER_API_CONSUMER_KEY`
-- `TWITTER_API_CONSUMER_SECRET`
-- `TWITTER_ACCESS_TOKEN_KEY`
-- `TWITTER_ACCESS_TOKEN_SECRET`
-
-Get these from the X Developer Portal:
-
-1. Go to https://developer.x.com/
-2. Open your project/app and create or view API keys and tokens.
-3. Copy the API key/secret and the access token/secret into the matching GitHub secrets.
-
-API posting cost (as of 2026-05):
-
-- Not fully free for normal automation use.
-- X moved to paid API access for most production usage.
-- For non-legacy developers, posting is typically billed pay-per-use (commonly reported around `$0.015` per post without URL and much higher for URL posts), and pricing can change.
-- Legacy fixed plans (`Basic`, `Pro`) are generally not open to new signups.
-- Check the official pricing page and your Developer Console before enabling automation:
-  - https://developer.x.com/en/products/x-api
-  - https://developer.x.com/docs/twitter-api/pricing
-
 ### Bluesky
 
 - `BLUESKY_IDENTIFIER` — your Bluesky handle, i.e. the last segment of your profile URL.  

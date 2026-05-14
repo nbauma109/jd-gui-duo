@@ -17,7 +17,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Crosspost to X, Bluesky, Mastodon, and Dev.to
+      - name: Crosspost to Bluesky, Mastodon, and Dev.to
         uses: tgagor/action-crosspost@9523ff489bc74e1a9849c5d3071b6bcbad40042d # v1.6.3
         with:
           feed-url: https://github.com/${{ github.repository }}/releases.atom
@@ -28,10 +28,6 @@ jobs:
             🎉 New release of ${{ github.event.repository.name }} is out!
             {url}
             #Java #JavaDecompiler #OpenSource #ReverseEngineering
-          twitter-api-consumer-key: ${{ secrets.TWITTER_API_CONSUMER_KEY }}
-          twitter-api-consumer-secret: ${{ secrets.TWITTER_API_CONSUMER_SECRET }}
-          twitter-access-token-key: ${{ secrets.TWITTER_ACCESS_TOKEN_KEY }}
-          twitter-access-token-secret: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
           bluesky-host: bsky.social
           bluesky-identifier: ${{ secrets.BLUESKY_IDENTIFIER }}
           bluesky-password: ${{ secrets.BLUESKY_PASSWORD }}
