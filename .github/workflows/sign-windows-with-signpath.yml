@@ -18,7 +18,7 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  actions: read
+  actions: write
   contents: write
 
 jobs:
@@ -184,10 +184,16 @@ jobs:
           $repo = "${{ github.repository }}"
           $checkoutRef = "${{ steps.context.outputs.checkout_ref }}"
           $signedRoot = Resolve-Path 'dist\published-signed'
+          $toolsRoot = Join-Path $env:GITHUB_WORKSPACE 'workflow-tools'
+          $portableZipScript = Join-Path $toolsRoot 'packaging\windows\build-portable-zip.ps1'
 
           $setupAssetName = "jd-gui-duo-windows-$version-setup.exe"
           $zipAssetName = "jd-gui-duo-windows-$version.zip"
           $tarXzAssetName = "jd-gui-duo-windows-$version.tar.xz"
+
+          if (-not (Test-Path $portableZipScript)) {
+            throw "The portable zip helper script was not found at $portableZipScript."
+          }
 
           $signedAppExecutables = @(Get-ChildItem $signedRoot -Recurse -File -Filter 'jd-gui-duo.exe')
           if ($signedAppExecutables.Count -ne 1) {
@@ -228,7 +234,7 @@ jobs:
 
           $release = gh release view $releaseTag --repo $repo --json assets | ConvertFrom-Json
           $publishedAssetNames = @($release.assets | ForEach-Object { $_.name })
-          foreach ($assetName in @($setupAssetName, $zipAssetName, $tarXzAssetName)) {
+          foreach ($assetName in @($setupAssetName, $tarXzAssetName)) {
             if ($publishedAssetNames -notcontains $assetName) {
               throw "Release '$releaseTag' does not contain required asset '$assetName'."
             }
@@ -236,7 +242,7 @@ jobs:
 
           $releaseAssetRoot = Join-Path $PWD 'dist\release-assets'
           New-Item -ItemType Directory -Force -Path $releaseAssetRoot | Out-Null
-          foreach ($assetName in @($setupAssetName, $zipAssetName, $tarXzAssetName)) {
+          foreach ($assetName in @($setupAssetName, $tarXzAssetName)) {
             gh release download $releaseTag --repo $repo --pattern $assetName --dir $releaseAssetRoot
             if ($LASTEXITCODE -ne 0) {
               throw "Failed to download release asset '$assetName'."
@@ -261,23 +267,6 @@ jobs:
 
           $setupAssetPath = Join-Path $releaseAssetRoot $setupAssetName
           Copy-Item $signedInstallerExecutables[0].FullName $setupAssetPath -Force
-
-          Add-Type -AssemblyName System.IO.Compression.FileSystem
-
-          $zipAssetPath = Join-Path $releaseAssetRoot $zipAssetName
-          $zipExtractRoot = Join-Path $releaseAssetRoot 'zip'
-          if (Test-Path $zipExtractRoot) {
-            Remove-Item -Recurse -Force $zipExtractRoot
-          }
-          New-Item -ItemType Directory -Force -Path $zipExtractRoot | Out-Null
-          [System.IO.Compression.ZipFile]::ExtractToDirectory($zipAssetPath, $zipExtractRoot)
-          Replace-AppExecutable -Root $zipExtractRoot -SignedExecutable $signedAppExecutables[0].FullName
-          $updatedZipPath = Join-Path $releaseAssetRoot "updated-$zipAssetName"
-          if (Test-Path $updatedZipPath) {
-            Remove-Item -Force $updatedZipPath
-          }
-          [System.IO.Compression.ZipFile]::CreateFromDirectory($zipExtractRoot, $updatedZipPath, [System.IO.Compression.CompressionLevel]::Optimal, $false)
-          Move-Item $updatedZipPath $zipAssetPath -Force
 
           $tarXzAssetPath = Join-Path $releaseAssetRoot $tarXzAssetName
           $tarXzExtractRoot = Join-Path $releaseAssetRoot 'tarxz'
@@ -304,9 +293,24 @@ jobs:
           }
           Move-Item $updatedTarXzPath $tarXzAssetPath -Force
 
+          $zipAssetPath = Join-Path $releaseAssetRoot $zipAssetName
+          & $portableZipScript `
+            -InputArchive $tarXzAssetPath `
+            -OutputZip $zipAssetPath
+          if (-not (Test-Path $zipAssetPath)) {
+            throw "Failed to rebuild $zipAssetName."
+          }
+
           gh release upload $releaseTag $setupAssetPath $zipAssetPath $tarXzAssetPath --repo $repo --clobber
           if ($LASTEXITCODE -ne 0) {
             throw "Failed to upload signed Windows release assets."
+          }
+
+          foreach ($workflowName in @('publish-chocolatey.yml', 'publish-winget.yml')) {
+            gh workflow run $workflowName --repo $repo -f "tag=$releaseTag"
+            if ($LASTEXITCODE -ne 0) {
+              throw "Failed to trigger $workflowName for $releaseTag."
+            }
           }
 
           "release_tag=$releaseTag" >> $env:GITHUB_OUTPUT
@@ -322,7 +326,8 @@ jobs:
             "- Signing policy: ${{ github.event.inputs.signing_policy_slug }}",
             "- Signing request: ${{ steps.signpath.outputs.signing-request-web-url }}",
             "- Signed files artifact: signed-windows-executables-${{ steps.artifacts.outputs.version }}",
-            "- Updated release: ${{ steps.update_release.outputs.release_tag }}"
+            "- Updated release: ${{ steps.update_release.outputs.release_tag }}",
+            "- Triggered package publishers: publish-chocolatey.yml, publish-winget.yml"
           )
 
           [string]::Join([Environment]::NewLine, $lines) | Add-Content -Path $env:GITHUB_STEP_SUMMARY
