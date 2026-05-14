@@ -3,7 +3,6 @@ name: "Crosspost Release to Social Media"
 on:
   release:
     types: [created]
-  workflow_dispatch:
 
 jobs:
   crosspost:
@@ -16,9 +15,11 @@ jobs:
         uses: tgagor/action-crosspost@9523ff489bc74e1a9849c5d3071b6bcbad40042d # v1.6.3
         with:
           feed-url: https://github.com/${{ github.repository }}/releases.atom
-          since: 1
+          since: 7
           since-unit: day
           limit: 1
+          filter-urls: |
+            /releases/tag/${{ github.event.release.tag_name }}
           message: |
             🎉 New release of ${{ github.event.repository.name }} is out!
             {url}
