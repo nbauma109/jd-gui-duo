@@ -127,6 +127,7 @@ jobs:
         with:
           name: unsigned-windows-app-signing-input-${{ steps.artifacts.outputs.version }}
           path: ${{ steps.artifacts.outputs.app_executable }}
+          archive: false
           if-no-files-found: error
 
       - name: Submit SignPath app signing request
@@ -222,6 +223,7 @@ jobs:
         with:
           name: unsigned-windows-installer-signing-input-${{ steps.artifacts.outputs.version }}
           path: ${{ steps.signed_bundle.outputs.unsigned_installer_executable }}
+          archive: false
           if-no-files-found: error
 
       - name: Submit SignPath installer signing request
