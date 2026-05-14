@@ -14,7 +14,7 @@ jobs:
         uses: tgagor/action-crosspost@v1
         with:
           feed-url: https://github.com/${{ github.repository }}/releases.atom
-          since: '1'
+          since: 1
           since-unit: hour
           limit: 1
           message: |
