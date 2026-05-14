@@ -74,7 +74,7 @@ API posting cost (as of 2026-05):
 Create a token in your Mastodon instance:
 
 1. Open your account **Preferences → Development**.
-2. Create a new application with posting scope (`write:statuses`).
+2. Create a new application with scopes `write:statuses` and `write:media`.
 3. Copy the generated access token to `MASTODON_ACCESS_TOKEN`.
 
 API posting cost:

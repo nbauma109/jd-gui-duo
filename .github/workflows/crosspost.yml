@@ -34,3 +34,77 @@ jobs:
           mastodon-access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
           mastodon-host: ${{ secrets.MASTODON_HOST }}
           devto-api-key: ${{ secrets.DEVTO_API_KEY }}
+
+      - name: Fix Dev.to cover image
+        continue-on-error: true
+        env:
+          DEVTO_API_KEY: ${{ secrets.DEVTO_API_KEY }}
+        run: |
+          TAG="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.event.release.tag_name }}"
+          RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${TAG}"
+
+          if [ -z "${DEVTO_API_KEY}" ]; then
+            echo "No DEVTO_API_KEY configured, skipping Dev.to cover image update"
+            exit 0
+          fi
+
+          # Write a helper script that extracts the og:image from a page
+          cat > /tmp/parse_og.py << 'PYEOF'
+          import sys, html.parser
+          class P(html.parser.HTMLParser):
+              og_image = None
+              def handle_starttag(self, tag, attrs):
+                  if tag == 'meta':
+                      d = dict(attrs)
+                      if d.get('property') == 'og:image':
+                          self.og_image = d.get('content')
+          p = P()
+          p.feed(sys.stdin.read())
+          if p.og_image:
+              print(p.og_image, end='')
+          PYEOF
+
+          # Write a helper script that sets main_image and strips embedded base64 images
+          cat > /tmp/fix_devto.py << 'PYEOF'
+          import sys, json, re, os
+          article = json.load(sys.stdin)
+          og_image = os.environ['OG_IMAGE']
+          body = article.get('body_markdown') or ''
+          body = re.sub(r'\n*!\[[^\]]*\]\(data:[^)]+\)\n*', '\n', body).strip()
+          print(json.dumps({'article': {'main_image': og_image, 'body_markdown': body}}))
+          PYEOF
+
+          # Extract og:image URL from the GitHub release page
+          OG_IMAGE=$(curl -fsSL "$RELEASE_URL" | python3 /tmp/parse_og.py || true)
+
+          if [ -z "$OG_IMAGE" ]; then
+            echo "⚠️ No og:image found for $RELEASE_URL, skipping Dev.to cover image update"
+            exit 0
+          fi
+          echo "🖼️ og:image: $OG_IMAGE"
+
+          # Find the dev.to article that contains the release URL in its body
+          ARTICLE_ID=$(curl -fsSL \
+            -H "api-key: ${DEVTO_API_KEY}" \
+            "https://dev.to/api/articles/me/published?per_page=5" \
+            | jq -r --arg url "$RELEASE_URL" \
+              '[.[] | select((.body_markdown // "") | contains($url)) | .id | tostring] | .[0] // ""')
+
+          if [ -z "$ARTICLE_ID" ]; then
+            echo "⚠️ Dev.to article not found for $RELEASE_URL, skipping cover image update"
+            exit 0
+          fi
+          echo "📝 Updating Dev.to article ${ARTICLE_ID} with cover image"
+
+          # Fetch the full article, set main_image, and strip any embedded base64 images from body
+          UPDATE_PAYLOAD=$(curl -fsSL \
+            -H "api-key: ${DEVTO_API_KEY}" \
+            "https://dev.to/api/articles/${ARTICLE_ID}" \
+            | OG_IMAGE="$OG_IMAGE" python3 /tmp/fix_devto.py)
+
+          curl -fsSL -X PUT \
+            -H "api-key: ${DEVTO_API_KEY}" \
+            -H "Content-Type: application/json" \
+            --data "$UPDATE_PAYLOAD" \
+            "https://dev.to/api/articles/${ARTICLE_ID}" \
+            | jq -r '"✅ Dev.to article updated: " + (.url // "unknown")'
