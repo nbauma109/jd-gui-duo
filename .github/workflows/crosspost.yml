@@ -3,6 +3,12 @@ name: "Crosspost Release to Social Media"
 on:
   release:
     types: [created]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to crosspost (for dispatches from release workflow)
+        required: true
+        type: string
 
 jobs:
   crosspost:
@@ -17,7 +23,7 @@ jobs:
           feed-url: https://github.com/${{ github.repository }}/releases.atom
           limit: 1
           filter-urls: |
-            /releases/tag/${{ github.event.release.tag_name }}
+            /releases/tag/${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.event.release.tag_name }}
           message: |
             🎉 New release of ${{ github.event.repository.name }} is out!
             {url}
