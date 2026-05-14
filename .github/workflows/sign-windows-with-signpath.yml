@@ -32,11 +32,28 @@ jobs:
         env:
           INPUT_REF: ${{ github.event.inputs.ref }}
           GITHUB_REF_VALUE: ${{ github.ref }}
+          SIGNING_POLICY_SLUG: ${{ github.event.inputs.signing_policy_slug }}
         run: |
-          $checkoutRef = if ([string]::IsNullOrWhiteSpace($env:INPUT_REF)) {
-            $env:GITHUB_REF_VALUE
+          if ($env:SIGNING_POLICY_SLUG -eq 'release-signing') {
+            if ([string]::IsNullOrWhiteSpace($env:INPUT_REF)) {
+              if ($env:GITHUB_REF_VALUE -notmatch '^refs/tags/') {
+                throw "Release signing requires an explicit tag ref or tag input."
+              }
+
+              $checkoutRef = $env:GITHUB_REF_VALUE
+            } elseif ($env:INPUT_REF -match '^refs/tags/') {
+              $checkoutRef = $env:INPUT_REF
+            } elseif ($env:INPUT_REF -match '^refs/') {
+              throw "Release signing requires a tag ref, not '$($env:INPUT_REF)'."
+            } else {
+              $checkoutRef = "refs/tags/$($env:INPUT_REF)"
+            }
           } else {
-            $env:INPUT_REF
+            $checkoutRef = if ([string]::IsNullOrWhiteSpace($env:INPUT_REF)) {
+              $env:GITHUB_REF_VALUE
+            } else {
+              $env:INPUT_REF
+            }
           }
 
           "checkout_ref=$checkoutRef" >> $env:GITHUB_OUTPUT
@@ -179,29 +196,17 @@ jobs:
           $version = "${{ steps.artifacts.outputs.version }}"
           $toolsRoot = Join-Path $env:GITHUB_WORKSPACE 'workflow-tools'
           $buildInstallerScript = Join-Path $toolsRoot 'packaging\windows\build-installer.ps1'
+          $replaceAppExecutableScript = Join-Path $toolsRoot 'packaging\windows\replace-app-executable.ps1'
           if (-not (Test-Path $buildInstallerScript)) {
             throw "The installer helper script was not found at $buildInstallerScript."
+          }
+          if (-not (Test-Path $replaceAppExecutableScript)) {
+            throw "The executable replacement helper script was not found at $replaceAppExecutableScript."
           }
 
           $signedAppExecutables = @(Get-ChildItem 'dist\signed-app' -Recurse -File -Filter 'jd-gui-duo.exe')
           if ($signedAppExecutables.Count -ne 1) {
             throw "Expected exactly one signed jd-gui-duo.exe in dist\signed-app, found $($signedAppExecutables.Count)."
-          }
-
-          function Replace-AppExecutable {
-            param(
-              [Parameter(Mandatory = $true)][string]$Root,
-              [Parameter(Mandatory = $true)][string]$SignedExecutable
-            )
-
-            $targets = @(Get-ChildItem $Root -Recurse -File -Filter 'jd-gui-duo.exe')
-            if ($targets.Count -eq 0) {
-              throw "No jd-gui-duo.exe was found under $Root."
-            }
-
-            foreach ($target in $targets) {
-              Copy-Item $SignedExecutable $target.FullName -Force
-            }
           }
 
           $bundleRoot = Join-Path $PWD 'dist\signed-bundle'
@@ -217,7 +222,7 @@ jobs:
             throw "Failed to extract ${{ steps.artifacts.outputs.windows_archive }}."
           }
 
-          Replace-AppExecutable -Root $extractRoot -SignedExecutable $signedAppExecutables[0].FullName
+          & $replaceAppExecutableScript -Root $extractRoot -SignedExecutable $signedAppExecutables[0].FullName
 
           $signedArchivePath = Join-Path $bundleRoot "jd-gui-duo-windows-$version.tar.xz"
           $tarEntries = @(Get-ChildItem $extractRoot -Force | ForEach-Object { $_.Name })
@@ -289,6 +294,7 @@ jobs:
           $releaseTag = "${{ steps.release_ref.outputs.release_tag }}"
           $toolsRoot = Join-Path $env:GITHUB_WORKSPACE 'workflow-tools'
           $portableZipScript = Join-Path $toolsRoot 'packaging\windows\build-portable-zip.ps1'
+          $replaceAppExecutableScript = Join-Path $toolsRoot 'packaging\windows\replace-app-executable.ps1'
 
           $setupAssetName = "jd-gui-duo-windows-$version-setup.exe"
           $zipAssetName = "jd-gui-duo-windows-$version.zip"
@@ -296,6 +302,9 @@ jobs:
 
           if (-not (Test-Path $portableZipScript)) {
             throw "The portable zip helper script was not found at $portableZipScript."
+          }
+          if (-not (Test-Path $replaceAppExecutableScript)) {
+            throw "The executable replacement helper script was not found at $replaceAppExecutableScript."
           }
 
           $signedAppExecutables = @(Get-ChildItem 'dist\signed-app' -Recurse -File -Filter 'jd-gui-duo.exe')
@@ -329,22 +338,6 @@ jobs:
             }
           }
 
-          function Replace-AppExecutable {
-            param(
-              [Parameter(Mandatory = $true)][string]$Root,
-              [Parameter(Mandatory = $true)][string]$SignedExecutable
-            )
-
-            $targets = @(Get-ChildItem $Root -Recurse -File -Filter 'jd-gui-duo.exe')
-            if ($targets.Count -eq 0) {
-              throw "No jd-gui-duo.exe was found under $Root."
-            }
-
-            foreach ($target in $targets) {
-              Copy-Item $SignedExecutable $target.FullName -Force
-            }
-          }
-
           $setupAssetPath = Join-Path $releaseAssetRoot $setupAssetName
           Copy-Item $signedInstallerExecutables[0].FullName $setupAssetPath -Force
 
@@ -358,7 +351,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) {
             throw "Failed to extract $tarXzAssetName."
           }
-          Replace-AppExecutable -Root $tarXzExtractRoot -SignedExecutable $signedAppExecutables[0].FullName
+          & $replaceAppExecutableScript -Root $tarXzExtractRoot -SignedExecutable $signedAppExecutables[0].FullName
           $updatedTarXzPath = Join-Path $releaseAssetRoot "updated-$tarXzAssetName"
           if (Test-Path $updatedTarXzPath) {
             Remove-Item -Force $updatedTarXzPath
@@ -384,6 +377,33 @@ jobs:
           gh release upload $releaseTag $setupAssetPath $zipAssetPath $tarXzAssetPath --repo $repo --clobber
           if ($LASTEXITCODE -ne 0) {
             throw "Failed to upload signed Windows release assets."
+          }
+
+          $verifyRoot = Join-Path $PWD 'dist\release-asset-verification'
+          if (Test-Path $verifyRoot) {
+            Remove-Item -Recurse -Force $verifyRoot
+          }
+          New-Item -ItemType Directory -Force -Path $verifyRoot | Out-Null
+          foreach ($assetName in @($setupAssetName, $zipAssetName, $tarXzAssetName)) {
+            gh release download $releaseTag --repo $repo --pattern $assetName --dir $verifyRoot
+            if ($LASTEXITCODE -ne 0) {
+              throw "Failed to download uploaded release asset '$assetName' for verification."
+            }
+          }
+
+          foreach ($asset in @(
+            @{ Name = $setupAssetName; LocalPath = $setupAssetPath },
+            @{ Name = $zipAssetName; LocalPath = $zipAssetPath },
+            @{ Name = $tarXzAssetName; LocalPath = $tarXzAssetPath }
+          )) {
+            $assetName = $asset['Name']
+            $localPath = $asset['LocalPath']
+            $downloadedPath = Join-Path $verifyRoot $assetName
+            $localHash = (Get-FileHash -Algorithm SHA256 $localPath).Hash
+            $uploadedHash = (Get-FileHash -Algorithm SHA256 $downloadedPath).Hash
+            if ($localHash -ne $uploadedHash) {
+              throw "Uploaded release asset '$assetName' hash mismatch. Local=$localHash Uploaded=$uploadedHash"
+            }
           }
 
           foreach ($workflowName in @('publish-chocolatey.yml', 'publish-winget.yml')) {
