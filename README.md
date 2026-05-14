@@ -75,6 +75,8 @@ Windows users can also install with WinGet:
 winget install --id Nbauma109.JDGUIDuo
 ```
 
+This installs the latest stable release from the default WinGet source.
+
 # Feature tour
 
 ## Supported formats
