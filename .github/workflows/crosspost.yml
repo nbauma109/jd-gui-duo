@@ -1,0 +1,33 @@
+name: "Crosspost Release to Social Media"
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  crosspost:
+    name: "Crosspost to Social Media"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Crosspost to X, Bluesky, Mastodon, and Dev.to
+        uses: tgagor/action-crosspost@v1
+        with:
+          feed-url: https://github.com/${{ github.repository }}/releases.atom
+          since: '1'
+          since-unit: hour
+          limit: 1
+          message: |
+            🎉 New release of JD-GUI Duo is out!
+            {url}
+            #Java #JavaDecompiler #OpenSource #ReverseEngineering
+          twitter-api-consumer-key: ${{ secrets.TWITTER_API_CONSUMER_KEY }}
+          twitter-api-consumer-secret: ${{ secrets.TWITTER_API_CONSUMER_SECRET }}
+          twitter-access-token-key: ${{ secrets.TWITTER_ACCESS_TOKEN_KEY }}
+          twitter-access-token-secret: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
+          bluesky-host: bsky.social
+          bluesky-identifier: ${{ secrets.BLUESKY_IDENTIFIER }}
+          bluesky-password: ${{ secrets.BLUESKY_PASSWORD }}
+          mastodon-access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
+          mastodon-host: ${{ secrets.MASTODON_HOST }}
+          devto-api-key: ${{ secrets.DEVTO_API_KEY }}
