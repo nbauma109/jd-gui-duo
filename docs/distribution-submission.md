@@ -56,6 +56,16 @@ Get these from the X Developer Portal:
 2. Open your project/app and create or view API keys and tokens.
 3. Copy the API key/secret and the access token/secret into the matching GitHub secrets.
 
+API posting cost (as of 2026-05):
+
+- Not fully free for normal automation use.
+- X moved to paid API access for most production usage.
+- For non-legacy developers, posting is typically billed pay-per-use (commonly reported around `$0.015` per post without URL and much higher for URL posts), and pricing can change.
+- Legacy fixed plans (`Basic`, `Pro`) are generally not open to new signups.
+- Check the official pricing page and your Developer Console before enabling automation:
+  - https://developer.x.com/en/products/x-api
+  - https://developer.x.com/docs/twitter-api/pricing
+
 ### Bluesky
 
 - `BLUESKY_IDENTIFIER` (usually your handle, for example `yourname.bsky.social`)
@@ -66,6 +76,13 @@ Create an app password in Bluesky:
 1. Open Bluesky settings.
 2. Go to **Privacy and Security → App Passwords**.
 3. Create an app password and store it in `BLUESKY_PASSWORD`.
+
+API posting cost (as of 2026-05):
+
+- Free (`$0`) on official Bluesky infrastructure.
+- No paid API tier is required for normal posting.
+- Subject to rate limits (for example, write-point quotas) documented here:
+  - https://docs.bsky.app/docs/advanced-guides/rate-limits
 
 ### Mastodon
 
@@ -78,6 +95,17 @@ Create a token in your Mastodon instance:
 2. Create a new application with posting scope (`write:statuses`).
 3. Copy the generated access token to `MASTODON_ACCESS_TOKEN`.
 
+API posting cost:
+
+- Free (`$0`) from the Mastodon software/project perspective.
+- There is no central Mastodon API fee.
+- Potential indirect costs depend on where you post:
+  - public instance: usually free (`$0`) unless that instance has its own policy
+  - self-hosted instance: you pay your own server/hosting costs
+- Official API docs:
+  - https://docs.joinmastodon.org/client/intro/
+  - https://docs.joinmastodon.org/methods/
+
 ### Dev.to
 
 - `DEVTO_API_KEY`
@@ -87,6 +115,14 @@ Get it from Dev.to:
 1. Open https://dev.to/settings/account
 2. Create/copy an API key in the Dev.to API key section.
 3. Save it as `DEVTO_API_KEY`.
+
+API posting cost:
+
+- Free (`$0`) for standard API publishing.
+- No paid API tier is documented for normal article posting.
+- API usage is rate-limited; see official docs:
+  - https://developers.forem.com/
+  - https://developers.forem.com/api/v0
 
 ### GitHub token for downstream workflow dispatch
 
