@@ -37,7 +37,7 @@ Optional variable:
 
 If `PAT_TOKEN` is not configured, the workflow still prepares the manifests for manual submission to `microsoft/winget-pkgs`.
 
-On `workflow_dispatch`, the workflow uses the branch selected in the GitHub UI for packaging logic and the provided tag for release assets. On `release` events, it uses the tagged sources.
+The Chocolatey and WinGet workflows are dispatch-only. The SignPath Windows signing workflow dispatches them after it replaces the release assets with signed Windows binaries, so package checksums are computed from the final signed downloads. Manual dispatches require a release tag and use the tagged sources for packaging logic and release assets.
 
 ## Social crosspost secrets
 
@@ -115,3 +115,4 @@ This token is used by `release.yml` to dispatch downstream workflows (`rewrite-r
 1. Create a personal access token for a maintainer account.
 2. Ensure it can run workflows in this repository (for classic tokens, include `repo` and `workflow` scopes).
 3. Save it as `PAT_TOKEN` in repository Actions secrets.
+
