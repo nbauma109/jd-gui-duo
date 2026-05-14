@@ -19,7 +19,7 @@ concurrency:
 
 permissions:
   actions: read
-  contents: read
+  contents: write
 
 jobs:
   sign-windows-executables:
@@ -166,6 +166,151 @@ jobs:
           path: dist/signed
           if-no-files-found: error
 
+      - name: Download published signed executables
+        uses: actions/download-artifact@v7
+        with:
+          name: signed-windows-executables-${{ steps.artifacts.outputs.version }}
+          path: dist/published-signed
+
+      - name: Update release Windows assets
+        id: update_release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $version = "${{ steps.artifacts.outputs.version }}"
+          $repo = "${{ github.repository }}"
+          $checkoutRef = "${{ steps.context.outputs.checkout_ref }}"
+          $signedRoot = Resolve-Path 'dist\published-signed'
+
+          $setupAssetName = "jd-gui-duo-windows-$version-setup.exe"
+          $zipAssetName = "jd-gui-duo-windows-$version.zip"
+          $tarXzAssetName = "jd-gui-duo-windows-$version.tar.xz"
+
+          $signedAppExecutables = @(Get-ChildItem $signedRoot -Recurse -File -Filter 'jd-gui-duo.exe')
+          if ($signedAppExecutables.Count -ne 1) {
+            throw "Expected exactly one signed jd-gui-duo.exe in $signedRoot, found $($signedAppExecutables.Count)."
+          }
+
+          $signedInstallerExecutables = @(Get-ChildItem $signedRoot -Recurse -File -Filter $setupAssetName)
+          if ($signedInstallerExecutables.Count -ne 1) {
+            throw "Expected exactly one signed $setupAssetName in $signedRoot, found $($signedInstallerExecutables.Count)."
+          }
+
+          $candidateTags = [System.Collections.Generic.List[string]]::new()
+          if ($checkoutRef -match '^refs/tags/(.+)$') {
+            $candidateTags.Add($Matches[1])
+          }
+          if (-not [string]::IsNullOrWhiteSpace($checkoutRef) -and -not $checkoutRef.Contains('/')) {
+            $candidateTags.Add($checkoutRef)
+          }
+          $candidateTags.Add("v$version")
+          $candidateTags.Add($version)
+
+          $releaseTag = $null
+          foreach ($candidateTag in ($candidateTags | Select-Object -Unique)) {
+            if ([string]::IsNullOrWhiteSpace($candidateTag)) {
+              continue
+            }
+
+            gh release view $candidateTag --repo $repo 1>$null 2>$null
+            if ($LASTEXITCODE -eq 0) {
+              $releaseTag = $candidateTag
+              break
+            }
+          }
+
+          if ([string]::IsNullOrWhiteSpace($releaseTag)) {
+            throw "No GitHub release was found for checkout ref '$checkoutRef' or version '$version'."
+          }
+
+          $release = gh release view $releaseTag --repo $repo --json assets | ConvertFrom-Json
+          $publishedAssetNames = @($release.assets | ForEach-Object { $_.name })
+          foreach ($assetName in @($setupAssetName, $zipAssetName, $tarXzAssetName)) {
+            if ($publishedAssetNames -notcontains $assetName) {
+              throw "Release '$releaseTag' does not contain required asset '$assetName'."
+            }
+          }
+
+          $releaseAssetRoot = Join-Path $PWD 'dist\release-assets'
+          New-Item -ItemType Directory -Force -Path $releaseAssetRoot | Out-Null
+          foreach ($assetName in @($setupAssetName, $zipAssetName, $tarXzAssetName)) {
+            gh release download $releaseTag --repo $repo --pattern $assetName --dir $releaseAssetRoot
+            if ($LASTEXITCODE -ne 0) {
+              throw "Failed to download release asset '$assetName'."
+            }
+          }
+
+          function Replace-AppExecutable {
+            param(
+              [Parameter(Mandatory = $true)][string]$Root,
+              [Parameter(Mandatory = $true)][string]$SignedExecutable
+            )
+
+            $targets = @(Get-ChildItem $Root -Recurse -File -Filter 'jd-gui-duo.exe')
+            if ($targets.Count -eq 0) {
+              throw "No jd-gui-duo.exe was found under $Root."
+            }
+
+            foreach ($target in $targets) {
+              Copy-Item $SignedExecutable $target.FullName -Force
+            }
+          }
+
+          $setupAssetPath = Join-Path $releaseAssetRoot $setupAssetName
+          Copy-Item $signedInstallerExecutables[0].FullName $setupAssetPath -Force
+
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+
+          $zipAssetPath = Join-Path $releaseAssetRoot $zipAssetName
+          $zipExtractRoot = Join-Path $releaseAssetRoot 'zip'
+          if (Test-Path $zipExtractRoot) {
+            Remove-Item -Recurse -Force $zipExtractRoot
+          }
+          New-Item -ItemType Directory -Force -Path $zipExtractRoot | Out-Null
+          [System.IO.Compression.ZipFile]::ExtractToDirectory($zipAssetPath, $zipExtractRoot)
+          Replace-AppExecutable -Root $zipExtractRoot -SignedExecutable $signedAppExecutables[0].FullName
+          $updatedZipPath = Join-Path $releaseAssetRoot "updated-$zipAssetName"
+          if (Test-Path $updatedZipPath) {
+            Remove-Item -Force $updatedZipPath
+          }
+          [System.IO.Compression.ZipFile]::CreateFromDirectory($zipExtractRoot, $updatedZipPath, [System.IO.Compression.CompressionLevel]::Optimal, $false)
+          Move-Item $updatedZipPath $zipAssetPath -Force
+
+          $tarXzAssetPath = Join-Path $releaseAssetRoot $tarXzAssetName
+          $tarXzExtractRoot = Join-Path $releaseAssetRoot 'tarxz'
+          if (Test-Path $tarXzExtractRoot) {
+            Remove-Item -Recurse -Force $tarXzExtractRoot
+          }
+          New-Item -ItemType Directory -Force -Path $tarXzExtractRoot | Out-Null
+          tar -xf $tarXzAssetPath -C $tarXzExtractRoot
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to extract $tarXzAssetName."
+          }
+          Replace-AppExecutable -Root $tarXzExtractRoot -SignedExecutable $signedAppExecutables[0].FullName
+          $updatedTarXzPath = Join-Path $releaseAssetRoot "updated-$tarXzAssetName"
+          if (Test-Path $updatedTarXzPath) {
+            Remove-Item -Force $updatedTarXzPath
+          }
+          $tarEntries = @(Get-ChildItem $tarXzExtractRoot -Force | ForEach-Object { $_.Name })
+          if ($tarEntries.Count -eq 0) {
+            throw "No entries were found after extracting $tarXzAssetName."
+          }
+          tar -cJf $updatedTarXzPath -C $tarXzExtractRoot @tarEntries
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to rebuild $tarXzAssetName."
+          }
+          Move-Item $updatedTarXzPath $tarXzAssetPath -Force
+
+          gh release upload $releaseTag $setupAssetPath $zipAssetPath $tarXzAssetPath --repo $repo --clobber
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to upload signed Windows release assets."
+          }
+
+          "release_tag=$releaseTag" >> $env:GITHUB_OUTPUT
+
       - name: Write summary
         shell: pwsh
         run: |
@@ -176,7 +321,8 @@ jobs:
             "- Version: ${{ steps.artifacts.outputs.version }}",
             "- Signing policy: ${{ github.event.inputs.signing_policy_slug }}",
             "- Signing request: ${{ steps.signpath.outputs.signing-request-web-url }}",
-            "- Signed files artifact: signed-windows-executables-${{ steps.artifacts.outputs.version }}"
+            "- Signed files artifact: signed-windows-executables-${{ steps.artifacts.outputs.version }}",
+            "- Updated release: ${{ steps.update_release.outputs.release_tag }}"
           )
 
           [string]::Join([Environment]::NewLine, $lines) | Add-Content -Path $env:GITHUB_STEP_SUMMARY
