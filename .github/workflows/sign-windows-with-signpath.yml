@@ -97,6 +97,7 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $workspace = $env:GITHUB_WORKSPACE
           $sourceRoot = Join-Path $workspace 'source'
+          $toolsRoot = Join-Path $workspace 'workflow-tools'
 
           # Extract version from pom.xml instead of exe filename
           $pomPath = Join-Path $sourceRoot 'pom.xml'
@@ -117,16 +118,48 @@ jobs:
             throw "No Windows archive matching jd-gui-duo-windows-*.tar.xz was found in assembler\target."
           }
 
+          $installerPath = Join-Path $sourceRoot "assembler\target\jd-gui-duo-windows-$version-setup.exe"
+          $buildInstallerScript = Join-Path $toolsRoot 'packaging\windows\build-installer.ps1'
+          if (-not (Test-Path $buildInstallerScript)) {
+            throw "The installer helper script was not found at $buildInstallerScript."
+          }
+
+          & $buildInstallerScript `
+            -InputArchive $archive.FullName `
+            -OutputInstaller $installerPath `
+            -AppVersion $version
+
+          if (-not (Test-Path $installerPath)) {
+            throw "The installer was not created at $installerPath."
+          }
+
           "version=$version" >> $env:GITHUB_OUTPUT
           "app_executable=$($appExecutable.FullName)" >> $env:GITHUB_OUTPUT
           "windows_archive=$($archive.FullName)" >> $env:GITHUB_OUTPUT
+          "initial_installer_executable=$installerPath" >> $env:GITHUB_OUTPUT
 
-      - name: Upload unsigned app executable
-        id: upload_unsigned_app
+      - name: Prepare app signing input
+        id: app_signing_input
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $inputRoot = Join-Path $PWD 'dist\signing-input\app'
+          if (Test-Path $inputRoot) {
+            Remove-Item -Recurse -Force $inputRoot
+          }
+          New-Item -ItemType Directory -Force -Path $inputRoot | Out-Null
+
+          Copy-Item "${{ steps.artifacts.outputs.app_executable }}" (Join-Path $inputRoot 'jd-gui-duo.exe') -Force
+          Copy-Item "${{ steps.artifacts.outputs.initial_installer_executable }}" (Join-Path $inputRoot "jd-gui-duo-windows-${{ steps.artifacts.outputs.version }}-setup.exe") -Force
+
+          "path=$inputRoot" >> $env:GITHUB_OUTPUT
+
+      - name: Upload app signing input
+        id: upload_app_signing_input
         uses: actions/upload-artifact@v7
         with:
-          name: unsigned-windows-app-executable-${{ steps.artifacts.outputs.version }}
-          path: ${{ steps.artifacts.outputs.app_executable }}
+          name: unsigned-windows-app-signing-input-${{ steps.artifacts.outputs.version }}
+          path: ${{ steps.app_signing_input.outputs.path }}/*
           if-no-files-found: error
 
       - name: Submit SignPath app signing request
@@ -137,7 +170,7 @@ jobs:
           organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
           project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
           signing-policy-slug: ${{ github.event.inputs.signing_policy_slug }}
-          github-artifact-id: ${{ steps.upload_unsigned_app.outputs.artifact-id }}
+          github-artifact-id: ${{ steps.upload_app_signing_input.outputs.artifact-id }}
           wait-for-completion: true
           output-artifact-directory: dist/signed-app
           parameters: |
@@ -215,12 +248,33 @@ jobs:
           "signed_windows_archive=$signedArchivePath" >> $env:GITHUB_OUTPUT
           "unsigned_installer_executable=$unsignedInstallerPath" >> $env:GITHUB_OUTPUT
 
-      - name: Upload unsigned installer executable
-        id: upload_unsigned_installer
+      - name: Prepare installer signing input
+        id: installer_signing_input
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $inputRoot = Join-Path $PWD 'dist\signing-input\installer'
+          if (Test-Path $inputRoot) {
+            Remove-Item -Recurse -Force $inputRoot
+          }
+          New-Item -ItemType Directory -Force -Path $inputRoot | Out-Null
+
+          $signedAppExecutables = @(Get-ChildItem 'dist\signed-app' -Recurse -File -Filter 'jd-gui-duo.exe')
+          if ($signedAppExecutables.Count -ne 1) {
+            throw "Expected exactly one signed jd-gui-duo.exe in dist\signed-app, found $($signedAppExecutables.Count)."
+          }
+
+          Copy-Item $signedAppExecutables[0].FullName (Join-Path $inputRoot 'jd-gui-duo.exe') -Force
+          Copy-Item "${{ steps.signed_bundle.outputs.unsigned_installer_executable }}" (Join-Path $inputRoot "jd-gui-duo-windows-${{ steps.artifacts.outputs.version }}-setup.exe") -Force
+
+          "path=$inputRoot" >> $env:GITHUB_OUTPUT
+
+      - name: Upload installer signing input
+        id: upload_installer_signing_input
         uses: actions/upload-artifact@v7
         with:
-          name: unsigned-windows-installer-executable-${{ steps.artifacts.outputs.version }}
-          path: ${{ steps.signed_bundle.outputs.unsigned_installer_executable }}
+          name: unsigned-windows-installer-signing-input-${{ steps.artifacts.outputs.version }}
+          path: ${{ steps.installer_signing_input.outputs.path }}/*
           if-no-files-found: error
 
       - name: Submit SignPath installer signing request
@@ -231,7 +285,7 @@ jobs:
           organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
           project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
           signing-policy-slug: ${{ github.event.inputs.signing_policy_slug }}
-          github-artifact-id: ${{ steps.upload_unsigned_installer.outputs.artifact-id }}
+          github-artifact-id: ${{ steps.upload_installer_signing_input.outputs.artifact-id }}
           wait-for-completion: true
           output-artifact-directory: dist/signed-installer
           parameters: |
@@ -241,9 +295,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: signed-windows-executables-${{ steps.artifacts.outputs.version }}
-          path: |
-            dist/signed-app
-            dist/signed-installer
+          path: dist/signed-installer
           if-no-files-found: error
 
       - name: Download published signed executables
