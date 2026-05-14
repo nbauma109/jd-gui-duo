@@ -9,9 +9,11 @@ jobs:
   crosspost:
     name: "Crosspost to Social Media"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Crosspost to X, Bluesky, Mastodon, and Dev.to
-        uses: tgagor/action-crosspost@v1
+        uses: tgagor/action-crosspost@9523ff489bc74e1a9849c5d3071b6bcbad40042d # v1.6.3
         with:
           feed-url: https://github.com/${{ github.repository }}/releases.atom
           since: 1
