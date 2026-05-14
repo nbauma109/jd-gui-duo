@@ -75,7 +75,8 @@ jobs:
           PYEOF
 
           # Extract og:image URL from the GitHub release page
-          OG_IMAGE=$(curl -fsSL "$RELEASE_URL" | python3 /tmp/parse_og.py || true)
+          OG_IMAGE=$(curl -fsSL "$RELEASE_URL" | python3 /tmp/parse_og.py) \
+            || { echo "⚠️ Failed to extract og:image from $RELEASE_URL, skipping Dev.to cover image update"; exit 0; }
 
           if [ -z "$OG_IMAGE" ]; then
             echo "⚠️ No og:image found for $RELEASE_URL, skipping Dev.to cover image update"
@@ -83,7 +84,8 @@ jobs:
           fi
           echo "🖼️ og:image: $OG_IMAGE"
 
-          # Find the dev.to article that contains the release URL in its body
+          # Find the dev.to article that contains the release URL in its body.
+          # The release URL is unique per release, so contains() gives a precise match.
           ARTICLE_ID=$(curl -fsSL \
             -H "api-key: ${DEVTO_API_KEY}" \
             "https://dev.to/api/articles/me/published?per_page=5" \
