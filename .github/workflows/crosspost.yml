@@ -21,7 +21,7 @@ jobs:
       contents: read
     steps:
       - name: Post to Mastodon
-        uses: cbrgm/mastodon-github-action@v2
+        uses: cbrgm/mastodon-github-action@776364a15dd1171530479600c75363f7cbc89ef5 # v2
         with:
           access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
           url: https://${{ secrets.MASTODON_HOST }}
@@ -37,7 +37,7 @@ jobs:
       contents: read
     steps:
       - name: Post to Bluesky
-        uses: cbrgm/bluesky-github-action@v1
+        uses: cbrgm/bluesky-github-action@d643d172e122e8ced65f2bd5061b6e77c5146c07 # v1
         with:
           handle: ${{ secrets.BLUESKY_IDENTIFIER }}
           password: ${{ secrets.BLUESKY_PASSWORD }}
@@ -52,28 +52,35 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Create release post
+        env:
+          RELEASE_TAG: ${{ env.RELEASE_TAG }}
+          REPOSITORY_NAME: ${{ github.event.repository.name }}
+          REPOSITORY: ${{ github.repository }}
         run: |
           mkdir -p posts
-          cat > "posts/release-${{ env.RELEASE_TAG }}.md" << 'EOF'
+          POST_FILE="posts/release-${RELEASE_TAG}.md"
+          if [ ! -f "$POST_FILE" ]; then
+            cat > "$POST_FILE" << EOF
           ---
-          title: "${{ github.event.repository.name }} ${{ env.RELEASE_TAG }} Released"
+          title: "${REPOSITORY_NAME} ${RELEASE_TAG} Released"
           published: true
-          description: "New release of ${{ github.event.repository.name }}"
+          description: "New release of ${REPOSITORY_NAME}"
           tags: java, decompiler, opensource, reverseengineering
           ---
 
-          🎉 New release of [${{ github.event.repository.name }}](https://github.com/${{ github.repository }}) is out!
+          🎉 New release of [${REPOSITORY_NAME}](https://github.com/${REPOSITORY}) is out!
 
-          Check out the [release notes](https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }}).
+          Check out the [release notes](https://github.com/${REPOSITORY}/releases/tag/${RELEASE_TAG}).
           EOF
+          fi
       - name: Publish to Dev.to
-        uses: sinedied/publish-devto@v2
+        uses: sinedied/publish-devto@85426e8090533468bb8012015451e3af797b65af # v2
         with:
           devto_key: ${{ secrets.DEVTO_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          files: 'posts/release-*.md'
+          files: 'posts/release-${{ env.RELEASE_TAG }}.md'
           branch: master
           conventional_commits: false
 
@@ -84,7 +91,7 @@ jobs:
       contents: read
     steps:
       - name: Post Show HN
-        uses: higgins/action-hackernews-post@v1.0.1
+        uses: higgins/action-hackernews-post@74acdeb91fd56c6e46a448351515932c0b2ce049 # v1.0.1
         with:
           HN_USERNAME: ${{ secrets.HN_USERNAME }}
           HN_PASSWORD: ${{ secrets.HN_PASSWORD }}
