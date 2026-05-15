@@ -24,7 +24,7 @@ jobs:
         uses: cbrgm/mastodon-github-action@v2
         with:
           access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
-          url: ${{ secrets.MASTODON_HOST }}
+          url: https://${{ secrets.MASTODON_HOST }}
           message: |
             🎉 New release of ${{ github.event.repository.name }} ${{ env.RELEASE_TAG }} is out!
             https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }}
@@ -85,7 +85,7 @@ jobs:
     steps:
       - name: Post Show HN
         uses: higgins/action-hackernews-post@v1.0.1
-        env:
+        with:
           HN_USERNAME: ${{ secrets.HN_USERNAME }}
           HN_PASSWORD: ${{ secrets.HN_PASSWORD }}
           POST_TITLE: "Show HN: ${{ github.event.repository.name }} ${{ env.RELEASE_TAG }}"
