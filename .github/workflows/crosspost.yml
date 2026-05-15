@@ -23,7 +23,8 @@ jobs:
       - name: Verify release tag
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release view "${{ env.RELEASE_TAG }}" --repo "${{ github.repository }}"
+          RELEASE_TAG: ${{ env.RELEASE_TAG }}
+        run: gh release view "$RELEASE_TAG" --repo "${{ github.repository }}"
 
   mastodon:
     name: "Post to Mastodon"
@@ -99,7 +100,7 @@ jobs:
           conventional_commits: false
 
   hackernews:
-    name: "Post to HackerNews"
+    name: "Post to Hacker News"
     needs: validate
     runs-on: ubuntu-latest
     permissions:
