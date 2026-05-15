@@ -106,6 +106,17 @@ API posting cost:
   - https://developers.forem.com/
   - https://developers.forem.com/api/v0
 
+### HackerNews
+
+- `HN_USERNAME` — your Hacker News username
+- `HN_PASSWORD` — your Hacker News password
+
+Each release is submitted as a **Show HN** post with the release URL. HackerNews has no API key system; the action authenticates with your account credentials directly.
+
+API posting cost:
+
+- Free (`$0`). HackerNews has no paid API or posting tier.
+
 ### GitHub token for downstream workflow dispatch
 
 - `PAT_TOKEN`

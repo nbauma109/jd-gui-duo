@@ -14,8 +14,20 @@ env:
   RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.event.release.tag_name }}
 
 jobs:
+  validate:
+    name: "Validate release exists"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Verify release tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release view "${{ env.RELEASE_TAG }}" --repo "${{ github.repository }}"
+
   mastodon:
     name: "Post to Mastodon"
+    needs: validate
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -32,6 +44,7 @@ jobs:
 
   bluesky:
     name: "Post to Bluesky"
+    needs: validate
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -48,6 +61,7 @@ jobs:
 
   devto:
     name: "Publish to Dev.to"
+    needs: validate
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -59,8 +73,8 @@ jobs:
           REPOSITORY_NAME: ${{ github.event.repository.name }}
           REPOSITORY: ${{ github.repository }}
         run: |
-          mkdir -p posts
           POST_FILE="posts/release-${RELEASE_TAG}.md"
+          mkdir -p "$(dirname "$POST_FILE")"
           if [ ! -f "$POST_FILE" ]; then
             cat > "$POST_FILE" << EOF
           ---
@@ -86,6 +100,7 @@ jobs:
 
   hackernews:
     name: "Post to HackerNews"
+    needs: validate
     runs-on: ubuntu-latest
     permissions:
       contents: read
