@@ -10,27 +10,83 @@ on:
         required: true
         type: string
 
+env:
+  RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.event.release.tag_name }}
+
 jobs:
-  crosspost:
-    name: "Crosspost to Social Media"
+  mastodon:
+    name: "Post to Mastodon"
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
-      - name: Crosspost to Bluesky, Mastodon, and Dev.to
-        uses: tgagor/action-crosspost@9523ff489bc74e1a9849c5d3071b6bcbad40042d # v1.6.3
+      - name: Post to Mastodon
+        uses: cbrgm/mastodon-github-action@v2
         with:
-          feed-url: https://github.com/${{ github.repository }}/releases.atom
-          limit: 1
-          filter-urls: |
-            /releases/tag/${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.event.release.tag_name }}
+          access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
+          url: ${{ secrets.MASTODON_HOST }}
           message: |
-            🎉 New release of ${{ github.event.repository.name }} is out!
-            {url}
+            🎉 New release of ${{ github.event.repository.name }} ${{ env.RELEASE_TAG }} is out!
+            https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }}
             #Java #JavaDecompiler #OpenSource #ReverseEngineering
-          bluesky-host: bsky.social
-          bluesky-identifier: ${{ secrets.BLUESKY_IDENTIFIER }}
-          bluesky-password: ${{ secrets.BLUESKY_PASSWORD }}
-          mastodon-access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
-          mastodon-host: ${{ secrets.MASTODON_HOST }}
-          devto-api-key: ${{ secrets.DEVTO_API_KEY }}
+
+  bluesky:
+    name: "Post to Bluesky"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Post to Bluesky
+        uses: cbrgm/bluesky-github-action@v1
+        with:
+          handle: ${{ secrets.BLUESKY_IDENTIFIER }}
+          password: ${{ secrets.BLUESKY_PASSWORD }}
+          text: |
+            🎉 New release of ${{ github.event.repository.name }} ${{ env.RELEASE_TAG }} is out!
+            https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }}
+            #Java #JavaDecompiler #OpenSource #ReverseEngineering
+
+  devto:
+    name: "Publish to Dev.to"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create release post
+        run: |
+          mkdir -p posts
+          cat > "posts/release-${{ env.RELEASE_TAG }}.md" << 'EOF'
+          ---
+          title: "${{ github.event.repository.name }} ${{ env.RELEASE_TAG }} Released"
+          published: true
+          description: "New release of ${{ github.event.repository.name }}"
+          tags: java, decompiler, opensource, reverseengineering
+          ---
+
+          🎉 New release of [${{ github.event.repository.name }}](https://github.com/${{ github.repository }}) is out!
+
+          Check out the [release notes](https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }}).
+          EOF
+      - name: Publish to Dev.to
+        uses: sinedied/publish-devto@v2
+        with:
+          devto_key: ${{ secrets.DEVTO_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          files: 'posts/release-*.md'
+          branch: master
+          conventional_commits: false
+
+  hackernews:
+    name: "Post to HackerNews"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Post Show HN
+        uses: higgins/action-hackernews-post@v1.0.1
+        env:
+          HN_USERNAME: ${{ secrets.HN_USERNAME }}
+          HN_PASSWORD: ${{ secrets.HN_PASSWORD }}
+          POST_TITLE: "Show HN: ${{ github.event.repository.name }} ${{ env.RELEASE_TAG }}"
+          POST_URL: "https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }}"
