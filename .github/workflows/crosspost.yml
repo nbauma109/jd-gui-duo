@@ -24,23 +24,6 @@ jobs:
           RELEASE_TAG: ${{ env.RELEASE_TAG }}
         run: gh release view "$RELEASE_TAG" --repo "${{ github.repository }}"
 
-  mastodon:
-    name: "Post to Mastodon"
-    needs: validate
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Post to Mastodon
-        uses: cbrgm/mastodon-github-action@776364a15dd1171530479600c75363f7cbc89ef5 # v2.2.0
-        with:
-          access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
-          url: https://mastodon.social
-          message: |
-            🎉 New release of ${{ github.event.repository.name }} ${{ env.RELEASE_TAG }} is out!
-            https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }}
-            #Java #JavaDecompiler #OpenSource #ReverseEngineering
-
   devto:
     name: "Publish to Dev.to"
     needs: validate
