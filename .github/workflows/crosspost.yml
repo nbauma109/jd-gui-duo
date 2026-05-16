@@ -72,9 +72,95 @@ jobs:
       contents: read
     steps:
       - name: Post Show HN
-        uses: meysam81/submit-hackernews@08ece9b8142e8aef7f2c0a8fa6b747f5044c60d3
-        with:
-          username: ${{ secrets.HN_USERNAME }}
-          password: ${{ secrets.HN_PASSWORD }}
-          title: "Show HN: ${{ github.event.repository.name }} ${{ env.RELEASE_TAG }}"
-          url: "https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }}"
+        env:
+          HN_USERNAME: ${{ secrets.HN_USERNAME }}
+          HN_PASSWORD: ${{ secrets.HN_PASSWORD }}
+          POST_TITLE: "Show HN: ${{ github.event.repository.name }} ${{ env.RELEASE_TAG }}"
+          POST_URL: "https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }}"
+        run: |
+          set -euo pipefail
+
+          cookie_jar="$(mktemp)"
+          headers="$(mktemp)"
+          body="$(mktemp)"
+          trap 'rm -f "$cookie_jar" "$headers" "$body"' EXIT
+
+          user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+
+          login_status="$(
+            curl -sS \
+              -A "$user_agent" \
+              -c "$cookie_jar" \
+              -b "$cookie_jar" \
+              -D "$headers" \
+              -o "$body" \
+              -w "%{http_code}" \
+              -H "Content-Type: application/x-www-form-urlencoded" \
+              --data-urlencode "goto=newest" \
+              --data-urlencode "acct=$HN_USERNAME" \
+              --data-urlencode "pw=$HN_PASSWORD" \
+              https://news.ycombinator.com/login
+          )"
+
+          if ! awk '$6 == "user" && $7 != "" { found=1 } END { exit found ? 0 : 1 }' "$cookie_jar"; then
+            echo "Hacker News login failed with HTTP $login_status."
+            exit 1
+          fi
+
+          submit_form="$(curl -fsS -A "$user_agent" -b "$cookie_jar" https://news.ycombinator.com/submitlink)"
+          fnid="$(printf '%s' "$submit_form" | sed -n 's/.*name="fnid"[[:space:]]*value="\([^"]*\)".*/\1/p' | head -n 1)"
+          fnop="$(printf '%s' "$submit_form" | sed -n 's/.*name="fnop"[[:space:]]*value="\([^"]*\)".*/\1/p' | head -n 1)"
+
+          if [ -z "$fnid" ] || [ -z "$fnop" ]; then
+            echo "Could not find the Hacker News submission form fields. The account may not be allowed to submit."
+            exit 1
+          fi
+
+          submit_status="$(
+            curl -sS \
+              -A "$user_agent" \
+              -b "$cookie_jar" \
+              -D "$headers" \
+              -o "$body" \
+              -w "%{http_code}" \
+              -H "Content-Type: application/x-www-form-urlencoded" \
+              --data-urlencode "fnid=$fnid" \
+              --data-urlencode "fnop=$fnop" \
+              --data-urlencode "title=$POST_TITLE" \
+              --data-urlencode "url=$POST_URL" \
+              https://news.ycombinator.com/r
+          )"
+
+          location="$(tr -d '\r' < "$headers" | sed -n 's/^[Ll]ocation: //p' | tail -n 1)"
+
+          if [ "$submit_status" = "302" ]; then
+            case "$location" in
+              *fnop=toonew*)
+                echo "Hacker News rejected the submission because this account is too new to submit links."
+                exit 1
+                ;;
+              /x\?*|x\?*)
+                echo "Hacker News rejected the submission with redirect: $location"
+                exit 1
+                ;;
+              *)
+                echo "Submitted to Hacker News: $location"
+                exit 0
+                ;;
+            esac
+          fi
+
+          if grep -qi "already been submitted" "$body"; then
+            echo "Hacker News says this URL has already been submitted."
+            exit 1
+          fi
+
+          if grep -qi "you have to wait\|too new\|bad login" "$body"; then
+            echo "Hacker News rejected the submission:"
+            sed -E 's/<[^>]+>/ /g' "$body" | tr -s ' ' | head -c 500
+            echo
+            exit 1
+          fi
+
+          echo "Hacker News submission failed with HTTP $submit_status."
+          exit 1
