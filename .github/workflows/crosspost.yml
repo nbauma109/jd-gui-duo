@@ -79,15 +79,13 @@ jobs:
           if [ ! -f "$POST_FILE" ]; then
             cat > "$POST_FILE" << EOF
           ---
-          title: "${REPOSITORY_NAME} ${RELEASE_TAG} Released"
+          title: "🎉 New release of ${REPOSITORY_NAME} ${RELEASE_TAG} is out!"
           published: true
           description: "New release of ${REPOSITORY_NAME}"
           tags: java, decompiler, opensource, reverseengineering
           ---
 
-          🎉 New release of [${REPOSITORY_NAME}](https://github.com/${REPOSITORY}) is out!
-
-          https://github.com/${REPOSITORY}/releases/tag/${RELEASE_TAG}
+          [![${REPOSITORY_NAME} release ${RELEASE_TAG}](https://opengraph.githubassets.com/1/${REPOSITORY}/releases/tag/${RELEASE_TAG})](https://github.com/${REPOSITORY}/releases/tag/${RELEASE_TAG})
           EOF
           fi
       - name: Publish to Dev.to
