@@ -72,9 +72,9 @@ jobs:
       contents: read
     steps:
       - name: Post Show HN
-        uses: higgins/action-hackernews-post@74acdeb91fd56c6e46a448351515932c0b2ce049 # v1.0.1
+        uses: meysam81/submit-hackernews@08ece9b8142e8aef7f2c0a8fa6b747f5044c60d3
         with:
-          HN_USERNAME: ${{ secrets.HN_USERNAME }}
-          HN_PASSWORD: ${{ secrets.HN_PASSWORD }}
-          POST_TITLE: "Show HN: ${{ github.event.repository.name }} ${{ env.RELEASE_TAG }}"
-          POST_URL: "https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }}"
+          username: ${{ secrets.HN_USERNAME }}
+          password: ${{ secrets.HN_PASSWORD }}
+          title: "Show HN: ${{ github.event.repository.name }} ${{ env.RELEASE_TAG }}"
+          url: "https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }}"
