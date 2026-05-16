@@ -85,7 +85,7 @@ jobs:
 
           🎉 New release of [${REPOSITORY_NAME}](https://github.com/${REPOSITORY}) is out!
 
-          Check out the [release notes](https://github.com/${REPOSITORY}/releases/tag/${RELEASE_TAG}).
+          https://github.com/${REPOSITORY}/releases/tag/${RELEASE_TAG}
           EOF
           fi
       - name: Publish to Dev.to
