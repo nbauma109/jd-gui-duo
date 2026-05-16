@@ -34,7 +34,7 @@ jobs:
       - name: Verify Mastodon token from GitHub Actions
         shell: bash
         env:
-          MASTODON_URL: https://${{ secrets.MASTODON_URL }}
+          MASTODON_URL: https://mastodon.social
           MASTODON_ACCESS_TOKEN: ${{ secrets.MASTODON_ACCESS_TOKEN }}
         run: |
           set -euo pipefail
@@ -52,25 +52,8 @@ jobs:
         uses: cbrgm/mastodon-github-action@776364a15dd1171530479600c75363f7cbc89ef5 # v2.2.0
         with:
           access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
-          url: https://${{ secrets.MASTODON_HOST }}
+          url: https://mastodon.social
           message: |
-            🎉 New release of ${{ github.event.repository.name }} ${{ env.RELEASE_TAG }} is out!
-            https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }}
-            #Java #JavaDecompiler #OpenSource #ReverseEngineering
-
-  bluesky:
-    name: "Post to Bluesky"
-    needs: validate
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Post to Bluesky
-        uses: cbrgm/bluesky-github-action@d643d172e122e8ced65f2bd5061b6e77c5146c07 # v1.2.5
-        with:
-          handle: ${{ secrets.BLUESKY_IDENTIFIER }}
-          password: ${{ secrets.BLUESKY_PASSWORD }}
-          text: |
             🎉 New release of ${{ github.event.repository.name }} ${{ env.RELEASE_TAG }} is out!
             https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }}
             #Java #JavaDecompiler #OpenSource #ReverseEngineering
