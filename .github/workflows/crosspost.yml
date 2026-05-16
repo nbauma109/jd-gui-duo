@@ -1,8 +1,6 @@
 name: "Crosspost Release to Social Media"
 
 on:
-  release:
-    types: [created]
   workflow_dispatch:
     inputs:
       tag:
@@ -10,27 +8,107 @@ on:
         required: true
         type: string
 
+env:
+  RELEASE_TAG: ${{ github.event.inputs.tag }}
+
 jobs:
-  crosspost:
-    name: "Crosspost to Social Media"
+  validate:
+    name: "Validate release exists"
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
-      - name: Crosspost to Bluesky, Mastodon, and Dev.to
-        uses: tgagor/action-crosspost@9523ff489bc74e1a9849c5d3071b6bcbad40042d # v1.6.3
+      - name: Verify release tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ env.RELEASE_TAG }}
+        run: gh release view "$RELEASE_TAG" --repo "${{ github.repository }}"
+
+  mastodon:
+    name: "Post to Mastodon"
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Post to Mastodon
+        uses: cbrgm/mastodon-github-action@776364a15dd1171530479600c75363f7cbc89ef5 # v2.2.0
         with:
-          feed-url: https://github.com/${{ github.repository }}/releases.atom
-          limit: 1
-          filter-urls: |
-            /releases/tag/${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.event.release.tag_name }}
+          access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
+          url: https://${{ secrets.MASTODON_HOST }}
           message: |
-            🎉 New release of ${{ github.event.repository.name }} is out!
-            {url}
+            🎉 New release of ${{ github.event.repository.name }} ${{ env.RELEASE_TAG }} is out!
+            https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }}
             #Java #JavaDecompiler #OpenSource #ReverseEngineering
-          bluesky-host: bsky.social
-          bluesky-identifier: ${{ secrets.BLUESKY_IDENTIFIER }}
-          bluesky-password: ${{ secrets.BLUESKY_PASSWORD }}
-          mastodon-access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
-          mastodon-host: ${{ secrets.MASTODON_HOST }}
-          devto-api-key: ${{ secrets.DEVTO_API_KEY }}
+
+  bluesky:
+    name: "Post to Bluesky"
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Post to Bluesky
+        uses: cbrgm/bluesky-github-action@d643d172e122e8ced65f2bd5061b6e77c5146c07 # v1.2.5
+        with:
+          handle: ${{ secrets.BLUESKY_IDENTIFIER }}
+          password: ${{ secrets.BLUESKY_PASSWORD }}
+          text: |
+            🎉 New release of ${{ github.event.repository.name }} ${{ env.RELEASE_TAG }} is out!
+            https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }}
+            #Java #JavaDecompiler #OpenSource #ReverseEngineering
+
+  devto:
+    name: "Publish to Dev.to"
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+      - name: Create release post
+        env:
+          RELEASE_TAG: ${{ env.RELEASE_TAG }}
+          REPOSITORY_NAME: ${{ github.event.repository.name }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          POST_FILE="posts/release-${RELEASE_TAG}.md"
+          mkdir -p "$(dirname "$POST_FILE")"
+          if [ ! -f "$POST_FILE" ]; then
+            cat > "$POST_FILE" << EOF
+          ---
+          title: "${REPOSITORY_NAME} ${RELEASE_TAG} Released"
+          published: true
+          description: "New release of ${REPOSITORY_NAME}"
+          tags: java, decompiler, opensource, reverseengineering
+          ---
+
+          🎉 New release of [${REPOSITORY_NAME}](https://github.com/${REPOSITORY}) is out!
+
+          Check out the [release notes](https://github.com/${REPOSITORY}/releases/tag/${RELEASE_TAG}).
+          EOF
+          fi
+      - name: Publish to Dev.to
+        uses: sinedied/publish-devto@c713cc0934b35cb3df9fca759b98e36e6a540a85 # v2
+        with:
+          devto_key: ${{ secrets.DEVTO_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          files: 'posts/release-${{ env.RELEASE_TAG }}.md'
+          branch: master
+          conventional_commits: false
+
+  hackernews:
+    name: "Post to Hacker News"
+    needs: validate
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Post Show HN
+        uses: higgins/action-hackernews-post@74acdeb91fd56c6e46a448351515932c0b2ce049 # v1.0.1
+        with:
+          HN_USERNAME: ${{ secrets.HN_USERNAME }}
+          HN_PASSWORD: ${{ secrets.HN_PASSWORD }}
+          POST_TITLE: "Show HN: ${{ github.event.repository.name }} ${{ env.RELEASE_TAG }}"
+          POST_URL: "https://github.com/${{ github.repository }}/releases/tag/${{ env.RELEASE_TAG }}"
