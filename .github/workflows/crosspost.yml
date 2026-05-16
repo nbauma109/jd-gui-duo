@@ -27,6 +27,7 @@ jobs:
   mastodon:
     name: "Post to Mastodon"
     needs: validate
+    if: ${{ false }} # Temporarily disabled
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -44,6 +45,7 @@ jobs:
   bluesky:
     name: "Post to Bluesky"
     needs: validate
+    if: ${{ false }} # Temporarily disabled
     runs-on: ubuntu-latest
     permissions:
       contents: read
