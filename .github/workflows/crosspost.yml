@@ -11,7 +11,7 @@ on:
         type: string
 
 env:
-  RELEASE_TAG: ${{ github.event.inputs.tag }}
+  RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.event.release.tag_name }}
 
 jobs:
   validate:
@@ -35,14 +35,16 @@ jobs:
     steps:
       - name: Crosspost to Bluesky and Mastodon
         uses: tgagor/action-crosspost@9523ff489bc74e1a9849c5d3071b6bcbad40042d # v1.6.3
+        env:
+          RELEASE_TAG: ${{ env.RELEASE_TAG }}
         with:
           feed-url: https://github.com/${{ github.repository }}/releases.atom
           limit: 1
           since: 15
           filter-urls: |
-            /releases/tag/${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.event.release.tag_name }}
+            /releases/tag/${{ env.RELEASE_TAG }}
           message: |
-            🎉 New release of ${{ github.event.repository.name }} is out!
+            🎉 New release of JD-GUI Duo ${{ env.RELEASE_TAG }} is out!
             {url}
             #Java #JavaDecompiler #OpenSource #ReverseEngineering
           bluesky-host: bsky.social
@@ -62,7 +64,6 @@ jobs:
       - name: Create release post
         env:
           RELEASE_TAG: ${{ env.RELEASE_TAG }}
-          REPOSITORY_NAME: ${{ github.event.repository.name }}
           REPOSITORY: ${{ github.repository }}
         run: |
           OPENGRAPH_CACHE_KEY="$(openssl rand -hex 32)"
@@ -71,13 +72,13 @@ jobs:
           if [ ! -f "$POST_FILE" ]; then
             cat > "$POST_FILE" << EOF
           ---
-          title: "🎉 New release of ${REPOSITORY_NAME} ${RELEASE_TAG} is out!"
+          title: "🎉 New release of JD-GUI Duo ${RELEASE_TAG} is out!"
           published: true
-          description: "New release of ${REPOSITORY_NAME}"
+          description: "New release of JD-GUI Duo"
           tags: java, decompiler, opensource, reverseengineering
           ---
 
-          [![${REPOSITORY_NAME} release ${RELEASE_TAG}](https://opengraph.githubassets.com/${OPENGRAPH_CACHE_KEY}/${REPOSITORY}/releases/tag/${RELEASE_TAG})](https://github.com/${REPOSITORY}/releases/tag/${RELEASE_TAG})
+          [![JD-GUI Duo release ${RELEASE_TAG}](https://opengraph.githubassets.com/${OPENGRAPH_CACHE_KEY}/${REPOSITORY}/releases/tag/${RELEASE_TAG})](https://github.com/${REPOSITORY}/releases/tag/${RELEASE_TAG})
           EOF
           fi
       - name: Publish to Dev.to
