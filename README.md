@@ -331,3 +331,9 @@ JD-GUI|Emmanuel Dupuy|https://github.com/java-decompiler/jd-gui|GPL v3
     <td>Free code signing on Windows provided by <a href="https://signpath.io/">SignPath.io</a>, certificate by <a href="https://signpath.org/">SignPath Foundation</a></td>
   </tr>
 </table>
+
+## Star history
+
+This project receives no funding at all. If you like this project but cannot donate 1 euro, please give a star.
+
+[![Star History Chart](https://api.star-history.com/chart?repos=nbauma109/jd-gui-duo&type=date&line=blue&logscale&legend=top-left)](https://www.star-history.com/?repos=nbauma109%2Fjd-gui-duo&type=date&logscale=&legend=top-left)
