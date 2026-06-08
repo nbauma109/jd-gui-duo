@@ -334,6 +334,6 @@ JD-GUI|Emmanuel Dupuy|https://github.com/java-decompiler/jd-gui|GPL v3
 
 ## Star history
 
-This project receives no funding. If you enjoy using it but cannot afford to donate, please consider giving it a star.
+This project receives no funding. If you find it useful but cannot afford to donate, please consider giving it a star.
 
 [![Star History Chart](https://api.star-history.com/chart?repos=nbauma109/jd-gui-duo&type=date&logscale&legend=top-left)](https://www.star-history.com/?repos=nbauma109%2Fjd-gui-duo&type=date&logscale=&legend=top-left)
