@@ -84,14 +84,14 @@ jobs:
           }
 
       - name: Checkout workflow tools
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.sha }}
           path: workflow-tools
           persist-credentials: false
 
       - name: Checkout source ref
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ steps.context.outputs.checkout_ref }}
           path: source

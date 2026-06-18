@@ -60,7 +60,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Create release post
         env:
           RELEASE_TAG: ${{ env.RELEASE_TAG }}
