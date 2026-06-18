@@ -189,7 +189,7 @@
          • JADX
        ====================================================================== -->
     <transformer-api.version>4.2.6</transformer-api.version>
-    <dex2jar.version>2.4.36</dex2jar.version>
+    <dex2jar.version>2.4.37</dex2jar.version>
     <!-- ======================================================================
          NetBeans Visual Diff Standalone — Diff Component for Swing
          ======================================================================
