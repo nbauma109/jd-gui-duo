@@ -24,7 +24,7 @@
                 <artifactItem>
                   <groupId>org.aspectj</groupId>
                   <artifactId>aspectjweaver</artifactId>
-                  <version>1.8.13</version>
+                  <version>1.9.25.1</version>
                   <type>jar</type>
                 </artifactItem>
               </artifactItems>
@@ -171,7 +171,7 @@
     <dependency>
       <groupId>org.aspectj</groupId>
       <artifactId>aspectjweaver</artifactId>
-      <version>1.8.13</version>
+      <version>1.9.25.1</version>
       <!-- JDK 22+ cannot put this malformed legacy JAR on javac's classpath. -->
       <type>pom</type>
       <scope>test</scope>
