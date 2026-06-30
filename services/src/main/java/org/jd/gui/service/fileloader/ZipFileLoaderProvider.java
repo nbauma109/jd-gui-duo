@@ -8,19 +8,27 @@
 
 package org.jd.gui.service.fileloader;
 
+import org.apache.commons.io.FilenameUtils;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 public class ZipFileLoaderProvider extends AbstractFileLoaderProvider {
     protected static final String[] EXTENSIONS = { "zip" };
@@ -55,7 +63,7 @@ public class ZipFileLoaderProvider extends AbstractFileLoaderProvider {
                 fileSystem = FileSystems.getFileSystem(uri);
             } catch (FileSystemNotFoundException e) {
                 // Resource leak : file system cannot be closed until the application is closed
-                fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
+                fileSystem = newFileSystem(uri, file);
             }
 
             if (fileSystem != null) {
@@ -69,5 +77,34 @@ public class ZipFileLoaderProvider extends AbstractFileLoaderProvider {
         }
 
         return false;
+    }
+
+    private FileSystem newFileSystem(URI uri, File file) throws IOException {
+        try {
+            return FileSystems.newFileSystem(uri, Collections.emptyMap());
+        } catch (ZipException _) {
+            // Rewrite entries through ZipInputStream to discard malformed CEN metadata.
+            Path userHome = Path.of(System.getProperty("user.home"));
+            Path sanitizedArchive = Files.createTempFile(userHome, "jd-gui-duo-", getExtension(file));
+            sanitizedArchive.toFile().deleteOnExit();
+
+            try (ZipInputStream input = new ZipInputStream(new FileInputStream(file));
+                 ZipOutputStream output = new ZipOutputStream(new FileOutputStream(sanitizedArchive.toFile()))) {
+                ZipEntry entry;
+
+                while ((entry = input.getNextEntry()) != null) {
+                    output.putNextEntry(new ZipEntry(entry.getName()));
+                    input.transferTo(output);
+                    output.closeEntry();
+                }
+            }
+
+            return FileSystems.newFileSystem(sanitizedArchive, (ClassLoader)null);
+        }
+    }
+
+    private String getExtension(File file) {
+        String extension = FilenameUtils.getExtension(file.getName());
+        return extension.isEmpty() ? ".zip" : '.' + extension;
     }
 }
