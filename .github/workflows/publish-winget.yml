@@ -202,7 +202,7 @@ jobs:
 
       - name: Install .NET runtime for wingetcreate
         if: ${{ env.PAT_TOKEN != '' }}
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: "6.0.x"
 
