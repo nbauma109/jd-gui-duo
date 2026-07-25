@@ -1,6 +1,6 @@
 package org.jd.gui.view.component;
 
-import org.fife.ui.rsyntaxtextarea.DocumentRange;
+import org.fife.ui.rtextarea.DocumentRange;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

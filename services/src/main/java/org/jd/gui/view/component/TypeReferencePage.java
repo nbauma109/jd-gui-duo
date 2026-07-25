@@ -8,7 +8,7 @@
 
 package org.jd.gui.view.component;
 
-import org.fife.ui.rsyntaxtextarea.DocumentRange;
+import org.fife.ui.rtextarea.DocumentRange;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 
