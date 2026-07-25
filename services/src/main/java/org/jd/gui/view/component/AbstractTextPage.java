@@ -8,12 +8,12 @@
 
 package org.jd.gui.view.component;
 
-import org.fife.ui.rsyntaxtextarea.DocumentRange;
 import org.fife.ui.rsyntaxtextarea.ErrorStrip;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaEditorKit;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.folding.FoldManager;
+import org.fife.ui.rtextarea.DocumentRange;
 import org.fife.ui.rtextarea.FoldIndicatorStyle;
 import org.fife.ui.rtextarea.Gutter;
 import org.fife.ui.rtextarea.RTextScrollPane;

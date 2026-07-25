@@ -11,7 +11,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.fife.ui.rsyntaxtextarea.DocumentRange;
+import org.fife.ui.rtextarea.DocumentRange;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.FocusedTypeGettable;
