@@ -188,7 +188,7 @@
          • JD-Core V1
          • JADX
        ====================================================================== -->
-    <transformer-api.version>5.0.0</transformer-api.version>
+    <transformer-api.version>5.0.1</transformer-api.version>
     <dex2jar.version>2.4.38</dex2jar.version>
     <!-- ======================================================================
          NetBeans Visual Diff Standalone — Diff Component for Swing
