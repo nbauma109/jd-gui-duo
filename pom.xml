@@ -202,6 +202,6 @@
          • No need to start NetBeans platform
          • No restriction from NetBeans module system
        ====================================================================== -->
-    <netbeans-visual-diff-standalone.version>2.0.52</netbeans-visual-diff-standalone.version>
+    <netbeans-visual-diff-standalone.version>3.0.0</netbeans-visual-diff-standalone.version>
   </properties>
 </project>
