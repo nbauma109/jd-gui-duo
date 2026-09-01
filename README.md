@@ -30,6 +30,13 @@ Downloads from Sourceforge :
     alt="SourceForge OSS Rising Star Award"
     width="110">
 </a>
+<a href="https://sourceforge.net/projects/jd-gui-duo/">
+  <img
+    src="https://a.fsdn.com/con/app/syndication/badge_img_direct/oss-community-choice/oss-community-choice/?variant_id=sf"
+    width="125"
+    alt="SourceForge Community Choice"
+  />
+</a>
 
 Looking for an Eclipse plugin ? Try [ECD++](https://github.com/nbauma109/ecd)
 
