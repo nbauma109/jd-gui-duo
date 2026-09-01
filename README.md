@@ -30,6 +30,13 @@ Downloads from Sourceforge :
     alt="SourceForge OSS Rising Star Award"
     width="110">
 </a>
+<!-- Begin  Tag -->
+<div class="sf-root" data-id="3961310" data-badge="oss-community-choice-white" data-metadata="achievement=oss-community-choice" style="width:125px">
+    <a href="https://sourceforge.net/projects/jd-gui-duo/" target="_blank">jd-gui-duo</a>
+</div>
+<script>(function () {var sc=document.createElement('script');sc.async=true;sc.src='https://b.sf-syn.com/badge_js?sf_id=3961310';var p=document.getElementsByTagName('script')[0];p.parentNode.insertBefore(sc, p);})();
+</script>
+<!-- End  Tag -->
 
 Looking for an Eclipse plugin ? Try [ECD++](https://github.com/nbauma109/ecd)
 
