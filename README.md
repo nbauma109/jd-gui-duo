@@ -32,7 +32,7 @@ Downloads from Sourceforge :
 </a>
 <a href="https://sourceforge.net/projects/jd-gui-duo/">
   <img
-    src="https://a.fsdn.com/con/app/syndication/badge_img_direct/oss-community-choice/oss-community-choice/?variant_id=sf"
+    src="https://sourceforge.net/cdn/syndication/badge_img/3961310/oss-community-choice-white?achievement=oss-community-choice"
     width="125"
     alt="SourceForge Community Choice"
   />
