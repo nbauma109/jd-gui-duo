@@ -39,7 +39,7 @@ Downloads from Sourceforge :
 </a>
 <a href="https://sourceforge.net/projects/jd-gui-duo/">
   <img
-    src="https://sourceforge.net/cdn/syndication/badge_img/3961310/oss-excellence-white?achievement=oss-excellence"
+    src="https://sourceforge.net/cdn/syndication/badge_img/3961310/oss-open-source-excellence-white?achievement=oss-open-source-excellence"
     width="125"
     alt="SourceForge Excellence Award"
   />
