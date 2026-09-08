@@ -24,19 +24,7 @@ Downloads from Sourceforge :
 
 [![Download jd-gui-duo](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/jd-gui-duo/files/latest/download)
 
-<a href="https://sourceforge.net/projects/jd-gui-duo/">
-  <img
-    src="https://sourceforge.net/cdn/syndication/badge_img/3961310/oss-rising-star-white"
-    alt="SourceForge OSS Rising Star Award"
-    width="110">
-</a>
-<a href="https://sourceforge.net/projects/jd-gui-duo/">
-  <img
-    src="https://sourceforge.net/cdn/syndication/badge_img/3961310/oss-community-choice-white?achievement=oss-community-choice"
-    width="125"
-    alt="SourceForge Community Choice"
-  />
-</a>
+
 <a href="https://sourceforge.net/projects/jd-gui-duo/">
   <img
     src="https://sourceforge.net/cdn/syndication/badge_img/3961310/oss-open-source-excellence-white?achievement=oss-open-source-excellence"
