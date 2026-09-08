@@ -37,6 +37,13 @@ Downloads from Sourceforge :
     alt="SourceForge Community Choice"
   />
 </a>
+<a href="https://sourceforge.net/projects/jd-gui-duo/">
+  <img
+    src="https://sourceforge.net/cdn/syndication/badge_img/3961310/oss-open-source-excellence-white?achievement=oss-open-source-excellence"
+    width="125"
+    alt="SourceForge Excellence Award"
+  />
+</a>
 
 Looking for an Eclipse plugin ? Try [ECD++](https://github.com/nbauma109/ecd)
 
@@ -338,4 +345,3 @@ JD-GUI|Emmanuel Dupuy|https://github.com/java-decompiler/jd-gui|GPL v3
     <td>Free code signing on Windows provided by <a href="https://signpath.io/">SignPath.io</a>, certificate by <a href="https://signpath.org/">SignPath Foundation</a></td>
   </tr>
 </table>
-
