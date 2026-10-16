@@ -46,7 +46,7 @@ import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
 import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 
 /**
- * Unsafe thread implementation of class file indexer.
+ * Thread safe implementation of class file indexer.
  */
 public class ClassFileIndexerProvider extends AbstractIndexerProvider {
     protected Set<String> typeDeclarationSet = new HashSet<>();
@@ -77,9 +77,13 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
         return externalPathPattern;
     }
 
+    //  Multiple remembered files are each indexed in parallel by an IndexerWorker running on a
+    //  separate worker thread. api.getIndexer() returns same single instance. This method then
+    //  needs to be declared synchronized to avoid ConcurrentModificationException from any of
+    //  the member Sets<>.
     @SuppressWarnings("unchecked")
     @Override
-    public void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
+    public synchronized void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
         // Cleaning sets...
         typeDeclarationSet.clear();
         constructorDeclarationSet.clear();
