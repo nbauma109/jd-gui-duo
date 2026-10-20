@@ -30,81 +30,82 @@ import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
 import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 
 /**
- * Unsafe thread implementation of class file indexer.
+ * Indexes module descriptors using a separate context for each invocation.
  */
 public class JavaModuleInfoFileIndexerProvider extends AbstractIndexerProvider {
-    protected Set<String> javaModuleDeclarationSet = new HashSet<>();
-    protected Set<String> javaModuleReferenceSet = new HashSet<>();
-    protected Set<String> typeReferenceSet = new HashSet<>();
-
-    protected ClassIndexer classIndexer = new ClassIndexer();
-
     @Override
     public String[] getSelectors() { return appendSelectors("jmod:file:classes/module-info.class"); }
 
     @Override
     public void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
-        // Cleaning sets...
-        javaModuleDeclarationSet.clear();
-        javaModuleReferenceSet.clear();
-        typeReferenceSet.clear();
-
-        try (InputStream inputStream = entry.getInputStream()) {
-            // Index field, method, interfaces & super type
-            ClassReader classReader = new ClassReader(inputStream);
-            classReader.accept(classIndexer, SKIP_CODE|SKIP_DEBUG|SKIP_FRAMES);
-
-            // Append sets to indexes
-            addToIndexes(indexes, "javaModuleDeclarations", javaModuleDeclarationSet, entry);
-            addToIndexes(indexes, "javaModuleReferences", javaModuleReferenceSet, entry);
-            addToIndexes(indexes, "typeReferences", typeReferenceSet, entry);
-        } catch (Exception e) {
-            assert ExceptionUtil.printStackTrace(e);
-        }
+        new IndexingContext().index(entry, indexes);
     }
 
-    protected class ClassIndexer extends ClassVisitor {
-        private ModuleIndexer moduleIndexer = new ModuleIndexer();
+    protected static class IndexingContext {
+        private final Set<String> javaModuleDeclarationSet = new HashSet<>();
+        private final Set<String> javaModuleReferenceSet = new HashSet<>();
+        private final Set<String> typeReferenceSet = new HashSet<>();
 
-        public ClassIndexer() { super(Opcodes.ASM9); }
+        private final ClassIndexer classIndexer = new ClassIndexer();
 
-        @Override
-        public ModuleVisitor visitModule(String moduleName, int moduleFlags, String moduleVersion) {
-            javaModuleDeclarationSet.add(moduleName);
-            return moduleIndexer;
-        }
-    }
+        public void index(Container.Entry entry, Indexes indexes) {
+            try (InputStream inputStream = entry.getInputStream()) {
+                // Index field, method, interfaces & super type
+                ClassReader classReader = new ClassReader(inputStream);
+                classReader.accept(classIndexer, SKIP_CODE|SKIP_DEBUG|SKIP_FRAMES);
 
-    protected class ModuleIndexer extends ModuleVisitor {
-        public ModuleIndexer() { super(Opcodes.ASM9); }
-
-        @Override
-        public void visitMainClass(final String mainClass) { typeReferenceSet.add(mainClass); }
-        @Override
-        public void visitRequire(final String module, final int access, final String version) { javaModuleReferenceSet.add(module); }
-        @Override
-        public void visitUse(final String service) { typeReferenceSet.add(service); }
-
-        @Override
-        public void visitExport(final String packaze, final int access, final String... modules) {
-            if (modules != null) {
-                Collections.addAll(javaModuleReferenceSet, modules);
+                // Append sets to indexes
+                addToIndexes(indexes, "javaModuleDeclarations", javaModuleDeclarationSet, entry);
+                addToIndexes(indexes, "javaModuleReferences", javaModuleReferenceSet, entry);
+                addToIndexes(indexes, "typeReferences", typeReferenceSet, entry);
+            } catch (Exception e) {
+                assert ExceptionUtil.printStackTrace(e);
             }
         }
 
-        @Override
-        public void visitOpen(final String packaze, final int access, final String... modules) {
-            if (modules != null) {
-                Collections.addAll(javaModuleReferenceSet, modules);
+        protected class ClassIndexer extends ClassVisitor {
+            private ModuleIndexer moduleIndexer = new ModuleIndexer();
+
+            public ClassIndexer() { super(Opcodes.ASM9); }
+
+            @Override
+            public ModuleVisitor visitModule(String moduleName, int moduleFlags, String moduleVersion) {
+                javaModuleDeclarationSet.add(moduleName);
+                return moduleIndexer;
             }
         }
 
-        @Override
-        public void visitProvide(final String service, final String... providers) {
-            typeReferenceSet.add(service);
+        protected class ModuleIndexer extends ModuleVisitor {
+            public ModuleIndexer() { super(Opcodes.ASM9); }
 
-            if (providers != null) {
-                Collections.addAll(typeReferenceSet, providers);
+            @Override
+            public void visitMainClass(final String mainClass) { typeReferenceSet.add(mainClass); }
+            @Override
+            public void visitRequire(final String module, final int access, final String version) { javaModuleReferenceSet.add(module); }
+            @Override
+            public void visitUse(final String service) { typeReferenceSet.add(service); }
+
+            @Override
+            public void visitExport(final String packaze, final int access, final String... modules) {
+                if (modules != null) {
+                    Collections.addAll(javaModuleReferenceSet, modules);
+                }
+            }
+
+            @Override
+            public void visitOpen(final String packaze, final int access, final String... modules) {
+                if (modules != null) {
+                    Collections.addAll(javaModuleReferenceSet, modules);
+                }
+            }
+
+            @Override
+            public void visitProvide(final String service, final String... providers) {
+                typeReferenceSet.add(service);
+
+                if (providers != null) {
+                    Collections.addAll(typeReferenceSet, providers);
+                }
             }
         }
     }
