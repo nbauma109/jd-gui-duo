@@ -46,15 +46,21 @@ class IndexerConcurrencyTest {
                         "constructorDeclarations", Set.of("First"),
                         "methodDeclarations", Set.of("methodFirst"),
                         "fieldDeclarations", Set.of("fieldFirst", "stringFirst"),
-                        "typeReferences", Set.of("First", "ReferenceFirst", "AnnotationFirst", "NestedFirst", "ExceptionFirst", "java/lang/Object", "java/lang/String"),
+                        "typeReferences", Set.of("OwnerFirst", "First", "ReferenceFirst", "AnnotationFirst", "NestedFirst", "ExceptionFirst", "java/lang/Object", "java/lang/String"),
                         "strings", Set.of("valueFirst"),
+                        "fieldReferences", Set.of("referencedFieldFirst"),
+                        "methodReferences", Set.of("referencedMethodFirst"),
+                        "constructorReferences", Set.of("OwnerFirst"),
                         "subTypeNames", Set.of("java/lang/Object")),
                 Map.of("typeDeclarations", Set.of("Second"),
                         "constructorDeclarations", Set.of("Second"),
                         "methodDeclarations", Set.of("methodSecond"),
                         "fieldDeclarations", Set.of("fieldSecond", "stringSecond"),
-                        "typeReferences", Set.of("Second", "ReferenceSecond", "AnnotationSecond", "NestedSecond", "ExceptionSecond", "java/lang/Object", "java/lang/String"),
+                        "typeReferences", Set.of("OwnerSecond", "Second", "ReferenceSecond", "AnnotationSecond", "NestedSecond", "ExceptionSecond", "java/lang/Object", "java/lang/String"),
                         "strings", Set.of("valueSecond"),
+                        "fieldReferences", Set.of("referencedFieldSecond"),
+                        "methodReferences", Set.of("referencedMethodSecond"),
+                        "constructorReferences", Set.of("OwnerSecond"),
                         "subTypeNames", Set.of("java/lang/Object")));
     }
 
@@ -133,7 +139,17 @@ class IndexerConcurrencyTest {
         writer.visitField(Opcodes.ACC_PUBLIC, "field" + name, "LReference" + name + ";", null, null).visitEnd();
         writer.visitField(Opcodes.ACC_STATIC | Opcodes.ACC_FINAL, "string" + name, "Ljava/lang/String;", null, "value" + name).visitEnd();
         writer.visitMethod(Opcodes.ACC_PUBLIC, "<init>", "()V", null, null).visitEnd();
-        writer.visitMethod(Opcodes.ACC_PUBLIC, "method" + name, "()V", null, new String[] { "Exception" + name }).visitEnd();
+        var method = writer.visitMethod(Opcodes.ACC_PUBLIC, "method" + name, "()V", null, new String[] { "Exception" + name });
+        method.visitCode();
+        method.visitTypeInsn(Opcodes.NEW, "Owner" + name);
+        method.visitInsn(Opcodes.DUP);
+        method.visitMethodInsn(Opcodes.INVOKESPECIAL, "Owner" + name, "<init>", "()V", false);
+        method.visitFieldInsn(Opcodes.GETFIELD, "Owner" + name, "referencedField" + name, "I");
+        method.visitInsn(Opcodes.POP);
+        method.visitMethodInsn(Opcodes.INVOKESTATIC, "Owner" + name, "referencedMethod" + name, "()V", false);
+        method.visitInsn(Opcodes.RETURN);
+        method.visitMaxs(2, 1);
+        method.visitEnd();
         writer.visitEnd();
         return writer.toByteArray();
     }

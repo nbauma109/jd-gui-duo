@@ -95,56 +95,7 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
                     new SignatureReader(descriptor).accept(signatureIndexer);
                 }
 
-                // Index references
-                char[] buffer = new char[classReader.getMaxStringLength()];
-
-                for (int i = classReader.getItemCount() - 1; i > 0; i--) {
-                    int startIndex = classReader.getItem(i);
-
-                    if (startIndex != 0) {
-                        int tag = classReader.readByte(startIndex - 1);
-
-                        switch (tag) {
-                        case CONSTANT_Class:
-                            String className = classReader.readUTF8(startIndex, buffer);
-                            if (className.startsWith("[")) {
-                                new SignatureReader(className).acceptType(signatureIndexer);
-                            } else {
-                                typeReferenceSet.add(className);
-                            }
-                            break;
-                        case CONSTANT_String:
-                            String str = classReader.readUTF8(startIndex, buffer);
-                            stringSet.add(str);
-                            break;
-                        case CONSTANT_Fieldref:
-                            int nameAndTypeItem = classReader.readUnsignedShort(startIndex + 2);
-                            int nameAndTypeIndex = classReader.getItem(nameAndTypeItem);
-                            tag = classReader.readByte(nameAndTypeIndex - 1);
-                            if (tag == CONSTANT_NameAndType) {
-                                String fieldName = classReader.readUTF8(nameAndTypeIndex, buffer);
-                                fieldReferenceSet.add(fieldName);
-                            }
-                            break;
-                        case CONSTANT_Methodref, CONSTANT_InterfaceMethodref:
-                            nameAndTypeItem = classReader.readUnsignedShort(startIndex + 2);
-                            nameAndTypeIndex = classReader.getItem(nameAndTypeItem);
-                            tag = classReader.readByte(nameAndTypeIndex - 1);
-                            if (tag == CONSTANT_NameAndType) {
-                                String methodName = classReader.readUTF8(nameAndTypeIndex, buffer);
-                                if (StringConstants.INSTANCE_CONSTRUCTOR.equals(methodName)) {
-                                    int classItem = classReader.readUnsignedShort(startIndex);
-                                    int classIndex = classReader.getItem(classItem);
-                                    className = classReader.readUTF8(classIndex, buffer);
-                                    constructorReferenceSet.add(className);
-                                } else {
-                                    methodReferenceSet.add(methodName);
-                                }
-                            }
-                            break;
-                        }
-                    }
-                }
+                indexReferences(classReader);
 
                 String typeName = classIndexer.name;
 
@@ -173,6 +124,60 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
 
             } catch (Exception e) {
                 assert ExceptionUtil.printStackTrace(e);
+            }
+        }
+
+        private void indexReferences(ClassReader classReader) {
+            char[] buffer = new char[classReader.getMaxStringLength()];
+            for (int i = classReader.getItemCount() - 1; i > 0; i--) {
+                int startIndex = classReader.getItem(i);
+                if (startIndex != 0) {
+                    indexReference(classReader, buffer, startIndex);
+                }
+            }
+        }
+
+        private void indexReference(ClassReader classReader, char[] buffer, int startIndex) {
+            int tag = classReader.readByte(startIndex - 1);
+
+            switch (tag) {
+            case CONSTANT_Class:
+                String className = classReader.readUTF8(startIndex, buffer);
+                if (className.startsWith("[")) {
+                    new SignatureReader(className).acceptType(signatureIndexer);
+                } else {
+                    typeReferenceSet.add(className);
+                }
+                break;
+            case CONSTANT_String:
+                String str = classReader.readUTF8(startIndex, buffer);
+                stringSet.add(str);
+                break;
+            case CONSTANT_Fieldref:
+                int nameAndTypeItem = classReader.readUnsignedShort(startIndex + 2);
+                int nameAndTypeIndex = classReader.getItem(nameAndTypeItem);
+                tag = classReader.readByte(nameAndTypeIndex - 1);
+                if (tag == CONSTANT_NameAndType) {
+                    String fieldName = classReader.readUTF8(nameAndTypeIndex, buffer);
+                    fieldReferenceSet.add(fieldName);
+                }
+                break;
+            case CONSTANT_Methodref, CONSTANT_InterfaceMethodref:
+                nameAndTypeItem = classReader.readUnsignedShort(startIndex + 2);
+                nameAndTypeIndex = classReader.getItem(nameAndTypeItem);
+                tag = classReader.readByte(nameAndTypeIndex - 1);
+                if (tag == CONSTANT_NameAndType) {
+                    String methodName = classReader.readUTF8(nameAndTypeIndex, buffer);
+                    if (StringConstants.INSTANCE_CONSTRUCTOR.equals(methodName)) {
+                        int classItem = classReader.readUnsignedShort(startIndex);
+                        int classIndex = classReader.getItem(classItem);
+                        className = classReader.readUTF8(classIndex, buffer);
+                        constructorReferenceSet.add(className);
+                    } else {
+                        methodReferenceSet.add(methodName);
+                    }
+                }
+                break;
             }
         }
 
