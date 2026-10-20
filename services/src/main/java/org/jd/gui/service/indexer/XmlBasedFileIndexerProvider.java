@@ -28,13 +28,6 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 public class XmlBasedFileIndexerProvider extends AbstractIndexerProvider {
-    private XMLInputFactory factory;
-
-    public XmlBasedFileIndexerProvider() {
-        factory = XMLInputFactory.newInstance();
-        factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
-    }
-
     @Override
     public String[] getSelectors() {
         return appendSelectors("*:file:*.xsl", "*:file:*.xslt", "*:file:*.xsd");
@@ -47,6 +40,8 @@ public class XmlBasedFileIndexerProvider extends AbstractIndexerProvider {
 
         try (InputStream inputStream = entry.getInputStream()) {
 
+            XMLInputFactory factory = XMLInputFactory.newInstance();
+            factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
             reader = factory.createXMLStreamReader(inputStream);
 
             stringSet.add(reader.getVersion());
