@@ -142,6 +142,23 @@ jobs:
           $supportUrl = "$publisherUrl/issues"
           $licenseUrl = "$publisherUrl/blob/${{ steps.release.outputs.tag }}/LICENSE"
           $releaseNotesUrl = "$publisherUrl/releases/tag/${{ steps.release.outputs.tag }}"
+
+          $release = gh release view "${{ steps.release.outputs.tag }}" `
+            --repo "${{ github.repository }}" `
+            --json body,publishedAt | ConvertFrom-Json
+
+          if ([string]::IsNullOrWhiteSpace($release.publishedAt)) {
+            throw "GitHub release has no publication date."
+          }
+
+          $releaseDate = ([DateTimeOffset]::Parse($release.publishedAt)).ToString('yyyy-MM-dd')
+
+          $releaseNotes = if ([string]::IsNullOrWhiteSpace($release.body)) {
+            "Release details are available at $releaseNotesUrl"
+          } else {
+            $release.body.Trim()
+          }
+
           $manifestRoot = Join-Path $PWD "dist\winget"
           $manifestPath = Join-Path $manifestRoot ("manifests\{0}\{1}\${{ steps.release.outputs.version }}" -f `
             "${{ steps.release.outputs.package_identifier }}".Substring(0, 1).ToLowerInvariant(), `
@@ -159,6 +176,8 @@ jobs:
             -ShortDescription "${env:WINGET_SHORT_DESCRIPTION}" `
             -Description "${env:WINGET_SHORT_DESCRIPTION}" `
             -Moniker "${env:WINGET_MONIKER}" `
+            -ReleaseNotes $releaseNotes `
+            -ReleaseDate $releaseDate `
             -ReleaseNotesUrl $releaseNotesUrl `
             -InstallerUrl "${{ steps.installer.outputs.asset_url }}" `
             -InstallerSha256 "${{ steps.installer.outputs.asset_sha256 }}" `

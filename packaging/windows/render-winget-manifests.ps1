@@ -33,6 +33,13 @@ param(
     [string]$Moniker,
 
     [Parameter(Mandatory = $true)]
+    [string]$ReleaseNotes,
+
+    [Parameter(Mandatory = $true)]
+    [ValidatePattern('^\d{4}-\d{2}-\d{2}$')]
+    [string]$ReleaseDate,
+
+    [Parameter(Mandatory = $true)]
     [string]$ReleaseNotesUrl,
 
     [Parameter(Mandatory = $true)]
@@ -103,6 +110,7 @@ $defaultLocaleManifest = @(
     "ShortDescription: $ShortDescription"
     "Description: $Description"
     "Moniker: $Moniker"
+    ("ReleaseNotes: {0}" -f (ConvertTo-Json -InputObject $ReleaseNotes -Compress))
     "ReleaseNotesUrl: $ReleaseNotesUrl"
     "Tags:"
     "  - java"
@@ -120,10 +128,12 @@ $installerManifest = @(
     "PackageIdentifier: $PackageIdentifier"
     "PackageVersion: $PackageVersion"
     "InstallerType: $InstallerType"
+    "InstallerLocale: en-US"
     "InstallModes:"
     "  - interactive"
     "  - silent"
     "  - silentWithProgress"
+    "ReleaseDate: $ReleaseDate"
     "Installers:"
     "  - Architecture: x64"
     "    Scope: machine"
