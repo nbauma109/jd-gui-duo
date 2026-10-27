@@ -1,3 +1,4 @@
+
 name: Sign Windows executables with SignPath
 
 on:
@@ -25,8 +26,14 @@ permissions:
   contents: write
 
 jobs:
-  sign-windows-executables:
+  submit-app-signing:
     runs-on: windows-latest
+    outputs:
+      checkout_ref: ${{ steps.context.outputs.checkout_ref }}
+      version: ${{ steps.artifacts.outputs.version }}
+      release_tag: ${{ steps.release_ref.outputs.release_tag }}
+      app_signing_request_id: ${{ steps.sign_app.outputs.signing-request-id }}
+      app_signing_request_url: ${{ steps.sign_app.outputs.signing-request-web-url }}
 
     steps:
       - name: Resolve checkout ref
@@ -109,10 +116,6 @@ jobs:
         working-directory: source
         run: mvn --no-transfer-progress -B package
 
-      - name: Install Inno Setup
-        shell: pwsh
-        run: choco install innosetup --no-progress -y
-
       - name: Build unsigned Windows bundle
         id: artifacts
         shell: pwsh
@@ -121,7 +124,7 @@ jobs:
           $workspace = $env:GITHUB_WORKSPACE
           $sourceRoot = Join-Path $workspace 'source'
 
-          # Extract version from pom.xml instead of exe filename
+          # Read the version from the Maven project.
           $pomPath = Join-Path $sourceRoot 'pom.xml'
           [xml]$pom = Get-Content $pomPath
           $version = $pom.project.version
@@ -129,7 +132,6 @@ jobs:
             throw "Could not extract version from pom.xml."
           }
 
-          # Look for the version-agnostic exe filename
           $appExecutable = Get-ChildItem (Join-Path $sourceRoot 'assembler\target\windows') -Filter 'jd-gui-duo.exe' | Select-Object -First 1
           if ($null -eq $appExecutable) {
             throw "No application executable 'jd-gui-duo.exe' was found in assembler\target\windows."
@@ -150,22 +152,21 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.artifacts.outputs.version }}
+          CHECKOUT_REF: ${{ steps.context.outputs.checkout_ref }}
+          REPOSITORY: ${{ github.repository }}
         run: |
           $ErrorActionPreference = 'Stop'
 
-          $version = "${{ steps.artifacts.outputs.version }}"
-          $checkoutRef = "${{ steps.context.outputs.checkout_ref }}"
-          $repo = "${{ github.repository }}"
-          $expectedReleaseRefs = @("refs/tags/v$version", "refs/tags/$version")
-
-          if ($expectedReleaseRefs -notcontains $checkoutRef) {
-            throw "Tag input resolves to '$checkoutRef', which does not match version '$version'. Expected '$version' or 'v$version'."
+          $expectedReleaseRefs = @("refs/tags/v$env:VERSION", "refs/tags/$env:VERSION")
+          if ($expectedReleaseRefs -notcontains $env:CHECKOUT_REF) {
+            throw "Tag input resolves to '$env:CHECKOUT_REF', which does not match version '$env:VERSION'. Expected '$env:VERSION' or 'v$env:VERSION'."
           }
 
-          $releaseTag = $checkoutRef -replace '^refs/tags/', ''
-          gh release view $releaseTag --repo $repo 1>$null 2>$null
+          $releaseTag = $env:CHECKOUT_REF -replace '^refs/tags/', ''
+          gh release view $releaseTag --repo $env:REPOSITORY 1>$null 2>$null
           if ($LASTEXITCODE -ne 0) {
-            throw "No GitHub release exists for validated tag '$releaseTag' in repository '$repo'."
+            throw "No GitHub release exists for validated tag '$releaseTag' in repository '$env:REPOSITORY'."
           }
 
           "release_tag=$releaseTag" >> $env:GITHUB_OUTPUT
@@ -179,6 +180,14 @@ jobs:
           archive: false
           if-no-files-found: error
 
+      - name: Preserve unsigned Windows archive for test signing
+        if: ${{ github.event.inputs.signing_policy_slug != 'release-signing' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: unsigned-windows-archive-${{ steps.artifacts.outputs.version }}
+          path: ${{ steps.artifacts.outputs.windows_archive }}
+          if-no-files-found: error
+
       - name: Submit SignPath app signing request
         id: sign_app
         uses: signpath/github-action-submit-signing-request@v3
@@ -189,21 +198,100 @@ jobs:
           signing-policy-slug: ${{ github.event.inputs.signing_policy_slug }}
           artifact-configuration-slug: jd-gui-duo.exe
           github-artifact-id: ${{ steps.upload_app_signing_input.outputs.artifact-id }}
-          wait-for-completion: true
-          output-artifact-directory: dist/signed-app
-          skip-decompress: true
+          wait-for-completion: false
+
+      - name: Write app signing request summary
+        shell: pwsh
+        env:
+          SIGNING_REQUEST_ID: ${{ steps.sign_app.outputs.signing-request-id }}
+          SIGNING_REQUEST_URL: ${{ steps.sign_app.outputs.signing-request-web-url }}
+          VERSION: ${{ steps.artifacts.outputs.version }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:SIGNING_REQUEST_ID)) {
+            throw "SignPath did not return an app signing request ID."
+          }
+
+          @(
+            '## Application signing',
+            '',
+            "- Version: $env:VERSION",
+            "- Signing request: $env:SIGNING_REQUEST_URL",
+            '- Approve in SignPath, then approve the waiting signpath-app-approved environment job in GitHub Actions.'
+          ) | Add-Content -Path $env:GITHUB_STEP_SUMMARY
+
+  build-and-submit-installer:
+    needs: submit-app-signing
+    runs-on: windows-latest
+    environment: signpath-app-approved
+    outputs:
+      installer_signing_request_id: ${{ steps.sign_installer.outputs.signing-request-id }}
+      installer_signing_request_url: ${{ steps.sign_installer.outputs.signing-request-web-url }}
+      input_archive_sha256: ${{ steps.signed_bundle.outputs.input_archive_sha256 }}
+
+    steps:
+      - name: Checkout workflow tools
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          path: workflow-tools
+          persist-credentials: false
+
+      - name: Download unsigned Windows archive for test signing
+        if: ${{ github.event.inputs.signing_policy_slug != 'release-signing' }}
+        uses: actions/download-artifact@v8
+        with:
+          name: unsigned-windows-archive-${{ needs.submit-app-signing.outputs.version }}
+          path: dist/unsigned-archive
+
+      - name: Retrieve approved signed application
+        shell: pwsh
+        env:
+          SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          SIGNING_REQUEST_ID: ${{ needs.submit-app-signing.outputs.app_signing_request_id }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($env:SIGNING_REQUEST_ID -notmatch '^[0-9a-fA-F-]{36}$') {
+            throw "Invalid or missing application signing request ID."
+          }
+
+          $headers = @{ Authorization = "Bearer $env:SIGNPATH_API_TOKEN" }
+          $baseUri = "https://app.signpath.io/Api/v1/$($env:SIGNPATH_ORGANIZATION_ID)/SigningRequests/$($env:SIGNING_REQUEST_ID)"
+          $status = Invoke-RestMethod -Uri "$baseUri/Status" -Method Get -Headers $headers
+          if ($status.status -ne 'Completed') {
+            throw "Application signing request is '$($status.status)' (workflow status: '$($status.workflowStatus)'). Approve it in SignPath before releasing the GitHub job."
+          }
+
+          $outputDirectory = 'dist/signed-app'
+          New-Item -ItemType Directory -Force -Path $outputDirectory | Out-Null
+          Invoke-WebRequest -Uri "$baseUri/SignedArtifact" -Method Get -Headers $headers -OutFile (Join-Path $outputDirectory 'jd-gui-duo.exe')
+
+      - name: Preserve signed application for finalization
+        uses: actions/upload-artifact@v7
+        with:
+          name: approved-windows-app-${{ needs.submit-app-signing.outputs.version }}
+          path: dist/signed-app
+          if-no-files-found: error
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --no-progress -y
 
       - name: Build installer with signed app executable
         id: signed_bundle
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.event.inputs.signing_policy_slug == 'release-signing' && github.token || '' }}
+          VERSION: ${{ needs.submit-app-signing.outputs.version }}
+          RELEASE_TAG: ${{ needs.submit-app-signing.outputs.release_tag }}
+          REPOSITORY: ${{ github.repository }}
+          SIGNING_POLICY_SLUG: ${{ github.event.inputs.signing_policy_slug }}
         run: |
           $ErrorActionPreference = 'Stop'
 
-          $version = "${{ steps.artifacts.outputs.version }}"
-          $repo = "${{ github.repository }}"
-          $releaseTag = "${{ steps.release_ref.outputs.release_tag }}"
+          $version = $env:VERSION
+          $repo = $env:REPOSITORY
+          $releaseTag = $env:RELEASE_TAG
           $toolsRoot = Join-Path $env:GITHUB_WORKSPACE 'workflow-tools'
           $buildInstallerScript = Join-Path $toolsRoot 'packaging\windows\build-installer.ps1'
           $replaceAppExecutableScript = Join-Path $toolsRoot 'packaging\windows\replace-app-executable.ps1'
@@ -225,8 +313,8 @@ jobs:
           }
           New-Item -ItemType Directory -Force -Path $bundleRoot | Out-Null
 
-          $inputArchivePath = "${{ steps.artifacts.outputs.windows_archive }}"
-          if ("${{ github.event.inputs.signing_policy_slug }}" -eq 'release-signing') {
+          $inputArchivePath = Join-Path $PWD "dist\unsigned-archive\jd-gui-duo-windows-$version.tar.xz"
+          if ($env:SIGNING_POLICY_SLUG -eq 'release-signing') {
             if ([string]::IsNullOrWhiteSpace($releaseTag)) {
               throw "Validated release tag output is missing."
             }
@@ -243,6 +331,10 @@ jobs:
             if (-not (Test-Path $inputArchivePath)) {
               throw "Downloaded release archive was not found at $inputArchivePath."
             }
+          }
+
+          if (-not (Test-Path $inputArchivePath)) {
+            throw "The unsigned Windows archive was not found at $inputArchivePath."
           }
 
           $extractRoot = Join-Path $bundleRoot 'windows'
@@ -282,7 +374,7 @@ jobs:
         id: upload_installer_signing_input
         uses: actions/upload-artifact@v7
         with:
-          name: unsigned-windows-installer-signing-input-${{ steps.artifacts.outputs.version }}
+          name: unsigned-windows-installer-signing-input-${{ needs.submit-app-signing.outputs.version }}
           path: ${{ steps.signed_bundle.outputs.unsigned_installer_executable }}
           archive: false
           if-no-files-found: error
@@ -297,15 +389,76 @@ jobs:
           signing-policy-slug: ${{ github.event.inputs.signing_policy_slug }}
           artifact-configuration-slug: installer
           github-artifact-id: ${{ steps.upload_installer_signing_input.outputs.artifact-id }}
-          wait-for-completion: true
-          output-artifact-directory: dist/signed-installer
-          skip-decompress: true
+          wait-for-completion: false
+
+      - name: Write installer signing request summary
+        shell: pwsh
+        env:
+          SIGNING_REQUEST_ID: ${{ steps.sign_installer.outputs.signing-request-id }}
+          SIGNING_REQUEST_URL: ${{ steps.sign_installer.outputs.signing-request-web-url }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:SIGNING_REQUEST_ID)) {
+            throw "SignPath did not return an installer signing request ID."
+          }
+
+          @(
+            '## Installer signing',
+            '',
+            "- Signing request: $env:SIGNING_REQUEST_URL",
+            '- Approve in SignPath, then approve the waiting signpath-installer-approved environment job in GitHub Actions.'
+          ) | Add-Content -Path $env:GITHUB_STEP_SUMMARY
+
+  finalize-windows-signing:
+    needs:
+      - submit-app-signing
+      - build-and-submit-installer
+    runs-on: windows-latest
+    environment: signpath-installer-approved
+
+    steps:
+      - name: Checkout workflow tools
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          path: workflow-tools
+          persist-credentials: false
+
+      - name: Download signed application
+        uses: actions/download-artifact@v8
+        with:
+          name: approved-windows-app-${{ needs.submit-app-signing.outputs.version }}
+          path: dist/signed-app
+
+      - name: Retrieve approved signed installer
+        shell: pwsh
+        env:
+          SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          SIGNING_REQUEST_ID: ${{ needs.build-and-submit-installer.outputs.installer_signing_request_id }}
+          VERSION: ${{ needs.submit-app-signing.outputs.version }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($env:SIGNING_REQUEST_ID -notmatch '^[0-9a-fA-F-]{36}$') {
+            throw "Invalid or missing installer signing request ID."
+          }
+
+          $headers = @{ Authorization = "Bearer $env:SIGNPATH_API_TOKEN" }
+          $baseUri = "https://app.signpath.io/Api/v1/$($env:SIGNPATH_ORGANIZATION_ID)/SigningRequests/$($env:SIGNING_REQUEST_ID)"
+          $status = Invoke-RestMethod -Uri "$baseUri/Status" -Method Get -Headers $headers
+          if ($status.status -ne 'Completed') {
+            throw "Installer signing request is '$($status.status)' (workflow status: '$($status.workflowStatus)'). Approve it in SignPath before releasing the GitHub job."
+          }
+
+          $outputDirectory = 'dist/signed-installer'
+          New-Item -ItemType Directory -Force -Path $outputDirectory | Out-Null
+          $installerName = "jd-gui-duo-windows-$($env:VERSION)-setup.exe"
+          Invoke-WebRequest -Uri "$baseUri/SignedArtifact" -Method Get -Headers $headers -OutFile (Join-Path $outputDirectory $installerName)
 
       - name: Upload signed Windows outputs
         if: ${{ github.event.inputs.signing_policy_slug != 'release-signing' }}
         uses: actions/upload-artifact@v7
         with:
-          name: signed-windows-outputs-${{ steps.artifacts.outputs.version }}
+          name: signed-windows-outputs-${{ needs.submit-app-signing.outputs.version }}
           path: |
             dist/signed-app
             dist/signed-installer
@@ -317,12 +470,16 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.submit-app-signing.outputs.version }}
+          RELEASE_TAG: ${{ needs.submit-app-signing.outputs.release_tag }}
+          INPUT_ARCHIVE_SHA256: ${{ needs.build-and-submit-installer.outputs.input_archive_sha256 }}
+          REPOSITORY: ${{ github.repository }}
         run: |
           $ErrorActionPreference = 'Stop'
 
-          $version = "${{ steps.artifacts.outputs.version }}"
-          $repo = "${{ github.repository }}"
-          $releaseTag = "${{ steps.release_ref.outputs.release_tag }}"
+          $version = $env:VERSION
+          $repo = $env:REPOSITORY
+          $releaseTag = $env:RELEASE_TAG
           $toolsRoot = Join-Path $env:GITHUB_WORKSPACE 'workflow-tools'
           $portableZipScript = Join-Path $toolsRoot 'packaging\windows\build-portable-zip.ps1'
           $replaceAppExecutableScript = Join-Path $toolsRoot 'packaging\windows\replace-app-executable.ps1'
@@ -370,7 +527,7 @@ jobs:
           }
 
           $originalTarXzAssetPath = Join-Path $releaseAssetRoot $tarXzAssetName
-          $expectedInputArchiveHash = "${{ steps.signed_bundle.outputs.input_archive_sha256 }}"
+          $expectedInputArchiveHash = $env:INPUT_ARCHIVE_SHA256
           $actualInputArchiveHash = (Get-FileHash -Algorithm SHA256 $originalTarXzAssetPath).Hash
           if ($actualInputArchiveHash -ne $expectedInputArchiveHash) {
             throw "Release archive '$tarXzAssetName' changed after the installer was built. Expected=$expectedInputArchiveHash Actual=$actualInputArchiveHash"
@@ -455,22 +612,29 @@ jobs:
 
       - name: Write summary
         shell: pwsh
+        env:
+          CHECKOUT_REF: ${{ needs.submit-app-signing.outputs.checkout_ref }}
+          VERSION: ${{ needs.submit-app-signing.outputs.version }}
+          SIGNING_POLICY_SLUG: ${{ github.event.inputs.signing_policy_slug }}
+          APP_SIGNING_REQUEST_URL: ${{ needs.submit-app-signing.outputs.app_signing_request_url }}
+          INSTALLER_SIGNING_REQUEST_URL: ${{ needs.build-and-submit-installer.outputs.installer_signing_request_url }}
+          RELEASE_TAG: ${{ steps.update_release.outputs.release_tag }}
         run: |
           $lines = @(
-            "## SignPath",
-            "",
-            "- Ref: ${{ steps.context.outputs.checkout_ref }}",
-            "- Version: ${{ steps.artifacts.outputs.version }}",
-            "- Signing policy: ${{ github.event.inputs.signing_policy_slug }}",
-            "- App signing request: ${{ steps.sign_app.outputs.signing-request-web-url }}",
-            "- Installer signing request: ${{ steps.sign_installer.outputs.signing-request-web-url }}"
+            '## SignPath',
+            '',
+            "- Ref: $env:CHECKOUT_REF",
+            "- Version: $env:VERSION",
+            "- Signing policy: $env:SIGNING_POLICY_SLUG",
+            "- App signing request: $env:APP_SIGNING_REQUEST_URL",
+            "- Installer signing request: $env:INSTALLER_SIGNING_REQUEST_URL"
           )
 
-          if ("${{ github.event.inputs.signing_policy_slug }}" -eq 'release-signing') {
-            $lines += "- Updated release: ${{ steps.update_release.outputs.release_tag }}"
-            $lines += "- Triggered package publishers: publish-chocolatey.yml, publish-winget.yml"
+          if ($env:SIGNING_POLICY_SLUG -eq 'release-signing') {
+            $lines += "- Updated release: $env:RELEASE_TAG"
+            $lines += '- Triggered package publishers: publish-chocolatey.yml, publish-winget.yml'
           } else {
-            $lines += "- Release update: skipped for non-production signing policy"
+            $lines += '- Release update: skipped for non-production signing policy'
           }
 
           [string]::Join([Environment]::NewLine, $lines) | Add-Content -Path $env:GITHUB_STEP_SUMMARY
