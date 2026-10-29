@@ -301,6 +301,12 @@ public class MainController implements API {
                 });
                 mainView.setAddExceptionBreakpointCallback(() -> getRemoteDebugController().showAddExceptionBreakpointDialog());
                 mainView.setSkipAllBreakpointsCallback(skip -> getRemoteDebugController().setSkipAllBreakpoints((Boolean) skip));
+                mainView.setInspectCallback(() -> {
+                    BreakpointCapablePage page = getCurrentBreakpointPage();
+                    if (page != null) {
+                        page.inspectSelection();
+                    }
+                });
                 mainView.setRunToLineCallback(() -> {
                     BreakpointCapablePage page = getCurrentBreakpointPage();
                     int line = page == null ? 0 : page.getCaretSourceLine();
@@ -734,6 +740,14 @@ public class MainController implements API {
 
     void showDebugVariables(String title, List<org.jd.gui.model.debug.DebugVariableNode> variables) {
         mainView.showDebugVariables(title, variables);
+    }
+
+    void showDebugExpressionsTab() {
+        mainView.selectDebugTab(2);
+    }
+
+    void showInspectPopup(org.jd.gui.model.debug.DebugVariableNode node, java.awt.Point screenLocation, Runnable showInExpressions) {
+        mainView.showInspectPopup(node, screenLocation, showInExpressions);
     }
 
     void showDebugExpressions(List<org.jd.gui.model.debug.DebugVariableNode> expressions) {

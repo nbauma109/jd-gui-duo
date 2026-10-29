@@ -158,6 +158,9 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     private Runnable toggleBreakpointCallback;
     private Runnable dropToFrameCallback;
     private Runnable runToLineCallback;
+    private Runnable inspectCallback;
+    private Action inspectAction;
+    private java.util.function.Function<DebugVariableNode.Kind, Icon> debugVariableIcons;
     private Action runToLineAction;
     private Action dropToFrameAction;
     private java.util.function.BiConsumer<String, Boolean> breakpointEnabledCallback;
@@ -337,6 +340,8 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             stepIntoAction = newAction("Step Into", newImageIcon("/org/jd/gui/images/stepinto_co.png"), false, "Step into", stepIntoActionListener);
             stepOverAction = newAction("Step Over", newImageIcon("/org/jd/gui/images/stepover_co.png"), false, "Step over", stepOverActionListener);
             stepReturnAction = newAction("Step Return", newImageIcon("/org/jd/gui/images/stepreturn_co.png"), false, "Step return", stepReturnActionListener);
+            inspectAction = newAction("Inspect", false, "Inspect the selected expression",
+                    e -> { if (inspectCallback != null) { inspectCallback.run(); } });
             runToLineAction = newAction("Run to Line", newImageIcon("/org/jd/gui/images/runtoline_co.png"), false, "Run to the caret line",
                     e -> { if (runToLineCallback != null) { runToLineCallback.run(); } });
             dropToFrameAction = newAction("Drop to Frame", newImageIcon("/org/jd/gui/images/drop_to_frame.png"), false, "Drop to the selected stack frame",
@@ -391,6 +396,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             registerKeyBinding(Binding.DISCONNECT, disconnectAction);
             registerKeyBinding(Binding.RESUME, resumeAction);
             registerKeyBinding(Binding.TOGGLE_BREAKPOINT, toggleBreakpointAction);
+            registerKeyBinding(Binding.INSPECT, inspectAction);
             registerKeyBinding(Binding.RUN_TO_LINE, runToLineAction);
             registerKeyBinding(Binding.DROP_TO_FRAME, dropToFrameAction);
             registerKeyBinding(Binding.STEP_INTO, stepIntoAction);
@@ -472,6 +478,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             menu.add(stepReturnAction);
             menu.add(dropToFrameAction);
             menu.add(runToLineAction);
+            menu.add(inspectAction);
             menu = new JMenu("Help");
             menuBar.add(menu);
             if (browser) {
@@ -732,6 +739,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
                 stepReturnAction.setEnabled(enabled);
                 dropToFrameAction.setEnabled(enabled);
                 runToLineAction.setEnabled(enabled);
+                inspectAction.setEnabled(enabled);
             }
         };
         if (javax.swing.SwingUtilities.isEventDispatchThread()) {
@@ -772,6 +780,95 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
 
     public void setSkipAllBreakpointsCallback(Consumer<Boolean> callback) {
         this.skipAllBreakpointsCallback = callback;
+    }
+
+    public void setInspectCallback(Runnable callback) {
+        this.inspectCallback = callback;
+    }
+
+    public void selectDebugTab(int index) {
+        invokeLater(() -> {
+            if (debugTabbedPane != null && index < debugTabbedPane.getTabCount()) {
+                debugTabbedPane.setSelectedIndex(index);
+            }
+        });
+    }
+
+    /** Eclipse-style "Inspect" popup: the evaluated expression as an expandable Name/Value tree. */
+    public void showInspectPopup(DebugVariableNode node, java.awt.Point screenLocation, Runnable showInExpressions) {
+        invokeLater(() -> {
+            DefaultMutableTreeNode root = new DefaultMutableTreeNode("Inspect");
+            root.add(buildTreeNode(node));
+            DefaultTreeModel model = new DefaultTreeModel(root);
+            DebugValueTree tree = new DebugValueTree(model, debugVariableIcons, newImageIcon("/org/jd/gui/images/expression_obj.png"));
+            tree.addTreeWillExpandListener(new TreeWillExpandListener() {
+                @Override
+                public void treeWillExpand(javax.swing.event.TreeExpansionEvent event) throws ExpandVetoException {
+                    DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) event.getPath().getLastPathComponent();
+                    if (treeNode.getUserObject() instanceof DebugVariableNode variable && !variable.isChildrenLoaded()) {
+                        treeNode.removeAllChildren();
+                        for (DebugVariableNode child : variable.getChildren()) {
+                            treeNode.add(buildTreeNode(child));
+                        }
+                        model.nodeStructureChanged(treeNode);
+                    }
+                }
+
+                @Override
+                public void treeWillCollapse(javax.swing.event.TreeExpansionEvent event) throws ExpandVetoException { /* no-op */ }
+            });
+            javax.swing.KeyStroke inspectKey = inspectAction == null ? null : (javax.swing.KeyStroke) inspectAction.getValue(Action.ACCELERATOR_KEY);
+            JLabel hint = new JLabel(inspectKey == null ? " " : " Press '" + KeyBindings.toDisplayText(inspectKey) + "' to show in Expressions view");
+            hint.setForeground(java.awt.Color.GRAY);
+            hint.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+            JPanel content = new JPanel(new BorderLayout());
+            content.setBorder(BorderFactory.createLineBorder(java.awt.Color.GRAY));
+            content.add(tree.wrapInScrollPane(), BorderLayout.CENTER);
+            content.add(hint, BorderLayout.SOUTH);
+
+            javax.swing.JDialog popup = new javax.swing.JDialog(mainFrame);
+            popup.setUndecorated(true);
+            popup.setContentPane(content);
+            popup.setSize(460, 240);
+            java.awt.Rectangle screen = mainFrame.getGraphicsConfiguration().getBounds();
+            popup.setLocation(Math.max(screen.x, Math.min(screenLocation.x, screen.x + screen.width - popup.getWidth())),
+                    Math.max(screen.y, Math.min(screenLocation.y + 4, screen.y + screen.height - popup.getHeight())));
+            popup.setFocusableWindowState(true);
+            popup.addWindowFocusListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowLostFocus(java.awt.event.WindowEvent e) {
+                    popup.dispose();
+                }
+            });
+            javax.swing.InputMap inputMap = content.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+            javax.swing.ActionMap actionMap = content.getActionMap();
+            inputMap.put(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ESCAPE, 0), "close");
+            actionMap.put("close", new javax.swing.AbstractAction() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    popup.dispose();
+                }
+            });
+            if (inspectKey != null) {
+                inputMap.put(inspectKey, "watch");
+                actionMap.put("watch", new javax.swing.AbstractAction() {
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public void actionPerformed(java.awt.event.ActionEvent e) {
+                        popup.dispose();
+                        showInExpressions.run();
+                    }
+                });
+            }
+            popup.setVisible(true);
+            popup.toFront();
+            tree.requestFocusInWindow();
+            // rows were measured while the tree had no width yet: measure them again now that it is laid out
+            invokeLater(() -> model.nodeStructureChanged(root));
+        });
     }
 
     public void setRunToLineCallback(Runnable callback) {
@@ -895,6 +992,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
         // --- Variables tab ---
         debugVariablesTreeModel = new DefaultTreeModel(new DefaultMutableTreeNode("Variables"));
         java.util.function.Function<DebugVariableNode.Kind, Icon> variableIcons = newVariableIcons();
+        debugVariableIcons = variableIcons;
         DebugValueTree variablesTree = new DebugValueTree(debugVariablesTreeModel, variableIcons, null);
         debugVariablesTree = variablesTree;
         debugVariablesTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);

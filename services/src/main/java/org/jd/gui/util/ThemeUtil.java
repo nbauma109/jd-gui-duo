@@ -64,7 +64,7 @@ public class ThemeUtil {
 
     private static final Binding[] DEBUG_BINDINGS = {
         Binding.REMOTE_DEBUG, Binding.DISCONNECT, Binding.RESUME, Binding.STEP_INTO, Binding.STEP_OVER,
-        Binding.STEP_RETURN, Binding.DROP_TO_FRAME, Binding.RUN_TO_LINE, Binding.TOGGLE_BREAKPOINT
+        Binding.STEP_RETURN, Binding.DROP_TO_FRAME, Binding.RUN_TO_LINE, Binding.TOGGLE_BREAKPOINT, Binding.INSPECT
     };
 
     /**
