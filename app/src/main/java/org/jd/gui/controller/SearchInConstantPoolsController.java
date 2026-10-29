@@ -22,6 +22,8 @@ import org.jd.gui.util.function.TriConsumer;
 import org.jd.gui.view.SearchInConstantPoolsView;
 import org.jd.util.LRUCache;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
@@ -31,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.ObjIntConsumer;
@@ -48,7 +51,8 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
     private final SearchInConstantPoolsView searchInConstantPoolsView;
     @SuppressWarnings("rawtypes")
     private final Map<String, Map<String, Collection>> cache;
-    private final Set<DelegatingFilterContainer> delegatingFilterContainers = new HashSet<>();
+    private volatile Set<DelegatingFilterContainer> delegatingFilterContainers = new HashSet<>();
+    private final AtomicLong searchGeneration = new AtomicLong();
     private Collection<Future<Indexes>> collectionOfFutureIndexes;
     private Consumer<URI> openCallback;
     private long indexesHashCode;
@@ -82,9 +86,11 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
 
     @SuppressWarnings("unchecked")
     protected void updateTree(String pattern, int flags) {
-        delegatingFilterContainers.clear();
+        // Each search fills its own set; a newer search supersedes older ones still running
+        long generation = searchGeneration.incrementAndGet();
 
         executor.execute(() -> {
+            Set<DelegatingFilterContainer> containers = new HashSet<>();
             // Waiting the end of indexation...
             searchInConstantPoolsView.showWaitCursor();
 
@@ -110,14 +116,14 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
                                     parentEntry = container.getRoot().getParent();
                                 }
 
-                                // TODO In a future release, display matching strings, types, inner-types,
-                                // fields and methods, not only matching files
+                                Set<URI> fragmentUris = collectFragmentUris(matchingEntries, pattern, flags);
                                 matchingEntries = getOuterEntries(matchingEntries);
+                                fragmentUris.addAll(FragmentUriCollector.innerEntryUris(matchingEntries));
 
                                 matchingTypeCount += matchingEntries.size();
 
                                 // Create a filtered container
-                                delegatingFilterContainers.add(new DelegatingFilterContainer(container, matchingEntries));
+                                containers.add(new DelegatingFilterContainer(container, matchingEntries, fragmentUris));
                             }
                         }
                     }
@@ -133,7 +139,10 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
             final int count = matchingTypeCount;
 
             searchInConstantPoolsView.hideWaitCursor();
-            searchInConstantPoolsView.updateTree(delegatingFilterContainers, count);
+            if (generation == searchGeneration.get()) {
+                delegatingFilterContainers = containers;
+                searchInConstantPoolsView.updateTree(containers, count);
+            }
         });
     }
 
@@ -223,6 +232,21 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
         return matchingOuterEntriesSet;
     }
 
+    private Set<URI> collectFragmentUris(Set<Container.Entry> matchingEntries, String pattern, int flags) {
+        Pattern referencePattern = createPattern(pattern);
+        return FragmentUriCollector.collect(matchingEntries, entry -> {
+            TypeFactory factory = TypeFactoryService.getInstance().get(entry);
+            return factory == null ? null : factory.make(api, entry, null);
+        }, entry -> {
+            try (InputStream inputStream = entry.getInputStream()) {
+                return ReferenceScanner.scan(inputStream, referencePattern, flags);
+            } catch (IOException | RuntimeException e) {
+                assert ExceptionUtil.printStackTrace(e);
+                return ReferenceScanner.Result.EMPTY;
+            }
+        }, pattern, flags);
+    }
+
     protected void filter(Indexes indexes, String pattern, int flags, Set<Container.Entry> matchingEntries) {
         boolean declarations = (flags & SearchInConstantPoolsView.SEARCH_DECLARATION) != 0;
         boolean references = (flags & SearchInConstantPoolsView.SEARCH_REFERENCE) != 0;
@@ -267,7 +291,7 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
             }
         }
 
-        if ((flags & SearchInConstantPoolsView.SEARCH_STRING) != 0 && (declarations || references)) {
+        if ((flags & SearchInConstantPoolsView.SEARCH_STRING) != 0 && references) {
             match(indexes, "strings", pattern, SearchInConstantPoolsController::matchWithChar, SearchInConstantPoolsController::matchWithString, matchingEntries);
         }
 
@@ -436,8 +460,14 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
         // Open the single entry uri
         Container.Entry entry = null;
 
+        // Type, method and field nodes carry a fragment; entries are registered without it
+        URI entryUri = uri;
+        if (uri.getFragment() != null) {
+            entryUri = URI.create(uri.toString().substring(0, uri.toString().indexOf('#')));
+        }
+
         for (DelegatingFilterContainer container : delegatingFilterContainers) {
-            entry = container.getEntry(uri);
+            entry = container.getEntry(entryUri);
             if (entry != null) {
                 break;
             }
@@ -490,7 +520,7 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
             URI u = entry.getUri();
 
             try {
-                openCallback.accept(new URI(u.getScheme(), u.getHost(), u.getPath(), query, null));
+                openCallback.accept(new URI(u.getScheme(), u.getHost(), u.getPath(), query, uri.getFragment()));
             } catch (URISyntaxException e) {
                 assert ExceptionUtil.printStackTrace(e);
             }

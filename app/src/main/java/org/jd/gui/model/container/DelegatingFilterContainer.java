@@ -9,7 +9,6 @@
 package org.jd.gui.model.container;
 
 import org.jd.gui.api.model.Container;
-import org.jd.gui.model.container.entry.path.SimpleEntryPath;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -19,7 +18,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class DelegatingFilterContainer implements Container {
     protected static final URI DEFAULT_ROOT_URI = URI.create("file:.");
@@ -41,6 +41,11 @@ public class DelegatingFilterContainer implements Container {
                 entry = entry.getParent();
             }
         }
+    }
+
+    public DelegatingFilterContainer(Container container, Collection<Entry> entries, Set<URI> extraUris) {
+        this(container, entries);
+        validEntries.addAll(extraUris);
     }
 
     @Override
@@ -90,8 +95,17 @@ public class DelegatingFilterContainer implements Container {
         @Override
         public Map<Container.EntryPath, Container.Entry> getChildren() {
             if (children == null) {
-                children = entry.getChildren().values().stream().filter(child -> validEntries.contains(child.getUri()))
-                        .collect(Collectors.toMap(SimpleEntryPath::new, this::getDelegEntry));
+                // Same ordering as the delegate: EntryPath equality is class-sensitive, so a hash map would
+                // miss lookups such as the type factory's FileEntryPath inner class lookup
+                Map<Container.EntryPath, Container.Entry> source = entry.getChildren();
+                Map<Container.EntryPath, Container.Entry> filtered = source instanceof SortedMap<Container.EntryPath, Container.Entry> sorted
+                        ? new TreeMap<>(sorted.comparator()) : new HashMap<>();
+                for (Map.Entry<Container.EntryPath, Container.Entry> child : source.entrySet()) {
+                    if (validEntries.contains(child.getValue().getUri())) {
+                        filtered.put(child.getKey(), getDelegEntry(child.getValue()));
+                    }
+                }
+                children = filtered;
             }
             return children;
         }
