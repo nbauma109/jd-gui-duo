@@ -26,6 +26,7 @@ import com.sun.jdi.event.ClassPrepareEvent;
 import com.sun.jdi.event.Event;
 import com.sun.jdi.event.EventQueue;
 import com.sun.jdi.event.EventSet;
+import com.sun.jdi.event.ExceptionEvent;
 import com.sun.jdi.event.StepEvent;
 import com.sun.jdi.event.ThreadDeathEvent;
 import com.sun.jdi.event.VMDeathEvent;
@@ -34,6 +35,7 @@ import com.sun.jdi.request.BreakpointRequest;
 import com.sun.jdi.request.ClassPrepareRequest;
 import com.sun.jdi.request.EventRequest;
 import com.sun.jdi.request.EventRequestManager;
+import com.sun.jdi.request.ExceptionRequest;
 import com.sun.jdi.request.StepRequest;
 import com.sun.jdi.request.ThreadDeathRequest;
 
@@ -69,6 +71,7 @@ import java.util.Set;
 
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -82,6 +85,9 @@ public class RemoteDebugController {
     private static final String HOST_PREFERENCE = "UIRemoteDebug.host";
     private static final String PORT_PREFERENCE = "UIRemoteDebug.port";
     private static final String BREAKPOINTS_PREFERENCE = "UIRemoteDebug.breakpoints";
+    private static final String EXCEPTIONS_PREFERENCE = "UIRemoteDebug.exceptionBreakpoints";
+    /** Prefix of the Breakpoints view key of an exception breakpoint ({@code exception:java.lang.Error}). */
+    public static final String EXCEPTION_KEY_PREFIX = "exception:";
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 5005;
     private static final int CONNECT_TIMEOUT_MILLIS = 5000;
@@ -117,6 +123,9 @@ public class RemoteDebugController {
     /** Method descriptions ({@code main(String[])}) read from the class files, so labels also work while detached. */
     private final Map<BreakpointKey, String> methodDescriptions = new ConcurrentHashMap<>();
     private final Map<String, BreakpointCapablePage> pagesByType = new ConcurrentHashMap<>();
+    private final Map<String, ExceptionBreakpoint> exceptionBreakpoints = new ConcurrentHashMap<>();
+    private final Set<String> disabledExceptions = ConcurrentHashMap.newKeySet();
+    private final Map<String, List<ExceptionRequest>> installedExceptions = new ConcurrentHashMap<>();
 
     public RemoteDebugController(Configuration configuration, MainController controller, JFrame mainFrame) {
         this.configuration = configuration;
@@ -126,8 +135,21 @@ public class RemoteDebugController {
 
     /** Restores the breakpoints saved in the configuration by a previous session. */
     public void loadPersistedBreakpoints() {
+        String savedExceptions = configuration.getPreferences().get(EXCEPTIONS_PREFERENCE);
+        if (savedExceptions != null && !savedExceptions.isBlank()) {
+            for (String entry : savedExceptions.split(";")) {
+                String[] parts = entry.split(":");
+                if (parts.length == 4) {
+                    exceptionBreakpoints.put(parts[0], new ExceptionBreakpoint(parts[0], "1".equals(parts[1]), "1".equals(parts[2])));
+                    if ("0".equals(parts[3])) {
+                        disabledExceptions.add(parts[0]);
+                    }
+                }
+            }
+        }
         String saved = configuration.getPreferences().get(BREAKPOINTS_PREFERENCE);
         if (saved == null || saved.isBlank()) {
+            publishBreakpoints();
             return;
         }
         for (String entry : saved.split(";")) {
@@ -154,6 +176,88 @@ public class RemoteDebugController {
             .map(key -> key.typeName() + ":" + key.lineNumber() + ":" + (disabledBreakpoints.contains(key) ? "0" : "1"))
             .collect(java.util.stream.Collectors.joining(";"));
         configuration.getPreferences().put(BREAKPOINTS_PREFERENCE, value);
+        configuration.getPreferences().put(EXCEPTIONS_PREFERENCE, exceptionBreakpoints.values().stream()
+            .sorted(Comparator.comparing(ExceptionBreakpoint::typeName))
+            .map(e -> e.typeName() + ":" + (e.caught() ? "1" : "0") + ":" + (e.uncaught() ? "1" : "0") + ":" + (disabledExceptions.contains(e.typeName()) ? "0" : "1"))
+            .collect(java.util.stream.Collectors.joining(";")));
+    }
+
+    /** "Add Java Exception Breakpoint": asks for the exception class and when to stop. */
+    public void showAddExceptionBreakpointDialog() {
+        JTextField nameField = new JTextField(32);
+        JCheckBox caughtBox = new JCheckBox("Caught", true);
+        JCheckBox uncaughtBox = new JCheckBox("Uncaught", true);
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.anchor = GridBagConstraints.WEST;
+        constraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panel.add(new JLabel("Exception class (fully qualified, e.g. java.lang.NullPointerException):"), constraints);
+        constraints.gridy = 1;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        panel.add(nameField, constraints);
+        constraints.gridy = 2;
+        panel.add(caughtBox, constraints);
+        constraints.gridy = 3;
+        panel.add(uncaughtBox, constraints);
+        while (JOptionPane.showConfirmDialog(mainFrame, panel, "Add Java Exception Breakpoint", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) == JOptionPane.OK_OPTION) {
+            String name = nameField.getText().trim();
+            if (!name.matches("[\\p{L}_$][\\p{L}\\p{N}_$]*(\\.[\\p{L}_$][\\p{L}\\p{N}_$]*)*")) {
+                JOptionPane.showMessageDialog(mainFrame, "Enter a fully qualified class name.", "Add Java Exception Breakpoint", JOptionPane.WARNING_MESSAGE);
+            } else if (!caughtBox.isSelected() && !uncaughtBox.isSelected()) {
+                JOptionPane.showMessageDialog(mainFrame, "Select Caught, Uncaught or both.", "Add Java Exception Breakpoint", JOptionPane.WARNING_MESSAGE);
+            } else {
+                addExceptionBreakpoint(name, caughtBox.isSelected(), uncaughtBox.isSelected());
+                return;
+            }
+        }
+    }
+
+    public void addExceptionBreakpoint(String typeName, boolean caught, boolean uncaught) {
+        uninstallException(typeName);
+        exceptionBreakpoints.put(typeName, new ExceptionBreakpoint(typeName, caught, uncaught));
+        disabledExceptions.remove(typeName);
+        installException(exceptionBreakpoints.get(typeName));
+        publishBreakpoints();
+    }
+
+    private void installException(ExceptionBreakpoint breakpoint) {
+        VirtualMachine vm = virtualMachine;
+        if (vm == null) {
+            return;
+        }
+        for (ReferenceType referenceType : vm.classesByName(breakpoint.typeName())) {
+            installException(referenceType, breakpoint);
+        }
+    }
+
+    private void installException(ReferenceType referenceType, ExceptionBreakpoint breakpoint) {
+        VirtualMachine vm = virtualMachine;
+        if (vm == null) {
+            return;
+        }
+        try {
+            ExceptionRequest request = vm.eventRequestManager().createExceptionRequest(referenceType, breakpoint.caught(), breakpoint.uncaught());
+            request.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
+            request.setEnabled(!skipAllBreakpoints && !disabledExceptions.contains(breakpoint.typeName()));
+            installedExceptions.computeIfAbsent(breakpoint.typeName(), _ -> new CopyOnWriteArrayList<>()).add(request);
+        } catch (RuntimeException e) {
+            assert ExceptionUtil.printStackTrace(e);
+        }
+    }
+
+    private void uninstallException(String typeName) {
+        VirtualMachine vm = virtualMachine;
+        List<ExceptionRequest> requests = installedExceptions.remove(typeName);
+        if (vm != null && requests != null) {
+            vm.eventRequestManager().deleteEventRequests(new ArrayList<>(requests));
+        }
+    }
+
+    private String exceptionLabel(ExceptionBreakpoint breakpoint) {
+        String when = breakpoint.caught() && breakpoint.uncaught() ? "caught and uncaught" : breakpoint.caught() ? "caught" : "uncaught";
+        return JdiValues.simpleName(breakpoint.typeName()) + " [" + when + "]";
     }
 
     public void show() {
@@ -369,6 +473,9 @@ public class RemoteDebugController {
         for (BreakpointKey breakpoint : breakpoints) {
             installBreakpoint(breakpoint);
         }
+        for (ExceptionBreakpoint exception : exceptionBreakpoints.values()) {
+            installException(exception);
+        }
         publishBreakpoints();
 
         Thread eventThread = new Thread(this::runEventLoop, "JD-GUI remote debug events");
@@ -390,7 +497,17 @@ public class RemoteDebugController {
                 for (Event event : eventSet) {
                     if (event instanceof ClassPrepareEvent classPrepareEvent) {
                         installBreakpoints(classPrepareEvent.referenceType());
+                        ExceptionBreakpoint exception = exceptionBreakpoints.get(classPrepareEvent.referenceType().name());
+                        if (exception != null) {
+                            installException(classPrepareEvent.referenceType(), exception);
+                        }
                         publishBreakpoints();
+                    } else if (event instanceof ExceptionEvent exceptionEvent) {
+                        clearRunToLine();
+                        pendingSteps.remove(exceptionEvent.thread());
+                        deleteStepRequests(exceptionEvent.thread());
+                        onSuspended(exceptionEvent.thread(), exceptionEvent.location());
+                        resume = false;
                     } else if (event instanceof BreakpointEvent breakpointEvent) {
                         clearRunToLine();
                         pendingSteps.remove(breakpointEvent.thread());
@@ -545,10 +662,30 @@ public class RemoteDebugController {
     }
 
     private void showSuspended(ThreadReference thread, Location location) {
+        int frameIndex = firstApplicationFrame(thread, location);
         synchronized (threadLock) {
-            selectedFrameIndex = 0;
+            selectedFrameIndex = frameIndex;
         }
-        showFrame(thread, 0, true);
+        showFrame(thread, frameIndex, true);
+    }
+
+    /** An exception can be thrown deep inside library code that has no source: show the nearest application frame. */
+    private int firstApplicationFrame(ThreadReference thread, Location location) {
+        if (location.lineNumber() >= 0 && !isLibraryClass(location.declaringType().name())) {
+            return 0;
+        }
+        try {
+            List<StackFrame> frames = thread.frames();
+            for (int i = 0; i < frames.size(); i++) {
+                Location candidate = frames.get(i).location();
+                if (candidate.lineNumber() >= 0 && !isLibraryClass(candidate.declaringType().name())) {
+                    return i;
+                }
+            }
+        } catch (IncompatibleThreadStateException | RuntimeException e) {
+            // keep the top frame
+        }
+        return 0;
     }
 
     /**
@@ -869,6 +1006,15 @@ public class RemoteDebugController {
     }
 
     public void removeBreakpoint(String locationKey) {
+        if (locationKey.startsWith(EXCEPTION_KEY_PREFIX)) {
+            String typeName = locationKey.substring(EXCEPTION_KEY_PREFIX.length());
+            if (exceptionBreakpoints.remove(typeName) != null) {
+                disabledExceptions.remove(typeName);
+                uninstallException(typeName);
+                publishBreakpoints();
+            }
+            return;
+        }
         // locationKey format: "className:lineNumber"
         int colon = locationKey.lastIndexOf(':');
         if (colon < 0) {
@@ -894,12 +1040,26 @@ public class RemoteDebugController {
         }
         breakpoints.clear();
         disabledBreakpoints.clear();
+        for (String typeName : new ArrayList<>(exceptionBreakpoints.keySet())) {
+            uninstallException(typeName);
+        }
+        exceptionBreakpoints.clear();
+        disabledExceptions.clear();
         publishBreakpoints();
     }
 
     /** "Skip All Breakpoints": keeps every breakpoint but stops none of them from suspending. */
     public void setSkipAllBreakpoints(boolean skip) {
         skipAllBreakpoints = skip;
+        for (Map.Entry<String, List<ExceptionRequest>> entry : installedExceptions.entrySet()) {
+            for (ExceptionRequest request : entry.getValue()) {
+                try {
+                    request.setEnabled(!skip && !disabledExceptions.contains(entry.getKey()));
+                } catch (RuntimeException e) {
+                    assert ExceptionUtil.printStackTrace(e);
+                }
+            }
+        }
         for (Map.Entry<BreakpointKey, List<BreakpointRequest>> entry : installedBreakpoints.entrySet()) {
             for (BreakpointRequest request : entry.getValue()) {
                 try {
@@ -913,6 +1073,22 @@ public class RemoteDebugController {
 
     /** Enables or disables a breakpoint without removing it (the checkbox of the Breakpoints view). */
     public void setBreakpointEnabled(String locationKey, boolean enabled) {
+        if (locationKey.startsWith(EXCEPTION_KEY_PREFIX)) {
+            String typeName = locationKey.substring(EXCEPTION_KEY_PREFIX.length());
+            if (!exceptionBreakpoints.containsKey(typeName)) {
+                return;
+            }
+            if (enabled) {
+                disabledExceptions.remove(typeName);
+            } else {
+                disabledExceptions.add(typeName);
+            }
+            for (ExceptionRequest request : installedExceptions.getOrDefault(typeName, List.of())) {
+                request.setEnabled(enabled && !skipAllBreakpoints);
+            }
+            publishBreakpoints();
+            return;
+        }
         int colon = locationKey.lastIndexOf(':');
         if (colon < 0) {
             return;
@@ -1059,6 +1235,7 @@ public class RemoteDebugController {
         virtualMachine = null;
         resetThreads();
         installedBreakpoints.clear();
+        installedExceptions.clear();
         SwingUtil.invokeLater(() -> {
             controller.setDebugStepActionsEnabled(false);
             controller.setDebugConnected(false);
@@ -1073,7 +1250,13 @@ public class RemoteDebugController {
     private void publishBreakpoints() {
         persistBreakpoints();
         VirtualMachine vm = virtualMachine;
-        controller.showDebugBreakpoints(breakpoints.stream()
+        List<String[]> exceptionRows = exceptionBreakpoints.values().stream()
+            .sorted(Comparator.comparing(ExceptionBreakpoint::typeName))
+            .map(exception -> new String[] { EXCEPTION_KEY_PREFIX + exception.typeName(),
+                vm == null ? "Pending" : installedExceptions.containsKey(exception.typeName()) ? "Installed" : "Unresolved",
+                exceptionLabel(exception), Boolean.toString(!disabledExceptions.contains(exception.typeName())) })
+            .toList();
+        List<String[]> lineRows = breakpoints.stream()
             .sorted(Comparator.comparing(BreakpointKey::typeName).thenComparingInt(BreakpointKey::lineNumber))
             .map(breakpoint -> {
                 String status;
@@ -1087,7 +1270,10 @@ public class RemoteDebugController {
                 return new String[] { breakpoint.typeName() + ":" + breakpoint.lineNumber(), status,
                     breakpointLabel(breakpoint), Boolean.toString(!disabledBreakpoints.contains(breakpoint)) };
             })
-            .toList());
+            .toList();
+        List<String[]> rows = new ArrayList<>(exceptionRows);
+        rows.addAll(lineRows);
+        controller.showDebugBreakpoints(rows);
     }
 
     private static VirtualMachine attach(String host, int port) throws IOException, IllegalConnectorArgumentsException {
@@ -1145,6 +1331,9 @@ public class RemoteDebugController {
             String message = cause.getMessage();
             return message == null || message.isBlank() ? cause.getClass().getSimpleName() : message;
         }
+    }
+
+    private record ExceptionBreakpoint(String typeName, boolean caught, boolean uncaught) {
     }
 
     private record BreakpointKey(String typeName, int lineNumber) {
