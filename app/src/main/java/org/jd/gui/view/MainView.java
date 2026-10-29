@@ -32,6 +32,8 @@ import org.jd.gui.util.KeyBindings.Binding;
 import org.jd.gui.util.decompiler.GuiPreferences;
 import org.jd.gui.util.swing.SwingUtil;
 import org.jd.gui.view.component.DynamicPage;
+import org.jd.gui.view.component.BreakpointListPanel;
+import org.jd.gui.view.component.DebugValueTree;
 import org.jd.gui.view.component.IconButton;
 import org.jd.gui.view.component.panel.MainTabbedPanel;
 
@@ -62,6 +64,9 @@ import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
@@ -75,9 +80,12 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.JTree;
 import javax.swing.InputMap;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
@@ -87,14 +95,22 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
+import javax.swing.event.TreeWillExpandListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.ExpandVetoException;
+import javax.swing.tree.TreeSelectionModel;
 
 import static org.jd.gui.util.ImageUtil.newImageIcon;
 import static org.jd.gui.util.swing.SwingUtil.invokeLater;
 import static org.jd.gui.util.swing.SwingUtil.newAction;
 
 import de.cismet.custom.visualdiff.PlatformService;
+
+import org.jd.gui.model.debug.DebugVariableNode;
 
 @SuppressWarnings("unchecked")
 public class MainView<T extends JComponent & UriGettable> implements UriOpenable, PreferencesChangeListener {
@@ -103,6 +119,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     private static final String EXIT_ACTION_KEY = "MainView.exit";
     private final History history;
     private final Consumer<File> openFilesCallback;
+    private static final String BASE_DESCRIPTION_KEY = "baseShortDescription";
     private final EnumMap<Binding, Action> keyBindingActions = new EnumMap<>(Binding.class);
     private JFrame mainFrame;
     private final JMenu recentFiles = new JMenu("Recent Files");
@@ -112,6 +129,11 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     private Action quickOutlineAction;
     private Action backwardAction;
     private Action forwardAction;
+    private Action disconnectAction;
+    private Action resumeAction;
+    private Action stepIntoAction;
+    private Action stepOverAction;
+    private Action stepReturnAction;
     private Action toggleHighlightAction;
     @SuppressWarnings("all")
     private MainTabbedPanel mainTabbedPanel;
@@ -123,6 +145,26 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     private JTextField findEditor;
     private AbstractButton findNextButton;
     private AbstractButton findPreviousButton;
+    private JPanel debugVariablesPanel;
+    private JTabbedPane debugTabbedPane;
+    private JTree debugVariablesTree;
+    private DefaultTreeModel debugVariablesTreeModel;
+    private BreakpointListPanel breakpointListPanel;
+    private Consumer<String> breakpointNavigateCallback;
+    private Consumer<Boolean> skipAllBreakpointsCallback;
+    private Consumer<String> removeBreakpointCallback;
+    private Runnable removeAllBreakpointsCallback;
+    private Runnable toggleBreakpointCallback;
+    private Runnable dropToFrameCallback;
+    private Runnable runToLineCallback;
+    private Action runToLineAction;
+    private Action dropToFrameAction;
+    private java.util.function.BiConsumer<String, Boolean> breakpointEnabledCallback;
+    private JTree debugExpressionsTree;
+    private DefaultTreeModel debugExpressionsTreeModel;
+    private Consumer<String> addExpressionCallback;
+    private Consumer<String> removeExpressionCallback;
+    private Runnable removeAllExpressionsCallback;
     private Runnable findNextShortcutAction;
     private Runnable findPreviousShortcutAction;
     private KeyStroke installedExitKeyStroke;
@@ -161,6 +203,12 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             ActionListener goToActionListener,
             ActionListener backwardActionListener,
             ActionListener forwardActionListener,
+            ActionListener remoteDebugActionListener,
+            ActionListener disconnectActionListener,
+            ActionListener resumeActionListener,
+            ActionListener stepIntoActionListener,
+            ActionListener stepOverActionListener,
+            ActionListener stepReturnActionListener,
             ActionListener searchActionListener,
             ActionListener jdWebSiteActionListener,
             ActionListener jdGuiIssuesActionListener,
@@ -178,6 +226,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
         this.history = history;
         this.openFilesCallback = openFilesCallback;
         // Build GUI
+        releaseDebugFunctionKeys();
         SwingUtil.invokeLater(() -> {
             mainFrame = new JFrame(JAVA_DECOMPILER);
             ImageUtil.addJDIconsToFrame(mainFrame);
@@ -281,6 +330,18 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             Action goToAction = newAction("Go to Line...", false, goToActionListener);
             backwardAction = newAction("Back", newImageIcon("/org/jd/gui/images/backward_nav.png"), false, backwardActionListener);
             forwardAction = newAction("Forward", newImageIcon("/org/jd/gui/images/forward_nav.png"), false, forwardActionListener);
+            Action remoteDebugAction = newAction("Remote Debug...", newImageIcon("/org/jd/gui/images/bug_exc.png"), true, "Attach to a remote JVM debugger", remoteDebugActionListener);
+            disconnectAction = newAction("Disconnect", newImageIcon("/org/jd/gui/images/disconnect_co.png"), false, "Disconnect from remote JVM", disconnectActionListener);
+            resumeAction = newAction("Resume", newImageIcon("/org/jd/gui/images/resume_co.png"), false, "Resume execution", resumeActionListener);
+            stepIntoAction = newAction("Step Into", newImageIcon("/org/jd/gui/images/stepinto_co.png"), false, "Step into", stepIntoActionListener);
+            stepOverAction = newAction("Step Over", newImageIcon("/org/jd/gui/images/stepover_co.png"), false, "Step over", stepOverActionListener);
+            stepReturnAction = newAction("Step Return", newImageIcon("/org/jd/gui/images/stepreturn_co.png"), false, "Step return", stepReturnActionListener);
+            runToLineAction = newAction("Run to Line", newImageIcon("/org/jd/gui/images/runtoline_co.png"), false, "Run to the caret line",
+                    e -> { if (runToLineCallback != null) { runToLineCallback.run(); } });
+            dropToFrameAction = newAction("Drop to Frame", newImageIcon("/org/jd/gui/images/drop_to_frame.png"), false, "Drop to the selected stack frame",
+                    e -> { if (dropToFrameCallback != null) { dropToFrameCallback.run(); } });
+            Action toggleBreakpointAction = newAction("Toggle Breakpoint", newImageIcon("/org/jd/gui/images/brkp_obj.png"), true, "Toggle breakpoint on the caret line",
+                    e -> { if (toggleBreakpointCallback != null) { toggleBreakpointCallback.run(); } });
             Action searchAction = newAction("Search...", newImageIcon("/org/jd/gui/images/search_src.png"), false, searchActionListener);
             Action jdWebSiteAction = newAction("JD Web site", newImageIcon("/org/jd/gui/images/github.png"), browser, "Open JD Web site", jdWebSiteActionListener);
             Action jdGuiIssuesActionAction = newAction("JD-GUI issues", browser, "Open JD-GUI issues page", jdGuiIssuesActionListener);
@@ -325,6 +386,15 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             registerKeyBinding(Binding.GO_TO_LINE, goToAction);
             registerKeyBinding(Binding.BACK, backwardAction);
             registerKeyBinding(Binding.FORWARD, forwardAction);
+            registerKeyBinding(Binding.REMOTE_DEBUG, remoteDebugAction);
+            registerKeyBinding(Binding.DISCONNECT, disconnectAction);
+            registerKeyBinding(Binding.RESUME, resumeAction);
+            registerKeyBinding(Binding.TOGGLE_BREAKPOINT, toggleBreakpointAction);
+            registerKeyBinding(Binding.RUN_TO_LINE, runToLineAction);
+            registerKeyBinding(Binding.DROP_TO_FRAME, dropToFrameAction);
+            registerKeyBinding(Binding.STEP_INTO, stepIntoAction);
+            registerKeyBinding(Binding.STEP_OVER, stepOverAction);
+            registerKeyBinding(Binding.STEP_RETURN, stepReturnAction);
             registerKeyBinding(Binding.SEARCH, searchAction);
             registerKeyBinding(Binding.PREFERENCES, preferencesAction);
             registerKeyBinding(Binding.ABOUT, aboutAction);
@@ -388,6 +458,19 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             menuBar.add(menu);
             menu.add(searchAction);
             menu.add(new JCheckBoxMenuItem(toggleHighlightAction));
+            menu = new JMenu("Debug");
+            menuBar.add(menu);
+            menu.add(remoteDebugAction);
+            menu.add(disconnectAction);
+            menu.addSeparator();
+            menu.add(toggleBreakpointAction);
+            menu.addSeparator();
+            menu.add(resumeAction);
+            menu.add(stepIntoAction);
+            menu.add(stepOverAction);
+            menu.add(stepReturnAction);
+            menu.add(dropToFrameAction);
+            menu.add(runToLineAction);
             menu = new JMenu("Help");
             menuBar.add(menu);
             if (browser) {
@@ -415,6 +498,14 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             toolBar.addSeparator();
             toolBar.add(new IconButton(openTypeAction));
             toolBar.add(new IconButton(searchAction));
+            toolBar.add(new IconButton(remoteDebugAction));
+            toolBar.add(new IconButton(disconnectAction));
+            toolBar.add(new IconButton(resumeAction));
+            toolBar.add(new IconButton(stepIntoAction));
+            toolBar.add(new IconButton(stepOverAction));
+            toolBar.add(new IconButton(stepReturnAction));
+            toolBar.add(new IconButton(dropToFrameAction));
+            toolBar.add(new IconButton(runToLineAction));
             toolBar.add(newToolbarToggleButton(toggleHighlightAction));
             toolBar.addSeparator();
             toolBar.add(new IconButton(backwardAction));
@@ -495,6 +586,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             });
             mainTabbedPanel.preferencesChanged(configuration.getPreferences());
             panel.add(mainTabbedPanel, BorderLayout.CENTER);
+            panel.add(createDebugVariablesPanel(), BorderLayout.LINE_END);
 
             panel.add(findPanel, BorderLayout.PAGE_END);
             mainFrame.add(panel);
@@ -628,8 +720,300 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
         });
     }
 
+    public void setDebugStepActionsEnabled(boolean enabled) {
+        // Run directly if already on the EDT (called from SwingWorker.done() etc.)
+        // to avoid nested invokeLater races with onSuspended's invokeLater.
+        Runnable r = () -> {
+            if (resumeAction != null) {
+                resumeAction.setEnabled(enabled);
+                stepIntoAction.setEnabled(enabled);
+                stepOverAction.setEnabled(enabled);
+                stepReturnAction.setEnabled(enabled);
+                dropToFrameAction.setEnabled(enabled);
+                runToLineAction.setEnabled(enabled);
+            }
+        };
+        if (javax.swing.SwingUtilities.isEventDispatchThread()) {
+            r.run();
+        } else {
+            invokeLater(r);
+        }
+    }
+
+    public void setDebugConnectedActionsEnabled(boolean enabled) {
+        Runnable r = () -> {
+            if (disconnectAction != null) {
+                disconnectAction.setEnabled(enabled);
+            }
+        };
+        if (javax.swing.SwingUtilities.isEventDispatchThread()) {
+            r.run();
+        } else {
+            invokeLater(r);
+        }
+    }
+
+    public void setRemoveBreakpointCallback(Consumer<String> callback) {
+        this.removeBreakpointCallback = callback;
+    }
+
+    public void setRemoveAllBreakpointsCallback(Runnable callback) {
+        this.removeAllBreakpointsCallback = callback;
+    }
+
+    public void setBreakpointNavigateCallback(Consumer<String> callback) {
+        this.breakpointNavigateCallback = callback;
+    }
+
+    public void setSkipAllBreakpointsCallback(Consumer<Boolean> callback) {
+        this.skipAllBreakpointsCallback = callback;
+    }
+
+    public void setRunToLineCallback(Runnable callback) {
+        this.runToLineCallback = callback;
+    }
+
+    public void setDropToFrameCallback(Runnable callback) {
+        this.dropToFrameCallback = callback;
+    }
+
+    public void setToggleBreakpointCallback(Runnable callback) {
+        this.toggleBreakpointCallback = callback;
+    }
+
+    public void setBreakpointEnabledCallback(java.util.function.BiConsumer<String, Boolean> callback) {
+        this.breakpointEnabledCallback = callback;
+    }
+
+    public void setAddExpressionCallback(Consumer<String> callback) {
+        this.addExpressionCallback = callback;
+    }
+
+    public void setRemoveExpressionCallback(Consumer<String> callback) {
+        this.removeExpressionCallback = callback;
+    }
+
+    public void setRemoveAllExpressionsCallback(Runnable callback) {
+        this.removeAllExpressionsCallback = callback;
+    }
+
+    /** Replaces the watch expressions with freshly evaluated nodes (keeps the expanded ones open). */
+    public void showDebugExpressions(List<DebugVariableNode> expressions) {
+        invokeLater(() -> {
+            java.util.Set<String> expanded = new java.util.HashSet<>();
+            DefaultMutableTreeNode oldRoot = (DefaultMutableTreeNode) debugExpressionsTreeModel.getRoot();
+            for (int i = 0; i < oldRoot.getChildCount(); i++) {
+                DefaultMutableTreeNode child = (DefaultMutableTreeNode) oldRoot.getChildAt(i);
+                if (debugExpressionsTree.isExpanded(new javax.swing.tree.TreePath(child.getPath())) && child.getUserObject() instanceof DebugVariableNode node) {
+                    expanded.add(node.name);
+                }
+            }
+            DefaultMutableTreeNode root = new DefaultMutableTreeNode("Expressions");
+            for (DebugVariableNode node : expressions) {
+                root.add(buildTreeNode(node));
+            }
+            root.add(new DefaultMutableTreeNode(DebugValueTree.ADD_ROW));
+            debugExpressionsTreeModel.setRoot(root);
+            for (int i = 0; i < root.getChildCount(); i++) {
+                DefaultMutableTreeNode child = (DefaultMutableTreeNode) root.getChildAt(i);
+                if (child.getUserObject() instanceof DebugVariableNode node && expanded.contains(node.name)) {
+                    debugExpressionsTree.expandPath(new javax.swing.tree.TreePath(child.getPath()));
+                }
+            }
+        });
+    }
+
+    public void showDebugVariables(String title, List<DebugVariableNode> variables) {
+        invokeLater(() -> {
+            DefaultMutableTreeNode root = new DefaultMutableTreeNode(title != null ? title : "Variables");
+            for (DebugVariableNode node : variables) {
+                root.add(buildTreeNode(node));
+            }
+            debugVariablesTreeModel.setRoot(root);
+            if (!variables.isEmpty()) {
+                debugTabbedPane.setSelectedIndex(0);
+            }
+            debugVariablesPanel.setVisible(true);
+            debugVariablesPanel.revalidate();
+            debugVariablesPanel.repaint();
+            mainFrame.validate();
+        });
+    }
+
+    private static DefaultMutableTreeNode buildTreeNode(DebugVariableNode node) {
+        DefaultMutableTreeNode treeNode = new DefaultMutableTreeNode(node);
+        if (!node.isLeaf()) {
+            treeNode.add(new DefaultMutableTreeNode("Loading...")); // placeholder triggers expand arrow
+        }
+        return treeNode;
+    }
+
+    public void showDebugBreakpoints(List<String[]> breakpoints) {
+        invokeLater(() -> {
+            List<BreakpointListPanel.Row> rows = new java.util.ArrayList<>();
+            for (String[] bp : breakpoints) {
+                // bp = { "typeName:lineNumber", state, label, enabled }
+                rows.add(new BreakpointListPanel.Row(bp[0], bp.length > 2 ? bp[2] : bp[0], bp[1],
+                        bp.length <= 3 || Boolean.parseBoolean(bp[3])));
+            }
+            breakpointListPanel.setBreakpoints(rows);
+            debugVariablesPanel.setVisible(true);
+            debugVariablesPanel.revalidate();
+            debugVariablesPanel.repaint();
+            mainFrame.validate();
+        });
+    }
+
     private JTextField getFindEditor() {
         return (JTextField)findComboBox.getEditor().getEditorComponent();
+    }
+
+    /** Eclipse icons: grey "L" for locals (objects included), JDT field icons for members. */
+    private java.util.function.Function<DebugVariableNode.Kind, Icon> newVariableIcons() {
+        java.util.Map<DebugVariableNode.Kind, Icon> icons = new java.util.EnumMap<>(DebugVariableNode.Kind.class);
+        icons.put(DebugVariableNode.Kind.LOCAL, newImageIcon("/org/jd/gui/images/localvariable_obj.png"));
+        icons.put(DebugVariableNode.Kind.FIELD_PUBLIC, newImageIcon("/org/jd/gui/images/field_public_obj.png"));
+        icons.put(DebugVariableNode.Kind.FIELD_PROTECTED, newImageIcon("/org/jd/gui/images/field_protected_obj.png"));
+        icons.put(DebugVariableNode.Kind.FIELD_PRIVATE, newImageIcon("/org/jd/gui/images/field_private_obj.png"));
+        icons.put(DebugVariableNode.Kind.FIELD_DEFAULT, newImageIcon("/org/jd/gui/images/field_default_obj.png"));
+        return icons::get;
+    }
+
+    private JPanel createDebugVariablesPanel() {
+        debugVariablesPanel = new JPanel(new BorderLayout(0, 4));
+        debugVariablesPanel.setBorder(BorderFactory.createEmptyBorder(4, 6, 4, 6));
+        debugVariablesPanel.setPreferredSize(new Dimension(440, 0));
+        debugVariablesPanel.setVisible(false);
+
+        debugTabbedPane = new JTabbedPane();
+
+        // --- Variables tab ---
+        debugVariablesTreeModel = new DefaultTreeModel(new DefaultMutableTreeNode("Variables"));
+        java.util.function.Function<DebugVariableNode.Kind, Icon> variableIcons = newVariableIcons();
+        DebugValueTree variablesTree = new DebugValueTree(debugVariablesTreeModel, variableIcons, null);
+        debugVariablesTree = variablesTree;
+        debugVariablesTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        debugVariablesTree.addTreeWillExpandListener(new TreeWillExpandListener() {
+            @Override
+            public void treeWillExpand(javax.swing.event.TreeExpansionEvent event) throws ExpandVetoException {
+                DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) event.getPath().getLastPathComponent();
+                Object userObj = treeNode.getUserObject();
+                if (userObj instanceof DebugVariableNode node && !node.isChildrenLoaded()) {
+                    treeNode.removeAllChildren();
+                    for (DebugVariableNode child : node.getChildren()) {
+                        treeNode.add(buildTreeNode(child));
+                    }
+                    debugVariablesTreeModel.nodeStructureChanged(treeNode);
+                }
+            }
+            @Override
+            public void treeWillCollapse(javax.swing.event.TreeExpansionEvent event) throws ExpandVetoException { /* no-op */ }
+        });
+        debugTabbedPane.addTab("Variables", newImageIcon("/org/jd/gui/images/variable_tab.png"), variablesTree.wrapInScrollPane());
+
+        // --- Breakpoints tab ---
+        breakpointListPanel = new BreakpointListPanel(
+                newImageIcon("/org/jd/gui/images/brkp_obj.png"),
+                newImageIcon("/org/jd/gui/images/brkpd_obj.png"),
+                newImageIcon("/org/jd/gui/images/bp_remove.png"),
+                newImageIcon("/org/jd/gui/images/bp_remove_all.png"),
+                newImageIcon("/org/jd/gui/images/bp_goto_file.png"),
+                newImageIcon("/org/jd/gui/images/bp_skip_all.png"));
+        breakpointListPanel.setRemoveCallback(key -> {
+            if (removeBreakpointCallback != null) {
+                removeBreakpointCallback.accept(key);
+            }
+        });
+        breakpointListPanel.setRemoveAllCallback(() -> {
+            if (removeAllBreakpointsCallback != null) {
+                removeAllBreakpointsCallback.run();
+            }
+        });
+        breakpointListPanel.setEnabledCallback((key, enabled) -> {
+            if (breakpointEnabledCallback != null) {
+                breakpointEnabledCallback.accept(key, enabled);
+            }
+        });
+        breakpointListPanel.setNavigateCallback(key -> {
+            if (breakpointNavigateCallback != null) {
+                breakpointNavigateCallback.accept(key);
+            }
+        });
+        breakpointListPanel.setSkipAllCallback(skip -> {
+            if (skipAllBreakpointsCallback != null) {
+                skipAllBreakpointsCallback.accept(skip);
+            }
+        });
+        JPanel bpTabPanel = breakpointListPanel;
+
+        debugTabbedPane.addTab("Breakpoints", newImageIcon("/org/jd/gui/images/breakpoint_view.png"), bpTabPanel);
+
+        // --- Expressions tab ---
+        DefaultMutableTreeNode initialExpressionsRoot = new DefaultMutableTreeNode("Expressions");
+        initialExpressionsRoot.add(new DefaultMutableTreeNode(DebugValueTree.ADD_ROW));
+        debugExpressionsTreeModel = new DefaultTreeModel(initialExpressionsRoot);
+        DebugValueTree expressionsTree = new DebugValueTree(debugExpressionsTreeModel, variableIcons,
+                newImageIcon("/org/jd/gui/images/expression_obj.png"));
+        debugExpressionsTree = expressionsTree;
+        debugExpressionsTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        debugExpressionsTree.addTreeWillExpandListener(new TreeWillExpandListener() {
+            @Override
+            public void treeWillExpand(javax.swing.event.TreeExpansionEvent event) throws ExpandVetoException {
+                DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) event.getPath().getLastPathComponent();
+                if (treeNode.getUserObject() instanceof DebugVariableNode node && !node.isChildrenLoaded()) {
+                    treeNode.removeAllChildren();
+                    for (DebugVariableNode child : node.getChildren()) {
+                        treeNode.add(buildTreeNode(child));
+                    }
+                    debugExpressionsTreeModel.nodeStructureChanged(treeNode);
+                }
+            }
+            @Override
+            public void treeWillCollapse(javax.swing.event.TreeExpansionEvent event) throws ExpandVetoException { /* no-op */ }
+        });
+
+        JButton addExpressionButton = new JButton("Add...");
+        addExpressionButton.setToolTipText("Add a watch expression");
+        addExpressionButton.setFocusable(false);
+        Runnable addExpressionAction = () -> {
+            Object input = javax.swing.JOptionPane.showInputDialog(mainFrame, "Expression:", "Add Watch Expression",
+                    javax.swing.JOptionPane.PLAIN_MESSAGE, null, null, "");
+            if (input != null && addExpressionCallback != null) {
+                addExpressionCallback.accept(input.toString());
+            }
+        };
+        addExpressionButton.addActionListener(e -> addExpressionAction.run());
+        expressionsTree.setAddRowAction(addExpressionAction);
+        JButton removeExpressionButton = new JButton("Remove");
+        removeExpressionButton.setToolTipText("Remove the selected watch expression");
+        removeExpressionButton.setFocusable(false);
+        removeExpressionButton.addActionListener(e -> {
+            javax.swing.tree.TreePath path = debugExpressionsTree.getSelectionPath();
+            if (path != null && path.getPathCount() >= 2 && removeExpressionCallback != null
+                    && ((DefaultMutableTreeNode) path.getPathComponent(1)).getUserObject() instanceof DebugVariableNode node) {
+                removeExpressionCallback.accept(node.name);
+            }
+        });
+        JButton removeAllExpressionsButton = new JButton(newImageIcon("/org/jd/gui/images/delete_config.png"));
+        removeAllExpressionsButton.setToolTipText("Remove all watch expressions");
+        removeAllExpressionsButton.setFocusable(false);
+        removeAllExpressionsButton.addActionListener(e -> {
+            if (removeAllExpressionsCallback != null) {
+                removeAllExpressionsCallback.run();
+            }
+        });
+        JPanel expressionsToolbar = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 4, 2));
+        expressionsToolbar.add(addExpressionButton);
+        expressionsToolbar.add(removeExpressionButton);
+        expressionsToolbar.add(removeAllExpressionsButton);
+
+        JPanel expressionsTabPanel = new JPanel(new BorderLayout());
+        expressionsTabPanel.add(expressionsToolbar, BorderLayout.NORTH);
+        expressionsTabPanel.add(expressionsTree.wrapInScrollPane(), BorderLayout.CENTER);
+        debugTabbedPane.addTab("Expressions", newImageIcon("/org/jd/gui/images/watchlist_view.png"), expressionsTabPanel);
+
+        debugVariablesPanel.add(debugTabbedPane, BorderLayout.CENTER);
+        return debugVariablesPanel;
     }
 
     // --- Utils --- //
@@ -691,12 +1075,38 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
         return button;
     }
 
+    /**
+     * The look and feel binds F6 (toggle focus) and F8 (start resize) on every split pane. Those bindings are
+     * resolved before menu accelerators, so they would swallow the Step Over and Resume shortcuts.
+     */
+    private static void releaseDebugFunctionKeys() {
+        Object inputMap = UIManager.get("SplitPane.ancestorInputMap");
+        if (inputMap instanceof InputMap map) {
+            map.remove(KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0));
+            map.remove(KeyStroke.getKeyStroke(KeyEvent.VK_F8, 0));
+        }
+    }
+
     private void registerKeyBinding(Binding binding, Action action) {
         keyBindingActions.put(binding, action);
     }
 
     private void applyConfiguredKeyBindings(Map<String, String> preferences) {
         KeyBindings.apply(preferences, keyBindingActions);
+        // Toolbar buttons show their shortcut in the tooltip, e.g. "Resume execution (F8)"
+        for (Map.Entry<Binding, Action> entry : keyBindingActions.entrySet()) {
+            Action action = entry.getValue();
+            if (action.getValue(Action.SMALL_ICON) == null || !(action.getValue(Action.SHORT_DESCRIPTION) instanceof String)) {
+                continue;
+            }
+            String base = (String) action.getValue(BASE_DESCRIPTION_KEY);
+            if (base == null) {
+                base = (String) action.getValue(Action.SHORT_DESCRIPTION);
+                action.putValue(BASE_DESCRIPTION_KEY, base);
+            }
+            KeyStroke keyStroke = (KeyStroke) action.getValue(Action.ACCELERATOR_KEY);
+            action.putValue(Action.SHORT_DESCRIPTION, keyStroke == null ? base : base + " (" + KeyBindings.toDisplayText(keyStroke) + ")");
+        }
     }
 
     private void updateExitShortcutBinding(Map<String, String> preferences) {
