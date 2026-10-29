@@ -18,6 +18,7 @@ import org.fife.ui.rtextarea.LineNumberList;
 import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextAreaUI;
 import org.jd.gui.api.API;
+import org.jd.gui.util.KeyBindings;
 import org.jd.gui.util.ThemeUtil;
 
 import java.awt.Color;
@@ -69,8 +70,103 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
     private int maxLineNumber;
     private final Set<Integer> breakpointLineNumbers = new HashSet<>();
 
+    private final transient API debugApi;
+    private transient java.util.function.BooleanSupplier debugSuspended;
+    private transient java.util.function.BiConsumer<String, java.awt.Point> inspectHandler;
+    private transient java.util.function.Consumer<String> watchHandler;
+
     protected CustomLineNumbersPage(API api) {
     	super(api);
+        this.debugApi = api;
+        textArea.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                showDebugContextMenu(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                showDebugContextMenu(e);
+            }
+        });
+    }
+
+    public void setDebugExpressionHandlers(java.util.function.BooleanSupplier suspended,
+            java.util.function.BiConsumer<String, java.awt.Point> inspect, java.util.function.Consumer<String> watch) {
+        this.debugSuspended = suspended;
+        this.inspectHandler = inspect;
+        this.watchHandler = watch;
+    }
+
+    private boolean isDebugSuspended() {
+        return debugSuspended != null && debugSuspended.getAsBoolean() && inspectHandler != null && watchHandler != null;
+    }
+
+    /** Right-click menu of a suspended debuggee: Inspect and Watch the selected expression. */
+    private void showDebugContextMenu(MouseEvent e) {
+        if (!e.isPopupTrigger() || !isDebugSuspended()) {
+            return;
+        }
+        String expression = selectedExpression();
+        if (expression == null) {
+            expression = identifierAt(textArea.viewToModel2D(e.getPoint()));
+        }
+        String finalExpression = expression;
+        java.awt.Point screenLocation = e.getLocationOnScreen();
+        javax.swing.JPopupMenu menu = new javax.swing.JPopupMenu();
+        javax.swing.JMenuItem inspect = new javax.swing.JMenuItem("Inspect");
+        inspect.setAccelerator(KeyBindings.getConfiguredKeyStroke(debugApi.getPreferences(), KeyBindings.Binding.INSPECT));
+        inspect.addActionListener(a -> inspectHandler.accept(finalExpression, screenLocation));
+        javax.swing.JMenuItem watch = new javax.swing.JMenuItem("Watch");
+        watch.addActionListener(a -> watchHandler.accept(finalExpression));
+        inspect.setEnabled(expression != null);
+        watch.setEnabled(expression != null);
+        menu.add(inspect);
+        menu.add(watch);
+        menu.show(textArea, e.getX(), e.getY());
+    }
+
+    public void inspectSelection() {
+        if (!isDebugSuspended()) {
+            return;
+        }
+        String expression = selectedExpression();
+        if (expression == null) {
+            expression = identifierAt(textArea.getCaretPosition());
+        }
+        if (expression == null) {
+            return;
+        }
+        java.awt.Point screenLocation;
+        try {
+            java.awt.geom.Rectangle2D caret = textArea.modelToView2D(textArea.getCaretPosition());
+            java.awt.Point origin = textArea.getLocationOnScreen();
+            screenLocation = new java.awt.Point(origin.x + (int) caret.getX(), origin.y + (int) (caret.getY() + caret.getHeight()));
+        } catch (BadLocationException | java.awt.IllegalComponentStateException e) {
+            return;
+        }
+        inspectHandler.accept(expression, screenLocation);
+    }
+
+    private String selectedExpression() {
+        String selected = textArea.getSelectedText();
+        return selected == null || selected.isBlank() ? null : selected.trim().replaceAll("\\s+", " ");
+    }
+
+    private String identifierAt(int offset) {
+        String text = textArea.getText();
+        if (offset < 0 || offset > text.length()) {
+            return null;
+        }
+        int start = offset;
+        while (start > 0 && Character.isJavaIdentifierPart(text.charAt(start - 1))) {
+            start--;
+        }
+        int end = offset;
+        while (end < text.length() && Character.isJavaIdentifierPart(text.charAt(end))) {
+            end++;
+        }
+        return end > start ? text.substring(start, end) : null;
     }
 
     private static Image loadBreakpointIcon() {

@@ -328,6 +328,7 @@ public class RemoteDebugController {
         String typeName = page.getDebugTypeName();
         page.setBreakpointToggleHandler(this::toggleBreakpoint);
         pagesByType.put(typeName, page);
+        page.setDebugExpressionHandlers(this::canStep, this::inspectExpression, this::watchFromEditor);
 
         // Adopt breakpoints the user set locally before any debug session started
         for (int lineNumber : page.getBreakpointLines()) {
@@ -766,6 +767,51 @@ public class RemoteDebugController {
             watchExpressions.add(trimmed);
             publishExpressionsAsync();
         }
+    }
+
+    /** Editor "Watch": adds the expression and shows the Expressions view. */
+    public void watchFromEditor(String expression) {
+        addWatchExpression(expression);
+        SwingUtil.invokeLater(controller::showDebugExpressionsTab);
+    }
+
+    /** Editor "Inspect": evaluates the expression in the selected frame and shows the result in a popup. */
+    public void inspectExpression(String expression, java.awt.Point screenLocation) {
+        new SwingWorker<DebugVariableNode, Void>() {
+            @Override
+            protected DebugVariableNode doInBackground() {
+                synchronized (evaluationLock) {
+                    ThreadReference thread;
+                    int frameIndex;
+                    synchronized (threadLock) {
+                        thread = activeRunning ? null : activeThread;
+                        frameIndex = selectedFrameIndex;
+                    }
+                    if (thread == null) {
+                        return null;
+                    }
+                    try {
+                        return JdiValues.toNode(expression, JdiExpressionEvaluator.evaluate(expression, thread, frameIndex));
+                    } catch (JdiExpressionEvaluator.EvaluationException e) {
+                        return new DebugVariableNode(expression, "<" + e.getMessage() + ">");
+                    }
+                }
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    DebugVariableNode node = get();
+                    if (node != null) {
+                        controller.showInspectPopup(node, screenLocation, () -> watchFromEditor(expression));
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } catch (java.util.concurrent.ExecutionException e) {
+                    assert ExceptionUtil.printStackTrace(e);
+                }
+            }
+        }.execute();
     }
 
     public void removeWatchExpression(String expression) {
