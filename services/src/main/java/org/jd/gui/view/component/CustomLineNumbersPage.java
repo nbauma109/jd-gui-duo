@@ -74,6 +74,7 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
     private transient java.util.function.BooleanSupplier debugSuspended;
     private transient java.util.function.BiConsumer<String, java.awt.Point> inspectHandler;
     private transient java.util.function.Consumer<String> watchHandler;
+    private transient java.util.function.IntConsumer runToLineHandler;
 
     protected CustomLineNumbersPage(API api) {
     	super(api);
@@ -92,10 +93,17 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
     }
 
     public void setDebugExpressionHandlers(java.util.function.BooleanSupplier suspended,
-            java.util.function.BiConsumer<String, java.awt.Point> inspect, java.util.function.Consumer<String> watch) {
+            java.util.function.BiConsumer<String, java.awt.Point> inspect, java.util.function.Consumer<String> watch,
+            java.util.function.IntConsumer runToLine) {
         this.debugSuspended = suspended;
         this.inspectHandler = inspect;
         this.watchHandler = watch;
+        this.runToLineHandler = runToLine;
+    }
+
+    private static javax.swing.Icon debugMenuIcon(String name) {
+        URL url = CustomLineNumbersPage.class.getResource("/org/jd/gui/images/" + name);
+        return url == null ? null : new ImageIcon(url);
     }
 
     private boolean isDebugSuspended() {
@@ -113,16 +121,29 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
         }
         String finalExpression = expression;
         java.awt.Point screenLocation = e.getLocationOnScreen();
+        // same entries, order, icons and shortcuts as the debug section of Eclipse's editor menu
         javax.swing.JPopupMenu menu = new javax.swing.JPopupMenu();
-        javax.swing.JMenuItem inspect = new javax.swing.JMenuItem("Inspect");
+        javax.swing.JMenuItem watch = new javax.swing.JMenuItem("Watch", debugMenuIcon("watch_exp.png"));
+        watch.addActionListener(a -> watchHandler.accept(finalExpression));
+        javax.swing.JMenuItem inspect = new javax.swing.JMenuItem("Inspect", debugMenuIcon("insp_sbook.png"));
         inspect.setAccelerator(KeyBindings.getConfiguredKeyStroke(debugApi.getPreferences(), KeyBindings.Binding.INSPECT));
         inspect.addActionListener(a -> inspectHandler.accept(finalExpression, screenLocation));
-        javax.swing.JMenuItem watch = new javax.swing.JMenuItem("Watch");
-        watch.addActionListener(a -> watchHandler.accept(finalExpression));
+        javax.swing.JMenuItem runToLine = new javax.swing.JMenuItem("Run to Line", debugMenuIcon("runtoline_co.png"));
+        runToLine.setAccelerator(KeyBindings.getConfiguredKeyStroke(debugApi.getPreferences(), KeyBindings.Binding.RUN_TO_LINE));
+        int clickedLine = 0;
+        try {
+            clickedLine = getSourceLineNumber(textArea.getLineOfOffset(textArea.viewToModel2D(e.getPoint())) + 1);
+        } catch (BadLocationException ex) {
+            // click below the last line
+        }
+        int finalLine = clickedLine;
+        runToLine.addActionListener(a -> runToLineHandler.accept(finalLine));
         inspect.setEnabled(expression != null);
         watch.setEnabled(expression != null);
-        menu.add(inspect);
+        runToLine.setEnabled(finalLine > 0 && runToLineHandler != null);
         menu.add(watch);
+        menu.add(inspect);
+        menu.add(runToLine);
         menu.show(textArea, e.getX(), e.getY());
     }
 

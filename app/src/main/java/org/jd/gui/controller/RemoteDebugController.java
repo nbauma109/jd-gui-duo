@@ -328,7 +328,8 @@ public class RemoteDebugController {
         String typeName = page.getDebugTypeName();
         page.setBreakpointToggleHandler(this::toggleBreakpoint);
         pagesByType.put(typeName, page);
-        page.setDebugExpressionHandlers(this::canStep, this::inspectExpression, this::watchFromEditor);
+        page.setDebugExpressionHandlers(this::canStep, this::inspectExpression, this::watchFromEditor,
+            line -> runToLine(page.getDebugTypeName(), line));
 
         // Adopt breakpoints the user set locally before any debug session started
         for (int lineNumber : page.getBreakpointLines()) {

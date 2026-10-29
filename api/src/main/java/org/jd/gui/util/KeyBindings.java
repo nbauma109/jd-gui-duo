@@ -46,7 +46,7 @@ public final class KeyBindings {
         STEP_OVER(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.stepOver", "Step Over", shortcut(KeyEvent.VK_F6, 0)),
         RUN_TO_LINE(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.runToLine", "Run to Line", menuShortcut(KeyEvent.VK_R)),
         INSPECT(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.inspect", "Inspect", menuShortcut(KeyEvent.VK_I, InputEvent.SHIFT_DOWN_MASK)),
-        DROP_TO_FRAME(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.dropToFrame", "Drop to Frame", shortcut(KeyEvent.VK_F7, InputEvent.ALT_DOWN_MASK)),
+        DROP_TO_FRAME(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.dropToFrame", "Drop to Frame", _ -> null), // unassigned by default, like in Eclipse
         STEP_RETURN(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.stepReturn", "Step Return", shortcut(KeyEvent.VK_F7, 0)),
         SEARCH(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.search", "Search...", menuShortcut(KeyEvent.VK_S, InputEvent.SHIFT_DOWN_MASK)),
         PREFERENCES(MAIN_WINDOW, "UIKeyBindingsPreferencesProvider.preferences", "Preferences...", menuShortcut(KeyEvent.VK_P, InputEvent.SHIFT_DOWN_MASK)),

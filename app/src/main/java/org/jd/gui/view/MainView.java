@@ -340,7 +340,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             stepIntoAction = newAction("Step Into", newImageIcon("/org/jd/gui/images/stepinto_co.png"), false, "Step into", stepIntoActionListener);
             stepOverAction = newAction("Step Over", newImageIcon("/org/jd/gui/images/stepover_co.png"), false, "Step over", stepOverActionListener);
             stepReturnAction = newAction("Step Return", newImageIcon("/org/jd/gui/images/stepreturn_co.png"), false, "Step return", stepReturnActionListener);
-            inspectAction = newAction("Inspect", false, "Inspect the selected expression",
+            inspectAction = newAction("Inspect", newImageIcon("/org/jd/gui/images/insp_sbook.png"), false, "Inspect the selected expression",
                     e -> { if (inspectCallback != null) { inspectCallback.run(); } });
             runToLineAction = newAction("Run to Line", newImageIcon("/org/jd/gui/images/runtoline_co.png"), false, "Run to the caret line",
                     e -> { if (runToLineCallback != null) { runToLineCallback.run(); } });
@@ -468,16 +468,17 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             menu = new JMenu("Debug");
             menuBar.add(menu);
             menu.add(remoteDebugAction);
-            menu.add(disconnectAction);
-            menu.addSeparator();
-            menu.add(toggleBreakpointAction);
             menu.addSeparator();
             menu.add(resumeAction);
+            menu.add(disconnectAction);
+            menu.addSeparator();
             menu.add(stepIntoAction);
             menu.add(stepOverAction);
             menu.add(stepReturnAction);
             menu.add(dropToFrameAction);
             menu.add(runToLineAction);
+            menu.addSeparator();
+            menu.add(toggleBreakpointAction);
             menu.add(inspectAction);
             menu = new JMenu("Help");
             menuBar.add(menu);
@@ -794,13 +795,43 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
         });
     }
 
-    /** Eclipse-style "Inspect" popup: the evaluated expression as an expandable Name/Value tree. */
+    /**
+     * Eclipse-style "Inspect" popup: a small rounded panel with the evaluated expression as a one-column tree
+     * ({@code "expr"= value}), the full value of the selected row below it and a hint to move it to Expressions.
+     */
     public void showInspectPopup(DebugVariableNode node, java.awt.Point screenLocation, Runnable showInExpressions) {
         invokeLater(() -> {
             DefaultMutableTreeNode root = new DefaultMutableTreeNode("Inspect");
-            root.add(buildTreeNode(node));
+            DefaultMutableTreeNode top = buildTreeNode(node);
+            root.add(top);
             DefaultTreeModel model = new DefaultTreeModel(root);
-            DebugValueTree tree = new DebugValueTree(model, debugVariableIcons, newImageIcon("/org/jd/gui/images/expression_obj.png"));
+            JTree tree = new JTree(model);
+            tree.setRootVisible(false);
+            tree.setShowsRootHandles(true);
+            tree.setRowHeight(20);
+            tree.setBorder(BorderFactory.createEmptyBorder(6, 6, 0, 0));
+            tree.setCellRenderer(new javax.swing.tree.DefaultTreeCellRenderer() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public java.awt.Component getTreeCellRendererComponent(JTree t, Object value, boolean selected, boolean expanded,
+                        boolean leaf, int row, boolean focus) {
+                    // Eclipse marks the selected row with a light blue box and a blue outline, text stays black
+                    setBackgroundSelectionColor(new java.awt.Color(0xCCE4F7));
+                    setBorderSelectionColor(new java.awt.Color(0x3399FF));
+                    setTextSelectionColor(java.awt.Color.BLACK);
+                    super.getTreeCellRendererComponent(t, value, selected, expanded, leaf, row, focus);
+                    Object userObject = ((DefaultMutableTreeNode) value).getUserObject();
+                    if (userObject instanceof DebugVariableNode variable) {
+                        boolean topLevel = ((DefaultMutableTreeNode) value).getParent() == root;
+                        setText((topLevel ? "\"" + variable.name + "\"" : variable.name) + "= " + variable.valueText);
+                        setIcon(topLevel ? newImageIcon("/org/jd/gui/images/insp_obj.png") : debugVariableIcons.apply(variable.kind));
+                    } else {
+                        setIcon(null);
+                    }
+                    return this;
+                }
+            });
             tree.addTreeWillExpandListener(new TreeWillExpandListener() {
                 @Override
                 public void treeWillExpand(javax.swing.event.TreeExpansionEvent event) throws ExpandVetoException {
@@ -817,23 +848,76 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
                 @Override
                 public void treeWillCollapse(javax.swing.event.TreeExpansionEvent event) throws ExpandVetoException { /* no-op */ }
             });
+
+            // full value of the selected row
+            javax.swing.JTextArea detail = new javax.swing.JTextArea(node.valueText);
+            detail.setEditable(false);
+            detail.setLineWrap(false);
+            detail.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
+            JScrollPane detailScroll = new JScrollPane(detail);
+            detailScroll.setPreferredSize(new Dimension(0, 58));
+            detailScroll.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(2, 6, 4, 6), detailScroll.getBorder()));
+            tree.addTreeSelectionListener(e -> {
+                if (e.getPath() != null && ((DefaultMutableTreeNode) e.getPath().getLastPathComponent()).getUserObject() instanceof DebugVariableNode selected) {
+                    detail.setText(selected.valueText);
+                    detail.setCaretPosition(0);
+                }
+            });
+            javax.swing.JSplitPane split = new javax.swing.JSplitPane(javax.swing.JSplitPane.VERTICAL_SPLIT, new JScrollPane(tree), detailScroll);
+            split.setBorder(null);
+            split.setResizeWeight(1.0);
+            split.setDividerSize(5);
+
             javax.swing.KeyStroke inspectKey = inspectAction == null ? null : (javax.swing.KeyStroke) inspectAction.getValue(Action.ACCELERATOR_KEY);
-            JLabel hint = new JLabel(inspectKey == null ? " " : " Press '" + KeyBindings.toDisplayText(inspectKey) + "' to show in Expressions view");
+            JLabel hint = new JLabel(inspectKey == null ? " " : "Press " + KeyBindings.toDisplayText(inspectKey) + " to Move to Expressions View", javax.swing.SwingConstants.RIGHT);
             hint.setForeground(java.awt.Color.GRAY);
-            hint.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+            hint.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(1, 0, 0, 0, new java.awt.Color(0xD0D0D0)), BorderFactory.createEmptyBorder(3, 6, 3, 6)));
+
+            JLabel grip = new JLabel("\u22EE ", javax.swing.SwingConstants.RIGHT); // vertical ellipsis: drag handle, as in Eclipse
+            grip.setForeground(java.awt.Color.GRAY);
+            grip.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.MOVE_CURSOR));
+            grip.setToolTipText("Drag to move");
+            JPanel header = new JPanel(new BorderLayout());
+            header.setPreferredSize(new Dimension(0, 20));
+            header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(0xD0D0D0)));
+            header.add(grip, BorderLayout.EAST);
+
             JPanel content = new JPanel(new BorderLayout());
-            content.setBorder(BorderFactory.createLineBorder(java.awt.Color.GRAY));
-            content.add(tree.wrapInScrollPane(), BorderLayout.CENTER);
+            content.setBorder(BorderFactory.createLineBorder(new java.awt.Color(0xB0B0B0)));
+            content.add(header, BorderLayout.NORTH);
+            content.add(split, BorderLayout.CENTER);
             content.add(hint, BorderLayout.SOUTH);
 
             javax.swing.JDialog popup = new javax.swing.JDialog(mainFrame);
             popup.setUndecorated(true);
             popup.setContentPane(content);
-            popup.setSize(460, 240);
+            popup.setSize(300, 250);
+            try {
+                popup.setShape(new java.awt.geom.RoundRectangle2D.Double(0, 0, popup.getWidth(), popup.getHeight(), 10, 10));
+            } catch (UnsupportedOperationException | java.awt.IllegalComponentStateException e) {
+                // square corners where shaped windows are not supported
+            }
             java.awt.Rectangle screen = mainFrame.getGraphicsConfiguration().getBounds();
             popup.setLocation(Math.max(screen.x, Math.min(screenLocation.x, screen.x + screen.width - popup.getWidth())),
                     Math.max(screen.y, Math.min(screenLocation.y + 4, screen.y + screen.height - popup.getHeight())));
-            popup.setFocusableWindowState(true);
+            java.awt.event.MouseAdapter drag = new java.awt.event.MouseAdapter() {
+                private java.awt.Point origin;
+
+                @Override
+                public void mousePressed(java.awt.event.MouseEvent e) {
+                    origin = e.getLocationOnScreen();
+                }
+
+                @Override
+                public void mouseDragged(java.awt.event.MouseEvent e) {
+                    java.awt.Point now = e.getLocationOnScreen();
+                    popup.setLocation(popup.getX() + now.x - origin.x, popup.getY() + now.y - origin.y);
+                    origin = now;
+                }
+            };
+            header.addMouseListener(drag);
+            header.addMouseMotionListener(drag);
             popup.addWindowFocusListener(new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowLostFocus(java.awt.event.WindowEvent e) {
@@ -865,9 +949,8 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             }
             popup.setVisible(true);
             popup.toFront();
+            tree.setSelectionPath(new javax.swing.tree.TreePath(top.getPath()));
             tree.requestFocusInWindow();
-            // rows were measured while the tree had no width yet: measure them again now that it is laid out
-            invokeLater(() -> model.nodeStructureChanged(root));
         });
     }
 

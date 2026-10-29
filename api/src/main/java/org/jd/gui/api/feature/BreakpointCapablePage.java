@@ -32,11 +32,12 @@ public interface BreakpointCapablePage {
     }
 
     /**
-     * Installs the editor's debug context menu (Inspect, Watch). The menu is only offered while
+     * Installs the editor's debug context menu (Watch, Inspect, Run to Line). The menu is only offered while
      * {@code suspended} says the debuggee is stopped; handlers receive the expression text.
      */
     default void setDebugExpressionHandlers(java.util.function.BooleanSupplier suspended,
-            java.util.function.BiConsumer<String, java.awt.Point> inspect, java.util.function.Consumer<String> watch) {
+            java.util.function.BiConsumer<String, java.awt.Point> inspect, java.util.function.Consumer<String> watch,
+            java.util.function.IntConsumer runToLine) {
     }
 
     /** Inspects the selected expression (or the identifier at the caret): shortcut of the context menu entry. */
