@@ -12,33 +12,55 @@ import org.fife.ui.rsyntaxtextarea.DocumentRange;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeWriter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.core.v1.util.ParserRealigner;
 import org.jd.gui.api.API;
+import org.jd.gui.api.feature.BreakpointCapablePage;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.util.MethodPatcher;
 import org.jd.gui.util.decompiler.ContainerLoader;
 import org.jd.gui.util.decompiler.GuiPreferences;
 import org.jd.gui.util.loader.LoaderUtils;
 import org.jd.gui.util.parser.jdt.core.manipulation.RemoveUnnecessaryCasts;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 
 import com.heliosdecompiler.transformerapi.StandardTransformers;
 import com.heliosdecompiler.transformerapi.common.Loader;
+import com.heliosdecompiler.transformerapi.decompilers.Decompiler;
+import com.heliosdecompiler.transformerapi.decompilers.cfr.CFRSettings;
+import com.heliosdecompiler.transformerapi.decompilers.fernflower.FernflowerSettings;
+import com.heliosdecompiler.transformerapi.decompilers.jadx.MapJadxArgs;
+import com.heliosdecompiler.transformerapi.decompilers.jd.JDSettings;
+import com.heliosdecompiler.transformerapi.decompilers.procyon.MapDecompilerSettings;
+import com.heliosdecompiler.transformerapi.decompilers.vineflower.VineflowerSettings;
 
 import java.awt.Color;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiPredicate;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_CFR;
+import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_FERNFLOWER;
+import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JADX;
+import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE;
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V0;
 import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_JD_CORE_V1;
+import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_PROCYON;
+import static com.heliosdecompiler.transformerapi.StandardTransformers.Decompilers.ENGINE_VINEFLOWER;
 import static jd.core.preferences.Preferences.DISPLAY_DEFAULT_CONSTRUCTOR;
 import static jd.core.preferences.Preferences.ESCAPE_UNICODE_CHARACTERS;
 import static jd.core.preferences.Preferences.OMIT_THIS_PREFIX;
@@ -58,7 +80,7 @@ import static org.jd.gui.util.decompiler.GuiPreferences.SHOW_COMPILER_WARNINGS;
 import jd.core.ClassUtil;
 import jd.core.DecompilationResult;
 
-public class ClassFilePage extends TypePage {
+public class ClassFilePage extends TypePage implements BreakpointCapablePage {
 
     private static final String INTERNAL_ERROR = "// INTERNAL ERROR //";
 
@@ -88,6 +110,7 @@ public class ClassFilePage extends TypePage {
     private int maximumLineNumber = -1;
     private int lastDecompilePreferencesHash;
     private int lastParserPreferencesHash;
+    private transient BiPredicate<String, Integer> breakpointToggleHandler;
 
     public ClassFilePage(API api, Container.Entry entry) {
         super(api, entry);
@@ -98,6 +121,12 @@ public class ClassFilePage extends TypePage {
         decompile(preferences);
         lastDecompilePreferencesHash = computePreferencesHash(preferences, DECOMPILE_RELEVANT_PREFERENCES);
         lastParserPreferencesHash = computePreferencesHash(preferences, PARSER_RELEVANT_PREFERENCES);
+    }
+
+    @Override
+    public void addNotify() {
+        super.addNotify();
+        javax.swing.SwingUtilities.invokeLater(() -> api.syncBreakpointPage(this));
     }
 
     public void decompile(Map<String, String> preferences) {
@@ -119,14 +148,15 @@ public class ClassFilePage extends TypePage {
 
             String engineName = preferences.getOrDefault(DECOMPILE_ENGINE, ENGINE_JD_CORE_V1);
             Loader apiLoader = LoaderUtils.createLoader(preferences, loader, entry);
-            DecompilationResult decompilationResult = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, engineName);
+            boolean parserRealignmentRequired = isParserRealignmentRequired(engineName, realignmentLineNumbers);
+            DecompilationResult decompilationResult = decompileForDisplay(apiLoader, entryInternalName, preferences, engineName, realignmentLineNumbers);
             if (decompilationResult.getDecompiledOutput().contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
                 /*
                  * Sometimes JD-Core v0 decompiles with success where JD-Core v1 fails.
                  * In this case, patch JD-Core v0 method into JD-Core v1 method.
                  * It will appear with comment 'Patched from JD-Core V0'
                  */
-                DecompilationResult sourceCodeV0 = StandardTransformers.decompile(apiLoader, entryInternalName, preferences, ENGINE_JD_CORE_V0);
+                DecompilationResult sourceCodeV0 = decompileForDisplay(apiLoader, entryInternalName, preferences, ENGINE_JD_CORE_V0, realignmentLineNumbers);
                 String patchedCode = MethodPatcher.patchCode(api, decompilationResult.getDecompiledOutput(), sourceCodeV0.getDecompiledOutput(), entry);
                 if (removeUnnecessaryCasts) {
                     patchedCode = new RemoveUnnecessaryCasts(api, entry).process(patchedCode);
@@ -141,15 +171,17 @@ public class ClassFilePage extends TypePage {
                 listener.getDeclarations().putAll(decompilationResult.getDeclarations());
                 listener.getReferences().addAll(decompilationResult.getReferences());
                 hyperlinks.putAll(decompilationResult.getHyperlinks());
-                if (decompilationResult.getMaxLineNumber() != 0) {
+                if (!parserRealignmentRequired && decompilationResult.getMaxLineNumber() != 0) {
                     setMaxLineNumber(decompilationResult.getMaxLineNumber());
                 }
-                for (Map.Entry<Integer, Integer> entry : decompilationResult.getLineNumbers().entrySet()) {
-                    Integer textAreaLineNumber = entry.getKey();
-                    Integer sourceLineNumber = entry.getValue();
-                    setLineNumber(textAreaLineNumber, sourceLineNumber);
+                if (!parserRealignmentRequired) {
+                    for (Map.Entry<Integer, Integer> entry : decompilationResult.getLineNumbers().entrySet()) {
+                        Integer textAreaLineNumber = entry.getKey();
+                        Integer sourceLineNumber = entry.getValue();
+                        setLineNumber(textAreaLineNumber, sourceLineNumber);
+                    }
                 }
-                if (hyperlinks.isEmpty() || removeUnnecessaryCasts) {
+                if (parserRealignmentRequired || hyperlinks.isEmpty() || removeUnnecessaryCasts) {
                     /*
                      * if hyperlinks are empty, it means the links are not supported by the decompiler, so the JAVA parser is called to
                      * enable the links. Same thing in case 'Remove casts' options is activated, as it ruins the hyperlinks.
@@ -169,6 +201,42 @@ public class ClassFilePage extends TypePage {
         } finally {
             maximumLineNumber = getMaximumSourceLineNumber();
         }
+    }
+
+    private static boolean isParserRealignmentRequired(String engineName, boolean realignmentLineNumbers) {
+        Decompiler<?> decompiler = StandardTransformers.Decompilers.valueOf(engineName);
+        return realignmentLineNumbers && !decompiler.supportsRealignment();
+    }
+
+    private static DecompilationResult decompileForDisplay(Loader apiLoader, String entryInternalName, Map<String, String> preferences,
+            String engineName, boolean realignmentLineNumbers) throws Exception {
+        boolean parserRealignmentRequired = isParserRealignmentRequired(engineName, realignmentLineNumbers);
+        Map<String, String> decompilePreferences = parserRealignmentRequired ? withLineNumberSettings(preferences, engineName) : preferences;
+        DecompilationResult result = StandardTransformers.decompile(apiLoader, entryInternalName, decompilePreferences, engineName);
+
+        if (parserRealignmentRequired && !result.getDecompiledOutput().contains(ByteCodeWriter.DECOMPILATION_FAILED_AT_LINE)) {
+            result.setDecompiledOutput(new ParserRealigner().realign(result.getDecompiledOutput()));
+        }
+
+        return result;
+    }
+
+    private static Map<String, String> withLineNumberSettings(Map<String, String> preferences, String engineName) {
+        Map<String, String> result = new HashMap<>(preferences);
+        result.putAll(lineNumbersFor(engineName));
+        return result;
+    }
+
+    private static Map<String, String> lineNumbersFor(String engineName) {
+        return switch (engineName) {
+            case ENGINE_JD_CORE_V0, ENGINE_JD_CORE_V1, ENGINE_JD_CORE -> JDSettings.lineNumbers();
+            case ENGINE_CFR -> CFRSettings.lineNumbers();
+            case ENGINE_PROCYON -> MapDecompilerSettings.lineNumbers();
+            case ENGINE_FERNFLOWER -> FernflowerSettings.lineNumbers();
+            case ENGINE_VINEFLOWER -> VineflowerSettings.lineNumbers();
+            case ENGINE_JADX -> MapJadxArgs.lineNumbers();
+            default -> Map.of();
+        };
     }
 
     @Override
@@ -239,6 +307,92 @@ public class ClassFilePage extends TypePage {
     @Override
     public boolean checkLineNumber(int lineNumber) {
         return lineNumber <= maximumLineNumber;
+    }
+
+    // --- BreakpointCapablePage --- //
+    @Override
+    public String getDebugTypeName() {
+        return ClassUtil.getInternalName(entry.getPath()).replace('/', '.');
+    }
+
+    @Override
+    public String getBreakpointMethodDescription(int lineNumber) {
+        List<String[]> methods = new java.util.ArrayList<>(); // { name, descriptor, synthetic }
+        String[] holder = new String[2];
+        try (java.io.InputStream inputStream = entry.getInputStream()) {
+            new ClassReader(inputStream).accept(new ClassVisitor(Opcodes.ASM9) {
+                @Override
+                public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+                    methods.add(new String[] { name, descriptor, (access & Opcodes.ACC_SYNTHETIC) != 0 ? "true" : "false" });
+                    return new MethodVisitor(Opcodes.ASM9) {
+                        @Override
+                        public void visitLineNumber(int line, org.objectweb.asm.Label start) {
+                            if (line == lineNumber && holder[0] == null) {
+                                holder[0] = name;
+                                holder[1] = descriptor;
+                            }
+                        }
+                    };
+                }
+            }, ClassReader.SKIP_FRAMES);
+        } catch (IOException | RuntimeException e) {
+            assert ExceptionUtil.printStackTrace(e);
+            return null;
+        }
+        if (holder[0] == null) {
+            return null;
+        }
+        String name = holder[0];
+        String descriptor = holder[1];
+        // Lambda bodies are compiled to lambda$name$N: name the enclosing source method like Eclipse does
+        java.util.regex.Matcher lambda = java.util.regex.Pattern.compile("lambda\\$(.+)\\$\\d+").matcher(name);
+        if (lambda.matches()) {
+            for (String[] method : methods) {
+                if (method[0].equals(lambda.group(1)) && "false".equals(method[2])) {
+                    name = method[0];
+                    descriptor = method[1];
+                    break;
+                }
+            }
+        }
+        String simpleClassName = getDebugTypeName().substring(getDebugTypeName().lastIndexOf('.') + 1);
+        if ("<clinit>".equals(name)) {
+            return "static {...}";
+        }
+        StringBuilder description = new StringBuilder("<init>".equals(name) ? simpleClassName : name).append('(');
+        Type[] arguments = Type.getArgumentTypes(descriptor);
+        for (int i = 0; i < arguments.length; i++) {
+            String argument = arguments[i].getClassName();
+            description.append(i > 0 ? ", " : "").append(argument.substring(argument.lastIndexOf('.') + 1));
+        }
+        return description.append(')').toString();
+    }
+
+    @Override
+    public void setBreakpointToggleHandler(BiPredicate<String, Integer> handler) {
+        this.breakpointToggleHandler = handler;
+    }
+
+    @Override
+    public void setBreakpointLine(int lineNumber, boolean enabled) {
+        setBreakpointLineNumber(lineNumber, enabled);
+    }
+
+    @Override
+    protected void toggleBreakpointLineNumber(int sourceLineNumber) {
+        boolean nowEnabled = !isBreakpointLineNumber(sourceLineNumber);
+        setBreakpointLineNumber(sourceLineNumber, nowEnabled);
+        if (breakpointToggleHandler != null) {
+            boolean vmEnabled = breakpointToggleHandler.test(getDebugTypeName(), sourceLineNumber);
+            if (vmEnabled != nowEnabled) {
+                setBreakpointLineNumber(sourceLineNumber, vmEnabled);
+            }
+        }
+    }
+
+    @Override
+    public void setCurrentExecutionLine(int lineNumber) {
+        super.setCurrentExecutionLine(lineNumber);
     }
 
     // --- PreferencesChangeListener --- //

@@ -8,6 +8,7 @@
 
 package org.jd.gui.api;
 
+import org.jd.gui.api.feature.BreakpointCapablePage;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
@@ -80,4 +81,6 @@ public interface API {
     void repaint();
 
     boolean isDarkMode();
+
+    default void syncBreakpointPage(BreakpointCapablePage page) {}
 }

@@ -10,6 +10,8 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.Theme;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
+import org.jd.gui.util.KeyBindings;
+import org.jd.gui.util.KeyBindings.Binding;
 import org.jd.gui.util.decompiler.GuiPreferences;
 
 import java.awt.Component;
@@ -20,6 +22,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.swing.Icon;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 
@@ -53,7 +58,27 @@ public class ThemeUtil {
                 assert ExceptionUtil.printStackTrace(e);
             }
         }
+        releaseDebugShortcuts(preferences, rSyntaxTextArea);
         return rSyntaxTextArea;
+    }
+
+    private static final Binding[] DEBUG_BINDINGS = {
+        Binding.REMOTE_DEBUG, Binding.DISCONNECT, Binding.RESUME, Binding.STEP_INTO, Binding.STEP_OVER,
+        Binding.STEP_RETURN, Binding.DROP_TO_FRAME, Binding.RUN_TO_LINE, Binding.TOGGLE_BREAKPOINT
+    };
+
+    /**
+     * The editor binds some keys itself (e.g. Ctrl+F2 toggles a bookmark). Component bindings win over menu
+     * accelerators, so shadow the ones that collide with a debug shortcut to let the shortcut reach the menu.
+     */
+    private static void releaseDebugShortcuts(Map<String, String> preferences, RSyntaxTextArea textArea) {
+        InputMap inputMap = textArea.getInputMap(JComponent.WHEN_FOCUSED);
+        for (Binding binding : DEBUG_BINDINGS) {
+            KeyStroke keyStroke = KeyBindings.getConfiguredKeyStroke(preferences, binding);
+            if (keyStroke != null && inputMap.get(keyStroke) != null) {
+                inputMap.put(keyStroke, "none");
+            }
+        }
     }
 
     private static final int JAVA_MAJOR_VERSION = Runtime.version().feature();

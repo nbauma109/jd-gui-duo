@@ -20,6 +20,7 @@ import org.jd.gui.api.feature.TreeNodeExpandable;
 import org.jd.gui.api.feature.UriGettable;
 import org.jd.gui.api.feature.UriOpenable;
 import org.jd.gui.api.model.TreeNodeData;
+import org.jd.gui.model.debug.DebugThread;
 import org.jd.gui.view.component.Tree;
 import org.jd.gui.view.renderer.TreeNodeRenderer;
 
@@ -38,17 +39,23 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
+import org.jd.gui.model.debug.DebugThread;
+
 import javax.swing.Action;
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
@@ -60,9 +67,21 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
     private static final long serialVersionUID = 1L;
     private static final int MIN_TREE_NODE_FONT_SIZE = 2;
     private static final int MAX_TREE_NODE_FONT_SIZE = 40;
+
+    private static final DefaultMutableTreeNode DEBUG_TREE_ROOT = new DefaultMutableTreeNode("Debug");
+    private static final DefaultTreeModel DEBUG_TREE_MODEL = new DefaultTreeModel(DEBUG_TREE_ROOT);
+    private static final java.util.WeakHashMap<TreeTabbedPanel<?>, Void> INSTANCES = new java.util.WeakHashMap<>();
+    /** Set by MainController so clicking a frame navigates to that class/line. */
+    private static java.util.function.BiConsumer<String, Integer> debugNavigateHandler;
+    /** Set by MainController: (thread name, frame index) of the frame the user selected. */
+    private static java.util.function.BiConsumer<String, Integer> debugFrameSelectHandler;
+    /** True while setDebugFrames updates the tree, so programmatic selection changes are not user clicks. */
+    private static boolean debugTreeAdjusting;
+
     protected final transient API api;
     private final URI uri;
     protected final Tree tree;
+    private JTabbedPane leftTabs;
     @SuppressWarnings("rawtypes")
     private final TabbedPanel tabbedPanel;
     private final transient List<PageChangeListener> pageChangedListeners = new ArrayList<>();
@@ -161,10 +180,165 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
 
         applyTreeNodeFontSize(preferences);
 
-        JSplitPane splitter = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScrollPane, tabbedPanel);
+        leftTabs = new JTabbedPane(JTabbedPane.BOTTOM);
+        javax.swing.Icon prjIcon = loadIcon("/org/jd/gui/images/filenav_nav.png");
+        javax.swing.Icon dbgIcon = loadIcon("/org/jd/gui/images/bug_exc.png");
+        leftTabs.addTab("Project Explorer", prjIcon, treeScrollPane);
+        JTree debugTree = new JTree(DEBUG_TREE_MODEL);
+        debugTree.setRootVisible(false);
+        debugTree.setShowsRootHandles(true);
+        debugTree.setCellRenderer(new DebugTreeRenderer());
+        debugTree.setFont(debugTree.getFont().deriveFont(java.awt.Font.PLAIN, 11f));
+        debugTree.addTreeSelectionListener(e -> {
+            TreePath path = debugTree.getSelectionPath();
+            if (path == null || debugTreeAdjusting) {
+                return;
+            }
+            Object last = path.getLastPathComponent();
+            if (debugFrameSelectHandler != null && last instanceof DefaultMutableTreeNode selected) {
+                if (selected.getUserObject() instanceof DebugThread dt && dt.isSuspended()) {
+                    debugFrameSelectHandler.accept(dt.name(), 0);
+                    return;
+                }
+                if (selected.getUserObject() instanceof String && selected.getParent() instanceof DefaultMutableTreeNode parent
+                        && parent.getUserObject() instanceof DebugThread dt) {
+                    debugFrameSelectHandler.accept(dt.name(), parent.getIndex(selected));
+                    return;
+                }
+            }
+            if (debugNavigateHandler == null) {
+                return;
+            }
+            if (last instanceof DefaultMutableTreeNode node && node.getUserObject() instanceof String frame) {
+                // Frame format: "com.example.Foo.bar() line: 42"
+                int lineMarker = frame.lastIndexOf(" line: ");
+                if (lineMarker >= 0) {
+                    try {
+                        int lineNum = Integer.parseInt(frame.substring(lineMarker + 7).trim());
+                        String methodPart = frame.substring(0, lineMarker); // "com.example.Foo.bar()"
+                        int parenIdx = methodPart.lastIndexOf('(');
+                        if (parenIdx > 0) {
+                            String classAndMethod = methodPart.substring(0, parenIdx); // "com.example.Foo.bar"
+                            int lastDot = classAndMethod.lastIndexOf('.');
+                            if (lastDot > 0) {
+                                String className = classAndMethod.substring(0, lastDot); // "com.example.Foo"
+                                debugNavigateHandler.accept(className, lineNum);
+                            }
+                        }
+                    } catch (NumberFormatException ex) {
+                        // ignore malformed frame string
+                    }
+                }
+            }
+        });
+        leftTabs.addTab("Debug", dbgIcon, new JScrollPane(debugTree));
+
+        JSplitPane splitter = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftTabs, tabbedPanel);
         splitter.setResizeWeight(0.2);
 
         add(splitter, BorderLayout.CENTER);
+        INSTANCES.put(this, null);
+    }
+
+    private static javax.swing.Icon loadIcon(String path) {
+        java.net.URL url = TreeTabbedPanel.class.getResource(path);
+        return url == null ? null : new ImageIcon(url);
+    }
+
+    public static void setDebugFrames(List<DebugThread> threads) {
+        debugTreeAdjusting = true;
+        try {
+            applyDebugFrames(threads);
+        } finally {
+            debugTreeAdjusting = false;
+        }
+    }
+
+    private static void applyDebugFrames(List<DebugThread> threads) {
+        // Smart update: avoid a full reload() which collapses the entire tree (causes blink).
+        // If the set of threads (by name, in order) is unchanged, update each node individually:
+        //   - nodeChanged()          for label-only changes  (no collapse)
+        //   - nodeStructureChanged() for frame-list changes  (collapses only that thread node)
+        // Otherwise fall back to a full rebuild.
+        int existingCount = DEBUG_TREE_ROOT.getChildCount();
+        boolean sameThreads = (existingCount == threads.size());
+        if (sameThreads) {
+            for (int i = 0; i < existingCount; i++) {
+                DefaultMutableTreeNode n = (DefaultMutableTreeNode) DEBUG_TREE_ROOT.getChildAt(i);
+                DebugThread existing = n.getUserObject() instanceof DebugThread dt ? dt : null;
+                if (existing == null || !existing.name().equals(threads.get(i).name())) {
+                    sameThreads = false;
+                    break;
+                }
+            }
+        }
+
+        if (sameThreads) {
+            // Incremental update per thread node
+            for (int i = 0; i < threads.size(); i++) {
+                DefaultMutableTreeNode threadNode = (DefaultMutableTreeNode) DEBUG_TREE_ROOT.getChildAt(i);
+                DebugThread oldDt = (DebugThread) threadNode.getUserObject();
+                DebugThread newDt = threads.get(i);
+
+                if (oldDt.equals(newDt)) {
+                    continue; // Nothing changed for this thread
+                }
+
+                threadNode.setUserObject(newDt);
+
+                boolean structureChanged = oldDt.isSuspended() != newDt.isSuspended()
+                    || !oldDt.frames().equals(newDt.frames());
+
+                if (structureChanged) {
+                    threadNode.removeAllChildren();
+                    if (newDt.isSuspended()) {
+                        for (String frame : newDt.frames()) {
+                            threadNode.add(new DefaultMutableTreeNode(frame));
+                        }
+                    }
+                    DEBUG_TREE_MODEL.nodeStructureChanged(threadNode);
+                } else {
+                    DEBUG_TREE_MODEL.nodeChanged(threadNode);
+                }
+            }
+        } else {
+            // Full rebuild (first connect, disconnect, or thread set changed)
+            DEBUG_TREE_ROOT.removeAllChildren();
+            for (DebugThread dt : threads) {
+                DefaultMutableTreeNode threadNode = new DefaultMutableTreeNode(dt);
+                if (dt.isSuspended()) {
+                    for (String frame : dt.frames()) {
+                        threadNode.add(new DefaultMutableTreeNode(frame));
+                    }
+                }
+                DEBUG_TREE_ROOT.add(threadNode);
+            }
+            DEBUG_TREE_MODEL.reload(DEBUG_TREE_ROOT);
+        }
+
+        // Re-expand suspended thread nodes in all instances
+        if (!threads.isEmpty()) {
+            INSTANCES.keySet().forEach(panel -> {
+                panel.leftTabs.setSelectedIndex(1);
+                JTree debugTree = (JTree) ((JScrollPane) panel.leftTabs.getComponentAt(1)).getViewport().getView();
+                for (int i = 0; i < DEBUG_TREE_ROOT.getChildCount(); i++) {
+                    DefaultMutableTreeNode threadNode = (DefaultMutableTreeNode) DEBUG_TREE_ROOT.getChildAt(i);
+                    if (threadNode.getUserObject() instanceof DebugThread dt && dt.isSuspended()) {
+                        debugTree.expandPath(new TreePath(threadNode.getPath()));
+                    }
+                }
+            });
+        }
+    }
+
+    /** Called by MainController: the user selected a stack frame of a stopped thread. */
+    public static void setDebugFrameSelectHandler(java.util.function.BiConsumer<String, Integer> handler) {
+        debugFrameSelectHandler = handler;
+    }
+
+    /** Called by MainController to wire up frame-click → navigate-to-source. */
+    public static void setDebugNavigateHandler(java.util.function.BiConsumer<String, Integer> handler) {
+        debugNavigateHandler = handler;
     }
 
     protected void updateTreeNodeFontSize(int delta) {
@@ -418,5 +592,48 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
     public void preferencesChanged(Map<String, String> preferences) {
         applyTreeNodeFontSize(preferences);
         tabbedPanel.preferencesChanged(preferences);
+    }
+
+    /**
+     * Renders the Debug JTree:
+     *  • Thread node  → thread icon (event thread = yellow/suspended icon, others = plain thread icon)
+     *  • Frame node 0 → stckframe_obj (top / suspended frame)
+     *  • Frame node N → stckframe_running_obj (running frame below top)
+     */
+    private static class DebugTreeRenderer extends DefaultTreeCellRenderer {
+        private static final long serialVersionUID = 1L;
+        private static final javax.swing.Icon THREAD_EVENT_ICON   = loadIcon("/org/jd/gui/images/debugts_obj.png");
+        private static final javax.swing.Icon THREAD_OTHER_ICON   = loadIcon("/org/jd/gui/images/thread_obj.png");
+        private static final javax.swing.Icon FRAME_TOP_ICON      = loadIcon("/org/jd/gui/images/stckframe_obj.png");
+        private static final javax.swing.Icon FRAME_RUNNING_ICON  = loadIcon("/org/jd/gui/images/stckframe_running_obj.png");
+
+        @Override
+        public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel,
+                boolean expanded, boolean leaf, int row, boolean hasFocus) {
+            JLabel label = (JLabel) super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+            if (value instanceof DefaultMutableTreeNode node) {
+                Object userObj = node.getUserObject();
+                if (userObj instanceof DebugThread dt) {
+                    // Thread node
+                    String status;
+                    if (!dt.isSuspended()) {
+                        status = " (Running)";
+                    } else if (dt.isEventThread()) {
+                        status = " (Suspended, at breakpoint)";
+                    } else {
+                        status = " (Suspended)";
+                    }
+                    label.setText("Thread \"" + dt.name() + "\"" + status);
+                    label.setIcon(dt.isEventThread() ? THREAD_EVENT_ICON : THREAD_OTHER_ICON);
+                } else if (userObj instanceof String frame) {
+                    // Frame node — determine if it is the top frame of its parent
+                    DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
+                    boolean isTop = parent != null && parent.getIndex(node) == 0;
+                    label.setText(frame);
+                    label.setIcon(isTop ? FRAME_TOP_ICON : FRAME_RUNNING_ICON);
+                }
+            }
+            return label;
+        }
     }
 }

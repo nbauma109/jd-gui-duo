@@ -19,10 +19,16 @@ public class IconButton extends JButton {
         super(action);
         setText(text);
         setFocusPainted(false);
+        // Toolbar buttons must not take the focus: disabling a focused button (e.g. Step Over)
+        // would otherwise drop the focus and break the window-level key bindings.
+        setFocusable(false);
     }
 
     public IconButton(Action action) {
         super(action);
         setFocusPainted(false);
+        // Toolbar buttons must not take the focus: disabling a focused button (e.g. Step Over)
+        // would otherwise drop the focus and break the window-level key bindings.
+        setFocusable(false);
     }
 }
