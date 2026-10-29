@@ -9,7 +9,6 @@ package org.jd.gui.controller;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Type;
 import org.jd.gui.model.container.entry.path.FileEntryPath;
-import org.jd.gui.view.SearchInConstantPoolsView;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;

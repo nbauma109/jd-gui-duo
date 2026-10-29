@@ -27,6 +27,8 @@ import java.util.regex.Pattern;
  */
 final class FragmentUriCollector {
 
+    private static final String STATIC_INITIALIZER = "<clinit>";
+
     private FragmentUriCollector() {
     }
 
@@ -53,16 +55,12 @@ final class FragmentUriCollector {
 
         for (Container.Entry entry : matchingEntries) {
             Type type = typeLoader.apply(entry);
-            if (type == null) {
-                continue;
-            }
-            Container.Entry outerEntry = getTopLevelOuterEntry(entry);
-            if (outerEntry == null) {
-                continue;
-            }
-            collectTypeFragments(outerEntry, type, typePattern, memberPattern, flags, fragmentUris);
-            if (references) {
-                collectReferenceFragments(outerEntry, entry, type, referenceScanner, fragmentUris);
+            Container.Entry outerEntry = type == null ? null : getTopLevelOuterEntry(entry);
+            if (outerEntry != null) {
+                collectTypeFragments(outerEntry, type, typePattern, memberPattern, flags, fragmentUris);
+                if (references) {
+                    collectReferenceFragments(outerEntry, entry, type, referenceScanner, fragmentUris);
+                }
             }
         }
 
@@ -109,49 +107,54 @@ final class FragmentUriCollector {
     }
 
     private static void collectTypeFragments(Container.Entry outerEntry, Type type, Pattern typePattern, Pattern memberPattern, int flags, Set<URI> fragmentUris) {
-        String typeName = type.getName();
-        String simpleTypeName = lastIdentifier(typeName);
-
         // Always show the type node for every match (declaration or reference), so the user
         // sees the class/interface/enum/annotation/record icon instead of just the file icon.
-        addTypeFragmentWithAncestors(outerEntry, typeName, fragmentUris);
+        addTypeFragmentWithAncestors(outerEntry, type.getName(), fragmentUris);
 
         // For declarations only, we can additionally pinpoint specific matching members.
-        if ((flags & SearchInConstantPoolsView.SEARCH_DECLARATION) == 0) {
-            return;
+        if ((flags & SearchInConstantPoolsView.SEARCH_DECLARATION) != 0) {
+            collectConstructorFragments(outerEntry, type, typePattern, fragmentUris);
+            collectMethodFragments(outerEntry, type, memberPattern, flags, fragmentUris);
+            collectFieldFragments(outerEntry, type, memberPattern, flags, fragmentUris);
         }
+    }
 
-        // Constructor declarations are indexed by type simple name
-        if (typePattern != null && typePattern.matcher(simpleTypeName).matches()) {
+    /** Constructor declarations are indexed by type simple name. */
+    private static void collectConstructorFragments(Container.Entry outerEntry, Type type, Pattern typePattern, Set<URI> fragmentUris) {
+        if (typePattern != null && typePattern.matcher(lastIdentifier(type.getName())).matches()) {
             for (Type.Method method : type.getMethods()) {
                 if (StringConstants.INSTANCE_CONSTRUCTOR.equals(method.getName())) {
-                    fragmentUris.add(fragmentUri(outerEntry, typeName + '-' + method.getName() + '-' + method.getDescriptor()));
+                    addMemberFragment(outerEntry, type, method.getName(), method.getDescriptor(), fragmentUris);
                 }
             }
         }
+    }
 
-        if (memberPattern == null) {
-            return;
-        }
-
-        // Method declarations matched by method name
-        if ((flags & SearchInConstantPoolsView.SEARCH_METHOD) != 0) {
+    /** Method declarations are matched by method name. */
+    private static void collectMethodFragments(Container.Entry outerEntry, Type type, Pattern memberPattern, int flags, Set<URI> fragmentUris) {
+        if (memberPattern != null && (flags & SearchInConstantPoolsView.SEARCH_METHOD) != 0) {
             for (Type.Method method : type.getMethods()) {
                 String methodName = method.getName();
-                if (!StringConstants.INSTANCE_CONSTRUCTOR.equals(methodName) && !"<clinit>".equals(methodName) && memberPattern.matcher(methodName).matches()) {
-                    fragmentUris.add(fragmentUri(outerEntry, typeName + '-' + methodName + '-' + method.getDescriptor()));
+                if (!StringConstants.INSTANCE_CONSTRUCTOR.equals(methodName) && !STATIC_INITIALIZER.equals(methodName) && memberPattern.matcher(methodName).matches()) {
+                    addMemberFragment(outerEntry, type, methodName, method.getDescriptor(), fragmentUris);
                 }
             }
         }
+    }
 
-        // Field declarations matched by field name
-        if ((flags & SearchInConstantPoolsView.SEARCH_FIELD) != 0) {
+    /** Field declarations are matched by field name. */
+    private static void collectFieldFragments(Container.Entry outerEntry, Type type, Pattern memberPattern, int flags, Set<URI> fragmentUris) {
+        if (memberPattern != null && (flags & SearchInConstantPoolsView.SEARCH_FIELD) != 0) {
             for (Type.Field field : type.getFields()) {
                 if (memberPattern.matcher(field.getName()).matches()) {
-                    fragmentUris.add(fragmentUri(outerEntry, typeName + '-' + field.getName() + '-' + field.getDescriptor()));
+                    addMemberFragment(outerEntry, type, field.getName(), field.getDescriptor(), fragmentUris);
                 }
             }
         }
+    }
+
+    private static void addMemberFragment(Container.Entry outerEntry, Type type, String name, String descriptor, Set<URI> fragmentUris) {
+        fragmentUris.add(fragmentUri(outerEntry, type.getName() + '-' + name + '-' + descriptor));
     }
 
     /**
@@ -161,16 +164,15 @@ final class FragmentUriCollector {
     private static void collectReferenceFragments(Container.Entry outerEntry, Container.Entry entry, Type type,
             Function<Container.Entry, ReferenceScanner.Result> referenceScanner, Set<URI> fragmentUris) {
         ReferenceScanner.Result result = referenceScanner.apply(entry);
-        String typeName = type.getName();
 
         for (Type.Method method : type.getMethods()) {
-            if (!"<clinit>".equals(method.getName()) && result.methods().contains(method.getName() + method.getDescriptor())) {
-                fragmentUris.add(fragmentUri(outerEntry, typeName + '-' + method.getName() + '-' + method.getDescriptor()));
+            if (!STATIC_INITIALIZER.equals(method.getName()) && result.methods().contains(method.getName() + method.getDescriptor())) {
+                addMemberFragment(outerEntry, type, method.getName(), method.getDescriptor(), fragmentUris);
             }
         }
         for (Type.Field field : type.getFields()) {
             if (result.fields().contains(field.getName() + field.getDescriptor())) {
-                fragmentUris.add(fragmentUri(outerEntry, typeName + '-' + field.getName() + '-' + field.getDescriptor()));
+                addMemberFragment(outerEntry, type, field.getName(), field.getDescriptor(), fragmentUris);
             }
         }
     }

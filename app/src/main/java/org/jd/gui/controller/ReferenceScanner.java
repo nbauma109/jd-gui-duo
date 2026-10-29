@@ -12,12 +12,14 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Handle;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -122,72 +124,65 @@ final class ReferenceScanner {
         @Override
         public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
             String key = name + descriptor;
-            if (matchesType(Type.getMethodType(descriptor))) {
+            if (matchesType(Type.getMethodType(descriptor)) || matchesAnyType(exceptions)) {
                 methods.add(key);
             }
-            if (exceptions != null) {
-                for (String exception : exceptions) {
-                    if (matchesType(exception)) {
-                        methods.add(key);
-                    }
-                }
+            return new BodyVisitor(key);
+        }
+
+        private boolean matchesAnyType(String[] internalNames) {
+            return internalNames != null && Arrays.stream(internalNames).anyMatch(this::matchesType);
+        }
+
+        /** Records the method as soon as one of its instructions holds a matching reference. */
+        private final class BodyVisitor extends MethodVisitor {
+            private final String key;
+
+            BodyVisitor(String key) {
+                super(Opcodes.ASM9);
+                this.key = key;
             }
-            return new MethodVisitor(Opcodes.ASM9) {
-                private void hit() {
+
+            private void hitIf(boolean matching) {
+                if (matching) {
                     methods.add(key);
                 }
+            }
 
-                @Override
-                public void visitTypeInsn(int opcode, String type) {
-                    if (matchesType(type)) {
-                        hit();
-                    }
-                }
+            @Override
+            public void visitTypeInsn(int opcode, String type) {
+                hitIf(matchesType(type));
+            }
 
-                @Override
-                public void visitFieldInsn(int opcode, String owner, String fieldName, String fieldDescriptor) {
-                    if (matchesType(owner) || matchesField(fieldName) || matchesType(Type.getType(fieldDescriptor))) {
-                        hit();
-                    }
-                }
+            @Override
+            public void visitFieldInsn(int opcode, String owner, String fieldName, String fieldDescriptor) {
+                hitIf(matchesType(owner) || matchesField(fieldName) || matchesType(Type.getType(fieldDescriptor)));
+            }
 
-                @Override
-                public void visitMethodInsn(int opcode, String owner, String methodName, String methodDescriptor, boolean isInterface) {
-                    if (matchesType(owner) || matchesMethod(owner, methodName)) {
-                        hit();
-                    }
-                }
+            @Override
+            public void visitMethodInsn(int opcode, String owner, String methodName, String methodDescriptor, boolean isInterface) {
+                hitIf(matchesType(owner) || matchesMethod(owner, methodName));
+            }
 
-                @Override
-                public void visitInvokeDynamicInsn(String indyName, String indyDescriptor, Handle bootstrap, Object... arguments) {
-                    for (Object argument : arguments) {
-                        if (matchesConstant(argument)) {
-                            hit();
-                        }
-                    }
-                }
+            @Override
+            public void visitInvokeDynamicInsn(String indyName, String indyDescriptor, Handle bootstrap, Object... arguments) {
+                hitIf(Arrays.stream(arguments).anyMatch(Visitor.this::matchesConstant));
+            }
 
-                @Override
-                public void visitLdcInsn(Object value) {
-                    if (matchesConstant(value)) {
-                        hit();
-                    }
-                }
+            @Override
+            public void visitLdcInsn(Object value) {
+                hitIf(matchesConstant(value));
+            }
 
-                @Override
-                public void visitMultiANewArrayInsn(String arrayDescriptor, int dimensions) {
-                    if (matchesType(Type.getType(arrayDescriptor))) {
-                        hit();
-                    }
-                }
+            @Override
+            public void visitMultiANewArrayInsn(String arrayDescriptor, int dimensions) {
+                hitIf(matchesType(Type.getType(arrayDescriptor)));
+            }
 
-                @Override
-                public void visitTryCatchBlock(org.objectweb.asm.Label start, org.objectweb.asm.Label end, org.objectweb.asm.Label handler, String type) {
-                    if (matchesType(type)) {
-                        hit();
-                    }
-                }
-            };
+            @Override
+            public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
+                hitIf(matchesType(type));
+            }
         }
 
         private static String simpleName(String internalName) {
