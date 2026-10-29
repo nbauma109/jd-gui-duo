@@ -152,6 +152,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
     private BreakpointListPanel breakpointListPanel;
     private Consumer<String> breakpointNavigateCallback;
     private Consumer<Boolean> skipAllBreakpointsCallback;
+    private Runnable addExceptionBreakpointCallback;
     private Consumer<String> removeBreakpointCallback;
     private Runnable removeAllBreakpointsCallback;
     private Runnable toggleBreakpointCallback;
@@ -765,6 +766,10 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
         this.breakpointNavigateCallback = callback;
     }
 
+    public void setAddExceptionBreakpointCallback(Runnable callback) {
+        this.addExceptionBreakpointCallback = callback;
+    }
+
     public void setSkipAllBreakpointsCallback(Consumer<Boolean> callback) {
         this.skipAllBreakpointsCallback = callback;
     }
@@ -915,10 +920,18 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
         breakpointListPanel = new BreakpointListPanel(
                 newImageIcon("/org/jd/gui/images/brkp_obj.png"),
                 newImageIcon("/org/jd/gui/images/brkpd_obj.png"),
+                newImageIcon("/org/jd/gui/images/jexception_obj.png"),
+                newImageIcon("/org/jd/gui/images/jexceptiond_obj.png"),
                 newImageIcon("/org/jd/gui/images/bp_remove.png"),
                 newImageIcon("/org/jd/gui/images/bp_remove_all.png"),
                 newImageIcon("/org/jd/gui/images/bp_goto_file.png"),
-                newImageIcon("/org/jd/gui/images/bp_skip_all.png"));
+                newImageIcon("/org/jd/gui/images/bp_skip_all.png"),
+                newImageIcon("/org/jd/gui/images/exc_catch.png"));
+        breakpointListPanel.setAddExceptionCallback(() -> {
+            if (addExceptionBreakpointCallback != null) {
+                addExceptionBreakpointCallback.run();
+            }
+        });
         breakpointListPanel.setRemoveCallback(key -> {
             if (removeBreakpointCallback != null) {
                 removeBreakpointCallback.accept(key);

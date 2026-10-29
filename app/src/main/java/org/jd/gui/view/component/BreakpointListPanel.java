@@ -55,6 +55,7 @@ public class BreakpointListPanel extends JPanel {
     private final JButton removeAllButton;
     private final JButton goToFileButton;
     private final JToggleButton skipAllButton;
+    private final JButton addExceptionButton;
     private final int checkBoxWidth = new JCheckBox().getPreferredSize().width + 4;
 
     private transient Consumer<String> removeCallback;
@@ -62,8 +63,10 @@ public class BreakpointListPanel extends JPanel {
     private transient BiConsumer<String, Boolean> enabledCallback;
     private transient Consumer<String> navigateCallback;
     private transient Consumer<Boolean> skipAllCallback;
+    private transient Runnable addExceptionCallback;
 
-    public BreakpointListPanel(Icon enabledIcon, Icon disabledIcon, Icon removeIcon, Icon removeAllIcon, Icon goToFileIcon, Icon skipAllIcon) {
+    public BreakpointListPanel(Icon enabledIcon, Icon disabledIcon, Icon exceptionIcon, Icon disabledExceptionIcon,
+            Icon removeIcon, Icon removeAllIcon, Icon goToFileIcon, Icon skipAllIcon, Icon addExceptionIcon) {
         super(new BorderLayout());
 
         removeButton = newButton(removeIcon, "Remove Selected Breakpoints");
@@ -71,6 +74,18 @@ public class BreakpointListPanel extends JPanel {
         goToFileButton = newButton(goToFileIcon, "Go to File for Breakpoint");
         skipAllButton = new JToggleButton(skipAllIcon);
         style(skipAllButton, "Skip All Breakpoints");
+        // a toggle must show that it is pressed
+        skipAllButton.addItemListener(e -> {
+            boolean pressed = skipAllButton.isSelected();
+            skipAllButton.setContentAreaFilled(pressed);
+            skipAllButton.setBorderPainted(pressed);
+        });
+        addExceptionButton = newButton(addExceptionIcon, "Add Java Exception Breakpoint...");
+        addExceptionButton.addActionListener(e -> {
+            if (addExceptionCallback != null) {
+                addExceptionCallback.run();
+            }
+        });
 
         removeButton.addActionListener(e -> removeSelected());
         removeAllButton.addActionListener(e -> {
@@ -90,10 +105,11 @@ public class BreakpointListPanel extends JPanel {
         toolbar.add(removeAllButton);
         toolbar.add(goToFileButton);
         toolbar.add(skipAllButton);
+        toolbar.add(addExceptionButton);
         add(toolbar, BorderLayout.NORTH);
 
         list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        list.setCellRenderer(new Renderer(enabledIcon, disabledIcon));
+        list.setCellRenderer(new Renderer(enabledIcon, disabledIcon, exceptionIcon, disabledExceptionIcon));
         list.setFixedCellHeight(21);
         list.addListSelectionListener(e -> updateButtons());
         list.addMouseListener(new MouseAdapter() {
@@ -157,6 +173,10 @@ public class BreakpointListPanel extends JPanel {
         this.navigateCallback = callback;
     }
 
+    public void setAddExceptionCallback(Runnable callback) {
+        this.addExceptionCallback = callback;
+    }
+
     public void setSkipAllCallback(Consumer<Boolean> callback) {
         this.skipAllCallback = callback;
     }
@@ -207,10 +227,14 @@ public class BreakpointListPanel extends JPanel {
         private final JLabel label = new JLabel();
         private final Icon enabledIcon;
         private final Icon disabledIcon;
+        private final Icon exceptionIcon;
+        private final Icon disabledExceptionIcon;
 
-        Renderer(Icon enabledIcon, Icon disabledIcon) {
+        Renderer(Icon enabledIcon, Icon disabledIcon, Icon exceptionIcon, Icon disabledExceptionIcon) {
             this.enabledIcon = enabledIcon;
             this.disabledIcon = disabledIcon;
+            this.exceptionIcon = exceptionIcon;
+            this.disabledExceptionIcon = disabledExceptionIcon;
             checkBox.setOpaque(false);
             checkBox.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 2));
             label.setIconTextGap(5);
@@ -224,7 +248,8 @@ public class BreakpointListPanel extends JPanel {
             label.setForeground(selected ? UIManager.getColor("List.selectionForeground") : jList.getForeground());
             label.setFont(jList.getFont());
             label.setText(row.text());
-            label.setIcon(row.enabled() ? enabledIcon : disabledIcon);
+            boolean exception = row.key().startsWith("exception:");
+            label.setIcon(exception ? (row.enabled() ? exceptionIcon : disabledExceptionIcon) : (row.enabled() ? enabledIcon : disabledIcon));
             checkBox.setSelected(row.enabled());
             panel.setToolTipText(row.key() + " [" + row.state() + "]");
             return panel;

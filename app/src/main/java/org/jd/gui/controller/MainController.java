@@ -299,6 +299,7 @@ public class MainController implements API {
                         }
                     }
                 });
+                mainView.setAddExceptionBreakpointCallback(() -> getRemoteDebugController().showAddExceptionBreakpointDialog());
                 mainView.setSkipAllBreakpointsCallback(skip -> getRemoteDebugController().setSkipAllBreakpoints((Boolean) skip));
                 mainView.setRunToLineCallback(() -> {
                     BreakpointCapablePage page = getCurrentBreakpointPage();
