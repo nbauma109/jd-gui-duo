@@ -123,6 +123,8 @@ public class RemoteDebugController {
     /** Temporary breakpoint(s) of a pending "Run to Line"; removed as soon as the thread stops anywhere. */
     private final transient List<BreakpointRequest> runToLineRequests = new CopyOnWriteArrayList<>();
     private volatile ThreadReference runToLineThread;
+    /** Number of expression evaluations running: requests installed meanwhile stay disabled until they end. */
+    private final java.util.concurrent.atomic.AtomicInteger evaluations = new java.util.concurrent.atomic.AtomicInteger();
     /** Changes whenever the stop shown in the views stops being current (resume, step, other thread, disconnect). */
     private volatile long stopGeneration;
     /** Reads the stack and evaluates the watch expressions after a stop, away from the event loop. */
@@ -263,8 +265,9 @@ public class RemoteDebugController {
         try {
             ExceptionRequest request = vm.eventRequestManager().createExceptionRequest(referenceType, breakpoint.caught(), breakpoint.uncaught());
             request.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
-            request.setEnabled(!skipAllBreakpoints && !disabledExceptions.contains(breakpoint.typeName()));
+            // registered first, enabled after: an evaluation that ends in between still finds it (see restoreRequests)
             installedExceptions.computeIfAbsent(breakpoint.typeName(), _ -> new CopyOnWriteArrayList<>()).add(request);
+            request.setEnabled(evaluations.get() == 0 && !skipAllBreakpoints && !disabledExceptions.contains(breakpoint.typeName()));
         } catch (RuntimeException e) {
             assert ExceptionUtil.printStackTrace(e);
         }
@@ -953,6 +956,7 @@ public class RemoteDebugController {
     private <T> T withoutSuspendingRequests(Supplier<T> action) {
         VirtualMachine vm = virtualMachine;
         List<EventRequest> switchedOff = new ArrayList<>();
+        evaluations.incrementAndGet();
         if (vm != null) {
             try {
                 EventRequestManager manager = vm.eventRequestManager();
@@ -971,6 +975,7 @@ public class RemoteDebugController {
         try {
             return action.get();
         } finally {
+            evaluations.decrementAndGet();
             restoreRequests(switchedOff);
         }
     }
@@ -978,18 +983,20 @@ public class RemoteDebugController {
     /** Re-enables what an evaluation switched off, unless the user disabled or skipped it in the meantime. */
     private void restoreRequests(List<EventRequest> switchedOff) {
         Set<EventRequest> handled = new HashSet<>();
+        boolean idle = evaluations.get() == 0;
+        // every managed request, not only those switched off: some were installed while the evaluation ran
         for (Map.Entry<BreakpointKey, List<BreakpointRequest>> entry : installedBreakpoints.entrySet()) {
             for (BreakpointRequest request : entry.getValue()) {
-                if (switchedOff.contains(request)) {
-                    handled.add(request);
+                handled.add(request);
+                if (idle) {
                     setEnabledQuietly(request, !skipAllBreakpoints && !disabledBreakpoints.contains(entry.getKey()));
                 }
             }
         }
         for (Map.Entry<String, List<ExceptionRequest>> entry : installedExceptions.entrySet()) {
             for (ExceptionRequest request : entry.getValue()) {
-                if (switchedOff.contains(request)) {
-                    handled.add(request);
+                handled.add(request);
+                if (idle) {
                     setEnabledQuietly(request, !skipAllBreakpoints && !disabledExceptions.contains(entry.getKey()));
                 }
             }
@@ -1430,8 +1437,8 @@ public class RemoteDebugController {
             for (Location location : referenceType.locationsOfLine(breakpoint.lineNumber())) {
                 BreakpointRequest request = vm.eventRequestManager().createBreakpointRequest(location);
                 request.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
-                request.setEnabled(!skipAllBreakpoints && !disabledBreakpoints.contains(breakpoint));
-                installedBreakpoints.computeIfAbsent(breakpoint, _ -> new ArrayList<>()).add(request);
+                installedBreakpoints.computeIfAbsent(breakpoint, _ -> new CopyOnWriteArrayList<>()).add(request);
+                request.setEnabled(evaluations.get() == 0 && !skipAllBreakpoints && !disabledBreakpoints.contains(breakpoint));
             }
         } catch (AbsentInformationException e) {
             assert ExceptionUtil.printStackTrace(e);
