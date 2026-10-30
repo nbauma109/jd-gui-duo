@@ -765,9 +765,16 @@ public class MainController implements API {
 
         String internalTypeName = typeName.replace('.', '/');
         List<Container.Entry> entries = IndexesUtil.findInternalTypeName(getCollectionOfFutureIndexes(), internalTypeName);
-        if (!entries.isEmpty()) {
-            openURI(UriUtil.createURI(this, getCollectionOfFutureIndexes(), entries.get(0), "lineNumber=" + lineNumber, null));
+        if (entries.isEmpty()) {
+            // The class is not among the opened archives (e.g. a dependency): the page on display is unrelated,
+            // so it must not get the execution marker, and the marker of the previous stop is obsolete.
+            BreakpointCapablePage unrelated = getCurrentBreakpointPage();
+            if (unrelated != null) {
+                unrelated.setCurrentExecutionLine(0);
+            }
+            return;
         }
+        openURI(UriUtil.createURI(this, getCollectionOfFutureIndexes(), entries.get(0), "lineNumber=" + lineNumber, null));
         // currentPage was updated synchronously by openURI (via pageChanged callbacks).
         // Set the execution-line highlight immediately — no need for another invokeLater.
         BreakpointCapablePage bcp = getCurrentBreakpointPage();

@@ -332,6 +332,7 @@ public class RemoteDebugController {
     public boolean toggleBreakpoint(String typeName, int lineNumber) {
         BreakpointKey key = new BreakpointKey(typeName, lineNumber);
         if (breakpoints.remove(key)) {
+            disabledBreakpoints.remove(key); // a breakpoint added again later must not inherit this one's setting
             uninstallBreakpoint(key);
             publishBreakpoints();
             return false;
