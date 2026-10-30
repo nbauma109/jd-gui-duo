@@ -17,6 +17,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
@@ -35,19 +36,23 @@ final class FragmentUriCollector {
     private final Function<Container.Entry, ReferenceScanner.Result> referenceScanner;
     private final Pattern typePattern;
     private final Pattern memberPattern;
+    private final Pattern declaredTypePattern;
+    private final boolean declarations;
     private final boolean references;
     private final int flags;
     private final Set<URI> fragmentUris = new HashSet<>();
 
     private FragmentUriCollector(Function<Container.Entry, Collection<Type>> typeLoader,
             Function<Container.Entry, ReferenceScanner.Result> referenceScanner, String pattern, int flags) {
-        boolean declarations = (flags & SearchInConstantPoolsView.SEARCH_DECLARATION) != 0;
+        this.declarations = (flags & SearchInConstantPoolsView.SEARCH_DECLARATION) != 0;
         this.typeLoader = typeLoader;
         this.referenceScanner = referenceScanner;
         this.flags = flags;
         this.references = (flags & SearchInConstantPoolsView.SEARCH_REFERENCE) != 0;
         // typePattern is used to match constructor declarations by type simple name
         this.typePattern = patternIf(declarations && (flags & SearchInConstantPoolsView.SEARCH_CONSTRUCTOR) != 0, pattern);
+        // declaredTypePattern is used to match nested type declarations by type simple name
+        this.declaredTypePattern = patternIf(declarations && (flags & SearchInConstantPoolsView.SEARCH_TYPE) != 0, pattern);
         // memberPattern is used to match method/field declaration names
         this.memberPattern = patternIf(declarations && (flags & (SearchInConstantPoolsView.SEARCH_METHOD | SearchInConstantPoolsView.SEARCH_FIELD)) != 0, pattern);
     }
@@ -161,65 +166,89 @@ final class FragmentUriCollector {
 
     private void collectTypeTree(Container.Entry outerEntry, Type type, boolean nested) {
         if (type != null) {
-            collectTypeFragments(outerEntry, type, nested);
-            Collection<Type> innerTypes = type.getInnerTypes();
-            if (innerTypes != null) {
-                for (Type innerType : innerTypes) {
-                    collectTypeTree(outerEntry, innerType, true);
-                }
+            // Always show the type node for every match (declaration or reference), so the user
+            // sees the class/interface/enum/annotation/record icon instead of just the file icon.
+            addTypeFragmentWithAncestors(fragmentUris, outerEntry, type.getName(), nested);
+            collectMemberFragments(fragmentUris, outerEntry, type);
+            for (Type innerType : innerTypesOf(type)) {
+                fragmentUris.addAll(collectNestedType(outerEntry, innerType));
             }
         }
     }
 
-    private void collectTypeFragments(Container.Entry outerEntry, Type type, boolean nested) {
-        // Always show the type node for every match (declaration or reference), so the user
-        // sees the class/interface/enum/annotation/record icon instead of just the file icon.
-        addTypeFragmentWithAncestors(outerEntry, type.getName(), nested);
+    /**
+     * Collects the nodes of a type nested in a matching type. The type is only displayed when it
+     * declares a match, or contains a nested type that does: the class file matched through its
+     * outer type or another member, not through every type it happens to declare.
+     */
+    private Set<URI> collectNestedType(Container.Entry outerEntry, Type type) {
+        Set<URI> found = new HashSet<>();
+        if (type != null) {
+            collectMemberFragments(found, outerEntry, type);
+            for (Type innerType : innerTypesOf(type)) {
+                found.addAll(collectNestedType(outerEntry, innerType));
+            }
+            if (!found.isEmpty() || declaredTypeMatches(type)) {
+                addTypeFragmentWithAncestors(found, outerEntry, type.getName(), true);
+            }
+        }
+        return found;
+    }
 
-        // For declarations only, we can additionally pinpoint specific matching members.
-        if ((flags & SearchInConstantPoolsView.SEARCH_DECLARATION) != 0) {
-            collectConstructorFragments(outerEntry, type);
-            collectMethodFragments(outerEntry, type);
-            collectFieldFragments(outerEntry, type);
+    private static Collection<Type> innerTypesOf(Type type) {
+        Collection<Type> innerTypes = type.getInnerTypes();
+        return innerTypes == null ? List.of() : innerTypes;
+    }
+
+    private boolean declaredTypeMatches(Type type) {
+        return declaredTypePattern != null && declaredTypePattern.matcher(lastIdentifier(type.getName())).matches();
+    }
+
+    /** For declarations only, we can pinpoint specific matching members. */
+    private void collectMemberFragments(Set<URI> target, Container.Entry outerEntry, Type type) {
+        if (declarations) {
+            collectConstructorFragments(target, outerEntry, type);
+            collectMethodFragments(target, outerEntry, type);
+            collectFieldFragments(target, outerEntry, type);
         }
     }
 
     /** Constructor declarations are indexed by type simple name. */
-    private void collectConstructorFragments(Container.Entry outerEntry, Type type) {
+    private void collectConstructorFragments(Set<URI> target, Container.Entry outerEntry, Type type) {
         if (typePattern != null && typePattern.matcher(lastIdentifier(type.getName())).matches()) {
             for (Type.Method method : type.getMethods()) {
                 if (StringConstants.INSTANCE_CONSTRUCTOR.equals(method.getName())) {
-                    addMemberFragment(outerEntry, type, method.getName(), method.getDescriptor());
+                    addMemberFragment(target, outerEntry, type, method.getName(), method.getDescriptor());
                 }
             }
         }
     }
 
     /** Method declarations are matched by method name. */
-    private void collectMethodFragments(Container.Entry outerEntry, Type type) {
+    private void collectMethodFragments(Set<URI> target, Container.Entry outerEntry, Type type) {
         if (memberPattern != null && (flags & SearchInConstantPoolsView.SEARCH_METHOD) != 0) {
             for (Type.Method method : type.getMethods()) {
                 String methodName = method.getName();
                 if (!StringConstants.INSTANCE_CONSTRUCTOR.equals(methodName) && !STATIC_INITIALIZER.equals(methodName) && memberPattern.matcher(methodName).matches()) {
-                    addMemberFragment(outerEntry, type, methodName, method.getDescriptor());
+                    addMemberFragment(target, outerEntry, type, methodName, method.getDescriptor());
                 }
             }
         }
     }
 
     /** Field declarations are matched by field name. */
-    private void collectFieldFragments(Container.Entry outerEntry, Type type) {
+    private void collectFieldFragments(Set<URI> target, Container.Entry outerEntry, Type type) {
         if (memberPattern != null && (flags & SearchInConstantPoolsView.SEARCH_FIELD) != 0) {
             for (Type.Field field : type.getFields()) {
                 if (memberPattern.matcher(field.getName()).matches()) {
-                    addMemberFragment(outerEntry, type, field.getName(), field.getDescriptor());
+                    addMemberFragment(target, outerEntry, type, field.getName(), field.getDescriptor());
                 }
             }
         }
     }
 
-    private void addMemberFragment(Container.Entry outerEntry, Type type, String name, String descriptor) {
-        fragmentUris.add(fragmentUri(outerEntry, type.getName() + '-' + name + '-' + descriptor));
+    private static void addMemberFragment(Set<URI> target, Container.Entry outerEntry, Type type, String name, String descriptor) {
+        target.add(fragmentUri(outerEntry, type.getName() + '-' + name + '-' + descriptor));
     }
 
     /**
@@ -234,12 +263,12 @@ final class FragmentUriCollector {
 
         for (Type.Method method : type.getMethods()) {
             if (!STATIC_INITIALIZER.equals(method.getName()) && result.methods().contains(method.getName() + method.getDescriptor())) {
-                addMemberFragment(outerEntry, type, method.getName(), method.getDescriptor());
+                addMemberFragment(fragmentUris, outerEntry, type, method.getName(), method.getDescriptor());
             }
         }
         for (Type.Field field : type.getFields()) {
             if (result.fields().contains(field.getName() + field.getDescriptor())) {
-                addMemberFragment(outerEntry, type, field.getName(), field.getDescriptor());
+                addMemberFragment(fragmentUris, outerEntry, type, field.getName(), field.getDescriptor());
             }
         }
     }
@@ -248,8 +277,8 @@ final class FragmentUriCollector {
      * Adds the fragment URI for the given type name plus, for a nested type, all ancestor type
      * URIs (stripping '$'-delimited suffixes) so that the full path in the tree is visible.
      */
-    private void addTypeFragmentWithAncestors(Container.Entry outerEntry, String typeName, boolean nested) {
-        fragmentUris.add(fragmentUri(outerEntry, typeName));
+    private static void addTypeFragmentWithAncestors(Set<URI> target, Container.Entry outerEntry, String typeName, boolean nested) {
+        target.add(fragmentUri(outerEntry, typeName));
         if (!nested) {
             return;
         }
@@ -259,7 +288,7 @@ final class FragmentUriCollector {
         int lastDollar;
         while ((lastDollar = name.lastIndexOf('$')) >= simpleNameStart && lastDollar > 0) {
             name = name.substring(0, lastDollar);
-            fragmentUris.add(fragmentUri(outerEntry, name));
+            target.add(fragmentUri(outerEntry, name));
         }
     }
 

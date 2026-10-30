@@ -124,6 +124,40 @@ class FragmentUriCollectorTest {
     }
 
     @Test
+    void unrelatedInnerTypesOfAMatchingTypeAreNotDisplayed() {
+        Type unrelated = type("com/example/Foo$Unrelated", Map.of(), Map.of("other", "()V"));
+        Type matching = type("com/example/Foo$Matching", Map.of(), Map.of("run", "()V"));
+        Type source = type("com/example/Foo", Map.of(), Map.of("run", "()V"), List.of(unrelated, matching));
+
+        Set<URI> uris = FragmentUriCollector.collect(List.of(foo), e -> List.of(source), "run", SEARCH_DECLARATION | SEARCH_METHOD);
+
+        assertEquals(Set.of(uri(FOO, "com/example/Foo"), uri(FOO, "com/example/Foo-run-()V"),
+                uri(FOO, "com/example/Foo$Matching"), uri(FOO, "com/example/Foo$Matching-run-()V")), uris);
+    }
+
+    @Test
+    void innerTypeIsKeptAsAncestorOfAMatchInAnInnerTypeOfItself() {
+        Type deep = type("com/example/Foo$Mid$Deep", Map.of(), Map.of("run", "()V"));
+        Type mid = type("com/example/Foo$Mid", Map.of(), Map.of(), List.of(deep));
+        Type source = type("com/example/Foo", Map.of(), Map.of(), List.of(mid));
+
+        Set<URI> uris = FragmentUriCollector.collect(List.of(foo), e -> List.of(source), "run", SEARCH_DECLARATION | SEARCH_METHOD);
+
+        assertEquals(Set.of(uri(FOO, "com/example/Foo"), uri(FOO, "com/example/Foo$Mid"), uri(FOO, "com/example/Foo$Mid$Deep"),
+                uri(FOO, "com/example/Foo$Mid$Deep-run-()V")), uris);
+    }
+
+    @Test
+    void innerTypeDeclarationMatchingTheSearchedNameIsDisplayed() {
+        Type inner = type("com/example/Foo$Needle", Map.of(), Map.of());
+        Type source = type("com/example/Foo", Map.of(), Map.of(), List.of(inner));
+
+        Set<URI> uris = FragmentUriCollector.collect(List.of(foo), e -> List.of(source), "Needle", SEARCH_DECLARATION | SEARCH_TYPE);
+
+        assertEquals(Set.of(uri(FOO, "com/example/Foo"), uri(FOO, "com/example/Foo$Needle")), uris);
+    }
+
+    @Test
     void everyRootTypeOfASourceFileIsCollected() {
         Type second = type("com/example/Second", Map.of(), Map.of("run", "()V"));
         Set<URI> uris = FragmentUriCollector.collect(List.of(foo), e -> List.of(fooType, second), "run", SEARCH_DECLARATION | SEARCH_METHOD);
