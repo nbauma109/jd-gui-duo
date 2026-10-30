@@ -99,8 +99,8 @@ public class RemoteDebugController {
     private final Configuration configuration;
     private final MainController controller;
     private final JFrame mainFrame;
-    private final Set<BreakpointKey> breakpoints = new HashSet<>();
-    private final Map<BreakpointKey, List<BreakpointRequest>> installedBreakpoints = new HashMap<>();
+    private final Set<BreakpointKey> breakpoints = ConcurrentHashMap.newKeySet();
+    private final Map<BreakpointKey, List<BreakpointRequest>> installedBreakpoints = new ConcurrentHashMap<>();
 
     private transient VirtualMachine virtualMachine;
     /**
@@ -115,7 +115,7 @@ public class RemoteDebugController {
     private transient int selectedFrameIndex; // frame shown in Variables/Expressions, 0 = top frame
     private final List<String> watchExpressions = new CopyOnWriteArrayList<>();
     private final Object evaluationLock = new Object();
-    private final Set<BreakpointKey> disabledBreakpoints = new HashSet<>();
+    private final Set<BreakpointKey> disabledBreakpoints = ConcurrentHashMap.newKeySet();
     /** Library classes that are never shown: stepping into them returns to the caller (like Eclipse's step filters). */
     private static final String[] STEP_FILTER_PREFIXES = { "java.", "javax.", "jdk.", "sun.", "com.sun." };
     /** Step to issue once a step through library code is back in application code (thread -> StepRequest depth). */
@@ -945,13 +945,41 @@ public class RemoteDebugController {
         try {
             return action.get();
         } finally {
-            for (EventRequest request : switchedOff) {
-                try {
-                    request.enable();
-                } catch (RuntimeException e) {
-                    // the request was deleted meanwhile
+            restoreRequests(switchedOff);
+        }
+    }
+
+    /** Re-enables what an evaluation switched off, unless the user disabled or skipped it in the meantime. */
+    private void restoreRequests(List<EventRequest> switchedOff) {
+        Set<EventRequest> handled = new HashSet<>();
+        for (Map.Entry<BreakpointKey, List<BreakpointRequest>> entry : installedBreakpoints.entrySet()) {
+            for (BreakpointRequest request : entry.getValue()) {
+                if (switchedOff.contains(request)) {
+                    handled.add(request);
+                    setEnabledQuietly(request, !skipAllBreakpoints && !disabledBreakpoints.contains(entry.getKey()));
                 }
             }
+        }
+        for (Map.Entry<String, List<ExceptionRequest>> entry : installedExceptions.entrySet()) {
+            for (ExceptionRequest request : entry.getValue()) {
+                if (switchedOff.contains(request)) {
+                    handled.add(request);
+                    setEnabledQuietly(request, !skipAllBreakpoints && !disabledExceptions.contains(entry.getKey()));
+                }
+            }
+        }
+        for (EventRequest request : switchedOff) {
+            if (!handled.contains(request)) {
+                setEnabledQuietly(request, true);
+            }
+        }
+    }
+
+    private static void setEnabledQuietly(EventRequest request, boolean enabled) {
+        try {
+            request.setEnabled(enabled);
+        } catch (RuntimeException e) {
+            // the request was deleted meanwhile
         }
     }
 
@@ -1068,8 +1096,14 @@ public class RemoteDebugController {
                     pendingSteps.remove(thread);
                     deleteStepRequests(thread);
                     clearRunToLine();
-                    for (ReferenceType referenceType : vm.classesByName(typeName)) {
-                        for (Location location : referenceType.locationsOfLine(lineNumber)) {
+                    for (ReferenceType referenceType : classesOf(vm, typeName)) {
+                        List<Location> locations;
+                        try {
+                            locations = referenceType.locationsOfLine(lineNumber);
+                        } catch (AbsentInformationException e) {
+                            continue; // generated classes (lambda forwarders...) have no line table
+                        }
+                        for (Location location : locations) {
                             BreakpointRequest request = vm.eventRequestManager().createBreakpointRequest(location);
                             request.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
                             request.addThreadFilter(thread);
@@ -1082,7 +1116,7 @@ public class RemoteDebugController {
                     }
                     runToLineThread = thread;
                     thread.resume();
-                } catch (AbsentInformationException | RuntimeException e) {
+                } catch (RuntimeException e) {
                     clearRunToLine();
                     synchronized (threadLock) {
                         activeRunning = false;
@@ -1320,14 +1354,29 @@ public class RemoteDebugController {
             return;
         }
 
-        for (ReferenceType referenceType : vm.classesByName(breakpoint.typeName())) {
+        for (ReferenceType referenceType : classesOf(vm, breakpoint.typeName())) {
             installBreakpoint(referenceType, breakpoint);
         }
     }
 
+    /** The editor shows a nested or anonymous class inside its outer class: its code lives in {@code Outer$Inner}. */
+    private static boolean isTypeOrNested(String className, String typeName) {
+        return className.equals(typeName) || className.startsWith(typeName + "$");
+    }
+
+    private static List<ReferenceType> classesOf(VirtualMachine vm, String typeName) {
+        List<ReferenceType> result = new ArrayList<>(vm.classesByName(typeName));
+        for (ReferenceType candidate : vm.allClasses()) {
+            if (candidate.name().startsWith(typeName + "$")) {
+                result.add(candidate);
+            }
+        }
+        return result;
+    }
+
     private void installBreakpoints(ReferenceType referenceType) {
         for (BreakpointKey breakpoint : breakpoints) {
-            if (breakpoint.typeName().equals(referenceType.name())) {
+            if (isTypeOrNested(referenceType.name(), breakpoint.typeName())) {
                 installBreakpoint(referenceType, breakpoint);
             }
         }

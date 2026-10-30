@@ -167,15 +167,7 @@ public final class JdiExpressionEvaluator {
                 left = null;
                 continue;
             }
-            double l = number(left);
-            double r = number(right);
-            boolean result = switch (op) {
-                case "<=" -> l <= r;
-                case ">=" -> l >= r;
-                case "<" -> l < r;
-                default -> l > r;
-            };
-            left = vm.mirrorOf(result);
+            left = vm.mirrorOf(compare(op, value(left), value(right)));
         }
     }
 
@@ -596,6 +588,15 @@ public final class JdiExpressionEvaluator {
         if (typeName.equals(superName) || "java.lang.Object".equals(superName)) {
             return true;
         }
+        if (typeName.endsWith("[]")) {
+            // arrays are Cloneable and Serializable, and covariant when their elements are references
+            if ("java.lang.Cloneable".equals(superName) || "java.io.Serializable".equals(superName)) {
+                return true;
+            }
+            String element = typeName.substring(0, typeName.length() - 2);
+            return superName.endsWith("[]") && !isPrimitiveName(element)
+                && isSubtype(element, superName.substring(0, superName.length() - 2));
+        }
         ReferenceType type = findClass(typeName);
         if (type instanceof ClassType classType) {
             for (ClassType current = classType; current != null; current = current.superclass()) {
@@ -668,6 +669,29 @@ public final class JdiExpressionEvaluator {
             return primitive.longValue();
         }
         throw new EvaluationException("A number is required");
+    }
+
+    /** Relational operators: integral operands are compared as integers (a double would lose the low bits of a long). */
+    private static boolean compare(String op, Value left, Value right) throws EvaluationException {
+        if (isNumeric(left) && isNumeric(right) && !(left instanceof DoubleValue || left instanceof FloatValue
+                || right instanceof DoubleValue || right instanceof FloatValue)) {
+            long l = numberAsLong(left);
+            long r = numberAsLong(right);
+            return switch (op) {
+                case "<=" -> l <= r;
+                case ">=" -> l >= r;
+                case "<" -> l < r;
+                default -> l > r;
+            };
+        }
+        double l = number(left);
+        double r = number(right);
+        return switch (op) {
+            case "<=" -> l <= r;
+            case ">=" -> l >= r;
+            case "<" -> l < r;
+            default -> l > r;
+        };
     }
 
     private static boolean isNumeric(Value value) {

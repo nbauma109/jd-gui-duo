@@ -842,11 +842,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
                 public void treeWillExpand(javax.swing.event.TreeExpansionEvent event) throws ExpandVetoException {
                     DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) event.getPath().getLastPathComponent();
                     if (treeNode.getUserObject() instanceof DebugVariableNode variable && !variable.isChildrenLoaded()) {
-                        treeNode.removeAllChildren();
-                        for (DebugVariableNode child : variable.getChildren()) {
-                            treeNode.add(buildTreeNode(child));
-                        }
-                        model.nodeStructureChanged(treeNode);
+                        loadChildrenAsync(model, treeNode, variable);
                     }
                 }
 
@@ -1037,6 +1033,43 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
         });
     }
 
+    private final java.util.Set<DebugVariableNode> loadingNodes = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+
+    /**
+     * Reading the fields or elements of a value is a round trip to the debuggee: do it in the background and fill
+     * the node when it arrives, so the window stays responsive. The "Loading..." placeholder shows meanwhile.
+     */
+    private void loadChildrenAsync(DefaultTreeModel model, DefaultMutableTreeNode treeNode, DebugVariableNode node) {
+        if (!loadingNodes.add(node)) {
+            return;
+        }
+        new javax.swing.SwingWorker<List<DebugVariableNode>, Void>() {
+            @Override
+            protected List<DebugVariableNode> doInBackground() {
+                return node.getChildren();
+            }
+
+            @Override
+            protected void done() {
+                loadingNodes.remove(node);
+                try {
+                    List<DebugVariableNode> children = get();
+                    treeNode.removeAllChildren();
+                    for (DebugVariableNode child : children) {
+                        treeNode.add(buildTreeNode(child));
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                } catch (java.util.concurrent.ExecutionException | RuntimeException e) {
+                    treeNode.removeAllChildren();
+                    treeNode.add(new DefaultMutableTreeNode(new DebugVariableNode("<error>", String.valueOf(e.getCause() == null ? e.getMessage() : e.getCause().getMessage()))));
+                }
+                model.nodeStructureChanged(treeNode);
+            }
+        }.execute();
+    }
+
     private static DefaultMutableTreeNode buildTreeNode(DebugVariableNode node) {
         DefaultMutableTreeNode treeNode = new DefaultMutableTreeNode(node);
         if (!node.isLeaf()) {
@@ -1097,11 +1130,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
                 DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) event.getPath().getLastPathComponent();
                 Object userObj = treeNode.getUserObject();
                 if (userObj instanceof DebugVariableNode node && !node.isChildrenLoaded()) {
-                    treeNode.removeAllChildren();
-                    for (DebugVariableNode child : node.getChildren()) {
-                        treeNode.add(buildTreeNode(child));
-                    }
-                    debugVariablesTreeModel.nodeStructureChanged(treeNode);
+                    loadChildrenAsync(debugVariablesTreeModel, treeNode, node);
                 }
             }
             @Override
@@ -1167,11 +1196,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             public void treeWillExpand(javax.swing.event.TreeExpansionEvent event) throws ExpandVetoException {
                 DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) event.getPath().getLastPathComponent();
                 if (treeNode.getUserObject() instanceof DebugVariableNode node && !node.isChildrenLoaded()) {
-                    treeNode.removeAllChildren();
-                    for (DebugVariableNode child : node.getChildren()) {
-                        treeNode.add(buildTreeNode(child));
-                    }
-                    debugExpressionsTreeModel.nodeStructureChanged(treeNode);
+                    loadChildrenAsync(debugExpressionsTreeModel, treeNode, node);
                 }
             }
             @Override

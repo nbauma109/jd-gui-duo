@@ -171,7 +171,8 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
 
     private String selectedExpression() {
         String selected = textArea.getSelectedText();
-        return selected == null || selected.isBlank() ? null : selected.trim().replaceAll("\\s+", " ");
+        // keep the text as selected: collapsing spaces would change string literals such as "a  b"
+        return selected == null || selected.isBlank() ? null : selected.trim();
     }
 
     private String identifierAt(int offset) {
