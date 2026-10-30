@@ -121,8 +121,7 @@ public class RemoteDebugController {
     /** Step to issue once a step through library code is back in application code (thread -> StepRequest depth). */
     private final transient Map<ThreadReference, Integer> pendingSteps = new ConcurrentHashMap<>();
     /** Temporary breakpoint(s) of a pending "Run to Line"; removed as soon as the thread stops anywhere. */
-    private final transient List<BreakpointRequest> runToLineRequests = new CopyOnWriteArrayList<>();
-    private volatile ThreadReference runToLineThread;
+    private final transient Map<ThreadReference, List<BreakpointRequest>> runToLineRequests = new ConcurrentHashMap<>();
     /** Number of expression evaluations running: requests installed meanwhile stay disabled until they end. */
     private final java.util.concurrent.atomic.AtomicInteger evaluations = new java.util.concurrent.atomic.AtomicInteger();
     /** Changes whenever the stop shown in the views stops being current (resume, step, other thread, disconnect). */
@@ -673,22 +672,15 @@ public class RemoteDebugController {
 
     /** Cancels the pending Run to Line when {@code thread} is the thread running to the line. */
     private void clearRunToLine(ThreadReference thread) {
-        if (thread != null && thread.equals(runToLineThread)) {
-            clearRunToLine();
-        }
-    }
-
-    private void clearRunToLine() {
-        runToLineThread = null;
+        List<BreakpointRequest> requests = thread == null ? null : runToLineRequests.remove(thread);
         VirtualMachine vm = virtualMachine;
-        if (vm != null && !runToLineRequests.isEmpty()) {
+        if (vm != null && requests != null && !requests.isEmpty()) {
             try {
-                vm.eventRequestManager().deleteEventRequests(new ArrayList<>(runToLineRequests));
+                vm.eventRequestManager().deleteEventRequests(new ArrayList<>(requests));
             } catch (RuntimeException e) {
                 assert ExceptionUtil.printStackTrace(e);
             }
         }
-        runToLineRequests.clear();
     }
 
     private void resetThreads() {
@@ -1130,7 +1122,9 @@ public class RemoteDebugController {
                 try {
                     pendingSteps.remove(thread);
                     deleteStepRequests(thread);
-                    clearRunToLine();
+                    clearRunToLine(thread); // an earlier Run to Line of this thread; other threads keep theirs
+                    List<BreakpointRequest> requests = new CopyOnWriteArrayList<>();
+                    runToLineRequests.put(thread, requests);
                     for (ReferenceType referenceType : classesOf(vm, typeName)) {
                         List<Location> locations;
                         try {
@@ -1143,16 +1137,15 @@ public class RemoteDebugController {
                             request.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
                             request.addThreadFilter(thread);
                             request.enable();
-                            runToLineRequests.add(request);
+                            requests.add(request);
                         }
                     }
-                    if (runToLineRequests.isEmpty()) {
+                    if (requests.isEmpty()) {
                         throw new IllegalStateException("No executable code on line " + lineNumber);
                     }
-                    runToLineThread = thread;
                     thread.resume();
                 } catch (RuntimeException e) {
-                    clearRunToLine();
+                    clearRunToLine(thread);
                     synchronized (threadLock) {
                         activeRunning = false;
                     }
