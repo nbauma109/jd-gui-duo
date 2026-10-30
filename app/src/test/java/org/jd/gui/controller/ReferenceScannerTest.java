@@ -70,6 +70,20 @@ class ReferenceScannerTest {
     }
 
     @Test
+    void annotationTypesAreAttributedToTheirMembers() throws IOException {
+        ReferenceScanner.Result result = scan("Marker", SEARCH_TYPE);
+        assertTrue(result.fields().contains("markedI"));
+        assertTrue(result.methods().contains("markedMethod()V"));
+        assertTrue(result.methods().contains("markedParameter(I)V"));
+        assertFalse(result.methods().contains("untouched()V"));
+    }
+
+    @Test
+    void classValueOfAnAnnotationIsAttributedToItsMember() throws IOException {
+        assertEquals(Set.of("markedClassValue()V"), scan("Thread", SEARCH_TYPE).methods());
+    }
+
+    @Test
     void methodWithoutMatchingReferenceIsNotReported() throws IOException {
         assertFalse(scan("*", SEARCH_METHOD | SEARCH_FIELD | SEARCH_STRING).methods().contains("untouched()V"));
     }

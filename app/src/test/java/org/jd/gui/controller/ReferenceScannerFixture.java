@@ -15,6 +15,21 @@ class ReferenceScannerFixture {
     List<String> items;
     List<StringBuilder> builders;
 
+    @interface Marker {
+        Class<?> value() default Void.class;
+    }
+
+    @Marker int marked;
+
+    @Marker void markedMethod() {
+    }
+
+    void markedParameter(@Marker int parameter) {
+    }
+
+    @Marker(Thread.class) void markedClassValue() {
+    }
+
     List<Integer> genericReturn(List<ProcessBuilder> argument) {
         return null;
     }

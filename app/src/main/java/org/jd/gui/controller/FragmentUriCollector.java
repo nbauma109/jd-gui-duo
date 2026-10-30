@@ -43,15 +43,9 @@ final class FragmentUriCollector {
         boolean references = (flags & SearchInConstantPoolsView.SEARCH_REFERENCE) != 0;
 
         // typePattern is used to match constructor declarations by type simple name
-        Pattern typePattern = null;
-        if (declarations && (flags & SearchInConstantPoolsView.SEARCH_CONSTRUCTOR) != 0) {
-            typePattern = SearchInConstantPoolsController.createPattern(pattern);
-        }
+        Pattern typePattern = patternIf(declarations && (flags & SearchInConstantPoolsView.SEARCH_CONSTRUCTOR) != 0, pattern);
         // memberPattern is used to match method/field declaration names
-        Pattern memberPattern = null;
-        if (declarations && (flags & (SearchInConstantPoolsView.SEARCH_METHOD | SearchInConstantPoolsView.SEARCH_FIELD)) != 0) {
-            memberPattern = SearchInConstantPoolsController.createPattern(pattern);
-        }
+        Pattern memberPattern = patternIf(declarations && (flags & (SearchInConstantPoolsView.SEARCH_METHOD | SearchInConstantPoolsView.SEARCH_FIELD)) != 0, pattern);
 
         for (Container.Entry entry : matchingEntries) {
             // A source file can declare several root types, each with inner types
@@ -69,6 +63,10 @@ final class FragmentUriCollector {
         }
 
         return fragmentUris;
+    }
+
+    private static Pattern patternIf(boolean needed, String pattern) {
+        return needed ? SearchInConstantPoolsController.createPattern(pattern) : null;
     }
 
     /**

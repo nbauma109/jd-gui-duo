@@ -8,6 +8,7 @@ package org.jd.gui.controller;
 
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.view.SearchInConstantPoolsView;
+import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
@@ -15,6 +16,7 @@ import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.TypePath;
 import org.objectweb.asm.signature.SignatureReader;
 import org.objectweb.asm.signature.SignatureVisitor;
 import org.objectweb.asm.Type;
@@ -143,10 +145,63 @@ final class ReferenceScanner {
 
         @Override
         public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
+            String key = name + descriptor;
             if (matchesType(Type.getType(descriptor)) || matchesSignature(signature, true) || matchesConstant(value)) {
-                fields.add(name + descriptor);
+                fields.add(key);
             }
-            return null;
+            return new FieldVisitor(Opcodes.ASM9) {
+                @Override
+                public AnnotationVisitor visitAnnotation(String annotationDescriptor, boolean visible) {
+                    return annotation(fields, key, annotationDescriptor);
+                }
+
+                @Override
+                public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String annotationDescriptor, boolean visible) {
+                    return annotation(fields, key, annotationDescriptor);
+                }
+            };
+        }
+
+        /** Types used by annotations are indexed too: the owning member holds the reference. */
+        private AnnotationVisitor annotation(Set<String> target, String key, String annotationDescriptor) {
+            if (matchesType(Type.getType(annotationDescriptor))) {
+                target.add(key);
+            }
+            return new AnnotationMatcher(target, key);
+        }
+
+        /** Looks for types in nested annotations, enum constants and class values of an annotation. */
+        private final class AnnotationMatcher extends AnnotationVisitor {
+            private final Set<String> target;
+            private final String key;
+
+            AnnotationMatcher(Set<String> target, String key) {
+                super(Opcodes.ASM9);
+                this.target = target;
+                this.key = key;
+            }
+
+            @Override
+            public void visit(String name, Object value) {
+                if (value instanceof Type type && matchesType(type)) {
+                    target.add(key);
+                }
+            }
+
+            @Override
+            public void visitEnum(String name, String enumDescriptor, String value) {
+                annotation(target, key, enumDescriptor);
+            }
+
+            @Override
+            public AnnotationVisitor visitAnnotation(String name, String annotationDescriptor) {
+                return annotation(target, key, annotationDescriptor);
+            }
+
+            @Override
+            public AnnotationVisitor visitArray(String name) {
+                return this;
+            }
         }
 
         @Override
@@ -175,6 +230,26 @@ final class ReferenceScanner {
                 if (matching) {
                     methods.add(key);
                 }
+            }
+
+            @Override
+            public AnnotationVisitor visitAnnotation(String annotationDescriptor, boolean visible) {
+                return annotation(methods, key, annotationDescriptor);
+            }
+
+            @Override
+            public AnnotationVisitor visitParameterAnnotation(int parameter, String annotationDescriptor, boolean visible) {
+                return annotation(methods, key, annotationDescriptor);
+            }
+
+            @Override
+            public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String annotationDescriptor, boolean visible) {
+                return annotation(methods, key, annotationDescriptor);
+            }
+
+            @Override
+            public AnnotationVisitor visitAnnotationDefault() {
+                return new AnnotationMatcher(methods, key);
             }
 
             @Override
