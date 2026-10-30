@@ -642,6 +642,7 @@ public final class JdiExpressionEvaluator {
             }
             return typed(classRef.type().getValue(field), field.typeName());
         }
+        String declaredName = declaredTypeOf(target);
         Value value = value(target);
         if (value instanceof ArrayReference array && "length".equals(name)) {
             return vm.mirrorOf(array.length());
@@ -649,11 +650,19 @@ public final class JdiExpressionEvaluator {
         if (!(value instanceof ObjectReference object)) {
             throw new EvaluationException("Cannot read '" + name + "' on " + (value == null ? "null" : "a primitive value"));
         }
-        Field field = object.referenceType().fieldByName(name);
+        // Java picks the field from the declared type (Base b = new Child(): b.x is Base.x), the receiver only holds the value
+        Field field = null;
+        ReferenceType declaredType = declaredName == null ? null : findClass(declaredName);
+        if (declaredType != null) {
+            field = declaredType.fieldByName(name);
+        }
+        if (field == null) {
+            field = object.referenceType().fieldByName(name);
+        }
         if (field == null) {
             throw new EvaluationException("No field '" + name + "' in " + object.referenceType().name());
         }
-        return typed(field.isStatic() ? object.referenceType().getValue(field) : object.getValue(field), field.typeName());
+        return typed(field.isStatic() ? field.declaringType().getValue(field) : object.getValue(field), field.typeName());
     }
 
     private Object invokeImplicit(String name, Arguments arguments) throws EvaluationException, IncompatibleThreadStateException {
@@ -672,29 +681,24 @@ public final class JdiExpressionEvaluator {
     private Object invoke(Object target, String name, List<Value> arguments, List<String> declaredTypes) throws EvaluationException {
         ReferenceType type;
         ObjectReference receiver = null;
+        ReferenceType declaredReceiver = null;
         if (target instanceof ClassRef classRef) {
             type = classRef.type();
         } else {
+            String declaredName = declaredTypeOf(target);
             Value value = value(target);
             if (!(value instanceof ObjectReference object)) {
                 throw new EvaluationException("Cannot call '" + name + "' on " + (value == null ? "null" : "a primitive value"));
             }
             receiver = object;
             type = object.referenceType();
+            declaredReceiver = declaredName == null ? null : findClass(declaredName);
         }
-        // Like Java: among the methods applicable to the argument types (no narrowing), call the most specific one.
-        Method chosen = null;
-        for (Method method : type.methodsByName(name)) {
-            if ((method.isAbstract() && receiver == null) || (receiver == null && !method.isStatic())) {
-                continue;
-            }
-            List<String> parameterTypes = method.argumentTypeNames();
-            if (parameterTypes.size() != arguments.size() || !isApplicable(arguments, declaredTypes, parameterTypes)) {
-                continue;
-            }
-            if (chosen == null || isMoreSpecific(parameterTypes, chosen.argumentTypeNames())) {
-                chosen = method;
-            }
+        // Like Java: the signature is chosen among the methods of the declared type of the receiver that are applicable
+        // to the arguments (no narrowing), the most specific one; invoking it still dispatches on the runtime type.
+        Method chosen = chooseMethod(declaredReceiver != null ? declaredReceiver : type, name, arguments, declaredTypes, receiver == null);
+        if (chosen == null && declaredReceiver != null) {
+            chosen = chooseMethod(type, name, arguments, declaredTypes, false); // e.g. Object methods on an interface type
         }
         if (chosen == null) {
             throw new EvaluationException("No method " + name + "/" + arguments.size() + " in " + type.name() + " accepts these arguments");
@@ -721,6 +725,23 @@ public final class JdiExpressionEvaluator {
         } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException e) {
             throw new EvaluationException("Cannot call " + name + "(): " + e.getClass().getSimpleName() + (e.getMessage() == null ? "" : " " + e.getMessage()));
         }
+    }
+
+    private Method chooseMethod(ReferenceType type, String name, List<Value> arguments, List<String> declaredTypes, boolean staticContext) {
+        Method chosen = null;
+        for (Method method : type.methodsByName(name)) {
+            if ((method.isAbstract() && staticContext) || (staticContext && !method.isStatic())) {
+                continue;
+            }
+            List<String> parameterTypes = method.argumentTypeNames();
+            if (parameterTypes.size() != arguments.size() || !isApplicable(arguments, declaredTypes, parameterTypes)) {
+                continue;
+            }
+            if (chosen == null || isMoreSpecific(parameterTypes, chosen.argumentTypeNames())) {
+                chosen = method;
+            }
+        }
+        return chosen;
     }
 
     private static final List<String> NUMERIC_ORDER = List.of("byte", "short", "int", "long", "float", "double");
