@@ -386,10 +386,9 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
 
     protected int getSourceLineNumber(int textAreaLineNumber) {
         if (lineNumberMap != null) {
-            int sourceLineNumber = textAreaLineNumber < lineNumberMap.length ? lineNumberMap[textAreaLineNumber] : 0;
-            if (sourceLineNumber > 0) {
-                return sourceLineNumber;
-            }
+            // Blank lines, braces and generated declarations have no original line: 0, not their row number,
+            // which would point at an unrelated statement.
+            return textAreaLineNumber < lineNumberMap.length ? lineNumberMap[textAreaLineNumber] : 0;
         }
         return textAreaLineNumber;
     }
