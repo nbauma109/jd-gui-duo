@@ -16,7 +16,7 @@ public final class DebugVariableNode {
     public final String valueText;
     public final Kind kind;
     private final Supplier<List<DebugVariableNode>> childLoader;
-    private List<DebugVariableNode> children;
+    private volatile List<DebugVariableNode> children;
     /** Full value as shown in the detail pane of the Inspect popup (e.g. the toString() of an object), or null. */
     private volatile String detailText;
 
@@ -63,7 +63,7 @@ public final class DebugVariableNode {
     }
 
     /** Returns children, loading them on first call if necessary. */
-    public List<DebugVariableNode> getChildren() {
+    public synchronized List<DebugVariableNode> getChildren() {
         if (childLoader == null) {
             return Collections.emptyList();
         }

@@ -110,8 +110,10 @@ public final class JdiValues {
         List<DebugVariableNode> children = new ArrayList<>();
         int length = array.length();
         int shown = Math.min(length, MAX_ARRAY_ELEMENTS);
+        // one round trip for all the elements: each getValue(i) would cost a full JDWP request
+        List<Value> values = array.getValues(0, shown);
         for (int i = 0; i < shown; i++) {
-            children.add(toNode("[" + i + "]", array.getValue(i)));
+            children.add(toNode("[" + i + "]", values.get(i)));
         }
         if (length > shown) {
             children.add(new DebugVariableNode("...", (length - shown) + " more elements"));
@@ -123,10 +125,15 @@ public final class JdiValues {
         List<DebugVariableNode> children = new ArrayList<>();
         try {
             // allFields() keeps declaration order; ObjectReference.getValues() would return an unordered map.
+            List<Field> fields = new ArrayList<>();
             for (Field field : object.referenceType().allFields()) {
                 if (!field.isStatic()) {
-                    children.add(toNode(field.name(), object.getValue(field), kindOf(field)));
+                    fields.add(field);
                 }
+            }
+            java.util.Map<Field, Value> values = object.getValues(fields); // one round trip for all the fields
+            for (Field field : fields) {
+                children.add(toNode(field.name(), values.get(field), kindOf(field)));
             }
         } catch (RuntimeException e) {
             String message = e.getMessage();
