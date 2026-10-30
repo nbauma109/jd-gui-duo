@@ -11,6 +11,7 @@ import org.jd.gui.view.SearchInConstantPoolsView;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.ConstantDynamic;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
@@ -27,6 +28,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 /**
  * Finds which methods and fields of a class file hold a reference matching a search, using the
@@ -140,7 +142,16 @@ final class ReferenceScanner {
             if (constant instanceof Type type) {
                 return matchesType(type);
             }
+            if (constant instanceof ConstantDynamic dynamic) {
+                return matchesDynamic(dynamic);
+            }
             return constant instanceof Handle handle && matchesHandle(handle);
+        }
+
+        /** A dynamic constant references its bootstrap method and the constants passed to it. */
+        private boolean matchesDynamic(ConstantDynamic dynamic) {
+            return matchesHandle(dynamic.getBootstrapMethod())
+                    || IntStream.range(0, dynamic.getBootstrapMethodArgumentCount()).anyMatch(i -> matchesConstant(dynamic.getBootstrapMethodArgument(i)));
         }
 
         @Override

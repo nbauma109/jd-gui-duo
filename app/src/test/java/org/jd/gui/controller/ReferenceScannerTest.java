@@ -7,7 +7,13 @@
 package org.jd.gui.controller;
 
 import org.junit.jupiter.api.Test;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.ConstantDynamic;
+import org.objectweb.asm.Handle;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
@@ -87,6 +93,29 @@ class ReferenceScannerTest {
     void invokedynamicBootstrapMethodIsAttributedToTheContainingMethod() throws IOException {
         assertEquals(Set.of("lambdaUser()Ljava/lang/Runnable;"), scan("metafactory", SEARCH_METHOD).methods());
         assertTrue(scan("LambdaMetafactory", SEARCH_TYPE).methods().contains("lambdaUser()Ljava/lang/Runnable;"));
+    }
+
+    @Test
+    void dynamicConstantBootstrapIsAttributedToTheContainingMethod() throws IOException {
+        // javac does not emit "ldc" of a dynamic constant, so the class is generated
+        ClassWriter writer = new ClassWriter(0);
+        writer.visit(Opcodes.V17, Opcodes.ACC_PUBLIC, "generated/Condy", null, "java/lang/Object", null);
+        MethodVisitor method = writer.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, "dynamicHolder", "()Ljava/lang/Object;", null, null);
+        method.visitCode();
+        Handle bootstrap = new Handle(Opcodes.H_INVOKESTATIC, "java/lang/invoke/ConstantBootstraps", "nullConstant",
+                "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Object;", false);
+        method.visitLdcInsn(new ConstantDynamic("unused", "Ljava/lang/Object;", bootstrap));
+        method.visitInsn(Opcodes.ARETURN);
+        method.visitMaxs(1, 0);
+        method.visitEnd();
+        writer.visitEnd();
+        byte[] bytes = writer.toByteArray();
+
+        ReferenceScanner.Result byMethod = ReferenceScanner.scan(new ByteArrayInputStream(bytes), SearchInConstantPoolsController.createPattern("nullConstant"), SEARCH_METHOD);
+        ReferenceScanner.Result byType = ReferenceScanner.scan(new ByteArrayInputStream(bytes), SearchInConstantPoolsController.createPattern("ConstantBootstraps"), SEARCH_TYPE);
+
+        assertEquals(Set.of("dynamicHolder()Ljava/lang/Object;"), byMethod.methods());
+        assertEquals(Set.of("dynamicHolder()Ljava/lang/Object;"), byType.methods());
     }
 
     @Test
