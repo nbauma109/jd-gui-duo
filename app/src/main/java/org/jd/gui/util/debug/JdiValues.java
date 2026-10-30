@@ -44,7 +44,8 @@ public final class JdiValues {
             return simpleName(withLength) + " (id=" + array.uniqueID() + ")";
         }
         if (value instanceof ObjectReference object) {
-            return simpleName(object.referenceType().name()) + " (id=" + object.uniqueID() + ")";
+            // Eclipse puts two spaces between the type name and the id of plain objects (not of strings and arrays)
+            return simpleName(object.referenceType().name()) + "  (id=" + object.uniqueID() + ")";
         }
         if (value instanceof CharValue character) {
             return "'" + character.value() + "'";

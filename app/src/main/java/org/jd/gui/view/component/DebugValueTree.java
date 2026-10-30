@@ -43,7 +43,7 @@ import javax.swing.tree.TreePath;
  * Tree laid out like the Eclipse Variables/Expressions views: a "Name | Value" table with a column
  * header and grid lines, where the name column holds the tree structure.
  */
-public class DebugValueTree extends JTree {
+public class DebugValueTree extends LinelessTree {
     private static final long serialVersionUID = 1L;
 
     /** User object of the trailing "Add new expression" row. */

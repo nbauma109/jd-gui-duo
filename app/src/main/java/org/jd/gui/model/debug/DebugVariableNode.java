@@ -17,6 +17,8 @@ public final class DebugVariableNode {
     public final Kind kind;
     private final Supplier<List<DebugVariableNode>> childLoader;
     private List<DebugVariableNode> children;
+    /** Full value as shown in the detail pane of the Inspect popup (e.g. the toString() of an object), or null. */
+    private volatile String detailText;
 
     /** Leaf node (primitive, null, String, etc.) */
     public DebugVariableNode(String name, String valueText) {
@@ -42,6 +44,14 @@ public final class DebugVariableNode {
         this.kind = kind;
         this.childLoader = childLoader;
         this.children = null;
+    }
+
+    public String getDetailText() {
+        return detailText != null ? detailText : valueText;
+    }
+
+    public void setDetailText(String detailText) {
+        this.detailText = detailText;
     }
 
     public boolean isLeaf() {
