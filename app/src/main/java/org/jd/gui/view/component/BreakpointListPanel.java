@@ -7,6 +7,7 @@
 package org.jd.gui.view.component;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Insets;
@@ -244,8 +245,10 @@ public class BreakpointListPanel extends JPanel {
 
         @Override
         public Component getListCellRendererComponent(JList<? extends Row> jList, Row row, int index, boolean selected, boolean focus) {
-            panel.setBackground(selected ? UIManager.getColor("List.selectionBackground") : jList.getBackground());
-            label.setForeground(selected ? UIManager.getColor("List.selectionForeground") : jList.getForeground());
+            // Eclipse marks the selected row with a light blue band and a thin dark outline, text stays black
+            panel.setBackground(selected ? new Color(0xCCE4F7) : jList.getBackground());
+            panel.setBorder(selected ? BorderFactory.createLineBorder(new Color(0x404B5C)) : BorderFactory.createEmptyBorder(1, 1, 1, 1));
+            label.setForeground(jList.getForeground());
             label.setFont(jList.getFont());
             label.setText(row.text());
             boolean exception = row.key().startsWith("exception:");

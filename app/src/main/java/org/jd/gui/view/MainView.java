@@ -35,6 +35,8 @@ import org.jd.gui.view.component.DynamicPage;
 import org.jd.gui.view.component.BreakpointListPanel;
 import org.jd.gui.view.component.DebugValueTree;
 import org.jd.gui.view.component.IconButton;
+import org.jd.gui.view.component.LinelessTree;
+import org.jd.gui.view.component.ShadowPopupPanel;
 import org.jd.gui.view.component.panel.MainTabbedPanel;
 
 import java.awt.BorderLayout;
@@ -805,7 +807,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             DefaultMutableTreeNode top = buildTreeNode(node);
             root.add(top);
             DefaultTreeModel model = new DefaultTreeModel(root);
-            JTree tree = new JTree(model);
+            JTree tree = new LinelessTree(model);
             tree.setRootVisible(false);
             tree.setShowsRootHandles(true);
             tree.setRowHeight(20);
@@ -818,9 +820,12 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
                         boolean leaf, int row, boolean focus) {
                     // Eclipse marks the selected row with a light blue box and a blue outline, text stays black
                     setBackgroundSelectionColor(new java.awt.Color(0xCCE4F7));
-                    setBorderSelectionColor(new java.awt.Color(0x3399FF));
+                    setBorderSelectionColor(null); // the look and feel would draw a dotted focus line: use a plain outline instead
                     setTextSelectionColor(java.awt.Color.BLACK);
                     super.getTreeCellRendererComponent(t, value, selected, expanded, leaf, row, focus);
+                    setBorder(selected
+                        ? BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(new java.awt.Color(0x3399FF)), BorderFactory.createEmptyBorder(0, 2, 0, 2))
+                        : BorderFactory.createEmptyBorder(1, 3, 1, 3));
                     Object userObject = ((DefaultMutableTreeNode) value).getUserObject();
                     if (userObject instanceof DebugVariableNode variable) {
                         boolean topLevel = ((DefaultMutableTreeNode) value).getParent() == root;
@@ -850,16 +855,18 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             });
 
             // full value of the selected row
-            javax.swing.JTextArea detail = new javax.swing.JTextArea(node.valueText);
+            javax.swing.JTextArea detail = new javax.swing.JTextArea(node.getDetailText());
+            detail.setFont(tree.getFont());
             detail.setEditable(false);
             detail.setLineWrap(false);
             detail.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
             JScrollPane detailScroll = new JScrollPane(detail);
             detailScroll.setPreferredSize(new Dimension(0, 58));
-            detailScroll.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(2, 6, 4, 6), detailScroll.getBorder()));
+            detailScroll.setBorder(BorderFactory.createEmptyBorder(2, 6, 4, 6));
+            detailScroll.getViewport().setBackground(java.awt.Color.WHITE);
             tree.addTreeSelectionListener(e -> {
                 if (e.getPath() != null && ((DefaultMutableTreeNode) e.getPath().getLastPathComponent()).getUserObject() instanceof DebugVariableNode selected) {
-                    detail.setText(selected.valueText);
+                    detail.setText(selected.getDetailText());
                     detail.setCaretPosition(0);
                 }
             });
@@ -883,21 +890,23 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(0xD0D0D0)));
             header.add(grip, BorderLayout.EAST);
 
-            JPanel content = new JPanel(new BorderLayout());
-            content.setBorder(BorderFactory.createLineBorder(new java.awt.Color(0xB0B0B0)));
-            content.add(header, BorderLayout.NORTH);
-            content.add(split, BorderLayout.CENTER);
-            content.add(hint, BorderLayout.SOUTH);
+            JPanel inner = new JPanel(new BorderLayout());
+            inner.setOpaque(false);
+            inner.add(header, BorderLayout.NORTH);
+            inner.add(split, BorderLayout.CENTER);
+            inner.add(hint, BorderLayout.SOUTH);
+            ShadowPopupPanel shadowPanel = new ShadowPopupPanel(inner);
+            JComponent content = shadowPanel.getCard();
 
             javax.swing.JDialog popup = new javax.swing.JDialog(mainFrame);
             popup.setUndecorated(true);
-            popup.setContentPane(content);
-            popup.setSize(300, 250);
             try {
-                popup.setShape(new java.awt.geom.RoundRectangle2D.Double(0, 0, popup.getWidth(), popup.getHeight(), 10, 10));
+                popup.setBackground(new java.awt.Color(0, 0, 0, 0)); // translucent window: the shadow and rounded corners show through
             } catch (UnsupportedOperationException | java.awt.IllegalComponentStateException e) {
-                // square corners where shaped windows are not supported
+                // opaque square window where translucency is not supported
             }
+            popup.setContentPane(shadowPanel);
+            popup.setSize(312, 262);
             java.awt.Rectangle screen = mainFrame.getGraphicsConfiguration().getBounds();
             popup.setLocation(Math.max(screen.x, Math.min(screenLocation.x, screen.x + screen.width - popup.getWidth())),
                     Math.max(screen.y, Math.min(screenLocation.y + 4, screen.y + screen.height - popup.getHeight())));
@@ -950,6 +959,9 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             popup.setVisible(true);
             popup.toFront();
             tree.setSelectionPath(new javax.swing.tree.TreePath(top.getPath()));
+            if (!node.isLeaf()) {
+                tree.expandPath(new javax.swing.tree.TreePath(top.getPath())); // objects open one level, as in Eclipse
+            }
             tree.requestFocusInWindow();
         });
     }

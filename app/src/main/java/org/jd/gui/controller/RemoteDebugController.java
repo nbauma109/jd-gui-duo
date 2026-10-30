@@ -792,11 +792,31 @@ public class RemoteDebugController {
                         return null;
                     }
                     try {
-                        return JdiValues.toNode(expression, JdiExpressionEvaluator.evaluate(expression, thread, frameIndex));
+                        com.sun.jdi.Value value = JdiExpressionEvaluator.evaluate(expression, thread, frameIndex);
+                        DebugVariableNode node = JdiValues.toNode(expression, value);
+                        node.setDetailText(detailOf(expression, value, thread, frameIndex));
+                        return node;
                     } catch (JdiExpressionEvaluator.EvaluationException e) {
                         return new DebugVariableNode(expression, "<" + e.getMessage() + ">");
                     }
                 }
+            }
+
+            /** Like Eclipse's detail pane: the raw text of a string, the toString() of any other object. */
+            private String detailOf(String expression, com.sun.jdi.Value value, ThreadReference thread, int frameIndex) {
+                if (value instanceof com.sun.jdi.StringReference string) {
+                    return string.value();
+                }
+                if (value instanceof ObjectReference && !(value instanceof com.sun.jdi.ArrayReference)) {
+                    try {
+                        if (JdiExpressionEvaluator.evaluate("(" + expression + ").toString()", thread, frameIndex) instanceof com.sun.jdi.StringReference text) {
+                            return text.value();
+                        }
+                    } catch (JdiExpressionEvaluator.EvaluationException | RuntimeException e) {
+                        // no usable toString(): the detail pane shows the value
+                    }
+                }
+                return null;
             }
 
             @Override
