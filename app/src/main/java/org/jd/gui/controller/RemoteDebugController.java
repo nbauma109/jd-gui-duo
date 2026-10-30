@@ -518,9 +518,8 @@ public class RemoteDebugController {
         eventThread.setDaemon(true);
         eventThread.start();
 
-        // Safe even when the VM is already running (suspend=n): JDI resume() is a no-op if the VM is not suspended.
-        // Required when the VM was started with suspend=y to let it run past the VMStartEvent.
-        vm.resume();
+        // No vm.resume() here: a JVM started with suspend=y is released by the event loop, which resumes the
+        // event set of the VMStartEvent exactly once (a second resume could release a newer stop).
     }
 
     private void runEventLoop() {
@@ -529,6 +528,8 @@ public class RemoteDebugController {
             while (connected) {
                 EventSet eventSet = queue.remove();
                 boolean resume = true;
+                // two requests on the same location (e.g. Run to Line on a breakpoint) give two events for one stop
+                Set<ThreadReference> reported = new HashSet<>();
 
                 for (Event event : eventSet) {
                     if (event instanceof ClassPrepareEvent classPrepareEvent) {
@@ -542,18 +543,22 @@ public class RemoteDebugController {
                         clearRunToLine(exceptionEvent.thread());
                         pendingSteps.remove(exceptionEvent.thread());
                         deleteStepRequests(exceptionEvent.thread());
-                        onSuspended(exceptionEvent.thread(), exceptionEvent.location());
+                        if (reported.add(exceptionEvent.thread())) {
+                            onSuspended(exceptionEvent.thread(), exceptionEvent.location());
+                        }
                         resume = false;
                     } else if (event instanceof BreakpointEvent breakpointEvent) {
                         clearRunToLine(breakpointEvent.thread());
                         pendingSteps.remove(breakpointEvent.thread());
                         deleteStepRequests(breakpointEvent.thread());
-                        onSuspended(breakpointEvent.thread(), breakpointEvent.location());
+                        if (reported.add(breakpointEvent.thread())) {
+                            onSuspended(breakpointEvent.thread(), breakpointEvent.location());
+                        }
                         resume = false;
                     } else if (event instanceof StepEvent stepEvent) {
                         int depth = ((StepRequest) stepEvent.request()).depth();
                         deleteStepRequests(stepEvent.thread());
-                        if (!continueThroughLibraryCode(stepEvent.thread(), stepEvent.location(), depth)) {
+                        if (!continueThroughLibraryCode(stepEvent.thread(), stepEvent.location(), depth) && reported.add(stepEvent.thread())) {
                             onSuspended(stepEvent.thread(), stepEvent.location());
                         }
                         resume = false;

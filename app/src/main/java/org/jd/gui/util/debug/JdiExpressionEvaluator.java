@@ -526,6 +526,9 @@ public final class JdiExpressionEvaluator {
                 coerced.add(coerce(arguments.get(i), parameterTypes.get(i)));
             }
             if (chosen.isStatic()) {
+                if (type instanceof com.sun.jdi.InterfaceType interfaceType) {
+                    return interfaceType.invokeMethod(thread, chosen, coerced, ObjectReference.INVOKE_SINGLE_THREADED);
+                }
                 return ((ClassType) type).invokeMethod(thread, chosen, coerced, ObjectReference.INVOKE_SINGLE_THREADED);
             }
             return receiver.invokeMethod(thread, chosen, coerced, ObjectReference.INVOKE_SINGLE_THREADED);
@@ -671,12 +674,28 @@ public final class JdiExpressionEvaluator {
         throw new EvaluationException("A number is required");
     }
 
+    private static float asFloat(Value value) {
+        return value instanceof FloatValue f ? f.value() : (float) ((PrimitiveValue) value).longValue();
+    }
+
     /** Relational operators: integral operands are compared as integers (a double would lose the low bits of a long). */
     private static boolean compare(String op, Value left, Value right) throws EvaluationException {
         if (isNumeric(left) && isNumeric(right) && !(left instanceof DoubleValue || left instanceof FloatValue
                 || right instanceof DoubleValue || right instanceof FloatValue)) {
             long l = numberAsLong(left);
             long r = numberAsLong(right);
+            return switch (op) {
+                case "<=" -> l <= r;
+                case ">=" -> l >= r;
+                case "<" -> l < r;
+                default -> l > r;
+            };
+        }
+        if (!(left instanceof DoubleValue || right instanceof DoubleValue) && (left instanceof FloatValue || right instanceof FloatValue)) {
+            number(left); // both must be numbers
+            number(right);
+            float l = asFloat(left);
+            float r = asFloat(right);
             return switch (op) {
                 case "<=" -> l <= r;
                 case ">=" -> l >= r;
@@ -700,10 +719,13 @@ public final class JdiExpressionEvaluator {
 
     private static boolean valuesEqual(Value left, Value right) {
         if (isNumeric(left) && isNumeric(right)) {
-            boolean floating = left instanceof DoubleValue || left instanceof FloatValue || right instanceof DoubleValue || right instanceof FloatValue;
-            return floating
-                ? ((PrimitiveValue) left).doubleValue() == ((PrimitiveValue) right).doubleValue()
-                : ((PrimitiveValue) left).longValue() == ((PrimitiveValue) right).longValue();
+            if (left instanceof DoubleValue || right instanceof DoubleValue) {
+                return ((PrimitiveValue) left).doubleValue() == ((PrimitiveValue) right).doubleValue();
+            }
+            if (left instanceof FloatValue || right instanceof FloatValue) {
+                return asFloat(left) == asFloat(right); // Java rounds the other operand to float
+            }
+            return ((PrimitiveValue) left).longValue() == ((PrimitiveValue) right).longValue();
         }
         if (left instanceof BooleanValue l && right instanceof BooleanValue r) {
             return l.value() == r.value();
