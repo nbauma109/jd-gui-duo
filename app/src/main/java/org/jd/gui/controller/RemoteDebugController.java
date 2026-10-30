@@ -62,6 +62,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -118,6 +122,13 @@ public class RemoteDebugController {
     private final transient Map<ThreadReference, Integer> pendingSteps = new ConcurrentHashMap<>();
     /** Temporary breakpoint(s) of a pending "Run to Line"; removed as soon as the thread stops anywhere. */
     private final transient List<BreakpointRequest> runToLineRequests = new CopyOnWriteArrayList<>();
+    private volatile ThreadReference runToLineThread;
+    /** Reads the stack and evaluates the watch expressions after a stop, away from the event loop. */
+    private final ExecutorService stopExecutor = Executors.newSingleThreadExecutor(runnable -> {
+        Thread thread = new Thread(runnable, "JD-GUI remote debug stop");
+        thread.setDaemon(true);
+        return thread;
+    });
     private volatile boolean connected;
     private volatile boolean skipAllBreakpoints;
     /** Method descriptions ({@code main(String[])}) read from the class files, so labels also work while detached. */
@@ -203,7 +214,7 @@ public class RemoteDebugController {
         panel.add(uncaughtBox, constraints);
         while (JOptionPane.showConfirmDialog(mainFrame, panel, "Add Java Exception Breakpoint", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) == JOptionPane.OK_OPTION) {
             String name = nameField.getText().trim();
-            if (!name.matches("[\\p{L}_$][\\p{L}\\p{N}_$]*(\\.[\\p{L}_$][\\p{L}\\p{N}_$]*)*")) {
+            if (!isQualifiedClassName(name)) {
                 JOptionPane.showMessageDialog(mainFrame, "Enter a fully qualified class name.", "Add Java Exception Breakpoint", JOptionPane.WARNING_MESSAGE);
             } else if (!caughtBox.isSelected() && !uncaughtBox.isSelected()) {
                 JOptionPane.showMessageDialog(mainFrame, "Select Caught, Uncaught or both.", "Add Java Exception Breakpoint", JOptionPane.WARNING_MESSAGE);
@@ -212,6 +223,15 @@ public class RemoteDebugController {
                 return;
             }
         }
+    }
+
+    private static boolean isQualifiedClassName(String name) {
+        for (String part : name.split("\\.", -1)) {
+            if (part.isEmpty() || !Character.isJavaIdentifierStart(part.charAt(0)) || !part.chars().allMatch(Character::isJavaIdentifierPart)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void addExceptionBreakpoint(String typeName, boolean caught, boolean uncaught) {
@@ -261,6 +281,10 @@ public class RemoteDebugController {
     }
 
     public void show() {
+        if (connected) {
+            JOptionPane.showMessageDialog(mainFrame, "Already attached to a remote JVM. Disconnect first.", "Remote Debug", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
         JTextField hostField = new JTextField(configuration.getPreferences().getOrDefault(HOST_PREFERENCE, DEFAULT_HOST), 28);
         JSpinner portSpinner = new JSpinner(new SpinnerNumberModel(getSavedPort(), 1, 65535, 1));
         JFormattedTextField portField = ((JSpinner.NumberEditor) portSpinner.getEditor()).getTextField();
@@ -454,6 +478,15 @@ public class RemoteDebugController {
     }
 
     private void attached(VirtualMachine vm, String host, int port) {
+        if (connected) {
+            // another attachment finished while a session is running: keep the first one
+            try {
+                vm.dispose();
+            } catch (RuntimeException e) {
+                assert ExceptionUtil.printStackTrace(e);
+            }
+            return;
+        }
         this.virtualMachine = vm;
         connected = true;
         resetThreads();
@@ -464,7 +497,8 @@ public class RemoteDebugController {
 
         EventRequestManager requestManager = vm.eventRequestManager();
         ClassPrepareRequest prepareRequest = requestManager.createClassPrepareRequest();
-        prepareRequest.setSuspendPolicy(EventRequest.SUSPEND_NONE);
+        // the loading thread waits (event set resumed by the event loop) until the pending breakpoints are installed
+        prepareRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
         prepareRequest.enable();
 
         // A stepping thread that ends (e.g. stepping out of run()) must not leave the buttons disabled.
@@ -505,13 +539,13 @@ public class RemoteDebugController {
                         }
                         publishBreakpoints();
                     } else if (event instanceof ExceptionEvent exceptionEvent) {
-                        clearRunToLine();
+                        clearRunToLine(exceptionEvent.thread());
                         pendingSteps.remove(exceptionEvent.thread());
                         deleteStepRequests(exceptionEvent.thread());
                         onSuspended(exceptionEvent.thread(), exceptionEvent.location());
                         resume = false;
                     } else if (event instanceof BreakpointEvent breakpointEvent) {
-                        clearRunToLine();
+                        clearRunToLine(breakpointEvent.thread());
                         pendingSteps.remove(breakpointEvent.thread());
                         deleteStepRequests(breakpointEvent.thread());
                         onSuspended(breakpointEvent.thread(), breakpointEvent.location());
@@ -603,7 +637,7 @@ public class RemoteDebugController {
 
     private void threadDied(ThreadReference thread) {
         pendingSteps.remove(thread);
-        clearRunToLine();
+        clearRunToLine(thread);
         boolean wasActive;
         synchronized (threadLock) {
             queuedThreads.remove(thread);
@@ -618,7 +652,15 @@ public class RemoteDebugController {
         }
     }
 
+    /** Cancels the pending Run to Line when {@code thread} is the thread running to the line. */
+    private void clearRunToLine(ThreadReference thread) {
+        if (thread != null && thread.equals(runToLineThread)) {
+            clearRunToLine();
+        }
+    }
+
     private void clearRunToLine() {
+        runToLineThread = null;
         VirtualMachine vm = virtualMachine;
         if (vm != null && !runToLineRequests.isEmpty()) {
             try {
@@ -655,7 +697,8 @@ public class RemoteDebugController {
             active = activeThread;
         }
         if (takeOver) {
-            showSuspended(thread, location);
+            // evaluating watch expressions invokes methods in the debuggee: never block the event loop with that
+            stopExecutor.execute(() -> showSuspended(thread, location));
         } else {
             // Another thread is being debugged: only refresh the thread list, keep the current location.
             List<DebugThread> threads = collectAllThreadsFrames(active);
@@ -716,7 +759,7 @@ public class RemoteDebugController {
     }
 
     /** Called when the user selects a stack frame (of any stopped thread) in the Debug tree. */
-    public void selectFrame(String threadName, int frameIndex) {
+    public void selectFrame(String threadId, int frameIndex) {
         if (virtualMachine == null) {
             return;
         }
@@ -730,11 +773,11 @@ public class RemoteDebugController {
                         if (activeRunning) {
                             return null;
                         }
-                        if (activeThread != null && activeThread.name().equals(threadName)) {
+                        if (activeThread != null && Long.toString(activeThread.uniqueID()).equals(threadId)) {
                             target = activeThread;
                         } else {
                             for (ThreadReference candidate : queuedThreads.keySet()) {
-                                if (candidate.name().equals(threadName)) {
+                                if (Long.toString(candidate.uniqueID()).equals(threadId)) {
                                     target = candidate;
                                     break;
                                 }
@@ -782,37 +825,46 @@ public class RemoteDebugController {
             @Override
             protected DebugVariableNode doInBackground() {
                 synchronized (evaluationLock) {
-                    ThreadReference thread;
-                    int frameIndex;
-                    synchronized (threadLock) {
-                        thread = activeRunning ? null : activeThread;
-                        frameIndex = selectedFrameIndex;
-                    }
-                    if (thread == null) {
-                        return null;
-                    }
-                    try {
-                        com.sun.jdi.Value value = JdiExpressionEvaluator.evaluate(expression, thread, frameIndex);
-                        DebugVariableNode node = JdiValues.toNode(expression, value);
-                        node.setDetailText(detailOf(expression, value, thread, frameIndex));
-                        return node;
-                    } catch (JdiExpressionEvaluator.EvaluationException e) {
-                        return new DebugVariableNode(expression, "<" + e.getMessage() + ">");
-                    }
+                    return withoutSuspendingRequests(this::inspect);
+                }
+            }
+
+            private DebugVariableNode inspect() {
+                ThreadReference thread;
+                int frameIndex;
+                synchronized (threadLock) {
+                    thread = activeRunning ? null : activeThread;
+                    frameIndex = selectedFrameIndex;
+                }
+                if (thread == null) {
+                    return null;
+                }
+                try {
+                    com.sun.jdi.Value value = JdiExpressionEvaluator.evaluate(expression, thread, frameIndex);
+                    DebugVariableNode node = JdiValues.toNode(expression, value);
+                    node.setDetailText(detailOf(value, thread));
+                    return node;
+                } catch (JdiExpressionEvaluator.EvaluationException e) {
+                    return new DebugVariableNode(expression, "<" + e.getMessage() + ">");
                 }
             }
 
             /** Like Eclipse's detail pane: the raw text of a string, the toString() of any other object. */
-            private String detailOf(String expression, com.sun.jdi.Value value, ThreadReference thread, int frameIndex) {
+            private String detailOf(com.sun.jdi.Value value, ThreadReference thread) {
                 if (value instanceof com.sun.jdi.StringReference string) {
                     return string.value();
                 }
-                if (value instanceof ObjectReference && !(value instanceof com.sun.jdi.ArrayReference)) {
+                if (value instanceof ObjectReference object && !(value instanceof com.sun.jdi.ArrayReference)) {
+                    // call toString() on the object that was evaluated, not on a second evaluation of the expression
                     try {
-                        if (JdiExpressionEvaluator.evaluate("(" + expression + ").toString()", thread, frameIndex) instanceof com.sun.jdi.StringReference text) {
-                            return text.value();
+                        for (com.sun.jdi.Method method : object.referenceType().methodsByName("toString", "()Ljava/lang/String;")) {
+                            if (object.invokeMethod(thread, method, List.of(), ObjectReference.INVOKE_SINGLE_THREADED) instanceof com.sun.jdi.StringReference text) {
+                                return text.value();
+                            }
+                            break;
                         }
-                    } catch (JdiExpressionEvaluator.EvaluationException | RuntimeException e) {
+                    } catch (com.sun.jdi.InvalidTypeException | com.sun.jdi.ClassNotLoadedException | IncompatibleThreadStateException
+                            | com.sun.jdi.InvocationException | RuntimeException e) {
                         // no usable toString(): the detail pane shows the value
                     }
                 }
@@ -865,7 +917,42 @@ public class RemoteDebugController {
     private List<DebugVariableNode> evaluateExpressions() {
         // Evaluations invoke methods in the debuggee thread: they must not overlap.
         synchronized (evaluationLock) {
-            return evaluateExpressionsLocked();
+            return withoutSuspendingRequests(this::evaluateExpressionsLocked);
+        }
+    }
+
+    /**
+     * Evaluations invoke methods in the debuggee. A breakpoint or exception request reached by such a call
+     * would stop the invocation half-way, so the requests are switched off while it runs.
+     */
+    private <T> T withoutSuspendingRequests(Supplier<T> action) {
+        VirtualMachine vm = virtualMachine;
+        List<EventRequest> switchedOff = new ArrayList<>();
+        if (vm != null) {
+            try {
+                EventRequestManager manager = vm.eventRequestManager();
+                List<EventRequest> candidates = new ArrayList<>(manager.breakpointRequests());
+                candidates.addAll(manager.exceptionRequests());
+                for (EventRequest request : candidates) {
+                    if (request.isEnabled()) {
+                        request.disable();
+                        switchedOff.add(request);
+                    }
+                }
+            } catch (RuntimeException e) {
+                assert ExceptionUtil.printStackTrace(e);
+            }
+        }
+        try {
+            return action.get();
+        } finally {
+            for (EventRequest request : switchedOff) {
+                try {
+                    request.enable();
+                } catch (RuntimeException e) {
+                    // the request was deleted meanwhile
+                }
+            }
         }
     }
 
@@ -915,10 +1002,10 @@ public class RemoteDebugController {
                         return loc.declaringType().name() + "." + loc.method().name() + "() line: " + loc.lineNumber();
                     })
                     .toList();
-                result.add(new DebugThread(t.name(), t.equals(eventThread), true, frames));
+                result.add(new DebugThread(t.name(), t.uniqueID(), t.equals(eventThread), true, frames));
             } catch (IncompatibleThreadStateException e) {
                 // Thread is running (SUSPEND_EVENT_THREAD — only event thread is suspended)
-                result.add(new DebugThread(t.name(), false, false, List.of()));
+                result.add(new DebugThread(t.name(), t.uniqueID(), false, false, List.of()));
             } catch (com.sun.jdi.ObjectCollectedException e) {
                 // Thread terminated while we were listing them: skip it
             }
@@ -994,6 +1081,7 @@ public class RemoteDebugController {
                     if (runToLineRequests.isEmpty()) {
                         throw new IllegalStateException("No executable code on line " + lineNumber);
                     }
+                    runToLineThread = thread;
                     thread.resume();
                 } catch (AbsentInformationException | RuntimeException e) {
                     clearRunToLine();
@@ -1094,6 +1182,7 @@ public class RemoteDebugController {
             if (breakpoints.remove(key)) {
                 disabledBreakpoints.remove(key);
                 uninstallBreakpoint(key);
+                clearPageMarker(key);
                 publishBreakpoints();
             }
         } catch (NumberFormatException ignored) {
@@ -1104,6 +1193,7 @@ public class RemoteDebugController {
     public void removeAllBreakpoints() {
         for (BreakpointKey key : new java.util.ArrayList<>(breakpoints)) {
             uninstallBreakpoint(key);
+            clearPageMarker(key);
         }
         breakpoints.clear();
         disabledBreakpoints.clear();
@@ -1113,6 +1203,15 @@ public class RemoteDebugController {
         exceptionBreakpoints.clear();
         disabledExceptions.clear();
         publishBreakpoints();
+    }
+
+    /** The open editor keeps its own gutter markers: clear the one of a removed breakpoint so a later sync cannot revive it. */
+    private void clearPageMarker(BreakpointKey key) {
+        methodDescriptions.remove(key);
+        BreakpointCapablePage page = pagesByType.get(key.typeName());
+        if (page != null) {
+            SwingUtil.invokeLater(() -> page.setBreakpointLine(key.lineNumber(), false));
+        }
     }
 
     /** "Skip All Breakpoints": keeps every breakpoint but stops none of them from suspending. */
@@ -1384,7 +1483,9 @@ public class RemoteDebugController {
             super.done();
             try {
                 attached(get(), host, port);
-            } catch (Exception e) {
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } catch (ExecutionException | RuntimeException e) {
                 assert ExceptionUtil.printStackTrace(e);
                 JOptionPane.showMessageDialog(parent, getRootMessage(e), "Remote Debug", JOptionPane.ERROR_MESSAGE);
             }

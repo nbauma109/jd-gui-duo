@@ -73,7 +73,7 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
     private static final java.util.WeakHashMap<TreeTabbedPanel<?>, Void> INSTANCES = new java.util.WeakHashMap<>();
     /** Set by MainController so clicking a frame navigates to that class/line. */
     private static java.util.function.BiConsumer<String, Integer> debugNavigateHandler;
-    /** Set by MainController: (thread name, frame index) of the frame the user selected. */
+    /** Set by MainController: (thread id, frame index) of the frame the user selected. */
     private static java.util.function.BiConsumer<String, Integer> debugFrameSelectHandler;
     /** True while setDebugFrames updates the tree, so programmatic selection changes are not user clicks. */
     private static boolean debugTreeAdjusting;
@@ -197,12 +197,12 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
             Object last = path.getLastPathComponent();
             if (debugFrameSelectHandler != null && last instanceof DefaultMutableTreeNode selected) {
                 if (selected.getUserObject() instanceof DebugThread dt && dt.isSuspended()) {
-                    debugFrameSelectHandler.accept(dt.name(), 0);
+                    debugFrameSelectHandler.accept(Long.toString(dt.id()), 0);
                     return;
                 }
                 if (selected.getUserObject() instanceof String && selected.getParent() instanceof DefaultMutableTreeNode parent
                         && parent.getUserObject() instanceof DebugThread dt) {
-                    debugFrameSelectHandler.accept(dt.name(), parent.getIndex(selected));
+                    debugFrameSelectHandler.accept(Long.toString(dt.id()), parent.getIndex(selected));
                     return;
                 }
             }
@@ -266,7 +266,7 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
             for (int i = 0; i < existingCount; i++) {
                 DefaultMutableTreeNode n = (DefaultMutableTreeNode) DEBUG_TREE_ROOT.getChildAt(i);
                 DebugThread existing = n.getUserObject() instanceof DebugThread dt ? dt : null;
-                if (existing == null || !existing.name().equals(threads.get(i).name())) {
+                if (existing == null || existing.id() != threads.get(i).id()) {
                     sameThreads = false;
                     break;
                 }

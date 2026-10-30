@@ -56,6 +56,13 @@ public final class JdiExpressionEvaluator {
     private final int frameIndex;
     private final String src;
     private int pos;
+    /** > 0 while parsing an operand that must not be evaluated (short-circuit && || and the unselected ?: branch). */
+    private int skipping;
+
+    @FunctionalInterface
+    private interface Operand {
+        Object parse() throws EvaluationException, IncompatibleThreadStateException;
+    }
 
     private JdiExpressionEvaluator(ThreadReference thread, int frameIndex, String src) {
         this.vm = thread.virtualMachine();
@@ -87,13 +94,28 @@ public final class JdiExpressionEvaluator {
 
     // --- Grammar --- //
 
+    /** Parses an operand; when {@code skip} is set it is only parsed, never evaluated (no calls, no lookups). */
+    private Object parseOperand(boolean skip, Operand operand) throws EvaluationException, IncompatibleThreadStateException {
+        if (skip) {
+            skipping++;
+        }
+        try {
+            return operand.parse();
+        } finally {
+            if (skip) {
+                skipping--;
+            }
+        }
+    }
+
     private Object parseTernary() throws EvaluationException, IncompatibleThreadStateException {
         Object condition = parseOr();
         if (accept("?")) {
-            Object whenTrue = parseTernary();
+            boolean selectTrue = skipping == 0 && asBoolean(condition);
+            Object whenTrue = parseOperand(!selectTrue, this::parseTernary);
             expect(":");
-            Object whenFalse = parseTernary();
-            return asBoolean(condition) ? whenTrue : whenFalse;
+            Object whenFalse = parseOperand(selectTrue, this::parseTernary);
+            return skipping > 0 ? null : selectTrue ? whenTrue : whenFalse;
         }
         return condition;
     }
@@ -101,8 +123,9 @@ public final class JdiExpressionEvaluator {
     private Object parseOr() throws EvaluationException, IncompatibleThreadStateException {
         Object left = parseAnd();
         while (accept("||")) {
-            Object right = parseAnd();
-            left = vm.mirrorOf(asBoolean(left) || asBoolean(right));
+            boolean decided = skipping == 0 && asBoolean(left); // true || x: x is not evaluated
+            Object right = parseOperand(decided, this::parseAnd);
+            left = skipping > 0 ? null : vm.mirrorOf(decided || asBoolean(right));
         }
         return left;
     }
@@ -110,8 +133,9 @@ public final class JdiExpressionEvaluator {
     private Object parseAnd() throws EvaluationException, IncompatibleThreadStateException {
         Object left = parseEquality();
         while (accept("&&")) {
-            Object right = parseEquality();
-            left = vm.mirrorOf(asBoolean(left) && asBoolean(right));
+            boolean decided = skipping == 0 && !asBoolean(left); // false && x: x is not evaluated
+            Object right = parseOperand(decided, this::parseEquality);
+            left = skipping > 0 ? null : vm.mirrorOf(!decided && asBoolean(right));
         }
         return left;
     }
@@ -120,9 +144,11 @@ public final class JdiExpressionEvaluator {
         Object left = parseRelational();
         while (true) {
             if (accept("==")) {
-                left = vm.mirrorOf(equal(value(left), value(parseRelational())));
+                Object right = parseRelational();
+                left = skipping > 0 ? null : vm.mirrorOf(valuesEqual(value(left), value(right)));
             } else if (accept("!=")) {
-                left = vm.mirrorOf(!equal(value(left), value(parseRelational())));
+                Object right = parseRelational();
+                left = skipping > 0 ? null : vm.mirrorOf(!valuesEqual(value(left), value(right)));
             } else {
                 return left;
             }
@@ -137,6 +163,10 @@ public final class JdiExpressionEvaluator {
                 return left;
             }
             Object right = parseAdditive();
+            if (skipping > 0) {
+                left = null;
+                continue;
+            }
             double l = number(left);
             double r = number(right);
             boolean result = switch (op) {
@@ -156,7 +186,8 @@ public final class JdiExpressionEvaluator {
             if (op == null) {
                 return left;
             }
-            left = arithmetic(op, left, parseMultiplicative());
+            Object right = parseMultiplicative();
+            left = skipping > 0 ? null : arithmetic(op, left, right);
         }
     }
 
@@ -167,16 +198,22 @@ public final class JdiExpressionEvaluator {
             if (op == null) {
                 return left;
             }
-            left = arithmetic(op, left, parseUnary());
+            Object right = parseUnary();
+            left = skipping > 0 ? null : arithmetic(op, left, right);
         }
     }
 
     private Object parseUnary() throws EvaluationException, IncompatibleThreadStateException {
         if (accept("!")) {
-            return vm.mirrorOf(!asBoolean(parseUnary()));
+            Object operand = parseUnary();
+            return skipping > 0 ? null : vm.mirrorOf(!asBoolean(operand));
         }
         if (accept("-")) {
-            Value operand = value(parseUnary());
+            Object operandResult = parseUnary();
+            if (skipping > 0) {
+                return null;
+            }
+            Value operand = value(operandResult);
             if (operand instanceof DoubleValue d) {
                 return vm.mirrorOf(-d.value());
             }
@@ -200,13 +237,18 @@ public final class JdiExpressionEvaluator {
             if (accept(".")) {
                 String name = identifier();
                 if (accept("(")) {
-                    target = invoke(target, name, parseArguments());
+                    List<Value> arguments = parseArguments();
+                    target = skipping > 0 ? null : invoke(target, name, arguments);
                 } else {
-                    target = member(target, name);
+                    target = skipping > 0 ? null : member(target, name);
                 }
             } else if (accept("[")) {
                 Object index = parseTernary();
                 expect("]");
+                if (skipping > 0) {
+                    target = null;
+                    continue;
+                }
                 Value array = value(target);
                 if (!(array instanceof ArrayReference arrayReference)) {
                     throw new EvaluationException("Not an array");
@@ -265,7 +307,11 @@ public final class JdiExpressionEvaluator {
                 break;
         }
         if (accept("(")) {
-            return invokeImplicit(name, parseArguments());
+            List<Value> arguments = parseArguments();
+            return skipping > 0 ? null : invokeImplicit(name, arguments);
+        }
+        if (skipping > 0) {
+            return null;
         }
         Object resolved = resolveName(name);
         if (resolved != NOT_FOUND) {
@@ -464,34 +510,112 @@ public final class JdiExpressionEvaluator {
             receiver = object;
             type = object.referenceType();
         }
-        EvaluationException lastFailure = null;
+        // Like Java: among the methods applicable to the argument types (no narrowing), call the most specific one.
+        Method chosen = null;
         for (Method method : type.methodsByName(name)) {
-            if (method.isAbstract() && receiver == null) {
+            if ((method.isAbstract() && receiver == null) || (receiver == null && !method.isStatic())) {
                 continue;
             }
             List<String> parameterTypes = method.argumentTypeNames();
-            if (parameterTypes.size() != arguments.size() || (receiver == null && !method.isStatic())) {
+            if (parameterTypes.size() != arguments.size() || !isApplicable(arguments, parameterTypes)) {
                 continue;
             }
-            try {
-                List<Value> coerced = new ArrayList<>();
-                for (int i = 0; i < arguments.size(); i++) {
-                    coerced.add(coerce(arguments.get(i), parameterTypes.get(i)));
-                }
-                Value result;
-                if (method.isStatic()) {
-                    result = ((ClassType) type).invokeMethod(thread, method, coerced, ObjectReference.INVOKE_SINGLE_THREADED);
-                } else {
-                    result = receiver.invokeMethod(thread, method, coerced, ObjectReference.INVOKE_SINGLE_THREADED);
-                }
-                return result;
-            } catch (InvocationException e) {
-                throw new EvaluationException("Exception in " + name + "(): " + e.exception().referenceType().name());
-            } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException e) {
-                lastFailure = new EvaluationException("Cannot call " + name + "(): " + e.getClass().getSimpleName() + (e.getMessage() == null ? "" : " " + e.getMessage()));
+            if (chosen == null || isMoreSpecific(parameterTypes, chosen.argumentTypeNames())) {
+                chosen = method;
             }
         }
-        throw lastFailure != null ? lastFailure : new EvaluationException("No method " + name + "/" + arguments.size() + " in " + type.name());
+        if (chosen == null) {
+            throw new EvaluationException("No method " + name + "/" + arguments.size() + " in " + type.name() + " accepts these arguments");
+        }
+        try {
+            List<String> parameterTypes = chosen.argumentTypeNames();
+            List<Value> coerced = new ArrayList<>();
+            for (int i = 0; i < arguments.size(); i++) {
+                coerced.add(coerce(arguments.get(i), parameterTypes.get(i)));
+            }
+            if (chosen.isStatic()) {
+                return ((ClassType) type).invokeMethod(thread, chosen, coerced, ObjectReference.INVOKE_SINGLE_THREADED);
+            }
+            return receiver.invokeMethod(thread, chosen, coerced, ObjectReference.INVOKE_SINGLE_THREADED);
+        } catch (InvocationException e) {
+            throw new EvaluationException("Exception in " + name + "(): " + e.exception().referenceType().name());
+        } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException e) {
+            throw new EvaluationException("Cannot call " + name + "(): " + e.getClass().getSimpleName() + (e.getMessage() == null ? "" : " " + e.getMessage()));
+        }
+    }
+
+    private static final List<String> NUMERIC_ORDER = List.of("byte", "short", "int", "long", "float", "double");
+
+    /** Widening primitive conversion (byte to short to int to long to float to double, char to int...). */
+    private static boolean widens(String from, String to) {
+        if (from.equals(to)) {
+            return true;
+        }
+        if ("char".equals(from)) {
+            return NUMERIC_ORDER.indexOf(to) >= NUMERIC_ORDER.indexOf("int");
+        }
+        int source = NUMERIC_ORDER.indexOf(from);
+        int target = NUMERIC_ORDER.indexOf(to);
+        return source >= 0 && target > source && !"char".equals(to);
+    }
+
+    private static boolean isPrimitiveName(String type) {
+        return "boolean".equals(type) || "char".equals(type) || NUMERIC_ORDER.contains(type);
+    }
+
+    private boolean isApplicable(List<Value> arguments, List<String> parameterTypes) {
+        for (int i = 0; i < arguments.size(); i++) {
+            Value argument = arguments.get(i);
+            String parameter = parameterTypes.get(i);
+            if (isPrimitiveName(parameter)) {
+                if (!(argument instanceof PrimitiveValue) || !widens(argument.type().name(), parameter)) {
+                    return false;
+                }
+            } else if (argument instanceof PrimitiveValue) {
+                return false; // no boxing
+            } else if (argument instanceof ObjectReference object && !isSubtype(object.referenceType().name(), parameter)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isMoreSpecific(List<String> candidate, List<String> other) {
+        for (int i = 0; i < candidate.size(); i++) {
+            String from = candidate.get(i);
+            String to = other.get(i);
+            boolean ok = isPrimitiveName(from) && isPrimitiveName(to) ? widens(from, to) : !isPrimitiveName(from) && !isPrimitiveName(to) && isSubtype(from, to);
+            if (!ok) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isSubtype(String typeName, String superName) {
+        if (typeName.equals(superName) || "java.lang.Object".equals(superName)) {
+            return true;
+        }
+        ReferenceType type = findClass(typeName);
+        if (type instanceof ClassType classType) {
+            for (ClassType current = classType; current != null; current = current.superclass()) {
+                if (current.name().equals(superName)) {
+                    return true;
+                }
+                for (com.sun.jdi.InterfaceType declared : current.allInterfaces()) {
+                    if (declared.name().equals(superName)) {
+                        return true;
+                    }
+                }
+            }
+        } else if (type instanceof com.sun.jdi.InterfaceType interfaceType) {
+            for (com.sun.jdi.InterfaceType declared : interfaceType.superinterfaces()) {
+                if (isSubtype(declared.name(), superName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /** Widens primitive arguments to the declared parameter type (int to long, to double...). */
@@ -550,7 +674,7 @@ public final class JdiExpressionEvaluator {
         return value instanceof PrimitiveValue && !(value instanceof BooleanValue);
     }
 
-    private static boolean equal(Value left, Value right) {
+    private static boolean valuesEqual(Value left, Value right) {
         if (isNumeric(left) && isNumeric(right)) {
             boolean floating = left instanceof DoubleValue || left instanceof FloatValue || right instanceof DoubleValue || right instanceof FloatValue;
             return floating

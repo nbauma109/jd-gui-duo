@@ -76,7 +76,7 @@ public class ShadowPopupPanel extends JPanel {
             int height = getHeight() - TOP - BOTTOM;
             for (int i = SHADOW_STEPS; i >= 1; i--) {
                 g2.setColor(new Color(0, 0, 0, 9));
-                g2.fill(new RoundRectangle2D.Float(LEFT - i + 2, TOP - i + 4, width + 2f * i, height + 2f * i, ARC + 2f * i, ARC + 2f * i));
+                g2.fill(new RoundRectangle2D.Float(LEFT - i + 2f, TOP - i + 4f, width + 2f * i, height + 2f * i, ARC + 2f * i, ARC + 2f * i));
             }
         } finally {
             g2.dispose();
