@@ -293,7 +293,7 @@ public class MainController implements API {
                     int colon = key.lastIndexOf(':');
                     if (colon > 0) {
                         try {
-                            openDebugLocation(key.substring(0, colon), Integer.parseInt(key.substring(colon + 1)));
+                            openLocation(key.substring(0, colon), Integer.parseInt(key.substring(colon + 1)));
                         } catch (NumberFormatException ignored) {
                             // malformed key
                         }
@@ -725,6 +725,13 @@ public class MainController implements API {
     @Override
     public void syncBreakpointPage(BreakpointCapablePage page) {
         checkDebuggablePage((JComponent) page);
+        // a page that replaces the displayed one (original source loaded in the background) has no marker yet
+        String type = executionTypeName;
+        String pageType = page.getDebugTypeName();
+        if (type != null && executionLineNumber > 0 && (type.equals(pageType) || type.startsWith(pageType + "$"))) {
+            page.setCurrentExecutionLine(executionLineNumber);
+            executionMarkedPage = page;
+        }
     }
 
     private RemoteDebugController getRemoteDebugController() {
@@ -758,20 +765,28 @@ public class MainController implements API {
         mainView.showDebugBreakpoints(breakpoints);
     }
 
+    /** Plain navigation (e.g. from the Breakpoints view): opens the class at the line, no execution marker. */
+    private boolean openLocation(String typeName, int lineNumber) {
+        String internalTypeName = typeName.replace('.', '/');
+        List<Container.Entry> entries = IndexesUtil.findInternalTypeName(getCollectionOfFutureIndexes(), internalTypeName);
+        if (entries.isEmpty()) {
+            return false;
+        }
+        openURI(UriUtil.createURI(this, getCollectionOfFutureIndexes(), entries.get(0), "lineNumber=" + lineNumber, null));
+        return true;
+    }
+
     void openDebugLocation(String typeName, int lineNumber) {
         if (lineNumber < 1) {
             return;
         }
 
-        String internalTypeName = typeName.replace('.', '/');
-        List<Container.Entry> entries = IndexesUtil.findInternalTypeName(getCollectionOfFutureIndexes(), internalTypeName);
-        if (entries.isEmpty()) {
+        if (!openLocation(typeName, lineNumber)) {
             // The class is not among the opened archives (e.g. a dependency): the page on display is unrelated,
             // so it must not get the execution marker, and the marker of the previous stop is obsolete.
             clearDebugExecutionLine();
             return;
         }
-        openURI(UriUtil.createURI(this, getCollectionOfFutureIndexes(), entries.get(0), "lineNumber=" + lineNumber, null));
         // currentPage was updated synchronously by openURI (via pageChanged callbacks).
         // Set the execution-line highlight immediately — no need for another invokeLater.
         BreakpointCapablePage bcp = getCurrentBreakpointPage();
@@ -782,10 +797,15 @@ public class MainController implements API {
             bcp.setCurrentExecutionLine(lineNumber);
         }
         executionMarkedPage = bcp;
+        executionTypeName = typeName;
+        executionLineNumber = lineNumber;
     }
 
     /** The page that shows the execution marker: it may no longer be the one on display. */
     private BreakpointCapablePage executionMarkedPage;
+    /** Where the debuggee is stopped, to mark a page that appears later (original source loaded after the stop). */
+    private String executionTypeName;
+    private int executionLineNumber;
 
     /** The current page is usually a DynamicPage wrapping the debuggable ClassFilePage. */
     private BreakpointCapablePage getCurrentBreakpointPage() {
@@ -810,6 +830,8 @@ public class MainController implements API {
                 executionMarkedPage.setCurrentExecutionLine(0);
                 executionMarkedPage = null;
             }
+            executionTypeName = null;
+            executionLineNumber = 0;
         };
         if (javax.swing.SwingUtilities.isEventDispatchThread()) {
             r.run();
