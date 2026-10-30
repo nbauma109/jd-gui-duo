@@ -123,6 +123,8 @@ public class RemoteDebugController {
     /** Temporary breakpoint(s) of a pending "Run to Line"; removed as soon as the thread stops anywhere. */
     private final transient List<BreakpointRequest> runToLineRequests = new CopyOnWriteArrayList<>();
     private volatile ThreadReference runToLineThread;
+    /** Changes whenever the stop shown in the views stops being current (resume, step, other thread, disconnect). */
+    private volatile long stopGeneration;
     /** Reads the stack and evaluates the watch expressions after a stop, away from the event loop. */
     private final ExecutorService stopExecutor = Executors.newSingleThreadExecutor(runnable -> {
         Thread thread = new Thread(runnable, "JD-GUI remote debug stop");
@@ -412,6 +414,7 @@ public class RemoteDebugController {
             }
             thread = activeThread;
             activeThread = null;
+            stopGeneration++;
         }
         new SwingWorker<Void, Void>() {
             @Override
@@ -515,7 +518,7 @@ public class RemoteDebugController {
         }
         publishBreakpoints();
 
-        Thread eventThread = new Thread(this::runEventLoop, "JD-GUI remote debug events");
+        Thread eventThread = new Thread(() -> runEventLoop(vm), "JD-GUI remote debug events");
         eventThread.setDaemon(true);
         eventThread.start();
 
@@ -523,11 +526,15 @@ public class RemoteDebugController {
         // event set of the VMStartEvent exactly once (a second resume could release a newer stop).
     }
 
-    private void runEventLoop() {
+    /** Each loop belongs to one session: after a disconnect and a new attachment the old loop must not touch the new one. */
+    private void runEventLoop(VirtualMachine owner) {
         try {
-            EventQueue queue = virtualMachine.eventQueue();
-            while (connected) {
+            EventQueue queue = owner.eventQueue();
+            while (connected && virtualMachine == owner) {
                 EventSet eventSet = queue.remove();
+                if (virtualMachine != owner) {
+                    return;
+                }
                 boolean resume = true;
                 // two requests on the same location (e.g. Run to Line on a breakpoint) give two events for one stop
                 Set<ThreadReference> reported = new HashSet<>();
@@ -566,7 +573,9 @@ public class RemoteDebugController {
                     } else if (event instanceof ThreadDeathEvent deathEvent) {
                         threadDied(deathEvent.thread());
                     } else if (event instanceof VMDisconnectEvent || event instanceof VMDeathEvent) {
-                        disconnected();
+                        if (virtualMachine == owner) {
+                            disconnected();
+                        }
                         resume = false;
                     }
                 }
@@ -578,7 +587,7 @@ public class RemoteDebugController {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (Exception e) {
-            if (connected) {
+            if (connected && virtualMachine == owner) {
                 assert ExceptionUtil.printStackTrace(e);
                 disconnected();
             }
@@ -685,6 +694,7 @@ public class RemoteDebugController {
             activeThread = null;
             activeRunning = false;
             queuedThreads.clear();
+            stopGeneration++;
         }
     }
 
@@ -716,6 +726,7 @@ public class RemoteDebugController {
         int frameIndex = firstApplicationFrame(thread, location);
         synchronized (threadLock) {
             selectedFrameIndex = frameIndex;
+            stopGeneration++;
         }
         showFrame(thread, frameIndex, true);
     }
@@ -744,6 +755,7 @@ public class RemoteDebugController {
      * The stack-frame tree is only refreshed when the active thread changed.
      */
     private void showFrame(ThreadReference thread, int frameIndex, boolean refreshThreads) {
+        final long generation = stopGeneration;
         Location location;
         try {
             location = thread.frame(frameIndex).location();
@@ -754,6 +766,9 @@ public class RemoteDebugController {
         List<DebugThread> threads = refreshThreads ? collectAllThreadsFrames(thread) : null;
         List<DebugVariableNode> expressions = evaluateExpressions();
         SwingUtil.invokeLater(() -> {
+            if (generation != stopGeneration || virtualMachine == null) {
+                return; // resumed, disconnected or another frame selected while this was being read
+            }
             controller.setDebugStepActionsEnabled(true);
             controller.openDebugLocation(location.declaringType().name(), location.lineNumber());
             controller.showDebugVariables(location.declaringType().name() + ":" + location.lineNumber(), variables);
@@ -776,10 +791,10 @@ public class RemoteDebugController {
                     ThreadReference target = null;
                     boolean switched = false;
                     synchronized (threadLock) {
-                        if (activeRunning) {
-                            return null;
-                        }
                         if (activeThread != null && Long.toString(activeThread.uniqueID()).equals(threadId)) {
+                            if (activeRunning) {
+                                return null; // it is running a step: nothing to show yet
+                            }
                             target = activeThread;
                         } else {
                             for (ThreadReference candidate : queuedThreads.keySet()) {
@@ -791,14 +806,18 @@ public class RemoteDebugController {
                             if (target == null) {
                                 return null; // running thread: nothing to show
                             }
-                            if (activeThread != null) {
+                            // A thread that is still stepping simply goes on in the background (it may be waiting for
+                            // this very thread); its next stop is queued like any other.
+                            if (activeThread != null && !activeRunning) {
                                 queuedThreads.put(activeThread, activeThread.frame(0).location());
                             }
                             queuedThreads.remove(target);
                             activeThread = target;
+                            activeRunning = false;
                             switched = true;
                         }
                         selectedFrameIndex = frameIndex;
+                        stopGeneration++;
                     }
                     showFrame(target, frameIndex, switched);
                 } catch (IncompatibleThreadStateException | RuntimeException e) {
@@ -1055,6 +1074,7 @@ public class RemoteDebugController {
             }
             thread = activeThread;
             activeRunning = true;
+            stopGeneration++;
         }
         // Disable step/resume buttons immediately (on EDT) to block double-clicking
         // while the step is in flight. showSuspended re-enables them when the thread stops.
@@ -1092,6 +1112,7 @@ public class RemoteDebugController {
             }
             thread = activeThread;
             activeRunning = true;
+            stopGeneration++;
         }
         controller.setDebugStepActionsEnabled(false);
 
@@ -1165,6 +1186,7 @@ public class RemoteDebugController {
             thread = activeThread;
             frameIndex = selectedFrameIndex;
             activeRunning = true;
+            stopGeneration++;
         }
         if (!vm.canPopFrames()) {
             synchronized (threadLock) {
