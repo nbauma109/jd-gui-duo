@@ -272,7 +272,8 @@ public final class JdiExpressionEvaluator {
             return parseNumber();
         }
         if (c == '"') {
-            return vm.mirrorOf(parseQuoted('"'));
+            String text = parseQuoted('"');
+            return skipping > 0 ? null : internedLiteral(text);
         }
         if (c == '\'') {
             String text = parseQuoted('\'');
@@ -316,6 +317,20 @@ public final class JdiExpressionEvaluator {
             return classRef;
         }
         throw new EvaluationException("'" + name + "' cannot be resolved");
+    }
+
+    /** Java interns string literals, so that "a" == "a" and s == "a" hold when s was initialised with that literal. */
+    private Value internedLiteral(String text) {
+        StringReference literal = vm.mirrorOf(text);
+        try {
+            List<Method> intern = literal.referenceType().methodsByName("intern", "()Ljava/lang/String;");
+            if (!intern.isEmpty()) {
+                return literal.invokeMethod(thread, intern.get(0), List.of(), ObjectReference.INVOKE_SINGLE_THREADED);
+            }
+        } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException | InvocationException e) {
+            // keep the plain copy: comparisons by content still work
+        }
+        return literal;
     }
 
     private static final Object NOT_FOUND = new Object();
