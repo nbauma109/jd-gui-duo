@@ -1298,7 +1298,7 @@ public class RemoteDebugController {
         for (Map.Entry<String, List<ExceptionRequest>> entry : installedExceptions.entrySet()) {
             for (ExceptionRequest request : entry.getValue()) {
                 try {
-                    request.setEnabled(!skip && !disabledExceptions.contains(entry.getKey()));
+                    request.setEnabled(evaluations.get() == 0 && !skip && !disabledExceptions.contains(entry.getKey()));
                 } catch (RuntimeException e) {
                     assert ExceptionUtil.printStackTrace(e);
                 }
@@ -1307,7 +1307,7 @@ public class RemoteDebugController {
         for (Map.Entry<BreakpointKey, List<BreakpointRequest>> entry : installedBreakpoints.entrySet()) {
             for (BreakpointRequest request : entry.getValue()) {
                 try {
-                    request.setEnabled(!skip && !disabledBreakpoints.contains(entry.getKey()));
+                    request.setEnabled(evaluations.get() == 0 && !skip && !disabledBreakpoints.contains(entry.getKey()));
                 } catch (RuntimeException e) {
                     assert ExceptionUtil.printStackTrace(e);
                 }
@@ -1328,7 +1328,7 @@ public class RemoteDebugController {
                 disabledExceptions.add(typeName);
             }
             for (ExceptionRequest request : installedExceptions.getOrDefault(typeName, List.of())) {
-                request.setEnabled(enabled && !skipAllBreakpoints);
+                request.setEnabled(evaluations.get() == 0 && enabled && !skipAllBreakpoints);
             }
             publishBreakpoints();
             return;
@@ -1350,7 +1350,7 @@ public class RemoteDebugController {
             List<BreakpointRequest> requests = installedBreakpoints.get(key);
             if (requests != null) {
                 for (BreakpointRequest request : requests) {
-                    request.setEnabled(enabled && !skipAllBreakpoints);
+                    request.setEnabled(evaluations.get() == 0 && enabled && !skipAllBreakpoints);
                 }
             }
             publishBreakpoints();
