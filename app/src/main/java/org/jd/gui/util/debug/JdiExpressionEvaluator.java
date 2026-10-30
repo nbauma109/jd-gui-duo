@@ -503,20 +503,61 @@ public final class JdiExpressionEvaluator {
         }
     }
 
+    /** The character of a Java escape sequence; {@code pos} is just after the backslash. */
+    private char parseEscape() throws EvaluationException {
+        char escaped = src.charAt(pos++);
+        switch (escaped) {
+            case 'b':
+                return '\b';
+            case 't':
+                return '\t';
+            case 'n':
+                return '\n';
+            case 'f':
+                return '\f';
+            case 'r':
+                return '\r';
+            case 's':
+                return ' ';
+            case '"':
+            case '\'':
+            case '\\':
+                return escaped;
+            case 'u':
+                while (pos < src.length() && src.charAt(pos) == 'u') {
+                    pos++; // several u are allowed
+                }
+                if (pos + 4 > src.length()) {
+                    throw new EvaluationException("Invalid unicode escape");
+                }
+                try {
+                    char decoded = (char) Integer.parseInt(src.substring(pos, pos + 4), 16);
+                    pos += 4;
+                    return decoded;
+                } catch (NumberFormatException e) {
+                    throw new EvaluationException("Invalid unicode escape");
+                }
+            default:
+                if (escaped >= '0' && escaped <= '7') {
+                    // octal escape: 0 to 377
+                    int value = escaped - '0';
+                    int maxDigits = escaped <= '3' ? 2 : 1;
+                    for (int i = 0; i < maxDigits && pos < src.length() && src.charAt(pos) >= '0' && src.charAt(pos) <= '7'; i++) {
+                        value = value * 8 + (src.charAt(pos++) - '0');
+                    }
+                    return (char) value;
+                }
+                throw new EvaluationException("Invalid escape sequence \\" + escaped);
+        }
+    }
+
     private String parseQuoted(char quote) throws EvaluationException {
         pos++; // opening quote
         StringBuilder sb = new StringBuilder();
         while (pos < src.length() && src.charAt(pos) != quote) {
             char c = src.charAt(pos++);
             if (c == '\\' && pos < src.length()) {
-                char escaped = src.charAt(pos++);
-                sb.append(switch (escaped) {
-                    case 'n' -> '\n';
-                    case 't' -> '\t';
-                    case 'r' -> '\r';
-                    case '0' -> '\0';
-                    default -> escaped;
-                });
+                sb.append(parseEscape());
             } else {
                 sb.append(c);
             }
