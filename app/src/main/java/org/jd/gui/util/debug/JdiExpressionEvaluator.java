@@ -293,7 +293,16 @@ public final class JdiExpressionEvaluator {
             return vm.mirrorOf(-(int) numberAsLong(operand));
         }
         if (accept("+")) {
-            return parseUnary();
+            Object operandResult = parseUnary();
+            if (skipping > 0) {
+                return null;
+            }
+            Value operand = value(operandResult);
+            if (operand instanceof com.sun.jdi.ByteValue || operand instanceof com.sun.jdi.ShortValue || operand instanceof CharValue) {
+                return vm.mirrorOf(((PrimitiveValue) operand).intValue()); // unary numeric promotion
+            }
+            numberAsLong(operand); // only numbers
+            return operand;
         }
         return parsePostfix();
     }
@@ -316,6 +325,7 @@ public final class JdiExpressionEvaluator {
                     target = null;
                     continue;
                 }
+                String declaredArray = declaredTypeOf(target);
                 Value array = value(target);
                 if (!(array instanceof ArrayReference arrayReference)) {
                     throw new EvaluationException("Not an array");
@@ -324,7 +334,11 @@ public final class JdiExpressionEvaluator {
                 if (i < 0 || i >= arrayReference.length()) {
                     throw new EvaluationException("Index " + i + " out of bounds for length " + arrayReference.length());
                 }
-                target = typed(arrayReference.getValue(i), arrayReference.referenceType() instanceof com.sun.jdi.ArrayType arrayType ? arrayType.componentTypeName() : null);
+                // Object[] a = new String[1]: a[0] is an Object for Java, whatever the array really is
+                String component = declaredArray != null && declaredArray.endsWith("[]")
+                    ? declaredArray.substring(0, declaredArray.length() - 2)
+                    : arrayReference.referenceType() instanceof com.sun.jdi.ArrayType arrayType ? arrayType.componentTypeName() : null;
+                target = typed(arrayReference.getValue(i), component);
             } else {
                 return target;
             }
@@ -370,7 +384,7 @@ public final class JdiExpressionEvaluator {
             case "null":
                 return null;
             case "this":
-                return frame().thisObject();
+                return typed(frame().thisObject(), frame().location().declaringType().name());
             default:
                 break;
         }
@@ -669,7 +683,8 @@ public final class JdiExpressionEvaluator {
         StackFrame frame = frame();
         ObjectReference self = frame.thisObject();
         if (self != null) {
-            return invoke(self, name, arguments.values(), arguments.declaredTypes());
+            // the receiver of an unqualified call has the type of the class that contains the call
+            return invoke(typed(self, frame.location().declaringType().name()), name, arguments.values(), arguments.declaredTypes());
         }
         return invoke(new ClassRef(frame.location().declaringType()), name, arguments.values(), arguments.declaredTypes());
     }
