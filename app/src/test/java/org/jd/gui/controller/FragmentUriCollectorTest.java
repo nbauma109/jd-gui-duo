@@ -41,7 +41,7 @@ class FragmentUriCollectorTest {
     private final Container.Entry fooBar = entry("com/example/Foo$Bar.class", parent, Map.of());
 
     private final Type fooType = type("com/example/Foo", Map.of("count", "I"), Map.of("<init>", "()V", "getCount", "()I", "<clinit>", "()V"));
-    private final Type barType = type("com/example/Foo$Bar", Map.of("value", "I"), Map.of("<init>", "()V", "getValue", "()I"));
+    private final Type barType = type("com/example/Foo$Bar", "com/example/Foo", Map.of("value", "I"), Map.of("<init>", "()V", "getValue", "()I"), List.of());
     private final Map<Container.Entry, Type> types = Map.of(foo, fooType, fooBar, barType);
     private final Function<Container.Entry, Collection<Type>> loader = e -> types.containsKey(e) ? List.of(types.get(e)) : List.of();
 
@@ -137,12 +137,31 @@ class FragmentUriCollectorTest {
         Container.Entry outer = entry("com/$generated/Outer.class", dir, Map.of());
         Container.Entry inner = entry("com/$generated/Outer$Inner.class", dir, Map.of());
         dir.getChildren().put(new FileEntryPath("com/$generated/Outer.class"), outer);
-        Type innerType = type("com/$generated/Outer$Inner", Map.of(), Map.of("go", "()V"));
+        Type innerType = type("com/$generated/Outer$Inner", "com/$generated/Outer", Map.of(), Map.of("go", "()V"), List.of());
         String outerUri = "file:///lib.jar!/com/$generated/Outer.class";
 
         Set<URI> uris = FragmentUriCollector.collect(List.of(inner), e -> List.of(innerType), "go", SEARCH_DECLARATION | SEARCH_METHOD);
 
         assertEquals(Set.of(uri(outerUri, "com/$generated/Outer"), uri(outerUri, "com/$generated/Outer$Inner"), uri(outerUri, "com/$generated/Outer$Inner-go-()V")), uris);
+    }
+
+    @Test
+    void topLevelClassWithDollarInItsNameStaysItsOwnEntry() {
+        Container.Entry dir = entry("com/example", null, new HashMap<>());
+        Container.Entry dollar = entry("com/example/Foo$Bar.class", dir, Map.of());
+        Type dollarType = type("com/example/Foo$Bar", Map.of(), Map.of("go", "()V"));
+        String dollarUri = "file:///lib.jar!/com/example/Foo$Bar.class";
+
+        Set<URI> uris = FragmentUriCollector.collect(List.of(dollar), e -> List.of(dollarType), "go", SEARCH_DECLARATION | SEARCH_METHOD);
+
+        assertEquals(Set.of(uri(dollarUri, "com/example/Foo$Bar"), uri(dollarUri, "com/example/Foo$Bar-go-()V")), uris);
+    }
+
+    @Test
+    void anonymousClassWithoutOuterMetadataIsFiledUnderTheClassNamedBeforeTheDollar() {
+        Type anonymous = type("com/example/Foo$1", Map.of(), Map.of("run", "()V"));
+        Set<URI> uris = FragmentUriCollector.collect(List.of(entry("com/example/Foo$1.class", parent, Map.of())), e -> List.of(anonymous), "run", SEARCH_DECLARATION | SEARCH_METHOD);
+        assertEquals(Set.of(uri(FOO, "com/example/Foo"), uri(FOO, "com/example/Foo$1"), uri(FOO, "com/example/Foo$1-run-()V")), uris);
     }
 
     @Test
@@ -185,14 +204,19 @@ class FragmentUriCollectorTest {
     }
 
     private static Type type(String name, Map<String, String> fields, Map<String, String> methods) {
-        return type(name, fields, methods, List.of());
+        return type(name, null, fields, methods, List.of());
     }
 
     private static Type type(String name, Map<String, String> fields, Map<String, String> methods, List<Type> innerTypes) {
+        return type(name, null, fields, methods, innerTypes);
+    }
+
+    private static Type type(String name, String outerName, Map<String, String> fields, Map<String, String> methods, List<Type> innerTypes) {
         List<Type.Field> fieldList = fields.entrySet().stream().map(e -> member(Type.Field.class, e.getKey(), e.getValue())).toList();
         List<Type.Method> methodList = methods.entrySet().stream().map(e -> member(Type.Method.class, e.getKey(), e.getValue())).toList();
         return (Type) Proxy.newProxyInstance(Type.class.getClassLoader(), new Class<?>[] { Type.class }, (p, m, a) -> switch (m.getName()) {
             case "getName" -> name;
+            case "getOuterName" -> outerName;
             case "getFields" -> fieldList;
             case "getMethods" -> methodList;
             case "getInnerTypes" -> innerTypes;

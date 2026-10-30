@@ -17,6 +17,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -28,8 +29,27 @@ import java.util.regex.Pattern;
 final class FragmentUriCollector {
 
     private static final String STATIC_INITIALIZER = "<clinit>";
+    private static final int MAX_NESTING = 32;
 
-    private FragmentUriCollector() {
+    private final Function<Container.Entry, Collection<Type>> typeLoader;
+    private final Function<Container.Entry, ReferenceScanner.Result> referenceScanner;
+    private final Pattern typePattern;
+    private final Pattern memberPattern;
+    private final boolean references;
+    private final int flags;
+    private final Set<URI> fragmentUris = new HashSet<>();
+
+    private FragmentUriCollector(Function<Container.Entry, Collection<Type>> typeLoader,
+            Function<Container.Entry, ReferenceScanner.Result> referenceScanner, String pattern, int flags) {
+        boolean declarations = (flags & SearchInConstantPoolsView.SEARCH_DECLARATION) != 0;
+        this.typeLoader = typeLoader;
+        this.referenceScanner = referenceScanner;
+        this.flags = flags;
+        this.references = (flags & SearchInConstantPoolsView.SEARCH_REFERENCE) != 0;
+        // typePattern is used to match constructor declarations by type simple name
+        this.typePattern = patternIf(declarations && (flags & SearchInConstantPoolsView.SEARCH_CONSTRUCTOR) != 0, pattern);
+        // memberPattern is used to match method/field declaration names
+        this.memberPattern = patternIf(declarations && (flags & (SearchInConstantPoolsView.SEARCH_METHOD | SearchInConstantPoolsView.SEARCH_FIELD)) != 0, pattern);
     }
 
     static Set<URI> collect(Collection<Container.Entry> matchingEntries, Function<Container.Entry, Collection<Type>> typeLoader, String pattern, int flags) {
@@ -38,35 +58,35 @@ final class FragmentUriCollector {
 
     static Set<URI> collect(Collection<Container.Entry> matchingEntries, Function<Container.Entry, Collection<Type>> typeLoader,
             Function<Container.Entry, ReferenceScanner.Result> referenceScanner, String pattern, int flags) {
-        Set<URI> fragmentUris = new HashSet<>();
-        boolean declarations = (flags & SearchInConstantPoolsView.SEARCH_DECLARATION) != 0;
-        boolean references = (flags & SearchInConstantPoolsView.SEARCH_REFERENCE) != 0;
-
-        // typePattern is used to match constructor declarations by type simple name
-        Pattern typePattern = patternIf(declarations && (flags & SearchInConstantPoolsView.SEARCH_CONSTRUCTOR) != 0, pattern);
-        // memberPattern is used to match method/field declaration names
-        Pattern memberPattern = patternIf(declarations && (flags & (SearchInConstantPoolsView.SEARCH_METHOD | SearchInConstantPoolsView.SEARCH_FIELD)) != 0, pattern);
-
+        FragmentUriCollector collector = new FragmentUriCollector(typeLoader, referenceScanner, pattern, flags);
         for (Container.Entry entry : matchingEntries) {
-            // A source file can declare several root types, each with inner types
-            Collection<Type> types = typeLoader.apply(entry);
-            Container.Entry outerEntry = types == null || types.isEmpty() ? null : getTopLevelOuterEntry(entry);
-            if (outerEntry != null) {
-                for (Type type : types) {
-                    collectTypeTree(outerEntry, type, typePattern, memberPattern, flags, fragmentUris);
-                    // Only the entry's own types can be scanned, inner types have their own class files
-                    if (references) {
-                        collectReferenceFragments(outerEntry, entry, type, referenceScanner, fragmentUris);
-                    }
-                }
-            }
+            collector.collectEntry(entry);
         }
-
-        return fragmentUris;
+        return collector.fragmentUris;
     }
 
     private static Pattern patternIf(boolean needed, String pattern) {
         return needed ? SearchInConstantPoolsController.createPattern(pattern) : null;
+    }
+
+    private void collectEntry(Container.Entry entry) {
+        // A source file can declare several root types, each with inner types
+        Collection<Type> types = typeLoader.apply(entry);
+        Container.Entry outerEntry = types == null ? null : getTopLevelOuterEntry(entry, firstType(types));
+        if (outerEntry != null) {
+            for (Type type : types) {
+                // The type is nested when the metadata says so, or when it is filed under another class file
+                collectTypeTree(outerEntry, type, outerEntry != entry || (type != null && type.getOuterName() != null));
+                // Only the entry's own types can be scanned, inner types have their own class files
+                if (references) {
+                    collectReferenceFragments(outerEntry, entry, type);
+                }
+            }
+        }
+    }
+
+    private static Type firstType(Collection<Type> types) {
+        return types == null ? null : types.stream().filter(Objects::nonNull).findFirst().orElse(null);
     }
 
     /**
@@ -98,77 +118,107 @@ final class FragmentUriCollector {
         return uris;
     }
 
-    private static Container.Entry getTopLevelOuterEntry(Container.Entry entry) {
-        String path = entry.getPath();
-        // The separator is looked up in the file name only, packages may contain '$'
-        int idx = path.indexOf(StringConstants.INTERNAL_INNER_SEPARATOR, path.lastIndexOf('/') + 1);
-        if (idx != -1 && path.endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
-            FileEntryPath outerPath = new FileEntryPath(path.substring(0, idx) + StringConstants.CLASS_FILE_SUFFIX);
-            return entry.getParent().getChildren().get(outerPath); // may be null if outer not found
+    /**
+     * Resolves the class file under which the entry's type is displayed. The type metadata tells
+     * the outer type, since a '$' in a name alone does not make a class an inner class.
+     */
+    private Container.Entry getTopLevelOuterEntry(Container.Entry entry, Type type) {
+        Container.Entry current = entry;
+        Type currentType = type;
+        for (int depth = 0; depth < MAX_NESTING && current != null && currentType != null && currentType.getOuterName() != null; depth++) {
+            current = sibling(current, currentType.getOuterName());
+            currentType = current == null ? null : firstType(typeLoader.apply(current));
         }
-        return entry; // Already a top-level class
+        return currentType == null || currentType.getOuterName() == null ? pathBasedOuterEntry(current) : current;
     }
 
-    private static void collectTypeTree(Container.Entry outerEntry, Type type, Pattern typePattern, Pattern memberPattern, int flags, Set<URI> fragmentUris) {
+    private static Container.Entry sibling(Container.Entry entry, String internalName) {
+        String path = entry.getPath();
+        String directory = path.substring(0, path.lastIndexOf('/') + 1);
+        String simpleName = internalName.substring(internalName.lastIndexOf('/') + 1);
+        return entry.getParent().getChildren().get(new FileEntryPath(directory + simpleName + StringConstants.CLASS_FILE_SUFFIX));
+    }
+
+    /**
+     * Fallback for classes without outer type metadata (anonymous and local classes): the outer
+     * class file is the one named before the first '$' of the file name, if it exists. Packages may
+     * contain '$', and so may the name of a top-level class, which then stays its own entry.
+     */
+    static Container.Entry pathBasedOuterEntry(Container.Entry entry) {
+        if (entry == null) {
+            return null;
+        }
+        String path = entry.getPath();
+        int idx = path.indexOf(StringConstants.INTERNAL_INNER_SEPARATOR, path.lastIndexOf('/') + 1);
+        if (idx != -1 && path.endsWith(StringConstants.CLASS_FILE_SUFFIX) && entry.getParent() != null) {
+            Container.Entry outer = entry.getParent().getChildren().get(new FileEntryPath(path.substring(0, idx) + StringConstants.CLASS_FILE_SUFFIX));
+            if (outer != null) {
+                return outer;
+            }
+        }
+        return entry;
+    }
+
+    private void collectTypeTree(Container.Entry outerEntry, Type type, boolean nested) {
         if (type != null) {
-            collectTypeFragments(outerEntry, type, typePattern, memberPattern, flags, fragmentUris);
+            collectTypeFragments(outerEntry, type, nested);
             Collection<Type> innerTypes = type.getInnerTypes();
             if (innerTypes != null) {
                 for (Type innerType : innerTypes) {
-                    collectTypeTree(outerEntry, innerType, typePattern, memberPattern, flags, fragmentUris);
+                    collectTypeTree(outerEntry, innerType, true);
                 }
             }
         }
     }
 
-    private static void collectTypeFragments(Container.Entry outerEntry, Type type, Pattern typePattern, Pattern memberPattern, int flags, Set<URI> fragmentUris) {
+    private void collectTypeFragments(Container.Entry outerEntry, Type type, boolean nested) {
         // Always show the type node for every match (declaration or reference), so the user
         // sees the class/interface/enum/annotation/record icon instead of just the file icon.
-        addTypeFragmentWithAncestors(outerEntry, type.getName(), fragmentUris);
+        addTypeFragmentWithAncestors(outerEntry, type.getName(), nested);
 
         // For declarations only, we can additionally pinpoint specific matching members.
         if ((flags & SearchInConstantPoolsView.SEARCH_DECLARATION) != 0) {
-            collectConstructorFragments(outerEntry, type, typePattern, fragmentUris);
-            collectMethodFragments(outerEntry, type, memberPattern, flags, fragmentUris);
-            collectFieldFragments(outerEntry, type, memberPattern, flags, fragmentUris);
+            collectConstructorFragments(outerEntry, type);
+            collectMethodFragments(outerEntry, type);
+            collectFieldFragments(outerEntry, type);
         }
     }
 
     /** Constructor declarations are indexed by type simple name. */
-    private static void collectConstructorFragments(Container.Entry outerEntry, Type type, Pattern typePattern, Set<URI> fragmentUris) {
+    private void collectConstructorFragments(Container.Entry outerEntry, Type type) {
         if (typePattern != null && typePattern.matcher(lastIdentifier(type.getName())).matches()) {
             for (Type.Method method : type.getMethods()) {
                 if (StringConstants.INSTANCE_CONSTRUCTOR.equals(method.getName())) {
-                    addMemberFragment(outerEntry, type, method.getName(), method.getDescriptor(), fragmentUris);
+                    addMemberFragment(outerEntry, type, method.getName(), method.getDescriptor());
                 }
             }
         }
     }
 
     /** Method declarations are matched by method name. */
-    private static void collectMethodFragments(Container.Entry outerEntry, Type type, Pattern memberPattern, int flags, Set<URI> fragmentUris) {
+    private void collectMethodFragments(Container.Entry outerEntry, Type type) {
         if (memberPattern != null && (flags & SearchInConstantPoolsView.SEARCH_METHOD) != 0) {
             for (Type.Method method : type.getMethods()) {
                 String methodName = method.getName();
                 if (!StringConstants.INSTANCE_CONSTRUCTOR.equals(methodName) && !STATIC_INITIALIZER.equals(methodName) && memberPattern.matcher(methodName).matches()) {
-                    addMemberFragment(outerEntry, type, methodName, method.getDescriptor(), fragmentUris);
+                    addMemberFragment(outerEntry, type, methodName, method.getDescriptor());
                 }
             }
         }
     }
 
     /** Field declarations are matched by field name. */
-    private static void collectFieldFragments(Container.Entry outerEntry, Type type, Pattern memberPattern, int flags, Set<URI> fragmentUris) {
+    private void collectFieldFragments(Container.Entry outerEntry, Type type) {
         if (memberPattern != null && (flags & SearchInConstantPoolsView.SEARCH_FIELD) != 0) {
             for (Type.Field field : type.getFields()) {
                 if (memberPattern.matcher(field.getName()).matches()) {
-                    addMemberFragment(outerEntry, type, field.getName(), field.getDescriptor(), fragmentUris);
+                    addMemberFragment(outerEntry, type, field.getName(), field.getDescriptor());
                 }
             }
         }
     }
 
-    private static void addMemberFragment(Container.Entry outerEntry, Type type, String name, String descriptor, Set<URI> fragmentUris) {
+    private void addMemberFragment(Container.Entry outerEntry, Type type, String name, String descriptor) {
         fragmentUris.add(fragmentUri(outerEntry, type.getName() + '-' + name + '-' + descriptor));
     }
 
@@ -176,8 +226,7 @@ final class FragmentUriCollector {
      * Adds the members of the type that hold a matching reference. A reference in a member that
      * has no tree node (static initializer, synthetic method) is covered by the type node.
      */
-    private static void collectReferenceFragments(Container.Entry outerEntry, Container.Entry entry, Type type,
-            Function<Container.Entry, ReferenceScanner.Result> referenceScanner, Set<URI> fragmentUris) {
+    private void collectReferenceFragments(Container.Entry outerEntry, Container.Entry entry, Type type) {
         if (type == null) {
             return;
         }
@@ -185,22 +234,25 @@ final class FragmentUriCollector {
 
         for (Type.Method method : type.getMethods()) {
             if (!STATIC_INITIALIZER.equals(method.getName()) && result.methods().contains(method.getName() + method.getDescriptor())) {
-                addMemberFragment(outerEntry, type, method.getName(), method.getDescriptor(), fragmentUris);
+                addMemberFragment(outerEntry, type, method.getName(), method.getDescriptor());
             }
         }
         for (Type.Field field : type.getFields()) {
             if (result.fields().contains(field.getName() + field.getDescriptor())) {
-                addMemberFragment(outerEntry, type, field.getName(), field.getDescriptor(), fragmentUris);
+                addMemberFragment(outerEntry, type, field.getName(), field.getDescriptor());
             }
         }
     }
 
     /**
-     * Adds the fragment URI for the given type name plus all ancestor type URIs
-     * (stripping '$'-delimited suffixes) so that the full path in the tree is visible.
+     * Adds the fragment URI for the given type name plus, for a nested type, all ancestor type
+     * URIs (stripping '$'-delimited suffixes) so that the full path in the tree is visible.
      */
-    private static void addTypeFragmentWithAncestors(Container.Entry outerEntry, String typeName, Set<URI> fragmentUris) {
+    private void addTypeFragmentWithAncestors(Container.Entry outerEntry, String typeName, boolean nested) {
         fragmentUris.add(fragmentUri(outerEntry, typeName));
+        if (!nested) {
+            return;
+        }
         String name = typeName;
         // Only the simple name can hold inner type separators, packages may contain '$'
         int simpleNameStart = typeName.lastIndexOf('/') + 1;

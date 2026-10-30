@@ -84,6 +84,12 @@ class ReferenceScannerTest {
     }
 
     @Test
+    void invokedynamicBootstrapMethodIsAttributedToTheContainingMethod() throws IOException {
+        assertEquals(Set.of("lambdaUser()Ljava/lang/Runnable;"), scan("metafactory", SEARCH_METHOD).methods());
+        assertTrue(scan("LambdaMetafactory", SEARCH_TYPE).methods().contains("lambdaUser()Ljava/lang/Runnable;"));
+    }
+
+    @Test
     void methodWithoutMatchingReferenceIsNotReported() throws IOException {
         assertFalse(scan("*", SEARCH_METHOD | SEARCH_FIELD | SEARCH_STRING).methods().contains("untouched()V"));
     }

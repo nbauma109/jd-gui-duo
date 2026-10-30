@@ -269,7 +269,7 @@ final class ReferenceScanner {
 
             @Override
             public void visitInvokeDynamicInsn(String indyName, String indyDescriptor, Handle bootstrap, Object... arguments) {
-                hitIf(Arrays.stream(arguments).anyMatch(Visitor.this::matchesConstant));
+                hitIf(matchesHandle(bootstrap) || Arrays.stream(arguments).anyMatch(Visitor.this::matchesConstant));
             }
 
             @Override

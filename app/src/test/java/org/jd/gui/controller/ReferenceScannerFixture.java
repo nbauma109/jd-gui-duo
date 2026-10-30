@@ -53,6 +53,11 @@ class ReferenceScannerFixture {
     void throwsType() throws java.io.IOException {
     }
 
+    Runnable lambdaUser() {
+        return () -> {
+        };
+    }
+
     void untouched() {
     }
 }
