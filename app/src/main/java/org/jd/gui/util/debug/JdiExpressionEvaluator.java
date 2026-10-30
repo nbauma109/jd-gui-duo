@@ -433,8 +433,38 @@ public final class JdiExpressionEvaluator {
         return arguments;
     }
 
+    /** Integer literal in the given radix, with the optional L suffix; hex, octal and binary literals may fill 32 bits. */
+    private Value integer(String digits, int radix) {
+        boolean isLong = pos < src.length() && (src.charAt(pos) == 'L' || src.charAt(pos) == 'l');
+        if (isLong) {
+            pos++;
+        }
+        long parsed = Long.parseLong(digits, radix);
+        if (isLong) {
+            return vm.mirrorOf(parsed);
+        }
+        if (radix == 10) {
+            return parsed > Integer.MAX_VALUE ? vm.mirrorOf(parsed) : vm.mirrorOf((int) parsed);
+        }
+        return parsed <= 0xFFFFFFFFL ? vm.mirrorOf((int) parsed) : vm.mirrorOf(parsed);
+    }
+
     private Object parseNumber() throws EvaluationException {
         int start = pos;
+        if (src.charAt(pos) == '0' && pos + 1 < src.length() && "xXbB".indexOf(src.charAt(pos + 1)) >= 0) {
+            int radix = Character.toLowerCase(src.charAt(pos + 1)) == 'x' ? 16 : 2;
+            pos += 2;
+            int digitsStart = pos;
+            while (pos < src.length() && (Character.digit(src.charAt(pos), radix) >= 0 || src.charAt(pos) == '_')) {
+                pos++;
+            }
+            String digits = src.substring(digitsStart, pos).replace("_", "");
+            try {
+                return integer(digits, radix);
+            } catch (NumberFormatException e) {
+                throw new EvaluationException("Invalid number '" + src.substring(start, pos) + "'");
+            }
+        }
         boolean floating = false;
         while (pos < src.length()) {
             char c = src.charAt(pos);
@@ -455,10 +485,6 @@ public final class JdiExpressionEvaluator {
         }
         String text = src.substring(start, pos).replace("_", "");
         try {
-            if (pos < src.length() && (src.charAt(pos) == 'L' || src.charAt(pos) == 'l')) {
-                pos++;
-                return vm.mirrorOf(Long.parseLong(text));
-            }
             if (pos < src.length() && (src.charAt(pos) == 'f' || src.charAt(pos) == 'F')) {
                 pos++;
                 return vm.mirrorOf(Float.parseFloat(text));
@@ -470,8 +496,8 @@ public final class JdiExpressionEvaluator {
             if (floating) {
                 return vm.mirrorOf(Double.parseDouble(text));
             }
-            long parsed = Long.parseLong(text);
-            return parsed > Integer.MAX_VALUE ? vm.mirrorOf(parsed) : vm.mirrorOf((int) parsed);
+            // a leading 0 makes the literal octal, as in Java
+            return integer(text, text.length() > 1 && text.charAt(0) == '0' ? 8 : 10);
         } catch (NumberFormatException e) {
             throw new EvaluationException("Invalid number '" + text + "'");
         }
