@@ -220,12 +220,35 @@ public final class JdiExpressionEvaluator {
         }
     }
 
+    /** -2147483648 and -9223372036854775808L: only the negated literal fits its type (an int and a long). */
+    private Object minimumLiteral() {
+        skipWs();
+        if (src.startsWith("2147483648", pos) && literalEnds(pos + 10)) {
+            pos += 10;
+            return skipping > 0 ? null : vm.mirrorOf(Integer.MIN_VALUE);
+        }
+        if (src.startsWith("9223372036854775808", pos) && pos + 19 < src.length()
+                && (src.charAt(pos + 19) == 'L' || src.charAt(pos + 19) == 'l') && literalEnds(pos + 20)) {
+            pos += 20;
+            return skipping > 0 ? null : vm.mirrorOf(Long.MIN_VALUE);
+        }
+        return NOT_FOUND;
+    }
+
+    private boolean literalEnds(int end) {
+        return end >= src.length() || !(Character.isLetterOrDigit(src.charAt(end)) || src.charAt(end) == '.' || src.charAt(end) == '_');
+    }
+
     private Object parseUnary() throws EvaluationException, IncompatibleThreadStateException {
         if (accept("!")) {
             Object operand = parseUnary();
             return skipping > 0 ? null : vm.mirrorOf(!asBoolean(operand));
         }
         if (accept("-")) {
+            Object minimum = minimumLiteral();
+            if (minimum != NOT_FOUND) {
+                return minimum;
+            }
             Object operandResult = parseUnary();
             if (skipping > 0) {
                 return null;
@@ -378,6 +401,16 @@ public final class JdiExpressionEvaluator {
         }
         ObjectReference self = frame.thisObject();
         ReferenceType declaring = frame.location().declaringType();
+        // the field the executing method sees: looked up in its class, not in the (sub)class of the receiver
+        Field lexical = declaring.fieldByName(name);
+        if (lexical != null) {
+            if (lexical.isStatic()) {
+                return declaring.getValue(lexical);
+            }
+            if (self != null) {
+                return self.getValue(lexical);
+            }
+        }
         if (self != null) {
             Field field = self.referenceType().fieldByName(name);
             if (field != null) {
