@@ -115,9 +115,34 @@ public final class JdiExpressionEvaluator {
             Object whenTrue = parseOperand(!selectTrue, this::parseTernary);
             expect(":");
             Object whenFalse = parseOperand(selectTrue, this::parseTernary);
-            return skipping > 0 ? null : selectTrue ? whenTrue : whenFalse;
+            if (skipping > 0) {
+                return null;
+            }
+            return promoteConditional(selectTrue ? whenTrue : whenFalse, selectTrue ? whenFalse : whenTrue);
         }
         return condition;
+    }
+
+    /**
+     * The type of {@code c ? a : b} is the promotion of both branch types: {@code (true ? 1 : 2.0)} is a double.
+     * The branch that is not selected is only parsed, so its type is known when it is a literal or a plain name.
+     */
+    private Object promoteConditional(Object selected, Object other) {
+        if (selected instanceof PrimitiveValue s && other instanceof PrimitiveValue o && isNumeric(s) && isNumeric(o)) {
+            if (s instanceof DoubleValue || o instanceof DoubleValue) {
+                return vm.mirrorOf(s.doubleValue());
+            }
+            if (s instanceof FloatValue || o instanceof FloatValue) {
+                return vm.mirrorOf(s.floatValue());
+            }
+            if (s instanceof LongValue || o instanceof LongValue) {
+                return vm.mirrorOf(s.longValue());
+            }
+            if (!s.type().name().equals(o.type().name())) {
+                return vm.mirrorOf(s.intValue());
+            }
+        }
+        return selected;
     }
 
     private Object parseOr() throws EvaluationException, IncompatibleThreadStateException {
@@ -304,7 +329,13 @@ public final class JdiExpressionEvaluator {
             return skipping > 0 ? null : invokeImplicit(name, arguments);
         }
         if (skipping > 0) {
-            return null;
+            // not evaluated, but reading a variable has no side effect and tells the type of a ?: branch
+            try {
+                Object read = resolveName(name);
+                return read instanceof Value || read == null ? read : null;
+            } catch (EvaluationException | IncompatibleThreadStateException | RuntimeException e) {
+                return null;
+            }
         }
         Object resolved = resolveName(name);
         if (resolved != NOT_FOUND) {

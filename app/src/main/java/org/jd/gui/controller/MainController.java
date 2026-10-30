@@ -768,20 +768,24 @@ public class MainController implements API {
         if (entries.isEmpty()) {
             // The class is not among the opened archives (e.g. a dependency): the page on display is unrelated,
             // so it must not get the execution marker, and the marker of the previous stop is obsolete.
-            BreakpointCapablePage unrelated = getCurrentBreakpointPage();
-            if (unrelated != null) {
-                unrelated.setCurrentExecutionLine(0);
-            }
+            clearDebugExecutionLine();
             return;
         }
         openURI(UriUtil.createURI(this, getCollectionOfFutureIndexes(), entries.get(0), "lineNumber=" + lineNumber, null));
         // currentPage was updated synchronously by openURI (via pageChanged callbacks).
         // Set the execution-line highlight immediately — no need for another invokeLater.
         BreakpointCapablePage bcp = getCurrentBreakpointPage();
+        if (executionMarkedPage != null && executionMarkedPage != bcp) {
+            executionMarkedPage.setCurrentExecutionLine(0); // execution moved on from the class shown before
+        }
         if (bcp != null) {
             bcp.setCurrentExecutionLine(lineNumber);
         }
+        executionMarkedPage = bcp;
     }
+
+    /** The page that shows the execution marker: it may no longer be the one on display. */
+    private BreakpointCapablePage executionMarkedPage;
 
     /** The current page is usually a DynamicPage wrapping the debuggable ClassFilePage. */
     private BreakpointCapablePage getCurrentBreakpointPage() {
@@ -801,6 +805,10 @@ public class MainController implements API {
             BreakpointCapablePage bcp = getCurrentBreakpointPage();
             if (bcp != null) {
                 bcp.setCurrentExecutionLine(0);
+            }
+            if (executionMarkedPage != null) {
+                executionMarkedPage.setCurrentExecutionLine(0);
+                executionMarkedPage = null;
             }
         };
         if (javax.swing.SwingUtilities.isEventDispatchThread()) {
