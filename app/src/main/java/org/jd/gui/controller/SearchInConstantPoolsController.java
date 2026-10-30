@@ -29,6 +29,7 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -118,12 +119,12 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
 
                                 Set<URI> fragmentUris = collectFragmentUris(matchingEntries, pattern, flags);
                                 matchingEntries = getOuterEntries(matchingEntries);
-                                fragmentUris.addAll(FragmentUriCollector.innerEntryUris(matchingEntries));
+                                Set<URI> lookupOnlyUris = FragmentUriCollector.innerEntryUris(matchingEntries);
 
                                 matchingTypeCount += matchingEntries.size();
 
                                 // Create a filtered container
-                                containers.add(new DelegatingFilterContainer(container, matchingEntries, fragmentUris));
+                                containers.add(new DelegatingFilterContainer(container, matchingEntries, fragmentUris, lookupOnlyUris));
                             }
                         }
                     }
@@ -236,7 +237,7 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
         Pattern referencePattern = createPattern(pattern);
         return FragmentUriCollector.collect(matchingEntries, entry -> {
             TypeFactory factory = TypeFactoryService.getInstance().get(entry);
-            return factory == null ? null : factory.make(api, entry, null);
+            return factory == null ? List.<Type>of() : factory.make(api, entry);
         }, entry -> {
             try (InputStream inputStream = entry.getInputStream()) {
                 return ReferenceScanner.scan(inputStream, referencePattern, flags);

@@ -43,7 +43,7 @@ class FragmentUriCollectorTest {
     private final Type fooType = type("com/example/Foo", Map.of("count", "I"), Map.of("<init>", "()V", "getCount", "()I", "<clinit>", "()V"));
     private final Type barType = type("com/example/Foo$Bar", Map.of("value", "I"), Map.of("<init>", "()V", "getValue", "()I"));
     private final Map<Container.Entry, Type> types = Map.of(foo, fooType, fooBar, barType);
-    private final Function<Container.Entry, Type> loader = types::get;
+    private final Function<Container.Entry, Collection<Type>> loader = e -> types.containsKey(e) ? List.of(types.get(e)) : List.of();
 
     FragmentUriCollectorTest() {
         siblings.put(new FileEntryPath("com/example/Foo.class"), foo);
@@ -116,6 +116,36 @@ class FragmentUriCollectorTest {
     }
 
     @Test
+    void innerTypesOfSourceFileTypesAreTraversed() {
+        Type inner = type("com/example/Foo$Bar", Map.of(), Map.of("getValue", "()I"));
+        Type source = type("com/example/Foo", Map.of(), Map.of(), List.of(inner));
+        Set<URI> uris = FragmentUriCollector.collect(List.of(foo), e -> List.of(source), "getValue", SEARCH_DECLARATION | SEARCH_METHOD);
+        assertEquals(Set.of(uri(FOO, "com/example/Foo"), uri(FOO, "com/example/Foo$Bar"), uri(FOO, "com/example/Foo$Bar-getValue-()I")), uris);
+    }
+
+    @Test
+    void everyRootTypeOfASourceFileIsCollected() {
+        Type second = type("com/example/Second", Map.of(), Map.of("run", "()V"));
+        Set<URI> uris = FragmentUriCollector.collect(List.of(foo), e -> List.of(fooType, second), "run", SEARCH_DECLARATION | SEARCH_METHOD);
+        assertTrue(uris.contains(uri(FOO, "com/example/Second-run-()V")));
+        assertTrue(uris.contains(uri(FOO, "com/example/Foo")));
+    }
+
+    @Test
+    void dollarInPackageNameIsNotTakenAsInnerTypeSeparator() {
+        Container.Entry dir = entry("com/$generated", null, new HashMap<>());
+        Container.Entry outer = entry("com/$generated/Outer.class", dir, Map.of());
+        Container.Entry inner = entry("com/$generated/Outer$Inner.class", dir, Map.of());
+        dir.getChildren().put(new FileEntryPath("com/$generated/Outer.class"), outer);
+        Type innerType = type("com/$generated/Outer$Inner", Map.of(), Map.of("go", "()V"));
+        String outerUri = "file:///lib.jar!/com/$generated/Outer.class";
+
+        Set<URI> uris = FragmentUriCollector.collect(List.of(inner), e -> List.of(innerType), "go", SEARCH_DECLARATION | SEARCH_METHOD);
+
+        assertEquals(Set.of(uri(outerUri, "com/$generated/Outer"), uri(outerUri, "com/$generated/Outer$Inner"), uri(outerUri, "com/$generated/Outer$Inner-go-()V")), uris);
+    }
+
+    @Test
     void entriesWithoutTypeAreIgnored() {
         Container.Entry other = entry("com/example/readme.txt", parent, Map.of());
         assertTrue(collect(List.of(other), "x", SEARCH_DECLARATION | SEARCH_METHOD).isEmpty());
@@ -155,13 +185,17 @@ class FragmentUriCollectorTest {
     }
 
     private static Type type(String name, Map<String, String> fields, Map<String, String> methods) {
+        return type(name, fields, methods, List.of());
+    }
+
+    private static Type type(String name, Map<String, String> fields, Map<String, String> methods, List<Type> innerTypes) {
         List<Type.Field> fieldList = fields.entrySet().stream().map(e -> member(Type.Field.class, e.getKey(), e.getValue())).toList();
         List<Type.Method> methodList = methods.entrySet().stream().map(e -> member(Type.Method.class, e.getKey(), e.getValue())).toList();
         return (Type) Proxy.newProxyInstance(Type.class.getClassLoader(), new Class<?>[] { Type.class }, (p, m, a) -> switch (m.getName()) {
             case "getName" -> name;
             case "getFields" -> fieldList;
             case "getMethods" -> methodList;
-            case "getInnerTypes" -> List.of();
+            case "getInnerTypes" -> innerTypes;
             default -> null;
         });
     }

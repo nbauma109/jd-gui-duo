@@ -13,6 +13,11 @@ import java.util.List;
 class ReferenceScannerFixture {
     String name;
     List<String> items;
+    List<StringBuilder> builders;
+
+    List<Integer> genericReturn(List<ProcessBuilder> argument) {
+        return null;
+    }
 
     void callsMethod() {
         String.valueOf(1);

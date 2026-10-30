@@ -32,11 +32,11 @@ final class FragmentUriCollector {
     private FragmentUriCollector() {
     }
 
-    static Set<URI> collect(Collection<Container.Entry> matchingEntries, Function<Container.Entry, Type> typeLoader, String pattern, int flags) {
+    static Set<URI> collect(Collection<Container.Entry> matchingEntries, Function<Container.Entry, Collection<Type>> typeLoader, String pattern, int flags) {
         return collect(matchingEntries, typeLoader, entry -> ReferenceScanner.Result.EMPTY, pattern, flags);
     }
 
-    static Set<URI> collect(Collection<Container.Entry> matchingEntries, Function<Container.Entry, Type> typeLoader,
+    static Set<URI> collect(Collection<Container.Entry> matchingEntries, Function<Container.Entry, Collection<Type>> typeLoader,
             Function<Container.Entry, ReferenceScanner.Result> referenceScanner, String pattern, int flags) {
         Set<URI> fragmentUris = new HashSet<>();
         boolean declarations = (flags & SearchInConstantPoolsView.SEARCH_DECLARATION) != 0;
@@ -54,12 +54,16 @@ final class FragmentUriCollector {
         }
 
         for (Container.Entry entry : matchingEntries) {
-            Type type = typeLoader.apply(entry);
-            Container.Entry outerEntry = type == null ? null : getTopLevelOuterEntry(entry);
+            // A source file can declare several root types, each with inner types
+            Collection<Type> types = typeLoader.apply(entry);
+            Container.Entry outerEntry = types == null || types.isEmpty() ? null : getTopLevelOuterEntry(entry);
             if (outerEntry != null) {
-                collectTypeFragments(outerEntry, type, typePattern, memberPattern, flags, fragmentUris);
-                if (references) {
-                    collectReferenceFragments(outerEntry, entry, type, referenceScanner, fragmentUris);
+                for (Type type : types) {
+                    collectTypeTree(outerEntry, type, typePattern, memberPattern, flags, fragmentUris);
+                    // Only the entry's own types can be scanned, inner types have their own class files
+                    if (references) {
+                        collectReferenceFragments(outerEntry, entry, type, referenceScanner, fragmentUris);
+                    }
                 }
             }
         }
@@ -69,7 +73,7 @@ final class FragmentUriCollector {
 
     /**
      * Returns the URIs of the inner class files of the given top-level class files. The filtered
-     * container must expose them: type lookup resolves inner types through the parent's children
+     * container must keep them resolvable (without displaying them): type lookup resolves inner types through the parent's children
      * and caches the result per URI, so an outer type first built from a filtered view without its
      * inner class files would permanently lose them (the package nodes hide these files themselves).
      */
@@ -98,12 +102,25 @@ final class FragmentUriCollector {
 
     private static Container.Entry getTopLevelOuterEntry(Container.Entry entry) {
         String path = entry.getPath();
-        int idx = path.indexOf(StringConstants.INTERNAL_INNER_SEPARATOR);
+        // The separator is looked up in the file name only, packages may contain '$'
+        int idx = path.indexOf(StringConstants.INTERNAL_INNER_SEPARATOR, path.lastIndexOf('/') + 1);
         if (idx != -1 && path.endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
             FileEntryPath outerPath = new FileEntryPath(path.substring(0, idx) + StringConstants.CLASS_FILE_SUFFIX);
             return entry.getParent().getChildren().get(outerPath); // may be null if outer not found
         }
         return entry; // Already a top-level class
+    }
+
+    private static void collectTypeTree(Container.Entry outerEntry, Type type, Pattern typePattern, Pattern memberPattern, int flags, Set<URI> fragmentUris) {
+        if (type != null) {
+            collectTypeFragments(outerEntry, type, typePattern, memberPattern, flags, fragmentUris);
+            Collection<Type> innerTypes = type.getInnerTypes();
+            if (innerTypes != null) {
+                for (Type innerType : innerTypes) {
+                    collectTypeTree(outerEntry, innerType, typePattern, memberPattern, flags, fragmentUris);
+                }
+            }
+        }
     }
 
     private static void collectTypeFragments(Container.Entry outerEntry, Type type, Pattern typePattern, Pattern memberPattern, int flags, Set<URI> fragmentUris) {
@@ -163,6 +180,9 @@ final class FragmentUriCollector {
      */
     private static void collectReferenceFragments(Container.Entry outerEntry, Container.Entry entry, Type type,
             Function<Container.Entry, ReferenceScanner.Result> referenceScanner, Set<URI> fragmentUris) {
+        if (type == null) {
+            return;
+        }
         ReferenceScanner.Result result = referenceScanner.apply(entry);
 
         for (Type.Method method : type.getMethods()) {
@@ -184,8 +204,10 @@ final class FragmentUriCollector {
     private static void addTypeFragmentWithAncestors(Container.Entry outerEntry, String typeName, Set<URI> fragmentUris) {
         fragmentUris.add(fragmentUri(outerEntry, typeName));
         String name = typeName;
+        // Only the simple name can hold inner type separators, packages may contain '$'
+        int simpleNameStart = typeName.lastIndexOf('/') + 1;
         int lastDollar;
-        while ((lastDollar = name.lastIndexOf('$')) != -1) {
+        while ((lastDollar = name.lastIndexOf('$')) >= simpleNameStart && lastDollar > 0) {
             name = name.substring(0, lastDollar);
             fragmentUris.add(fragmentUri(outerEntry, name));
         }

@@ -28,6 +28,8 @@ public class DelegatingFilterContainer implements Container {
     private final DelegatedEntry root;
 
     private final Set<URI> validEntries = new HashSet<>();
+    // Entries that stay resolvable through getChildren() (e.g. inner class files for type lookup) without being displayed
+    private final Set<URI> lookupOnlyEntries = new HashSet<>();
     private final Map<URI, DelegatedEntry> uriToDelegatedEntry = new HashMap<>();
     private final Map<URI, DelegatedContainer> uriToDelegatedContainer = new HashMap<>();
 
@@ -43,9 +45,10 @@ public class DelegatingFilterContainer implements Container {
         }
     }
 
-    public DelegatingFilterContainer(Container container, Collection<Entry> entries, Set<URI> extraUris) {
+    public DelegatingFilterContainer(Container container, Collection<Entry> entries, Set<URI> extraUris, Set<URI> lookupOnlyUris) {
         this(container, entries);
         validEntries.addAll(extraUris);
+        lookupOnlyEntries.addAll(lookupOnlyUris);
     }
 
     @Override
@@ -101,7 +104,8 @@ public class DelegatingFilterContainer implements Container {
                 Map<Container.EntryPath, Container.Entry> filtered = source instanceof SortedMap<Container.EntryPath, Container.Entry> sorted
                         ? new TreeMap<>(sorted.comparator()) : new HashMap<>();
                 for (Map.Entry<Container.EntryPath, Container.Entry> child : source.entrySet()) {
-                    if (validEntries.contains(child.getValue().getUri())) {
+                    URI childUri = child.getValue().getUri();
+                    if (validEntries.contains(childUri) || lookupOnlyEntries.contains(childUri)) {
                         filtered.put(child.getKey(), getDelegEntry(child.getValue()));
                     }
                 }

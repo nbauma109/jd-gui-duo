@@ -15,6 +15,8 @@ import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.signature.SignatureReader;
+import org.objectweb.asm.signature.SignatureVisitor;
 import org.objectweb.asm.Type;
 
 import java.io.IOException;
@@ -87,6 +89,32 @@ final class ReferenceScanner {
             return element.getSort() == Type.OBJECT && matches(simpleName(element.getInternalName()));
         }
 
+        /** Type references that only occur in a generic signature (e.g. {@code List<Needle>}) are indexed too. */
+        private boolean matchesSignature(String signature, boolean fieldType) {
+            if (signature == null || (flags & SearchInConstantPoolsView.SEARCH_TYPE) == 0) {
+                return false;
+            }
+            boolean[] found = new boolean[1];
+            SignatureVisitor visitor = new SignatureVisitor(Opcodes.ASM9) {
+                @Override
+                public void visitClassType(String name) {
+                    found[0] |= matches(simpleName(name));
+                }
+
+                @Override
+                public void visitInnerClassType(String name) {
+                    found[0] |= matches(name);
+                }
+            };
+            SignatureReader reader = new SignatureReader(signature);
+            if (fieldType) {
+                reader.acceptType(visitor);
+            } else {
+                reader.accept(visitor);
+            }
+            return found[0];
+        }
+
         private boolean matchesMethod(String owner, String name) {
             if (StringConstants.INSTANCE_CONSTRUCTOR.equals(name)) {
                 return (flags & SearchInConstantPoolsView.SEARCH_CONSTRUCTOR) != 0 && matches(simpleName(owner));
@@ -115,7 +143,7 @@ final class ReferenceScanner {
 
         @Override
         public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
-            if (matchesType(Type.getType(descriptor)) || matchesConstant(value)) {
+            if (matchesType(Type.getType(descriptor)) || matchesSignature(signature, true) || matchesConstant(value)) {
                 fields.add(name + descriptor);
             }
             return null;
@@ -124,7 +152,7 @@ final class ReferenceScanner {
         @Override
         public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
             String key = name + descriptor;
-            if (matchesType(Type.getMethodType(descriptor)) || matchesAnyType(exceptions)) {
+            if (matchesType(Type.getMethodType(descriptor)) || matchesSignature(signature, false) || matchesAnyType(exceptions)) {
                 methods.add(key);
             }
             return new BodyVisitor(key);

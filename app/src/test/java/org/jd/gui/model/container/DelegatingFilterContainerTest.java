@@ -20,8 +20,10 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DelegatingFilterContainerTest {
     private static final String DIR = "com/example";
@@ -56,6 +58,14 @@ class DelegatingFilterContainerTest {
         assertEquals(2, filteredChildren.size());
     }
 
+    @Test
+    void lookupOnlyEntriesAreResolvableButNotDisplayed() {
+        DelegatingFilterContainer container = filtered(Set.of(fooBar.getUri()));
+
+        assertTrue(container.getUris().contains(foo.getUri()));
+        assertFalse(container.getUris().contains(fooBar.getUri()));
+    }
+
     private DelegatingFilterContainer filtered(Set<URI> extraUris) {
         Container delegate = (Container) Proxy.newProxyInstance(Container.class.getClassLoader(), new Class<?>[] { Container.class }, (p, m, a) -> switch (m.getName()) {
             case "getRoot" -> root;
@@ -64,7 +74,7 @@ class DelegatingFilterContainerTest {
             case "equals" -> p == a[0];
             default -> null;
         });
-        DelegatingFilterContainer container = new DelegatingFilterContainer(delegate, List.of(foo), extraUris);
+        DelegatingFilterContainer container = new DelegatingFilterContainer(delegate, List.of(foo), Set.of(), extraUris);
         container.getRoot().getChildren();
         return container;
     }

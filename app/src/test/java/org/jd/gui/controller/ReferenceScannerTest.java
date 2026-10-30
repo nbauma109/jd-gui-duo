@@ -58,7 +58,15 @@ class ReferenceScannerTest {
     void typeReferenceCoversInstructionsThrowsClausesAndFieldDescriptors() throws IOException {
         assertTrue(scan("StringBuilder", SEARCH_TYPE).methods().contains("buildsType()V"));
         assertTrue(scan("IOException", SEARCH_TYPE).methods().contains("throwsType()V"));
-        assertEquals(Set.of("itemsLjava/util/List;"), scan("List", SEARCH_TYPE).fields());
+        assertEquals(Set.of("itemsLjava/util/List;", "buildersLjava/util/List;"), scan("List", SEARCH_TYPE).fields());
+    }
+
+    @Test
+    void typeOnlyInAGenericSignatureIsAttributedToItsMembers() throws IOException {
+        // StringBuilder is erased from the field descriptor (Ljava/util/List;) and kept in its signature
+        assertTrue(scan("StringBuilder", SEARCH_TYPE).fields().contains("buildersLjava/util/List;"));
+        assertTrue(scan("ProcessBuilder", SEARCH_TYPE).methods().contains("genericReturn(Ljava/util/List;)Ljava/util/List;"));
+        assertTrue(scan("Integer", SEARCH_TYPE).methods().contains("genericReturn(Ljava/util/List;)Ljava/util/List;"));
     }
 
     @Test
