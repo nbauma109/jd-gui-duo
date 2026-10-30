@@ -48,6 +48,31 @@ public final class JdiExpressionEvaluator {
         }
     }
 
+    /**
+     * A reference value with the declared type of the variable, field or method that produced it. Java chooses
+     * an overload from the declared type ({@code Object value = "x"; pick(value)} calls pick(Object)), the
+     * runtime type only decides which implementation runs.
+     */
+    private record Typed(Value value, String declaredType) {
+    }
+
+    private static Object typed(Value value, String declaredType) {
+        if (declaredType == null || !(value == null || value instanceof ObjectReference)) {
+            return value;
+        }
+        if (value instanceof ObjectReference object && declaredType.equals(object.referenceType().name())) {
+            return value; // same type: nothing to remember
+        }
+        return new Typed(value, declaredType);
+    }
+
+    private static String declaredTypeOf(Object result) {
+        return result instanceof Typed typed ? typed.declaredType() : null;
+    }
+
+    private record Arguments(List<Value> values, List<String> declaredTypes) {
+    }
+
     private record ClassRef(ReferenceType type) {
     }
 
@@ -83,7 +108,7 @@ public final class JdiExpressionEvaluator {
             if (result instanceof ClassRef classRef) {
                 throw new EvaluationException(classRef.type().name() + " is a type, not a value");
             }
-            return (Value) result;
+            return value(result);
         } catch (IncompatibleThreadStateException e) {
             throw new EvaluationException("The thread is not suspended");
         } catch (RuntimeException e) {
@@ -128,7 +153,9 @@ public final class JdiExpressionEvaluator {
      * The branch that is not selected is only parsed, so its type is known when it is a literal or a plain name.
      */
     private Object promoteConditional(Object selected, Object other) {
-        if (selected instanceof PrimitiveValue s && other instanceof PrimitiveValue o && isNumeric(s) && isNumeric(o)) {
+        Value selectedValue = selected instanceof Typed t ? t.value() : selected instanceof Value v ? v : null;
+        Value otherValue = other instanceof Typed t ? t.value() : other instanceof Value v ? v : null;
+        if (selectedValue instanceof PrimitiveValue s && otherValue instanceof PrimitiveValue o && isNumeric(s) && isNumeric(o)) {
             if (s instanceof DoubleValue || o instanceof DoubleValue) {
                 return vm.mirrorOf(s.doubleValue());
             }
@@ -277,8 +304,8 @@ public final class JdiExpressionEvaluator {
             if (accept(".")) {
                 String name = identifier();
                 if (accept("(")) {
-                    List<Value> arguments = parseArguments();
-                    target = skipping > 0 ? null : invoke(target, name, arguments);
+                    Arguments arguments = parseArguments();
+                    target = skipping > 0 ? null : invoke(target, name, arguments.values(), arguments.declaredTypes());
                 } else {
                     target = skipping > 0 ? null : member(target, name);
                 }
@@ -297,7 +324,7 @@ public final class JdiExpressionEvaluator {
                 if (i < 0 || i >= arrayReference.length()) {
                     throw new EvaluationException("Index " + i + " out of bounds for length " + arrayReference.length());
                 }
-                target = arrayReference.getValue(i);
+                target = typed(arrayReference.getValue(i), arrayReference.referenceType() instanceof com.sun.jdi.ArrayType arrayType ? arrayType.componentTypeName() : null);
             } else {
                 return target;
             }
@@ -348,14 +375,14 @@ public final class JdiExpressionEvaluator {
                 break;
         }
         if (accept("(")) {
-            List<Value> arguments = parseArguments();
+            Arguments arguments = parseArguments();
             return skipping > 0 ? null : invokeImplicit(name, arguments);
         }
         if (skipping > 0) {
             // not evaluated, but reading a variable has no side effect and tells the type of a ?: branch
             try {
                 Object read = resolveName(name);
-                return read instanceof Value || read == null ? read : null;
+                return read instanceof Value || read instanceof Typed || read == null ? read : null;
             } catch (EvaluationException | IncompatibleThreadStateException | RuntimeException e) {
                 return null;
             }
@@ -394,7 +421,7 @@ public final class JdiExpressionEvaluator {
         try {
             LocalVariable variable = frame.visibleVariableByName(name);
             if (variable != null) {
-                return frame.getValue(variable);
+                return typed(frame.getValue(variable), variable.typeName());
             }
         } catch (AbsentInformationException e) {
             // no local variable table: fall through to fields
@@ -405,21 +432,21 @@ public final class JdiExpressionEvaluator {
         Field lexical = declaring.fieldByName(name);
         if (lexical != null) {
             if (lexical.isStatic()) {
-                return declaring.getValue(lexical);
+                return typed(declaring.getValue(lexical), lexical.typeName());
             }
             if (self != null) {
-                return self.getValue(lexical);
+                return typed(self.getValue(lexical), lexical.typeName());
             }
         }
         if (self != null) {
             Field field = self.referenceType().fieldByName(name);
             if (field != null) {
-                return field.isStatic() ? self.referenceType().getValue(field) : self.getValue(field);
+                return typed(field.isStatic() ? self.referenceType().getValue(field) : self.getValue(field), field.typeName());
             }
         }
         Field staticField = declaring.fieldByName(name);
         if (staticField != null && staticField.isStatic()) {
-            return declaring.getValue(staticField);
+            return typed(declaring.getValue(staticField), staticField.typeName());
         }
         return NOT_FOUND;
     }
@@ -454,16 +481,19 @@ public final class JdiExpressionEvaluator {
         return types.isEmpty() ? null : types.get(0);
     }
 
-    private List<Value> parseArguments() throws EvaluationException, IncompatibleThreadStateException {
-        List<Value> arguments = new ArrayList<>();
+    private Arguments parseArguments() throws EvaluationException, IncompatibleThreadStateException {
+        List<Value> values = new ArrayList<>();
+        List<String> declaredTypes = new ArrayList<>();
         if (accept(")")) {
-            return arguments;
+            return new Arguments(values, declaredTypes);
         }
         do {
-            arguments.add(value(parseTernary()));
+            Object argument = parseTernary();
+            values.add(value(argument));
+            declaredTypes.add(declaredTypeOf(argument));
         } while (accept(","));
         expect(")");
-        return arguments;
+        return new Arguments(values, declaredTypes);
     }
 
     /** Integer literal in the given radix, with the optional L suffix; hex, octal and binary literals may fill 32 bits. */
@@ -610,7 +640,7 @@ public final class JdiExpressionEvaluator {
             if (field == null || !field.isStatic()) {
                 throw new EvaluationException("No static field '" + name + "' in " + classRef.type().name());
             }
-            return classRef.type().getValue(field);
+            return typed(classRef.type().getValue(field), field.typeName());
         }
         Value value = value(target);
         if (value instanceof ArrayReference array && "length".equals(name)) {
@@ -623,19 +653,23 @@ public final class JdiExpressionEvaluator {
         if (field == null) {
             throw new EvaluationException("No field '" + name + "' in " + object.referenceType().name());
         }
-        return field.isStatic() ? object.referenceType().getValue(field) : object.getValue(field);
+        return typed(field.isStatic() ? object.referenceType().getValue(field) : object.getValue(field), field.typeName());
     }
 
-    private Object invokeImplicit(String name, List<Value> arguments) throws EvaluationException, IncompatibleThreadStateException {
+    private Object invokeImplicit(String name, Arguments arguments) throws EvaluationException, IncompatibleThreadStateException {
         StackFrame frame = frame();
         ObjectReference self = frame.thisObject();
         if (self != null) {
-            return invoke(self, name, arguments);
+            return invoke(self, name, arguments.values(), arguments.declaredTypes());
         }
-        return invoke(new ClassRef(frame.location().declaringType()), name, arguments);
+        return invoke(new ClassRef(frame.location().declaringType()), name, arguments.values(), arguments.declaredTypes());
     }
 
     private Object invoke(Object target, String name, List<Value> arguments) throws EvaluationException {
+        return invoke(target, name, arguments, null);
+    }
+
+    private Object invoke(Object target, String name, List<Value> arguments, List<String> declaredTypes) throws EvaluationException {
         ReferenceType type;
         ObjectReference receiver = null;
         if (target instanceof ClassRef classRef) {
@@ -655,7 +689,7 @@ public final class JdiExpressionEvaluator {
                 continue;
             }
             List<String> parameterTypes = method.argumentTypeNames();
-            if (parameterTypes.size() != arguments.size() || !isApplicable(arguments, parameterTypes)) {
+            if (parameterTypes.size() != arguments.size() || !isApplicable(arguments, declaredTypes, parameterTypes)) {
                 continue;
             }
             if (chosen == null || isMoreSpecific(parameterTypes, chosen.argumentTypeNames())) {
@@ -671,13 +705,17 @@ public final class JdiExpressionEvaluator {
             for (int i = 0; i < arguments.size(); i++) {
                 coerced.add(coerce(arguments.get(i), parameterTypes.get(i)));
             }
+            Value result;
             if (chosen.isStatic()) {
                 if (type instanceof com.sun.jdi.InterfaceType interfaceType) {
-                    return interfaceType.invokeMethod(thread, chosen, coerced, ObjectReference.INVOKE_SINGLE_THREADED);
+                    result = interfaceType.invokeMethod(thread, chosen, coerced, ObjectReference.INVOKE_SINGLE_THREADED);
+                } else {
+                    result = ((ClassType) type).invokeMethod(thread, chosen, coerced, ObjectReference.INVOKE_SINGLE_THREADED);
                 }
-                return ((ClassType) type).invokeMethod(thread, chosen, coerced, ObjectReference.INVOKE_SINGLE_THREADED);
+            } else {
+                result = receiver.invokeMethod(thread, chosen, coerced, ObjectReference.INVOKE_SINGLE_THREADED);
             }
-            return receiver.invokeMethod(thread, chosen, coerced, ObjectReference.INVOKE_SINGLE_THREADED);
+            return typed(result, chosen.returnTypeName());
         } catch (InvocationException e) {
             throw new EvaluationException("Exception in " + name + "(): " + e.exception().referenceType().name());
         } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException e) {
@@ -704,17 +742,22 @@ public final class JdiExpressionEvaluator {
         return "boolean".equals(type) || "char".equals(type) || NUMERIC_ORDER.contains(type);
     }
 
-    private boolean isApplicable(List<Value> arguments, List<String> parameterTypes) {
+    private boolean isApplicable(List<Value> arguments, List<String> declaredTypes, List<String> parameterTypes) {
         for (int i = 0; i < arguments.size(); i++) {
             Value argument = arguments.get(i);
             String parameter = parameterTypes.get(i);
+            String declared = declaredTypes == null ? null : declaredTypes.get(i);
             if (isPrimitiveName(parameter)) {
                 if (!(argument instanceof PrimitiveValue) || !widens(argument.type().name(), parameter)) {
                     return false;
                 }
             } else if (argument instanceof PrimitiveValue) {
                 return false; // no boxing
-            } else if (argument instanceof ObjectReference object && !isSubtype(object.referenceType().name(), parameter)) {
+            } else if (argument == null) {
+                if (declared != null && !isSubtype(declared, parameter)) {
+                    return false; // a null of a declared type still selects the overload by that type
+                }
+            } else if (argument instanceof ObjectReference object && !isSubtype(declared != null ? declared : object.referenceType().name(), parameter)) {
                 return false;
             }
         }
@@ -793,6 +836,9 @@ public final class JdiExpressionEvaluator {
     }
 
     private static Value value(Object result) throws EvaluationException {
+        if (result instanceof Typed typed) {
+            return typed.value();
+        }
         if (result instanceof ClassRef classRef) {
             throw new EvaluationException(classRef.type().name() + " is a type, not a value");
         }
@@ -933,7 +979,7 @@ public final class JdiExpressionEvaluator {
             return value.toString();
         }
         Object result = invoke(value, "toString", List.of());
-        return result instanceof StringReference string ? string.value() : String.valueOf(result);
+        return value(result) instanceof StringReference string ? string.value() : String.valueOf(result);
     }
 
     // --- Lexing helpers --- //
