@@ -857,11 +857,10 @@ public class RemoteDebugController {
                 if (value instanceof ObjectReference object && !(value instanceof com.sun.jdi.ArrayReference)) {
                     // call toString() on the object that was evaluated, not on a second evaluation of the expression
                     try {
-                        for (com.sun.jdi.Method method : object.referenceType().methodsByName("toString", "()Ljava/lang/String;")) {
-                            if (object.invokeMethod(thread, method, List.of(), ObjectReference.INVOKE_SINGLE_THREADED) instanceof com.sun.jdi.StringReference text) {
-                                return text.value();
-                            }
-                            break;
+                        List<com.sun.jdi.Method> toStringMethods = object.referenceType().methodsByName("toString", "()Ljava/lang/String;");
+                        if (!toStringMethods.isEmpty()
+                                && object.invokeMethod(thread, toStringMethods.get(0), List.of(), ObjectReference.INVOKE_SINGLE_THREADED) instanceof com.sun.jdi.StringReference text) {
+                            return text.value();
                         }
                     } catch (com.sun.jdi.InvalidTypeException | com.sun.jdi.ClassNotLoadedException | IncompatibleThreadStateException
                             | com.sun.jdi.InvocationException | RuntimeException e) {
