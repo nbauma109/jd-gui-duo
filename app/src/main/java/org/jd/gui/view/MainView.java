@@ -66,9 +66,7 @@ import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
@@ -101,7 +99,6 @@ import javax.swing.event.TreeWillExpandListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreeSelectionModel;
@@ -807,48 +804,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             DefaultMutableTreeNode top = buildTreeNode(node);
             root.add(top);
             DefaultTreeModel model = new DefaultTreeModel(root);
-            JTree tree = new LinelessTree(model);
-            tree.setRootVisible(false);
-            tree.setShowsRootHandles(true);
-            tree.setRowHeight(20);
-            tree.setBorder(BorderFactory.createEmptyBorder(6, 6, 0, 0));
-            tree.setCellRenderer(new javax.swing.tree.DefaultTreeCellRenderer() {
-                private static final long serialVersionUID = 1L;
-
-                @Override
-                public java.awt.Component getTreeCellRendererComponent(JTree t, Object value, boolean selected, boolean expanded,
-                        boolean leaf, int row, boolean focus) {
-                    // Eclipse marks the selected row with a light blue box and a blue outline, text stays black
-                    setBackgroundSelectionColor(new java.awt.Color(0xCCE4F7));
-                    setBorderSelectionColor(null); // the look and feel would draw a dotted focus line: use a plain outline instead
-                    setTextSelectionColor(java.awt.Color.BLACK);
-                    super.getTreeCellRendererComponent(t, value, selected, expanded, leaf, row, focus);
-                    setBorder(selected
-                        ? BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(new java.awt.Color(0x3399FF)), BorderFactory.createEmptyBorder(0, 2, 0, 2))
-                        : BorderFactory.createEmptyBorder(1, 3, 1, 3));
-                    Object userObject = ((DefaultMutableTreeNode) value).getUserObject();
-                    if (userObject instanceof DebugVariableNode variable) {
-                        boolean topLevel = ((DefaultMutableTreeNode) value).getParent() == root;
-                        setText((topLevel ? "\"" + variable.name + "\"" : variable.name) + "= " + variable.valueText);
-                        setIcon(topLevel ? newImageIcon("/org/jd/gui/images/insp_obj.png") : debugVariableIcons.apply(variable.kind));
-                    } else {
-                        setIcon(null);
-                    }
-                    return this;
-                }
-            });
-            tree.addTreeWillExpandListener(new TreeWillExpandListener() {
-                @Override
-                public void treeWillExpand(javax.swing.event.TreeExpansionEvent event) throws ExpandVetoException {
-                    DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) event.getPath().getLastPathComponent();
-                    if (treeNode.getUserObject() instanceof DebugVariableNode variable && !variable.isChildrenLoaded()) {
-                        loadChildrenAsync(model, treeNode, variable);
-                    }
-                }
-
-                @Override
-                public void treeWillCollapse(javax.swing.event.TreeExpansionEvent event) throws ExpandVetoException { /* no-op */ }
-            });
+            JTree tree = createInspectTree(model, root);
 
             // full value of the selected row
             javax.swing.JTextArea detail = new javax.swing.JTextArea(node.getDetailText());
@@ -872,86 +828,23 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             split.setDividerSize(5);
 
             javax.swing.KeyStroke inspectKey = inspectAction == null ? null : (javax.swing.KeyStroke) inspectAction.getValue(Action.ACCELERATOR_KEY);
-            JLabel hint = new JLabel(inspectKey == null ? " " : "Press " + KeyBindings.toDisplayText(inspectKey) + " to Move to Expressions View", javax.swing.SwingConstants.RIGHT);
-            hint.setForeground(java.awt.Color.GRAY);
-            hint.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createMatteBorder(1, 0, 0, 0, new java.awt.Color(0xD0D0D0)), BorderFactory.createEmptyBorder(3, 6, 3, 6)));
-
-            JLabel grip = new JLabel("\u22EE ", javax.swing.SwingConstants.RIGHT); // vertical ellipsis: drag handle, as in Eclipse
-            grip.setForeground(java.awt.Color.GRAY);
-            grip.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.MOVE_CURSOR));
-            grip.setToolTipText("Drag to move");
-            JPanel header = new JPanel(new BorderLayout());
-            header.setPreferredSize(new Dimension(0, 20));
-            header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(0xD0D0D0)));
-            header.add(grip, BorderLayout.EAST);
-
+            JPanel header = createInspectHeader();
             JPanel inner = new JPanel(new BorderLayout());
             inner.setOpaque(false);
             inner.add(header, BorderLayout.NORTH);
             inner.add(split, BorderLayout.CENTER);
-            inner.add(hint, BorderLayout.SOUTH);
+            inner.add(createInspectHint(inspectKey), BorderLayout.SOUTH);
             ShadowPopupPanel shadowPanel = new ShadowPopupPanel(inner);
-            JComponent content = shadowPanel.getCard();
 
-            javax.swing.JDialog popup = new javax.swing.JDialog(mainFrame);
-            popup.setUndecorated(true);
-            try {
-                popup.setBackground(new java.awt.Color(0, 0, 0, 0)); // translucent window: the shadow and rounded corners show through
-            } catch (UnsupportedOperationException | java.awt.IllegalComponentStateException e) {
-                // opaque square window where translucency is not supported
-            }
-            popup.setContentPane(shadowPanel);
-            popup.setSize(312, 262);
-            java.awt.Rectangle screen = mainFrame.getGraphicsConfiguration().getBounds();
-            popup.setLocation(Math.max(screen.x, Math.min(screenLocation.x, screen.x + screen.width - popup.getWidth())),
-                    Math.max(screen.y, Math.min(screenLocation.y + 4, screen.y + screen.height - popup.getHeight())));
-            java.awt.event.MouseAdapter drag = new java.awt.event.MouseAdapter() {
-                private java.awt.Point origin;
-
-                @Override
-                public void mousePressed(java.awt.event.MouseEvent e) {
-                    origin = e.getLocationOnScreen();
-                }
-
-                @Override
-                public void mouseDragged(java.awt.event.MouseEvent e) {
-                    java.awt.Point now = e.getLocationOnScreen();
-                    popup.setLocation(popup.getX() + now.x - origin.x, popup.getY() + now.y - origin.y);
-                    origin = now;
-                }
-            };
-            header.addMouseListener(drag);
-            header.addMouseMotionListener(drag);
+            javax.swing.JDialog popup = createInspectDialog(shadowPanel, screenLocation);
+            installPopupDrag(header, popup);
             popup.addWindowFocusListener(new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowLostFocus(java.awt.event.WindowEvent e) {
                     popup.dispose();
                 }
             });
-            javax.swing.InputMap inputMap = content.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-            javax.swing.ActionMap actionMap = content.getActionMap();
-            inputMap.put(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ESCAPE, 0), "close");
-            actionMap.put("close", new javax.swing.AbstractAction() {
-                private static final long serialVersionUID = 1L;
-
-                @Override
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    popup.dispose();
-                }
-            });
-            if (inspectKey != null) {
-                inputMap.put(inspectKey, "watch");
-                actionMap.put("watch", new javax.swing.AbstractAction() {
-                    private static final long serialVersionUID = 1L;
-
-                    @Override
-                    public void actionPerformed(java.awt.event.ActionEvent e) {
-                        popup.dispose();
-                        showInExpressions.run();
-                    }
-                });
-            }
+            installInspectKeys(shadowPanel.getCard(), popup, inspectKey, showInExpressions);
             popup.setVisible(true);
             popup.toFront();
             tree.setSelectionPath(new javax.swing.tree.TreePath(top.getPath()));
@@ -960,6 +853,139 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             }
             tree.requestFocusInWindow();
         });
+    }
+
+    private JTree createInspectTree(DefaultTreeModel model, DefaultMutableTreeNode root) {
+        JTree tree = new LinelessTree(model);
+        tree.setRootVisible(false);
+        tree.setShowsRootHandles(true);
+        tree.setRowHeight(20);
+        tree.setBorder(BorderFactory.createEmptyBorder(6, 6, 0, 0));
+        tree.setCellRenderer(new javax.swing.tree.DefaultTreeCellRenderer() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public java.awt.Component getTreeCellRendererComponent(JTree t, Object value, boolean selected, boolean expanded,
+                    boolean leaf, int row, boolean focus) {
+                // Eclipse marks the selected row with a light blue box and a blue outline, text stays black
+                setBackgroundSelectionColor(new java.awt.Color(0xCCE4F7));
+                setBorderSelectionColor(null); // the look and feel would draw a dotted focus line: use a plain outline instead
+                setTextSelectionColor(java.awt.Color.BLACK);
+                super.getTreeCellRendererComponent(t, value, selected, expanded, leaf, row, focus);
+                setBorder(selected
+                    ? BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(new java.awt.Color(0x3399FF)), BorderFactory.createEmptyBorder(0, 2, 0, 2))
+                    : BorderFactory.createEmptyBorder(1, 3, 1, 3));
+                if (((DefaultMutableTreeNode) value).getUserObject() instanceof DebugVariableNode variable) {
+                    boolean topLevel = ((DefaultMutableTreeNode) value).getParent() == root;
+                    setText((topLevel ? "\"" + variable.name + "\"" : variable.name) + "= " + variable.valueText);
+                    setIcon(topLevel ? newImageIcon("/org/jd/gui/images/insp_obj.png") : debugVariableIcons.apply(variable.kind));
+                } else {
+                    setIcon(null);
+                }
+                return this;
+            }
+        });
+        tree.addTreeWillExpandListener(lazyChildrenLoader(model));
+        return tree;
+    }
+
+    /** Fills a node with the fields or elements of its value when it is expanded for the first time. */
+    private TreeWillExpandListener lazyChildrenLoader(DefaultTreeModel model) {
+        return new TreeWillExpandListener() {
+            @Override
+            public void treeWillExpand(javax.swing.event.TreeExpansionEvent event) throws ExpandVetoException {
+                DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) event.getPath().getLastPathComponent();
+                if (treeNode.getUserObject() instanceof DebugVariableNode variable && !variable.isChildrenLoaded()) {
+                    loadChildrenAsync(model, treeNode, variable);
+                }
+            }
+
+            @Override
+            public void treeWillCollapse(javax.swing.event.TreeExpansionEvent event) throws ExpandVetoException { /* no-op */ }
+        };
+    }
+
+    private static JLabel createInspectHint(javax.swing.KeyStroke inspectKey) {
+        JLabel hint = new JLabel(inspectKey == null ? " " : "Press " + KeyBindings.toDisplayText(inspectKey) + " to Move to Expressions View", javax.swing.SwingConstants.RIGHT);
+        hint.setForeground(java.awt.Color.GRAY);
+        hint.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(1, 0, 0, 0, new java.awt.Color(0xD0D0D0)), BorderFactory.createEmptyBorder(3, 6, 3, 6)));
+        return hint;
+    }
+
+    private static JPanel createInspectHeader() {
+        JLabel grip = new JLabel("\u22EE ", javax.swing.SwingConstants.RIGHT); // vertical ellipsis: drag handle, as in Eclipse
+        grip.setForeground(java.awt.Color.GRAY);
+        grip.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.MOVE_CURSOR));
+        grip.setToolTipText("Drag to move");
+        JPanel header = new JPanel(new BorderLayout());
+        header.setPreferredSize(new Dimension(0, 20));
+        header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(0xD0D0D0)));
+        header.add(grip, BorderLayout.EAST);
+        return header;
+    }
+
+    private javax.swing.JDialog createInspectDialog(ShadowPopupPanel shadowPanel, java.awt.Point screenLocation) {
+        javax.swing.JDialog popup = new javax.swing.JDialog(mainFrame);
+        popup.setUndecorated(true);
+        try {
+            popup.setBackground(new java.awt.Color(0, 0, 0, 0)); // translucent window: the shadow and rounded corners show through
+        } catch (UnsupportedOperationException | java.awt.IllegalComponentStateException _) {
+            // opaque square window where translucency is not supported
+        }
+        popup.setContentPane(shadowPanel);
+        popup.setSize(312, 262);
+        java.awt.Rectangle screen = mainFrame.getGraphicsConfiguration().getBounds();
+        popup.setLocation(Math.clamp(screenLocation.x, screen.x, Math.max(screen.x, screen.x + screen.width - popup.getWidth())),
+                Math.clamp(screenLocation.y + 4, screen.y, Math.max(screen.y, screen.y + screen.height - popup.getHeight())));
+        return popup;
+    }
+
+    private static void installPopupDrag(JComponent handle, javax.swing.JDialog popup) {
+        java.awt.event.MouseAdapter drag = new java.awt.event.MouseAdapter() {
+            private java.awt.Point origin;
+
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent e) {
+                origin = e.getLocationOnScreen();
+            }
+
+            @Override
+            public void mouseDragged(java.awt.event.MouseEvent e) {
+                java.awt.Point now = e.getLocationOnScreen();
+                popup.setLocation(popup.getX() + now.x - origin.x, popup.getY() + now.y - origin.y);
+                origin = now;
+            }
+        };
+        handle.addMouseListener(drag);
+        handle.addMouseMotionListener(drag);
+    }
+
+    /** Escape closes the popup, the Inspect shortcut moves the expression to the Expressions view. */
+    private static void installInspectKeys(JComponent content, javax.swing.JDialog popup, javax.swing.KeyStroke inspectKey, Runnable showInExpressions) {
+        javax.swing.InputMap inputMap = content.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        javax.swing.ActionMap actionMap = content.getActionMap();
+        inputMap.put(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ESCAPE, 0), "close");
+        actionMap.put("close", new javax.swing.AbstractAction() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                popup.dispose();
+            }
+        });
+        if (inspectKey != null) {
+            inputMap.put(inspectKey, "watch");
+            actionMap.put("watch", new javax.swing.AbstractAction() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    popup.dispose();
+                    showInExpressions.run();
+                }
+            });
+        }
     }
 
     public void setRunToLineCallback(Runnable callback) {
@@ -1018,7 +1044,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
 
     public void showDebugVariables(String title, List<DebugVariableNode> variables) {
         invokeLater(() -> {
-            DefaultMutableTreeNode root = new DefaultMutableTreeNode(title != null ? title : "Variables");
+            DefaultMutableTreeNode root = new DefaultMutableTreeNode(title != null ? title : VARIABLES_TITLE);
             for (DebugVariableNode node : variables) {
                 root.add(buildTreeNode(node));
             }
@@ -1058,7 +1084,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
                     for (DebugVariableNode child : children) {
                         treeNode.add(buildTreeNode(child));
                     }
-                } catch (InterruptedException e) {
+                } catch (InterruptedException _) {
                     Thread.currentThread().interrupt();
                     return;
                 } catch (java.util.concurrent.ExecutionException | RuntimeException e) {
@@ -1082,8 +1108,8 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
         invokeLater(() -> {
             List<BreakpointListPanel.Row> rows = new java.util.ArrayList<>();
             for (String[] bp : breakpoints) {
-                // bp = { "typeName:lineNumber", state, label, enabled }
-                rows.add(new BreakpointListPanel.Row(bp[0], bp.length > 2 ? bp[2] : bp[0], bp[1],
+                // layout of a row: typeName:lineNumber, state, label, enabled
+                rows.add(new BreakpointListPanel.Row(bp[0], bp[bp.length > 2 ? 2 : 0], bp[1],
                         bp.length <= 3 || Boolean.parseBoolean(bp[3])));
             }
             breakpointListPanel.setBreakpoints(rows);
@@ -1109,6 +1135,9 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
         return icons::get;
     }
 
+    private static final String VARIABLES_TITLE = "Variables";
+    private static final String EXPRESSIONS_TITLE = "Expressions";
+
     private JPanel createDebugVariablesPanel() {
         debugVariablesPanel = new JPanel(new BorderLayout(0, 4));
         debugVariablesPanel.setBorder(BorderFactory.createEmptyBorder(4, 6, 4, 6));
@@ -1118,90 +1147,26 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
         debugTabbedPane = new JTabbedPane();
 
         // --- Variables tab ---
-        debugVariablesTreeModel = new DefaultTreeModel(new DefaultMutableTreeNode("Variables"));
+        debugVariablesTreeModel = new DefaultTreeModel(new DefaultMutableTreeNode(VARIABLES_TITLE));
         java.util.function.Function<DebugVariableNode.Kind, Icon> variableIcons = newVariableIcons();
         debugVariableIcons = variableIcons;
         DebugValueTree variablesTree = new DebugValueTree(debugVariablesTreeModel, variableIcons, null);
         debugVariablesTree = variablesTree;
         debugVariablesTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-        debugVariablesTree.addTreeWillExpandListener(new TreeWillExpandListener() {
-            @Override
-            public void treeWillExpand(javax.swing.event.TreeExpansionEvent event) throws ExpandVetoException {
-                DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) event.getPath().getLastPathComponent();
-                Object userObj = treeNode.getUserObject();
-                if (userObj instanceof DebugVariableNode node && !node.isChildrenLoaded()) {
-                    loadChildrenAsync(debugVariablesTreeModel, treeNode, node);
-                }
-            }
-            @Override
-            public void treeWillCollapse(javax.swing.event.TreeExpansionEvent event) throws ExpandVetoException { /* no-op */ }
-        });
-        debugTabbedPane.addTab("Variables", newImageIcon("/org/jd/gui/images/variable_tab.png"), variablesTree.wrapInScrollPane());
+        debugVariablesTree.addTreeWillExpandListener(lazyChildrenLoader(debugVariablesTreeModel));
+        debugTabbedPane.addTab(VARIABLES_TITLE, newImageIcon("/org/jd/gui/images/variable_tab.png"), variablesTree.wrapInScrollPane());
 
-        // --- Breakpoints tab ---
-        breakpointListPanel = new BreakpointListPanel(
-                newImageIcon("/org/jd/gui/images/brkp_obj.png"),
-                newImageIcon("/org/jd/gui/images/brkpd_obj.png"),
-                newImageIcon("/org/jd/gui/images/jexception_obj.png"),
-                newImageIcon("/org/jd/gui/images/jexceptiond_obj.png"),
-                newImageIcon("/org/jd/gui/images/bp_remove.png"),
-                newImageIcon("/org/jd/gui/images/bp_remove_all.png"),
-                newImageIcon("/org/jd/gui/images/bp_goto_file.png"),
-                newImageIcon("/org/jd/gui/images/bp_skip_all.png"),
-                newImageIcon("/org/jd/gui/images/exc_catch.png"));
-        breakpointListPanel.setAddExceptionCallback(() -> {
-            if (addExceptionBreakpointCallback != null) {
-                addExceptionBreakpointCallback.run();
-            }
-        });
-        breakpointListPanel.setRemoveCallback(key -> {
-            if (removeBreakpointCallback != null) {
-                removeBreakpointCallback.accept(key);
-            }
-        });
-        breakpointListPanel.setRemoveAllCallback(() -> {
-            if (removeAllBreakpointsCallback != null) {
-                removeAllBreakpointsCallback.run();
-            }
-        });
-        breakpointListPanel.setEnabledCallback((key, enabled) -> {
-            if (breakpointEnabledCallback != null) {
-                breakpointEnabledCallback.accept(key, enabled);
-            }
-        });
-        breakpointListPanel.setNavigateCallback(key -> {
-            if (breakpointNavigateCallback != null) {
-                breakpointNavigateCallback.accept(key);
-            }
-        });
-        breakpointListPanel.setSkipAllCallback(skip -> {
-            if (skipAllBreakpointsCallback != null) {
-                skipAllBreakpointsCallback.accept(skip);
-            }
-        });
-        JPanel bpTabPanel = breakpointListPanel;
-
-        debugTabbedPane.addTab("Breakpoints", newImageIcon("/org/jd/gui/images/breakpoint_view.png"), bpTabPanel);
+        debugTabbedPane.addTab("Breakpoints", newImageIcon("/org/jd/gui/images/breakpoint_view.png"), createBreakpointsTab());
 
         // --- Expressions tab ---
-        DefaultMutableTreeNode initialExpressionsRoot = new DefaultMutableTreeNode("Expressions");
+        DefaultMutableTreeNode initialExpressionsRoot = new DefaultMutableTreeNode(EXPRESSIONS_TITLE);
         initialExpressionsRoot.add(new DefaultMutableTreeNode(DebugValueTree.ADD_ROW));
         debugExpressionsTreeModel = new DefaultTreeModel(initialExpressionsRoot);
         DebugValueTree expressionsTree = new DebugValueTree(debugExpressionsTreeModel, variableIcons,
                 newImageIcon("/org/jd/gui/images/expression_obj.png"));
         debugExpressionsTree = expressionsTree;
         debugExpressionsTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-        debugExpressionsTree.addTreeWillExpandListener(new TreeWillExpandListener() {
-            @Override
-            public void treeWillExpand(javax.swing.event.TreeExpansionEvent event) throws ExpandVetoException {
-                DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) event.getPath().getLastPathComponent();
-                if (treeNode.getUserObject() instanceof DebugVariableNode node && !node.isChildrenLoaded()) {
-                    loadChildrenAsync(debugExpressionsTreeModel, treeNode, node);
-                }
-            }
-            @Override
-            public void treeWillCollapse(javax.swing.event.TreeExpansionEvent event) throws ExpandVetoException { /* no-op */ }
-        });
+        debugExpressionsTree.addTreeWillExpandListener(lazyChildrenLoader(debugExpressionsTreeModel));
 
         JButton addExpressionButton = new JButton("Add...");
         addExpressionButton.setToolTipText("Add a watch expression");
@@ -1241,10 +1206,54 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
         JPanel expressionsTabPanel = new JPanel(new BorderLayout());
         expressionsTabPanel.add(expressionsToolbar, BorderLayout.NORTH);
         expressionsTabPanel.add(expressionsTree.wrapInScrollPane(), BorderLayout.CENTER);
-        debugTabbedPane.addTab("Expressions", newImageIcon("/org/jd/gui/images/watchlist_view.png"), expressionsTabPanel);
+        debugTabbedPane.addTab(EXPRESSIONS_TITLE, newImageIcon("/org/jd/gui/images/watchlist_view.png"), expressionsTabPanel);
 
         debugVariablesPanel.add(debugTabbedPane, BorderLayout.CENTER);
         return debugVariablesPanel;
+    }
+
+    private JPanel createBreakpointsTab() {
+        breakpointListPanel = new BreakpointListPanel(new BreakpointListPanel.Icons(
+                newImageIcon("/org/jd/gui/images/brkp_obj.png"),
+                newImageIcon("/org/jd/gui/images/brkpd_obj.png"),
+                newImageIcon("/org/jd/gui/images/jexception_obj.png"),
+                newImageIcon("/org/jd/gui/images/jexceptiond_obj.png"),
+                newImageIcon("/org/jd/gui/images/bp_remove.png"),
+                newImageIcon("/org/jd/gui/images/bp_remove_all.png"),
+                newImageIcon("/org/jd/gui/images/bp_goto_file.png"),
+                newImageIcon("/org/jd/gui/images/bp_skip_all.png"),
+                newImageIcon("/org/jd/gui/images/exc_catch.png")));
+        breakpointListPanel.setAddExceptionCallback(() -> {
+            if (addExceptionBreakpointCallback != null) {
+                addExceptionBreakpointCallback.run();
+            }
+        });
+        breakpointListPanel.setRemoveCallback(key -> {
+            if (removeBreakpointCallback != null) {
+                removeBreakpointCallback.accept(key);
+            }
+        });
+        breakpointListPanel.setRemoveAllCallback(() -> {
+            if (removeAllBreakpointsCallback != null) {
+                removeAllBreakpointsCallback.run();
+            }
+        });
+        breakpointListPanel.setEnabledCallback((key, enabled) -> {
+            if (breakpointEnabledCallback != null) {
+                breakpointEnabledCallback.accept(key, enabled);
+            }
+        });
+        breakpointListPanel.setNavigateCallback(key -> {
+            if (breakpointNavigateCallback != null) {
+                breakpointNavigateCallback.accept(key);
+            }
+        });
+        breakpointListPanel.setSkipAllCallback(skip -> {
+            if (skipAllBreakpointsCallback != null) {
+                skipAllBreakpointsCallback.accept(skip);
+            }
+        });
+        return breakpointListPanel;
     }
 
     // --- Utils --- //

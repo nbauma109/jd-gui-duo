@@ -10,7 +10,6 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.Theme;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
-import org.jd.gui.util.KeyBindings;
 import org.jd.gui.util.KeyBindings.Binding;
 import org.jd.gui.util.decompiler.GuiPreferences;
 

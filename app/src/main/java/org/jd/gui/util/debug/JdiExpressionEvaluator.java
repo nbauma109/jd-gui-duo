@@ -82,7 +82,7 @@ public final class JdiExpressionEvaluator {
             try {
                 object.disableCollection();
                 pinned.add(object);
-            } catch (com.sun.jdi.ObjectCollectedException | UnsupportedOperationException e) {
+            } catch (com.sun.jdi.ObjectCollectedException | UnsupportedOperationException _) {
                 // already gone, or not supported by the target: nothing to protect
             }
         }
@@ -93,7 +93,7 @@ public final class JdiExpressionEvaluator {
         for (ObjectReference object : pinned) {
             try {
                 object.enableCollection();
-            } catch (com.sun.jdi.ObjectCollectedException | UnsupportedOperationException e) {
+            } catch (com.sun.jdi.ObjectCollectedException | UnsupportedOperationException _) {
                 // collected meanwhile
             }
         }
@@ -135,11 +135,11 @@ public final class JdiExpressionEvaluator {
             if (evaluator.pos < evaluator.src.length()) {
                 throw new EvaluationException("Unexpected '" + evaluator.src.charAt(evaluator.pos) + "' at position " + evaluator.pos);
             }
-            if (result instanceof ClassRef classRef) {
-                throw new EvaluationException(classRef.type().name() + " is a type, not a value");
+            if (result instanceof ClassRef(ReferenceType type)) {
+                throw new EvaluationException(type.name() + " is a type, not a value");
             }
             return value(result);
-        } catch (IncompatibleThreadStateException e) {
+        } catch (IncompatibleThreadStateException _) {
             throw new EvaluationException("The thread is not suspended");
         } catch (RuntimeException e) {
             String message = e.getMessage();
@@ -188,21 +188,9 @@ public final class JdiExpressionEvaluator {
         Value selectedValue = unwrap(selected);
         Value otherValue = unwrap(other);
         if (selectedValue instanceof PrimitiveValue s && otherValue instanceof PrimitiveValue o && isNumeric(s) && isNumeric(o)) {
-            if (s instanceof DoubleValue || o instanceof DoubleValue) {
-                return vm.mirrorOf(s.doubleValue());
-            }
-            if (s instanceof FloatValue || o instanceof FloatValue) {
-                return vm.mirrorOf(s.floatValue());
-            }
-            if (s instanceof LongValue || o instanceof LongValue) {
-                return vm.mirrorOf(s.longValue());
-            }
-            Value narrowed = narrowedConditional(s, selected instanceof Constant, o, other instanceof Constant);
-            if (narrowed != null) {
-                return narrowed;
-            }
-            if (!s.type().name().equals(o.type().name())) {
-                return vm.mirrorOf(s.intValue());
+            Value promoted = promoteNumeric(s, selected instanceof Constant, o, other instanceof Constant);
+            if (promoted != null) {
+                return promoted;
             }
         }
         // references: the conditional has the common type of both branches, whichever one is selected
@@ -214,10 +202,28 @@ public final class JdiExpressionEvaluator {
         return selected;
     }
 
+    /** Binary numeric promotion of the two branches; null when the selected branch keeps its own type. */
+    private Value promoteNumeric(PrimitiveValue s, boolean selectedConstant, PrimitiveValue o, boolean otherConstant) {
+        if (s instanceof DoubleValue || o instanceof DoubleValue) {
+            return vm.mirrorOf(s.doubleValue());
+        }
+        if (s instanceof FloatValue || o instanceof FloatValue) {
+            return vm.mirrorOf(s.floatValue());
+        }
+        if (s instanceof LongValue || o instanceof LongValue) {
+            return vm.mirrorOf(s.longValue());
+        }
+        Value narrowed = narrowedConditional(s, selectedConstant, o, otherConstant);
+        if (narrowed != null) {
+            return narrowed;
+        }
+        return s.type().name().equals(o.type().name()) ? null : vm.mirrorOf(s.intValue());
+    }
+
     private static boolean fitsIn(String type, int value) {
         return switch (type) {
             case "byte" -> value >= Byte.MIN_VALUE && value <= Byte.MAX_VALUE;
-            case "short" -> value >= Short.MIN_VALUE && value <= Short.MAX_VALUE;
+            case SHORT_TYPE -> value >= Short.MIN_VALUE && value <= Short.MAX_VALUE;
             case "char" -> value >= Character.MIN_VALUE && value <= Character.MAX_VALUE;
             default -> false;
         };
@@ -226,7 +232,7 @@ public final class JdiExpressionEvaluator {
     private Value converted(PrimitiveValue value, String type) {
         return switch (type) {
             case "byte" -> vm.mirrorOf(value.byteValue());
-            case "short" -> vm.mirrorOf(value.shortValue());
+            case SHORT_TYPE -> vm.mirrorOf(value.shortValue());
             default -> vm.mirrorOf(value.charValue());
         };
     }
@@ -238,22 +244,28 @@ public final class JdiExpressionEvaluator {
     private Value narrowedConditional(PrimitiveValue selected, boolean selectedConstant, PrimitiveValue other, boolean otherConstant) {
         String selectedType = selected.type().name();
         String otherType = other.type().name();
-        boolean selectedNarrow = "byte".equals(selectedType) || "short".equals(selectedType) || "char".equals(selectedType);
-        boolean otherNarrow = "byte".equals(otherType) || "short".equals(otherType) || "char".equals(otherType);
+        boolean selectedNarrow = "byte".equals(selectedType) || SHORT_TYPE.equals(selectedType) || "char".equals(selectedType);
+        boolean otherNarrow = "byte".equals(otherType) || SHORT_TYPE.equals(otherType) || "char".equals(otherType);
         if (selectedNarrow && "int".equals(otherType) && otherConstant && fitsIn(selectedType, other.intValue())) {
             return selected;
         }
         if (otherNarrow && "int".equals(selectedType) && selectedConstant && fitsIn(otherType, selected.intValue())) {
             return converted(selected, otherType);
         }
-        if (("byte".equals(selectedType) && "short".equals(otherType)) || ("short".equals(selectedType) && "byte".equals(otherType))) {
-            return converted(selected, "short");
+        if (("byte".equals(selectedType) && SHORT_TYPE.equals(otherType)) || (SHORT_TYPE.equals(selectedType) && "byte".equals(otherType))) {
+            return converted(selected, SHORT_TYPE);
         }
         return null;
     }
 
     private static Value unwrap(Object result) {
-        return result instanceof Typed t ? t.value() : result instanceof Constant c ? c.value() : result instanceof Value v ? v : null;
+        if (result instanceof Typed(Value typedValue, _)) {
+            return typedValue;
+        }
+        if (result instanceof Constant(Value constantValue)) {
+            return constantValue;
+        }
+        return result instanceof Value v ? v : null;
     }
 
     private static String referenceTypeOf(Object result, Value value) {
@@ -272,27 +284,25 @@ public final class JdiExpressionEvaluator {
             return first;
         }
         if (first.contains("&") || second.contains("&")) {
-            return "java.lang.Object";
+            return OBJECT_TYPE;
         }
-        ReferenceType firstType = findClass(first);
-        if (firstType instanceof ClassType type) {
-            for (ClassType candidate = type.superclass(); candidate != null && !"java.lang.Object".equals(candidate.name()); candidate = candidate.superclass()) {
-                if (isSubtype(second, candidate.name())) {
-                    return candidate.name();
-                }
-            }
-            // only Object in common: the type is the intersection of the interfaces both classes implement
-            List<String> shared = new ArrayList<>();
-            for (com.sun.jdi.InterfaceType declared : type.allInterfaces()) {
-                if (isSubtype(second, declared.name())) {
-                    shared.add(declared.name());
-                }
-            }
-            if (!shared.isEmpty()) {
-                return String.join("&", shared);
+        return findClass(first) instanceof ClassType type ? commonSuperType(type, second) : OBJECT_TYPE;
+    }
+
+    private String commonSuperType(ClassType type, String second) {
+        for (ClassType candidate = type.superclass(); candidate != null && !OBJECT_TYPE.equals(candidate.name()); candidate = candidate.superclass()) {
+            if (isSubtype(second, candidate.name())) {
+                return candidate.name();
             }
         }
-        return "java.lang.Object";
+        // only Object in common: the type is the intersection of the interfaces both classes implement
+        List<String> shared = new ArrayList<>();
+        for (com.sun.jdi.InterfaceType declared : type.allInterfaces()) {
+            if (isSubtype(second, declared.name())) {
+                shared.add(declared.name());
+            }
+        }
+        return shared.isEmpty() ? OBJECT_TYPE : String.join("&", shared);
     }
 
     private Object parseOr() throws EvaluationException, IncompatibleThreadStateException {
@@ -411,77 +421,94 @@ public final class JdiExpressionEvaluator {
             return skipping > 0 ? null : vm.mirrorOf(!asBoolean(operand));
         }
         if (accept("-")) {
-            Object minimum = minimumLiteral();
-            if (minimum != NOT_FOUND) {
-                return minimum;
-            }
-            Object operandResult = parseUnary();
-            if (skipping > 0 && !(unwrap(operandResult) instanceof PrimitiveValue)) {
-                return null; // a number can be negated without side effect: the type of -2.0 matters in a skipped branch
-            }
-            Value operand = unbox(value(operandResult)); // unary operators unbox: -boxed, +boxed
-            if (operand instanceof DoubleValue d) {
-                return vm.mirrorOf(-d.value());
-            }
-            if (operand instanceof FloatValue f) {
-                return vm.mirrorOf(-f.value());
-            }
-            if (operand instanceof LongValue l) {
-                return vm.mirrorOf(-l.value());
-            }
-            return vm.mirrorOf(-(int) numberAsLong(operand));
+            return parseNegation();
         }
         if (accept("+")) {
-            Object operandResult = parseUnary();
-            if (skipping > 0) {
-                return null;
-            }
-            Value operand = unbox(value(operandResult)); // unary operators unbox: -boxed, +boxed
-            if (operand instanceof com.sun.jdi.ByteValue || operand instanceof com.sun.jdi.ShortValue || operand instanceof CharValue) {
-                return vm.mirrorOf(((PrimitiveValue) operand).intValue()); // unary numeric promotion
-            }
-            numberAsLong(operand); // only numbers
-            return operand;
+            return parseUnaryPlus();
         }
         return parsePostfix();
+    }
+
+    private Object parseNegation() throws EvaluationException, IncompatibleThreadStateException {
+        Object minimum = minimumLiteral();
+        if (minimum != NOT_FOUND) {
+            return minimum;
+        }
+        Object operandResult = parseUnary();
+        if (skipping > 0 && !(unwrap(operandResult) instanceof PrimitiveValue)) {
+            return null; // a number can be negated without side effect: the type of -2.0 matters in a skipped branch
+        }
+        Value operand = unbox(value(operandResult)); // unary operators unbox: -boxed, +boxed
+        if (operand instanceof DoubleValue d) {
+            return vm.mirrorOf(-d.value());
+        }
+        if (operand instanceof FloatValue f) {
+            return vm.mirrorOf(-f.value());
+        }
+        if (operand instanceof LongValue l) {
+            return vm.mirrorOf(-l.value());
+        }
+        return vm.mirrorOf(-(int) numberAsLong(operand));
+    }
+
+    private Object parseUnaryPlus() throws EvaluationException, IncompatibleThreadStateException {
+        Object operandResult = parseUnary();
+        if (skipping > 0) {
+            return null;
+        }
+        Value operand = unbox(value(operandResult)); // unary operators unbox: -boxed, +boxed
+        if (operand instanceof com.sun.jdi.ByteValue || operand instanceof com.sun.jdi.ShortValue || operand instanceof CharValue) {
+            return vm.mirrorOf(((PrimitiveValue) operand).intValue()); // unary numeric promotion
+        }
+        numberAsLong(operand); // only numbers
+        return operand;
     }
 
     private Object parsePostfix() throws EvaluationException, IncompatibleThreadStateException {
         Object target = parsePrimary();
         while (true) {
             if (accept(".")) {
-                String name = identifier();
-                if (accept("(")) {
-                    Arguments arguments = parseArguments();
-                    target = skipping > 0 ? skippedInvoke(target, name, arguments) : invoke(target, name, arguments.values(), arguments.declaredTypes());
-                } else {
-                    target = skipping > 0 ? skippedMember(target, name) : member(target, name);
-                }
+                target = parseMemberAccess(target);
             } else if (accept("[")) {
-                Object index = parseTernary();
-                expect("]");
-                if (skipping > 0) {
-                    target = null;
-                    continue;
-                }
-                String declaredArray = declaredTypeOf(target);
-                Value array = value(target);
-                if (!(array instanceof ArrayReference arrayReference)) {
-                    throw new EvaluationException("Not an array");
-                }
-                int i = (int) numberAsLong(value(index));
-                if (i < 0 || i >= arrayReference.length()) {
-                    throw new EvaluationException("Index " + i + " out of bounds for length " + arrayReference.length());
-                }
-                // Object[] a = new String[1]: a[0] is an Object for Java, whatever the array really is
-                String component = declaredArray != null && declaredArray.endsWith("[]")
-                    ? declaredArray.substring(0, declaredArray.length() - 2)
-                    : arrayReference.referenceType() instanceof com.sun.jdi.ArrayType arrayType ? arrayType.componentTypeName() : null;
-                target = typed(arrayReference.getValue(i), component);
+                target = parseIndex(target);
             } else {
                 return target;
             }
         }
+    }
+
+    private Object parseMemberAccess(Object target) throws EvaluationException, IncompatibleThreadStateException {
+        String name = identifier();
+        if (accept("(")) {
+            Arguments arguments = parseArguments();
+            return skipping > 0 ? skippedInvoke(target, name, arguments) : invoke(target, name, arguments.values(), arguments.declaredTypes());
+        }
+        return skipping > 0 ? skippedMember(target, name) : member(target, name);
+    }
+
+    private Object parseIndex(Object target) throws EvaluationException, IncompatibleThreadStateException {
+        Object index = parseTernary();
+        expect("]");
+        if (skipping > 0) {
+            return null;
+        }
+        String declaredArray = declaredTypeOf(target);
+        if (!(value(target) instanceof ArrayReference arrayReference)) {
+            throw new EvaluationException("Not an array");
+        }
+        int i = (int) numberAsLong(value(index));
+        if (i < 0 || i >= arrayReference.length()) {
+            throw new EvaluationException("Index " + i + " out of bounds for length " + arrayReference.length());
+        }
+        return typed(arrayReference.getValue(i), componentTypeOf(declaredArray, arrayReference));
+    }
+
+    /** Object[] a = new String[1]: a[0] is an Object for Java, whatever the array really is. */
+    private static String componentTypeOf(String declaredArray, ArrayReference array) {
+        if (declaredArray != null && declaredArray.endsWith("[]")) {
+            return declaredArray.substring(0, declaredArray.length() - 2);
+        }
+        return array.referenceType() instanceof com.sun.jdi.ArrayType arrayType ? arrayType.componentTypeName() : null;
     }
 
     private Object parsePrimary() throws EvaluationException, IncompatibleThreadStateException {
@@ -496,6 +523,18 @@ public final class JdiExpressionEvaluator {
             expect(")");
             return inner;
         }
+        Object literal = parseLiteral(c);
+        if (literal != NOT_FOUND) {
+            return literal;
+        }
+        if (!Character.isJavaIdentifierStart(c)) {
+            throw new EvaluationException("Unexpected '" + c + "' at position " + pos);
+        }
+        return parseNameOrCall();
+    }
+
+    /** A number, string or character literal starting with {@code c}; NOT_FOUND when {@code c} starts none of them. */
+    private Object parseLiteral(char c) throws EvaluationException {
         if (Character.isDigit(c) || (c == '.' && pos + 1 < src.length() && Character.isDigit(src.charAt(pos + 1)))) {
             return new Constant((Value) parseNumber());
         }
@@ -510,9 +549,10 @@ public final class JdiExpressionEvaluator {
             }
             return new Constant(vm.mirrorOf(text.charAt(0)));
         }
-        if (!Character.isJavaIdentifierStart(c)) {
-            throw new EvaluationException("Unexpected '" + c + "' at position " + pos);
-        }
+        return NOT_FOUND;
+    }
+
+    private Object parseNameOrCall() throws EvaluationException, IncompatibleThreadStateException {
         int start = pos;
         String name = identifier();
         switch (name) {
@@ -536,7 +576,7 @@ public final class JdiExpressionEvaluator {
             try {
                 Object read = resolveName(name);
                 return read instanceof Value || read instanceof Typed || read == null ? read : null;
-            } catch (EvaluationException | IncompatibleThreadStateException | RuntimeException e) {
+            } catch (IncompatibleThreadStateException | RuntimeException _) {
                 return null;
             }
         }
@@ -561,22 +601,26 @@ public final class JdiExpressionEvaluator {
             if (!intern.isEmpty()) {
                 return literal.invokeMethod(thread, intern.get(0), List.of(), ObjectReference.INVOKE_SINGLE_THREADED);
             }
-        } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException | InvocationException e) {
+        } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException | InvocationException _) {
             // keep the plain copy: comparisons by content still work
         }
         return literal;
     }
 
+    private static final String SHORT_TYPE = "short";
+    private static final String OBJECT_TYPE = "java.lang.Object";
+    private static final String DOUBLE_TYPE = "double";
+    private static final String FLOAT_TYPE = "float";
     private static final Object NOT_FOUND = new Object();
 
-    private Object resolveName(String name) throws EvaluationException, IncompatibleThreadStateException {
+    private Object resolveName(String name) throws IncompatibleThreadStateException {
         StackFrame frame = frame();
         try {
             LocalVariable variable = frame.visibleVariableByName(name);
             if (variable != null) {
                 return typed(frame.getValue(variable), variable.typeName());
             }
-        } catch (AbsentInformationException e) {
+        } catch (AbsentInformationException _) {
             // no local variable table: fall through to fields
         }
         ObjectReference self = frame.thisObject();
@@ -606,9 +650,9 @@ public final class JdiExpressionEvaluator {
 
     private ClassRef parseClassName() throws EvaluationException {
         int p = pos;
-        String candidate = identifier();
+        StringBuilder candidate = new StringBuilder(identifier());
         while (true) {
-            ReferenceType type = findClass(candidate);
+            ReferenceType type = findClass(candidate.toString());
             if (type != null) {
                 return new ClassRef(type);
             }
@@ -618,7 +662,7 @@ public final class JdiExpressionEvaluator {
             }
             if (q + 1 < src.length() && src.charAt(q) == '.' && Character.isJavaIdentifierStart(src.charAt(q + 1))) {
                 pos = q + 1;
-                candidate = candidate + "." + identifier();
+                candidate.append('.').append(identifier());
             } else {
                 pos = p;
                 return null;
@@ -635,7 +679,7 @@ public final class JdiExpressionEvaluator {
             contextLoaderKnown = true;
             try {
                 contextLoader = frame().location().declaringType().classLoader();
-            } catch (IncompatibleThreadStateException | RuntimeException e) {
+            } catch (IncompatibleThreadStateException | RuntimeException _) {
                 contextLoader = null;
             }
         }
@@ -713,19 +757,47 @@ public final class JdiExpressionEvaluator {
     private Object parseNumber() throws EvaluationException {
         int start = pos;
         if (src.charAt(pos) == '0' && pos + 1 < src.length() && "xXbB".indexOf(src.charAt(pos + 1)) >= 0) {
-            int radix = Character.toLowerCase(src.charAt(pos + 1)) == 'x' ? 16 : 2;
-            pos += 2;
-            int digitsStart = pos;
-            while (pos < src.length() && (Character.digit(src.charAt(pos), radix) >= 0 || src.charAt(pos) == '_')) {
-                pos++;
-            }
-            String digits = src.substring(digitsStart, pos).replace("_", "");
-            try {
-                return integer(digits, radix);
-            } catch (NumberFormatException e) {
-                throw new EvaluationException("Invalid number '" + src.substring(start, pos) + "'");
-            }
+            return parseRadixNumber(start);
         }
+        boolean floating = skipDecimalDigits();
+        String text = src.substring(start, pos).replace("_", "");
+        try {
+            if (pos < src.length() && (src.charAt(pos) == 'f' || src.charAt(pos) == 'F')) {
+                pos++;
+                return vm.mirrorOf(Float.parseFloat(text));
+            }
+            if (pos < src.length() && (src.charAt(pos) == 'd' || src.charAt(pos) == 'D')) {
+                pos++;
+                return vm.mirrorOf(Double.parseDouble(text));
+            }
+            if (floating) {
+                return vm.mirrorOf(Double.parseDouble(text));
+            }
+            // a leading 0 makes the literal octal, as in Java
+            return integer(text, text.length() > 1 && text.charAt(0) == '0' ? 8 : 10);
+        } catch (NumberFormatException _) {
+            throw new EvaluationException("Invalid number '" + text + "'");
+        }
+    }
+
+    /** 0x1F and 0b101: {@code pos} is on the leading 0. */
+    private Object parseRadixNumber(int start) throws EvaluationException {
+        int radix = Character.toLowerCase(src.charAt(pos + 1)) == 'x' ? 16 : 2;
+        pos += 2;
+        int digitsStart = pos;
+        while (pos < src.length() && (Character.digit(src.charAt(pos), radix) >= 0 || src.charAt(pos) == '_')) {
+            pos++;
+        }
+        String digits = src.substring(digitsStart, pos).replace("_", "");
+        try {
+            return integer(digits, radix);
+        } catch (NumberFormatException _) {
+            throw new EvaluationException("Invalid number '" + src.substring(start, pos) + "'");
+        }
+    }
+
+    /** Moves past the digits, the fraction and the exponent of a decimal literal; true when it is a floating-point one. */
+    private boolean skipDecimalDigits() {
         boolean floating = false;
         while (pos < src.length()) {
             char c = src.charAt(pos);
@@ -744,72 +816,54 @@ public final class JdiExpressionEvaluator {
                 break;
             }
         }
-        String text = src.substring(start, pos).replace("_", "");
-        try {
-            if (pos < src.length() && (src.charAt(pos) == 'f' || src.charAt(pos) == 'F')) {
-                pos++;
-                return vm.mirrorOf(Float.parseFloat(text));
-            }
-            if (pos < src.length() && (src.charAt(pos) == 'd' || src.charAt(pos) == 'D')) {
-                pos++;
-                return vm.mirrorOf(Double.parseDouble(text));
-            }
-            if (floating) {
-                return vm.mirrorOf(Double.parseDouble(text));
-            }
-            // a leading 0 makes the literal octal, as in Java
-            return integer(text, text.length() > 1 && text.charAt(0) == '0' ? 8 : 10);
-        } catch (NumberFormatException e) {
-            throw new EvaluationException("Invalid number '" + text + "'");
-        }
+        return floating;
     }
 
     /** The character of a Java escape sequence; {@code pos} is just after the backslash. */
     private char parseEscape() throws EvaluationException {
         char escaped = src.charAt(pos++);
-        switch (escaped) {
-            case 'b':
-                return '\b';
-            case 't':
-                return '\t';
-            case 'n':
-                return '\n';
-            case 'f':
-                return '\f';
-            case 'r':
-                return '\r';
-            case 's':
-                return ' ';
-            case '"':
-            case '\'':
-            case '\\':
-                return escaped;
-            case 'u':
-                while (pos < src.length() && src.charAt(pos) == 'u') {
-                    pos++; // several u are allowed
+        return switch (escaped) {
+            case 'b' -> '\b';
+            case 't' -> '\t';
+            case 'n' -> '\n';
+            case 'f' -> '\f';
+            case 'r' -> '\r';
+            case 's' -> ' ';
+            case '"', '\'', '\\' -> escaped;
+            case 'u' -> parseUnicodeEscape();
+            default -> {
+                if (escaped < '0' || escaped > '7') {
+                    throw new EvaluationException("Invalid escape sequence \\" + escaped);
                 }
-                if (pos + 4 > src.length()) {
-                    throw new EvaluationException("Invalid unicode escape");
-                }
-                try {
-                    char decoded = (char) Integer.parseInt(src.substring(pos, pos + 4), 16);
-                    pos += 4;
-                    return decoded;
-                } catch (NumberFormatException e) {
-                    throw new EvaluationException("Invalid unicode escape");
-                }
-            default:
-                if (escaped >= '0' && escaped <= '7') {
-                    // octal escape: 0 to 377
-                    int value = escaped - '0';
-                    int maxDigits = escaped <= '3' ? 2 : 1;
-                    for (int i = 0; i < maxDigits && pos < src.length() && src.charAt(pos) >= '0' && src.charAt(pos) <= '7'; i++) {
-                        value = value * 8 + (src.charAt(pos++) - '0');
-                    }
-                    return (char) value;
-                }
-                throw new EvaluationException("Invalid escape sequence \\" + escaped);
+                yield parseOctalEscape(escaped);
+            }
+        };
+    }
+
+    private char parseUnicodeEscape() throws EvaluationException {
+        while (pos < src.length() && src.charAt(pos) == 'u') {
+            pos++; // several u are allowed
         }
+        if (pos + 4 > src.length()) {
+            throw new EvaluationException("Invalid unicode escape");
+        }
+        try {
+            char decoded = (char) Integer.parseInt(src.substring(pos, pos + 4), 16);
+            pos += 4;
+            return decoded;
+        } catch (NumberFormatException _) {
+            throw new EvaluationException("Invalid unicode escape");
+        }
+    }
+
+    /** Octal escape: 0 to 377. */
+    private char parseOctalEscape(char first) {
+        int value = first - '0';
+        int maxDigits = first <= '3' ? 2 : 1;
+        for (int i = 0; i < maxDigits && pos < src.length() && src.charAt(pos) >= '0' && src.charAt(pos) <= '7'; i++) {
+            value = value * 8 + (src.charAt(pos++) - '0');
+        }
+        return (char) value;
     }
 
     private String parseQuoted(char quote) throws EvaluationException {
@@ -833,12 +887,12 @@ public final class JdiExpressionEvaluator {
     // --- Members and invocation --- //
 
     private Object member(Object target, String name) throws EvaluationException {
-        if (target instanceof ClassRef classRef) {
-            Field field = classRef.type().fieldByName(name);
+        if (target instanceof ClassRef(ReferenceType type)) {
+            Field field = type.fieldByName(name);
             if (field == null || !field.isStatic()) {
-                throw new EvaluationException("No static field '" + name + "' in " + classRef.type().name());
+                throw new EvaluationException("No static field '" + name + "' in " + type.name());
             }
-            return typed(classRef.type().getValue(field), field.typeName());
+            return typed(type.getValue(field), field.typeName());
         }
         String declaredName = declaredTypeOf(target);
         Value value = value(target);
@@ -856,19 +910,18 @@ public final class JdiExpressionEvaluator {
         if (!(value instanceof ObjectReference object)) {
             throw new EvaluationException("Cannot read '" + name + "' on " + (value == null ? "null" : "a primitive value"));
         }
-        // Java picks the field from the declared type (Base b = new Child(): b.x is Base.x), the receiver only holds the value
-        Field field = null;
-        ReferenceType declaredType = declaredName == null ? null : resolveType(declaredName, object);
-        if (declaredType != null) {
-            field = declaredType.fieldByName(name);
-        }
-        if (field == null) {
-            field = object.referenceType().fieldByName(name);
-        }
+        Field field = instanceField(object, declaredName, name);
         if (field == null) {
             throw new EvaluationException("No field '" + name + "' in " + object.referenceType().name());
         }
         return typed(field.isStatic() ? field.declaringType().getValue(field) : object.getValue(field), field.typeName());
+    }
+
+    /** Java picks the field from the declared type (Base b = new Child(): b.x is Base.x), the receiver only holds the value. */
+    private Field instanceField(ObjectReference object, String declaredName, String name) {
+        ReferenceType declaredType = declaredName == null ? null : resolveType(declaredName, object);
+        Field field = declaredType == null ? null : declaredType.fieldByName(name);
+        return field != null ? field : object.referenceType().fieldByName(name);
     }
 
     private Object invokeImplicit(String name, Arguments arguments, boolean dryRun) throws EvaluationException, IncompatibleThreadStateException {
@@ -889,7 +942,7 @@ public final class JdiExpressionEvaluator {
             if (unwrap(left) instanceof PrimitiveValue && unwrap(right) instanceof PrimitiveValue) {
                 return arithmetic(op, left, right, null);
             }
-        } catch (EvaluationException | RuntimeException e) {
+        } catch (EvaluationException | RuntimeException _) {
             // e.g. a division by zero: the type is unknown
         }
         return null;
@@ -898,7 +951,7 @@ public final class JdiExpressionEvaluator {
     private Object skippedMember(Object target, String name) {
         try {
             return member(target, name);
-        } catch (EvaluationException | RuntimeException e) {
+        } catch (EvaluationException | RuntimeException _) {
             return null;
         }
     }
@@ -906,7 +959,7 @@ public final class JdiExpressionEvaluator {
     private Object skippedInvoke(Object target, String name, Arguments arguments) {
         try {
             return invoke(target, name, arguments.values(), arguments.declaredTypes(), true);
-        } catch (EvaluationException | RuntimeException e) {
+        } catch (EvaluationException | RuntimeException _) {
             return null;
         }
     }
@@ -914,7 +967,7 @@ public final class JdiExpressionEvaluator {
     private Object skippedInvokeImplicit(String name, Arguments arguments) {
         try {
             return invokeImplicit(name, arguments, true);
-        } catch (EvaluationException | IncompatibleThreadStateException | RuntimeException e) {
+        } catch (EvaluationException | IncompatibleThreadStateException | RuntimeException _) {
             return null;
         }
     }
@@ -924,11 +977,11 @@ public final class JdiExpressionEvaluator {
         return switch (returnType) {
             case "int" -> vm.mirrorOf(0);
             case "long" -> vm.mirrorOf(0L);
-            case "double" -> vm.mirrorOf(0.0);
-            case "float" -> vm.mirrorOf(0f);
+            case DOUBLE_TYPE -> vm.mirrorOf(0.0);
+            case FLOAT_TYPE -> vm.mirrorOf(0f);
             case "boolean" -> vm.mirrorOf(false);
             case "byte" -> vm.mirrorOf((byte) 0);
-            case "short" -> vm.mirrorOf((short) 0);
+            case SHORT_TYPE -> vm.mirrorOf((short) 0);
             case "char" -> vm.mirrorOf('\0');
             case "void" -> null;
             default -> typed(null, returnType);
@@ -944,33 +997,14 @@ public final class JdiExpressionEvaluator {
     }
 
     private Object invoke(Object target, String name, List<Value> arguments, List<String> declaredTypes, boolean dryRun) throws EvaluationException {
-        ReferenceType type;
-        ObjectReference receiver = null;
-        ReferenceType declaredReceiver = null;
-        boolean nullReceiver = false;
-        if (target instanceof ClassRef classRef) {
-            type = classRef.type();
-        } else {
-            String declaredName = declaredTypeOf(target);
-            Value value = value(target);
-            if (value instanceof ObjectReference object) {
-                receiver = object;
-                type = object.referenceType();
-                declaredReceiver = declaredName == null ? null : resolveType(declaredName, object);
-            } else {
-                // a null reference still reaches the static methods of its declared type
-                ReferenceType declaredType = value == null && declaredName != null ? findClass(declaredName) : null;
-                if (declaredType == null) {
-                    throw new EvaluationException("Cannot call '" + name + "' on " + (value == null ? "null" : "a primitive value"));
-                }
-                type = declaredType;
-                nullReceiver = true;
-            }
-        }
+        Receiver receiver = resolveReceiver(target, name);
+        ReferenceType type = receiver.type();
+        ReferenceType declaredReceiver = receiver.declared();
+        boolean nullReceiver = receiver.nullReceiver();
         // Like Java: the signature is chosen among the methods of the declared type of the receiver that are applicable
         // to the arguments (no narrowing), the most specific one; invoking it still dispatches on the runtime type.
         // a null receiver is an instance context: the overload is chosen normally, and rejected below if it needs the instance
-        Method chosen = chooseMethod(declaredReceiver != null ? declaredReceiver : type, name, arguments, declaredTypes, receiver == null && !nullReceiver);
+        Method chosen = chooseMethod(declaredReceiver != null ? declaredReceiver : type, name, arguments, declaredTypes, receiver.object() == null && !nullReceiver);
         if (chosen == null && declaredReceiver != null) {
             chosen = chooseMethod(type, name, arguments, declaredTypes, false); // e.g. Object methods on an interface type
         }
@@ -983,36 +1017,58 @@ public final class JdiExpressionEvaluator {
         if (dryRun) {
             return placeholder(chosen.returnTypeName());
         }
-        for (boolean retried = false; ; retried = true) {
         try {
-            List<String> parameterTypes = chosen.argumentTypeNames();
-            List<Value> coerced = new ArrayList<>();
-            for (int i = 0; i < arguments.size(); i++) {
-                coerced.add(coerce(arguments.get(i), parameterTypes.get(i)));
+            try {
+                return call(receiver, chosen, arguments);
+            } catch (ClassNotLoadedException _) {
+                // the loader of the method never resolved one of its parameter types (java.lang.CharSequence...): make it do so
+                preloadParameterTypes(chosen);
             }
-            Value result;
-            if (chosen.isStatic()) {
-                if (type instanceof com.sun.jdi.InterfaceType interfaceType) {
-                    result = interfaceType.invokeMethod(thread, chosen, coerced, ObjectReference.INVOKE_SINGLE_THREADED);
-                } else {
-                    result = ((ClassType) type).invokeMethod(thread, chosen, coerced, ObjectReference.INVOKE_SINGLE_THREADED);
-                }
-            } else {
-                result = receiver.invokeMethod(thread, chosen, coerced, ObjectReference.INVOKE_SINGLE_THREADED);
-            }
-            return typed(pin(result), chosen.returnTypeName());
+            return call(receiver, chosen, arguments);
         } catch (InvocationException e) {
             throw new EvaluationException("Exception in " + name + "(): " + e.exception().referenceType().name());
-        } catch (ClassNotLoadedException e) {
-            if (retried) {
-                throw new EvaluationException("Cannot call " + name + "(): " + e.getClass().getSimpleName() + (e.getMessage() == null ? "" : " " + e.getMessage()));
-            }
-            // the loader of the method never resolved one of its parameter types (java.lang.CharSequence...): make it do so
-            preloadParameterTypes(chosen);
-        } catch (InvalidTypeException | IncompatibleThreadStateException e) {
+        } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException e) {
             throw new EvaluationException("Cannot call " + name + "(): " + e.getClass().getSimpleName() + (e.getMessage() == null ? "" : " " + e.getMessage()));
         }
+    }
+
+    /** The receiver of a call: the type that declares the method, the object (null for a static call) and its declared type. */
+    private record Receiver(ReferenceType type, ObjectReference object, ReferenceType declared, boolean nullReceiver) {
+    }
+
+    private Receiver resolveReceiver(Object target, String name) throws EvaluationException {
+        if (target instanceof ClassRef(ReferenceType type)) {
+            return new Receiver(type, null, null, false);
         }
+        String declaredName = declaredTypeOf(target);
+        Value value = value(target);
+        if (value instanceof ObjectReference object) {
+            return new Receiver(object.referenceType(), object, declaredName == null ? null : resolveType(declaredName, object), false);
+        }
+        // a null reference still reaches the static methods of its declared type
+        ReferenceType declaredType = value == null && declaredName != null ? findClass(declaredName) : null;
+        if (declaredType == null) {
+            throw new EvaluationException("Cannot call '" + name + "' on " + (value == null ? "null" : "a primitive value"));
+        }
+        return new Receiver(declaredType, null, null, true);
+    }
+
+    private Object call(Receiver receiver, Method chosen, List<Value> arguments) throws EvaluationException, InvalidTypeException,
+            ClassNotLoadedException, IncompatibleThreadStateException, InvocationException {
+        List<String> parameterTypes = chosen.argumentTypeNames();
+        List<Value> coerced = new ArrayList<>();
+        for (int i = 0; i < arguments.size(); i++) {
+            coerced.add(coerce(arguments.get(i), parameterTypes.get(i)));
+        }
+        Value result;
+        if (!chosen.isStatic()) {
+            result = receiver.object().invokeMethod(thread, chosen, coerced, ObjectReference.INVOKE_SINGLE_THREADED);
+        } else if (receiver.type() instanceof com.sun.jdi.InterfaceType interfaceType) {
+            result = interfaceType.invokeMethod(thread, chosen, coerced, ObjectReference.INVOKE_SINGLE_THREADED);
+        } else {
+            result = ((ClassType) receiver.type()).invokeMethod(thread, chosen, coerced, ObjectReference.INVOKE_SINGLE_THREADED);
+        }
+        return typed(pin(result), chosen.returnTypeName());
     }
 
     /** Class.forName(type, false, loader) for the parameter types: afterwards JDI sees them as loaded by that loader. */
@@ -1032,7 +1088,7 @@ public final class JdiExpressionEvaluator {
             }
             try {
                 classClass.invokeMethod(thread, forName, java.util.Arrays.<Value>asList(vm.mirrorOf(typeName), vm.mirrorOf(false), loader), ObjectReference.INVOKE_SINGLE_THREADED);
-            } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException | InvocationException | RuntimeException e) {
+            } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException | InvocationException | RuntimeException _) {
                 // not loadable that way: the retry reports the original failure
             }
         }
@@ -1041,13 +1097,10 @@ public final class JdiExpressionEvaluator {
     private Method chooseMethod(ReferenceType type, String name, List<Value> arguments, List<String> declaredTypes, boolean staticContext) {
         Method chosen = null;
         for (Method method : type.methodsByName(name)) {
-            if (method.isBridge() || (method.isAbstract() && staticContext) || (staticContext && !method.isStatic())) {
-                continue; // a bridge only forwards to the source method (and has the erased types)
-            }
-            List<String> parameterTypes = method.argumentTypeNames();
-            if (parameterTypes.size() != arguments.size() || !isApplicable(arguments, declaredTypes, parameterTypes)) {
+            if (!isCandidate(method, arguments, declaredTypes, staticContext)) {
                 continue;
             }
+            List<String> parameterTypes = method.argumentTypeNames();
             if (chosen == null
                     || (isMoreSpecific(parameterTypes, chosen.argumentTypeNames()) && !isMoreSpecific(chosen.argumentTypeNames(), parameterTypes))) {
                 chosen = method;
@@ -1056,7 +1109,16 @@ public final class JdiExpressionEvaluator {
         return chosen;
     }
 
-    private static final List<String> NUMERIC_ORDER = List.of("byte", "short", "int", "long", "float", "double");
+    private boolean isCandidate(Method method, List<Value> arguments, List<String> declaredTypes, boolean staticContext) {
+        // a bridge only forwards to the source method (and has the erased types)
+        if (method.isBridge() || (staticContext && (method.isAbstract() || !method.isStatic()))) {
+            return false;
+        }
+        List<String> parameterTypes = method.argumentTypeNames();
+        return parameterTypes.size() == arguments.size() && isApplicable(arguments, declaredTypes, parameterTypes);
+    }
+
+    private static final List<String> NUMERIC_ORDER = List.of("byte", SHORT_TYPE, "int", "long", FLOAT_TYPE, DOUBLE_TYPE);
 
     /** Widening primitive conversion (byte to short to int to long to float to double, char to int...). */
     private static boolean widens(String from, String to) {
@@ -1077,39 +1139,38 @@ public final class JdiExpressionEvaluator {
 
     private boolean isApplicable(List<Value> arguments, List<String> declaredTypes, List<String> parameterTypes) {
         for (int i = 0; i < arguments.size(); i++) {
-            Value argument = arguments.get(i);
-            String parameter = parameterTypes.get(i);
-            String declared = declaredTypes == null ? null : declaredTypes.get(i);
-            if (isPrimitiveName(parameter)) {
-                if (!(argument instanceof PrimitiveValue) || !widens(argument.type().name(), parameter)) {
-                    return false;
-                }
-            } else if (argument instanceof PrimitiveValue) {
-                return false; // no boxing
-            } else if (argument == null) {
-                if (declared != null && !isSubtype(declared, parameter)) {
-                    return false; // a null of a declared type still selects the overload by that type
-                }
-            } else if (argument instanceof ObjectReference object) {
-                boolean accepted = false;
-                if (declared == null) {
-                    accepted = isSubtypeOf(object.referenceType(), parameter);
-                } else {
-                    // the declared type of an intersection is accepted when one of its parts is
-                    for (String part : declared.split("&")) {
-                        ReferenceType from = resolveType(part, object);
-                        if (from != null && isSubtypeOf(from, parameter)) {
-                            accepted = true;
-                            break;
-                        }
-                    }
-                }
-                if (!accepted) {
-                    return false;
-                }
+            if (!isApplicable(arguments.get(i), declaredTypes == null ? null : declaredTypes.get(i), parameterTypes.get(i))) {
+                return false;
             }
         }
         return true;
+    }
+
+    private boolean isApplicable(Value argument, String declared, String parameter) {
+        if (isPrimitiveName(parameter)) {
+            return argument instanceof PrimitiveValue && widens(argument.type().name(), parameter);
+        }
+        if (argument instanceof PrimitiveValue) {
+            return false; // no boxing
+        }
+        if (argument == null) {
+            return declared == null || isSubtype(declared, parameter); // a null of a declared type still selects the overload by that type
+        }
+        return !(argument instanceof ObjectReference object) || isObjectApplicable(object, declared, parameter);
+    }
+
+    private boolean isObjectApplicable(ObjectReference object, String declared, String parameter) {
+        if (declared == null) {
+            return isSubtypeOf(object.referenceType(), parameter);
+        }
+        // the declared type of an intersection is accepted when one of its parts is
+        for (String part : declared.split("&")) {
+            ReferenceType from = resolveType(part, object);
+            if (from != null && isSubtypeOf(from, parameter)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isMoreSpecific(List<String> candidate, List<String> other) {
@@ -1125,7 +1186,7 @@ public final class JdiExpressionEvaluator {
     }
 
     private boolean isSubtype(String typeName, String superName) {
-        if (typeName.equals(superName) || "java.lang.Object".equals(superName)) {
+        if (typeName.equals(superName) || OBJECT_TYPE.equals(superName)) {
             return true;
         }
         if (typeName.endsWith("[]")) {
@@ -1142,28 +1203,25 @@ public final class JdiExpressionEvaluator {
     }
 
     private boolean isSubtypeOf(ReferenceType type, String superName) {
-        if (type.name().equals(superName) || "java.lang.Object".equals(superName)) {
+        if (type.name().equals(superName) || OBJECT_TYPE.equals(superName)) {
             return true;
         }
         if (type instanceof com.sun.jdi.ArrayType) {
             return isSubtype(type.name(), superName);
         }
         if (type instanceof ClassType classType) {
-            for (ClassType current = classType; current != null; current = current.superclass()) {
-                if (current.name().equals(superName)) {
-                    return true;
-                }
-                for (com.sun.jdi.InterfaceType declared : current.allInterfaces()) {
-                    if (declared.name().equals(superName)) {
-                        return true;
-                    }
-                }
-            }
-        } else if (type instanceof com.sun.jdi.InterfaceType interfaceType) {
-            for (com.sun.jdi.InterfaceType declared : interfaceType.superinterfaces()) {
-                if (isSubtype(declared.name(), superName)) {
-                    return true;
-                }
+            return isClassSubtypeOf(classType, superName);
+        }
+        if (type instanceof com.sun.jdi.InterfaceType interfaceType) {
+            return interfaceType.superinterfaces().stream().anyMatch(declared -> isSubtype(declared.name(), superName));
+        }
+        return false;
+    }
+
+    private static boolean isClassSubtypeOf(ClassType classType, String superName) {
+        for (ClassType current = classType; current != null; current = current.superclass()) {
+            if (current.name().equals(superName) || current.allInterfaces().stream().anyMatch(declared -> declared.name().equals(superName))) {
+                return true;
             }
         }
         return false;
@@ -1176,10 +1234,10 @@ public final class JdiExpressionEvaluator {
         }
         return switch (parameterType) {
             case "long" -> vm.mirrorOf(primitive.longValue());
-            case "double" -> vm.mirrorOf(primitive.doubleValue());
-            case "float" -> vm.mirrorOf(primitive.floatValue());
+            case DOUBLE_TYPE -> vm.mirrorOf(primitive.doubleValue());
+            case FLOAT_TYPE -> vm.mirrorOf(primitive.floatValue());
             case "int" -> vm.mirrorOf(primitive.intValue());
-            case "short" -> vm.mirrorOf(primitive.shortValue());
+            case SHORT_TYPE -> vm.mirrorOf(primitive.shortValue());
             case "byte" -> vm.mirrorOf(primitive.byteValue());
             case "char" -> vm.mirrorOf(primitive.charValue());
             default -> value;
@@ -1194,14 +1252,14 @@ public final class JdiExpressionEvaluator {
     }
 
     private static Value value(Object result) throws EvaluationException {
-        if (result instanceof Typed typed) {
-            return typed.value();
+        if (result instanceof Typed(Value typedValue, _)) {
+            return typedValue;
         }
-        if (result instanceof Constant constant) {
-            return constant.value();
+        if (result instanceof Constant(Value constantValue)) {
+            return constantValue;
         }
-        if (result instanceof ClassRef classRef) {
-            throw new EvaluationException(classRef.type().name() + " is a type, not a value");
+        if (result instanceof ClassRef(ReferenceType type)) {
+            throw new EvaluationException(type.name() + " is a type, not a value");
         }
         return (Value) result;
     }
@@ -1312,8 +1370,8 @@ public final class JdiExpressionEvaluator {
     /** A String operand, also a null one: its declared type makes + a concatenation. */
     private static boolean isString(Object result) {
         return result instanceof StringReference
-            || result instanceof Constant constant && constant.value() instanceof StringReference
-            || result instanceof Typed typed && (typed.value() instanceof StringReference || "java.lang.String".equals(typed.declaredType()));
+            || result instanceof Constant(Value constantValue) && constantValue instanceof StringReference
+            || result instanceof Typed(Value typedValue, String declaredType) && (typedValue instanceof StringReference || "java.lang.String".equals(declaredType));
     }
 
     private Object arithmetic(String op, Object leftResult, Object rightResult, String leftText) throws EvaluationException {
@@ -1329,8 +1387,10 @@ public final class JdiExpressionEvaluator {
             String concatenated = (leftText != null ? leftText : text(left)) + text(right);
             return constant ? internedLiteral(concatenated) : pin(vm.mirrorOf(concatenated));
         }
-        left = unbox(left);
-        right = unbox(right);
+        return numericArithmetic(op, unbox(left), unbox(right));
+    }
+
+    private Value numericArithmetic(String op, Value left, Value right) throws EvaluationException {
         if (!isNumeric(left) || !isNumeric(right)) {
             throw new EvaluationException("Operator " + op + " needs numbers");
         }

@@ -6,13 +6,14 @@
 package org.jd.gui.fixture;
 
 import java.time.Instant;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 public final class RemoteDebugLoop {
     private RemoteDebugLoop() {
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main() throws InterruptedException {
         AtomicLong globalCounter = new AtomicLong();
 
         Runnable task = () -> {
@@ -32,8 +33,8 @@ public final class RemoteDebugLoop {
                 System.out.println(message);
                 lastTick = now;
                 try {
-                    Thread.sleep(1000L);
-                } catch (InterruptedException e) {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException _) {
                     Thread.currentThread().interrupt();
                     return;
                 }
@@ -45,9 +46,9 @@ public final class RemoteDebugLoop {
         Thread t3 = new Thread(task, "worker-3");
 
         t1.start();
-        Thread.sleep(333L);
+        TimeUnit.MILLISECONDS.sleep(333);
         t2.start();
-        Thread.sleep(333L);
+        TimeUnit.MILLISECONDS.sleep(333);
         t3.start();
 
         t1.join();
