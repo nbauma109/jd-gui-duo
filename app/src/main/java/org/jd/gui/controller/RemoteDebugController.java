@@ -496,6 +496,51 @@ public class RemoteDebugController {
         }
     }
 
+    void attached(VirtualMachine vm) {
+        if (connected) {
+            // another attachment finished while a session is running: keep the first one
+            try {
+                vm.dispose();
+            } catch (RuntimeException e) {
+                assert ExceptionUtil.printStackTrace(e);
+            }
+            return;
+        }
+        this.virtualMachine = vm;
+        connected = true;
+        resetThreads();
+        controller.setDebugStepActionsEnabled(false);
+        controller.setDebugConnected(true);
+        controller.showDebugVariables(null, java.util.Collections.emptyList());
+        publishBreakpoints();
+
+        EventRequestManager requestManager = vm.eventRequestManager();
+        ClassPrepareRequest prepareRequest = requestManager.createClassPrepareRequest();
+        // the loading thread waits (event set resumed by the event loop) until the pending breakpoints are installed
+        prepareRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
+        prepareRequest.enable();
+
+        // A stepping thread that ends (e.g. stepping out of run()) must not leave the buttons disabled.
+        ThreadDeathRequest deathRequest = requestManager.createThreadDeathRequest();
+        deathRequest.setSuspendPolicy(EventRequest.SUSPEND_NONE);
+        deathRequest.enable();
+
+        for (BreakpointKey breakpoint : breakpoints) {
+            installBreakpoint(breakpoint);
+        }
+        for (ExceptionBreakpoint exception : exceptionBreakpoints.values()) {
+            installException(exception);
+        }
+        publishBreakpoints();
+
+        Thread eventThread = new Thread(() -> runEventLoop(vm), "JD-GUI remote debug events");
+        eventThread.setDaemon(true);
+        eventThread.start();
+
+        // No vm.resume() here: a JVM started with suspend=y is released by the event loop, which resumes the
+        // event set of the VMStartEvent exactly once (a second resume could release a newer stop).
+    }
+
     /** Each loop belongs to one session: after a disconnect and a new attachment the old loop must not touch the new one. */
     private void runEventLoop(VirtualMachine owner) {
         try {
@@ -557,16 +602,7 @@ public class RemoteDebugController {
             stopAtRequest(breakpointEvent.thread(), breakpointEvent.location(), reported);
             return true;
         } else if (event instanceof StepEvent stepEvent) {
-            int depth = ((StepRequest) stepEvent.request()).depth();
-            deleteStepRequests(stepEvent.thread());
-            boolean explicitStop = stoppedByRequest.contains(stepEvent.thread());
-            if (explicitStop) {
-                pendingSteps.remove(stepEvent.thread());
-            }
-            if ((explicitStop || !continueThroughLibraryCode(stepEvent.thread(), stepEvent.location(), depth))
-                    && reported.add(stepEvent.thread())) {
-                onSuspended(stepEvent.thread(), stepEvent.location());
-            }
+            handleStep(stepEvent, reported, stoppedByRequest);
             return true;
         } else if (event instanceof ThreadDeathEvent deathEvent) {
             threadDied(deathEvent.thread());
@@ -577,6 +613,19 @@ public class RemoteDebugController {
             return true;
         }
         return false;
+    }
+
+    private void handleStep(StepEvent stepEvent, Set<ThreadReference> reported, Set<ThreadReference> stoppedByRequest) {
+        ThreadReference thread = stepEvent.thread();
+        int depth = ((StepRequest) stepEvent.request()).depth();
+        deleteStepRequests(thread);
+        boolean explicitStop = stoppedByRequest.contains(thread);
+        if (explicitStop) {
+            pendingSteps.remove(thread);
+        }
+        if ((explicitStop || !continueThroughLibraryCode(thread, stepEvent.location(), depth)) && reported.add(thread)) {
+            onSuspended(thread, stepEvent.location());
+        }
     }
 
     /** A breakpoint or an exception ends whatever the thread was doing (step, Run to Line). */
@@ -1625,51 +1674,6 @@ public class RemoteDebugController {
                 assert ExceptionUtil.printStackTrace(e);
                 JOptionPane.showMessageDialog(parent, getRootMessage(e), REMOTE_DEBUG_TITLE, JOptionPane.ERROR_MESSAGE);
             }
-        }
-
-        private void attached(VirtualMachine vm) {
-            if (connected) {
-                // another attachment finished while a session is running: keep the first one
-                try {
-                    vm.dispose();
-                } catch (RuntimeException e) {
-                    assert ExceptionUtil.printStackTrace(e);
-                }
-                return;
-            }
-            RemoteDebugController.this.virtualMachine = vm;
-            connected = true;
-            resetThreads();
-            controller.setDebugStepActionsEnabled(false);
-            controller.setDebugConnected(true);
-            controller.showDebugVariables(null, java.util.Collections.emptyList());
-            publishBreakpoints();
-
-            EventRequestManager requestManager = vm.eventRequestManager();
-            ClassPrepareRequest prepareRequest = requestManager.createClassPrepareRequest();
-            // the loading thread waits (event set resumed by the event loop) until the pending breakpoints are installed
-            prepareRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
-            prepareRequest.enable();
-
-            // A stepping thread that ends (e.g. stepping out of run()) must not leave the buttons disabled.
-            ThreadDeathRequest deathRequest = requestManager.createThreadDeathRequest();
-            deathRequest.setSuspendPolicy(EventRequest.SUSPEND_NONE);
-            deathRequest.enable();
-
-            for (BreakpointKey breakpoint : breakpoints) {
-                installBreakpoint(breakpoint);
-            }
-            for (ExceptionBreakpoint exception : exceptionBreakpoints.values()) {
-                installException(exception);
-            }
-            publishBreakpoints();
-
-            Thread eventThread = new Thread(() -> runEventLoop(vm), "JD-GUI remote debug events");
-            eventThread.setDaemon(true);
-            eventThread.start();
-
-            // No vm.resume() here: a JVM started with suspend=y is released by the event loop, which resumes the
-            // event set of the VMStartEvent exactly once (a second resume could release a newer stop).
         }
 
         private String getRootMessage(Throwable throwable) {

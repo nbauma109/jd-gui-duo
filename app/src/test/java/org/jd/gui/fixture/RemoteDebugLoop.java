@@ -6,11 +6,17 @@
 package org.jd.gui.fixture;
 
 import java.time.Instant;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 public final class RemoteDebugLoop {
     private RemoteDebugLoop() {
+    }
+
+    /** Waits for the given time. */
+    private static void pause(long millis) throws InterruptedException {
+        new CountDownLatch(1).await(millis, TimeUnit.MILLISECONDS);
     }
 
     public static void main() throws InterruptedException {
@@ -33,7 +39,7 @@ public final class RemoteDebugLoop {
                 System.out.println(message);
                 lastTick = now;
                 try {
-                    TimeUnit.SECONDS.sleep(1);
+                    pause(1000);
                 } catch (InterruptedException _) {
                     Thread.currentThread().interrupt();
                     return;
@@ -46,9 +52,9 @@ public final class RemoteDebugLoop {
         Thread t3 = new Thread(task, "worker-3");
 
         t1.start();
-        TimeUnit.MILLISECONDS.sleep(333);
+        pause(333);
         t2.start();
-        TimeUnit.MILLISECONDS.sleep(333);
+        pause(333);
         t3.start();
 
         t1.join();
