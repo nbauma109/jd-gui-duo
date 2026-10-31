@@ -456,14 +456,18 @@ public class RemoteDebugController {
         if (next != null) {
             showSuspended(next, location);
         } else {
+            // everything is running again: the thread tree must stop showing the old stops
+            long generation = stopGeneration;
+            List<DebugThread> threads = collectAllThreadsFrames(null);
             SwingUtil.invokeLater(() -> {
                 synchronized (threadLock) {
-                    if (activeThread != null) {
-                        return;
+                    if (activeThread != null || generation != stopGeneration) {
+                        return; // stopped again in the meantime: that stop publishes its own state
                     }
                 }
                 controller.setDebugStepActionsEnabled(false);
                 controller.clearDebugExecutionLine();
+                controller.showDebugStackFrames(threads);
             });
             publishExpressions();
         }

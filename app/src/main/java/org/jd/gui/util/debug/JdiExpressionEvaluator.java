@@ -267,6 +267,11 @@ public final class JdiExpressionEvaluator {
     }
 
     private Object parseUnary() throws EvaluationException, IncompatibleThreadStateException {
+        skipWs();
+        if (src.startsWith("++", pos) || src.startsWith("--", pos)) {
+            // would otherwise be read as two unary operators and silently evaluate something else
+            throw new EvaluationException("Increment and decrement are not supported");
+        }
         if (accept("!")) {
             Object operand = parseUnary();
             return skipping > 0 ? null : vm.mirrorOf(!asBoolean(operand));
