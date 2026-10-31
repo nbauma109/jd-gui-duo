@@ -1387,13 +1387,16 @@ public final class JdiExpressionEvaluator {
         return value;
     }
 
-    private static boolean valuesEqual(Value originalLeft, Value originalRight) {
+    private static boolean valuesEqual(Value originalLeft, Value originalRight) throws EvaluationException {
         Value left = originalLeft;
         Value right = originalRight;
         if ((left instanceof PrimitiveValue) != (right instanceof PrimitiveValue)) {
             // a primitive on one side: the other side is unboxed (Integer.valueOf(1) == 1); two references stay a reference comparison
             left = unbox(left);
             right = unbox(right);
+            if (left == null || right == null) {
+                throw new EvaluationException("NullPointerException: a null cannot be unboxed");
+            }
         }
         if (isNumeric(left) && isNumeric(right)) {
             if (left instanceof DoubleValue || right instanceof DoubleValue) {
