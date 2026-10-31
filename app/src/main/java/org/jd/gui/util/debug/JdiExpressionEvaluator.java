@@ -293,6 +293,11 @@ public final class JdiExpressionEvaluator {
     private Object parseAdditive() throws EvaluationException, IncompatibleThreadStateException {
         Object left = parseMultiplicative();
         while (true) {
+            skipWs();
+            if (src.startsWith("++", pos) || src.startsWith("--", pos)) {
+                // a postfix increment: otherwise the first character would be read as an addition
+                throw new EvaluationException("Increment and decrement are not supported");
+            }
             String op = acceptAny("+", "-");
             if (op == null) {
                 return left;
@@ -799,14 +804,15 @@ public final class JdiExpressionEvaluator {
         }
         // Like Java: the signature is chosen among the methods of the declared type of the receiver that are applicable
         // to the arguments (no narrowing), the most specific one; invoking it still dispatches on the runtime type.
-        Method chosen = chooseMethod(declaredReceiver != null ? declaredReceiver : type, name, arguments, declaredTypes, receiver == null);
+        // a null receiver is an instance context: the overload is chosen normally, and rejected below if it needs the instance
+        Method chosen = chooseMethod(declaredReceiver != null ? declaredReceiver : type, name, arguments, declaredTypes, receiver == null && !nullReceiver);
         if (chosen == null && declaredReceiver != null) {
             chosen = chooseMethod(type, name, arguments, declaredTypes, false); // e.g. Object methods on an interface type
         }
+        if (nullReceiver && (chosen == null || !chosen.isStatic())) {
+            throw new EvaluationException("Cannot call '" + name + "' on null");
+        }
         if (chosen == null) {
-            if (nullReceiver) {
-                throw new EvaluationException("Cannot call '" + name + "' on null");
-            }
             throw new EvaluationException("No method " + name + "/" + arguments.size() + " in " + type.name() + " accepts these arguments");
         }
         try {
