@@ -201,6 +201,10 @@ public final class JdiExpressionEvaluator {
                 return s;
             }
         }
+        // Boolean next to boolean (or a null-free mix of Boolean and boolean) is a primitive boolean
+        if (!sameWrapper && selectedUnboxed instanceof BooleanValue && otherUnboxed instanceof BooleanValue) {
+            return selectedUnboxed;
+        }
         // references: the conditional has the common type of both branches, whichever one is selected
         String selectedType = referenceTypeOf(selected, selectedValue);
         String otherType = referenceTypeOf(other, otherValue);
@@ -1041,6 +1045,14 @@ public final class JdiExpressionEvaluator {
     private record Receiver(ReferenceType type, ObjectReference object, ReferenceType declared, boolean nullReceiver) {
     }
 
+    /** The type whose methods are looked up: an array has none of its own, the ones of Object are run on the array. */
+    private ReferenceType declaredReceiver(ObjectReference object, String declaredName) {
+        if (object instanceof ArrayReference) {
+            return findClass(OBJECT_TYPE);
+        }
+        return declaredName == null ? null : resolveType(declaredName, object);
+    }
+
     private Receiver resolveReceiver(Object target, String name) throws EvaluationException {
         if (target instanceof ClassRef(ReferenceType type)) {
             return new Receiver(type, null, null, false);
@@ -1048,7 +1060,8 @@ public final class JdiExpressionEvaluator {
         String declaredName = declaredTypeOf(target);
         Value value = value(target);
         if (value instanceof ObjectReference object) {
-            return new Receiver(object.referenceType(), object, declaredName == null ? null : resolveType(declaredName, object), false);
+            // an array has no methods of its own: the ones of Object are looked up in Object and run on the array
+            return new Receiver(object.referenceType(), object, declaredReceiver(object, declaredName), false);
         }
         // a null reference still reaches the static methods of its declared type
         ReferenceType declaredType = value == null && declaredName != null ? findClass(declaredName) : null;

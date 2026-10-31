@@ -133,7 +133,7 @@ public class RemoteDebugController {
     /** Method descriptions ({@code main(String[])}) read from the class files, so labels also work while detached. */
     private final Map<BreakpointKey, String> methodDescriptions = new ConcurrentHashMap<>();
     /** Weak: closing an editor tab must be enough to free the page (nothing here unregisters pages). */
-    private final Map<String, java.lang.ref.WeakReference<BreakpointCapablePage>> pagesByType = new ConcurrentHashMap<>();
+    private final Map<String, List<java.lang.ref.WeakReference<BreakpointCapablePage>>> pagesByType = new ConcurrentHashMap<>();
     private final Map<String, ExceptionBreakpoint> exceptionBreakpoints = new ConcurrentHashMap<>();
     private final Set<String> disabledExceptions = ConcurrentHashMap.newKeySet();
     private final Map<String, List<ExceptionRequest>> installedExceptions = new ConcurrentHashMap<>();
@@ -365,7 +365,9 @@ public class RemoteDebugController {
     public void sync(BreakpointCapablePage page) {
         String typeName = page.getDebugTypeName();
         page.setBreakpointToggleHandler(this::toggleBreakpoint);
-        pagesByType.put(typeName, new java.lang.ref.WeakReference<>(page));
+        List<java.lang.ref.WeakReference<BreakpointCapablePage>> pages = pagesByType.computeIfAbsent(typeName, k -> new CopyOnWriteArrayList<>());
+        pages.removeIf(reference -> reference.get() == null || reference.get() == page);
+        pages.add(new java.lang.ref.WeakReference<>(page)); // the same type may be open twice (two versions of an archive): keep every page
         page.setDebugExpressionHandlers(this::canStep, this::inspectExpression, this::watchFromEditor,
             line -> runToLine(page.getDebugTypeName(), line));
 
@@ -1358,20 +1360,31 @@ public class RemoteDebugController {
         publishBreakpoints();
     }
 
-    private BreakpointCapablePage pageOf(String typeName) {
-        java.lang.ref.WeakReference<BreakpointCapablePage> reference = pagesByType.get(typeName);
-        BreakpointCapablePage page = reference == null ? null : reference.get();
-        if (reference != null && page == null) {
-            pagesByType.remove(typeName, reference); // the editor was closed and collected
+    /** The open editors of a type, the most recently synchronized last; the ones that were closed and collected are dropped. */
+    private List<BreakpointCapablePage> pagesOf(String typeName) {
+        List<java.lang.ref.WeakReference<BreakpointCapablePage>> references = pagesByType.get(typeName);
+        List<BreakpointCapablePage> result = new ArrayList<>();
+        if (references != null) {
+            references.removeIf(reference -> reference.get() == null);
+            for (java.lang.ref.WeakReference<BreakpointCapablePage> reference : references) {
+                BreakpointCapablePage page = reference.get();
+                if (page != null) {
+                    result.add(page);
+                }
+            }
         }
-        return page;
+        return result;
+    }
+
+    private BreakpointCapablePage pageOf(String typeName) {
+        List<BreakpointCapablePage> pages = pagesOf(typeName);
+        return pages.isEmpty() ? null : pages.get(pages.size() - 1);
     }
 
     /** The open editor keeps its own gutter markers: clear the one of a removed breakpoint so a later sync cannot revive it. */
     private void clearPageMarker(BreakpointKey key) {
         methodDescriptions.remove(key);
-        BreakpointCapablePage page = pageOf(key.typeName());
-        if (page != null) {
+        for (BreakpointCapablePage page : pagesOf(key.typeName())) {
             SwingUtil.invokeLater(() -> page.setBreakpointLine(key.lineNumber(), false));
         }
     }
