@@ -666,6 +666,14 @@ public final class JdiExpressionEvaluator {
         if (value instanceof ArrayReference array && "length".equals(name)) {
             return vm.mirrorOf(array.length());
         }
+        if (value == null && declaredName != null) {
+            // Java reads a static field through a null reference without complaint
+            ReferenceType declaredType = findClass(declaredName);
+            Field staticField = declaredType == null ? null : declaredType.fieldByName(name);
+            if (staticField != null && staticField.isStatic()) {
+                return typed(staticField.declaringType().getValue(staticField), staticField.typeName());
+            }
+        }
         if (!(value instanceof ObjectReference object)) {
             throw new EvaluationException("Cannot read '" + name + "' on " + (value == null ? "null" : "a primitive value"));
         }
@@ -702,17 +710,25 @@ public final class JdiExpressionEvaluator {
         ReferenceType type;
         ObjectReference receiver = null;
         ReferenceType declaredReceiver = null;
+        boolean nullReceiver = false;
         if (target instanceof ClassRef classRef) {
             type = classRef.type();
         } else {
             String declaredName = declaredTypeOf(target);
             Value value = value(target);
-            if (!(value instanceof ObjectReference object)) {
-                throw new EvaluationException("Cannot call '" + name + "' on " + (value == null ? "null" : "a primitive value"));
+            if (value instanceof ObjectReference object) {
+                receiver = object;
+                type = object.referenceType();
+                declaredReceiver = declaredName == null ? null : findClass(declaredName);
+            } else {
+                // a null reference still reaches the static methods of its declared type
+                ReferenceType declaredType = value == null && declaredName != null ? findClass(declaredName) : null;
+                if (declaredType == null) {
+                    throw new EvaluationException("Cannot call '" + name + "' on " + (value == null ? "null" : "a primitive value"));
+                }
+                type = declaredType;
+                nullReceiver = true;
             }
-            receiver = object;
-            type = object.referenceType();
-            declaredReceiver = declaredName == null ? null : findClass(declaredName);
         }
         // Like Java: the signature is chosen among the methods of the declared type of the receiver that are applicable
         // to the arguments (no narrowing), the most specific one; invoking it still dispatches on the runtime type.
@@ -721,6 +737,9 @@ public final class JdiExpressionEvaluator {
             chosen = chooseMethod(type, name, arguments, declaredTypes, false); // e.g. Object methods on an interface type
         }
         if (chosen == null) {
+            if (nullReceiver) {
+                throw new EvaluationException("Cannot call '" + name + "' on null");
+            }
             throw new EvaluationException("No method " + name + "/" + arguments.size() + " in " + type.name() + " accepts these arguments");
         }
         try {
@@ -750,14 +769,15 @@ public final class JdiExpressionEvaluator {
     private Method chooseMethod(ReferenceType type, String name, List<Value> arguments, List<String> declaredTypes, boolean staticContext) {
         Method chosen = null;
         for (Method method : type.methodsByName(name)) {
-            if ((method.isAbstract() && staticContext) || (staticContext && !method.isStatic())) {
-                continue;
+            if (method.isBridge() || (method.isAbstract() && staticContext) || (staticContext && !method.isStatic())) {
+                continue; // a bridge only forwards to the source method (and has the erased types)
             }
             List<String> parameterTypes = method.argumentTypeNames();
             if (parameterTypes.size() != arguments.size() || !isApplicable(arguments, declaredTypes, parameterTypes)) {
                 continue;
             }
-            if (chosen == null || isMoreSpecific(parameterTypes, chosen.argumentTypeNames())) {
+            if (chosen == null
+                    || (isMoreSpecific(parameterTypes, chosen.argumentTypeNames()) && !isMoreSpecific(chosen.argumentTypeNames(), parameterTypes))) {
                 chosen = method;
             }
         }
@@ -966,10 +986,16 @@ public final class JdiExpressionEvaluator {
         return left == null ? right == null : left.equals(right);
     }
 
+    /** A String operand, also a null one: its declared type makes + a concatenation. */
+    private static boolean isString(Object result) {
+        return result instanceof StringReference
+            || result instanceof Typed typed && (typed.value() instanceof StringReference || "java.lang.String".equals(typed.declaredType()));
+    }
+
     private Object arithmetic(String op, Object leftResult, Object rightResult) throws EvaluationException {
         Value left = value(leftResult);
         Value right = value(rightResult);
-        if ("+".equals(op) && (left instanceof StringReference || right instanceof StringReference)) {
+        if ("+".equals(op) && (isString(leftResult) || isString(rightResult))) {
             return vm.mirrorOf(text(left) + text(right));
         }
         if (!isNumeric(left) || !isNumeric(right)) {
