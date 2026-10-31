@@ -1029,11 +1029,12 @@ public final class JdiExpressionEvaluator {
         if (chosen == null) {
             throw new EvaluationException("No method " + name + "/" + arguments.size() + " in " + type.name() + " accepts these arguments");
         }
+        String returnType = returnTypeOf(target, receiver, chosen);
         if (dryRun) {
-            return placeholder(chosen.returnTypeName());
+            return placeholder(returnType);
         }
         try {
-            return callRetrying(receiver, chosen, arguments);
+            return callRetrying(receiver, chosen, arguments, returnType);
         } catch (InvocationException e) {
             throw new EvaluationException("Exception in " + name + "(): " + e.exception().referenceType().name());
         } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException e) {
@@ -1071,18 +1072,27 @@ public final class JdiExpressionEvaluator {
         return new Receiver(declaredType, null, null, true);
     }
 
-    private Object callRetrying(Receiver receiver, Method chosen, List<Value> arguments) throws InvalidTypeException,
+    /** The clone of an array has the type of the array, not the Object of the method that was found. */
+    private String returnTypeOf(Object target, Receiver receiver, Method chosen) {
+        if (receiver.object() instanceof ArrayReference array && "clone".equals(chosen.name()) && chosen.argumentTypeNames().isEmpty()) {
+            String declared = declaredTypeOf(target);
+            return declared != null && declared.endsWith("[]") ? declared : array.referenceType().name();
+        }
+        return chosen.returnTypeName();
+    }
+
+    private Object callRetrying(Receiver receiver, Method chosen, List<Value> arguments, String returnType) throws InvalidTypeException,
             ClassNotLoadedException, IncompatibleThreadStateException, InvocationException {
         try {
-            return call(receiver, chosen, arguments);
+            return call(receiver, chosen, arguments, returnType);
         } catch (ClassNotLoadedException _) {
             // the loader of the method never resolved one of its parameter types (java.lang.CharSequence...): make it do so
             preloadParameterTypes(chosen);
         }
-        return call(receiver, chosen, arguments);
+        return call(receiver, chosen, arguments, returnType);
     }
 
-    private Object call(Receiver receiver, Method chosen, List<Value> arguments) throws InvalidTypeException,
+    private Object call(Receiver receiver, Method chosen, List<Value> arguments, String returnType) throws InvalidTypeException,
             ClassNotLoadedException, IncompatibleThreadStateException, InvocationException {
         List<String> parameterTypes = chosen.argumentTypeNames();
         List<Value> coerced = new ArrayList<>();
@@ -1097,7 +1107,7 @@ public final class JdiExpressionEvaluator {
         } else {
             result = ((ClassType) receiver.type()).invokeMethod(thread, chosen, coerced, ObjectReference.INVOKE_SINGLE_THREADED);
         }
-        return typed(pin(result), chosen.returnTypeName());
+        return typed(pin(result), returnType);
     }
 
     /** Class.forName(type, false, loader) for the parameter types: afterwards JDI sees them as loaded by that loader. */
@@ -1123,19 +1133,23 @@ public final class JdiExpressionEvaluator {
         }
     }
 
-    private Method chooseMethod(ReferenceType type, String name, List<Value> arguments, List<String> declaredTypes, boolean staticContext) {
-        Method chosen = null;
+    /** The most specific applicable method; like the compiler, an evaluation error when none of them is more specific than all the others. */
+    private Method chooseMethod(ReferenceType type, String name, List<Value> arguments, List<String> declaredTypes, boolean staticContext) throws EvaluationException {
+        List<Method> candidates = new ArrayList<>();
         for (Method method : type.methodsByName(name)) {
-            if (!isCandidate(method, arguments, declaredTypes, staticContext)) {
-                continue;
-            }
-            List<String> parameterTypes = method.argumentTypeNames();
-            if (chosen == null
-                    || (isMoreSpecific(parameterTypes, chosen.argumentTypeNames()) && !isMoreSpecific(chosen.argumentTypeNames(), parameterTypes))) {
-                chosen = method;
+            if (isCandidate(method, arguments, declaredTypes, staticContext)) {
+                candidates.add(method);
             }
         }
-        return chosen;
+        for (Method candidate : candidates) {
+            if (candidates.stream().allMatch(other -> isMoreSpecific(candidate.argumentTypeNames(), other.argumentTypeNames()))) {
+                return candidate;
+            }
+        }
+        if (candidates.size() > 1) {
+            throw new EvaluationException("The call of " + name + " is ambiguous");
+        }
+        return null;
     }
 
     private boolean isCandidate(Method method, List<Value> arguments, List<String> declaredTypes, boolean staticContext) {
