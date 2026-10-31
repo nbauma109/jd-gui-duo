@@ -197,6 +197,10 @@ public final class JdiExpressionEvaluator {
             if (s instanceof LongValue || o instanceof LongValue) {
                 return vm.mirrorOf(s.longValue());
             }
+            Value narrowed = narrowedConditional(s, selected instanceof Constant, o, other instanceof Constant);
+            if (narrowed != null) {
+                return narrowed;
+            }
             if (!s.type().name().equals(o.type().name())) {
                 return vm.mirrorOf(s.intValue());
             }
@@ -208,6 +212,44 @@ public final class JdiExpressionEvaluator {
             return typed(selectedValue, commonType(selectedType, otherType));
         }
         return selected;
+    }
+
+    private static boolean fitsIn(String type, int value) {
+        return switch (type) {
+            case "byte" -> value >= Byte.MIN_VALUE && value <= Byte.MAX_VALUE;
+            case "short" -> value >= Short.MIN_VALUE && value <= Short.MAX_VALUE;
+            case "char" -> value >= Character.MIN_VALUE && value <= Character.MAX_VALUE;
+            default -> false;
+        };
+    }
+
+    private Value converted(PrimitiveValue value, String type) {
+        return switch (type) {
+            case "byte" -> vm.mirrorOf(value.byteValue());
+            case "short" -> vm.mirrorOf(value.shortValue());
+            default -> vm.mirrorOf(value.charValue());
+        };
+    }
+
+    /**
+     * JLS 15.25: a byte, short or char branch and an int constant that fits it give the narrower type, and a byte
+     * with a short gives a short. Returns null when the usual numeric promotion applies.
+     */
+    private Value narrowedConditional(PrimitiveValue selected, boolean selectedConstant, PrimitiveValue other, boolean otherConstant) {
+        String selectedType = selected.type().name();
+        String otherType = other.type().name();
+        boolean selectedNarrow = "byte".equals(selectedType) || "short".equals(selectedType) || "char".equals(selectedType);
+        boolean otherNarrow = "byte".equals(otherType) || "short".equals(otherType) || "char".equals(otherType);
+        if (selectedNarrow && "int".equals(otherType) && otherConstant && fitsIn(selectedType, other.intValue())) {
+            return selected;
+        }
+        if (otherNarrow && "int".equals(selectedType) && selectedConstant && fitsIn(otherType, selected.intValue())) {
+            return converted(selected, otherType);
+        }
+        if (("byte".equals(selectedType) && "short".equals(otherType)) || ("short".equals(selectedType) && "byte".equals(otherType))) {
+            return converted(selected, "short");
+        }
+        return null;
     }
 
     private static Value unwrap(Object result) {
@@ -1216,8 +1258,8 @@ public final class JdiExpressionEvaluator {
         if (value instanceof PrimitiveValue) {
             return value.toString();
         }
-        Object result = invoke(value, "toString", List.of());
-        return value(result) instanceof StringReference string ? string.value() : String.valueOf(result);
+        Value result = value(invoke(value, "toString", List.of())); // unwrapped: the call is typed (a null result is "null")
+        return result instanceof StringReference string ? string.value() : String.valueOf(result);
     }
 
     // --- Lexing helpers --- //
