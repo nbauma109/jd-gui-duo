@@ -8,29 +8,31 @@
 package org.jd.gui.controller;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
-import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.API;
 import org.jd.gui.api.feature.IndexesChangeListener;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.api.model.Type;
 import org.jd.gui.model.container.DelegatingFilterContainer;
-import org.jd.gui.model.container.entry.path.FileEntryPath;
 import org.jd.gui.service.type.TypeFactoryService;
 import org.jd.gui.spi.TypeFactory;
 import org.jd.gui.util.function.TriConsumer;
 import org.jd.gui.view.SearchInConstantPoolsView;
 import org.jd.util.LRUCache;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.ObjIntConsumer;
@@ -48,7 +50,8 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
     private final SearchInConstantPoolsView searchInConstantPoolsView;
     @SuppressWarnings("rawtypes")
     private final Map<String, Map<String, Collection>> cache;
-    private final Set<DelegatingFilterContainer> delegatingFilterContainers = new HashSet<>();
+    private volatile Set<DelegatingFilterContainer> delegatingFilterContainers = new HashSet<>();
+    private final AtomicLong searchGeneration = new AtomicLong();
     private Collection<Future<Indexes>> collectionOfFutureIndexes;
     private Consumer<URI> openCallback;
     private long indexesHashCode;
@@ -82,9 +85,11 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
 
     @SuppressWarnings("unchecked")
     protected void updateTree(String pattern, int flags) {
-        delegatingFilterContainers.clear();
+        // Each search fills its own set; a newer search supersedes older ones still running
+        long generation = searchGeneration.incrementAndGet();
 
         executor.execute(() -> {
+            Set<DelegatingFilterContainer> containers = new HashSet<>();
             // Waiting the end of indexation...
             searchInConstantPoolsView.showWaitCursor();
 
@@ -110,14 +115,14 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
                                     parentEntry = container.getRoot().getParent();
                                 }
 
-                                // TODO In a future release, display matching strings, types, inner-types,
-                                // fields and methods, not only matching files
+                                Set<URI> fragmentUris = collectFragmentUris(matchingEntries, pattern, flags);
                                 matchingEntries = getOuterEntries(matchingEntries);
+                                Set<URI> lookupOnlyUris = FragmentUriCollector.innerEntryUris(matchingEntries);
 
                                 matchingTypeCount += matchingEntries.size();
 
                                 // Create a filtered container
-                                delegatingFilterContainers.add(new DelegatingFilterContainer(container, matchingEntries));
+                                containers.add(new DelegatingFilterContainer(container, matchingEntries, fragmentUris, lookupOnlyUris));
                             }
                         }
                     }
@@ -133,7 +138,10 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
             final int count = matchingTypeCount;
 
             searchInConstantPoolsView.hideWaitCursor();
-            searchInConstantPoolsView.updateTree(delegatingFilterContainers, count);
+            if (generation == searchGeneration.get()) {
+                delegatingFilterContainers = containers;
+                searchInConstantPoolsView.updateTree(containers, count);
+            }
         });
     }
 
@@ -206,14 +214,7 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
 
                     matchingOuterEntriesSet.add(outerTypeEntry);
                 } else {
-                    String path = entry.getPath();
-                    int idx = path.indexOf(StringConstants.INTERNAL_INNER_SEPARATOR);
-                    if (idx != -1 && path.endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
-                        FileEntryPath topLevelTypePath = new FileEntryPath(path.substring(0, idx) + StringConstants.CLASS_FILE_SUFFIX);
-                        matchingOuterEntriesSet.add(entry.getParent().getChildren().get(topLevelTypePath));
-                    } else {
-                        matchingOuterEntriesSet.add(entry);
-                    }
+                    matchingOuterEntriesSet.add(FragmentUriCollector.pathBasedOuterEntry(entry));
                 }
             } else {
                 matchingOuterEntriesSet.add(entry);
@@ -221,6 +222,21 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
         }
 
         return matchingOuterEntriesSet;
+    }
+
+    private Set<URI> collectFragmentUris(Set<Container.Entry> matchingEntries, String pattern, int flags) {
+        Pattern referencePattern = createPattern(pattern);
+        return FragmentUriCollector.collect(matchingEntries, entry -> {
+            TypeFactory factory = TypeFactoryService.getInstance().get(entry);
+            return factory == null ? List.<Type>of() : factory.make(api, entry);
+        }, entry -> {
+            try (InputStream inputStream = entry.getInputStream()) {
+                return ReferenceScanner.scan(inputStream, referencePattern, flags);
+            } catch (IOException | RuntimeException e) {
+                assert ExceptionUtil.printStackTrace(e);
+                return ReferenceScanner.Result.EMPTY;
+            }
+        }, pattern, flags);
     }
 
     protected void filter(Indexes indexes, String pattern, int flags, Set<Container.Entry> matchingEntries) {
@@ -267,7 +283,7 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
             }
         }
 
-        if ((flags & SearchInConstantPoolsView.SEARCH_STRING) != 0 && (declarations || references)) {
+        if ((flags & SearchInConstantPoolsView.SEARCH_STRING) != 0 && references) {
             match(indexes, "strings", pattern, SearchInConstantPoolsController::matchWithChar, SearchInConstantPoolsController::matchWithString, matchingEntries);
         }
 
@@ -405,6 +421,11 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
      */
     protected static Pattern createPattern(String pattern) {
         int patternLength = pattern.length();
+
+        // A single character is a literal prefix, like the index lookup (matchWithChar) does it
+        if (patternLength == 1 && pattern.charAt(0) != '*' && pattern.charAt(0) != '?') {
+            return Pattern.compile(Pattern.quote(pattern) + ".*");
+        }
         StringBuilder sbPattern = new StringBuilder(patternLength * 2);
 
         char c;
@@ -436,8 +457,14 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
         // Open the single entry uri
         Container.Entry entry = null;
 
+        // Type, method and field nodes carry a fragment; entries are registered without it
+        URI entryUri = uri;
+        if (uri.getFragment() != null) {
+            entryUri = URI.create(uri.toString().substring(0, uri.toString().indexOf('#')));
+        }
+
         for (DelegatingFilterContainer container : delegatingFilterContainers) {
-            entry = container.getEntry(uri);
+            entry = container.getEntry(entryUri);
             if (entry != null) {
                 break;
             }
@@ -490,7 +517,7 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
             URI u = entry.getUri();
 
             try {
-                openCallback.accept(new URI(u.getScheme(), u.getHost(), u.getPath(), query, null));
+                openCallback.accept(new URI(u.getScheme(), u.getHost(), u.getPath(), query, uri.getFragment()));
             } catch (URISyntaxException e) {
                 assert ExceptionUtil.printStackTrace(e);
             }

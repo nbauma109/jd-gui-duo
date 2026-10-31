@@ -146,6 +146,8 @@ public abstract class TypePage extends CustomLineNumbersPage
         if (fragment != null) {
             matchFragmentAndAddDocumentRange(fragment, listener.getDeclarations(), ranges);
         }
+        // The selected fragment decides where to scroll, not the earliest search highlight of the file
+        List<DocumentRange> fragmentRanges = new ArrayList<>(ranges);
 
         if (query != null) {
             Map<String, String> parameters = parseQuery(query);
@@ -183,7 +185,7 @@ public abstract class TypePage extends CustomLineNumbersPage
             setSelectionHighlightColor();
             textArea.markAll(ranges);
             Collections.sort(ranges);
-            setCaretPositionAndCenter(ranges.get(0));
+            setCaretPositionAndCenter(fragmentRanges.isEmpty() ? ranges.get(0) : Collections.min(fragmentRanges));
         }
 
         return true;
