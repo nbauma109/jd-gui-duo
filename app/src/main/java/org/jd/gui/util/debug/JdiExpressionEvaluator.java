@@ -70,6 +70,36 @@ public final class JdiExpressionEvaluator {
         return result instanceof Typed typed ? typed.declaredType() : null;
     }
 
+    /** A literal or a constant expression: Java interns constant strings, so "a" + "b" == "ab". */
+    private record Constant(Value value) {
+    }
+
+    /** Objects created for the evaluation (results of calls, string copies) are only reachable through their mirror: pin them. */
+    private final List<ObjectReference> pinned = new ArrayList<>();
+
+    private <T extends Value> T pin(T value) {
+        if (value instanceof ObjectReference object) {
+            try {
+                object.disableCollection();
+                pinned.add(object);
+            } catch (com.sun.jdi.ObjectCollectedException | UnsupportedOperationException e) {
+                // already gone, or not supported by the target: nothing to protect
+            }
+        }
+        return value;
+    }
+
+    private void releasePinned() {
+        for (ObjectReference object : pinned) {
+            try {
+                object.enableCollection();
+            } catch (com.sun.jdi.ObjectCollectedException | UnsupportedOperationException e) {
+                // collected meanwhile
+            }
+        }
+        pinned.clear();
+    }
+
     private record Arguments(List<Value> values, List<String> declaredTypes) {
     }
 
@@ -114,6 +144,8 @@ public final class JdiExpressionEvaluator {
         } catch (RuntimeException e) {
             String message = e.getMessage();
             throw new EvaluationException(message == null ? e.getClass().getSimpleName() : message);
+        } finally {
+            evaluator.releasePinned();
         }
     }
 
@@ -153,8 +185,8 @@ public final class JdiExpressionEvaluator {
      * The branch that is not selected is only parsed, so its type is known when it is a literal or a plain name.
      */
     private Object promoteConditional(Object selected, Object other) {
-        Value selectedValue = selected instanceof Typed t ? t.value() : selected instanceof Value v ? v : null;
-        Value otherValue = other instanceof Typed t ? t.value() : other instanceof Value v ? v : null;
+        Value selectedValue = unwrap(selected);
+        Value otherValue = unwrap(other);
         if (selectedValue instanceof PrimitiveValue s && otherValue instanceof PrimitiveValue o && isNumeric(s) && isNumeric(o)) {
             if (s instanceof DoubleValue || o instanceof DoubleValue) {
                 return vm.mirrorOf(s.doubleValue());
@@ -169,7 +201,42 @@ public final class JdiExpressionEvaluator {
                 return vm.mirrorOf(s.intValue());
             }
         }
+        // references: the conditional has the common type of both branches, whichever one is selected
+        String selectedType = referenceTypeOf(selected, selectedValue);
+        String otherType = referenceTypeOf(other, otherValue);
+        if (selectedType != null && otherType != null && !selectedType.equals(otherType)) {
+            return typed(selectedValue, commonType(selectedType, otherType));
+        }
         return selected;
+    }
+
+    private static Value unwrap(Object result) {
+        return result instanceof Typed t ? t.value() : result instanceof Constant c ? c.value() : result instanceof Value v ? v : null;
+    }
+
+    private static String referenceTypeOf(Object result, Value value) {
+        String declared = declaredTypeOf(result);
+        if (declared != null) {
+            return declared;
+        }
+        return value instanceof ObjectReference object ? object.referenceType().name() : null;
+    }
+
+    private String commonType(String first, String second) {
+        if (isSubtype(first, second)) {
+            return second;
+        }
+        if (isSubtype(second, first)) {
+            return first;
+        }
+        if (findClass(first) instanceof ClassType type) {
+            for (ClassType candidate = type.superclass(); candidate != null; candidate = candidate.superclass()) {
+                if (isSubtype(second, candidate.name())) {
+                    return candidate.name();
+                }
+            }
+        }
+        return "java.lang.Object";
     }
 
     private Object parseOr() throws EvaluationException, IncompatibleThreadStateException {
@@ -363,18 +430,18 @@ public final class JdiExpressionEvaluator {
             return inner;
         }
         if (Character.isDigit(c) || (c == '.' && pos + 1 < src.length() && Character.isDigit(src.charAt(pos + 1)))) {
-            return parseNumber();
+            return new Constant((Value) parseNumber());
         }
         if (c == '"') {
             String text = parseQuoted('"');
-            return skipping > 0 ? null : internedLiteral(text);
+            return skipping > 0 ? null : new Constant(internedLiteral(text));
         }
         if (c == '\'') {
             String text = parseQuoted('\'');
             if (text.length() != 1) {
                 throw new EvaluationException("Invalid character literal");
             }
-            return vm.mirrorOf(text.charAt(0));
+            return new Constant(vm.mirrorOf(text.charAt(0)));
         }
         if (!Character.isJavaIdentifierStart(c)) {
             throw new EvaluationException("Unexpected '" + c + "' at position " + pos);
@@ -383,9 +450,9 @@ public final class JdiExpressionEvaluator {
         String name = identifier();
         switch (name) {
             case "true":
-                return vm.mirrorOf(true);
+                return new Constant(vm.mirrorOf(true));
             case "false":
-                return vm.mirrorOf(false);
+                return new Constant(vm.mirrorOf(false));
             case "null":
                 return null;
             case "this":
@@ -421,7 +488,7 @@ public final class JdiExpressionEvaluator {
 
     /** Java interns string literals, so that "a" == "a" and s == "a" hold when s was initialised with that literal. */
     private Value internedLiteral(String text) {
-        StringReference literal = vm.mirrorOf(text);
+        StringReference literal = pin(vm.mirrorOf(text));
         try {
             List<Method> intern = literal.referenceType().methodsByName("intern", "()Ljava/lang/String;");
             if (!intern.isEmpty()) {
@@ -758,7 +825,7 @@ public final class JdiExpressionEvaluator {
             } else {
                 result = receiver.invokeMethod(thread, chosen, coerced, ObjectReference.INVOKE_SINGLE_THREADED);
             }
-            return typed(result, chosen.returnTypeName());
+            return typed(pin(result), chosen.returnTypeName());
         } catch (InvocationException e) {
             throw new EvaluationException("Exception in " + name + "(): " + e.exception().referenceType().name());
         } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException e) {
@@ -900,6 +967,9 @@ public final class JdiExpressionEvaluator {
         if (result instanceof Typed typed) {
             return typed.value();
         }
+        if (result instanceof Constant constant) {
+            return constant.value();
+        }
         if (result instanceof ClassRef classRef) {
             throw new EvaluationException(classRef.type().name() + " is a type, not a value");
         }
@@ -989,14 +1059,22 @@ public final class JdiExpressionEvaluator {
     /** A String operand, also a null one: its declared type makes + a concatenation. */
     private static boolean isString(Object result) {
         return result instanceof StringReference
+            || result instanceof Constant constant && constant.value() instanceof StringReference
             || result instanceof Typed typed && (typed.value() instanceof StringReference || "java.lang.String".equals(typed.declaredType()));
     }
 
     private Object arithmetic(String op, Object leftResult, Object rightResult) throws EvaluationException {
+        boolean constant = leftResult instanceof Constant && rightResult instanceof Constant;
+        Value result = arithmeticValue(op, leftResult, rightResult, constant);
+        return constant ? new Constant(result) : result;
+    }
+
+    private Value arithmeticValue(String op, Object leftResult, Object rightResult, boolean constant) throws EvaluationException {
         Value left = value(leftResult);
         Value right = value(rightResult);
         if ("+".equals(op) && (isString(leftResult) || isString(rightResult))) {
-            return vm.mirrorOf(text(left) + text(right));
+            String concatenated = text(left) + text(right);
+            return constant ? internedLiteral(concatenated) : pin(vm.mirrorOf(concatenated));
         }
         if (!isNumeric(left) || !isNumeric(right)) {
             throw new EvaluationException("Operator " + op + " needs numbers");
