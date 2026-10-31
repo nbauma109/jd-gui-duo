@@ -1086,9 +1086,13 @@ public class RemoteDebugController {
         }
         List<DebugThread> result = new ArrayList<>();
         for (ThreadReference t : threadsToShow(vm, eventThread)) {
-            // Skip low-level JVM threads (finalizer, GC, etc.)
-            com.sun.jdi.ThreadGroupReference tg = t.threadGroup();
-            if (tg != null && "system".equalsIgnoreCase(tg.name())) {
+            // Skip low-level JVM threads (finalizer, GC, etc.); a thread that ended and was collected meanwhile too
+            try {
+                com.sun.jdi.ThreadGroupReference tg = t.threadGroup();
+                if (tg != null && "system".equalsIgnoreCase(tg.name())) {
+                    continue;
+                }
+            } catch (com.sun.jdi.ObjectCollectedException gone) {
                 continue;
             }
             try {
@@ -1101,7 +1105,11 @@ public class RemoteDebugController {
                 result.add(new DebugThread(displayName(t), t.uniqueID(), t.equals(eventThread), true, frames));
             } catch (IncompatibleThreadStateException e) {
                 // Thread is running (SUSPEND_EVENT_THREAD — only event thread is suspended)
-                result.add(new DebugThread(displayName(t), t.uniqueID(), false, false, List.of()));
+                try {
+                    result.add(new DebugThread(displayName(t), t.uniqueID(), false, false, List.of()));
+                } catch (com.sun.jdi.ObjectCollectedException gone) {
+                    // ended while being listed
+                }
             } catch (com.sun.jdi.ObjectCollectedException e) {
                 // Thread terminated while we were listing them: skip it
             }

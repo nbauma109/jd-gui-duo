@@ -271,11 +271,25 @@ public final class JdiExpressionEvaluator {
         if (isSubtype(second, first)) {
             return first;
         }
-        if (findClass(first) instanceof ClassType type) {
-            for (ClassType candidate = type.superclass(); candidate != null; candidate = candidate.superclass()) {
+        if (first.contains("&") || second.contains("&")) {
+            return "java.lang.Object";
+        }
+        ReferenceType firstType = findClass(first);
+        if (firstType instanceof ClassType type) {
+            for (ClassType candidate = type.superclass(); candidate != null && !"java.lang.Object".equals(candidate.name()); candidate = candidate.superclass()) {
                 if (isSubtype(second, candidate.name())) {
                     return candidate.name();
                 }
+            }
+            // only Object in common: the type is the intersection of the interfaces both classes implement
+            List<String> shared = new ArrayList<>();
+            for (com.sun.jdi.InterfaceType declared : type.allInterfaces()) {
+                if (isSubtype(second, declared.name())) {
+                    shared.add(declared.name());
+                }
+            }
+            if (!shared.isEmpty()) {
+                return String.join("&", shared);
             }
         }
         return "java.lang.Object";
@@ -405,7 +419,7 @@ public final class JdiExpressionEvaluator {
             if (skipping > 0 && !(unwrap(operandResult) instanceof PrimitiveValue)) {
                 return null; // a number can be negated without side effect: the type of -2.0 matters in a skipped branch
             }
-            Value operand = value(operandResult);
+            Value operand = unbox(value(operandResult)); // unary operators unbox: -boxed, +boxed
             if (operand instanceof DoubleValue d) {
                 return vm.mirrorOf(-d.value());
             }
@@ -422,7 +436,7 @@ public final class JdiExpressionEvaluator {
             if (skipping > 0) {
                 return null;
             }
-            Value operand = value(operandResult);
+            Value operand = unbox(value(operandResult)); // unary operators unbox: -boxed, +boxed
             if (operand instanceof com.sun.jdi.ByteValue || operand instanceof com.sun.jdi.ShortValue || operand instanceof CharValue) {
                 return vm.mirrorOf(((PrimitiveValue) operand).intValue()); // unary numeric promotion
             }
@@ -646,7 +660,9 @@ public final class JdiExpressionEvaluator {
     }
 
     /** The declared type of a receiver: found in the receiver's own hierarchy, so it is the very class it was loaded as. */
-    private ReferenceType resolveType(String name, ObjectReference receiver) {
+    private ReferenceType resolveType(String declaredName, ObjectReference receiver) {
+        // an intersection type (A&B): the members of its first part, the others are reached through the runtime type
+        String name = declaredName.indexOf('&') < 0 ? declaredName : declaredName.substring(0, declaredName.indexOf('&'));
         if (receiver != null && receiver.referenceType() instanceof ClassType classType) {
             for (ClassType current = classType; current != null; current = current.superclass()) {
                 if (current.name().equals(name)) {
@@ -967,6 +983,7 @@ public final class JdiExpressionEvaluator {
         if (dryRun) {
             return placeholder(chosen.returnTypeName());
         }
+        for (boolean retried = false; ; retried = true) {
         try {
             List<String> parameterTypes = chosen.argumentTypeNames();
             List<Value> coerced = new ArrayList<>();
@@ -986,8 +1003,38 @@ public final class JdiExpressionEvaluator {
             return typed(pin(result), chosen.returnTypeName());
         } catch (InvocationException e) {
             throw new EvaluationException("Exception in " + name + "(): " + e.exception().referenceType().name());
-        } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException e) {
+        } catch (ClassNotLoadedException e) {
+            if (retried) {
+                throw new EvaluationException("Cannot call " + name + "(): " + e.getClass().getSimpleName() + (e.getMessage() == null ? "" : " " + e.getMessage()));
+            }
+            // the loader of the method never resolved one of its parameter types (java.lang.CharSequence...): make it do so
+            preloadParameterTypes(chosen);
+        } catch (InvalidTypeException | IncompatibleThreadStateException e) {
             throw new EvaluationException("Cannot call " + name + "(): " + e.getClass().getSimpleName() + (e.getMessage() == null ? "" : " " + e.getMessage()));
+        }
+        }
+    }
+
+    /** Class.forName(type, false, loader) for the parameter types: afterwards JDI sees them as loaded by that loader. */
+    private void preloadParameterTypes(Method method) {
+        List<ReferenceType> classClasses = vm.classesByName("java.lang.Class");
+        if (classClasses.isEmpty() || !(classClasses.get(0) instanceof ClassType classClass)) {
+            return;
+        }
+        Method forName = classClass.concreteMethodByName("forName", "(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;");
+        if (forName == null) {
+            return;
+        }
+        com.sun.jdi.ClassLoaderReference loader = method.declaringType().classLoader();
+        for (String typeName : method.argumentTypeNames()) {
+            if (isPrimitiveName(typeName) || typeName.endsWith("[]")) {
+                continue;
+            }
+            try {
+                classClass.invokeMethod(thread, forName, java.util.Arrays.<Value>asList(vm.mirrorOf(typeName), vm.mirrorOf(false), loader), ObjectReference.INVOKE_SINGLE_THREADED);
+            } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException | InvocationException | RuntimeException e) {
+                // not loadable that way: the retry reports the original failure
+            }
         }
     }
 
@@ -1044,8 +1091,20 @@ public final class JdiExpressionEvaluator {
                     return false; // a null of a declared type still selects the overload by that type
                 }
             } else if (argument instanceof ObjectReference object) {
-                ReferenceType from = declared != null ? resolveType(declared, object) : object.referenceType();
-                if (from == null || !isSubtypeOf(from, parameter)) {
+                boolean accepted = false;
+                if (declared == null) {
+                    accepted = isSubtypeOf(object.referenceType(), parameter);
+                } else {
+                    // the declared type of an intersection is accepted when one of its parts is
+                    for (String part : declared.split("&")) {
+                        ReferenceType from = resolveType(part, object);
+                        if (from != null && isSubtypeOf(from, parameter)) {
+                            accepted = true;
+                            break;
+                        }
+                    }
+                }
+                if (!accepted) {
                     return false;
                 }
             }
@@ -1148,14 +1207,14 @@ public final class JdiExpressionEvaluator {
     }
 
     private static boolean asBoolean(Object result) throws EvaluationException {
-        if (value(result) instanceof BooleanValue booleanValue) {
+        if (unbox(value(result)) instanceof BooleanValue booleanValue) {
             return booleanValue.value();
         }
         throw new EvaluationException("A boolean is required");
     }
 
     private static double number(Object result) throws EvaluationException {
-        if (value(result) instanceof PrimitiveValue primitive && !(primitive instanceof BooleanValue)) {
+        if (unbox(value(result)) instanceof PrimitiveValue primitive && !(primitive instanceof BooleanValue)) {
             return primitive.doubleValue();
         }
         throw new EvaluationException("A number is required");
