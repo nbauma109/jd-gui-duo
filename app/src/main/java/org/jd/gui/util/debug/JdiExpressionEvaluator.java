@@ -302,8 +302,14 @@ public final class JdiExpressionEvaluator {
             if (op == null) {
                 return left;
             }
+            // Java converts the left operand to a string before the right one is evaluated (obj + obj.change())
+            String leftText = null;
+            if (skipping == 0 && "+".equals(op) && !(left instanceof ClassRef) && value(left) instanceof ObjectReference object
+                    && !(object instanceof StringReference)) {
+                leftText = text(object);
+            }
             Object right = parseMultiplicative();
-            left = skipping > 0 ? null : arithmetic(op, left, right);
+            left = skipping > 0 ? null : arithmetic(op, left, right, leftText);
         }
     }
 
@@ -315,7 +321,7 @@ public final class JdiExpressionEvaluator {
                 return left;
             }
             Object right = parseUnary();
-            left = skipping > 0 ? null : arithmetic(op, left, right);
+            left = skipping > 0 ? null : arithmetic(op, left, right, null);
         }
     }
 
@@ -564,12 +570,54 @@ public final class JdiExpressionEvaluator {
         }
     }
 
+    private com.sun.jdi.ClassLoaderReference contextLoader;
+    private boolean contextLoaderKnown;
+
+    /** The class loader of the code that is executing: names in the expression are resolved there first. */
+    private com.sun.jdi.ClassLoaderReference contextLoader() {
+        if (!contextLoaderKnown) {
+            contextLoaderKnown = true;
+            try {
+                contextLoader = frame().location().declaringType().classLoader();
+            } catch (IncompatibleThreadStateException | RuntimeException e) {
+                contextLoader = null;
+            }
+        }
+        return contextLoader;
+    }
+
     private ReferenceType findClass(String name) {
         List<ReferenceType> types = vm.classesByName(name);
         if (types.isEmpty() && name.indexOf('.') < 0) {
             types = vm.classesByName("java.lang." + name);
         }
+        if (types.size() > 1) {
+            // the same name loaded by several class loaders: the one the executing code sees
+            com.sun.jdi.ClassLoaderReference loader = contextLoader();
+            for (ReferenceType candidate : types) {
+                if (loader != null && loader.equals(candidate.classLoader())) {
+                    return candidate;
+                }
+            }
+        }
         return types.isEmpty() ? null : types.get(0);
+    }
+
+    /** The declared type of a receiver: found in the receiver's own hierarchy, so it is the very class it was loaded as. */
+    private ReferenceType resolveType(String name, ObjectReference receiver) {
+        if (receiver != null && receiver.referenceType() instanceof ClassType classType) {
+            for (ClassType current = classType; current != null; current = current.superclass()) {
+                if (current.name().equals(name)) {
+                    return current;
+                }
+                for (com.sun.jdi.InterfaceType declared : current.allInterfaces()) {
+                    if (declared.name().equals(name)) {
+                        return declared;
+                    }
+                }
+            }
+        }
+        return findClass(name);
     }
 
     private Arguments parseArguments() throws EvaluationException, IncompatibleThreadStateException {
@@ -752,7 +800,7 @@ public final class JdiExpressionEvaluator {
         }
         // Java picks the field from the declared type (Base b = new Child(): b.x is Base.x), the receiver only holds the value
         Field field = null;
-        ReferenceType declaredType = declaredName == null ? null : findClass(declaredName);
+        ReferenceType declaredType = declaredName == null ? null : resolveType(declaredName, object);
         if (declaredType != null) {
             field = declaredType.fieldByName(name);
         }
@@ -792,7 +840,7 @@ public final class JdiExpressionEvaluator {
             if (value instanceof ObjectReference object) {
                 receiver = object;
                 type = object.referenceType();
-                declaredReceiver = declaredName == null ? null : findClass(declaredName);
+                declaredReceiver = declaredName == null ? null : resolveType(declaredName, object);
             } else {
                 // a null reference still reaches the static methods of its declared type
                 ReferenceType declaredType = value == null && declaredName != null ? findClass(declaredName) : null;
@@ -892,8 +940,11 @@ public final class JdiExpressionEvaluator {
                 if (declared != null && !isSubtype(declared, parameter)) {
                     return false; // a null of a declared type still selects the overload by that type
                 }
-            } else if (argument instanceof ObjectReference object && !isSubtype(declared != null ? declared : object.referenceType().name(), parameter)) {
-                return false;
+            } else if (argument instanceof ObjectReference object) {
+                ReferenceType from = declared != null ? resolveType(declared, object) : object.referenceType();
+                if (from == null || !isSubtypeOf(from, parameter)) {
+                    return false;
+                }
             }
         }
         return true;
@@ -925,6 +976,16 @@ public final class JdiExpressionEvaluator {
                 && isSubtype(element, superName.substring(0, superName.length() - 2));
         }
         ReferenceType type = findClass(typeName);
+        return type != null && isSubtypeOf(type, superName);
+    }
+
+    private boolean isSubtypeOf(ReferenceType type, String superName) {
+        if (type.name().equals(superName) || "java.lang.Object".equals(superName)) {
+            return true;
+        }
+        if (type instanceof com.sun.jdi.ArrayType) {
+            return isSubtype(type.name(), superName);
+        }
         if (type instanceof ClassType classType) {
             for (ClassType current = classType; current != null; current = current.superclass()) {
                 if (current.name().equals(superName)) {
@@ -1009,7 +1070,9 @@ public final class JdiExpressionEvaluator {
     }
 
     /** Relational operators: integral operands are compared as integers (a double would lose the low bits of a long). */
-    private static boolean compare(String op, Value left, Value right) throws EvaluationException {
+    private static boolean compare(String op, Value originalLeft, Value originalRight) throws EvaluationException {
+        Value left = unbox(originalLeft);
+        Value right = unbox(originalRight);
         if (isNumeric(left) && isNumeric(right) && !(left instanceof DoubleValue || left instanceof FloatValue
                 || right instanceof DoubleValue || right instanceof FloatValue)) {
             long l = numberAsLong(left);
@@ -1047,7 +1110,28 @@ public final class JdiExpressionEvaluator {
         return value instanceof PrimitiveValue && !(value instanceof BooleanValue);
     }
 
-    private static boolean valuesEqual(Value left, Value right) {
+    private static final java.util.Set<String> WRAPPERS = java.util.Set.of("java.lang.Boolean", "java.lang.Byte", "java.lang.Short",
+        "java.lang.Character", "java.lang.Integer", "java.lang.Long", "java.lang.Float", "java.lang.Double");
+
+    /** Unboxing conversion: the value of an Integer, Boolean... (anything else is returned as is). */
+    private static Value unbox(Value value) {
+        if (value instanceof ObjectReference object && WRAPPERS.contains(object.referenceType().name())) {
+            Field field = object.referenceType().fieldByName("value");
+            if (field != null) {
+                return object.getValue(field);
+            }
+        }
+        return value;
+    }
+
+    private static boolean valuesEqual(Value originalLeft, Value originalRight) {
+        Value left = originalLeft;
+        Value right = originalRight;
+        if ((left instanceof PrimitiveValue) != (right instanceof PrimitiveValue)) {
+            // a primitive on one side: the other side is unboxed (Integer.valueOf(1) == 1); two references stay a reference comparison
+            left = unbox(left);
+            right = unbox(right);
+        }
         if (isNumeric(left) && isNumeric(right)) {
             if (left instanceof DoubleValue || right instanceof DoubleValue) {
                 return ((PrimitiveValue) left).doubleValue() == ((PrimitiveValue) right).doubleValue();
@@ -1070,19 +1154,21 @@ public final class JdiExpressionEvaluator {
             || result instanceof Typed typed && (typed.value() instanceof StringReference || "java.lang.String".equals(typed.declaredType()));
     }
 
-    private Object arithmetic(String op, Object leftResult, Object rightResult) throws EvaluationException {
+    private Object arithmetic(String op, Object leftResult, Object rightResult, String leftText) throws EvaluationException {
         boolean constant = leftResult instanceof Constant && rightResult instanceof Constant;
-        Value result = arithmeticValue(op, leftResult, rightResult, constant);
+        Value result = arithmeticValue(op, leftResult, rightResult, constant, leftText);
         return constant ? new Constant(result) : result;
     }
 
-    private Value arithmeticValue(String op, Object leftResult, Object rightResult, boolean constant) throws EvaluationException {
+    private Value arithmeticValue(String op, Object leftResult, Object rightResult, boolean constant, String leftText) throws EvaluationException {
         Value left = value(leftResult);
         Value right = value(rightResult);
         if ("+".equals(op) && (isString(leftResult) || isString(rightResult))) {
-            String concatenated = text(left) + text(right);
+            String concatenated = (leftText != null ? leftText : text(left)) + text(right);
             return constant ? internedLiteral(concatenated) : pin(vm.mirrorOf(concatenated));
         }
+        left = unbox(left);
+        right = unbox(right);
         if (!isNumeric(left) || !isNumeric(right)) {
             throw new EvaluationException("Operator " + op + " needs numbers");
         }
