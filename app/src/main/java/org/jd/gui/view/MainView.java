@@ -937,7 +937,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
         popup.setSize(312, 262);
         java.awt.Rectangle screen = mainFrame.getGraphicsConfiguration().getBounds();
         popup.setLocation(Math.clamp(screenLocation.x, screen.x, Math.max(screen.x, screen.x + screen.width - popup.getWidth())),
-                Math.clamp(screenLocation.y + 4, screen.y, Math.max(screen.y, screen.y + screen.height - popup.getHeight())));
+                Math.clamp((long) screenLocation.y + 4, screen.y, Math.max(screen.y, screen.y + screen.height - popup.getHeight())));
         return popup;
     }
 
@@ -1027,7 +1027,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
                     expanded.add(node.name);
                 }
             }
-            DefaultMutableTreeNode root = new DefaultMutableTreeNode("Expressions");
+            DefaultMutableTreeNode root = new DefaultMutableTreeNode(EXPRESSIONS_TITLE);
             for (DebugVariableNode node : expressions) {
                 root.add(buildTreeNode(node));
             }

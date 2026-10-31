@@ -187,10 +187,18 @@ public final class JdiExpressionEvaluator {
     private Object promoteConditional(Object selected, Object other) {
         Value selectedValue = unwrap(selected);
         Value otherValue = unwrap(other);
-        if (selectedValue instanceof PrimitiveValue s && otherValue instanceof PrimitiveValue o && isNumeric(s) && isNumeric(o)) {
+        // a numeric wrapper next to a primitive (or another wrapper type) is unboxed first: Integer and int give an int
+        boolean sameWrapper = selectedValue instanceof ObjectReference a && otherValue instanceof ObjectReference b
+            && a.referenceType().equals(b.referenceType());
+        Value selectedUnboxed = sameWrapper ? selectedValue : unbox(selectedValue);
+        Value otherUnboxed = sameWrapper ? otherValue : unbox(otherValue);
+        if (selectedUnboxed instanceof PrimitiveValue s && otherUnboxed instanceof PrimitiveValue o && isNumeric(s) && isNumeric(o)) {
             Value promoted = promoteNumeric(s, selected instanceof Constant, o, other instanceof Constant);
             if (promoted != null) {
                 return promoted;
+            }
+            if (selectedValue instanceof ObjectReference) {
+                return s;
             }
         }
         // references: the conditional has the common type of both branches, whichever one is selected
@@ -496,7 +504,7 @@ public final class JdiExpressionEvaluator {
         if (!(value(target) instanceof ArrayReference arrayReference)) {
             throw new EvaluationException("Not an array");
         }
-        int i = (int) numberAsLong(value(index));
+        int i = (int) numberAsLong(unbox(value(index)));
         if (i < 0 || i >= arrayReference.length()) {
             throw new EvaluationException("Index " + i + " out of bounds for length " + arrayReference.length());
         }
@@ -899,13 +907,9 @@ public final class JdiExpressionEvaluator {
         if (value instanceof ArrayReference array && "length".equals(name)) {
             return vm.mirrorOf(array.length());
         }
-        if (value == null && declaredName != null) {
-            // Java reads a static field through a null reference without complaint
-            ReferenceType declaredType = findClass(declaredName);
-            Field staticField = declaredType == null ? null : declaredType.fieldByName(name);
-            if (staticField != null && staticField.isStatic()) {
-                return typed(staticField.declaringType().getValue(staticField), staticField.typeName());
-            }
+        Field staticField = value == null && declaredName != null ? staticFieldOf(declaredName, name) : null;
+        if (staticField != null) {
+            return typed(staticField.declaringType().getValue(staticField), staticField.typeName());
         }
         if (!(value instanceof ObjectReference object)) {
             throw new EvaluationException("Cannot read '" + name + "' on " + (value == null ? "null" : "a primitive value"));
@@ -915,6 +919,13 @@ public final class JdiExpressionEvaluator {
             throw new EvaluationException("No field '" + name + "' in " + object.referenceType().name());
         }
         return typed(field.isStatic() ? field.declaringType().getValue(field) : object.getValue(field), field.typeName());
+    }
+
+    /** Java reads a static field through a null reference without complaint. */
+    private Field staticFieldOf(String declaredName, String name) {
+        ReferenceType declaredType = findClass(declaredName);
+        Field field = declaredType == null ? null : declaredType.fieldByName(name);
+        return field != null && field.isStatic() ? field : null;
     }
 
     /** Java picks the field from the declared type (Base b = new Child(): b.x is Base.x), the receiver only holds the value. */
@@ -1018,13 +1029,7 @@ public final class JdiExpressionEvaluator {
             return placeholder(chosen.returnTypeName());
         }
         try {
-            try {
-                return call(receiver, chosen, arguments);
-            } catch (ClassNotLoadedException _) {
-                // the loader of the method never resolved one of its parameter types (java.lang.CharSequence...): make it do so
-                preloadParameterTypes(chosen);
-            }
-            return call(receiver, chosen, arguments);
+            return callRetrying(receiver, chosen, arguments);
         } catch (InvocationException e) {
             throw new EvaluationException("Exception in " + name + "(): " + e.exception().referenceType().name());
         } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException e) {
@@ -1053,7 +1058,18 @@ public final class JdiExpressionEvaluator {
         return new Receiver(declaredType, null, null, true);
     }
 
-    private Object call(Receiver receiver, Method chosen, List<Value> arguments) throws EvaluationException, InvalidTypeException,
+    private Object callRetrying(Receiver receiver, Method chosen, List<Value> arguments) throws InvalidTypeException,
+            ClassNotLoadedException, IncompatibleThreadStateException, InvocationException {
+        try {
+            return call(receiver, chosen, arguments);
+        } catch (ClassNotLoadedException _) {
+            // the loader of the method never resolved one of its parameter types (java.lang.CharSequence...): make it do so
+            preloadParameterTypes(chosen);
+        }
+        return call(receiver, chosen, arguments);
+    }
+
+    private Object call(Receiver receiver, Method chosen, List<Value> arguments) throws InvalidTypeException,
             ClassNotLoadedException, IncompatibleThreadStateException, InvocationException {
         List<String> parameterTypes = chosen.argumentTypeNames();
         List<Value> coerced = new ArrayList<>();

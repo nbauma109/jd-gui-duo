@@ -646,7 +646,7 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
                 g.drawImage(BREAKPOINT_ICON, 1, markerY, null);
                 return;
             }
-            int markerSize = Math.clamp(metrics.getHeight() - 2, 8, 12);
+            int markerSize = Math.clamp((long) metrics.getHeight() - 2, 8, 12);
             int markerY = y - metrics.getAscent() + (metrics.getHeight() - markerSize) / 2;
             g.setColor(new Color(42, 122, 198));
             g.fillOval(3, markerY, markerSize, markerSize);

@@ -29,21 +29,25 @@ public class LinelessTree extends JTree {
         super(model);
     }
 
+    private static final String PAINT_LINES = "Tree.paintLines";
+    private static final String COLLAPSED_ICON = "Tree.collapsedIcon";
+    private static final String EXPANDED_ICON = "Tree.expandedIcon";
+
     @Override
     public void updateUI() {
         // the look and feel reads these defaults when it installs its UI
-        Object paintLines = UIManager.get("Tree.paintLines");
-        Object collapsedIcon = UIManager.get("Tree.collapsedIcon");
-        Object expandedIcon = UIManager.get("Tree.expandedIcon");
-        UIManager.put("Tree.paintLines", Boolean.FALSE);
-        UIManager.put("Tree.collapsedIcon", new ChevronIcon(false));
-        UIManager.put("Tree.expandedIcon", new ChevronIcon(true));
+        Object paintLines = UIManager.get(PAINT_LINES);
+        Object collapsedIcon = UIManager.get(COLLAPSED_ICON);
+        Object expandedIcon = UIManager.get(EXPANDED_ICON);
+        UIManager.put(PAINT_LINES, Boolean.FALSE);
+        UIManager.put(COLLAPSED_ICON, new ChevronIcon(false));
+        UIManager.put(EXPANDED_ICON, new ChevronIcon(true));
         try {
             super.updateUI();
         } finally {
-            UIManager.put("Tree.paintLines", paintLines);
-            UIManager.put("Tree.collapsedIcon", collapsedIcon);
-            UIManager.put("Tree.expandedIcon", expandedIcon);
+            UIManager.put(PAINT_LINES, paintLines);
+            UIManager.put(COLLAPSED_ICON, collapsedIcon);
+            UIManager.put(EXPANDED_ICON, expandedIcon);
         }
     }
 
