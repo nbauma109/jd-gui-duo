@@ -10,6 +10,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.Theme;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
+import org.jd.gui.util.KeyBindings.Binding;
 import org.jd.gui.util.decompiler.GuiPreferences;
 
 import java.awt.Component;
@@ -20,6 +21,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.swing.Icon;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 
@@ -53,7 +57,45 @@ public class ThemeUtil {
                 assert ExceptionUtil.printStackTrace(e);
             }
         }
+        releaseDebugShortcuts(preferences, rSyntaxTextArea);
         return rSyntaxTextArea;
+    }
+
+    private static final Binding[] DEBUG_BINDINGS = {
+        Binding.REMOTE_DEBUG, Binding.DISCONNECT, Binding.RESUME, Binding.STEP_INTO, Binding.STEP_OVER,
+        Binding.STEP_RETURN, Binding.DROP_TO_FRAME, Binding.RUN_TO_LINE, Binding.TOGGLE_BREAKPOINT, Binding.INSPECT
+    };
+
+    /**
+     * The editor binds some keys itself (e.g. Ctrl+F2 toggles a bookmark). Component bindings win over menu
+     * accelerators, so shadow the ones that collide with a debug shortcut to let the shortcut reach the menu.
+     */
+    private static void releaseDebugShortcuts(Map<String, String> preferences, RSyntaxTextArea textArea) {
+        refreshDebugShortcuts(preferences, textArea);
+    }
+
+    private static final String SHADOWED_KEYS = "jd.debugShadowedKeys";
+
+    /**
+     * Shadows the editor bindings that collide with the configured debug shortcuts. Called again when the key bindings
+     * change: the editor's own binding comes back for a key that no longer collides.
+     */
+    public static void refreshDebugShortcuts(Map<String, String> preferences, RSyntaxTextArea textArea) {
+        InputMap inputMap = textArea.getInputMap(JComponent.WHEN_FOCUSED);
+        if (textArea.getClientProperty(SHADOWED_KEYS) instanceof java.util.Set<?> previous) {
+            for (Object keyStroke : previous) {
+                inputMap.remove((KeyStroke) keyStroke);
+            }
+        }
+        java.util.Set<KeyStroke> shadowed = new java.util.HashSet<>();
+        for (Binding binding : DEBUG_BINDINGS) {
+            KeyStroke keyStroke = KeyBindings.getConfiguredKeyStroke(preferences, binding);
+            if (keyStroke != null && inputMap.get(keyStroke) != null) {
+                inputMap.put(keyStroke, "none");
+                shadowed.add(keyStroke);
+            }
+        }
+        textArea.putClientProperty(SHADOWED_KEYS, shadowed);
     }
 
     private static final int JAVA_MAJOR_VERSION = Runtime.version().feature();

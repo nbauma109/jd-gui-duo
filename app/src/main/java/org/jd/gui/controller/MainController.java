@@ -16,6 +16,7 @@ import org.jd.gui.api.feature.ContentIndexable;
 import org.jd.gui.api.feature.ContentSavable;
 import org.jd.gui.api.feature.ContentSearchable;
 import org.jd.gui.api.feature.ContentSelectable;
+import org.jd.gui.api.feature.BreakpointCapablePage;
 import org.jd.gui.api.feature.FocusedTypeGettable;
 import org.jd.gui.api.feature.IndexesChangeListener;
 import org.jd.gui.api.feature.LineNumberNavigable;
@@ -27,6 +28,7 @@ import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Container.Entry;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.model.configuration.Configuration;
+import org.jd.gui.model.debug.DebugThread;
 import org.jd.gui.model.history.History;
 import org.jd.gui.service.actions.ContextualActionsFactoryService;
 import org.jd.gui.service.container.ContainerFactoryService;
@@ -61,6 +63,7 @@ import org.jd.gui.util.ZOutputStream;
 import org.jd.gui.util.container.JarContainerEntryUtil;
 import org.jd.gui.util.decompiler.GuiPreferences;
 import org.jd.gui.util.decompiler.ContainerLoader;
+import org.jd.gui.util.index.IndexesUtil;
 import org.jd.gui.util.loader.LoaderUtils;
 import org.jd.gui.util.matcher.ArtifactVersionMatcher;
 import org.jd.gui.util.maven.central.helper.NexusSearchFrame;
@@ -157,6 +160,7 @@ public class MainController implements API {
     private KeyBindingsController keyBindingsController;
     private SecuredPreferencesController securedPreferencesController;
     private EclipsePreferencesController eclipsePreferencesController;
+    private RemoteDebugController remoteDebugController;
     private SearchInConstantPoolsController searchInConstantPoolsController;
     private SaveAllSourcesController saveAllSourcesController;
     private SelectLocationController selectLocationController;
@@ -197,6 +201,12 @@ public class MainController implements API {
                 e -> onGoTo(),
                 e -> openURI(history.backward()),
                 e -> openURI(history.forward()),
+                e -> onRemoteDebug(),
+                e -> disconnect(),
+                e -> getRemoteDebugController().resume(),
+                e -> getRemoteDebugController().stepInto(),
+                e -> getRemoteDebugController().stepOver(),
+                e -> getRemoteDebugController().stepReturn(),
                 e -> onSearch(),
                 e -> onJdWebSite(),
                 e -> onJdGuiIssues(),
@@ -212,6 +222,54 @@ public class MainController implements API {
                 this::onCurrentPageChanged,
                 this::openFile)
         );
+    }
+
+    private void installDebugCallbacks(JFrame mainFrame) {
+        if (remoteDebugController == null) {
+            remoteDebugController = new RemoteDebugController(configuration, this, mainFrame);
+        }
+        org.jd.gui.view.component.panel.TreeTabbedPanel.setDebugNavigateHandler(this::openDebugLocation);
+        mainView.setRemoveBreakpointCallback(s -> getRemoteDebugController().removeBreakpoint((String) s));
+        mainView.setRemoveAllBreakpointsCallback(() -> getRemoteDebugController().removeAllBreakpoints());
+        mainView.setBreakpointEnabledCallback((key, enabled) -> getRemoteDebugController().setBreakpointEnabled((String) key, (Boolean) enabled));
+        mainView.setAddExpressionCallback(expression -> getRemoteDebugController().addWatchExpression((String) expression));
+        mainView.setRemoveExpressionCallback(expression -> getRemoteDebugController().removeWatchExpression((String) expression));
+        mainView.setRemoveAllExpressionsCallback(() -> getRemoteDebugController().removeAllWatchExpressions());
+        org.jd.gui.view.component.panel.TreeTabbedPanel.setDebugFrameSelectHandler((thread, frameIndex) -> getRemoteDebugController().selectFrame(thread, frameIndex));
+        remoteDebugController.loadPersistedBreakpoints();
+        mainView.setBreakpointNavigateCallback(object -> {
+            String key = (String) object;
+            int colon = key.lastIndexOf(':');
+            if (colon > 0) {
+                try {
+                    openLocation(key.substring(0, colon), Integer.parseInt(key.substring(colon + 1)));
+                } catch (NumberFormatException _) {
+                    // malformed key
+                }
+            }
+        });
+        mainView.setAddExceptionBreakpointCallback(() -> getRemoteDebugController().showAddExceptionBreakpointDialog());
+        mainView.setSkipAllBreakpointsCallback(skip -> getRemoteDebugController().setSkipAllBreakpoints((Boolean) skip));
+        mainView.setInspectCallback(() -> {
+            BreakpointCapablePage page = getCurrentBreakpointPage();
+            if (page != null) {
+                page.inspectSelection();
+            }
+        });
+        mainView.setRunToLineCallback(() -> {
+            BreakpointCapablePage page = getCurrentBreakpointPage();
+            int line = page == null ? 0 : page.getCaretSourceLine();
+            if (line > 0) {
+                getRemoteDebugController().runToLine(page.getDebugTypeName(), line);
+            }
+        });
+        mainView.setDropToFrameCallback(() -> getRemoteDebugController().dropToFrame());
+        mainView.setToggleBreakpointCallback(() -> {
+            BreakpointCapablePage page = getCurrentBreakpointPage();
+            if (page != null) {
+                page.toggleBreakpointAtCaret();
+            }
+        });
     }
 
 	// --- Show GUI --- //
@@ -266,6 +324,8 @@ public class MainController implements API {
                 }
                 securedPreferencesController = new SecuredPreferencesController(configuration, mainFrame, SecuredPreferencesPanelService.getInstance().getProviders());
                 eclipsePreferencesController = new EclipsePreferencesController(configuration, mainFrame, EclipsePreferencesPanelService.getInstance().getProviders());
+                installDebugCallbacks(mainFrame);
+                checkDebuggablePage(currentPage);
                 selectLocationController = new SelectLocationController(MainController.this, mainFrame);
                 aboutController = new AboutController(mainFrame, isDarkMode());
                 sourceLoaderService = new SourceLoaderService();
@@ -518,6 +578,10 @@ public class MainController implements API {
         searchInConstantPoolsController.show(getCollectionOfFutureIndexes(), this::openURI);
     }
 
+    protected void onRemoteDebug() {
+        getRemoteDebugController().show();
+    }
+
     protected void onFindPrevious() {
         if (currentPage instanceof ContentSearchable cs) {
             cs.findPrevious(mainView.getFindText(), mainView.getSearchType());
@@ -628,6 +692,7 @@ public class MainController implements API {
         currentPage = page;
         checkPreferencesChange(page);
         checkIndexesChange(page);
+        checkDebuggablePage(page);
     }
 
     protected void checkPreferencesChange(JComponent page) {
@@ -653,6 +718,142 @@ public class MainController implements API {
                 page.putClientProperty("collectionOfFutureIndexes-hashCode", currentHashcode);
             }
         }
+    }
+
+    protected void checkDebuggablePage(JComponent page) {
+        if (page instanceof BreakpointCapablePage debuggablePage) {
+            getRemoteDebugController().sync(debuggablePage);
+        }
+    }
+
+    @Override
+    public void syncBreakpointPage(BreakpointCapablePage page) {
+        checkDebuggablePage((JComponent) page);
+        // a page that replaces the displayed one (original source loaded in the background) has no marker yet
+        String type = executionTypeName;
+        String pageType = page.getDebugTypeName();
+        if (type != null && executionLineNumber > 0 && (type.equals(pageType) || type.startsWith(pageType + "$"))) {
+            page.setCurrentExecutionLine(executionLineNumber);
+            executionMarkedPage = page;
+        }
+    }
+
+    private RemoteDebugController getRemoteDebugController() {
+        if (remoteDebugController == null) {
+            remoteDebugController = new RemoteDebugController(configuration, this, mainView.getMainFrame());
+        }
+        return remoteDebugController;
+    }
+
+    void setDebugStepActionsEnabled(boolean enabled) {
+        mainView.setDebugStepActionsEnabled(enabled);
+    }
+
+    void showDebugVariables(String title, List<org.jd.gui.model.debug.DebugVariableNode> variables) {
+        mainView.showDebugVariables(title, variables);
+    }
+
+    void showDebugExpressionsTab() {
+        mainView.selectDebugTab(2);
+    }
+
+    void showInspectPopup(org.jd.gui.model.debug.DebugVariableNode node, java.awt.Point screenLocation, Runnable showInExpressions) {
+        mainView.showInspectPopup(node, screenLocation, showInExpressions);
+    }
+
+    void showDebugExpressions(List<org.jd.gui.model.debug.DebugVariableNode> expressions) {
+        mainView.showDebugExpressions(expressions);
+    }
+
+    void showDebugBreakpoints(List<String[]> breakpoints) {
+        mainView.showDebugBreakpoints(breakpoints);
+    }
+
+    /** Plain navigation (e.g. from the Breakpoints view): opens the class at the line, no execution marker. */
+    private boolean openLocation(String typeName, int lineNumber) {
+        String internalTypeName = typeName.replace('.', '/');
+        List<Container.Entry> entries = IndexesUtil.findInternalTypeName(getCollectionOfFutureIndexes(), internalTypeName);
+        if (entries.isEmpty()) {
+            return false;
+        }
+        openURI(UriUtil.createURI(this, getCollectionOfFutureIndexes(), entries.get(0), "lineNumber=" + lineNumber, null));
+        return true;
+    }
+
+    void openDebugLocation(String typeName, int lineNumber) {
+        if (lineNumber < 1) {
+            return;
+        }
+
+        if (!openLocation(typeName, lineNumber)) {
+            // The class is not among the opened archives (e.g. a dependency): the page on display is unrelated,
+            // so it must not get the execution marker, and the marker of the previous stop is obsolete.
+            clearDebugExecutionLine();
+            return;
+        }
+        // currentPage was updated synchronously by openURI (via pageChanged callbacks).
+        // Set the execution-line highlight immediately — no need for another invokeLater.
+        BreakpointCapablePage bcp = getCurrentBreakpointPage();
+        if (executionMarkedPage != null && executionMarkedPage != bcp) {
+            executionMarkedPage.setCurrentExecutionLine(0); // execution moved on from the class shown before
+        }
+        if (bcp != null) {
+            bcp.setCurrentExecutionLine(lineNumber);
+        }
+        executionMarkedPage = bcp;
+        executionTypeName = typeName;
+        executionLineNumber = lineNumber;
+    }
+
+    /** The page that shows the execution marker: it may no longer be the one on display. */
+    private BreakpointCapablePage executionMarkedPage;
+    /** Where the debuggee is stopped, to mark a page that appears later (original source loaded after the stop). */
+    private String executionTypeName;
+    private int executionLineNumber;
+
+    /** The current page is usually a DynamicPage wrapping the debuggable ClassFilePage. */
+    private BreakpointCapablePage getCurrentBreakpointPage() {
+        if (currentPage instanceof BreakpointCapablePage bcp) {
+            return bcp;
+        }
+        if (currentPage instanceof DynamicPage dynamicPage && dynamicPage.getPage() instanceof BreakpointCapablePage bcp) {
+            return bcp;
+        }
+        return null;
+    }
+
+    void clearDebugExecutionLine() {
+        // Run directly if on EDT (called from SwingWorker.done()) to avoid
+        // nested-invokeLater race with the next onSuspended's invokeLater.
+        Runnable r = () -> {
+            BreakpointCapablePage bcp = getCurrentBreakpointPage();
+            if (bcp != null) {
+                bcp.setCurrentExecutionLine(0);
+            }
+            if (executionMarkedPage != null) {
+                executionMarkedPage.setCurrentExecutionLine(0);
+                executionMarkedPage = null;
+            }
+            executionTypeName = null;
+            executionLineNumber = 0;
+        };
+        if (javax.swing.SwingUtilities.isEventDispatchThread()) {
+            r.run();
+        } else {
+            SwingUtil.invokeLater(r);
+        }
+    }
+
+    void showDebugStackFrames(List<DebugThread> threads) {
+        org.jd.gui.view.component.panel.TreeTabbedPanel.setDebugFrames(threads);
+    }
+
+    void setDebugConnected(boolean connected) {
+        mainView.setDebugConnectedActionsEnabled(connected);
+    }
+
+    void disconnect() {
+        getRemoteDebugController().disconnect();
     }
 
     // --- Operations --- //

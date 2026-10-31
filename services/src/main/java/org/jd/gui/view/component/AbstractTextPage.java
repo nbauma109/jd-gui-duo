@@ -477,6 +477,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
     @Override
     public void preferencesChanged(Map<String, String> preferences) {
         this.preferences = preferences;
+        org.jd.gui.util.ThemeUtil.refreshDebugShortcuts(preferences, textArea);
         boolean enabled = isSelectedWordHighlightEnabled(preferences);
         errorStrip.setShowMarkAll(enabled);
 
