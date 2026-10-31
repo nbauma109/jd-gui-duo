@@ -351,7 +351,7 @@ public final class JdiExpressionEvaluator {
                 leftText = text(object);
             }
             Object right = parseMultiplicative();
-            left = skipping > 0 ? null : arithmetic(op, left, right, leftText);
+            left = skipping > 0 ? skippedArithmetic(op, left, right) : arithmetic(op, left, right, leftText);
         }
     }
 
@@ -363,7 +363,7 @@ public final class JdiExpressionEvaluator {
                 return left;
             }
             Object right = parseUnary();
-            left = skipping > 0 ? null : arithmetic(op, left, right, null);
+            left = skipping > 0 ? skippedArithmetic(op, left, right) : arithmetic(op, left, right, null);
         }
     }
 
@@ -402,8 +402,8 @@ public final class JdiExpressionEvaluator {
                 return minimum;
             }
             Object operandResult = parseUnary();
-            if (skipping > 0) {
-                return null;
+            if (skipping > 0 && !(unwrap(operandResult) instanceof PrimitiveValue)) {
+                return null; // a number can be negated without side effect: the type of -2.0 matters in a skipped branch
             }
             Value operand = value(operandResult);
             if (operand instanceof DoubleValue d) {
@@ -439,9 +439,9 @@ public final class JdiExpressionEvaluator {
                 String name = identifier();
                 if (accept("(")) {
                     Arguments arguments = parseArguments();
-                    target = skipping > 0 ? null : invoke(target, name, arguments.values(), arguments.declaredTypes());
+                    target = skipping > 0 ? skippedInvoke(target, name, arguments) : invoke(target, name, arguments.values(), arguments.declaredTypes());
                 } else {
-                    target = skipping > 0 ? null : member(target, name);
+                    target = skipping > 0 ? skippedMember(target, name) : member(target, name);
                 }
             } else if (accept("[")) {
                 Object index = parseTernary();
@@ -515,7 +515,7 @@ public final class JdiExpressionEvaluator {
         }
         if (accept("(")) {
             Arguments arguments = parseArguments();
-            return skipping > 0 ? null : invokeImplicit(name, arguments);
+            return skipping > 0 ? skippedInvokeImplicit(name, arguments) : invokeImplicit(name, arguments, false);
         }
         if (skipping > 0) {
             // not evaluated, but reading a variable has no side effect and tells the type of a ?: branch
@@ -855,14 +855,68 @@ public final class JdiExpressionEvaluator {
         return typed(field.isStatic() ? field.declaringType().getValue(field) : object.getValue(field), field.typeName());
     }
 
-    private Object invokeImplicit(String name, Arguments arguments) throws EvaluationException, IncompatibleThreadStateException {
+    private Object invokeImplicit(String name, Arguments arguments, boolean dryRun) throws EvaluationException, IncompatibleThreadStateException {
         StackFrame frame = frame();
         ObjectReference self = frame.thisObject();
         if (self != null) {
             // the receiver of an unqualified call has the type of the class that contains the call
-            return invoke(typed(self, frame.location().declaringType().name()), name, arguments.values(), arguments.declaredTypes());
+            return invoke(typed(self, frame.location().declaringType().name()), name, arguments.values(), arguments.declaredTypes(), dryRun);
         }
-        return invoke(new ClassRef(frame.location().declaringType()), name, arguments.values(), arguments.declaredTypes());
+        return invoke(new ClassRef(frame.location().declaringType()), name, arguments.values(), arguments.declaredTypes(), dryRun);
+    }
+
+    // A branch that is not selected is not executed, but its type still decides the type of the conditional:
+    // reading variables and doing arithmetic on numbers has no side effect, and a call is only resolved (not run).
+
+    private Object skippedArithmetic(String op, Object left, Object right) {
+        try {
+            if (unwrap(left) instanceof PrimitiveValue && unwrap(right) instanceof PrimitiveValue) {
+                return arithmetic(op, left, right, null);
+            }
+        } catch (EvaluationException | RuntimeException e) {
+            // e.g. a division by zero: the type is unknown
+        }
+        return null;
+    }
+
+    private Object skippedMember(Object target, String name) {
+        try {
+            return member(target, name);
+        } catch (EvaluationException | RuntimeException e) {
+            return null;
+        }
+    }
+
+    private Object skippedInvoke(Object target, String name, Arguments arguments) {
+        try {
+            return invoke(target, name, arguments.values(), arguments.declaredTypes(), true);
+        } catch (EvaluationException | RuntimeException e) {
+            return null;
+        }
+    }
+
+    private Object skippedInvokeImplicit(String name, Arguments arguments) {
+        try {
+            return invokeImplicit(name, arguments, true);
+        } catch (EvaluationException | IncompatibleThreadStateException | RuntimeException e) {
+            return null;
+        }
+    }
+
+    /** What a call that was not run stands for: a zero of its primitive return type, or a null of its reference type. */
+    private Object placeholder(String returnType) {
+        return switch (returnType) {
+            case "int" -> vm.mirrorOf(0);
+            case "long" -> vm.mirrorOf(0L);
+            case "double" -> vm.mirrorOf(0.0);
+            case "float" -> vm.mirrorOf(0f);
+            case "boolean" -> vm.mirrorOf(false);
+            case "byte" -> vm.mirrorOf((byte) 0);
+            case "short" -> vm.mirrorOf((short) 0);
+            case "char" -> vm.mirrorOf('\0');
+            case "void" -> null;
+            default -> typed(null, returnType);
+        };
     }
 
     private Object invoke(Object target, String name, List<Value> arguments) throws EvaluationException {
@@ -870,6 +924,10 @@ public final class JdiExpressionEvaluator {
     }
 
     private Object invoke(Object target, String name, List<Value> arguments, List<String> declaredTypes) throws EvaluationException {
+        return invoke(target, name, arguments, declaredTypes, false);
+    }
+
+    private Object invoke(Object target, String name, List<Value> arguments, List<String> declaredTypes, boolean dryRun) throws EvaluationException {
         ReferenceType type;
         ObjectReference receiver = null;
         ReferenceType declaredReceiver = null;
@@ -905,6 +963,9 @@ public final class JdiExpressionEvaluator {
         }
         if (chosen == null) {
             throw new EvaluationException("No method " + name + "/" + arguments.size() + " in " + type.name() + " accepts these arguments");
+        }
+        if (dryRun) {
+            return placeholder(chosen.returnTypeName());
         }
         try {
             List<String> parameterTypes = chosen.argumentTypeNames();

@@ -545,6 +545,15 @@ public class RemoteDebugController {
                 boolean resume = true;
                 // two requests on the same location (e.g. Run to Line on a breakpoint) give two events for one stop
                 Set<ThreadReference> reported = new HashSet<>();
+                // a breakpoint or exception in the same event set as a step ends the step there: never continue through it
+                Set<ThreadReference> stoppedByRequest = new HashSet<>();
+                for (Event candidate : eventSet) {
+                    if (candidate instanceof BreakpointEvent b) {
+                        stoppedByRequest.add(b.thread());
+                    } else if (candidate instanceof ExceptionEvent x) {
+                        stoppedByRequest.add(x.thread());
+                    }
+                }
 
                 for (Event event : eventSet) {
                     if (event instanceof ClassPrepareEvent classPrepareEvent) {
@@ -573,7 +582,12 @@ public class RemoteDebugController {
                     } else if (event instanceof StepEvent stepEvent) {
                         int depth = ((StepRequest) stepEvent.request()).depth();
                         deleteStepRequests(stepEvent.thread());
-                        if (!continueThroughLibraryCode(stepEvent.thread(), stepEvent.location(), depth) && reported.add(stepEvent.thread())) {
+                        boolean explicitStop = stoppedByRequest.contains(stepEvent.thread());
+                        if (explicitStop) {
+                            pendingSteps.remove(stepEvent.thread());
+                        }
+                        if ((explicitStop || !continueThroughLibraryCode(stepEvent.thread(), stepEvent.location(), depth))
+                                && reported.add(stepEvent.thread())) {
                             onSuspended(stepEvent.thread(), stepEvent.location());
                         }
                         resume = false;
