@@ -39,7 +39,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
-import org.jd.gui.model.debug.DebugThread;
 
 import javax.swing.Action;
 import javax.swing.ImageIcon;
@@ -81,7 +80,7 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
     protected final transient API api;
     private final URI uri;
     protected final Tree tree;
-    private JTabbedPane leftTabs;
+    private final JTabbedPane leftTabs;
     @SuppressWarnings("rawtypes")
     private final TabbedPanel tabbedPanel;
     private final transient List<PageChangeListener> pageChangedListeners = new ArrayList<>();
@@ -180,7 +179,7 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
 
         applyTreeNodeFontSize(preferences);
 
-        leftTabs = new JTabbedPane(JTabbedPane.BOTTOM);
+        leftTabs = new JTabbedPane(javax.swing.SwingConstants.BOTTOM);
         javax.swing.Icon prjIcon = loadIcon("/org/jd/gui/images/filenav_nav.png");
         javax.swing.Icon dbgIcon = loadIcon("/org/jd/gui/images/bug_exc.png");
         leftTabs.addTab("Project Explorer", prjIcon, treeScrollPane);
@@ -225,7 +224,7 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
                                 debugNavigateHandler.accept(className, lineNum);
                             }
                         }
-                    } catch (NumberFormatException ex) {
+                    } catch (NumberFormatException _) {
                         // ignore malformed frame string
                     }
                 }
@@ -260,74 +259,73 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
         //   - nodeChanged()          for label-only changes  (no collapse)
         //   - nodeStructureChanged() for frame-list changes  (collapses only that thread node)
         // Otherwise fall back to a full rebuild.
-        int existingCount = DEBUG_TREE_ROOT.getChildCount();
-        boolean sameThreads = (existingCount == threads.size());
-        if (sameThreads) {
-            for (int i = 0; i < existingCount; i++) {
-                DefaultMutableTreeNode n = (DefaultMutableTreeNode) DEBUG_TREE_ROOT.getChildAt(i);
-                DebugThread existing = n.getUserObject() instanceof DebugThread dt ? dt : null;
-                if (existing == null || existing.id() != threads.get(i).id()) {
-                    sameThreads = false;
-                    break;
-                }
-            }
-        }
-
-        if (sameThreads) {
+        if (hasSameThreads(threads)) {
             // Incremental update per thread node
             for (int i = 0; i < threads.size(); i++) {
-                DefaultMutableTreeNode threadNode = (DefaultMutableTreeNode) DEBUG_TREE_ROOT.getChildAt(i);
-                DebugThread oldDt = (DebugThread) threadNode.getUserObject();
-                DebugThread newDt = threads.get(i);
-
-                if (oldDt.equals(newDt)) {
-                    continue; // Nothing changed for this thread
-                }
-
-                threadNode.setUserObject(newDt);
-
-                boolean structureChanged = oldDt.isSuspended() != newDt.isSuspended()
-                    || !oldDt.frames().equals(newDt.frames());
-
-                if (structureChanged) {
-                    threadNode.removeAllChildren();
-                    if (newDt.isSuspended()) {
-                        for (String frame : newDt.frames()) {
-                            threadNode.add(new DefaultMutableTreeNode(frame));
-                        }
-                    }
-                    DEBUG_TREE_MODEL.nodeStructureChanged(threadNode);
-                } else {
-                    DEBUG_TREE_MODEL.nodeChanged(threadNode);
-                }
+                updateThreadNode((DefaultMutableTreeNode) DEBUG_TREE_ROOT.getChildAt(i), threads.get(i));
             }
         } else {
             // Full rebuild (first connect, disconnect, or thread set changed)
             DEBUG_TREE_ROOT.removeAllChildren();
             for (DebugThread dt : threads) {
                 DefaultMutableTreeNode threadNode = new DefaultMutableTreeNode(dt);
-                if (dt.isSuspended()) {
-                    for (String frame : dt.frames()) {
-                        threadNode.add(new DefaultMutableTreeNode(frame));
-                    }
-                }
+                addFrames(threadNode, dt);
                 DEBUG_TREE_ROOT.add(threadNode);
             }
             DEBUG_TREE_MODEL.reload(DEBUG_TREE_ROOT);
         }
 
-        // Re-expand suspended thread nodes in all instances
         if (!threads.isEmpty()) {
-            INSTANCES.keySet().forEach(panel -> {
-                panel.leftTabs.setSelectedIndex(1);
-                JTree debugTree = (JTree) ((JScrollPane) panel.leftTabs.getComponentAt(1)).getViewport().getView();
-                for (int i = 0; i < DEBUG_TREE_ROOT.getChildCount(); i++) {
-                    DefaultMutableTreeNode threadNode = (DefaultMutableTreeNode) DEBUG_TREE_ROOT.getChildAt(i);
-                    if (threadNode.getUserObject() instanceof DebugThread dt && dt.isSuspended()) {
-                        debugTree.expandPath(new TreePath(threadNode.getPath()));
-                    }
-                }
-            });
+            INSTANCES.keySet().forEach(TreeTabbedPanel::expandSuspendedThreads);
+        }
+    }
+
+    private static boolean hasSameThreads(List<DebugThread> threads) {
+        int existingCount = DEBUG_TREE_ROOT.getChildCount();
+        if (existingCount != threads.size()) {
+            return false;
+        }
+        for (int i = 0; i < existingCount; i++) {
+            DefaultMutableTreeNode n = (DefaultMutableTreeNode) DEBUG_TREE_ROOT.getChildAt(i);
+            if (!(n.getUserObject() instanceof DebugThread existing) || existing.id() != threads.get(i).id()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static void updateThreadNode(DefaultMutableTreeNode threadNode, DebugThread newDt) {
+        DebugThread oldDt = (DebugThread) threadNode.getUserObject();
+        if (oldDt.equals(newDt)) {
+            return; // Nothing changed for this thread
+        }
+        threadNode.setUserObject(newDt);
+        if (oldDt.isSuspended() != newDt.isSuspended() || !oldDt.frames().equals(newDt.frames())) {
+            threadNode.removeAllChildren();
+            addFrames(threadNode, newDt);
+            DEBUG_TREE_MODEL.nodeStructureChanged(threadNode);
+        } else {
+            DEBUG_TREE_MODEL.nodeChanged(threadNode);
+        }
+    }
+
+    private static void addFrames(DefaultMutableTreeNode threadNode, DebugThread dt) {
+        if (dt.isSuspended()) {
+            for (String frame : dt.frames()) {
+                threadNode.add(new DefaultMutableTreeNode(frame));
+            }
+        }
+    }
+
+    /** Re-expands the suspended thread nodes of one panel. */
+    private static void expandSuspendedThreads(TreeTabbedPanel panel) {
+        panel.leftTabs.setSelectedIndex(1);
+        JTree debugTree = (JTree) ((JScrollPane) panel.leftTabs.getComponentAt(1)).getViewport().getView();
+        for (int i = 0; i < DEBUG_TREE_ROOT.getChildCount(); i++) {
+            DefaultMutableTreeNode threadNode = (DefaultMutableTreeNode) DEBUG_TREE_ROOT.getChildAt(i);
+            if (threadNode.getUserObject() instanceof DebugThread dt && dt.isSuspended()) {
+                debugTree.expandPath(new TreePath(threadNode.getPath()));
+            }
         }
     }
 
@@ -614,16 +612,7 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
             if (value instanceof DefaultMutableTreeNode node) {
                 Object userObj = node.getUserObject();
                 if (userObj instanceof DebugThread dt) {
-                    // Thread node
-                    String status;
-                    if (!dt.isSuspended()) {
-                        status = " (Running)";
-                    } else if (dt.isEventThread()) {
-                        status = " (Suspended, at breakpoint)";
-                    } else {
-                        status = " (Suspended)";
-                    }
-                    label.setText("Thread \"" + dt.name() + "\"" + status);
+                    label.setText("Thread \"" + dt.name() + "\"" + statusOf(dt));
                     label.setIcon(dt.isEventThread() ? THREAD_EVENT_ICON : THREAD_OTHER_ICON);
                 } else if (userObj instanceof String frame) {
                     // Frame node — determine if it is the top frame of its parent
@@ -634,6 +623,13 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
                 }
             }
             return label;
+        }
+
+        private static String statusOf(DebugThread dt) {
+            if (!dt.isSuspended()) {
+                return " (Running)";
+            }
+            return dt.isEventThread() ? " (Suspended, at breakpoint)" : " (Suspended)";
         }
     }
 }

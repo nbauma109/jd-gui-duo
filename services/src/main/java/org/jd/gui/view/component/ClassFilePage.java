@@ -11,6 +11,7 @@ package org.jd.gui.view.component;
 import org.fife.ui.rsyntaxtextarea.DocumentRange;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeWriter;
+import org.jd.core.v1.parser.ParseException;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.ParserRealigner;
 import org.jd.gui.api.API;
@@ -39,6 +40,7 @@ import com.heliosdecompiler.transformerapi.decompilers.vineflower.VineflowerSett
 
 import java.awt.Color;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -209,7 +211,7 @@ public class ClassFilePage extends TypePage implements BreakpointCapablePage {
     }
 
     private static DecompilationResult decompileForDisplay(Loader apiLoader, String entryInternalName, Map<String, String> preferences,
-            String engineName, boolean realignmentLineNumbers) throws Exception {
+            String engineName, boolean realignmentLineNumbers) throws IOException, IllegalAccessException, InvocationTargetException, ParseException {
         boolean parserRealignmentRequired = isParserRealignmentRequired(engineName, realignmentLineNumbers);
         Map<String, String> decompilePreferences = parserRealignmentRequired ? withLineNumberSettings(preferences, engineName) : preferences;
         DecompilationResult result = StandardTransformers.decompile(apiLoader, entryInternalName, decompilePreferences, engineName);
@@ -317,13 +319,13 @@ public class ClassFilePage extends TypePage implements BreakpointCapablePage {
 
     @Override
     public String getBreakpointMethodDescription(int lineNumber) {
-        List<String[]> methods = new java.util.ArrayList<>(); // { name, descriptor, synthetic }
+        List<String[]> methods = new java.util.ArrayList<>(); // name, descriptor, synthetic
         String[] holder = new String[2];
         try (java.io.InputStream inputStream = entry.getInputStream()) {
             new ClassReader(inputStream).accept(new ClassVisitor(Opcodes.ASM9) {
                 @Override
                 public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-                    methods.add(new String[] { name, descriptor, (access & Opcodes.ACC_SYNTHETIC) != 0 ? "true" : "false" });
+                    methods.add(new String[] { name, descriptor, Boolean.toString((access & Opcodes.ACC_SYNTHETIC) != 0) });
                     return new MethodVisitor(Opcodes.ASM9) {
                         @Override
                         public void visitLineNumber(int line, org.objectweb.asm.Label start) {
@@ -342,23 +344,30 @@ public class ClassFilePage extends TypePage implements BreakpointCapablePage {
         if (holder[0] == null) {
             return null;
         }
-        String name = holder[0];
-        String descriptor = holder[1];
-        // Lambda bodies are compiled to lambda$name$N: name the enclosing source method like Eclipse does
-        java.util.regex.Matcher lambda = java.util.regex.Pattern.compile("lambda\\$(.+)\\$\\d+").matcher(name);
+        String[] source = enclosingSourceMethod(holder[0], holder[1], methods);
+        return describeMethod(source[0], source[1]);
+    }
+
+    private static final java.util.regex.Pattern LAMBDA_NAME = java.util.regex.Pattern.compile("lambda\\$(.+)\\$\\d+");
+
+    /** Lambda bodies are compiled to lambda$name$N: name the enclosing source method like Eclipse does. */
+    private static String[] enclosingSourceMethod(String name, String descriptor, List<String[]> methods) {
+        java.util.regex.Matcher lambda = LAMBDA_NAME.matcher(name);
         if (lambda.matches()) {
             for (String[] method : methods) {
                 if (method[0].equals(lambda.group(1)) && "false".equals(method[2])) {
-                    name = method[0];
-                    descriptor = method[1];
-                    break;
+                    return new String[] { method[0], method[1] };
                 }
             }
         }
-        String simpleClassName = getDebugTypeName().substring(getDebugTypeName().lastIndexOf('.') + 1);
+        return new String[] { name, descriptor };
+    }
+
+    private String describeMethod(String name, String descriptor) {
         if ("<clinit>".equals(name)) {
             return "static {...}";
         }
+        String simpleClassName = getDebugTypeName().substring(getDebugTypeName().lastIndexOf('.') + 1);
         StringBuilder description = new StringBuilder("<init>".equals(name) ? simpleClassName : name).append('(');
         Type[] arguments = Type.getArgumentTypes(descriptor);
         for (int i = 0; i < arguments.length; i++) {
@@ -388,11 +397,6 @@ public class ClassFilePage extends TypePage implements BreakpointCapablePage {
                 setBreakpointLineNumber(sourceLineNumber, vmEnabled);
             }
         }
-    }
-
-    @Override
-    public void setCurrentExecutionLine(int lineNumber) {
-        super.setCurrentExecutionLine(lineNumber);
     }
 
     // --- PreferencesChangeListener --- //

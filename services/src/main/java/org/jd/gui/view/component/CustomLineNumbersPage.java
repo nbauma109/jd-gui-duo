@@ -55,7 +55,7 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
     private boolean showMisalignment = true;
     private int currentExecutionLine;       // source line number, 0 = none
     private int currentExecutionTextAreaLine; // text-area line number, 0 = none
-    private Object lineHighlightTag;
+    private transient Object lineHighlightTag;
 
     protected void setErrorForeground(Color color) {
         errorForeground = color;
@@ -133,7 +133,7 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
         int clickedLine = 0;
         try {
             clickedLine = getSourceLineNumber(textArea.getLineOfOffset(textArea.viewToModel2D(e.getPoint())) + 1);
-        } catch (BadLocationException ex) {
+        } catch (BadLocationException _) {
             // click below the last line
         }
         int finalLine = clickedLine;
@@ -163,7 +163,7 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
             java.awt.geom.Rectangle2D caret = textArea.modelToView2D(textArea.getCaretPosition());
             java.awt.Point origin = textArea.getLocationOnScreen();
             screenLocation = new java.awt.Point(origin.x + (int) caret.getX(), origin.y + (int) (caret.getY() + caret.getHeight()));
-        } catch (BadLocationException | java.awt.IllegalComponentStateException e) {
+        } catch (BadLocationException | java.awt.IllegalComponentStateException _) {
             return;
         }
         inspectHandler.accept(expression, screenLocation);
@@ -305,7 +305,7 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
                     lineHighlightTag = textArea.addLineHighlight(taLine - 1, EXECUTION_LINE_COLOR);
                     int offset = textArea.getLineStartOffset(taLine - 1);
                     scrollToLineCentered(offset);
-                } catch (BadLocationException e) {
+                } catch (BadLocationException _) {
                     // line not in this view
                 }
             }
@@ -333,12 +333,12 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
                         if (r != null) {
                             doScrollCentered(r);
                         }
-                    } catch (BadLocationException ex) {
+                    } catch (BadLocationException _) {
                         // ignore
                     }
                 });
             }
-        } catch (BadLocationException e) {
+        } catch (BadLocationException _) {
             // ignore
         }
     }
@@ -367,7 +367,7 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
     public int getCaretSourceLine() {
         try {
             return getSourceLineNumber(textArea.getLineOfOffset(textArea.getCaretPosition()) + 1);
-        } catch (BadLocationException e) {
+        } catch (BadLocationException _) {
             return 0;
         }
     }
@@ -379,7 +379,7 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
             if (sourceLineNumber > 0) {
                 toggleBreakpointLineNumber(sourceLineNumber);
             }
-        } catch (BadLocationException e) {
+        } catch (BadLocationException _) {
             // caret outside the document
         }
     }
@@ -435,7 +435,7 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
                         g.setColor(EXECUTION_LINE_COLOR);
                         g.fillRect(0, (int) r.getY(), rsta.getWidth(), rsta.getLineHeight());
                     }
-                } catch (BadLocationException e) {
+                } catch (BadLocationException _) {
                     // line out of range in this view — ignore
                 }
             }
@@ -481,7 +481,7 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
                 if (sourceLineNumber > 0) {
                     toggleBreakpointLineNumber(sourceLineNumber);
                 }
-            } catch (Exception ex) {
+            } catch (Exception _) {
                 // Ignore clicks outside valid text rows.
             }
         }
@@ -616,50 +616,55 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
         }
 
         protected void paintLineNumber(Graphics g, FontMetrics metrics, int x, int y, int lineNumber) {
-            int originalLineNumber;
-
-            if (lineNumberMap != null) {
-                originalLineNumber = lineNumber < lineNumberMap.length ? lineNumberMap[lineNumber] : 0;
-                if (originalLineNumber == 0 && isBreakpointLineNumber(lineNumber)) {
-                    originalLineNumber = lineNumber;
-                }
-            } else {
-                originalLineNumber = lineNumber;
-            }
+            int originalLineNumber = originalLineNumberOf(lineNumber);
 
             if (originalLineNumber != 0) {
                 String number = Integer.toString(originalLineNumber);
                 int strWidth = metrics.stringWidth(number);
-                boolean isExecLine = currentExecutionTextAreaLine > 0 && lineNumber == currentExecutionTextAreaLine;
                 if (isBreakpointLineNumber(originalLineNumber)) {
-                    if (BREAKPOINT_ICON != null) {
-                        int markerY = y - metrics.getAscent() + (metrics.getHeight() - 16) / 2;
-                        g.drawImage(BREAKPOINT_ICON, 1, markerY, null);
-                    } else {
-                        int markerSize = Math.max(8, Math.min(12, metrics.getHeight() - 2));
-                        int markerY = y - metrics.getAscent() + (metrics.getHeight() - markerSize) / 2;
-                        g.setColor(new Color(42, 122, 198));
-                        g.fillOval(3, markerY, markerSize, markerSize);
-                        g.setColor(new Color(16, 78, 156));
-                        g.drawOval(3, markerY, markerSize, markerSize);
-                        g.setColor(new Color(126, 190, 235));
-                        g.fillOval(5, markerY + 2, Math.max(2, markerSize / 3), Math.max(2, markerSize / 3));
-                    }
+                    paintBreakpointMarker(g, metrics, y);
                 }
-                if (isExecLine) {
-                    // draw a solid right-pointing arrow (Eclipse-style execution pointer)
-                    g.setColor(new Color(0, 128, 0));
-                    int mid = y - metrics.getAscent() + metrics.getHeight() / 2;
-                    int ah = Math.max(4, metrics.getHeight() / 3);
-                    int aw = ah;
-                    int ax = x - strWidth - aw - 3;
-                    int[] px = {ax, ax + aw, ax};
-                    int[] py = {mid - ah / 2, mid, mid + ah / 2};
-                    g.fillPolygon(px, py, 3);
+                if (currentExecutionTextAreaLine > 0 && lineNumber == currentExecutionTextAreaLine) {
+                    paintExecutionArrow(g, metrics, x - strWidth, y);
                 }
                 g.setColor(showMisalignment && lineNumber != originalLineNumber ? errorForeground : getForeground());
                 g.drawString(number, x-strWidth, y);
             }
+        }
+
+        private int originalLineNumberOf(int lineNumber) {
+            if (lineNumberMap == null) {
+                return lineNumber;
+            }
+            int originalLineNumber = lineNumber < lineNumberMap.length ? lineNumberMap[lineNumber] : 0;
+            return originalLineNumber == 0 && isBreakpointLineNumber(lineNumber) ? lineNumber : originalLineNumber;
+        }
+
+        private void paintBreakpointMarker(Graphics g, FontMetrics metrics, int y) {
+            if (BREAKPOINT_ICON != null) {
+                int markerY = y - metrics.getAscent() + (metrics.getHeight() - 16) / 2;
+                g.drawImage(BREAKPOINT_ICON, 1, markerY, null);
+                return;
+            }
+            int markerSize = Math.clamp(metrics.getHeight() - 2, 8, 12);
+            int markerY = y - metrics.getAscent() + (metrics.getHeight() - markerSize) / 2;
+            g.setColor(new Color(42, 122, 198));
+            g.fillOval(3, markerY, markerSize, markerSize);
+            g.setColor(new Color(16, 78, 156));
+            g.drawOval(3, markerY, markerSize, markerSize);
+            g.setColor(new Color(126, 190, 235));
+            g.fillOval(5, markerY + 2, Math.max(2, markerSize / 3), Math.max(2, markerSize / 3));
+        }
+
+        /** A solid right-pointing arrow (Eclipse-style execution pointer) that ends at {@code right}. */
+        private void paintExecutionArrow(Graphics g, FontMetrics metrics, int right, int y) {
+            g.setColor(new Color(0, 128, 0));
+            int mid = y - metrics.getAscent() + metrics.getHeight() / 2;
+            int ah = Math.max(4, metrics.getHeight() / 3);
+            int ax = right - ah - 3;
+            int[] px = {ax, ax + ah, ax};
+            int[] py = {mid - ah / 2, mid, mid + ah / 2};
+            g.fillPolygon(px, py, 3);
         }
 
         @Override

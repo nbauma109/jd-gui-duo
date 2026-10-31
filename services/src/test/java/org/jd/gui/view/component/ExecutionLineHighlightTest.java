@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * off-screen into a {@link BufferedImage}, and samples the pixel colour at the
  * target line row to assert it matches the expected green.
  */
-public class ExecutionLineHighlightTest {
+class ExecutionLineHighlightTest {
 
     private static final Color EXPECTED_COLOR = new Color(0xC6, 0xDB, 0xAE);
     private static final int TARGET_SOURCE_LINE = 5;   // the source line we will highlight
@@ -65,9 +65,9 @@ public class ExecutionLineHighlightTest {
 
         @Override public boolean openURI(URI uri) { return false; }
         @Override public boolean openURI(int x, int y, Collection<Container.Entry> entries, String query, String fragment) { return false; }
-        @Override public void addURI(URI uri) {}
-        @Override public void compareFiles(URI file1, URI file2) {}
-        @Override public <T extends JComponent & org.jd.gui.api.feature.UriGettable> void addPanel(File file, String title, Supplier<Icon> iconSupplier, String tip, T component) {}
+        @Override public void addURI(URI uri) { /* no-op */ }
+        @Override public void compareFiles(URI file1, URI file2) { /* no-op */ }
+        @Override public <T extends JComponent & org.jd.gui.api.feature.UriGettable> void addPanel(File file, String title, Supplier<Icon> iconSupplier, String tip, T component) { /* no-op */ }
         @Override public Collection<Action> getContextualActions(Container.Entry entry, String fragment) { return Collections.emptyList(); }
         @Override public UriLoader getUriLoader(URI uri) { return null; }
         @Override public FileLoader getFileLoader(File file) { return null; }
@@ -81,11 +81,11 @@ public class ExecutionLineHighlightTest {
         @Override public Collection<Indexes> getCollectionOfIndexes() { return Collections.emptyList(); }
         @Override public Collection<Future<Indexes>> getCollectionOfFutureIndexes() { return Collections.emptyList(); }
         @Override public String getSource(Container.Entry entry) { return null; }
-        @Override public void loadSource(Container.Entry entry, LoadSourceListener listener) {}
+        @Override public void loadSource(Container.Entry entry, LoadSourceListener listener) { /* no-op */ }
         @Override public File loadSourceFile(Container.Entry entry) { return null; }
-        @Override public void repaint() {}
+        @Override public void repaint() { /* no-op */ }
         @Override public boolean isDarkMode() { return false; }
-        @Override public void syncBreakpointPage(BreakpointCapablePage page) {}
+        @Override public void syncBreakpointPage(BreakpointCapablePage page) { /* no-op */ }
     };
 
     // ---------------------------------------------------------------------------
@@ -112,26 +112,33 @@ public class ExecutionLineHighlightTest {
         protected boolean isHyperlinkEnabled(HyperlinkData hyperlinkData) { return false; }
 
         @Override
-        protected void openHyperlink(int x, int y, HyperlinkData hyperlinkData) {}
+        protected void openHyperlink(int x, int y, HyperlinkData hyperlinkData) { /* no-op */ }
+    }
+
+    /** Lets the events that are already queued (layout, repaint, scroll) run: the EDT is flushed a few times. */
+    private static void settle() throws Exception {
+        for (int i = 0; i < 5; i++) {
+            SwingUtilities.invokeAndWait(() -> { /* flush */ });
+        }
     }
 
     // ---------------------------------------------------------------------------
     // Test
     // ---------------------------------------------------------------------------
     @Test
-    public void testExecutionLineColorIsGreen() throws Exception {
+    void testExecutionLineColorIsGreen() throws Exception {
         runScenario(false, false);
     }
 
     /** Real flow: openURI puts the caret on the target line before the highlight is set. */
     @Test
-    public void testGreenWhenCaretMovedBeforeHighlight() throws Exception {
+    void testGreenWhenCaretMovedBeforeHighlight() throws Exception {
         runScenario(true, false);
     }
 
     /** Caret lands on the target line after the highlight is set (invokeLater race). */
     @Test
-    public void testGreenWhenCaretMovedAfterHighlight() throws Exception {
+    void testGreenWhenCaretMovedAfterHighlight() throws Exception {
         runScenario(false, true);
     }
 
@@ -168,7 +175,7 @@ public class ExecutionLineHighlightTest {
         });
 
         // Give the component time to be laid out and painted initially.
-        Thread.sleep(300);
+        settle();
 
         // ── Step 2: set the execution line ────────────────────────────────────
         SwingUtilities.invokeAndWait(() -> {
@@ -188,7 +195,7 @@ public class ExecutionLineHighlightTest {
         });
 
         // Let any invokeLater scroll/repaint tasks settle.
-        Thread.sleep(200);
+        settle();
 
         // ── Step 3: render to BufferedImage and sample ────────────────────────
         final int[]         lineYHolder = new int[1];

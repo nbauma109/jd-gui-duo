@@ -33,7 +33,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
-import javax.swing.UIManager;
 
 /**
  * Breakpoints view laid out like Eclipse's: an icon toolbar on the right, then one selectable row per
@@ -66,14 +65,18 @@ public class BreakpointListPanel extends JPanel {
     private transient Consumer<Boolean> skipAllCallback;
     private transient Runnable addExceptionCallback;
 
-    public BreakpointListPanel(Icon enabledIcon, Icon disabledIcon, Icon exceptionIcon, Icon disabledExceptionIcon,
-            Icon removeIcon, Icon removeAllIcon, Icon goToFileIcon, Icon skipAllIcon, Icon addExceptionIcon) {
+    /** The icons of the rows and of the toolbar buttons. */
+    public record Icons(Icon enabled, Icon disabled, Icon exception, Icon disabledException,
+            Icon remove, Icon removeAll, Icon goToFile, Icon skipAll, Icon addException) {
+    }
+
+    public BreakpointListPanel(Icons icons) {
         super(new BorderLayout());
 
-        removeButton = newButton(removeIcon, "Remove Selected Breakpoints");
-        removeAllButton = newButton(removeAllIcon, "Remove All Breakpoints");
-        goToFileButton = newButton(goToFileIcon, "Go to File for Breakpoint");
-        skipAllButton = new JToggleButton(skipAllIcon);
+        removeButton = newButton(icons.remove(), "Remove Selected Breakpoints");
+        removeAllButton = newButton(icons.removeAll(), "Remove All Breakpoints");
+        goToFileButton = newButton(icons.goToFile(), "Go to File for Breakpoint");
+        skipAllButton = new JToggleButton(icons.skipAll());
         style(skipAllButton, "Skip All Breakpoints");
         // a toggle must show that it is pressed
         skipAllButton.addItemListener(e -> {
@@ -81,7 +84,7 @@ public class BreakpointListPanel extends JPanel {
             skipAllButton.setContentAreaFilled(pressed);
             skipAllButton.setBorderPainted(pressed);
         });
-        addExceptionButton = newButton(addExceptionIcon, "Add Java Exception Breakpoint...");
+        addExceptionButton = newButton(icons.addException(), "Add Java Exception Breakpoint...");
         addExceptionButton.addActionListener(e -> {
             if (addExceptionCallback != null) {
                 addExceptionCallback.run();
@@ -110,24 +113,13 @@ public class BreakpointListPanel extends JPanel {
         add(toolbar, BorderLayout.NORTH);
 
         list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        list.setCellRenderer(new Renderer(enabledIcon, disabledIcon, exceptionIcon, disabledExceptionIcon));
+        list.setCellRenderer(new Renderer(icons.enabled(), icons.disabled(), icons.exception(), icons.disabledException()));
         list.setFixedCellHeight(21);
         list.addListSelectionListener(e -> updateButtons());
         list.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                int index = list.locationToIndex(e.getPoint());
-                if (index < 0 || !list.getCellBounds(index, index).contains(e.getPoint())) {
-                    return;
-                }
-                if (e.getX() < checkBoxWidth) {
-                    Row row = model.get(index);
-                    if (enabledCallback != null) {
-                        enabledCallback.accept(row.key(), !row.enabled());
-                    }
-                } else if (e.getClickCount() == 2) {
-                    navigateToSelected();
-                }
+                rowClicked(e);
             }
         });
         list.addKeyListener(new KeyAdapter() {
@@ -142,6 +134,22 @@ public class BreakpointListPanel extends JPanel {
         });
         add(new JScrollPane(list), BorderLayout.CENTER);
         updateButtons();
+    }
+
+    /** The check box toggles the breakpoint, a double click goes to its file. */
+    private void rowClicked(MouseEvent e) {
+        int index = list.locationToIndex(e.getPoint());
+        if (index < 0 || !list.getCellBounds(index, index).contains(e.getPoint())) {
+            return;
+        }
+        if (e.getX() < checkBoxWidth) {
+            Row row = model.get(index);
+            if (enabledCallback != null) {
+                enabledCallback.accept(row.key(), !row.enabled());
+            }
+        } else if (e.getClickCount() == 2) {
+            navigateToSelected();
+        }
     }
 
     private static JButton newButton(Icon icon, String toolTip) {
@@ -243,6 +251,13 @@ public class BreakpointListPanel extends JPanel {
             panel.add(label, BorderLayout.CENTER);
         }
 
+        private Icon iconOf(Row row) {
+            if (row.key().startsWith("exception:")) {
+                return row.enabled() ? exceptionIcon : disabledExceptionIcon;
+            }
+            return row.enabled() ? enabledIcon : disabledIcon;
+        }
+
         @Override
         public Component getListCellRendererComponent(JList<? extends Row> jList, Row row, int index, boolean selected, boolean focus) {
             // Eclipse marks the selected row with a light blue band and a thin dark outline, text stays black
@@ -251,8 +266,7 @@ public class BreakpointListPanel extends JPanel {
             label.setForeground(jList.getForeground());
             label.setFont(jList.getFont());
             label.setText(row.text());
-            boolean exception = row.key().startsWith("exception:");
-            label.setIcon(exception ? (row.enabled() ? exceptionIcon : disabledExceptionIcon) : (row.enabled() ? enabledIcon : disabledIcon));
+            label.setIcon(iconOf(row));
             checkBox.setSelected(row.enabled());
             panel.setToolTipText(row.key() + " [" + row.state() + "]");
             return panel;

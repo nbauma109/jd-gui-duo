@@ -77,11 +77,6 @@ public class JavaFilePage extends TypePage implements BreakpointCapablePage {
         }
     }
 
-    @Override
-    public void setCurrentExecutionLine(int lineNumber) {
-        super.setCurrentExecutionLine(lineNumber);
-    }
-
     // --- ContentSavable --- //
     @Override
     public String getFileName() {

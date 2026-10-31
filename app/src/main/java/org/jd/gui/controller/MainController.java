@@ -224,6 +224,54 @@ public class MainController implements API {
         );
     }
 
+    private void installDebugCallbacks(JFrame mainFrame) {
+        if (remoteDebugController == null) {
+            remoteDebugController = new RemoteDebugController(configuration, this, mainFrame);
+        }
+        org.jd.gui.view.component.panel.TreeTabbedPanel.setDebugNavigateHandler(this::openDebugLocation);
+        mainView.setRemoveBreakpointCallback(s -> getRemoteDebugController().removeBreakpoint((String) s));
+        mainView.setRemoveAllBreakpointsCallback(() -> getRemoteDebugController().removeAllBreakpoints());
+        mainView.setBreakpointEnabledCallback((key, enabled) -> getRemoteDebugController().setBreakpointEnabled((String) key, (Boolean) enabled));
+        mainView.setAddExpressionCallback(expression -> getRemoteDebugController().addWatchExpression((String) expression));
+        mainView.setRemoveExpressionCallback(expression -> getRemoteDebugController().removeWatchExpression((String) expression));
+        mainView.setRemoveAllExpressionsCallback(() -> getRemoteDebugController().removeAllWatchExpressions());
+        org.jd.gui.view.component.panel.TreeTabbedPanel.setDebugFrameSelectHandler((thread, frameIndex) -> getRemoteDebugController().selectFrame(thread, frameIndex));
+        remoteDebugController.loadPersistedBreakpoints();
+        mainView.setBreakpointNavigateCallback(object -> {
+            String key = (String) object;
+            int colon = key.lastIndexOf(':');
+            if (colon > 0) {
+                try {
+                    openLocation(key.substring(0, colon), Integer.parseInt(key.substring(colon + 1)));
+                } catch (NumberFormatException _) {
+                    // malformed key
+                }
+            }
+        });
+        mainView.setAddExceptionBreakpointCallback(() -> getRemoteDebugController().showAddExceptionBreakpointDialog());
+        mainView.setSkipAllBreakpointsCallback(skip -> getRemoteDebugController().setSkipAllBreakpoints((Boolean) skip));
+        mainView.setInspectCallback(() -> {
+            BreakpointCapablePage page = getCurrentBreakpointPage();
+            if (page != null) {
+                page.inspectSelection();
+            }
+        });
+        mainView.setRunToLineCallback(() -> {
+            BreakpointCapablePage page = getCurrentBreakpointPage();
+            int line = page == null ? 0 : page.getCaretSourceLine();
+            if (line > 0) {
+                getRemoteDebugController().runToLine(page.getDebugTypeName(), line);
+            }
+        });
+        mainView.setDropToFrameCallback(() -> getRemoteDebugController().dropToFrame());
+        mainView.setToggleBreakpointCallback(() -> {
+            BreakpointCapablePage page = getCurrentBreakpointPage();
+            if (page != null) {
+                page.toggleBreakpointAtCaret();
+            }
+        });
+    }
+
 	// --- Show GUI --- //
     @SuppressWarnings("unchecked")
     public void show(List<File> files) {
@@ -276,51 +324,7 @@ public class MainController implements API {
                 }
                 securedPreferencesController = new SecuredPreferencesController(configuration, mainFrame, SecuredPreferencesPanelService.getInstance().getProviders());
                 eclipsePreferencesController = new EclipsePreferencesController(configuration, mainFrame, EclipsePreferencesPanelService.getInstance().getProviders());
-                if (remoteDebugController == null) {
-                    remoteDebugController = new RemoteDebugController(configuration, MainController.this, mainFrame);
-                }
-                org.jd.gui.view.component.panel.TreeTabbedPanel.setDebugNavigateHandler(MainController.this::openDebugLocation);
-                mainView.setRemoveBreakpointCallback(s -> getRemoteDebugController().removeBreakpoint((String) s));
-                mainView.setRemoveAllBreakpointsCallback(() -> getRemoteDebugController().removeAllBreakpoints());
-                mainView.setBreakpointEnabledCallback((key, enabled) -> getRemoteDebugController().setBreakpointEnabled((String) key, (Boolean) enabled));
-                mainView.setAddExpressionCallback(expression -> getRemoteDebugController().addWatchExpression((String) expression));
-                mainView.setRemoveExpressionCallback(expression -> getRemoteDebugController().removeWatchExpression((String) expression));
-                mainView.setRemoveAllExpressionsCallback(() -> getRemoteDebugController().removeAllWatchExpressions());
-                org.jd.gui.view.component.panel.TreeTabbedPanel.setDebugFrameSelectHandler((thread, frameIndex) -> getRemoteDebugController().selectFrame(thread, frameIndex));
-                remoteDebugController.loadPersistedBreakpoints();
-                mainView.setBreakpointNavigateCallback(object -> {
-                    String key = (String) object;
-                    int colon = key.lastIndexOf(':');
-                    if (colon > 0) {
-                        try {
-                            openLocation(key.substring(0, colon), Integer.parseInt(key.substring(colon + 1)));
-                        } catch (NumberFormatException ignored) {
-                            // malformed key
-                        }
-                    }
-                });
-                mainView.setAddExceptionBreakpointCallback(() -> getRemoteDebugController().showAddExceptionBreakpointDialog());
-                mainView.setSkipAllBreakpointsCallback(skip -> getRemoteDebugController().setSkipAllBreakpoints((Boolean) skip));
-                mainView.setInspectCallback(() -> {
-                    BreakpointCapablePage page = getCurrentBreakpointPage();
-                    if (page != null) {
-                        page.inspectSelection();
-                    }
-                });
-                mainView.setRunToLineCallback(() -> {
-                    BreakpointCapablePage page = getCurrentBreakpointPage();
-                    int line = page == null ? 0 : page.getCaretSourceLine();
-                    if (line > 0) {
-                        getRemoteDebugController().runToLine(page.getDebugTypeName(), line);
-                    }
-                });
-                mainView.setDropToFrameCallback(() -> getRemoteDebugController().dropToFrame());
-                mainView.setToggleBreakpointCallback(() -> {
-                    BreakpointCapablePage page = getCurrentBreakpointPage();
-                    if (page != null) {
-                        page.toggleBreakpointAtCaret();
-                    }
-                });
+                installDebugCallbacks(mainFrame);
                 checkDebuggablePage(currentPage);
                 selectLocationController = new SelectLocationController(MainController.this, mainFrame);
                 aboutController = new AboutController(mainFrame, isDarkMode());

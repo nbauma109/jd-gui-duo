@@ -58,8 +58,8 @@ public class DebugValueTree extends LinelessTree {
     private static final int RESIZE_GRIP = 4;
 
     private double nameColumnRatio = 0.45;
-    private transient java.util.function.Function<DebugVariableNode.Kind, Icon> iconProvider;
-    private transient Icon topLevelIcon;
+    private final transient java.util.function.Function<DebugVariableNode.Kind, Icon> iconProvider;
+    private final transient Icon topLevelIcon;
     private transient Runnable addRowAction;
 
     public DebugValueTree(DefaultTreeModel model, java.util.function.Function<DebugVariableNode.Kind, Icon> iconProvider, Icon topLevelIcon) {
@@ -145,21 +145,6 @@ public class DebugValueTree extends LinelessTree {
         return color != null ? color : new Color(0xE0E0E0);
     }
 
-    private int treeIndent() {
-        if (getUI() instanceof BasicTreeUI ui) {
-            return ui.getLeftChildIndent() + ui.getRightChildIndent();
-        }
-        return 20;
-    }
-
-    private Icon iconFor(DefaultMutableTreeNode node, int depth) {
-        if (depth == 1 && topLevelIcon != null) {
-            return topLevelIcon;
-        }
-        return node.getUserObject() instanceof DebugVariableNode variable
-            ? iconProvider.apply(variable.kind) : iconProvider.apply(DebugVariableNode.Kind.LOCAL);
-    }
-
     private final class Renderer implements TreeCellRenderer {
         private final JPanel panel = new JPanel(new BorderLayout());
         private final JLabel name = new JLabel();
@@ -171,6 +156,20 @@ public class DebugValueTree extends LinelessTree {
             value.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 4));
             panel.add(name, BorderLayout.WEST);
             panel.add(value, BorderLayout.CENTER);
+        }
+
+        private int treeIndent() {
+            if (DebugValueTree.this.getUI() instanceof BasicTreeUI ui) {
+                return ui.getLeftChildIndent() + ui.getRightChildIndent();
+            }
+            return 20;
+        }
+
+        private Icon iconFor(DefaultMutableTreeNode node, int depth) {
+            if (depth == 1 && topLevelIcon != null) {
+                return topLevelIcon;
+            }
+            return iconProvider.apply(node.getUserObject() instanceof DebugVariableNode variable ? variable.kind : DebugVariableNode.Kind.LOCAL);
         }
 
         @Override
@@ -269,7 +268,7 @@ public class DebugValueTree extends LinelessTree {
                 @Override
                 public void mouseDragged(MouseEvent e) {
                     if (dragging && DebugValueTree.this.getWidth() > 0) {
-                        nameColumnRatio = Math.min(0.85, Math.max(0.15, e.getX() / (double) DebugValueTree.this.getWidth()));
+                        nameColumnRatio = Math.clamp(e.getX() / (double) DebugValueTree.this.getWidth(), 0.15, 0.85);
                         DebugValueTree.this.repaint();
                         repaint();
                     }

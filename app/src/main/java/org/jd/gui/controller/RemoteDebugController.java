@@ -7,8 +7,6 @@ package org.jd.gui.controller;
 
 import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.Bootstrap;
-import com.sun.jdi.ClassType;
-import com.sun.jdi.Field;
 import com.sun.jdi.IncompatibleThreadStateException;
 import com.sun.jdi.LocalVariable;
 import com.sun.jdi.Location;
@@ -16,7 +14,6 @@ import com.sun.jdi.ObjectReference;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.StackFrame;
 import com.sun.jdi.ThreadReference;
-import com.sun.jdi.Value;
 import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.connect.AttachingConnector;
 import com.sun.jdi.connect.Connector;
@@ -58,7 +55,6 @@ import java.awt.Insets;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
@@ -102,26 +98,26 @@ public class RemoteDebugController {
     private final Set<BreakpointKey> breakpoints = ConcurrentHashMap.newKeySet();
     private final Map<BreakpointKey, List<BreakpointRequest>> installedBreakpoints = new ConcurrentHashMap<>();
 
-    private transient VirtualMachine virtualMachine;
+    private VirtualMachine virtualMachine;
     /**
      * Threads stopped by an event. With SUSPEND_EVENT_THREAD several threads can be stopped at once
      * (e.g. three workers hitting the same breakpoint). Like Eclipse, the UI stays bound to one
      * "active" thread; the others wait in {@link #queuedThreads} until the active one is resumed.
      */
-    private final transient Object threadLock = new Object();
-    private transient ThreadReference activeThread;
-    private transient boolean activeRunning; // a step is in flight on activeThread
-    private final transient Map<ThreadReference, Location> queuedThreads = new LinkedHashMap<>();
-    private transient int selectedFrameIndex; // frame shown in Variables/Expressions, 0 = top frame
+    private final Object threadLock = new Object();
+    private ThreadReference activeThread;
+    private boolean activeRunning; // a step is in flight on activeThread
+    private final Map<ThreadReference, Location> queuedThreads = new LinkedHashMap<>();
+    private int selectedFrameIndex; // frame shown in Variables/Expressions, 0 = top frame
     private final List<String> watchExpressions = new CopyOnWriteArrayList<>();
     private final Object evaluationLock = new Object();
     private final Set<BreakpointKey> disabledBreakpoints = ConcurrentHashMap.newKeySet();
     /** Library classes that are never shown: stepping into them returns to the caller (like Eclipse's step filters). */
     private static final String[] STEP_FILTER_PREFIXES = { "java.", "javax.", "jdk.", "sun.", "com.sun." };
     /** Step to issue once a step through library code is back in application code (thread -> StepRequest depth). */
-    private final transient Map<ThreadReference, Integer> pendingSteps = new ConcurrentHashMap<>();
+    private final Map<ThreadReference, Integer> pendingSteps = new ConcurrentHashMap<>();
     /** Temporary breakpoint(s) of a pending "Run to Line"; removed as soon as the thread stops anywhere. */
-    private final transient Map<ThreadReference, List<BreakpointRequest>> runToLineRequests = new ConcurrentHashMap<>();
+    private final Map<ThreadReference, List<BreakpointRequest>> runToLineRequests = new ConcurrentHashMap<>();
     /** Number of expression evaluations running: requests installed meanwhile stay disabled until they end. */
     private final java.util.concurrent.atomic.AtomicInteger evaluations = new java.util.concurrent.atomic.AtomicInteger();
     /** Changes whenever the stop shown in the views stops being current (resume, step, other thread, disconnect). */
@@ -150,39 +146,45 @@ public class RemoteDebugController {
 
     /** Restores the breakpoints saved in the configuration by a previous session. */
     public void loadPersistedBreakpoints() {
-        String savedExceptions = configuration.getPreferences().get(EXCEPTIONS_PREFERENCE);
-        if (savedExceptions != null && !savedExceptions.isBlank()) {
-            for (String entry : savedExceptions.split(";")) {
-                String[] parts = entry.split(":");
-                if (parts.length == 4) {
-                    exceptionBreakpoints.put(parts[0], new ExceptionBreakpoint(parts[0], "1".equals(parts[1]), "1".equals(parts[2])));
-                    if ("0".equals(parts[3])) {
-                        disabledExceptions.add(parts[0]);
-                    }
-                }
-            }
-        }
+        loadPersistedExceptions();
         String saved = configuration.getPreferences().get(BREAKPOINTS_PREFERENCE);
-        if (saved == null || saved.isBlank()) {
-            publishBreakpoints();
-            return;
-        }
-        for (String entry : saved.split(";")) {
-            String[] parts = entry.split(":");
-            if (parts.length < 2) {
-                continue;
-            }
-            try {
-                BreakpointKey key = new BreakpointKey(parts[0], Integer.parseInt(parts[1]));
-                breakpoints.add(key);
-                if (parts.length > 2 && "0".equals(parts[2])) {
-                    disabledBreakpoints.add(key);
-                }
-            } catch (NumberFormatException ignored) {
-                // corrupted entry — skip it
+        if (saved != null && !saved.isBlank()) {
+            for (String entry : saved.split(";")) {
+                loadPersistedBreakpoint(entry.split(":"));
             }
         }
         publishBreakpoints();
+    }
+
+    private void loadPersistedExceptions() {
+        String savedExceptions = configuration.getPreferences().get(EXCEPTIONS_PREFERENCE);
+        if (savedExceptions == null || savedExceptions.isBlank()) {
+            return;
+        }
+        for (String entry : savedExceptions.split(";")) {
+            String[] parts = entry.split(":");
+            if (parts.length == 4) {
+                exceptionBreakpoints.put(parts[0], new ExceptionBreakpoint(parts[0], "1".equals(parts[1]), "1".equals(parts[2])));
+                if ("0".equals(parts[3])) {
+                    disabledExceptions.add(parts[0]);
+                }
+            }
+        }
+    }
+
+    private void loadPersistedBreakpoint(String[] parts) {
+        if (parts.length < 2) {
+            return;
+        }
+        try {
+            BreakpointKey key = new BreakpointKey(parts[0], Integer.parseInt(parts[1]));
+            breakpoints.add(key);
+            if (parts.length > 2 && "0".equals(parts[2])) {
+                disabledBreakpoints.add(key);
+            }
+        } catch (NumberFormatException _) {
+            // corrupted entry — skip it
+        }
     }
 
     private void persistBreakpoints() {
@@ -196,6 +198,9 @@ public class RemoteDebugController {
             .map(e -> e.typeName() + ":" + (e.caught() ? "1" : "0") + ":" + (e.uncaught() ? "1" : "0") + ":" + (disabledExceptions.contains(e.typeName()) ? "0" : "1"))
             .collect(java.util.stream.Collectors.joining(";")));
     }
+
+    private static final String ADD_EXCEPTION_TITLE = "Add Java Exception Breakpoint";
+    private static final String REMOTE_DEBUG_TITLE = "Remote Debug";
 
     /** "Add Java Exception Breakpoint": asks for the exception class and when to stop. */
     public void showAddExceptionBreakpointDialog() {
@@ -216,12 +221,12 @@ public class RemoteDebugController {
         panel.add(caughtBox, constraints);
         constraints.gridy = 3;
         panel.add(uncaughtBox, constraints);
-        while (JOptionPane.showConfirmDialog(mainFrame, panel, "Add Java Exception Breakpoint", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) == JOptionPane.OK_OPTION) {
+        while (JOptionPane.showConfirmDialog(mainFrame, panel, ADD_EXCEPTION_TITLE, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) == JOptionPane.OK_OPTION) {
             String name = nameField.getText().trim();
             if (!isQualifiedClassName(name)) {
-                JOptionPane.showMessageDialog(mainFrame, "Enter a fully qualified class name.", "Add Java Exception Breakpoint", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, "Enter a fully qualified class name.", ADD_EXCEPTION_TITLE, JOptionPane.WARNING_MESSAGE);
             } else if (!caughtBox.isSelected() && !uncaughtBox.isSelected()) {
-                JOptionPane.showMessageDialog(mainFrame, "Select Caught, Uncaught or both.", "Add Java Exception Breakpoint", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, "Select Caught, Uncaught or both.", ADD_EXCEPTION_TITLE, JOptionPane.WARNING_MESSAGE);
             } else {
                 addExceptionBreakpoint(name, caughtBox.isSelected(), uncaughtBox.isSelected());
                 return;
@@ -281,13 +286,16 @@ public class RemoteDebugController {
     }
 
     private String exceptionLabel(ExceptionBreakpoint breakpoint) {
-        String when = breakpoint.caught() && breakpoint.uncaught() ? "caught and uncaught" : breakpoint.caught() ? "caught" : "uncaught";
+        String when = "uncaught";
+        if (breakpoint.caught()) {
+            when = breakpoint.uncaught() ? "caught and uncaught" : "caught";
+        }
         return JdiValues.simpleName(breakpoint.typeName()) + " [" + when + "]";
     }
 
     public void show() {
         if (connected) {
-            JOptionPane.showMessageDialog(mainFrame, "Already attached to a remote JVM. Disconnect first.", "Remote Debug", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(mainFrame, "Already attached to a remote JVM. Disconnect first.", REMOTE_DEBUG_TITLE, JOptionPane.INFORMATION_MESSAGE);
             return;
         }
         JTextField hostField = new JTextField(configuration.getPreferences().getOrDefault(HOST_PREFERENCE, DEFAULT_HOST), 28);
@@ -322,7 +330,7 @@ public class RemoteDebugController {
         panel.add(new JLabel("Attach to a JVM started with JDWP remote debugging enabled."), BorderLayout.NORTH);
         panel.add(fields, BorderLayout.CENTER);
 
-        if (JOptionPane.showConfirmDialog(mainFrame, panel, "Remote Debug", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) == JOptionPane.OK_OPTION) {
+        if (JOptionPane.showConfirmDialog(mainFrame, panel, REMOTE_DEBUG_TITLE, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) == JOptionPane.OK_OPTION) {
             String host = hostField.getText().trim();
             if (host.isEmpty()) {
                 host = DEFAULT_HOST;
@@ -488,51 +496,6 @@ public class RemoteDebugController {
         }
     }
 
-    private void attached(VirtualMachine vm, String host, int port) {
-        if (connected) {
-            // another attachment finished while a session is running: keep the first one
-            try {
-                vm.dispose();
-            } catch (RuntimeException e) {
-                assert ExceptionUtil.printStackTrace(e);
-            }
-            return;
-        }
-        this.virtualMachine = vm;
-        connected = true;
-        resetThreads();
-        controller.setDebugStepActionsEnabled(false);
-        controller.setDebugConnected(true);
-        controller.showDebugVariables(null, java.util.Collections.emptyList());
-        publishBreakpoints();
-
-        EventRequestManager requestManager = vm.eventRequestManager();
-        ClassPrepareRequest prepareRequest = requestManager.createClassPrepareRequest();
-        // the loading thread waits (event set resumed by the event loop) until the pending breakpoints are installed
-        prepareRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
-        prepareRequest.enable();
-
-        // A stepping thread that ends (e.g. stepping out of run()) must not leave the buttons disabled.
-        ThreadDeathRequest deathRequest = requestManager.createThreadDeathRequest();
-        deathRequest.setSuspendPolicy(EventRequest.SUSPEND_NONE);
-        deathRequest.enable();
-
-        for (BreakpointKey breakpoint : breakpoints) {
-            installBreakpoint(breakpoint);
-        }
-        for (ExceptionBreakpoint exception : exceptionBreakpoints.values()) {
-            installException(exception);
-        }
-        publishBreakpoints();
-
-        Thread eventThread = new Thread(() -> runEventLoop(vm), "JD-GUI remote debug events");
-        eventThread.setDaemon(true);
-        eventThread.start();
-
-        // No vm.resume() here: a JVM started with suspend=y is released by the event loop, which resumes the
-        // event set of the VMStartEvent exactly once (a second resume could release a newer stop).
-    }
-
     /** Each loop belongs to one session: after a disconnect and a new attachment the old loop must not touch the new one. */
     private void runEventLoop(VirtualMachine owner) {
         try {
@@ -542,76 +505,87 @@ public class RemoteDebugController {
                 if (virtualMachine != owner) {
                     return;
                 }
-                boolean resume = true;
-                // two requests on the same location (e.g. Run to Line on a breakpoint) give two events for one stop
-                Set<ThreadReference> reported = new HashSet<>();
-                // a breakpoint or exception in the same event set as a step ends the step there: never continue through it
-                Set<ThreadReference> stoppedByRequest = new HashSet<>();
-                for (Event candidate : eventSet) {
-                    if (candidate instanceof BreakpointEvent b) {
-                        stoppedByRequest.add(b.thread());
-                    } else if (candidate instanceof ExceptionEvent x) {
-                        stoppedByRequest.add(x.thread());
-                    }
-                }
-
-                for (Event event : eventSet) {
-                    if (event instanceof ClassPrepareEvent classPrepareEvent) {
-                        installBreakpoints(classPrepareEvent.referenceType());
-                        ExceptionBreakpoint exception = exceptionBreakpoints.get(classPrepareEvent.referenceType().name());
-                        if (exception != null) {
-                            installException(classPrepareEvent.referenceType(), exception);
-                        }
-                        publishBreakpoints();
-                    } else if (event instanceof ExceptionEvent exceptionEvent) {
-                        clearRunToLine(exceptionEvent.thread());
-                        pendingSteps.remove(exceptionEvent.thread());
-                        deleteStepRequests(exceptionEvent.thread());
-                        if (reported.add(exceptionEvent.thread())) {
-                            onSuspended(exceptionEvent.thread(), exceptionEvent.location());
-                        }
-                        resume = false;
-                    } else if (event instanceof BreakpointEvent breakpointEvent) {
-                        clearRunToLine(breakpointEvent.thread());
-                        pendingSteps.remove(breakpointEvent.thread());
-                        deleteStepRequests(breakpointEvent.thread());
-                        if (reported.add(breakpointEvent.thread())) {
-                            onSuspended(breakpointEvent.thread(), breakpointEvent.location());
-                        }
-                        resume = false;
-                    } else if (event instanceof StepEvent stepEvent) {
-                        int depth = ((StepRequest) stepEvent.request()).depth();
-                        deleteStepRequests(stepEvent.thread());
-                        boolean explicitStop = stoppedByRequest.contains(stepEvent.thread());
-                        if (explicitStop) {
-                            pendingSteps.remove(stepEvent.thread());
-                        }
-                        if ((explicitStop || !continueThroughLibraryCode(stepEvent.thread(), stepEvent.location(), depth))
-                                && reported.add(stepEvent.thread())) {
-                            onSuspended(stepEvent.thread(), stepEvent.location());
-                        }
-                        resume = false;
-                    } else if (event instanceof ThreadDeathEvent deathEvent) {
-                        threadDied(deathEvent.thread());
-                    } else if (event instanceof VMDisconnectEvent || event instanceof VMDeathEvent) {
-                        if (virtualMachine == owner) {
-                            disconnected();
-                        }
-                        resume = false;
-                    }
-                }
-
-                if (resume) {
+                if (handleEvents(owner, eventSet)) {
                     eventSet.resume();
                 }
             }
-        } catch (InterruptedException e) {
+        } catch (InterruptedException _) {
             Thread.currentThread().interrupt();
         } catch (Exception e) {
             if (connected && virtualMachine == owner) {
                 assert ExceptionUtil.printStackTrace(e);
                 disconnected();
             }
+        }
+    }
+
+    /** Returns true when the event set must be resumed: no event of it stopped a thread or ended the session. */
+    private boolean handleEvents(VirtualMachine owner, EventSet eventSet) {
+        boolean resume = true;
+        // two requests on the same location (e.g. Run to Line on a breakpoint) give two events for one stop
+        Set<ThreadReference> reported = new HashSet<>();
+        // a breakpoint or exception in the same event set as a step ends the step there: never continue through it
+        Set<ThreadReference> stoppedByRequest = new HashSet<>();
+        for (Event candidate : eventSet) {
+            if (candidate instanceof BreakpointEvent b) {
+                stoppedByRequest.add(b.thread());
+            } else if (candidate instanceof ExceptionEvent x) {
+                stoppedByRequest.add(x.thread());
+            }
+        }
+        for (Event event : eventSet) {
+            if (handleEvent(owner, event, reported, stoppedByRequest)) {
+                resume = false;
+            }
+        }
+        return resume;
+    }
+
+    /** Returns true when the event keeps its event set suspended. */
+    private boolean handleEvent(VirtualMachine owner, Event event, Set<ThreadReference> reported, Set<ThreadReference> stoppedByRequest) {
+        if (event instanceof ClassPrepareEvent classPrepareEvent) {
+            installBreakpoints(classPrepareEvent.referenceType());
+            ExceptionBreakpoint exception = exceptionBreakpoints.get(classPrepareEvent.referenceType().name());
+            if (exception != null) {
+                installException(classPrepareEvent.referenceType(), exception);
+            }
+            publishBreakpoints();
+        } else if (event instanceof ExceptionEvent exceptionEvent) {
+            stopAtRequest(exceptionEvent.thread(), exceptionEvent.location(), reported);
+            return true;
+        } else if (event instanceof BreakpointEvent breakpointEvent) {
+            stopAtRequest(breakpointEvent.thread(), breakpointEvent.location(), reported);
+            return true;
+        } else if (event instanceof StepEvent stepEvent) {
+            int depth = ((StepRequest) stepEvent.request()).depth();
+            deleteStepRequests(stepEvent.thread());
+            boolean explicitStop = stoppedByRequest.contains(stepEvent.thread());
+            if (explicitStop) {
+                pendingSteps.remove(stepEvent.thread());
+            }
+            if ((explicitStop || !continueThroughLibraryCode(stepEvent.thread(), stepEvent.location(), depth))
+                    && reported.add(stepEvent.thread())) {
+                onSuspended(stepEvent.thread(), stepEvent.location());
+            }
+            return true;
+        } else if (event instanceof ThreadDeathEvent deathEvent) {
+            threadDied(deathEvent.thread());
+        } else if (event instanceof VMDisconnectEvent || event instanceof VMDeathEvent) {
+            if (virtualMachine == owner) {
+                disconnected();
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /** A breakpoint or an exception ends whatever the thread was doing (step, Run to Line). */
+    private void stopAtRequest(ThreadReference thread, Location location, Set<ThreadReference> reported) {
+        clearRunToLine(thread);
+        pendingSteps.remove(thread);
+        deleteStepRequests(thread);
+        if (reported.add(thread)) {
+            onSuspended(thread, location);
         }
     }
 
@@ -653,7 +627,7 @@ public class RemoteDebugController {
                     return true;
                 }
             }
-        } catch (AbsentInformationException | RuntimeException e) {
+        } catch (AbsentInformationException | RuntimeException _) {
             // no line table: treat as mid-line
         }
         return false;
@@ -758,7 +732,7 @@ public class RemoteDebugController {
                     return i;
                 }
             }
-        } catch (IncompatibleThreadStateException | RuntimeException e) {
+        } catch (IncompatibleThreadStateException | RuntimeException _) {
             // keep the top frame
         }
         return 0;
@@ -773,7 +747,7 @@ public class RemoteDebugController {
         Location location;
         try {
             location = thread.frame(frameIndex).location();
-        } catch (IncompatibleThreadStateException | RuntimeException e) {
+        } catch (IncompatibleThreadStateException | RuntimeException _) {
             return; // thread resumed or frame vanished in the meantime
         }
         List<DebugVariableNode> variables = readVariableNodes(thread, frameIndex);
@@ -802,44 +776,59 @@ public class RemoteDebugController {
             @Override
             protected Void doInBackground() {
                 try {
-                    ThreadReference target = null;
-                    boolean switched = false;
-                    synchronized (threadLock) {
-                        if (activeThread != null && Long.toString(activeThread.uniqueID()).equals(threadId)) {
-                            if (activeRunning) {
-                                return null; // it is running a step: nothing to show yet
-                            }
-                            target = activeThread;
-                        } else {
-                            for (ThreadReference candidate : queuedThreads.keySet()) {
-                                if (Long.toString(candidate.uniqueID()).equals(threadId)) {
-                                    target = candidate;
-                                    break;
-                                }
-                            }
-                            if (target == null) {
-                                return null; // running thread: nothing to show
-                            }
-                            // A thread that is still stepping simply goes on in the background (it may be waiting for
-                            // this very thread); its next stop is queued like any other.
-                            if (activeThread != null && !activeRunning) {
-                                queuedThreads.put(activeThread, activeThread.frame(0).location());
-                            }
-                            queuedThreads.remove(target);
-                            activeThread = target;
-                            activeRunning = false;
-                            switched = true;
-                        }
-                        selectedFrameIndex = frameIndex;
-                        stopGeneration++;
+                    FrameSelection selection = activateThread(threadId, frameIndex);
+                    if (selection != null) {
+                        showFrame(selection.thread(), frameIndex, selection.switched());
                     }
-                    showFrame(target, frameIndex, switched);
                 } catch (IncompatibleThreadStateException | RuntimeException e) {
                     assert ExceptionUtil.printStackTrace(e);
                 }
                 return null;
             }
         }.execute();
+    }
+
+    private record FrameSelection(ThreadReference thread, boolean switched) {
+    }
+
+    /** Makes the stopped thread with this id the active one; null when it is running a step or not stopped. */
+    private FrameSelection activateThread(String threadId, int frameIndex) throws IncompatibleThreadStateException {
+        synchronized (threadLock) {
+            ThreadReference target = null;
+            boolean switched = false;
+            if (activeThread != null && Long.toString(activeThread.uniqueID()).equals(threadId)) {
+                if (activeRunning) {
+                    return null; // it is running a step: nothing to show yet
+                }
+                target = activeThread;
+            } else {
+                target = queuedThread(threadId);
+                if (target == null) {
+                    return null; // running thread: nothing to show
+                }
+                // A thread that is still stepping simply goes on in the background (it may be waiting for
+                // this very thread); its next stop is queued like any other.
+                if (activeThread != null && !activeRunning) {
+                    queuedThreads.put(activeThread, activeThread.frame(0).location());
+                }
+                queuedThreads.remove(target);
+                activeThread = target;
+                activeRunning = false;
+                switched = true;
+            }
+            selectedFrameIndex = frameIndex;
+            stopGeneration++;
+            return new FrameSelection(target, switched);
+        }
+    }
+
+    private ThreadReference queuedThread(String threadId) {
+        for (ThreadReference candidate : queuedThreads.keySet()) {
+            if (Long.toString(candidate.uniqueID()).equals(threadId)) {
+                return candidate;
+            }
+        }
+        return null;
     }
 
     // --- Watch expressions --- //
@@ -864,49 +853,8 @@ public class RemoteDebugController {
             @Override
             protected DebugVariableNode doInBackground() {
                 synchronized (evaluationLock) {
-                    return withoutSuspendingRequests(this::inspect);
+                    return withoutSuspendingRequests(() -> inspect(expression));
                 }
-            }
-
-            private DebugVariableNode inspect() {
-                ThreadReference thread;
-                int frameIndex;
-                synchronized (threadLock) {
-                    thread = activeRunning ? null : activeThread;
-                    frameIndex = selectedFrameIndex;
-                }
-                if (thread == null) {
-                    return null;
-                }
-                try {
-                    com.sun.jdi.Value value = JdiExpressionEvaluator.evaluate(expression, thread, frameIndex);
-                    DebugVariableNode node = JdiValues.toNode(expression, value);
-                    node.setDetailText(detailOf(value, thread));
-                    return node;
-                } catch (JdiExpressionEvaluator.EvaluationException e) {
-                    return new DebugVariableNode(expression, "<" + e.getMessage() + ">");
-                }
-            }
-
-            /** Like Eclipse's detail pane: the raw text of a string, the toString() of any other object. */
-            private String detailOf(com.sun.jdi.Value value, ThreadReference thread) {
-                if (value instanceof com.sun.jdi.StringReference string) {
-                    return string.value();
-                }
-                if (value instanceof ObjectReference object && !(value instanceof com.sun.jdi.ArrayReference)) {
-                    // call toString() on the object that was evaluated, not on a second evaluation of the expression
-                    try {
-                        List<com.sun.jdi.Method> toStringMethods = object.referenceType().methodsByName("toString", "()Ljava/lang/String;");
-                        if (!toStringMethods.isEmpty()
-                                && object.invokeMethod(thread, toStringMethods.get(0), List.of(), ObjectReference.INVOKE_SINGLE_THREADED) instanceof com.sun.jdi.StringReference text) {
-                            return text.value();
-                        }
-                    } catch (com.sun.jdi.InvalidTypeException | com.sun.jdi.ClassNotLoadedException | IncompatibleThreadStateException
-                            | com.sun.jdi.InvocationException | RuntimeException e) {
-                        // no usable toString(): the detail pane shows the value
-                    }
-                }
-                return null;
             }
 
             @Override
@@ -916,13 +864,54 @@ public class RemoteDebugController {
                     if (node != null) {
                         controller.showInspectPopup(node, screenLocation, () -> watchFromEditor(expression));
                     }
-                } catch (InterruptedException e) {
+                } catch (InterruptedException _) {
                     Thread.currentThread().interrupt();
                 } catch (java.util.concurrent.ExecutionException e) {
                     assert ExceptionUtil.printStackTrace(e);
                 }
             }
         }.execute();
+    }
+
+    private DebugVariableNode inspect(String expression) {
+        ThreadReference thread;
+        int frameIndex;
+        synchronized (threadLock) {
+            thread = activeRunning ? null : activeThread;
+            frameIndex = selectedFrameIndex;
+        }
+        if (thread == null) {
+            return null;
+        }
+        try {
+            com.sun.jdi.Value value = JdiExpressionEvaluator.evaluate(expression, thread, frameIndex);
+            DebugVariableNode node = JdiValues.toNode(expression, value);
+            node.setDetailText(detailOf(value, thread));
+            return node;
+        } catch (JdiExpressionEvaluator.EvaluationException e) {
+            return new DebugVariableNode(expression, "<" + e.getMessage() + ">");
+        }
+    }
+
+    /** Like Eclipse's detail pane: the raw text of a string, the toString() of any other object. */
+    private static String detailOf(com.sun.jdi.Value value, ThreadReference thread) {
+        if (value instanceof com.sun.jdi.StringReference string) {
+            return string.value();
+        }
+        if (value instanceof ObjectReference object && !(value instanceof com.sun.jdi.ArrayReference)) {
+            // call toString() on the object that was evaluated, not on a second evaluation of the expression
+            try {
+                List<com.sun.jdi.Method> toStringMethods = object.referenceType().methodsByName("toString", "()Ljava/lang/String;");
+                if (!toStringMethods.isEmpty()
+                        && object.invokeMethod(thread, toStringMethods.get(0), List.of(), ObjectReference.INVOKE_SINGLE_THREADED) instanceof com.sun.jdi.StringReference text) {
+                    return text.value();
+                }
+            } catch (com.sun.jdi.InvalidTypeException | com.sun.jdi.ClassNotLoadedException | IncompatibleThreadStateException
+                    | com.sun.jdi.InvocationException | RuntimeException _) {
+                // no usable toString(): the detail pane shows the value
+            }
+        }
+        return null;
     }
 
     public void removeWatchExpression(String expression) {
@@ -995,22 +984,10 @@ public class RemoteDebugController {
         Set<EventRequest> handled = new HashSet<>();
         boolean idle = evaluations.get() == 0;
         // every managed request, not only those switched off: some were installed while the evaluation ran
-        for (Map.Entry<BreakpointKey, List<BreakpointRequest>> entry : installedBreakpoints.entrySet()) {
-            for (BreakpointRequest request : entry.getValue()) {
-                handled.add(request);
-                if (idle) {
-                    setEnabledQuietly(request, !skipAllBreakpoints && !disabledBreakpoints.contains(entry.getKey()));
-                }
-            }
-        }
-        for (Map.Entry<String, List<ExceptionRequest>> entry : installedExceptions.entrySet()) {
-            for (ExceptionRequest request : entry.getValue()) {
-                handled.add(request);
-                if (idle) {
-                    setEnabledQuietly(request, !skipAllBreakpoints && !disabledExceptions.contains(entry.getKey()));
-                }
-            }
-        }
+        installedBreakpoints.forEach((key, requests) ->
+            restoreManaged(requests, handled, idle, !skipAllBreakpoints && !disabledBreakpoints.contains(key)));
+        installedExceptions.forEach((typeName, requests) ->
+            restoreManaged(requests, handled, idle, !skipAllBreakpoints && !disabledExceptions.contains(typeName)));
         for (EventRequest request : switchedOff) {
             if (!handled.contains(request)) {
                 setEnabledQuietly(request, true);
@@ -1018,10 +995,19 @@ public class RemoteDebugController {
         }
     }
 
+    private static void restoreManaged(List<? extends EventRequest> requests, Set<EventRequest> handled, boolean idle, boolean enabled) {
+        for (EventRequest request : requests) {
+            handled.add(request);
+            if (idle) {
+                setEnabledQuietly(request, enabled);
+            }
+        }
+    }
+
     private static void setEnabledQuietly(EventRequest request, boolean enabled) {
         try {
             request.setEnabled(enabled);
-        } catch (RuntimeException e) {
+        } catch (RuntimeException _) {
             // the request was deleted meanwhile
         }
     }
@@ -1048,11 +1034,6 @@ public class RemoteDebugController {
         return nodes;
     }
 
-    /**
-     * Collects frames for every non-system thread.
-     * With SUSPEND_EVENT_THREAD policy only the event thread is suspended;
-     * other threads are still running and their frames are unavailable.
-     */
     /** The JVM's threads plus the stopped ones: a stopped virtual thread is not necessarily in allThreads(). */
     private List<ThreadReference> threadsToShow(VirtualMachine vm, ThreadReference eventThread) {
         List<ThreadReference> threads = new ArrayList<>(vm.allThreads());
@@ -1079,6 +1060,11 @@ public class RemoteDebugController {
         return name == null || name.isEmpty() ? "<unnamed #" + thread.uniqueID() + ">" : name; // virtual threads have no name by default
     }
 
+    /**
+     * Collects frames for every non-system thread.
+     * With SUSPEND_EVENT_THREAD policy only the event thread is suspended;
+     * other threads are still running and their frames are unavailable.
+     */
     private List<DebugThread> collectAllThreadsFrames(ThreadReference eventThread) {
         VirtualMachine vm = virtualMachine;
         if (vm == null) {
@@ -1086,35 +1072,37 @@ public class RemoteDebugController {
         }
         List<DebugThread> result = new ArrayList<>();
         for (ThreadReference t : threadsToShow(vm, eventThread)) {
-            // Skip low-level JVM threads (finalizer, GC, etc.); a thread that ended and was collected meanwhile too
+            // a thread that ended and was collected while being listed is skipped
             try {
-                com.sun.jdi.ThreadGroupReference tg = t.threadGroup();
-                if (tg != null && "system".equalsIgnoreCase(tg.name())) {
-                    continue;
+                if (!isSystemThread(t)) {
+                    result.add(describeThread(t, eventThread));
                 }
-            } catch (com.sun.jdi.ObjectCollectedException gone) {
-                continue;
-            }
-            try {
-                List<String> frames = t.frames().stream()
-                    .map(f -> {
-                        Location loc = f.location();
-                        return loc.declaringType().name() + "." + loc.method().name() + "() line: " + loc.lineNumber();
-                    })
-                    .toList();
-                result.add(new DebugThread(displayName(t), t.uniqueID(), t.equals(eventThread), true, frames));
-            } catch (IncompatibleThreadStateException e) {
-                // Thread is running (SUSPEND_EVENT_THREAD — only event thread is suspended)
-                try {
-                    result.add(new DebugThread(displayName(t), t.uniqueID(), false, false, List.of()));
-                } catch (com.sun.jdi.ObjectCollectedException gone) {
-                    // ended while being listed
-                }
-            } catch (com.sun.jdi.ObjectCollectedException e) {
+            } catch (com.sun.jdi.ObjectCollectedException _) {
                 // Thread terminated while we were listing them: skip it
             }
         }
         return result;
+    }
+
+    /** Low-level JVM threads (finalizer, GC, etc.) are not shown. */
+    private static boolean isSystemThread(ThreadReference thread) {
+        com.sun.jdi.ThreadGroupReference group = thread.threadGroup();
+        return group != null && "system".equalsIgnoreCase(group.name());
+    }
+
+    private static DebugThread describeThread(ThreadReference t, ThreadReference eventThread) {
+        try {
+            List<String> frames = t.frames().stream()
+                .map(f -> {
+                    Location loc = f.location();
+                    return loc.declaringType().name() + "." + loc.method().name() + "() line: " + loc.lineNumber();
+                })
+                .toList();
+            return new DebugThread(displayName(t), t.uniqueID(), t.equals(eventThread), true, frames);
+        } catch (IncompatibleThreadStateException _) {
+            // Thread is running (SUSPEND_EVENT_THREAD — only event thread is suspended)
+            return new DebugThread(displayName(t), t.uniqueID(), false, false, List.of());
+        }
     }
 
     private void step(int depth) {
@@ -1178,13 +1166,7 @@ public class RemoteDebugController {
                     List<BreakpointRequest> requests = new CopyOnWriteArrayList<>();
                     runToLineRequests.put(thread, requests);
                     for (ReferenceType referenceType : classesOf(vm, typeName)) {
-                        List<Location> locations;
-                        try {
-                            locations = referenceType.locationsOfLine(lineNumber);
-                        } catch (AbsentInformationException | com.sun.jdi.ClassNotPreparedException e) {
-                            continue; // generated classes (lambda forwarders...) have no line table, unprepared ones no code yet
-                        }
-                        for (Location location : locations) {
+                        for (Location location : locationsOfLine(referenceType, lineNumber)) {
                             BreakpointRequest request = vm.eventRequestManager().createBreakpointRequest(location);
                             request.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
                             request.addThreadFilter(thread);
@@ -1210,6 +1192,14 @@ public class RemoteDebugController {
                 return null;
             }
         }.execute();
+    }
+
+    private static List<Location> locationsOfLine(ReferenceType referenceType, int lineNumber) {
+        try {
+            return referenceType.locationsOfLine(lineNumber);
+        } catch (AbsentInformationException | com.sun.jdi.ClassNotPreparedException _) {
+            return List.of(); // generated classes (lambda forwarders...) have no line table, unprepared ones no code yet
+        }
     }
 
     /** Resumes one thread until it completes a line step of the given depth. */
@@ -1299,7 +1289,7 @@ public class RemoteDebugController {
                 clearPageMarker(key);
                 publishBreakpoints();
             }
-        } catch (NumberFormatException ignored) {
+        } catch (NumberFormatException _) {
             // malformed key — ignore
         }
     }
@@ -1363,19 +1353,7 @@ public class RemoteDebugController {
     /** Enables or disables a breakpoint without removing it (the checkbox of the Breakpoints view). */
     public void setBreakpointEnabled(String locationKey, boolean enabled) {
         if (locationKey.startsWith(EXCEPTION_KEY_PREFIX)) {
-            String typeName = locationKey.substring(EXCEPTION_KEY_PREFIX.length());
-            if (!exceptionBreakpoints.containsKey(typeName)) {
-                return;
-            }
-            if (enabled) {
-                disabledExceptions.remove(typeName);
-            } else {
-                disabledExceptions.add(typeName);
-            }
-            for (ExceptionRequest request : installedExceptions.getOrDefault(typeName, List.of())) {
-                request.setEnabled(evaluations.get() == 0 && enabled && !skipAllBreakpoints);
-            }
-            publishBreakpoints();
+            setExceptionEnabled(locationKey.substring(EXCEPTION_KEY_PREFIX.length()), enabled);
             return;
         }
         int colon = locationKey.lastIndexOf(':');
@@ -1383,25 +1361,40 @@ public class RemoteDebugController {
             return;
         }
         try {
-            BreakpointKey key = new BreakpointKey(locationKey.substring(0, colon), Integer.parseInt(locationKey.substring(colon + 1)));
-            if (!breakpoints.contains(key)) {
-                return;
-            }
-            if (enabled) {
-                disabledBreakpoints.remove(key);
-            } else {
-                disabledBreakpoints.add(key);
-            }
-            List<BreakpointRequest> requests = installedBreakpoints.get(key);
-            if (requests != null) {
-                for (BreakpointRequest request : requests) {
-                    request.setEnabled(evaluations.get() == 0 && enabled && !skipAllBreakpoints);
-                }
-            }
-            publishBreakpoints();
-        } catch (NumberFormatException ignored) {
+            setLineBreakpointEnabled(new BreakpointKey(locationKey.substring(0, colon), Integer.parseInt(locationKey.substring(colon + 1))), enabled);
+        } catch (NumberFormatException _) {
             // malformed key — ignore
         }
+    }
+
+    private void setExceptionEnabled(String typeName, boolean enabled) {
+        if (!exceptionBreakpoints.containsKey(typeName)) {
+            return;
+        }
+        if (enabled) {
+            disabledExceptions.remove(typeName);
+        } else {
+            disabledExceptions.add(typeName);
+        }
+        for (ExceptionRequest request : installedExceptions.getOrDefault(typeName, List.of())) {
+            request.setEnabled(evaluations.get() == 0 && enabled && !skipAllBreakpoints);
+        }
+        publishBreakpoints();
+    }
+
+    private void setLineBreakpointEnabled(BreakpointKey key, boolean enabled) {
+        if (!breakpoints.contains(key)) {
+            return;
+        }
+        if (enabled) {
+            disabledBreakpoints.remove(key);
+        } else {
+            disabledBreakpoints.add(key);
+        }
+        for (BreakpointRequest request : installedBreakpoints.getOrDefault(key, List.of())) {
+            request.setEnabled(evaluations.get() == 0 && enabled && !skipAllBreakpoints);
+        }
+        publishBreakpoints();
     }
 
     /** Eclipse-style label: {@code Type [line: 28] - method(ArgType)}. */
@@ -1411,31 +1404,32 @@ public class RemoteDebugController {
         List<BreakpointRequest> requests = installedBreakpoints.get(breakpoint);
         if (requests != null && !requests.isEmpty()) {
             try {
-                com.sun.jdi.Method method = requests.get(0).location().method();
-                // Lambda bodies are compiled to lambda$name$N: Eclipse names the enclosing source method
-                String name = method.name();
-                java.util.regex.Matcher lambda = java.util.regex.Pattern.compile("lambda\\$(.+)\\$\\d+").matcher(name);
-                if (lambda.matches()) {
-                    for (com.sun.jdi.Method candidate : method.declaringType().methodsByName(lambda.group(1))) {
-                        if (!candidate.isSynthetic()) {
-                            method = candidate;
-                            break;
-                        }
-                    }
-                }
-                label.append(" - ").append(method.name()).append('(');
-                List<String> arguments = method.argumentTypeNames();
-                for (int i = 0; i < arguments.size(); i++) {
-                    label.append(i > 0 ? ", " : "").append(JdiValues.simpleName(arguments.get(i)));
-                }
-                label.append(')');
-            } catch (RuntimeException e) {
+                label.append(" - ").append(methodSignature(requests.get(0).location().method()));
+            } catch (RuntimeException _) {
                 // location no longer valid: keep the short label
             }
         } else if (methodDescriptions.containsKey(breakpoint)) {
             label.append(" - ").append(methodDescriptions.get(breakpoint));
         }
         return label.toString();
+    }
+
+    private static final java.util.regex.Pattern LAMBDA_NAME = java.util.regex.Pattern.compile("lambda\\$(.+)\\$\\d+");
+
+    private static String methodSignature(com.sun.jdi.Method compiled) {
+        com.sun.jdi.Method method = compiled;
+        // Lambda bodies are compiled to lambda$name$N: Eclipse names the enclosing source method
+        java.util.regex.Matcher lambda = LAMBDA_NAME.matcher(method.name());
+        if (lambda.matches()) {
+            for (com.sun.jdi.Method candidate : method.declaringType().methodsByName(lambda.group(1))) {
+                if (!candidate.isSynthetic()) {
+                    method = candidate;
+                    break;
+                }
+            }
+        }
+        List<String> arguments = method.argumentTypeNames().stream().map(JdiValues::simpleName).toList();
+        return method.name() + '(' + String.join(", ", arguments) + ')';
     }
 
     private void installBreakpoint(BreakpointKey breakpoint) {
@@ -1531,7 +1525,7 @@ public class RemoteDebugController {
             for (LocalVariable variable : frame.visibleVariables()) {
                 nodes.add(JdiValues.toNode(variable.name(), frame.getValue(variable)));
             }
-        } catch (AbsentInformationException e) {
+        } catch (AbsentInformationException _) {
             nodes.add(new DebugVariableNode("<debug info>", "Local variable table is not available"));
         } catch (IncompatibleThreadStateException | RuntimeException e) {
             String msg = e.getMessage();
@@ -1563,27 +1557,25 @@ public class RemoteDebugController {
         List<String[]> exceptionRows = exceptionBreakpoints.values().stream()
             .sorted(Comparator.comparing(ExceptionBreakpoint::typeName))
             .map(exception -> new String[] { EXCEPTION_KEY_PREFIX + exception.typeName(),
-                vm == null ? "Pending" : installedExceptions.containsKey(exception.typeName()) ? "Installed" : "Unresolved",
+                installationStatus(vm, installedExceptions.containsKey(exception.typeName())),
                 exceptionLabel(exception), Boolean.toString(!disabledExceptions.contains(exception.typeName())) })
             .toList();
         List<String[]> lineRows = breakpoints.stream()
             .sorted(Comparator.comparing(BreakpointKey::typeName).thenComparingInt(BreakpointKey::lineNumber))
-            .map(breakpoint -> {
-                String status;
-                if (vm == null) {
-                    status = "Pending";
-                } else if (installedBreakpoints.containsKey(breakpoint)) {
-                    status = "Installed";
-                } else {
-                    status = "Unresolved";
-                }
-                return new String[] { breakpoint.typeName() + ":" + breakpoint.lineNumber(), status,
-                    breakpointLabel(breakpoint), Boolean.toString(!disabledBreakpoints.contains(breakpoint)) };
-            })
+            .map(breakpoint -> new String[] { breakpoint.typeName() + ":" + breakpoint.lineNumber(),
+                installationStatus(vm, installedBreakpoints.containsKey(breakpoint)),
+                breakpointLabel(breakpoint), Boolean.toString(!disabledBreakpoints.contains(breakpoint)) })
             .toList();
         List<String[]> rows = new ArrayList<>(exceptionRows);
         rows.addAll(lineRows);
         controller.showDebugBreakpoints(rows);
+    }
+
+    private static String installationStatus(VirtualMachine vm, boolean installed) {
+        if (vm == null) {
+            return "Pending";
+        }
+        return installed ? "Installed" : "Unresolved";
     }
 
     private static VirtualMachine attach(String host, int port) throws IOException, IllegalConnectorArgumentsException {
@@ -1626,13 +1618,58 @@ public class RemoteDebugController {
         protected void done() {
             super.done();
             try {
-                attached(get(), host, port);
-            } catch (InterruptedException e) {
+                attached(get());
+            } catch (InterruptedException _) {
                 Thread.currentThread().interrupt();
             } catch (ExecutionException | RuntimeException e) {
                 assert ExceptionUtil.printStackTrace(e);
-                JOptionPane.showMessageDialog(parent, getRootMessage(e), "Remote Debug", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(parent, getRootMessage(e), REMOTE_DEBUG_TITLE, JOptionPane.ERROR_MESSAGE);
             }
+        }
+
+        private void attached(VirtualMachine vm) {
+            if (connected) {
+                // another attachment finished while a session is running: keep the first one
+                try {
+                    vm.dispose();
+                } catch (RuntimeException e) {
+                    assert ExceptionUtil.printStackTrace(e);
+                }
+                return;
+            }
+            RemoteDebugController.this.virtualMachine = vm;
+            connected = true;
+            resetThreads();
+            controller.setDebugStepActionsEnabled(false);
+            controller.setDebugConnected(true);
+            controller.showDebugVariables(null, java.util.Collections.emptyList());
+            publishBreakpoints();
+
+            EventRequestManager requestManager = vm.eventRequestManager();
+            ClassPrepareRequest prepareRequest = requestManager.createClassPrepareRequest();
+            // the loading thread waits (event set resumed by the event loop) until the pending breakpoints are installed
+            prepareRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
+            prepareRequest.enable();
+
+            // A stepping thread that ends (e.g. stepping out of run()) must not leave the buttons disabled.
+            ThreadDeathRequest deathRequest = requestManager.createThreadDeathRequest();
+            deathRequest.setSuspendPolicy(EventRequest.SUSPEND_NONE);
+            deathRequest.enable();
+
+            for (BreakpointKey breakpoint : breakpoints) {
+                installBreakpoint(breakpoint);
+            }
+            for (ExceptionBreakpoint exception : exceptionBreakpoints.values()) {
+                installException(exception);
+            }
+            publishBreakpoints();
+
+            Thread eventThread = new Thread(() -> runEventLoop(vm), "JD-GUI remote debug events");
+            eventThread.setDaemon(true);
+            eventThread.start();
+
+            // No vm.resume() here: a JVM started with suspend=y is released by the event loop, which resumes the
+            // event set of the VMStartEvent exactly once (a second resume could release a newer stop).
         }
 
         private String getRootMessage(Throwable throwable) {
