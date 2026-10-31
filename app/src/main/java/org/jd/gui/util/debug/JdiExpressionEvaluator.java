@@ -593,7 +593,8 @@ public final class JdiExpressionEvaluator {
         if (isLong) {
             pos++;
         }
-        long parsed = Long.parseLong(digits, radix);
+        // 0xFFFFFFFFFFFFFFFFL is the 64-bit pattern of -1L: hex, octal and binary literals are unsigned bit patterns
+        long parsed = isLong && radix != 10 ? Long.parseUnsignedLong(digits, radix) : Long.parseLong(digits, radix);
         if (isLong) {
             return vm.mirrorOf(parsed);
         }
