@@ -158,6 +158,12 @@ class FragmentUriCollectorTest {
     }
 
     @Test
+    void singleRegexMetacharacterSearchDoesNotFailTheCollection() {
+        Set<URI> uris = collect(List.of(foo), "[", SEARCH_DECLARATION | SEARCH_METHOD | SEARCH_FIELD | SEARCH_CONSTRUCTOR);
+        assertEquals(Set.of(uri(FOO, "com/example/Foo")), uris);
+    }
+
+    @Test
     void everyRootTypeOfASourceFileIsCollected() {
         Type second = type("com/example/Second", Map.of(), Map.of("run", "()V"));
         Set<URI> uris = FragmentUriCollector.collect(List.of(foo), e -> List.of(fooType, second), "run", SEARCH_DECLARATION | SEARCH_METHOD);

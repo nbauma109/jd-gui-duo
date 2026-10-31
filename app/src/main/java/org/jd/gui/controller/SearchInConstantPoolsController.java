@@ -421,6 +421,11 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
      */
     protected static Pattern createPattern(String pattern) {
         int patternLength = pattern.length();
+
+        // A single character is a literal prefix, like the index lookup (matchWithChar) does it
+        if (patternLength == 1 && pattern.charAt(0) != '*' && pattern.charAt(0) != '?') {
+            return Pattern.compile(Pattern.quote(pattern) + ".*");
+        }
         StringBuilder sbPattern = new StringBuilder(patternLength * 2);
 
         char c;
