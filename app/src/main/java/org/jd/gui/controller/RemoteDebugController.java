@@ -1039,13 +1039,39 @@ public class RemoteDebugController {
      * With SUSPEND_EVENT_THREAD policy only the event thread is suspended;
      * other threads are still running and their frames are unavailable.
      */
+    /** The JVM's threads plus the stopped ones: a stopped virtual thread is not necessarily in allThreads(). */
+    private List<ThreadReference> threadsToShow(VirtualMachine vm, ThreadReference eventThread) {
+        List<ThreadReference> threads = new ArrayList<>(vm.allThreads());
+        List<ThreadReference> stopped = new ArrayList<>();
+        synchronized (threadLock) {
+            if (activeThread != null) {
+                stopped.add(activeThread);
+            }
+            stopped.addAll(queuedThreads.keySet());
+        }
+        if (eventThread != null) {
+            stopped.add(eventThread);
+        }
+        for (ThreadReference thread : stopped) {
+            if (!threads.contains(thread)) {
+                threads.add(thread);
+            }
+        }
+        return threads;
+    }
+
+    private static String displayName(ThreadReference thread) {
+        String name = thread.name();
+        return name == null || name.isEmpty() ? "<unnamed #" + thread.uniqueID() + ">" : name; // virtual threads have no name by default
+    }
+
     private List<DebugThread> collectAllThreadsFrames(ThreadReference eventThread) {
         VirtualMachine vm = virtualMachine;
         if (vm == null) {
             return List.of();
         }
         List<DebugThread> result = new ArrayList<>();
-        for (ThreadReference t : vm.allThreads()) {
+        for (ThreadReference t : threadsToShow(vm, eventThread)) {
             // Skip low-level JVM threads (finalizer, GC, etc.)
             com.sun.jdi.ThreadGroupReference tg = t.threadGroup();
             if (tg != null && "system".equalsIgnoreCase(tg.name())) {
@@ -1058,10 +1084,10 @@ public class RemoteDebugController {
                         return loc.declaringType().name() + "." + loc.method().name() + "() line: " + loc.lineNumber();
                     })
                     .toList();
-                result.add(new DebugThread(t.name(), t.uniqueID(), t.equals(eventThread), true, frames));
+                result.add(new DebugThread(displayName(t), t.uniqueID(), t.equals(eventThread), true, frames));
             } catch (IncompatibleThreadStateException e) {
                 // Thread is running (SUSPEND_EVENT_THREAD — only event thread is suspended)
-                result.add(new DebugThread(t.name(), t.uniqueID(), false, false, List.of()));
+                result.add(new DebugThread(displayName(t), t.uniqueID(), false, false, List.of()));
             } catch (com.sun.jdi.ObjectCollectedException e) {
                 // Thread terminated while we were listing them: skip it
             }
@@ -1133,8 +1159,8 @@ public class RemoteDebugController {
                         List<Location> locations;
                         try {
                             locations = referenceType.locationsOfLine(lineNumber);
-                        } catch (AbsentInformationException e) {
-                            continue; // generated classes (lambda forwarders...) have no line table
+                        } catch (AbsentInformationException | com.sun.jdi.ClassNotPreparedException e) {
+                            continue; // generated classes (lambda forwarders...) have no line table, unprepared ones no code yet
                         }
                         for (Location location : locations) {
                             BreakpointRequest request = vm.eventRequestManager().createBreakpointRequest(location);
@@ -1407,9 +1433,15 @@ public class RemoteDebugController {
     }
 
     private static List<ReferenceType> classesOf(VirtualMachine vm, String typeName) {
-        List<ReferenceType> result = new ArrayList<>(vm.classesByName(typeName));
+        List<ReferenceType> result = new ArrayList<>();
+        for (ReferenceType candidate : vm.classesByName(typeName)) {
+            if (candidate.isPrepared()) {
+                result.add(candidate);
+            }
+        }
         for (ReferenceType candidate : vm.allClasses()) {
-            if (candidate.name().startsWith(typeName + "$")) {
+            // an unprepared class has no line table yet: its ClassPrepareEvent installs the breakpoints later
+            if (candidate.isPrepared() && candidate.name().startsWith(typeName + "$")) {
                 result.add(candidate);
             }
         }
@@ -1437,7 +1469,7 @@ public class RemoteDebugController {
                 installedBreakpoints.computeIfAbsent(breakpoint, _ -> new CopyOnWriteArrayList<>()).add(request);
                 request.setEnabled(evaluations.get() == 0 && !skipAllBreakpoints && !disabledBreakpoints.contains(breakpoint));
             }
-        } catch (AbsentInformationException e) {
+        } catch (AbsentInformationException | com.sun.jdi.ClassNotPreparedException e) {
             assert ExceptionUtil.printStackTrace(e);
         }
     }
