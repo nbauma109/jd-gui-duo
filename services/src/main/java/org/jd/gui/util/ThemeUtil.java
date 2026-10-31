@@ -72,13 +72,31 @@ public class ThemeUtil {
      * accelerators, so shadow the ones that collide with a debug shortcut to let the shortcut reach the menu.
      */
     private static void releaseDebugShortcuts(Map<String, String> preferences, RSyntaxTextArea textArea) {
+        refreshDebugShortcuts(preferences, textArea);
+    }
+
+    private static final String SHADOWED_KEYS = "jd.debugShadowedKeys";
+
+    /**
+     * Shadows the editor bindings that collide with the configured debug shortcuts. Called again when the key bindings
+     * change: the editor's own binding comes back for a key that no longer collides.
+     */
+    public static void refreshDebugShortcuts(Map<String, String> preferences, RSyntaxTextArea textArea) {
         InputMap inputMap = textArea.getInputMap(JComponent.WHEN_FOCUSED);
+        if (textArea.getClientProperty(SHADOWED_KEYS) instanceof java.util.Set<?> previous) {
+            for (Object keyStroke : previous) {
+                inputMap.remove((KeyStroke) keyStroke);
+            }
+        }
+        java.util.Set<KeyStroke> shadowed = new java.util.HashSet<>();
         for (Binding binding : DEBUG_BINDINGS) {
             KeyStroke keyStroke = KeyBindings.getConfiguredKeyStroke(preferences, binding);
             if (keyStroke != null && inputMap.get(keyStroke) != null) {
                 inputMap.put(keyStroke, "none");
+                shadowed.add(keyStroke);
             }
         }
+        textArea.putClientProperty(SHADOWED_KEYS, shadowed);
     }
 
     private static final int JAVA_MAJOR_VERSION = Runtime.version().feature();
