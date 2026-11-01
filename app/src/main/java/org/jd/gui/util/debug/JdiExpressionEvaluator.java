@@ -179,16 +179,17 @@ public final class JdiExpressionEvaluator {
             if (skipping > 0) {
                 return null;
             }
-            Object selected = selectTrue ? whenTrue : whenFalse;
-            Object other = selectTrue ? whenFalse : whenTrue;
-            boolean otherIsNull = selectTrue ? falseIsNull : trueIsNull;
-            if ((otherIsNull && unwrap(selected) instanceof PrimitiveValue) || ((selectTrue ? trueIsNull : falseIsNull) && unwrap(other) instanceof PrimitiveValue)) {
-                // Java boxes the primitive and gives the conditional a reference type; the evaluator cannot box, and keeping the primitive would pick another overload
-                throw new EvaluationException("A conditional of a primitive and null is not supported");
-            }
-            return promoteConditional(selected, other);
+            rejectNullWithPrimitive(unwrap(whenTrue), trueIsNull, unwrap(whenFalse), falseIsNull);
+            return promoteConditional(selectTrue ? whenTrue : whenFalse, selectTrue ? whenFalse : whenTrue);
         }
         return condition;
+    }
+
+    /** Java boxes the primitive next to a null and gives the conditional a reference type; the evaluator cannot box, and keeping the primitive would pick another overload. */
+    private static void rejectNullWithPrimitive(Value whenTrue, boolean trueIsNull, Value whenFalse, boolean falseIsNull) throws EvaluationException {
+        if (trueIsNull && whenFalse instanceof PrimitiveValue || falseIsNull && whenTrue instanceof PrimitiveValue) {
+            throw new EvaluationException("A conditional of a primitive and null is not supported");
+        }
     }
 
     /**
