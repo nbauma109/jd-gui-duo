@@ -169,13 +169,24 @@ public final class JdiExpressionEvaluator {
         Object condition = parseOr();
         if (accept("?")) {
             boolean selectTrue = skipping == 0 && asBoolean(condition);
+            int trueStart = pos;
             Object whenTrue = parseOperand(!selectTrue, this::parseTernary);
+            boolean trueIsNull = "null".equals(src.substring(trueStart, pos).trim());
             expect(":");
+            int falseStart = pos;
             Object whenFalse = parseOperand(selectTrue, this::parseTernary);
+            boolean falseIsNull = "null".equals(src.substring(falseStart, pos).trim());
             if (skipping > 0) {
                 return null;
             }
-            return promoteConditional(selectTrue ? whenTrue : whenFalse, selectTrue ? whenFalse : whenTrue);
+            Object selected = selectTrue ? whenTrue : whenFalse;
+            Object other = selectTrue ? whenFalse : whenTrue;
+            boolean otherIsNull = selectTrue ? falseIsNull : trueIsNull;
+            if ((otherIsNull && unwrap(selected) instanceof PrimitiveValue) || ((selectTrue ? trueIsNull : falseIsNull) && unwrap(other) instanceof PrimitiveValue)) {
+                // Java boxes the primitive and gives the conditional a reference type; the evaluator cannot box, and keeping the primitive would pick another overload
+                throw new EvaluationException("A conditional of a primitive and null is not supported");
+            }
+            return promoteConditional(selected, other);
         }
         return condition;
     }

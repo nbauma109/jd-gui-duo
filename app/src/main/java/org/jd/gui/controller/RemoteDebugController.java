@@ -1176,7 +1176,9 @@ public class RemoteDebugController {
             protected Void doInBackground() {
                 try {
                     pendingSteps.remove(thread);
-                    issueStep(vm, thread, depth);
+                    synchronized (evaluationLock) { // a step reached inside a running evaluation would suspend the invoked method and wedge both
+                        issueStep(vm, thread, depth);
+                    }
                 } catch (RuntimeException e) {
                     assert ExceptionUtil.printStackTrace(e);
                     synchronized (threadLock) {
@@ -1212,23 +1214,25 @@ public class RemoteDebugController {
             protected Void doInBackground() {
                 try {
                     pendingSteps.remove(thread);
-                    deleteStepRequests(thread);
-                    clearRunToLine(thread); // an earlier Run to Line of this thread; other threads keep theirs
-                    List<BreakpointRequest> requests = new CopyOnWriteArrayList<>();
-                    runToLineRequests.put(thread, requests);
-                    for (ReferenceType referenceType : classesOf(vm, typeName)) {
-                        for (Location location : locationsOfLine(referenceType, lineNumber)) {
-                            BreakpointRequest request = vm.eventRequestManager().createBreakpointRequest(location);
-                            request.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
-                            request.addThreadFilter(thread);
-                            request.enable();
-                            requests.add(request);
+                    synchronized (evaluationLock) { // the temporary breakpoint must not be hit by a running evaluation
+                        deleteStepRequests(thread);
+                        clearRunToLine(thread); // an earlier Run to Line of this thread; other threads keep theirs
+                        List<BreakpointRequest> requests = new CopyOnWriteArrayList<>();
+                        runToLineRequests.put(thread, requests);
+                        for (ReferenceType referenceType : classesOf(vm, typeName)) {
+                            for (Location location : locationsOfLine(referenceType, lineNumber)) {
+                                BreakpointRequest request = vm.eventRequestManager().createBreakpointRequest(location);
+                                request.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
+                                request.addThreadFilter(thread);
+                                request.enable();
+                                requests.add(request);
+                            }
                         }
+                        if (requests.isEmpty()) {
+                            throw new IllegalStateException("No executable code on line " + lineNumber);
+                        }
+                        thread.resume();
                     }
-                    if (requests.isEmpty()) {
-                        throw new IllegalStateException("No executable code on line " + lineNumber);
-                    }
-                    thread.resume();
                 } catch (RuntimeException e) {
                     clearRunToLine(thread);
                     synchronized (threadLock) {
@@ -1297,8 +1301,10 @@ public class RemoteDebugController {
                 try {
                     pendingSteps.remove(thread);
                     deleteStepRequests(thread);
-                    thread.popFrames(thread.frame(frameIndex));
-                    issueStep(vm, thread, StepRequest.STEP_INTO);
+                    synchronized (evaluationLock) {
+                        thread.popFrames(thread.frame(frameIndex));
+                        issueStep(vm, thread, StepRequest.STEP_INTO);
+                    }
                 } catch (IncompatibleThreadStateException | RuntimeException e) {
                     synchronized (threadLock) {
                         activeRunning = false;
