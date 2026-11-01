@@ -537,8 +537,12 @@ public final class JdiExpressionEvaluator {
         String declaredArray = declaredTypeOf(target);
         if (skipping > 0) {
             // not evaluated, but the element type matters to a ?: branch
-            String component = declaredArray != null && declaredArray.endsWith("[]") ? declaredArray.substring(0, declaredArray.length() - 2)
-                : unwrap(target) instanceof ArrayReference array ? componentTypeOf(null, array) : null;
+            String component = null;
+            if (declaredArray != null && declaredArray.endsWith("[]")) {
+                component = declaredArray.substring(0, declaredArray.length() - 2);
+            } else if (unwrap(target) instanceof ArrayReference array) {
+                component = componentTypeOf(null, array);
+            }
             return component == null ? null : placeholder(component);
         }
         if (!(value(target) instanceof ArrayReference arrayReference)) {
