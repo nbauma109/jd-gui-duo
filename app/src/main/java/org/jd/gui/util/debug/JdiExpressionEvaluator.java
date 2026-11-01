@@ -245,6 +245,9 @@ public final class JdiExpressionEvaluator {
         if (selectedType != null && otherType != null && !selectedType.equals(otherType)) {
             return typed(selectedValue, commonType(selectedType, otherType));
         }
+        if (selectedType == null && selectedValue == null && otherType != null) {
+            return typed(null, otherType); // a null literal takes the reference type of the other branch
+        }
         return selected;
     }
 
