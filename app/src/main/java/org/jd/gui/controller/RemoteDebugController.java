@@ -434,8 +434,10 @@ public class RemoteDebugController {
             protected Void doInBackground() {
                 try {
                     pendingSteps.remove(thread);
-                    deleteStepRequests(thread);
-                    thread.resume();
+                    synchronized (evaluationLock) { // resuming during an invocation would be undone when it suspends the thread again
+                        deleteStepRequests(thread);
+                        thread.resume();
+                    }
                 } catch (RuntimeException e) {
                     assert ExceptionUtil.printStackTrace(e);
                 }
