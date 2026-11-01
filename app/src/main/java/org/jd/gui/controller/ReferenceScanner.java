@@ -287,7 +287,7 @@ final class ReferenceScanner {
 
             @Override
             public void visitMethodInsn(int opcode, String owner, String methodName, String methodDescriptor, boolean isInterface) {
-                hitIf(matchesType(owner) || matchesMethod(owner, methodName));
+                hitIf(matchesType(owner) || matchesMethod(owner, methodName) || matchesType(Type.getMethodType(methodDescriptor)));
             }
 
             @Override

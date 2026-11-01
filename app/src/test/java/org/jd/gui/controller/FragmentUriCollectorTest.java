@@ -187,6 +187,43 @@ class FragmentUriCollectorTest {
     }
 
     @Test
+    void ownerResolvedThroughMetadataIsNotOverriddenByTheFileNameFallback() {
+        Map<FileEntryPath, Container.Entry> children = new HashMap<>();
+        Container.Entry dir = entry("com/example", null, children);
+        Container.Entry alpha = entry("com/example/Alpha.class", dir, Map.of());
+        Container.Entry beta = entry("com/example/Alpha$Beta.class", dir, Map.of());
+        Container.Entry gamma = entry("com/example/Alpha$Beta$Gamma.class", dir, Map.of());
+        children.put(new FileEntryPath("com/example/Alpha.class"), alpha);
+        children.put(new FileEntryPath("com/example/Alpha$Beta.class"), beta);
+        // A top-level class legitimately named Alpha$Beta, with an inner class Gamma, next to an unrelated Alpha
+        Type betaType = type("com/example/Alpha$Beta", Map.of(), Map.of());
+        Type gammaType = type("com/example/Alpha$Beta$Gamma", "com/example/Alpha$Beta", Map.of(), Map.of("go", "()V"), List.of());
+        Map<Container.Entry, Collection<Type>> types = Map.of(beta, List.of(betaType), gamma, List.of(gammaType));
+        String betaUri = "file:///lib.jar!/com/example/Alpha$Beta.class";
+
+        Set<URI> uris = FragmentUriCollector.collect(List.of(gamma), e -> types.getOrDefault(e, List.of()), "go", SEARCH_DECLARATION | SEARCH_METHOD);
+
+        assertEquals(Set.of(uri(betaUri, "com/example/Alpha$Beta"), uri(betaUri, "com/example/Alpha$Beta$Gamma"), uri(betaUri, "com/example/Alpha$Beta$Gamma-go-()V")), uris);
+    }
+
+    @Test
+    void innerEntryUrisSelectsOnlyTheInnerClassFilesOfTheOuterEntries() {
+        Map<FileEntryPath, Container.Entry> children = new HashMap<>();
+        Container.Entry dir = entry("a", null, children);
+        Container.Entry outer = entry("a/Foo.class", dir, Map.of());
+        Container.Entry inner = entry("a/Foo$Bar.class", dir, Map.of());
+        Container.Entry deeper = entry("a/Foo$Bar$Baz.class", dir, Map.of());
+        Container.Entry other = entry("a/Other.class", dir, Map.of());
+        Container.Entry otherInner = entry("a/Other$X.class", dir, Map.of());
+        Container.Entry similar = entry("a/FooBar.class", dir, Map.of());
+        for (Container.Entry e : List.of(outer, inner, deeper, other, otherInner, similar)) {
+            children.put(new FileEntryPath(e.getPath()), e);
+        }
+
+        assertEquals(Set.of(inner.getUri(), deeper.getUri()), FragmentUriCollector.innerEntryUris(List.of(outer)));
+    }
+
+    @Test
     void everyRootTypeOfASourceFileIsCollected() {
         Type second = type("com/example/Second", Map.of(), Map.of("run", "()V"));
         Set<URI> uris = FragmentUriCollector.collect(List.of(foo), e -> List.of(fooType, second), "run", SEARCH_DECLARATION | SEARCH_METHOD);

@@ -115,8 +115,7 @@ final class FragmentUriCollector {
         }
         for (Container.Entry parent : parents) {
             for (Container.Entry child : parent.getChildren().values()) {
-                String path = child.getPath();
-                if (path.endsWith(StringConstants.CLASS_FILE_SUFFIX) && prefixes.stream().anyMatch(path::startsWith)) {
+                if (hasOuterPrefix(child.getPath(), prefixes)) {
                     uris.add(child.getUri());
                 }
             }
@@ -124,18 +123,37 @@ final class FragmentUriCollector {
         return uris;
     }
 
+    /** Whether the class file name continues one of the prefixes ("Outer$") after a '$'; the number of checks does not depend on the prefixes. */
+    private static boolean hasOuterPrefix(String path, Set<String> prefixes) {
+        if (!path.endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
+            return false;
+        }
+        for (int idx = path.indexOf(StringConstants.INTERNAL_INNER_SEPARATOR, path.lastIndexOf('/') + 1); idx != -1;
+                idx = path.indexOf(StringConstants.INTERNAL_INNER_SEPARATOR, idx + 1)) {
+            if (prefixes.contains(path.substring(0, idx + 1))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Resolves the class file under which the entry's type is displayed. The type metadata tells
      * the outer type, since a '$' in a name alone does not make a class an inner class.
      */
     private Container.Entry getTopLevelOuterEntry(Container.Entry entry, Type type) {
+        if (type == null || type.getOuterName() == null) {
+            // No outer type metadata: a top-level class, or an anonymous/local class filed by its name
+            return pathBasedOuterEntry(entry);
+        }
         Container.Entry current = entry;
         Type currentType = type;
         for (int depth = 0; depth < MAX_NESTING && current != null && currentType != null && currentType.getOuterName() != null; depth++) {
             current = sibling(current, currentType.getOuterName());
             currentType = current == null ? null : firstType(typeLoader.apply(current));
         }
-        return currentType == null || currentType.getOuterName() == null ? pathBasedOuterEntry(current) : current;
+        // The owner resolved through the metadata stays, even if its name contains '$'
+        return current;
     }
 
     private static Container.Entry sibling(Container.Entry entry, String internalName) {
@@ -274,22 +292,29 @@ final class FragmentUriCollector {
     }
 
     /**
-     * Adds the fragment URI for the given type name plus, for a nested type, all ancestor type
-     * URIs (stripping '$'-delimited suffixes) so that the full path in the tree is visible.
+     * Adds the fragment URI for the given type name plus, for a nested type, the URIs of its
+     * ancestors up to the type that owns the class file (stripping '$'-delimited suffixes), so
+     * that the full path in the tree is visible.
      */
     private static void addTypeFragmentWithAncestors(Set<URI> target, Container.Entry outerEntry, String typeName, boolean nested) {
         target.add(fragmentUri(outerEntry, typeName));
-        if (!nested) {
-            return;
-        }
         String name = typeName;
         // Only the simple name can hold inner type separators, packages may contain '$'
         int simpleNameStart = typeName.lastIndexOf('/') + 1;
-        int lastDollar;
-        while ((lastDollar = name.lastIndexOf('$')) >= simpleNameStart && lastDollar > 0) {
+        int lastDollar = name.lastIndexOf('$');
+        while (nested && !isOwnerOf(outerEntry, name) && lastDollar >= simpleNameStart && lastDollar > 0) {
             name = name.substring(0, lastDollar);
             target.add(fragmentUri(outerEntry, name));
+            lastDollar = name.lastIndexOf('$');
         }
+    }
+
+    /** Whether the file of the entry declares the type: its path is the type name plus an extension. */
+    private static boolean isOwnerOf(Container.Entry entry, String typeName) {
+        String path = entry.getPath();
+        int extension = path.lastIndexOf('.');
+        String withoutExtension = extension == -1 ? path : path.substring(0, extension);
+        return withoutExtension.equals(typeName) || withoutExtension.endsWith('/' + typeName);
     }
 
     /** Returns the simple identifier after the last '/' or '$'. */

@@ -125,7 +125,7 @@ final class SourceReferenceScanner extends AbstractJavaListener {
         @SuppressWarnings("unchecked")
         List<VariableDeclarationFragment> fragments = node.fragments();
         for (VariableDeclarationFragment fragment : fragments) {
-            keys.add(fragment.getName().getIdentifier() + createDescriptor(node.getType(), fragment.getExtraDimensions()));
+            keys.add(fieldKey(node, fragment));
         }
         enterMember(new Member(null, keys));
         return true;
@@ -134,6 +134,26 @@ final class SourceReferenceScanner extends AbstractJavaListener {
     @Override
     public void endVisit(FieldDeclaration node) {
         exitMember();
+    }
+
+    /** The initializer of one declarator belongs to that field only, while the shared type belongs to all of them. */
+    @Override
+    public boolean visit(VariableDeclarationFragment node) {
+        if (node.getParent() instanceof FieldDeclaration field) {
+            enterMember(new Member(null, List.of(fieldKey(field, node))));
+        }
+        return true;
+    }
+
+    @Override
+    public void endVisit(VariableDeclarationFragment node) {
+        if (node.getParent() instanceof FieldDeclaration) {
+            exitMember();
+        }
+    }
+
+    private String fieldKey(FieldDeclaration field, VariableDeclarationFragment fragment) {
+        return fragment.getName().getIdentifier() + createDescriptor(field.getType(), fragment.getExtraDimensions());
     }
 
     @Override

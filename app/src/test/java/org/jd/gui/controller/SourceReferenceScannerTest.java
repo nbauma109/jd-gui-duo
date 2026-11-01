@@ -97,6 +97,8 @@ class SourceReferenceScannerTest {
         ReferenceScanner.Result result = scan("compute", SEARCH_METHOD).get("demo/Sample");
         assertTrue(result.fields().contains("countI"));
         assertTrue(result.fields().contains("secondI"));
+        // "first = 1" holds no call: the initializer of one declarator does not belong to its siblings
+        assertFalse(result.fields().contains("firstI"));
         assertEquals(Set.of(), result.methods());
     }
 

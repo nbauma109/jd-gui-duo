@@ -18,6 +18,7 @@ import org.jd.gui.service.type.TypeFactoryService;
 import org.jd.gui.spi.TypeFactory;
 import org.jd.gui.util.function.TriConsumer;
 import org.jd.gui.util.parser.jdt.ASTParserFactory;
+import org.jd.gui.util.swing.SwingUtil;
 import org.jd.gui.view.SearchInConstantPoolsView;
 import org.jd.util.LRUCache;
 
@@ -138,11 +139,15 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
 
             final int count = matchingTypeCount;
 
-            searchInConstantPoolsView.hideWaitCursor();
-            if (generation == searchGeneration.get()) {
-                delegatingFilterContainers = containers;
-                searchInConstantPoolsView.updateTree(containers, count);
-            }
+            // The generation is checked on the event dispatch thread, where the results are published
+            // together with the cursor and the tree: an older search can no longer overwrite a newer one
+            SwingUtil.invokeLater(() -> {
+                if (generation == searchGeneration.get()) {
+                    searchInConstantPoolsView.hideWaitCursor();
+                    delegatingFilterContainers = containers;
+                    searchInConstantPoolsView.updateTree(containers, count);
+                }
+            });
         });
     }
 

@@ -129,6 +129,12 @@ class ReferenceScannerTest {
     }
 
     @Test
+    void typeInTheDescriptorOfAnInvokedMethodIsAttributedToTheCaller() throws IOException {
+        // The call site only names StringBuffer in the descriptor of makeBuffer()
+        assertTrue(scan("StringBuffer", SEARCH_TYPE).methods().contains("callsDescriptorOnly()V"));
+    }
+
+    @Test
     void methodWithoutMatchingReferenceIsNotReported() throws IOException {
         assertFalse(scan("*", SEARCH_METHOD | SEARCH_FIELD | SEARCH_STRING).methods().contains("untouched()V"));
     }

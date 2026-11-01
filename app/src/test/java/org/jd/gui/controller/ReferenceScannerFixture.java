@@ -58,6 +58,14 @@ class ReferenceScannerFixture {
         };
     }
 
+    static StringBuffer makeBuffer() {
+        return null;
+    }
+
+    void callsDescriptorOnly() {
+        makeBuffer();
+    }
+
     void untouched() {
     }
 }
