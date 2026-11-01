@@ -198,10 +198,10 @@ class FragmentUriCollectorTest {
         // A top-level class legitimately named Alpha$Beta, with an inner class Gamma, next to an unrelated Alpha
         Type betaType = type("com/example/Alpha$Beta", Map.of(), Map.of());
         Type gammaType = type("com/example/Alpha$Beta$Gamma", "com/example/Alpha$Beta", Map.of(), Map.of("go", "()V"), List.of());
-        Map<Container.Entry, Collection<Type>> types = Map.of(beta, List.of(betaType), gamma, List.of(gammaType));
+        Map<Container.Entry, Collection<Type>> typesByEntry = Map.of(beta, List.of(betaType), gamma, List.of(gammaType));
         String betaUri = "file:///lib.jar!/com/example/Alpha$Beta.class";
 
-        Set<URI> uris = FragmentUriCollector.collect(List.of(gamma), e -> types.getOrDefault(e, List.of()), "go", SEARCH_DECLARATION | SEARCH_METHOD);
+        Set<URI> uris = FragmentUriCollector.collect(List.of(gamma), e -> typesByEntry.getOrDefault(e, List.of()), "go", SEARCH_DECLARATION | SEARCH_METHOD);
 
         assertEquals(Set.of(uri(betaUri, "com/example/Alpha$Beta"), uri(betaUri, "com/example/Alpha$Beta$Gamma"), uri(betaUri, "com/example/Alpha$Beta$Gamma-go-()V")), uris);
     }
