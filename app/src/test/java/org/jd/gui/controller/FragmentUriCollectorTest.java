@@ -91,7 +91,7 @@ class FragmentUriCollectorTest {
     @Test
     void referenceMatchShowsTheMembersHoldingTheReference() {
         ReferenceScanner.Result scanned = new ReferenceScanner.Result(Set.of("getCount()I", "<clinit>()V", "unlisted()V"), Set.of("countI"));
-        Set<URI> uris = FragmentUriCollector.collect(List.of(foo), loader, e -> scanned, "x", SEARCH_REFERENCE | SEARCH_METHOD);
+        Set<URI> uris = FragmentUriCollector.collect(List.of(foo), loader, e -> Map.of("com/example/Foo", scanned), "x", SEARCH_REFERENCE | SEARCH_METHOD);
         assertEquals(Set.of(uri(FOO, "com/example/Foo"), uri(FOO, "com/example/Foo-getCount-()I"), uri(FOO, "com/example/Foo-count-I")), uris);
     }
 
@@ -161,6 +161,29 @@ class FragmentUriCollectorTest {
     void singleRegexMetacharacterSearchDoesNotFailTheCollection() {
         Set<URI> uris = collect(List.of(foo), "[", SEARCH_DECLARATION | SEARCH_METHOD | SEARCH_FIELD | SEARCH_CONSTRUCTOR);
         assertEquals(Set.of(uri(FOO, "com/example/Foo")), uris);
+    }
+
+    @Test
+    void nestedTypeHoldingAReferenceIsDisplayedWithItsMember() {
+        Type unrelated = type("com/example/Foo$Unrelated", Map.of(), Map.of("other", "()V"));
+        Type holder = type("com/example/Foo$Holder", Map.of(), Map.of("use", "()V"));
+        Type source = type("com/example/Foo", Map.of(), Map.of(), List.of(unrelated, holder));
+        Map<String, ReferenceScanner.Result> scanned = Map.of("com/example/Foo$Holder", new ReferenceScanner.Result(Set.of("use()V"), Set.of()));
+
+        Set<URI> uris = FragmentUriCollector.collect(List.of(foo), e -> List.of(source), e -> scanned, "x", SEARCH_REFERENCE | SEARCH_METHOD);
+
+        assertEquals(Set.of(uri(FOO, "com/example/Foo"), uri(FOO, "com/example/Foo$Holder"), uri(FOO, "com/example/Foo$Holder-use-()V")), uris);
+    }
+
+    @Test
+    void nestedTypeWithAReferenceNoMemberCanShowIsStillDisplayed() {
+        Type holder = type("com/example/Foo$Holder", Map.of(), Map.of("use", "()V"));
+        Type source = type("com/example/Foo", Map.of(), Map.of(), List.of(holder));
+        Map<String, ReferenceScanner.Result> scanned = Map.of("com/example/Foo$Holder", new ReferenceScanner.Result(Set.of(), Set.of()));
+
+        Set<URI> uris = FragmentUriCollector.collect(List.of(foo), e -> List.of(source), e -> scanned, "x", SEARCH_REFERENCE | SEARCH_METHOD);
+
+        assertEquals(Set.of(uri(FOO, "com/example/Foo"), uri(FOO, "com/example/Foo$Holder")), uris);
     }
 
     @Test

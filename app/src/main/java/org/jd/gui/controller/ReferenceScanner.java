@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
@@ -46,9 +47,14 @@ final class ReferenceScanner {
     }
 
     static Result scan(InputStream inputStream, Pattern pattern, int flags) throws IOException {
+        return scanTypes(inputStream, pattern, flags).values().iterator().next();
+    }
+
+    /** @return the references found, by internal name of the class file's type */
+    static Map<String, Result> scanTypes(InputStream inputStream, Pattern pattern, int flags) throws IOException {
         Visitor visitor = new Visitor(pattern, flags);
         new ClassReader(inputStream).accept(visitor, ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
-        return new Result(visitor.methods, visitor.fields);
+        return Map.of(visitor.className, new Result(visitor.methods, visitor.fields));
     }
 
     private static final class Visitor extends ClassVisitor {
@@ -56,11 +62,17 @@ final class ReferenceScanner {
         private final int flags;
         private final Set<String> methods = new HashSet<>();
         private final Set<String> fields = new HashSet<>();
+        private String className = "";
 
         Visitor(Pattern pattern, int flags) {
             super(Opcodes.ASM9);
             this.pattern = pattern;
             this.flags = flags;
+        }
+
+        @Override
+        public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+            className = name;
         }
 
         private boolean matches(String text) {

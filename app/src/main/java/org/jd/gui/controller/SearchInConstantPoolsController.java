@@ -17,6 +17,7 @@ import org.jd.gui.model.container.DelegatingFilterContainer;
 import org.jd.gui.service.type.TypeFactoryService;
 import org.jd.gui.spi.TypeFactory;
 import org.jd.gui.util.function.TriConsumer;
+import org.jd.gui.util.parser.jdt.ASTParserFactory;
 import org.jd.gui.view.SearchInConstantPoolsView;
 import org.jd.util.LRUCache;
 
@@ -229,14 +230,22 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
         return FragmentUriCollector.collect(matchingEntries, entry -> {
             TypeFactory factory = TypeFactoryService.getInstance().get(entry);
             return factory == null ? List.<Type>of() : factory.make(api, entry);
-        }, entry -> {
-            try (InputStream inputStream = entry.getInputStream()) {
-                return ReferenceScanner.scan(inputStream, referencePattern, flags);
-            } catch (IOException | RuntimeException e) {
-                assert ExceptionUtil.printStackTrace(e);
-                return ReferenceScanner.Result.EMPTY;
+        }, entry -> scanReferences(entry, referencePattern, flags), pattern, flags);
+    }
+
+    /** Finds the types, methods and fields holding a reference: in the bytecode of a class file, in the AST of a source file. */
+    private Map<String, ReferenceScanner.Result> scanReferences(Container.Entry entry, Pattern referencePattern, int flags) {
+        try {
+            if (entry.getPath().endsWith(".java")) {
+                return SourceReferenceScanner.scan(ASTParserFactory.getInstance().newASTParser(api, entry), entry, referencePattern, flags);
             }
-        }, pattern, flags);
+            try (InputStream inputStream = entry.getInputStream()) {
+                return ReferenceScanner.scanTypes(inputStream, referencePattern, flags);
+            }
+        } catch (IOException | RuntimeException e) {
+            assert ExceptionUtil.printStackTrace(e);
+            return Map.of();
+        }
     }
 
     protected void filter(Indexes indexes, String pattern, int flags, Set<Container.Entry> matchingEntries) {

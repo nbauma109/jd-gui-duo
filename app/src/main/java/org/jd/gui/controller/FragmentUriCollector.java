@@ -18,6 +18,7 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
@@ -33,7 +34,7 @@ final class FragmentUriCollector {
     private static final int MAX_NESTING = 32;
 
     private final Function<Container.Entry, Collection<Type>> typeLoader;
-    private final Function<Container.Entry, ReferenceScanner.Result> referenceScanner;
+    private final Function<Container.Entry, Map<String, ReferenceScanner.Result>> referenceScanner;
     private final Pattern typePattern;
     private final Pattern memberPattern;
     private final Pattern declaredTypePattern;
@@ -41,9 +42,11 @@ final class FragmentUriCollector {
     private final boolean references;
     private final int flags;
     private final Set<URI> fragmentUris = new HashSet<>();
+    // References of the entry being collected, by internal type name
+    private Map<String, ReferenceScanner.Result> scanned = Map.of();
 
     private FragmentUriCollector(Function<Container.Entry, Collection<Type>> typeLoader,
-            Function<Container.Entry, ReferenceScanner.Result> referenceScanner, String pattern, int flags) {
+            Function<Container.Entry, Map<String, ReferenceScanner.Result>> referenceScanner, String pattern, int flags) {
         this.declarations = (flags & SearchInConstantPoolsView.SEARCH_DECLARATION) != 0;
         this.typeLoader = typeLoader;
         this.referenceScanner = referenceScanner;
@@ -58,11 +61,11 @@ final class FragmentUriCollector {
     }
 
     static Set<URI> collect(Collection<Container.Entry> matchingEntries, Function<Container.Entry, Collection<Type>> typeLoader, String pattern, int flags) {
-        return collect(matchingEntries, typeLoader, entry -> ReferenceScanner.Result.EMPTY, pattern, flags);
+        return collect(matchingEntries, typeLoader, entry -> Map.of(), pattern, flags);
     }
 
     static Set<URI> collect(Collection<Container.Entry> matchingEntries, Function<Container.Entry, Collection<Type>> typeLoader,
-            Function<Container.Entry, ReferenceScanner.Result> referenceScanner, String pattern, int flags) {
+            Function<Container.Entry, Map<String, ReferenceScanner.Result>> referenceScanner, String pattern, int flags) {
         FragmentUriCollector collector = new FragmentUriCollector(typeLoader, referenceScanner, pattern, flags);
         for (Container.Entry entry : matchingEntries) {
             collector.collectEntry(entry);
@@ -79,13 +82,11 @@ final class FragmentUriCollector {
         Collection<Type> types = typeLoader.apply(entry);
         Container.Entry outerEntry = types == null ? null : getTopLevelOuterEntry(entry, firstType(types));
         if (outerEntry != null) {
+            // The references found in a source file are those of all its types, a class file has one type
+            scanned = references ? referenceScanner.apply(entry) : Map.of();
             for (Type type : types) {
                 // The type is nested when the metadata says so, or when it is filed under another class file
                 collectTypeTree(outerEntry, type, outerEntry != entry || (type != null && type.getOuterName() != null));
-                // Only the entry's own types can be scanned, inner types have their own class files
-                if (references) {
-                    collectReferenceFragments(outerEntry, entry, type);
-                }
             }
         }
     }
@@ -188,7 +189,7 @@ final class FragmentUriCollector {
             for (Type innerType : innerTypesOf(type)) {
                 found.addAll(collectNestedType(outerEntry, innerType));
             }
-            if (!found.isEmpty() || declaredTypeMatches(type)) {
+            if (!found.isEmpty() || declaredTypeMatches(type) || scanned.containsKey(type.getName())) {
                 addTypeFragmentWithAncestors(found, outerEntry, type.getName(), true);
             }
         }
@@ -204,8 +205,9 @@ final class FragmentUriCollector {
         return declaredTypePattern != null && declaredTypePattern.matcher(lastIdentifier(type.getName())).matches();
     }
 
-    /** For declarations only, we can pinpoint specific matching members. */
+    /** Pinpoints the members that match a declaration search, or hold a reference. */
     private void collectMemberFragments(Set<URI> target, Container.Entry outerEntry, Type type) {
+        collectReferenceFragments(target, outerEntry, type);
         if (declarations) {
             collectConstructorFragments(target, outerEntry, type);
             collectMethodFragments(target, outerEntry, type);
@@ -255,20 +257,18 @@ final class FragmentUriCollector {
      * Adds the members of the type that hold a matching reference. A reference in a member that
      * has no tree node (static initializer, synthetic method) is covered by the type node.
      */
-    private void collectReferenceFragments(Container.Entry outerEntry, Container.Entry entry, Type type) {
-        if (type == null) {
-            return;
-        }
-        ReferenceScanner.Result result = referenceScanner.apply(entry);
-
-        for (Type.Method method : type.getMethods()) {
-            if (!STATIC_INITIALIZER.equals(method.getName()) && result.methods().contains(method.getName() + method.getDescriptor())) {
-                addMemberFragment(fragmentUris, outerEntry, type, method.getName(), method.getDescriptor());
+    private void collectReferenceFragments(Set<URI> target, Container.Entry outerEntry, Type type) {
+        ReferenceScanner.Result result = scanned.get(type.getName());
+        if (result != null) {
+            for (Type.Method method : type.getMethods()) {
+                if (!STATIC_INITIALIZER.equals(method.getName()) && result.methods().contains(method.getName() + method.getDescriptor())) {
+                    addMemberFragment(target, outerEntry, type, method.getName(), method.getDescriptor());
+                }
             }
-        }
-        for (Type.Field field : type.getFields()) {
-            if (result.fields().contains(field.getName() + field.getDescriptor())) {
-                addMemberFragment(fragmentUris, outerEntry, type, field.getName(), field.getDescriptor());
+            for (Type.Field field : type.getFields()) {
+                if (result.fields().contains(field.getName() + field.getDescriptor())) {
+                    addMemberFragment(target, outerEntry, type, field.getName(), field.getDescriptor());
+                }
             }
         }
     }

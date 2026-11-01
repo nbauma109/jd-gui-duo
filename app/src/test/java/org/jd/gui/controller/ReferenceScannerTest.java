@@ -16,6 +16,7 @@ import org.objectweb.asm.Opcodes;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Set;
 
 import static org.jd.gui.view.SearchInConstantPoolsView.SEARCH_CONSTRUCTOR;
@@ -116,6 +117,15 @@ class ReferenceScannerTest {
 
         assertEquals(Set.of("dynamicHolder()Ljava/lang/Object;"), byMethod.methods());
         assertEquals(Set.of("dynamicHolder()Ljava/lang/Object;"), byType.methods());
+    }
+
+    @Test
+    void scanTypesKeysTheResultByInternalTypeName() throws IOException {
+        try (InputStream in = ReferenceScannerFixture.class.getResourceAsStream("ReferenceScannerFixture.class")) {
+            Map<String, ReferenceScanner.Result> results = ReferenceScanner.scanTypes(in, SearchInConstantPoolsController.createPattern("valueOf"), SEARCH_METHOD);
+            assertEquals(Set.of("org/jd/gui/controller/ReferenceScannerFixture"), results.keySet());
+            assertEquals(Set.of("callsMethod()V"), results.values().iterator().next().methods());
+        }
     }
 
     @Test
