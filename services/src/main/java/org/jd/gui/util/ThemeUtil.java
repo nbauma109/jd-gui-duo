@@ -82,17 +82,23 @@ public class ThemeUtil {
      */
     public static void refreshDebugShortcuts(Map<String, String> preferences, RSyntaxTextArea textArea) {
         InputMap inputMap = textArea.getInputMap(JComponent.WHEN_FOCUSED);
-        if (textArea.getClientProperty(SHADOWED_KEYS) instanceof java.util.Set<?> previous) {
-            for (Object keyStroke : previous) {
-                inputMap.remove((KeyStroke) keyStroke);
+        if (textArea.getClientProperty(SHADOWED_KEYS) instanceof Map<?, ?> previous) {
+            // put back what the shadow replaced: the editor's own local entry, or nothing (the inherited binding shows again)
+            for (Map.Entry<?, ?> entry : previous.entrySet()) {
+                if (entry.getValue() == null) {
+                    inputMap.remove((KeyStroke) entry.getKey());
+                } else {
+                    inputMap.put((KeyStroke) entry.getKey(), entry.getValue());
+                }
             }
         }
-        java.util.Set<KeyStroke> shadowed = new java.util.HashSet<>();
+        Map<KeyStroke, Object> shadowed = new java.util.HashMap<>();
+        java.util.Set<KeyStroke> localKeys = inputMap.keys() == null ? java.util.Set.of() : new java.util.HashSet<>(java.util.Arrays.asList(inputMap.keys()));
         for (Binding binding : DEBUG_BINDINGS) {
             KeyStroke keyStroke = KeyBindings.getConfiguredKeyStroke(preferences, binding);
-            if (keyStroke != null && inputMap.get(keyStroke) != null) {
+            if (keyStroke != null && inputMap.get(keyStroke) != null && !shadowed.containsKey(keyStroke)) {
+                shadowed.put(keyStroke, localKeys.contains(keyStroke) ? inputMap.get(keyStroke) : null);
                 inputMap.put(keyStroke, "none");
-                shadowed.add(keyStroke);
             }
         }
         textArea.putClientProperty(SHADOWED_KEYS, shadowed);

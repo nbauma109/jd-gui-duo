@@ -110,6 +110,9 @@ public class BreakpointListPanel extends JPanel {
         toolbar.add(goToFileButton);
         toolbar.add(skipAllButton);
         toolbar.add(addExceptionButton);
+        // no menu entry or key binding reaches these two: they stay in the keyboard focus traversal (Space activates them)
+        skipAllButton.setFocusable(true);
+        addExceptionButton.setFocusable(true);
         add(toolbar, BorderLayout.NORTH);
 
         list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -129,11 +132,21 @@ public class BreakpointListPanel extends JPanel {
                     removeSelected();
                 } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     navigateToSelected();
+                } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                    toggleSelected(); // the check box is only painted: Space is its keyboard action
                 }
             }
         });
         add(new JScrollPane(list), BorderLayout.CENTER);
         updateButtons();
+    }
+
+    private void toggleSelected() {
+        if (enabledCallback != null) {
+            for (Row row : list.getSelectedValuesList()) {
+                enabledCallback.accept(row.key(), !row.enabled());
+            }
+        }
     }
 
     /** The check box toggles the breakpoint, a double click goes to its file. */

@@ -111,6 +111,11 @@ public class RemoteDebugController {
     private int selectedFrameIndex; // frame shown in Variables/Expressions, 0 = top frame
     private final List<String> watchExpressions = new CopyOnWriteArrayList<>();
     private final Object evaluationLock = new Object();
+    /** The thread that runs the methods of the evaluation in progress; its breakpoint and exception events are not stops. */
+    private volatile ThreadReference evaluatingThread;
+    /** Results of the last Inspect and of the last watch evaluation: pinned in the debuggee while the views may still read them. */
+    private com.sun.jdi.Value inspectedResult;
+    private final List<com.sun.jdi.Value> watchedResults = new ArrayList<>();
     private final Set<BreakpointKey> disabledBreakpoints = ConcurrentHashMap.newKeySet();
     /** Library classes that are never shown: stepping into them returns to the caller (like Eclipse's step filters). */
     private static final String[] STEP_FILTER_PREFIXES = { "java.", "javax.", "jdk.", "sun.", "com.sun." };
@@ -145,7 +150,11 @@ public class RemoteDebugController {
     }
 
     /** Restores the breakpoints saved in the configuration by a previous session. */
-    public void loadPersistedBreakpoints() {
+    public synchronized void loadPersistedBreakpoints() {
+        if (persistedLoaded) {
+            return;
+        }
+        persistedLoaded = true;
         loadPersistedExceptions();
         String saved = configuration.getPreferences().get(BREAKPOINTS_PREFERENCE);
         if (saved != null && !saved.isBlank()) {
@@ -155,6 +164,8 @@ public class RemoteDebugController {
         }
         publishBreakpoints();
     }
+
+    private boolean persistedLoaded;
 
     private void loadPersistedExceptions() {
         String savedExceptions = configuration.getPreferences().get(EXCEPTIONS_PREFERENCE);
@@ -347,6 +358,7 @@ public class RemoteDebugController {
         if (breakpoints.remove(key)) {
             disabledBreakpoints.remove(key); // a breakpoint added again later must not inherit this one's setting
             uninstallBreakpoint(key);
+            clearPageMarker(key); // the same type open twice: the other editor must not adopt the marker again
             publishBreakpoints();
             return false;
         }
@@ -363,6 +375,7 @@ public class RemoteDebugController {
     }
 
     public void sync(BreakpointCapablePage page) {
+        loadPersistedBreakpoints(); // a page can be synchronized before the delayed startup restored the saved breakpoints, and must not persist the empty state over them
         String typeName = page.getDebugTypeName();
         page.setBreakpointToggleHandler(this::toggleBreakpoint);
         List<java.lang.ref.WeakReference<BreakpointCapablePage>> pages = pagesByType.computeIfAbsent(typeName, k -> new CopyOnWriteArrayList<>());
@@ -451,6 +464,7 @@ public class RemoteDebugController {
     private void showNextQueuedThread() {
         ThreadReference next = null;
         Location location = null;
+        long token = 0;
         synchronized (threadLock) {
             if (activeThread != null) {
                 return; // the resumed thread already stopped again; onSuspended took over
@@ -463,10 +477,11 @@ public class RemoteDebugController {
                 location = entry.getValue();
                 activeThread = next;
                 activeRunning = false;
+                token = ++stopGeneration;
             }
         }
         if (next != null) {
-            showSuspended(next, location);
+            showSuspended(next, location, token);
         } else {
             // everything is running again: the thread tree must stop showing the old stops
             long generation = stopGeneration;
@@ -479,6 +494,7 @@ public class RemoteDebugController {
                 }
                 controller.setDebugStepActionsEnabled(false);
                 controller.clearDebugExecutionLine();
+                controller.showDebugVariables("", List.of()); // the locals of a frame that is running again are stale
                 controller.showDebugStackFrames(threads);
             });
             publishExpressions();
@@ -599,10 +615,10 @@ public class RemoteDebugController {
                 installException(classPrepareEvent.referenceType(), exception);
             }
             publishBreakpoints();
-        } else if (event instanceof ExceptionEvent exceptionEvent) {
+        } else if (event instanceof ExceptionEvent exceptionEvent && !isEvaluating(exceptionEvent.thread())) {
             stopAtRequest(exceptionEvent.thread(), exceptionEvent.location(), reported);
             return true;
-        } else if (event instanceof BreakpointEvent breakpointEvent) {
+        } else if (event instanceof BreakpointEvent breakpointEvent && !isEvaluating(breakpointEvent.thread())) {
             stopAtRequest(breakpointEvent.thread(), breakpointEvent.location(), reported);
             return true;
         } else if (event instanceof StepEvent stepEvent) {
@@ -617,6 +633,10 @@ public class RemoteDebugController {
             return true;
         }
         return false;
+    }
+
+    private boolean isEvaluating(ThreadReference thread) {
+        return evaluations.get() > 0 && thread.equals(evaluatingThread);
     }
 
     private void handleStep(StepEvent stepEvent, Set<ThreadReference> reported, Set<ThreadReference> stoppedByRequest) {
@@ -711,7 +731,8 @@ public class RemoteDebugController {
             }
         }
         if (wasActive) {
-            showNextQueuedThread();
+            // showing the next stop evaluates watch expressions: never on the event loop
+            stopExecutor.execute(this::showNextQueuedThread);
         }
     }
 
@@ -742,12 +763,14 @@ public class RemoteDebugController {
     private void onSuspended(ThreadReference thread, Location location) {
         boolean takeOver;
         ThreadReference active;
+        long token = 0;
         synchronized (threadLock) {
             takeOver = activeThread == null || activeThread.equals(thread);
             if (takeOver) {
                 activeThread = thread;
                 activeRunning = false;
                 queuedThreads.remove(thread);
+                token = ++stopGeneration;
             } else {
                 queuedThreads.put(thread, location);
             }
@@ -755,7 +778,8 @@ public class RemoteDebugController {
         }
         if (takeOver) {
             // evaluating watch expressions invokes methods in the debuggee: never block the event loop with that
-            stopExecutor.execute(() -> showSuspended(thread, location));
+            long stopToken = token;
+            stopExecutor.execute(() -> showSuspended(thread, location, stopToken));
         } else {
             // Another thread is being debugged: only refresh the thread list, keep the current location.
             List<DebugThread> threads = collectAllThreadsFrames(active);
@@ -763,11 +787,14 @@ public class RemoteDebugController {
         }
     }
 
-    private void showSuspended(ThreadReference thread, Location location) {
+    /** Shows the stop identified by {@code token}; a stop that was overtaken (resumed, another thread selected) in the meantime is dropped. */
+    private void showSuspended(ThreadReference thread, Location location, long token) {
         int frameIndex = firstApplicationFrame(thread, location);
         synchronized (threadLock) {
+            if (token != stopGeneration || !thread.equals(activeThread)) {
+                return;
+            }
             selectedFrameIndex = frameIndex;
-            stopGeneration++;
         }
         showFrame(thread, frameIndex, true);
     }
@@ -937,12 +964,18 @@ public class RemoteDebugController {
             return null;
         }
         try {
+            JdiExpressionEvaluator.release(inspectedResult);
+            inspectedResult = null;
+            evaluatingThread = thread;
             com.sun.jdi.Value value = JdiExpressionEvaluator.evaluate(expression, thread, frameIndex);
+            inspectedResult = value;
             DebugVariableNode node = JdiValues.toNode(expression, value);
             node.setDetailText(detailOf(value, thread));
             return node;
         } catch (JdiExpressionEvaluator.EvaluationException e) {
             return new DebugVariableNode(expression, "<" + e.getMessage() + ">");
+        } finally {
+            evaluatingThread = null;
         }
     }
 
@@ -1002,55 +1035,31 @@ public class RemoteDebugController {
     }
 
     /**
-     * Evaluations invoke methods in the debuggee. A breakpoint or exception request reached by such a call
-     * would stop the invocation half-way, so the requests are switched off while it runs.
+     * Evaluations invoke methods in the debuggee. A breakpoint or exception reached by such a call on the
+     * evaluating thread would stop the invocation half-way: the event loop ignores those (see
+     * {@link #evaluatingThread}), while the other threads keep stopping at the requests.
      */
     private <T> T withoutSuspendingRequests(Supplier<T> action) {
-        VirtualMachine vm = virtualMachine;
-        List<EventRequest> switchedOff = new ArrayList<>();
         evaluations.incrementAndGet();
-        if (vm != null) {
-            try {
-                EventRequestManager manager = vm.eventRequestManager();
-                List<EventRequest> candidates = new ArrayList<>(manager.breakpointRequests());
-                candidates.addAll(manager.exceptionRequests());
-                for (EventRequest request : candidates) {
-                    if (request.isEnabled()) {
-                        request.disable();
-                        switchedOff.add(request);
-                    }
-                }
-            } catch (RuntimeException e) {
-                assert ExceptionUtil.printStackTrace(e);
-            }
-        }
         try {
             return action.get();
         } finally {
             evaluations.decrementAndGet();
-            restoreRequests(switchedOff);
+            restoreRequests();
         }
     }
 
-    /** Re-enables what an evaluation switched off, unless the user disabled or skipped it in the meantime. */
-    private void restoreRequests(List<EventRequest> switchedOff) {
-        Set<EventRequest> handled = new HashSet<>();
+    /** Enables the requests that were installed while the evaluation ran, unless the user disabled or skipped them. */
+    private void restoreRequests() {
         boolean idle = evaluations.get() == 0;
-        // every managed request, not only those switched off: some were installed while the evaluation ran
         installedBreakpoints.forEach((key, requests) ->
-            restoreManaged(requests, handled, idle, !skipAllBreakpoints && !disabledBreakpoints.contains(key)));
+            restoreManaged(requests, idle, !skipAllBreakpoints && !disabledBreakpoints.contains(key)));
         installedExceptions.forEach((typeName, requests) ->
-            restoreManaged(requests, handled, idle, !skipAllBreakpoints && !disabledExceptions.contains(typeName)));
-        for (EventRequest request : switchedOff) {
-            if (!handled.contains(request)) {
-                setEnabledQuietly(request, true);
-            }
-        }
+            restoreManaged(requests, idle, !skipAllBreakpoints && !disabledExceptions.contains(typeName)));
     }
 
-    private static void restoreManaged(List<? extends EventRequest> requests, Set<EventRequest> handled, boolean idle, boolean enabled) {
+    private static void restoreManaged(List<? extends EventRequest> requests, boolean idle, boolean enabled) {
         for (EventRequest request : requests) {
-            handled.add(request);
             if (idle) {
                 setEnabledQuietly(request, enabled);
             }
@@ -1073,13 +1082,26 @@ public class RemoteDebugController {
             frameIndex = selectedFrameIndex;
         }
         List<DebugVariableNode> nodes = new ArrayList<>();
+        watchedResults.forEach(JdiExpressionEvaluator::release);
+        watchedResults.clear();
+        evaluatingThread = thread;
+        try {
+            return evaluateWatches(thread, frameIndex, nodes);
+        } finally {
+            evaluatingThread = null;
+        }
+    }
+
+    private List<DebugVariableNode> evaluateWatches(ThreadReference thread, int frameIndex, List<DebugVariableNode> nodes) {
         for (String expression : watchExpressions) {
             if (thread == null) {
                 nodes.add(new DebugVariableNode(expression, ""));
                 continue;
             }
             try {
-                nodes.add(JdiValues.toNode(expression, JdiExpressionEvaluator.evaluate(expression, thread, frameIndex)));
+                com.sun.jdi.Value result = JdiExpressionEvaluator.evaluate(expression, thread, frameIndex);
+                watchedResults.add(result);
+                nodes.add(JdiValues.toNode(expression, result));
             } catch (JdiExpressionEvaluator.EvaluationException e) {
                 nodes.add(new DebugVariableNode(expression, "<" + e.getMessage() + ">"));
             }

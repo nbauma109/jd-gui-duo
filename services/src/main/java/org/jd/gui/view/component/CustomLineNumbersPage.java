@@ -636,8 +636,7 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
             if (lineNumberMap == null) {
                 return lineNumber;
             }
-            int originalLineNumber = lineNumber < lineNumberMap.length ? lineNumberMap[lineNumber] : 0;
-            return originalLineNumber == 0 && isBreakpointLineNumber(lineNumber) ? lineNumber : originalLineNumber;
+            return lineNumber < lineNumberMap.length ? lineNumberMap[lineNumber] : 0; // an unmapped row stays unnumbered: a source line is not a text row
         }
 
         private void paintBreakpointMarker(Graphics g, FontMetrics metrics, int y) {

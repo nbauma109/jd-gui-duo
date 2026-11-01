@@ -733,6 +733,9 @@ public class MainController implements API {
         String type = executionTypeName;
         String pageType = page.getDebugTypeName();
         if (type != null && executionLineNumber > 0 && (type.equals(pageType) || type.startsWith(pageType + "$"))) {
+            if (executionMarkedPage != null && executionMarkedPage != page) {
+                executionMarkedPage.setCurrentExecutionLine(0); // the same type open twice: only the last synchronized page keeps the marker
+            }
             page.setCurrentExecutionLine(executionLineNumber);
             executionMarkedPage = page;
         }
@@ -776,8 +779,7 @@ public class MainController implements API {
         if (entries.isEmpty()) {
             return false;
         }
-        openURI(UriUtil.createURI(this, getCollectionOfFutureIndexes(), entries.get(0), "lineNumber=" + lineNumber, null));
-        return true;
+        return openURI(UriUtil.createURI(this, getCollectionOfFutureIndexes(), entries.get(0), "lineNumber=" + lineNumber, null));
     }
 
     void openDebugLocation(String typeName, int lineNumber) {

@@ -89,8 +89,11 @@ public final class JdiExpressionEvaluator {
         return value;
     }
 
-    private void releasePinned() {
+    private void releasePinned(Value keep) {
         for (ObjectReference object : pinned) {
+            if (object.equals(keep)) {
+                continue; // the result stays pinned; the caller releases it
+            }
             try {
                 object.enableCollection();
             } catch (com.sun.jdi.ObjectCollectedException | UnsupportedOperationException _) {
@@ -126,26 +129,42 @@ public final class JdiExpressionEvaluator {
         this.src = src;
     }
 
-    /** Evaluates {@code expression} in the given frame of a suspended thread. */
+    /**
+     * Evaluates {@code expression} in the given frame of a suspended thread. A result object created by the
+     * evaluation stays pinned so the views can still read it: the caller releases it with {@link #release}.
+     */
     public static Value evaluate(String expression, ThreadReference thread, int frameIndex) throws EvaluationException {
         JdiExpressionEvaluator evaluator = new JdiExpressionEvaluator(thread, frameIndex, expression);
+        Value result = null;
         try {
-            Object result = evaluator.parseTernary();
+            Object parsed = evaluator.parseTernary();
             evaluator.skipWs();
             if (evaluator.pos < evaluator.src.length()) {
                 throw new EvaluationException("Unexpected '" + evaluator.src.charAt(evaluator.pos) + "' at position " + evaluator.pos);
             }
-            if (result instanceof ClassRef(ReferenceType type)) {
+            if (parsed instanceof ClassRef(ReferenceType type)) {
                 throw new EvaluationException(type.name() + " is a type, not a value");
             }
-            return value(result);
+            result = value(parsed);
+            return result;
         } catch (IncompatibleThreadStateException _) {
             throw new EvaluationException("The thread is not suspended");
         } catch (RuntimeException e) {
             String message = e.getMessage();
             throw new EvaluationException(message == null ? e.getClass().getSimpleName() : message);
         } finally {
-            evaluator.releasePinned();
+            evaluator.releasePinned(result);
+        }
+    }
+
+    /** Lets the debuggee collect a result object that {@link #evaluate} kept pinned. */
+    public static void release(Value result) {
+        if (result instanceof ObjectReference object) {
+            try {
+                object.enableCollection();
+            } catch (com.sun.jdi.ObjectCollectedException | UnsupportedOperationException | com.sun.jdi.VMDisconnectedException _) {
+                // collected or disconnected meanwhile
+            }
         }
     }
 
@@ -478,7 +497,9 @@ public final class JdiExpressionEvaluator {
     private Object parseUnaryPlus() throws EvaluationException, IncompatibleThreadStateException {
         Object operandResult = parseUnary();
         if (skipping > 0) {
-            return null;
+            // not evaluated, but the type matters to a ?: branch: unary numeric promotion
+            return unwrap(operandResult) instanceof PrimitiveValue p && (p instanceof com.sun.jdi.ByteValue || p instanceof com.sun.jdi.ShortValue || p instanceof CharValue)
+                ? vm.mirrorOf(0) : operandResult;
         }
         Value operand = unbox(value(operandResult)); // unary operators unbox: -boxed, +boxed
         if (operand instanceof com.sun.jdi.ByteValue || operand instanceof com.sun.jdi.ShortValue || operand instanceof CharValue) {
@@ -513,14 +534,22 @@ public final class JdiExpressionEvaluator {
     private Object parseIndex(Object target) throws EvaluationException, IncompatibleThreadStateException {
         Object index = parseTernary();
         expect("]");
-        if (skipping > 0) {
-            return null;
-        }
         String declaredArray = declaredTypeOf(target);
+        if (skipping > 0) {
+            // not evaluated, but the element type matters to a ?: branch
+            String component = declaredArray != null && declaredArray.endsWith("[]") ? declaredArray.substring(0, declaredArray.length() - 2)
+                : unwrap(target) instanceof ArrayReference array ? componentTypeOf(null, array) : null;
+            return component == null ? null : placeholder(component);
+        }
         if (!(value(target) instanceof ArrayReference arrayReference)) {
             throw new EvaluationException("Not an array");
         }
-        int i = (int) numberAsLong(unbox(value(index)));
+        Value indexValue = unbox(value(index));
+        if (!(indexValue instanceof com.sun.jdi.IntegerValue || indexValue instanceof com.sun.jdi.ShortValue
+                || indexValue instanceof com.sun.jdi.ByteValue || indexValue instanceof CharValue)) {
+            throw new EvaluationException("An array index must be an int, short, byte or char"); // a long or a double does not index an array in Java
+        }
+        int i = (int) numberAsLong(indexValue);
         if (i < 0 || i >= arrayReference.length()) {
             throw new EvaluationException("Index " + i + " out of bounds for length " + arrayReference.length());
         }
@@ -599,8 +628,12 @@ public final class JdiExpressionEvaluator {
             // not evaluated, but reading a variable has no side effect and tells the type of a ?: branch
             try {
                 Object read = resolveName(name);
+                if (read == NOT_FOUND) {
+                    pos = start; // a class name (Math.PI): looking it up runs nothing
+                    return parseClassName();
+                }
                 return read instanceof Value || read instanceof Typed || read == null ? read : null;
-            } catch (IncompatibleThreadStateException | RuntimeException _) {
+            } catch (EvaluationException | IncompatibleThreadStateException | RuntimeException _) {
                 return null;
             }
         }
