@@ -199,7 +199,10 @@ public final class JdiExpressionEvaluator {
                 return null;
             }
             rejectNullWithPrimitive(unwrap(whenTrue), trueIsNull, unwrap(whenFalse), falseIsNull);
-            return promoteConditional(selectTrue ? whenTrue : whenFalse, selectTrue ? whenFalse : whenTrue);
+            Object promoted = promoteConditional(selectTrue ? whenTrue : whenFalse, selectTrue ? whenFalse : whenTrue);
+            boolean constant = condition instanceof Constant && whenTrue instanceof Constant && whenFalse instanceof Constant;
+            // only a conditional of constants is a constant expression (interned, narrowed): the others lose the marker
+            return !constant && promoted instanceof Constant(Value plain) ? plain : promoted;
         }
         return condition;
     }
