@@ -481,13 +481,18 @@ public final class JdiExpressionEvaluator {
     private Object parseNegation() throws EvaluationException, IncompatibleThreadStateException {
         Object minimum = minimumLiteral();
         if (minimum != NOT_FOUND) {
-            return minimum;
+            return minimum == null ? null : new Constant((Value) minimum); // -2147483648 is a constant expression
         }
         Object operandResult = parseUnary();
         if (skipping > 0 && !(unwrap(operandResult) instanceof PrimitiveValue)) {
             return null; // a number can be negated without side effect: the type of -2.0 matters in a skipped branch
         }
         Value operand = unbox(value(operandResult)); // unary operators unbox: -boxed, +boxed
+        Value negated = negate(operand);
+        return operandResult instanceof Constant ? new Constant(negated) : negated; // the negation of a constant is a constant
+    }
+
+    private Value negate(Value operand) throws EvaluationException {
         if (operand instanceof DoubleValue d) {
             return vm.mirrorOf(-d.value());
         }
@@ -512,7 +517,7 @@ public final class JdiExpressionEvaluator {
             return vm.mirrorOf(((PrimitiveValue) operand).intValue()); // unary numeric promotion
         }
         numberAsLong(operand); // only numbers
-        return operand;
+        return operandResult instanceof Constant ? new Constant(operand) : operand;
     }
 
     private Object parsePostfix() throws EvaluationException, IncompatibleThreadStateException {
