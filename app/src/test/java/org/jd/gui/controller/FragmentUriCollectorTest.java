@@ -224,11 +224,32 @@ class FragmentUriCollectorTest {
     }
 
     @Test
-    void everyRootTypeOfASourceFileIsCollected() {
+    void unrelatedRootTypesOfASourceFileAreNotDisplayed() {
+        Type unrelated = type("com/example/Unrelated", Map.of(), Map.of("other", "()V"));
+        Type worker = type("com/example/Worker", Map.of(), Map.of("run", "()V"));
+
+        Set<URI> uris = FragmentUriCollector.collect(List.of(foo), e -> List.of(unrelated, worker), "run", SEARCH_DECLARATION | SEARCH_METHOD);
+
+        assertEquals(Set.of(uri(FOO, "com/example/Worker"), uri(FOO, "com/example/Worker-run-()V")), uris);
+    }
+
+    @Test
+    void allRootTypesAreDisplayedWhenNoneCanBeToldApart() {
+        Type first = type("com/example/First", Map.of(), Map.of());
+        Type second = type("com/example/Second", Map.of(), Map.of());
+
+        Set<URI> uris = FragmentUriCollector.collect(List.of(foo), e -> List.of(first, second), "x", SEARCH_DECLARATION | SEARCH_METHOD);
+
+        assertEquals(Set.of(uri(FOO, "com/example/First"), uri(FOO, "com/example/Second")), uris);
+    }
+
+    @Test
+    void everyMatchingRootTypeOfASourceFileIsCollected() {
         Type second = type("com/example/Second", Map.of(), Map.of("run", "()V"));
-        Set<URI> uris = FragmentUriCollector.collect(List.of(foo), e -> List.of(fooType, second), "run", SEARCH_DECLARATION | SEARCH_METHOD);
-        assertTrue(uris.contains(uri(FOO, "com/example/Second-run-()V")));
-        assertTrue(uris.contains(uri(FOO, "com/example/Foo")));
+        Type third = type("com/example/Third", Map.of(), Map.of("run", "(I)V"));
+        Set<URI> uris = FragmentUriCollector.collect(List.of(foo), e -> List.of(fooType, second, third), "run", SEARCH_DECLARATION | SEARCH_METHOD);
+        assertEquals(Set.of(uri(FOO, "com/example/Second"), uri(FOO, "com/example/Second-run-()V"),
+                uri(FOO, "com/example/Third"), uri(FOO, "com/example/Third-run-(I)V")), uris);
     }
 
     @Test

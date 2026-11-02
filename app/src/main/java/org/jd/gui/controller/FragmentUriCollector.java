@@ -84,10 +84,31 @@ final class FragmentUriCollector {
         if (outerEntry != null) {
             // The references found in a source file are those of all its types, a class file has one type
             scanned = references ? referenceScanner.apply(entry) : Map.of();
-            for (Type type : types) {
-                // The type is nested when the metadata says so, or when it is filed under another class file
-                collectTypeTree(outerEntry, type, outerEntry != entry || (type != null && type.getOuterName() != null));
+            // The type is nested when the metadata says so, or when it is filed under another class file
+            boolean nested = outerEntry != entry || (firstType(types) != null && firstType(types).getOuterName() != null);
+            if (types.size() == 1) {
+                collectTypeTree(outerEntry, firstType(types), nested);
+            } else {
+                collectRootTypes(outerEntry, types);
             }
+        }
+    }
+
+    /**
+     * A source file declaring several root types: like nested types, a root type is only displayed
+     * when it declares or holds a match. When none can be told apart, all of them are displayed.
+     */
+    private void collectRootTypes(Container.Entry outerEntry, Collection<Type> rootTypes) {
+        Set<URI> found = new HashSet<>();
+        for (Type rootType : rootTypes) {
+            found.addAll(collectNestedType(outerEntry, rootType, false));
+        }
+        if (found.isEmpty()) {
+            for (Type rootType : rootTypes) {
+                collectTypeTree(outerEntry, rootType, false);
+            }
+        } else {
+            fragmentUris.addAll(found);
         }
     }
 
@@ -190,7 +211,7 @@ final class FragmentUriCollector {
             addTypeFragmentWithAncestors(fragmentUris, outerEntry, type.getName(), nested);
             collectMemberFragments(fragmentUris, outerEntry, type);
             for (Type innerType : innerTypesOf(type)) {
-                fragmentUris.addAll(collectNestedType(outerEntry, innerType));
+                fragmentUris.addAll(collectNestedType(outerEntry, innerType, true));
             }
         }
     }
@@ -200,15 +221,15 @@ final class FragmentUriCollector {
      * declares a match, or contains a nested type that does: the class file matched through its
      * outer type or another member, not through every type it happens to declare.
      */
-    private Set<URI> collectNestedType(Container.Entry outerEntry, Type type) {
+    private Set<URI> collectNestedType(Container.Entry outerEntry, Type type, boolean nested) {
         Set<URI> found = new HashSet<>();
         if (type != null) {
             collectMemberFragments(found, outerEntry, type);
             for (Type innerType : innerTypesOf(type)) {
-                found.addAll(collectNestedType(outerEntry, innerType));
+                found.addAll(collectNestedType(outerEntry, innerType, true));
             }
             if (!found.isEmpty() || declaredTypeMatches(type) || scanned.containsKey(type.getName())) {
-                addTypeFragmentWithAncestors(found, outerEntry, type.getName(), true);
+                addTypeFragmentWithAncestors(found, outerEntry, type.getName(), nested);
             }
         }
         return found;
