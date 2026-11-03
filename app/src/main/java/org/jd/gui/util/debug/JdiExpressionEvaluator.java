@@ -236,7 +236,7 @@ public final class JdiExpressionEvaluator {
     private Object promoteConditional(Object selected, Object other) throws EvaluationException {
         Value selectedValue = unwrap(selected);
         Value otherValue = unwrap(other);
-        if (selectedValue == null && WRAPPERS.contains(declaredTypeOf(selected)) && otherValue instanceof PrimitiveValue) {
+        if (selectedValue == null && isWrapper(declaredTypeOf(selected)) && otherValue instanceof PrimitiveValue) {
             throw new EvaluationException("NullPointerException: a null cannot be unboxed"); // the conditional is primitive: Java unboxes the selected null
         }
         if (mixedNumericWrappers(selected, other) && (selectedValue == null || otherValue == null)) {
@@ -244,7 +244,8 @@ public final class JdiExpressionEvaluator {
         }
         // a numeric wrapper next to a primitive (or another wrapper type) is unboxed first: Integer and int give an int
         boolean sameWrapper = selectedValue instanceof ObjectReference a && otherValue instanceof ObjectReference b
-            && a.referenceType().equals(b.referenceType());
+            && a.referenceType().equals(b.referenceType())
+            || isWrapper(declaredTypeOf(selected)) && declaredTypeOf(selected).equals(declaredTypeOf(other)); // one of them may be null
         Value selectedUnboxed = unboxedBranch(selected, selectedValue, sameWrapper, other);
         Value otherUnboxed = unboxedBranch(other, otherValue, sameWrapper, selected);
         if (selectedUnboxed instanceof PrimitiveValue s && otherUnboxed instanceof PrimitiveValue o && isNumeric(s) && isNumeric(o)) {
@@ -263,22 +264,30 @@ public final class JdiExpressionEvaluator {
         return promoteReferences(selected, other);
     }
 
+    private static boolean isWrapper(String type) {
+        return type != null && WRAPPERS.contains(type);
+    }
+
+    private static String primitiveOf(String wrapper) {
+        return wrapper == null ? null : PRIMITIVE_OF_WRAPPER.get(wrapper);
+    }
+
     private static boolean mixedNumericWrappers(Object first, Object second) {
         String firstType = declaredTypeOf(first);
         String secondType = declaredTypeOf(second);
         return firstType != null && secondType != null && !firstType.equals(secondType)
-            && WRAPPERS.contains(firstType) && WRAPPERS.contains(secondType)
+            && isWrapper(firstType) && isWrapper(secondType)
             && !BOOLEAN_WRAPPER.equals(firstType) && !BOOLEAN_WRAPPER.equals(secondType);
     }
 
     /** A branch declared as Number or Object is a reference whatever it holds: only wrapper (or unknown) declared types are unboxed. */
     private Value unboxedBranch(Object branch, Value value, boolean sameWrapper, Object counterpart) {
         String declared = declaredTypeOf(branch);
-        if (value == null && PRIMITIVE_OF_WRAPPER.containsKey(declared) && !declared.equals(declaredTypeOf(counterpart))) {
+        if (value == null && isWrapper(declared) && !declared.equals(declaredTypeOf(counterpart))) {
             // a wrapper that is null here (a call that was not run, or a null that is not unboxed) still has the numeric type of its declaration
-            return (Value) placeholder(PRIMITIVE_OF_WRAPPER.get(declared));
+            return (Value) placeholder(primitiveOf(declared));
         }
-        return sameWrapper || declared != null && !WRAPPERS.contains(declared) ? value : unbox(value);
+        return sameWrapper || declared != null && !isWrapper(declared) ? value : unbox(value);
     }
 
     /** References: the conditional has the common type of both branches, whichever one is selected. */
@@ -437,7 +446,7 @@ public final class JdiExpressionEvaluator {
 
     /** A null wrapper compared with a primitive is unboxed before the right operand is evaluated; two references are compared as references. */
     private void rejectNullUnboxingAgainstPrimitive(Object left) throws EvaluationException, IncompatibleThreadStateException {
-        if (skipping > 0 || unwrap(left) != null || !WRAPPERS.contains(declaredTypeOf(left))) {
+        if (skipping > 0 || unwrap(left) != null || !isWrapper(declaredTypeOf(left))) {
             return;
         }
         int resume = pos;
@@ -494,7 +503,7 @@ public final class JdiExpressionEvaluator {
      * effects of the right operand. For + the right operand tells whether this is a string concatenation.
      */
     private void rejectNullUnboxing(String op, Object left) throws EvaluationException, IncompatibleThreadStateException {
-        if (skipping > 0 || unwrap(left) != null || !WRAPPERS.contains(declaredTypeOf(left))) {
+        if (skipping > 0 || unwrap(left) != null || !isWrapper(declaredTypeOf(left))) {
             return;
         }
         if ("+".equals(op)) {
@@ -1115,7 +1124,7 @@ public final class JdiExpressionEvaluator {
         if (value instanceof PrimitiveValue) {
             return value;
         }
-        String primitive = value == null ? PRIMITIVE_OF_WRAPPER.get(declaredTypeOf(operand)) : null;
+        String primitive = value == null ? primitiveOf(declaredTypeOf(operand)) : null;
         return primitive == null ? null : (Value) placeholder(primitive);
     }
 
@@ -1541,7 +1550,7 @@ public final class JdiExpressionEvaluator {
 
     /** Unboxing conversion: the value of an Integer, Boolean... (anything else is returned as is). */
     private static Value unbox(Value value) {
-        if (value instanceof ObjectReference object && WRAPPERS.contains(object.referenceType().name())) {
+        if (value instanceof ObjectReference object && isWrapper(object.referenceType().name())) {
             Field field = object.referenceType().fieldByName("value");
             if (field != null) {
                 return object.getValue(field);
