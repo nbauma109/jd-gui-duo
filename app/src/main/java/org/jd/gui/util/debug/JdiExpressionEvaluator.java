@@ -567,7 +567,11 @@ public final class JdiExpressionEvaluator {
         }
         if (accept("!")) {
             Object operand = parseUnary();
-            return skipping > 0 ? vm.mirrorOf(false) : operand instanceof Constant ? new Constant(vm.mirrorOf(!asBoolean(operand))) : vm.mirrorOf(!asBoolean(operand));
+            if (skipping > 0) {
+                return vm.mirrorOf(false);
+            }
+            Value negated = vm.mirrorOf(!asBoolean(operand));
+            return operand instanceof Constant ? new Constant(negated) : negated;
         }
         if (accept("-")) {
             return parseNegation();
