@@ -393,7 +393,11 @@ public final class JdiExpressionEvaluator {
         if (first.contains("&") || second.contains("&")) {
             return OBJECT_TYPE;
         }
-        return findClass(first) instanceof ClassType type ? commonSuperType(type, second) : OBJECT_TYPE;
+        ReferenceType firstType = findClass(first);
+        if (firstType instanceof ClassType type) {
+            return commonSuperType(type, second);
+        }
+        return firstType instanceof com.sun.jdi.InterfaceType ? sharedInterfaces(firstType, second) : OBJECT_TYPE;
     }
 
     private String commonSuperType(ClassType type, String second) {
@@ -403,13 +407,30 @@ public final class JdiExpressionEvaluator {
             }
         }
         // only Object in common: the type is the intersection of the interfaces both classes implement
+        return sharedInterfaces(type, second);
+    }
+
+    /** The interfaces {@code type} implements or extends (itself included) that {@code second} is also a subtype of, joined as an intersection. */
+    private String sharedInterfaces(ReferenceType type, String second) {
+        java.util.Set<com.sun.jdi.InterfaceType> candidates = new java.util.LinkedHashSet<>();
+        if (type instanceof ClassType classType) {
+            candidates.addAll(classType.allInterfaces());
+        } else if (type instanceof com.sun.jdi.InterfaceType interfaceType) {
+            collectInterfaces(interfaceType, candidates);
+        }
         List<String> shared = new ArrayList<>();
-        for (com.sun.jdi.InterfaceType declared : type.allInterfaces()) {
+        for (com.sun.jdi.InterfaceType declared : candidates) {
             if (isSubtype(second, declared.name())) {
                 shared.add(declared.name());
             }
         }
         return shared.isEmpty() ? OBJECT_TYPE : String.join("&", shared);
+    }
+
+    private static void collectInterfaces(com.sun.jdi.InterfaceType type, java.util.Set<com.sun.jdi.InterfaceType> into) {
+        if (into.add(type)) {
+            type.superinterfaces().forEach(superinterface -> collectInterfaces(superinterface, into));
+        }
     }
 
     private Object parseOr() throws EvaluationException, IncompatibleThreadStateException {
@@ -1136,7 +1157,8 @@ public final class JdiExpressionEvaluator {
             Value rightPrimitive = skippedPrimitive(right);
             if (leftPrimitive != null && rightPrimitive != null) {
                 Value divisor = ("/".equals(op) || "%".equals(op)) ? nonZero(rightPrimitive) : rightPrimitive; // the zero of a placeholder must not divide
-                return arithmetic(op, leftPrimitive, divisor, null);
+                Object result = arithmetic(op, leftPrimitive, divisor, null);
+                return left instanceof Constant && right instanceof Constant && result instanceof Value value ? new Constant(value) : result;
             }
         } catch (EvaluationException | RuntimeException _) {
             // e.g. a division by zero: the type is unknown
