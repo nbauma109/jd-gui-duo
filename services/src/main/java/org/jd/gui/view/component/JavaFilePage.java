@@ -62,8 +62,9 @@ public class JavaFilePage extends TypePage implements BreakpointCapablePage {
 
     private static String debugTypeNameOf(String text, String path) {
         String simpleName = path.substring(path.lastIndexOf('/') + 1);
-        if (simpleName.endsWith(".java")) {
-            simpleName = simpleName.substring(0, simpleName.length() - ".java".length());
+        int extension = simpleName.lastIndexOf('.');
+        if (extension > 0 && (simpleName.endsWith(".java") || simpleName.endsWith(".class"))) { // attached source keeps the .class path
+            simpleName = simpleName.substring(0, extension);
         }
         java.util.regex.Matcher matcher = PACKAGE_DECLARATION.matcher(text);
         return matcher.find() ? matcher.group(1) + '.' + simpleName : simpleName;

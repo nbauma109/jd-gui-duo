@@ -239,6 +239,9 @@ public final class JdiExpressionEvaluator {
         if (selectedValue == null && WRAPPERS.contains(declaredTypeOf(selected)) && otherValue instanceof PrimitiveValue) {
             throw new EvaluationException("NullPointerException: a null cannot be unboxed"); // the conditional is primitive: Java unboxes the selected null
         }
+        if (mixedNumericWrappers(selected, other) && (selectedValue == null || otherValue == null)) {
+            throw new EvaluationException("NullPointerException: a null cannot be unboxed"); // two different numeric wrappers are unboxed and promoted
+        }
         // a numeric wrapper next to a primitive (or another wrapper type) is unboxed first: Integer and int give an int
         boolean sameWrapper = selectedValue instanceof ObjectReference a && otherValue instanceof ObjectReference b
             && a.referenceType().equals(b.referenceType());
@@ -258,6 +261,14 @@ public final class JdiExpressionEvaluator {
             return selectedUnboxed;
         }
         return promoteReferences(selected, other);
+    }
+
+    private static boolean mixedNumericWrappers(Object first, Object second) {
+        String firstType = declaredTypeOf(first);
+        String secondType = declaredTypeOf(second);
+        return firstType != null && secondType != null && !firstType.equals(secondType)
+            && WRAPPERS.contains(firstType) && WRAPPERS.contains(secondType)
+            && !"java.lang.Boolean".equals(firstType) && !"java.lang.Boolean".equals(secondType);
     }
 
     /** A branch declared as Number or Object is a reference whatever it holds: only wrapper (or unknown) declared types are unboxed. */
@@ -1081,14 +1092,30 @@ public final class JdiExpressionEvaluator {
 
     private Object skippedArithmetic(String op, Object left, Object right) {
         try {
-            if (unwrap(left) instanceof PrimitiveValue && unwrap(right) instanceof PrimitiveValue) {
-                return arithmetic(op, left, right, null);
+            Value leftPrimitive = skippedPrimitive(left);
+            Value rightPrimitive = skippedPrimitive(right);
+            if (leftPrimitive != null && rightPrimitive != null) {
+                return arithmetic(op, leftPrimitive, rightPrimitive, null);
             }
         } catch (EvaluationException | RuntimeException _) {
             // e.g. a division by zero: the type is unknown
         }
         return null;
     }
+
+    /** The primitive an operand stands for in arithmetic; a wrapper that is null (or unknown) stands for the zero of its primitive type. */
+    private Value skippedPrimitive(Object operand) {
+        Value value = unbox(unwrap(operand));
+        if (value instanceof PrimitiveValue) {
+            return value;
+        }
+        String primitive = value == null ? PRIMITIVE_OF_WRAPPER.get(declaredTypeOf(operand)) : null;
+        return primitive == null ? null : (Value) placeholder(primitive);
+    }
+
+    private static final java.util.Map<String, String> PRIMITIVE_OF_WRAPPER = java.util.Map.of("java.lang.Boolean", "boolean",
+        "java.lang.Byte", "byte", "java.lang.Short", SHORT_TYPE, "java.lang.Character", "char", "java.lang.Integer", "int",
+        "java.lang.Long", "long", "java.lang.Float", FLOAT_TYPE, "java.lang.Double", DOUBLE_TYPE);
 
     private Object skippedMember(Object target, String name) {
         try {
