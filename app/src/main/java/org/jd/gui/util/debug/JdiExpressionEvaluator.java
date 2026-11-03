@@ -245,8 +245,8 @@ public final class JdiExpressionEvaluator {
         // a numeric wrapper next to a primitive (or another wrapper type) is unboxed first: Integer and int give an int
         boolean sameWrapper = selectedValue instanceof ObjectReference a && otherValue instanceof ObjectReference b
             && a.referenceType().equals(b.referenceType());
-        Value selectedUnboxed = unboxedBranch(selected, selectedValue, sameWrapper);
-        Value otherUnboxed = unboxedBranch(other, otherValue, sameWrapper);
+        Value selectedUnboxed = unboxedBranch(selected, selectedValue, sameWrapper, other);
+        Value otherUnboxed = unboxedBranch(other, otherValue, sameWrapper, selected);
         if (selectedUnboxed instanceof PrimitiveValue s && otherUnboxed instanceof PrimitiveValue o && isNumeric(s) && isNumeric(o)) {
             Value promoted = promoteNumeric(s, selected instanceof Constant, o, other instanceof Constant);
             if (promoted != null) {
@@ -272,8 +272,12 @@ public final class JdiExpressionEvaluator {
     }
 
     /** A branch declared as Number or Object is a reference whatever it holds: only wrapper (or unknown) declared types are unboxed. */
-    private static Value unboxedBranch(Object branch, Value value, boolean sameWrapper) {
+    private Value unboxedBranch(Object branch, Value value, boolean sameWrapper, Object counterpart) {
         String declared = declaredTypeOf(branch);
+        if (value == null && PRIMITIVE_OF_WRAPPER.containsKey(declared) && !declared.equals(declaredTypeOf(counterpart))) {
+            // a wrapper that is null here (a call that was not run, or a null that is not unboxed) still has the numeric type of its declaration
+            return (Value) placeholder(PRIMITIVE_OF_WRAPPER.get(declared));
+        }
         return sameWrapper || declared != null && !WRAPPERS.contains(declared) ? value : unbox(value);
     }
 

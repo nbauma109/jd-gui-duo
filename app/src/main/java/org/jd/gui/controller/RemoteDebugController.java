@@ -1254,8 +1254,12 @@ public class RemoteDebugController {
                         List<BreakpointRequest> requests = new CopyOnWriteArrayList<>();
                         runToLineRequests.put(thread, requests);
                         runToLineTargets.put(thread, new RunToLineTarget(typeName, lineNumber));
-                        for (ReferenceType referenceType : classesOf(vm, typeName)) {
+                        List<ReferenceType> loaded = classesOf(vm, typeName);
+                        for (ReferenceType referenceType : loaded) {
                             addRunToLineRequests(vm, thread, referenceType, lineNumber);
+                        }
+                        if (requests.isEmpty() && isOutsideCode(loaded, lineNumber)) {
+                            throw new IllegalStateException("No executable code on line " + lineNumber);
                         }
                         thread.resume();
                     }
@@ -1273,6 +1277,23 @@ public class RemoteDebugController {
                 return null;
             }
         }.execute();
+    }
+
+    /** The line precedes or follows all the code of the loaded classes: no class loaded later can hold it. */
+    private static boolean isOutsideCode(List<ReferenceType> loaded, int lineNumber) {
+        int first = Integer.MAX_VALUE;
+        int last = 0;
+        for (ReferenceType referenceType : loaded) {
+            try {
+                for (Location location : referenceType.allLineLocations()) {
+                    first = Math.min(first, location.lineNumber());
+                    last = Math.max(last, location.lineNumber());
+                }
+            } catch (AbsentInformationException | com.sun.jdi.ClassNotPreparedException _) {
+                // no line table: nothing to compare with
+            }
+        }
+        return last > 0 && (lineNumber < first || lineNumber > last);
     }
 
     private void addRunToLineRequests(VirtualMachine vm, ThreadReference thread, ReferenceType referenceType, int lineNumber) {
