@@ -123,6 +123,11 @@ public class RemoteDebugController {
     private final Map<ThreadReference, Integer> pendingSteps = new ConcurrentHashMap<>();
     /** Temporary breakpoint(s) of a pending "Run to Line"; removed as soon as the thread stops anywhere. */
     private final Map<ThreadReference, List<BreakpointRequest>> runToLineRequests = new ConcurrentHashMap<>();
+    /** The line a thread runs to: its class may not be loaded yet, the ClassPrepareEvent then installs the temporary breakpoint. */
+    private final Map<ThreadReference, RunToLineTarget> runToLineTargets = new ConcurrentHashMap<>();
+
+    private record RunToLineTarget(String typeName, int lineNumber) {
+    }
     /** Number of expression evaluations running: requests installed meanwhile stay disabled until they end. */
     private final java.util.concurrent.atomic.AtomicInteger evaluations = new java.util.concurrent.atomic.AtomicInteger();
     /** Changes whenever the stop shown in the views stops being current (resume, step, other thread, disconnect). */
@@ -610,6 +615,7 @@ public class RemoteDebugController {
     private boolean handleEvent(VirtualMachine owner, Event event, Set<ThreadReference> reported, Set<ThreadReference> stoppedByRequest) {
         if (event instanceof ClassPrepareEvent classPrepareEvent) {
             installBreakpoints(classPrepareEvent.referenceType());
+            installRunToLines(classPrepareEvent.referenceType());
             ExceptionBreakpoint exception = exceptionBreakpoints.get(classPrepareEvent.referenceType().name());
             if (exception != null) {
                 installException(classPrepareEvent.referenceType(), exception);
@@ -738,6 +744,9 @@ public class RemoteDebugController {
 
     /** Cancels the pending Run to Line when {@code thread} is the thread running to the line. */
     private void clearRunToLine(ThreadReference thread) {
+        if (thread != null) {
+            runToLineTargets.remove(thread);
+        }
         List<BreakpointRequest> requests = thread == null ? null : runToLineRequests.remove(thread);
         VirtualMachine vm = virtualMachine;
         if (vm != null && requests != null && !requests.isEmpty()) {
@@ -751,6 +760,7 @@ public class RemoteDebugController {
 
     private void resetThreads() {
         runToLineRequests.clear();
+        runToLineTargets.clear();
         pendingSteps.clear();
         synchronized (threadLock) {
             activeThread = null;
@@ -1243,17 +1253,9 @@ public class RemoteDebugController {
                         clearRunToLine(thread); // an earlier Run to Line of this thread; other threads keep theirs
                         List<BreakpointRequest> requests = new CopyOnWriteArrayList<>();
                         runToLineRequests.put(thread, requests);
+                        runToLineTargets.put(thread, new RunToLineTarget(typeName, lineNumber));
                         for (ReferenceType referenceType : classesOf(vm, typeName)) {
-                            for (Location location : locationsOfLine(referenceType, lineNumber)) {
-                                BreakpointRequest request = vm.eventRequestManager().createBreakpointRequest(location);
-                                request.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
-                                request.addThreadFilter(thread);
-                                request.enable();
-                                requests.add(request);
-                            }
-                        }
-                        if (requests.isEmpty()) {
-                            throw new IllegalStateException("No executable code on line " + lineNumber);
+                            addRunToLineRequests(vm, thread, referenceType, lineNumber);
                         }
                         thread.resume();
                     }
@@ -1271,6 +1273,33 @@ public class RemoteDebugController {
                 return null;
             }
         }.execute();
+    }
+
+    private void addRunToLineRequests(VirtualMachine vm, ThreadReference thread, ReferenceType referenceType, int lineNumber) {
+        List<BreakpointRequest> requests = runToLineRequests.get(thread);
+        if (requests == null) {
+            return;
+        }
+        for (Location location : locationsOfLine(referenceType, lineNumber)) {
+            BreakpointRequest request = vm.eventRequestManager().createBreakpointRequest(location);
+            request.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
+            request.addThreadFilter(thread);
+            request.enable();
+            requests.add(request);
+        }
+    }
+
+    /** A class loaded after Run to Line was requested may hold the line (a nested class about to be used). */
+    private void installRunToLines(ReferenceType referenceType) {
+        VirtualMachine vm = virtualMachine;
+        if (vm == null) {
+            return;
+        }
+        runToLineTargets.forEach((thread, target) -> {
+            if (isTypeOrNested(referenceType.name(), target.typeName())) {
+                addRunToLineRequests(vm, thread, referenceType, target.lineNumber());
+            }
+        });
     }
 
     private static List<Location> locationsOfLine(ReferenceType referenceType, int lineNumber) {

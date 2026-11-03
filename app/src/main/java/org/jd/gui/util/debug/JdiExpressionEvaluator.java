@@ -204,6 +204,9 @@ public final class JdiExpressionEvaluator {
             Object promoted = promoteConditional(selectTrue ? whenTrue : whenFalse, selectTrue ? whenFalse : whenTrue);
             boolean constant = condition instanceof Constant && whenTrue instanceof Constant && whenFalse instanceof Constant;
             // only a conditional of constants is a constant expression (interned, narrowed): the others lose the marker
+            if (constant && promoted instanceof Value promotedValue) {
+                return new Constant(promotedValue); // numeric promotion made a new mirror
+            }
             return !constant && promoted instanceof Constant(Value plain) ? plain : promoted;
         }
         return condition;
@@ -385,7 +388,7 @@ public final class JdiExpressionEvaluator {
         while (accept("||")) {
             boolean decided = skipping == 0 && asBoolean(left); // true || x: x is not evaluated
             Object right = parseOperand(decided, this::parseAnd);
-            left = skipping > 0 ? null : vm.mirrorOf(decided || asBoolean(right));
+            left = skipping > 0 ? vm.mirrorOf(false) : vm.mirrorOf(decided || asBoolean(right));
         }
         return left;
     }
@@ -395,7 +398,7 @@ public final class JdiExpressionEvaluator {
         while (accept("&&")) {
             boolean decided = skipping == 0 && !asBoolean(left); // false && x: x is not evaluated
             Object right = parseOperand(decided, this::parseEquality);
-            left = skipping > 0 ? null : vm.mirrorOf(!decided && asBoolean(right));
+            left = skipping > 0 ? vm.mirrorOf(false) : vm.mirrorOf(!decided && asBoolean(right));
         }
         return left;
     }
@@ -406,11 +409,11 @@ public final class JdiExpressionEvaluator {
             if (accept("==")) {
                 rejectNullUnboxingAgainstPrimitive(left);
                 Object right = parseRelational();
-                left = skipping > 0 ? null : vm.mirrorOf(valuesEqual(value(left), value(right)));
+                left = skipping > 0 ? vm.mirrorOf(false) : vm.mirrorOf(valuesEqual(value(left), value(right)));
             } else if (accept("!=")) {
                 rejectNullUnboxingAgainstPrimitive(left);
                 Object right = parseRelational();
-                left = skipping > 0 ? null : vm.mirrorOf(!valuesEqual(value(left), value(right)));
+                left = skipping > 0 ? vm.mirrorOf(false) : vm.mirrorOf(!valuesEqual(value(left), value(right)));
             } else {
                 return left;
             }
@@ -440,7 +443,7 @@ public final class JdiExpressionEvaluator {
             rejectNullUnboxing(op, left);
             Object right = parseAdditive();
             if (skipping > 0) {
-                left = null;
+                left = vm.mirrorOf(false); // not evaluated, but still a boolean
                 continue;
             }
             left = vm.mirrorOf(compare(op, value(left), value(right)));
