@@ -244,16 +244,21 @@ public final class JdiExpressionEvaluator {
         if (!sameWrapper && selectedUnboxed instanceof BooleanValue && otherUnboxed instanceof BooleanValue) {
             return selectedUnboxed;
         }
-        // references: the conditional has the common type of both branches, whichever one is selected
+        return promoteReferences(selected, other);
+    }
+
+    /** References: the conditional has the common type of both branches, whichever one is selected. */
+    private Object promoteReferences(Object selected, Object other) {
+        Value selectedValue = unwrap(selected);
         String selectedType = referenceTypeOf(selected, selectedValue);
-        String otherType = referenceTypeOf(other, otherValue);
-        if (selectedType != null && otherType != null && !selectedType.equals(otherType)) {
-            return typed(selectedValue, commonType(selectedType, otherType));
+        String otherType = referenceTypeOf(other, unwrap(other));
+        if (otherType == null) {
+            return selected;
         }
-        if (selectedType == null && selectedValue == null && otherType != null) {
-            return typed(null, otherType); // a null literal takes the reference type of the other branch
+        if (selectedType == null) {
+            return selectedValue == null ? typed(null, otherType) : selected; // a null literal takes the reference type of the other branch
         }
-        return selected;
+        return selectedType.equals(otherType) ? selected : typed(selectedValue, commonType(selectedType, otherType));
     }
 
     /** Binary numeric promotion of the two branches; null when the selected branch keeps its own type. */
