@@ -229,8 +229,8 @@ public final class JdiExpressionEvaluator {
         // a numeric wrapper next to a primitive (or another wrapper type) is unboxed first: Integer and int give an int
         boolean sameWrapper = selectedValue instanceof ObjectReference a && otherValue instanceof ObjectReference b
             && a.referenceType().equals(b.referenceType());
-        Value selectedUnboxed = sameWrapper ? selectedValue : unbox(selectedValue);
-        Value otherUnboxed = sameWrapper ? otherValue : unbox(otherValue);
+        Value selectedUnboxed = unboxedBranch(selected, selectedValue, sameWrapper);
+        Value otherUnboxed = unboxedBranch(other, otherValue, sameWrapper);
         if (selectedUnboxed instanceof PrimitiveValue s && otherUnboxed instanceof PrimitiveValue o && isNumeric(s) && isNumeric(o)) {
             Value promoted = promoteNumeric(s, selected instanceof Constant, o, other instanceof Constant);
             if (promoted != null) {
@@ -245,6 +245,12 @@ public final class JdiExpressionEvaluator {
             return selectedUnboxed;
         }
         return promoteReferences(selected, other);
+    }
+
+    /** A branch declared as Number or Object is a reference whatever it holds: only wrapper (or unknown) declared types are unboxed. */
+    private static Value unboxedBranch(Object branch, Value value, boolean sameWrapper) {
+        String declared = declaredTypeOf(branch);
+        return sameWrapper || declared != null && !WRAPPERS.contains(declared) ? value : unbox(value);
     }
 
     /** References: the conditional has the common type of both branches, whichever one is selected. */
