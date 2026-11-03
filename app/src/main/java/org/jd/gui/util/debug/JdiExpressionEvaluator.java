@@ -268,7 +268,7 @@ public final class JdiExpressionEvaluator {
         String secondType = declaredTypeOf(second);
         return firstType != null && secondType != null && !firstType.equals(secondType)
             && WRAPPERS.contains(firstType) && WRAPPERS.contains(secondType)
-            && !"java.lang.Boolean".equals(firstType) && !"java.lang.Boolean".equals(secondType);
+            && !BOOLEAN_WRAPPER.equals(firstType) && !BOOLEAN_WRAPPER.equals(secondType);
     }
 
     /** A branch declared as Number or Object is a reference whatever it holds: only wrapper (or unknown) declared types are unboxed. */
@@ -759,6 +759,8 @@ public final class JdiExpressionEvaluator {
     private static final String SHORT_TYPE = "short";
     private static final String OBJECT_TYPE = "java.lang.Object";
     private static final String STRING_TYPE = "java.lang.String";
+    private static final String BOOLEAN_WRAPPER = "java.lang.Boolean";
+    private static final String BOOLEAN_TYPE = "boolean";
     private static final String DOUBLE_TYPE = "double";
     private static final String FLOAT_TYPE = "float";
     private static final Object NOT_FOUND = new Object();
@@ -1113,7 +1115,7 @@ public final class JdiExpressionEvaluator {
         return primitive == null ? null : (Value) placeholder(primitive);
     }
 
-    private static final java.util.Map<String, String> PRIMITIVE_OF_WRAPPER = java.util.Map.of("java.lang.Boolean", "boolean",
+    private static final java.util.Map<String, String> PRIMITIVE_OF_WRAPPER = java.util.Map.of(BOOLEAN_WRAPPER, BOOLEAN_TYPE,
         "java.lang.Byte", "byte", "java.lang.Short", SHORT_TYPE, "java.lang.Character", "char", "java.lang.Integer", "int",
         "java.lang.Long", "long", "java.lang.Float", FLOAT_TYPE, "java.lang.Double", DOUBLE_TYPE);
 
@@ -1148,7 +1150,7 @@ public final class JdiExpressionEvaluator {
             case "long" -> vm.mirrorOf(0L);
             case DOUBLE_TYPE -> vm.mirrorOf(0.0);
             case FLOAT_TYPE -> vm.mirrorOf(0f);
-            case "boolean" -> vm.mirrorOf(false);
+            case BOOLEAN_TYPE -> vm.mirrorOf(false);
             case "byte" -> vm.mirrorOf((byte) 0);
             case SHORT_TYPE -> vm.mirrorOf((short) 0);
             case "char" -> vm.mirrorOf('\0');
@@ -1334,7 +1336,7 @@ public final class JdiExpressionEvaluator {
     }
 
     private static boolean isPrimitiveName(String type) {
-        return "boolean".equals(type) || "char".equals(type) || NUMERIC_ORDER.contains(type);
+        return BOOLEAN_TYPE.equals(type) || "char".equals(type) || NUMERIC_ORDER.contains(type);
     }
 
     private boolean isApplicable(List<Value> arguments, List<String> declaredTypes, List<String> parameterTypes) {
@@ -1530,7 +1532,7 @@ public final class JdiExpressionEvaluator {
         return value instanceof PrimitiveValue && !(value instanceof BooleanValue);
     }
 
-    private static final java.util.Set<String> WRAPPERS = java.util.Set.of("java.lang.Boolean", "java.lang.Byte", "java.lang.Short",
+    private static final java.util.Set<String> WRAPPERS = java.util.Set.of(BOOLEAN_WRAPPER, "java.lang.Byte", "java.lang.Short",
         "java.lang.Character", "java.lang.Integer", "java.lang.Long", "java.lang.Float", "java.lang.Double");
 
     /** Unboxing conversion: the value of an Integer, Boolean... (anything else is returned as is). */
