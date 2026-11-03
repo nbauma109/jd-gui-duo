@@ -25,7 +25,11 @@ public class JavaFilePage extends TypePage implements BreakpointCapablePage {
 
     private static final long serialVersionUID = 1L;
 
+    private static final java.util.regex.Pattern PACKAGE_DECLARATION = java.util.regex.Pattern.compile("^\\s*package\\s+([\\w.]+)\\s*;", java.util.regex.Pattern.MULTILINE);
+
     private transient BiPredicate<String, Integer> breakpointToggleHandler;
+    /** The binary name of the type, from the package declaration: a source archive may keep directories such as src/main/java. */
+    private String debugTypeName;
     private final transient API pageApi;
 
     public JavaFilePage(API api, Container.Entry entry) {
@@ -36,6 +40,7 @@ public class JavaFilePage extends TypePage implements BreakpointCapablePage {
             String text = TextReader.getText(inputStream).replace("\r\n", "\n").replace('\r', '\n');
             // Parse
             parseAndSetText(text);
+            debugTypeName = debugTypeNameOf(text, entry.getPath());
         } catch (IOException e) {
             assert ExceptionUtil.printStackTrace(e);
         }
@@ -52,7 +57,16 @@ public class JavaFilePage extends TypePage implements BreakpointCapablePage {
 
     @Override
     public String getDebugTypeName() {
-        return ClassUtil.getInternalName(entry.getPath()).replace('/', '.');
+        return debugTypeName != null ? debugTypeName : ClassUtil.getInternalName(entry.getPath()).replace('/', '.');
+    }
+
+    private static String debugTypeNameOf(String text, String path) {
+        String simpleName = path.substring(path.lastIndexOf('/') + 1);
+        if (simpleName.endsWith(".java")) {
+            simpleName = simpleName.substring(0, simpleName.length() - ".java".length());
+        }
+        java.util.regex.Matcher matcher = PACKAGE_DECLARATION.matcher(text);
+        return matcher.find() ? matcher.group(1) + '.' + simpleName : simpleName;
     }
 
     @Override

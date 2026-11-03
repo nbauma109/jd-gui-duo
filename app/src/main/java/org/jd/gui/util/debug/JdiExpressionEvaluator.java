@@ -90,9 +90,11 @@ public final class JdiExpressionEvaluator {
     }
 
     private void releasePinned(Value keep) {
+        boolean kept = false;
         for (ObjectReference object : pinned) {
-            if (object.equals(keep)) {
-                continue; // the result stays pinned; the caller releases it
+            if (!kept && object.equals(keep)) {
+                kept = true; // one pin of the result stays; the caller releases it (every further call that returned it released its own)
+                continue;
             }
             try {
                 object.enableCollection();
@@ -218,9 +220,12 @@ public final class JdiExpressionEvaluator {
      * The type of {@code c ? a : b} is the promotion of both branch types: {@code (true ? 1 : 2.0)} is a double.
      * The branch that is not selected is only parsed, so its type is known when it is a literal or a plain name.
      */
-    private Object promoteConditional(Object selected, Object other) {
+    private Object promoteConditional(Object selected, Object other) throws EvaluationException {
         Value selectedValue = unwrap(selected);
         Value otherValue = unwrap(other);
+        if (selectedValue == null && WRAPPERS.contains(declaredTypeOf(selected)) && otherValue instanceof PrimitiveValue) {
+            throw new EvaluationException("NullPointerException: a null cannot be unboxed"); // the conditional is primitive: Java unboxes the selected null
+        }
         // a numeric wrapper next to a primitive (or another wrapper type) is unboxed first: Integer and int give an int
         boolean sameWrapper = selectedValue instanceof ObjectReference a && otherValue instanceof ObjectReference b
             && a.referenceType().equals(b.referenceType());
@@ -423,9 +428,29 @@ public final class JdiExpressionEvaluator {
                     && !(object instanceof StringReference)) {
                 leftText = text(object);
             }
+            rejectNullUnboxing(op, left);
             Object right = parseMultiplicative();
             left = skipping > 0 ? skippedArithmetic(op, left, right) : arithmetic(op, left, right, leftText);
         }
+    }
+
+    /**
+     * Java unboxes the left operand before the right one is evaluated: a null Integer fails there, without the side
+     * effects of the right operand. For + the right operand tells whether this is a string concatenation.
+     */
+    private void rejectNullUnboxing(String op, Object left) throws EvaluationException, IncompatibleThreadStateException {
+        if (skipping > 0 || unwrap(left) != null || !WRAPPERS.contains(declaredTypeOf(left))) {
+            return;
+        }
+        if ("+".equals(op)) {
+            int resume = pos;
+            Object peeked = parseOperand(true, this::parseMultiplicative); // only parsed: tells the type of the right operand
+            pos = resume;
+            if (peeked == null || "java.lang.String".equals(declaredTypeOf(peeked)) || unwrap(peeked) instanceof StringReference) {
+                return; // a string concatenation, or a right operand whose type is not known
+            }
+        }
+        throw new EvaluationException("NullPointerException: a null cannot be unboxed");
     }
 
     private Object parseMultiplicative() throws EvaluationException, IncompatibleThreadStateException {
@@ -435,6 +460,7 @@ public final class JdiExpressionEvaluator {
             if (op == null) {
                 return left;
             }
+            rejectNullUnboxing(op, left);
             Object right = parseUnary();
             left = skipping > 0 ? skippedArithmetic(op, left, right) : arithmetic(op, left, right, null);
         }
