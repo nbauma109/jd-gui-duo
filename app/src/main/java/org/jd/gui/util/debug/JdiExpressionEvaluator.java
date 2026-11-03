@@ -1144,7 +1144,9 @@ public final class JdiExpressionEvaluator {
         // a null receiver is an instance context: the overload is chosen normally, and rejected below if it needs the instance
         Method chosen = chooseMethod(declaredReceiver != null ? declaredReceiver : type, name, arguments, declaredTypes, receiver.object() == null && !nullReceiver);
         if (chosen == null && declaredReceiver != null) {
-            chosen = chooseMethod(type, name, arguments, declaredTypes, false); // e.g. Object methods on an interface type
+            // an interface has the methods of Object too, but not those of the runtime class: look them up in Object (dispatch stays virtual)
+            ReferenceType objectType = findClass(OBJECT_TYPE);
+            chosen = chooseMethod(objectType != null ? objectType : type, name, arguments, declaredTypes, false);
         }
         // a call that is not run (dry run) on the typed null placeholder of an earlier skipped call only needs the return type
         if (nullReceiver && !dryRun && (chosen == null || !chosen.isStatic())) {
