@@ -236,12 +236,7 @@ public final class JdiExpressionEvaluator {
     private Object promoteConditional(Object selected, Object other) throws EvaluationException {
         Value selectedValue = unwrap(selected);
         Value otherValue = unwrap(other);
-        if (selectedValue == null && isWrapper(declaredTypeOf(selected)) && otherValue instanceof PrimitiveValue) {
-            throw new EvaluationException("NullPointerException: a null cannot be unboxed"); // the conditional is primitive: Java unboxes the selected null
-        }
-        if (mixedNumericWrappers(selected, other) && (selectedValue == null || otherValue == null)) {
-            throw new EvaluationException("NullPointerException: a null cannot be unboxed"); // two different numeric wrappers are unboxed and promoted
-        }
+        rejectNullUnboxedByConditional(selected, other);
         // a numeric wrapper next to a primitive (or another wrapper type) is unboxed first: Integer and int give an int
         boolean sameWrapper = selectedValue instanceof ObjectReference a && otherValue instanceof ObjectReference b
             && a.referenceType().equals(b.referenceType())
@@ -262,6 +257,16 @@ public final class JdiExpressionEvaluator {
             return selectedUnboxed;
         }
         return promoteReferences(selected, other);
+    }
+
+    /** The conditional is primitive when a wrapper meets a primitive or another numeric wrapper: Java then unboxes the null branch. */
+    private static void rejectNullUnboxedByConditional(Object selected, Object other) throws EvaluationException {
+        Value selectedValue = unwrap(selected);
+        Value otherValue = unwrap(other);
+        boolean primitiveCounterpart = selectedValue == null && isWrapper(declaredTypeOf(selected)) && otherValue instanceof PrimitiveValue;
+        if (primitiveCounterpart || mixedNumericWrappers(selected, other) && (selectedValue == null || otherValue == null)) {
+            throw new EvaluationException("NullPointerException: a null cannot be unboxed");
+        }
     }
 
     private static boolean isWrapper(String type) {
