@@ -588,8 +588,10 @@ public final class JdiExpressionEvaluator {
             return minimum == null ? null : new Constant((Value) minimum); // -2147483648 is a constant expression
         }
         Object operandResult = parseUnary();
-        if (skipping > 0 && !(unwrap(operandResult) instanceof PrimitiveValue)) {
-            return null; // a number can be negated without side effect: the type of -2.0 matters in a skipped branch
+        if (skipping > 0) {
+            // a number can be negated without side effect: the type of -2.0 or -wrapper matters in a skipped branch
+            Value skipped = skippedPrimitive(operandResult);
+            return isNumeric(skipped) ? negate(skipped) : null;
         }
         Value operand = unbox(value(operandResult)); // unary operators unbox: -boxed, +boxed
         Value negated = negate(operand);
@@ -613,8 +615,12 @@ public final class JdiExpressionEvaluator {
         Object operandResult = parseUnary();
         if (skipping > 0) {
             // not evaluated, but the type matters to a ?: branch: unary numeric promotion
-            return unwrap(operandResult) instanceof PrimitiveValue p && (p instanceof com.sun.jdi.ByteValue || p instanceof com.sun.jdi.ShortValue || p instanceof CharValue)
-                ? vm.mirrorOf(0) : operandResult;
+            Value skipped = skippedPrimitive(operandResult);
+            if (!isNumeric(skipped)) {
+                return operandResult;
+            }
+            return skipped instanceof com.sun.jdi.ByteValue || skipped instanceof com.sun.jdi.ShortValue || skipped instanceof CharValue
+                ? vm.mirrorOf(0) : operandResult instanceof Constant ? operandResult : skipped;
         }
         Value operand = unbox(value(operandResult)); // unary operators unbox: -boxed, +boxed
         if (operand instanceof com.sun.jdi.ByteValue || operand instanceof com.sun.jdi.ShortValue || operand instanceof CharValue) {
