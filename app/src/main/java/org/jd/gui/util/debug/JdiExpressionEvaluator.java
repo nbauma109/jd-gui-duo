@@ -483,7 +483,7 @@ public final class JdiExpressionEvaluator {
             int resume = pos;
             Object peeked = parseOperand(true, this::parseMultiplicative); // only parsed: tells the type of the right operand
             pos = resume;
-            if (peeked == null || "java.lang.String".equals(declaredTypeOf(peeked)) || unwrap(peeked) instanceof StringReference) {
+            if (peeked == null || STRING_TYPE.equals(declaredTypeOf(peeked)) || unwrap(peeked) instanceof StringReference) {
                 return; // a string concatenation, or a right operand whose type is not known
             }
         }
@@ -671,7 +671,7 @@ public final class JdiExpressionEvaluator {
         }
         if (c == '"') {
             String text = parseQuoted('"');
-            return skipping > 0 ? placeholder("java.lang.String") : new Constant(internedLiteral(text));
+            return skipping > 0 ? placeholder(STRING_TYPE) : new Constant(internedLiteral(text));
         }
         if (c == '\'') {
             String text = parseQuoted('\'');
@@ -744,6 +744,7 @@ public final class JdiExpressionEvaluator {
 
     private static final String SHORT_TYPE = "short";
     private static final String OBJECT_TYPE = "java.lang.Object";
+    private static final String STRING_TYPE = "java.lang.String";
     private static final String DOUBLE_TYPE = "double";
     private static final String FLOAT_TYPE = "float";
     private static final Object NOT_FOUND = new Object();
@@ -1543,7 +1544,7 @@ public final class JdiExpressionEvaluator {
     private static boolean isString(Object result) {
         return result instanceof StringReference
             || result instanceof Constant(Value constantValue) && constantValue instanceof StringReference
-            || result instanceof Typed(Value typedValue, String declaredType) && (typedValue instanceof StringReference || "java.lang.String".equals(declaredType));
+            || result instanceof Typed(Value typedValue, String declaredType) && (typedValue instanceof StringReference || STRING_TYPE.equals(declaredType));
     }
 
     private Object arithmetic(String op, Object leftResult, Object rightResult, String leftText) throws EvaluationException {
