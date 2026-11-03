@@ -198,7 +198,7 @@ public final class JdiExpressionEvaluator {
             Object whenFalse = parseOperand(selectTrue, this::parseTernary);
             boolean falseIsNull = "null".equals(src.substring(falseStart, pos).trim());
             if (skipping > 0) {
-                return null;
+                return skippedConditional(whenTrue, whenFalse);
             }
             rejectNullWithPrimitive(unwrap(whenTrue), trueIsNull, unwrap(whenFalse), falseIsNull);
             Object promoted = promoteConditional(selectTrue ? whenTrue : whenFalse, selectTrue ? whenFalse : whenTrue);
@@ -207,6 +207,16 @@ public final class JdiExpressionEvaluator {
             return !constant && promoted instanceof Constant(Value plain) ? plain : promoted;
         }
         return condition;
+    }
+
+    /** A conditional that is not evaluated still has the promoted type of its branches (it may be a branch of another one). */
+    private Object skippedConditional(Object whenTrue, Object whenFalse) {
+        try {
+            Object promoted = promoteConditional(whenTrue, whenFalse);
+            return promoted instanceof Constant(Value plain) ? plain : promoted;
+        } catch (EvaluationException _) {
+            return null;
+        }
     }
 
     /** Java boxes the primitive next to a null and gives the conditional a reference type; the evaluator cannot box, and keeping the primitive would pick another overload. */
@@ -1136,7 +1146,8 @@ public final class JdiExpressionEvaluator {
         if (chosen == null && declaredReceiver != null) {
             chosen = chooseMethod(type, name, arguments, declaredTypes, false); // e.g. Object methods on an interface type
         }
-        if (nullReceiver && (chosen == null || !chosen.isStatic())) {
+        // a call that is not run (dry run) on the typed null placeholder of an earlier skipped call only needs the return type
+        if (nullReceiver && !dryRun && (chosen == null || !chosen.isStatic())) {
             throw new EvaluationException("Cannot call '" + name + "' on null");
         }
         if (chosen == null) {
