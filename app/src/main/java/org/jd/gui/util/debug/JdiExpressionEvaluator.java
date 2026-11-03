@@ -619,8 +619,10 @@ public final class JdiExpressionEvaluator {
             if (!isNumeric(skipped)) {
                 return operandResult;
             }
-            return skipped instanceof com.sun.jdi.ByteValue || skipped instanceof com.sun.jdi.ShortValue || skipped instanceof CharValue
-                ? vm.mirrorOf(0) : operandResult instanceof Constant ? operandResult : skipped;
+            if (skipped instanceof com.sun.jdi.ByteValue || skipped instanceof com.sun.jdi.ShortValue || skipped instanceof CharValue) {
+                return vm.mirrorOf(0);
+            }
+            return operandResult instanceof Constant ? operandResult : skipped;
         }
         Value operand = unbox(value(operandResult)); // unary operators unbox: -boxed, +boxed
         if (operand instanceof com.sun.jdi.ByteValue || operand instanceof com.sun.jdi.ShortValue || operand instanceof CharValue) {
