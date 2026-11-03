@@ -388,14 +388,29 @@ public final class JdiExpressionEvaluator {
         Object left = parseRelational();
         while (true) {
             if (accept("==")) {
+                rejectNullUnboxingAgainstPrimitive(left);
                 Object right = parseRelational();
                 left = skipping > 0 ? null : vm.mirrorOf(valuesEqual(value(left), value(right)));
             } else if (accept("!=")) {
+                rejectNullUnboxingAgainstPrimitive(left);
                 Object right = parseRelational();
                 left = skipping > 0 ? null : vm.mirrorOf(!valuesEqual(value(left), value(right)));
             } else {
                 return left;
             }
+        }
+    }
+
+    /** A null wrapper compared with a primitive is unboxed before the right operand is evaluated; two references are compared as references. */
+    private void rejectNullUnboxingAgainstPrimitive(Object left) throws EvaluationException, IncompatibleThreadStateException {
+        if (skipping > 0 || unwrap(left) != null || !WRAPPERS.contains(declaredTypeOf(left))) {
+            return;
+        }
+        int resume = pos;
+        Object peeked = parseOperand(true, this::parseRelational); // only parsed: tells the type of the right operand
+        pos = resume;
+        if (unwrap(peeked) instanceof PrimitiveValue) {
+            throw new EvaluationException("NullPointerException: a null cannot be unboxed");
         }
     }
 
@@ -406,6 +421,7 @@ public final class JdiExpressionEvaluator {
             if (op == null) {
                 return left;
             }
+            rejectNullUnboxing(op, left);
             Object right = parseAdditive();
             if (skipping > 0) {
                 left = null;
