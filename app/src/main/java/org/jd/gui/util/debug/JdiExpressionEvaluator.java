@@ -1135,12 +1135,22 @@ public final class JdiExpressionEvaluator {
             Value leftPrimitive = skippedPrimitive(left);
             Value rightPrimitive = skippedPrimitive(right);
             if (leftPrimitive != null && rightPrimitive != null) {
-                return arithmetic(op, leftPrimitive, rightPrimitive, null);
+                Value divisor = ("/".equals(op) || "%".equals(op)) ? nonZero(rightPrimitive) : rightPrimitive; // the zero of a placeholder must not divide
+                return arithmetic(op, leftPrimitive, divisor, null);
             }
         } catch (EvaluationException | RuntimeException _) {
             // e.g. a division by zero: the type is unknown
         }
         return null;
+    }
+
+    /** A one of the same promoted kind when the value is an integral zero (only the type of the result matters). */
+    private Value nonZero(Value value) {
+        if (value instanceof LongValue l && l.value() == 0) {
+            return vm.mirrorOf(1L);
+        }
+        return value instanceof PrimitiveValue p && !(p instanceof LongValue) && !(p instanceof DoubleValue) && !(p instanceof FloatValue) && p.intValue() == 0
+            ? vm.mirrorOf(1) : value;
     }
 
     private static boolean isStringOperand(Object operand) {
