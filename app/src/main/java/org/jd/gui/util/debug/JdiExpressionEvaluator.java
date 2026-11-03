@@ -417,7 +417,7 @@ public final class JdiExpressionEvaluator {
         while (accept("||")) {
             boolean decided = skipping == 0 && asBoolean(left); // true || x: x is not evaluated
             Object right = parseOperand(decided, this::parseAnd);
-            left = skipping > 0 ? vm.mirrorOf(false) : vm.mirrorOf(decided || asBoolean(right));
+            left = skipping > 0 ? vm.mirrorOf(false) : constantIf(left, right, vm.mirrorOf(decided || asBoolean(right)));
         }
         return left;
     }
@@ -427,7 +427,7 @@ public final class JdiExpressionEvaluator {
         while (accept("&&")) {
             boolean decided = skipping == 0 && !asBoolean(left); // false && x: x is not evaluated
             Object right = parseOperand(decided, this::parseEquality);
-            left = skipping > 0 ? vm.mirrorOf(false) : vm.mirrorOf(!decided && asBoolean(right));
+            left = skipping > 0 ? vm.mirrorOf(false) : constantIf(left, right, vm.mirrorOf(!decided && asBoolean(right)));
         }
         return left;
     }
@@ -438,11 +438,11 @@ public final class JdiExpressionEvaluator {
             if (accept("==")) {
                 rejectNullUnboxingAgainstPrimitive(left);
                 Object right = parseRelational();
-                left = skipping > 0 ? vm.mirrorOf(false) : vm.mirrorOf(valuesEqual(value(left), value(right)));
+                left = skipping > 0 ? vm.mirrorOf(false) : constantIf(left, right, vm.mirrorOf(valuesEqual(value(left), value(right))));
             } else if (accept("!=")) {
                 rejectNullUnboxingAgainstPrimitive(left);
                 Object right = parseRelational();
-                left = skipping > 0 ? vm.mirrorOf(false) : vm.mirrorOf(!valuesEqual(value(left), value(right)));
+                left = skipping > 0 ? vm.mirrorOf(false) : constantIf(left, right, vm.mirrorOf(!valuesEqual(value(left), value(right))));
             } else {
                 return left;
             }
@@ -475,7 +475,7 @@ public final class JdiExpressionEvaluator {
                 left = vm.mirrorOf(false); // not evaluated, but still a boolean
                 continue;
             }
-            left = vm.mirrorOf(compare(op, value(left), value(right)));
+            left = constantIf(left, right, vm.mirrorOf(compare(op, value(left), value(right))));
         }
     }
 
@@ -550,6 +550,11 @@ public final class JdiExpressionEvaluator {
         return NOT_FOUND;
     }
 
+    /** An operation on two constants is a constant expression (a string concatenated with it is interned). */
+    private static Object constantIf(Object left, Object right, Value result) {
+        return left instanceof Constant && right instanceof Constant ? new Constant(result) : result;
+    }
+
     private boolean literalEnds(int end) {
         return end >= src.length() || !(Character.isLetterOrDigit(src.charAt(end)) || src.charAt(end) == '.' || src.charAt(end) == '_');
     }
@@ -562,7 +567,7 @@ public final class JdiExpressionEvaluator {
         }
         if (accept("!")) {
             Object operand = parseUnary();
-            return skipping > 0 ? null : vm.mirrorOf(!asBoolean(operand));
+            return skipping > 0 ? vm.mirrorOf(false) : operand instanceof Constant ? new Constant(vm.mirrorOf(!asBoolean(operand))) : vm.mirrorOf(!asBoolean(operand));
         }
         if (accept("-")) {
             return parseNegation();
@@ -1112,6 +1117,9 @@ public final class JdiExpressionEvaluator {
 
     private Object skippedArithmetic(String op, Object left, Object right) {
         try {
+            if ("+".equals(op) && (isStringOperand(left) || isStringOperand(right))) {
+                return placeholder(STRING_TYPE); // a concatenation is a String whatever it joins
+            }
             Value leftPrimitive = skippedPrimitive(left);
             Value rightPrimitive = skippedPrimitive(right);
             if (leftPrimitive != null && rightPrimitive != null) {
@@ -1121,6 +1129,10 @@ public final class JdiExpressionEvaluator {
             // e.g. a division by zero: the type is unknown
         }
         return null;
+    }
+
+    private static boolean isStringOperand(Object operand) {
+        return unwrap(operand) instanceof StringReference || STRING_TYPE.equals(declaredTypeOf(operand));
     }
 
     /** The primitive an operand stands for in arithmetic; a wrapper that is null (or unknown) stands for the zero of its primitive type. */
