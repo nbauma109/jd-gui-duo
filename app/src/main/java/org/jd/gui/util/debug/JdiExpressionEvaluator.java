@@ -671,7 +671,7 @@ public final class JdiExpressionEvaluator {
         }
         if (c == '"') {
             String text = parseQuoted('"');
-            return skipping > 0 ? null : new Constant(internedLiteral(text));
+            return skipping > 0 ? placeholder("java.lang.String") : new Constant(internedLiteral(text));
         }
         if (c == '\'') {
             String text = parseQuoted('\'');
