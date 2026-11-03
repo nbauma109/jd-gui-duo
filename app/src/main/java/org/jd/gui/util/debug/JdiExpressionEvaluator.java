@@ -393,11 +393,24 @@ public final class JdiExpressionEvaluator {
         if (first.contains("&") || second.contains("&")) {
             return OBJECT_TYPE;
         }
+        if (first.endsWith("[]") && second.endsWith("[]")) {
+            return commonArrayType(first, second);
+        }
         ReferenceType firstType = findClass(first);
         if (firstType instanceof ClassType type) {
             return commonSuperType(type, second);
         }
         return firstType instanceof com.sun.jdi.InterfaceType ? sharedInterfaces(firstType, second) : OBJECT_TYPE;
+    }
+
+    /** Arrays of references have the array of the common type of their components (String[] and Integer[] give Object[]...); primitive components share only Object. */
+    private String commonArrayType(String first, String second) {
+        String firstComponent = first.substring(0, first.length() - 2);
+        String secondComponent = second.substring(0, second.length() - 2);
+        if (isPrimitiveName(firstComponent) || isPrimitiveName(secondComponent)) {
+            return OBJECT_TYPE;
+        }
+        return commonType(firstComponent, secondComponent) + "[]";
     }
 
     private String commonSuperType(ClassType type, String second) {
