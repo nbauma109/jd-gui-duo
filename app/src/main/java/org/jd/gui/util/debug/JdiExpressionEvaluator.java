@@ -198,7 +198,7 @@ public final class JdiExpressionEvaluator {
             Object whenFalse = parseOperand(selectTrue, this::parseTernary);
             boolean falseIsNull = "null".equals(src.substring(falseStart, pos).trim());
             if (skipping > 0) {
-                return skippedConditional(whenTrue, whenFalse);
+                return skippedConditional(condition, whenTrue, whenFalse);
             }
             rejectNullWithPrimitive(unwrap(whenTrue), trueIsNull, unwrap(whenFalse), falseIsNull);
             Object promoted = promoteConditional(selectTrue ? whenTrue : whenFalse, selectTrue ? whenFalse : whenTrue);
@@ -213,10 +213,14 @@ public final class JdiExpressionEvaluator {
     }
 
     /** A conditional that is not evaluated still has the promoted type of its branches (it may be a branch of another one). */
-    private Object skippedConditional(Object whenTrue, Object whenFalse) {
+    private Object skippedConditional(Object condition, Object whenTrue, Object whenFalse) {
         try {
             Object promoted = promoteConditional(whenTrue, whenFalse);
-            return promoted instanceof Constant(Value plain) ? plain : promoted;
+            boolean constant = condition instanceof Constant && whenTrue instanceof Constant && whenFalse instanceof Constant;
+            if (constant && promoted instanceof Value promotedValue) {
+                return new Constant(promotedValue); // a constant conditional is a constant expression even when it is not evaluated
+            }
+            return !constant && promoted instanceof Constant(Value plain) ? plain : promoted;
         } catch (EvaluationException _) {
             return null;
         }
@@ -1210,6 +1214,23 @@ public final class JdiExpressionEvaluator {
         try {
             return member(target, name);
         } catch (EvaluationException | RuntimeException _) {
+            return declaredField(target, name); // the receiver is a placeholder: the declared type still gives the type of the field
+        }
+    }
+
+    private Object declaredField(Object target, String name) {
+        String declared = declaredTypeOf(target);
+        if (declared == null) {
+            return null;
+        }
+        if (declared.endsWith("[]") && "length".equals(name)) {
+            return placeholder("int");
+        }
+        try {
+            ReferenceType type = findClass(declared);
+            Field field = type == null ? null : type.fieldByName(name);
+            return field == null ? null : placeholder(field.typeName());
+        } catch (RuntimeException _) {
             return null;
         }
     }
