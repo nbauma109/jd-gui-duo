@@ -215,7 +215,9 @@ public final class JdiExpressionEvaluator {
     /** A conditional that is not evaluated still has the promoted type of its branches (it may be a branch of another one). */
     private Object skippedConditional(Object condition, Object whenTrue, Object whenFalse) {
         try {
-            Object promoted = promoteConditional(whenTrue, whenFalse);
+            // a constant condition decides which branch's constant value the conditional has
+            boolean selectTrue = !(condition instanceof Constant) || asBoolean(condition);
+            Object promoted = promoteConditional(selectTrue ? whenTrue : whenFalse, selectTrue ? whenFalse : whenTrue);
             boolean constant = condition instanceof Constant && whenTrue instanceof Constant && whenFalse instanceof Constant;
             if (constant && promoted instanceof Value promotedValue) {
                 return new Constant(promotedValue); // a constant conditional is a constant expression even when it is not evaluated
@@ -629,7 +631,11 @@ public final class JdiExpressionEvaluator {
         if (skipping > 0) {
             // a number can be negated without side effect: the type of -2.0 or -wrapper matters in a skipped branch
             Value skipped = skippedPrimitive(operandResult);
-            return isNumeric(skipped) ? negate(skipped) : null;
+            if (!isNumeric(skipped)) {
+                return null;
+            }
+            Value negated = negate(skipped);
+            return operandResult instanceof Constant ? new Constant(negated) : negated;
         }
         Value operand = unbox(value(operandResult)); // unary operators unbox: -boxed, +boxed
         Value negated = negate(operand);
