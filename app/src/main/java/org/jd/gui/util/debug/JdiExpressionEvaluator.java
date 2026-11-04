@@ -580,12 +580,12 @@ public final class JdiExpressionEvaluator {
         skipWs();
         if (src.startsWith("2147483648", pos) && literalEnds(pos + 10)) {
             pos += 10;
-            return skipping > 0 ? null : vm.mirrorOf(Integer.MIN_VALUE);
+            return vm.mirrorOf(Integer.MIN_VALUE); // a primitive: nothing runs, and a skipped branch needs its type
         }
         if (src.startsWith("9223372036854775808", pos) && pos + 19 < src.length()
                 && (src.charAt(pos + 19) == 'L' || src.charAt(pos + 19) == 'l') && literalEnds(pos + 20)) {
             pos += 20;
-            return skipping > 0 ? null : vm.mirrorOf(Long.MIN_VALUE);
+            return vm.mirrorOf(Long.MIN_VALUE);
         }
         return NOT_FOUND;
     }
@@ -764,7 +764,7 @@ public final class JdiExpressionEvaluator {
         }
         if (c == '"') {
             String text = parseQuoted('"');
-            return skipping > 0 ? placeholder(STRING_TYPE) : new Constant(internedLiteral(text));
+            return new Constant(skipping > 0 ? pin(vm.mirrorOf(text)) : internedLiteral(text)); // a skipped literal is not interned: only its type and constness matter
         }
         if (c == '\'') {
             String text = parseQuoted('\'');
