@@ -1213,6 +1213,9 @@ public final class JdiExpressionEvaluator {
     private Object skippedArithmetic(String op, Object left, Object right) {
         try {
             if ("+".equals(op) && (isStringOperand(left) || isStringOperand(right))) {
+                if (left instanceof Constant && right instanceof Constant) {
+                    return new Constant(pin(vm.mirrorOf(""))); // a constant expression: only its type and constness matter, it is not interned
+                }
                 return placeholder(STRING_TYPE); // a concatenation is a String whatever it joins
             }
             Value leftPrimitive = skippedPrimitive(left);
@@ -1220,7 +1223,8 @@ public final class JdiExpressionEvaluator {
             if (leftPrimitive != null && rightPrimitive != null) {
                 Value divisor = ("/".equals(op) || "%".equals(op)) ? nonZero(rightPrimitive) : rightPrimitive; // the zero of a placeholder must not divide
                 Object result = arithmetic(op, leftPrimitive, divisor, null);
-                return left instanceof Constant && right instanceof Constant && result instanceof Value value ? new Constant(value) : result;
+                boolean substituted = divisor != rightPrimitive; // 1 / 0 completes abruptly: not a constant expression
+                return !substituted && left instanceof Constant && right instanceof Constant && result instanceof Value value ? new Constant(value) : result;
             }
         } catch (EvaluationException | RuntimeException _) {
             // e.g. a division by zero: the type is unknown
