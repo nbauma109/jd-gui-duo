@@ -15,6 +15,6 @@ class OregonTrailViewTest {
 
     @Test
     void toHtmlKeepsEmphasisTagsAndEscapesEverythingElse() {
-        assertEquals("<b>a &lt;c> &amp; d</b>", OregonTrailView.toHtml("<b>a <c> & d</b>"));
+        assertEquals("<u>x</u><b>a &lt;c> &amp; d</b>", OregonTrailView.toHtml("<u>x</u><b>a <c> & d</b>"));
     }
 }

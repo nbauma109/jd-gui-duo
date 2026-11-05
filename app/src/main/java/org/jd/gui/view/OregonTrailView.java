@@ -153,11 +153,11 @@ public class OregonTrailView {
         screenPane.setCaretPosition(screenPane.getDocument().getLength());
     }
 
-    /** Escapes the line but keeps the &lt;b&gt; and &lt;i&gt; tags the game uses for emphasis. */
+    /** Escapes the line but keeps the &lt;b&gt;, &lt;i&gt; and &lt;u&gt; tags the game uses for emphasis. */
     static String toHtml(String line) {
         return line.replace("&", "&amp;")
                 .replace("<", "&lt;")
-                .replaceAll("&lt;(/?[bi])>", "<$1>");
+                .replaceAll("&lt;(/?[biu])>", "<$1>");
     }
 
     private class GameSession {
