@@ -283,9 +283,18 @@ public final class JdiExpressionEvaluator {
         return wrapper == null ? null : PRIMITIVE_OF_WRAPPER.get(wrapper);
     }
 
+    /** The wrapper type of a branch: its declared type, or the class of its value when it has no metadata (a value typed as itself). */
+    private static String wrapperTypeOf(Object branch) {
+        String declared = declaredTypeOf(branch);
+        if (declared != null) {
+            return declared;
+        }
+        return unwrap(branch) instanceof ObjectReference object ? object.referenceType().name() : null;
+    }
+
     private static boolean mixedNumericWrappers(Object first, Object second) {
-        String firstType = declaredTypeOf(first);
-        String secondType = declaredTypeOf(second);
+        String firstType = wrapperTypeOf(first);
+        String secondType = wrapperTypeOf(second);
         return firstType != null && secondType != null && !firstType.equals(secondType)
             && isWrapper(firstType) && isWrapper(secondType)
             && !BOOLEAN_WRAPPER.equals(firstType) && !BOOLEAN_WRAPPER.equals(secondType);
@@ -294,7 +303,7 @@ public final class JdiExpressionEvaluator {
     /** A branch declared as Number or Object is a reference whatever it holds: only wrapper (or unknown) declared types are unboxed. */
     private Value unboxedBranch(Object branch, Value value, boolean sameWrapper, Object counterpart) {
         String declared = declaredTypeOf(branch);
-        if (value == null && isWrapper(declared) && !declared.equals(declaredTypeOf(counterpart))) {
+        if (value == null && isWrapper(declared) && !declared.equals(wrapperTypeOf(counterpart))) {
             // a wrapper that is null here (a call that was not run, or a null that is not unboxed) still has the numeric type of its declaration
             return (Value) placeholder(primitiveOf(declared));
         }
@@ -1324,10 +1333,10 @@ public final class JdiExpressionEvaluator {
     /** The method a call resolves to: among the declared type's, then the other parts of an intersection type, then Object's. */
     private Method chooseInvoked(Object target, Receiver receiver, String name, List<Value> arguments, List<String> declaredTypes) throws EvaluationException {
         ReferenceType declaredReceiver = receiver.declared();
-        Method chosen = chooseMethod(declaredReceiver != null ? declaredReceiver : receiver.type(), name, arguments, declaredTypes, receiver.object() == null && !receiver.nullReceiver());
-        if (chosen == null && receiver.object() != null) {
-            chosen = chooseFromIntersection(target, receiver.object(), name, arguments, declaredTypes);
-        }
+        List<ReferenceType> types = new ArrayList<>();
+        types.add(declaredReceiver != null ? declaredReceiver : receiver.type());
+        types.addAll(otherIntersectionParts(target, receiver.object()));
+        Method chosen = chooseMethod(types, name, arguments, declaredTypes, receiver.object() == null && !receiver.nullReceiver());
         if (chosen == null && declaredReceiver != null) {
             // an interface has the methods of Object too, but not those of the runtime class: look them up in Object (dispatch stays virtual)
             ReferenceType objectType = findClass(OBJECT_TYPE);
@@ -1336,21 +1345,21 @@ public final class JdiExpressionEvaluator {
         return chosen;
     }
 
-    /** A conditional of two classes has the intersection of their interfaces (A&B): the methods of every part are callable, the first one was already searched. */
-    private Method chooseFromIntersection(Object target, ObjectReference object, String name, List<Value> arguments, List<String> declaredTypes) throws EvaluationException {
+    /** A conditional of two classes has the intersection of their interfaces (A&B): the methods of every part are callable, the first one is the declared receiver. */
+    private List<ReferenceType> otherIntersectionParts(Object target, ObjectReference object) {
         String declared = declaredTypeOf(target);
-        if (declared == null || declared.indexOf('&') < 0) {
-            return null;
+        List<ReferenceType> parts = new ArrayList<>();
+        if (object == null || declared == null || declared.indexOf('&') < 0) {
+            return parts;
         }
-        String[] parts = declared.split("&");
-        for (int i = 1; i < parts.length; i++) {
-            ReferenceType part = resolveType(parts[i], object);
-            Method chosen = part == null ? null : chooseMethod(part, name, arguments, declaredTypes, false);
-            if (chosen != null) {
-                return chosen;
+        String[] names = declared.split("&");
+        for (int i = 1; i < names.length; i++) {
+            ReferenceType part = resolveType(names[i], object);
+            if (part != null) {
+                parts.add(part);
             }
         }
-        return null;
+        return parts;
     }
 
     /** The receiver of a call: the type that declares the method, the object (null for a static call) and its declared type. */
@@ -1446,10 +1455,17 @@ public final class JdiExpressionEvaluator {
 
     /** The most specific applicable method; like the compiler, an evaluation error when none of them is more specific than all the others. */
     private Method chooseMethod(ReferenceType type, String name, List<Value> arguments, List<String> declaredTypes, boolean staticContext) throws EvaluationException {
+        return chooseMethod(List.of(type), name, arguments, declaredTypes, staticContext);
+    }
+
+    /** The most specific applicable method among those of all the types (the parts of an intersection type are searched together). */
+    private Method chooseMethod(List<ReferenceType> types, String name, List<Value> arguments, List<String> declaredTypes, boolean staticContext) throws EvaluationException {
         List<Method> candidates = new ArrayList<>();
-        for (Method method : type.methodsByName(name)) {
-            if (isCandidate(method, arguments, declaredTypes, staticContext)) {
-                candidates.add(method);
+        for (ReferenceType type : types) {
+            for (Method method : type.methodsByName(name)) {
+                if (isCandidate(method, arguments, declaredTypes, staticContext)) {
+                    candidates.add(method);
+                }
             }
         }
         for (Method candidate : candidates) {
