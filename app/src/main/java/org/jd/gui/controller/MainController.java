@@ -161,6 +161,7 @@ public class MainController implements API {
     private SaveAllSourcesController saveAllSourcesController;
     private SelectLocationController selectLocationController;
     private AboutController aboutController;
+    private OregonTrailController oregonTrailController;
     private SourceLoaderService sourceLoaderService;
 
     private final History history = new History();
@@ -207,6 +208,7 @@ public class MainController implements API {
                 e -> onEclipsePreferences(),
                 e -> onMavenCentralSearch(),
                 this::onToggleHighlightChanged,
+                e -> onOregonTrail(),
                 e -> onAbout(),
                 this::panelClosed,
                 this::onCurrentPageChanged,
@@ -268,6 +270,7 @@ public class MainController implements API {
                 eclipsePreferencesController = new EclipsePreferencesController(configuration, mainFrame, EclipsePreferencesPanelService.getInstance().getProviders());
                 selectLocationController = new SelectLocationController(MainController.this, mainFrame);
                 aboutController = new AboutController(mainFrame, isDarkMode());
+                oregonTrailController = new OregonTrailController(mainFrame);
                 sourceLoaderService = new SourceLoaderService();
                 // Add listeners
                 mainFrame.addComponentListener(new MainFrameListener(configuration));
@@ -618,6 +621,10 @@ public class MainController implements API {
         configuration.getPreferences().put(GuiPreferences.SELECTED_WORD_HIGHLIGHT_ENABLED, Boolean.toString(enabled));
         checkPreferencesChange(currentPage);
         mainView.preferencesChanged(getPreferences());
+    }
+
+    protected void onOregonTrail() {
+        oregonTrailController.show();
     }
 
     protected void onAbout() {

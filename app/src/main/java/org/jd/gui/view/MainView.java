@@ -171,6 +171,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             ActionListener eclipsePreferencesActionListener,
             ActionListener mavenCentralHelperActionListener,
             Consumer<Boolean> toggleHighlightChangedCallback,
+            ActionListener oregonTrailActionListener,
             ActionListener aboutActionListener,
             Runnable panelClosedCallback,
             Consumer<T> currentPageChangedCallback,
@@ -308,6 +309,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             };
             toggleHighlightAction.putValue(Action.SHORT_DESCRIPTION, "Toggle selected word highlight");
             toggleHighlightAction.putValue(Action.SELECTED_KEY, isSelectedWordHighlightEnabled(configuration.getPreferences()));
+            Action oregonTrailAction = newAction("The Oregon Trail...", true, "Play the Oregon Trail game bundled with older PlantUML versions", oregonTrailActionListener);
             Action aboutAction = newAction("About...", true, "About JD-GUI", aboutActionListener);
 
             registerKeyBinding(Binding.OPEN_FILE, openAction);
@@ -401,6 +403,8 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
             menu.add(securedPreferencesAction);
             menu.add(eclipsePreferencesAction);
             menu.add(mavenCentralHelperAction);
+            menu.addSeparator();
+            menu.add(oregonTrailAction);
             menu.addSeparator();
             menu.add(aboutAction);
             mainFrame.setJMenuBar(menuBar);

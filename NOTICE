@@ -6,6 +6,7 @@ Groovy - Apache License 2.0
 Gradle - Apache License 2.0
 JD-Core Java Release - GPLv3
 RSyntaxTextArea - Modified BSD license
+The Oregon Trail game (org.jd.gui.game.oregon, from PlantUML by Arnaud Roques) - MIT License
 
 JD-GUI Mac OSX distribution:
 
