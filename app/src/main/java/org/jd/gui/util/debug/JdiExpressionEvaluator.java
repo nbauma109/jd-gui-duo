@@ -860,7 +860,7 @@ public final class JdiExpressionEvaluator {
         Field lexical = declaring.fieldByName(name);
         if (lexical != null) {
             if (lexical.isStatic()) {
-                return typed(declaring.getValue(lexical), lexical.typeName());
+                return fieldResult(lexical, declaring.getValue(lexical));
             }
             if (self != null) {
                 return typed(self.getValue(lexical), lexical.typeName());
@@ -869,12 +869,12 @@ public final class JdiExpressionEvaluator {
         if (self != null) {
             Field field = self.referenceType().fieldByName(name);
             if (field != null) {
-                return typed(field.isStatic() ? self.referenceType().getValue(field) : self.getValue(field), field.typeName());
+                return fieldResult(field, field.isStatic() ? self.referenceType().getValue(field) : self.getValue(field));
             }
         }
         Field staticField = declaring.fieldByName(name);
         if (staticField != null && staticField.isStatic()) {
-            return typed(declaring.getValue(staticField), staticField.typeName());
+            return fieldResult(staticField, declaring.getValue(staticField));
         }
         return NOT_FOUND;
     }
@@ -1123,7 +1123,7 @@ public final class JdiExpressionEvaluator {
             if (field == null || !field.isStatic()) {
                 throw new EvaluationException("No static field '" + name + "' in " + type.name());
             }
-            return typed(type.getValue(field), field.typeName());
+            return fieldResult(field, type.getValue(field));
         }
         String declaredName = declaredTypeOf(target);
         Value value = value(target);
@@ -1132,7 +1132,7 @@ public final class JdiExpressionEvaluator {
         }
         Field staticField = value == null && declaredName != null ? staticFieldOf(declaredName, name) : null;
         if (staticField != null) {
-            return typed(staticField.declaringType().getValue(staticField), staticField.typeName());
+            return fieldResult(staticField, staticField.declaringType().getValue(staticField));
         }
         if (!(value instanceof ObjectReference object)) {
             throw new EvaluationException("Cannot read '" + name + "' on " + (value == null ? "null" : "a primitive value"));
@@ -1141,7 +1141,19 @@ public final class JdiExpressionEvaluator {
         if (field == null) {
             throw new EvaluationException("No field '" + name + "' in " + object.referenceType().name());
         }
-        return typed(field.isStatic() ? field.declaringType().getValue(field) : object.getValue(field), field.typeName());
+        return fieldResult(field, field.isStatic() ? field.declaringType().getValue(field) : object.getValue(field));
+    }
+
+    /**
+     * A static final primitive or String field is read as a constant variable (narrowing, interning). The debugger cannot tell a
+     * constant initializer from a computed one; the constants are by far the most common.
+     */
+    private Object fieldResult(Field field, Value value) {
+        boolean constantType = isPrimitiveName(field.typeName()) || STRING_TYPE.equals(field.typeName());
+        if (value != null && field.isStatic() && field.isFinal() && constantType) {
+            return new Constant(value);
+        }
+        return typed(value, field.typeName());
     }
 
     /** Java reads a static field through a null reference without complaint. */
@@ -1290,6 +1302,9 @@ public final class JdiExpressionEvaluator {
         // to the arguments (no narrowing), the most specific one; invoking it still dispatches on the runtime type.
         // a null receiver is an instance context: the overload is chosen normally, and rejected below if it needs the instance
         Method chosen = chooseMethod(declaredReceiver != null ? declaredReceiver : type, name, arguments, declaredTypes, receiver.object() == null && !nullReceiver);
+        if (chosen == null && receiver.object() != null) {
+            chosen = chooseFromIntersection(target, receiver.object(), name, arguments, declaredTypes);
+        }
         if (chosen == null && declaredReceiver != null) {
             // an interface has the methods of Object too, but not those of the runtime class: look them up in Object (dispatch stays virtual)
             ReferenceType objectType = findClass(OBJECT_TYPE);
@@ -1313,6 +1328,23 @@ public final class JdiExpressionEvaluator {
         } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException e) {
             throw new EvaluationException("Cannot call " + name + "(): " + e.getClass().getSimpleName() + (e.getMessage() == null ? "" : " " + e.getMessage()));
         }
+    }
+
+    /** A conditional of two classes has the intersection of their interfaces (A&B): the methods of every part are callable, the first one was already searched. */
+    private Method chooseFromIntersection(Object target, ObjectReference object, String name, List<Value> arguments, List<String> declaredTypes) throws EvaluationException {
+        String declared = declaredTypeOf(target);
+        if (declared == null || declared.indexOf('&') < 0) {
+            return null;
+        }
+        String[] parts = declared.split("&");
+        for (int i = 1; i < parts.length; i++) {
+            ReferenceType part = resolveType(parts[i], object);
+            Method chosen = part == null ? null : chooseMethod(part, name, arguments, declaredTypes, false);
+            if (chosen != null) {
+                return chosen;
+            }
+        }
+        return null;
     }
 
     /** The receiver of a call: the type that declares the method, the object (null for a static call) and its declared type. */
