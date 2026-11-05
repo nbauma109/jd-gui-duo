@@ -242,7 +242,9 @@ public final class JdiExpressionEvaluator {
     private Object promoteConditional(Object selected, Object other) throws EvaluationException {
         Value selectedValue = unwrap(selected);
         Value otherValue = unwrap(other);
-        rejectNullUnboxedByConditional(selected, other);
+        if (skipping == 0) {
+            rejectNullUnboxedByConditional(selected, other); // a branch that is not evaluated is never unboxed
+        }
         // a numeric wrapper next to a primitive (or another wrapper type) is unboxed first: Integer and int give an int
         boolean sameWrapper = selectedValue instanceof ObjectReference a && otherValue instanceof ObjectReference b
             && a.referenceType().equals(b.referenceType())
@@ -270,7 +272,7 @@ public final class JdiExpressionEvaluator {
         Value selectedValue = unwrap(selected);
         Value otherValue = unwrap(other);
         boolean primitiveCounterpart = selectedValue == null && isWrapper(declaredTypeOf(selected)) && otherValue instanceof PrimitiveValue;
-        if (primitiveCounterpart || mixedNumericWrappers(selected, other) && (selectedValue == null || otherValue == null)) {
+        if (primitiveCounterpart || mixedNumericWrappers(selected, other) && selectedValue == null) { // only the selected branch is unboxed
             throw new EvaluationException("NullPointerException: a null cannot be unboxed");
         }
     }
@@ -428,10 +430,21 @@ public final class JdiExpressionEvaluator {
         return commonType(firstComponent, secondComponent) + "[]";
     }
 
+    /** The common superclass together with the interfaces both classes implement that the superclass does not (Base&Extra). */
+    private String withSharedInterfaces(ClassType superclass, ClassType type, String second) {
+        List<String> extra = new ArrayList<>();
+        for (String shared : sharedInterfaceNames(type, second)) {
+            if (!isSubtype(superclass.name(), shared)) {
+                extra.add(shared);
+            }
+        }
+        return extra.isEmpty() ? superclass.name() : superclass.name() + "&" + String.join("&", extra);
+    }
+
     private String commonSuperType(ClassType type, String second) {
         for (ClassType candidate = type.superclass(); candidate != null && !OBJECT_TYPE.equals(candidate.name()); candidate = candidate.superclass()) {
             if (isSubtype(second, candidate.name())) {
-                return candidate.name();
+                return withSharedInterfaces(candidate, type, second);
             }
         }
         // only Object in common: the type is the intersection of the interfaces both classes implement
@@ -440,6 +453,11 @@ public final class JdiExpressionEvaluator {
 
     /** The interfaces {@code type} implements or extends (itself included) that {@code second} is also a subtype of, joined as an intersection. */
     private String sharedInterfaces(ReferenceType type, String second) {
+        List<String> shared = sharedInterfaceNames(type, second);
+        return shared.isEmpty() ? OBJECT_TYPE : String.join("&", shared);
+    }
+
+    private List<String> sharedInterfaceNames(ReferenceType type, String second) {
         java.util.Set<com.sun.jdi.InterfaceType> candidates = new java.util.LinkedHashSet<>();
         if (type instanceof ClassType classType) {
             candidates.addAll(classType.allInterfaces());
@@ -452,7 +470,7 @@ public final class JdiExpressionEvaluator {
                 shared.add(declared.name());
             }
         }
-        return shared.isEmpty() ? OBJECT_TYPE : String.join("&", shared);
+        return shared;
     }
 
     private static void collectInterfaces(com.sun.jdi.InterfaceType type, java.util.Set<com.sun.jdi.InterfaceType> into) {
@@ -812,7 +830,7 @@ public final class JdiExpressionEvaluator {
                     pos = start; // a class name (Math.PI): looking it up runs nothing
                     return parseClassName();
                 }
-                return read instanceof Value || read instanceof Typed || read == null ? read : null;
+                return read instanceof Value || read instanceof Typed || read instanceof Constant || read == null ? read : null;
             } catch (EvaluationException | IncompatibleThreadStateException | RuntimeException _) {
                 return null;
             }
