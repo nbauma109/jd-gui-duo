@@ -1296,20 +1296,11 @@ public final class JdiExpressionEvaluator {
     private Object invoke(Object target, String name, List<Value> arguments, List<String> declaredTypes, boolean dryRun) throws EvaluationException {
         Receiver receiver = resolveReceiver(target, name);
         ReferenceType type = receiver.type();
-        ReferenceType declaredReceiver = receiver.declared();
         boolean nullReceiver = receiver.nullReceiver();
         // Like Java: the signature is chosen among the methods of the declared type of the receiver that are applicable
         // to the arguments (no narrowing), the most specific one; invoking it still dispatches on the runtime type.
         // a null receiver is an instance context: the overload is chosen normally, and rejected below if it needs the instance
-        Method chosen = chooseMethod(declaredReceiver != null ? declaredReceiver : type, name, arguments, declaredTypes, receiver.object() == null && !nullReceiver);
-        if (chosen == null && receiver.object() != null) {
-            chosen = chooseFromIntersection(target, receiver.object(), name, arguments, declaredTypes);
-        }
-        if (chosen == null && declaredReceiver != null) {
-            // an interface has the methods of Object too, but not those of the runtime class: look them up in Object (dispatch stays virtual)
-            ReferenceType objectType = findClass(OBJECT_TYPE);
-            chosen = chooseMethod(objectType != null ? objectType : type, name, arguments, declaredTypes, false);
-        }
+        Method chosen = chooseInvoked(target, receiver, name, arguments, declaredTypes);
         // a call that is not run (dry run) on the typed null placeholder of an earlier skipped call only needs the return type
         if (nullReceiver && !dryRun && (chosen == null || !chosen.isStatic())) {
             throw new EvaluationException("Cannot call '" + name + "' on null");
@@ -1328,6 +1319,21 @@ public final class JdiExpressionEvaluator {
         } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException e) {
             throw new EvaluationException("Cannot call " + name + "(): " + e.getClass().getSimpleName() + (e.getMessage() == null ? "" : " " + e.getMessage()));
         }
+    }
+
+    /** The method a call resolves to: among the declared type's, then the other parts of an intersection type, then Object's. */
+    private Method chooseInvoked(Object target, Receiver receiver, String name, List<Value> arguments, List<String> declaredTypes) throws EvaluationException {
+        ReferenceType declaredReceiver = receiver.declared();
+        Method chosen = chooseMethod(declaredReceiver != null ? declaredReceiver : receiver.type(), name, arguments, declaredTypes, receiver.object() == null && !receiver.nullReceiver());
+        if (chosen == null && receiver.object() != null) {
+            chosen = chooseFromIntersection(target, receiver.object(), name, arguments, declaredTypes);
+        }
+        if (chosen == null && declaredReceiver != null) {
+            // an interface has the methods of Object too, but not those of the runtime class: look them up in Object (dispatch stays virtual)
+            ReferenceType objectType = findClass(OBJECT_TYPE);
+            chosen = chooseMethod(objectType != null ? objectType : receiver.type(), name, arguments, declaredTypes, false);
+        }
+        return chosen;
     }
 
     /** A conditional of two classes has the intersection of their interfaces (A&B): the methods of every part are callable, the first one was already searched. */
