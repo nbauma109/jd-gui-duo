@@ -484,7 +484,9 @@ public final class JdiExpressionEvaluator {
         while (accept("||")) {
             boolean decided = skipping == 0 && asBoolean(left); // true || x: x is not evaluated
             Object right = parseOperand(decided, this::parseAnd);
-            left = skipping > 0 ? vm.mirrorOf(false) : constantIf(left, right, vm.mirrorOf(decided || asBoolean(right)));
+            Object leftOperand = left;
+            left = skipping > 0 ? skippedBoolean(leftOperand, right, () -> asBoolean(leftOperand) || asBoolean(right))
+                : constantIf(left, right, vm.mirrorOf(decided || asBoolean(right)));
         }
         return left;
     }
@@ -494,7 +496,9 @@ public final class JdiExpressionEvaluator {
         while (accept("&&")) {
             boolean decided = skipping == 0 && !asBoolean(left); // false && x: x is not evaluated
             Object right = parseOperand(decided, this::parseEquality);
-            left = skipping > 0 ? vm.mirrorOf(false) : constantIf(left, right, vm.mirrorOf(!decided && asBoolean(right)));
+            Object leftOperand = left;
+            left = skipping > 0 ? skippedBoolean(leftOperand, right, () -> asBoolean(leftOperand) && asBoolean(right))
+                : constantIf(left, right, vm.mirrorOf(!decided && asBoolean(right)));
         }
         return left;
     }
@@ -505,11 +509,15 @@ public final class JdiExpressionEvaluator {
             if (accept("==")) {
                 rejectNullUnboxingAgainstPrimitive(left);
                 Object right = parseRelational();
-                left = skipping > 0 ? vm.mirrorOf(false) : constantIf(left, right, vm.mirrorOf(valuesEqual(value(left), value(right))));
+                Object leftOperand = left;
+                left = skipping > 0 ? skippedBoolean(leftOperand, right, () -> valuesEqual(value(leftOperand), value(right)))
+                    : constantIf(left, right, vm.mirrorOf(valuesEqual(value(left), value(right))));
             } else if (accept("!=")) {
                 rejectNullUnboxingAgainstPrimitive(left);
                 Object right = parseRelational();
-                left = skipping > 0 ? vm.mirrorOf(false) : constantIf(left, right, vm.mirrorOf(!valuesEqual(value(left), value(right))));
+                Object leftOperand = left;
+                left = skipping > 0 ? skippedBoolean(leftOperand, right, () -> !valuesEqual(value(leftOperand), value(right)))
+                    : constantIf(left, right, vm.mirrorOf(!valuesEqual(value(left), value(right))));
             } else {
                 return left;
             }
@@ -539,7 +547,8 @@ public final class JdiExpressionEvaluator {
             rejectNullUnboxing(op, left);
             Object right = parseAdditive();
             if (skipping > 0) {
-                left = vm.mirrorOf(false); // not evaluated, but still a boolean
+                Object leftOperand = left;
+                left = skippedBoolean(leftOperand, right, () -> compare(op, value(leftOperand), value(right)));
                 continue;
             }
             left = constantIf(left, right, vm.mirrorOf(compare(op, value(left), value(right))));
@@ -617,6 +626,23 @@ public final class JdiExpressionEvaluator {
         return NOT_FOUND;
     }
 
+    @FunctionalInterface
+    private interface BooleanOperation {
+        boolean test() throws EvaluationException;
+    }
+
+    /** A comparison that is not evaluated: of two constants it has no side effect, so it keeps its value and constant status; otherwise any boolean stands for it. */
+    private Object skippedBoolean(Object left, Object right, BooleanOperation operation) {
+        if (left instanceof Constant && right instanceof Constant) {
+            try {
+                return new Constant(vm.mirrorOf(operation.test()));
+            } catch (EvaluationException | RuntimeException _) {
+                // not computable: any boolean stands for it
+            }
+        }
+        return vm.mirrorOf(false);
+    }
+
     /** An operation on two constants is a constant expression (a string concatenated with it is interned). */
     private static Object constantIf(Object left, Object right, Value result) {
         return left instanceof Constant && right instanceof Constant ? new Constant(result) : result;
@@ -682,6 +708,11 @@ public final class JdiExpressionEvaluator {
         return vm.mirrorOf(-(int) numberAsLong(operand));
     }
 
+    private Object promotedToInt(PrimitiveValue operand, boolean constant) {
+        Value promoted = vm.mirrorOf(operand.intValue());
+        return constant ? new Constant(promoted) : promoted;
+    }
+
     private Object parseUnaryPlus() throws EvaluationException, IncompatibleThreadStateException {
         Object operandResult = parseUnary();
         if (skipping > 0) {
@@ -691,13 +722,13 @@ public final class JdiExpressionEvaluator {
                 return operandResult;
             }
             if (skipped instanceof com.sun.jdi.ByteValue || skipped instanceof com.sun.jdi.ShortValue || skipped instanceof CharValue) {
-                return vm.mirrorOf(0);
+                return promotedToInt((PrimitiveValue) skipped, operandResult instanceof Constant); // +'a' keeps the value 97
             }
             return operandResult instanceof Constant ? operandResult : skipped;
         }
         Value operand = unbox(value(operandResult)); // unary operators unbox: -boxed, +boxed
         if (operand instanceof com.sun.jdi.ByteValue || operand instanceof com.sun.jdi.ShortValue || operand instanceof CharValue) {
-            return vm.mirrorOf(((PrimitiveValue) operand).intValue()); // unary numeric promotion
+            return promotedToInt((PrimitiveValue) operand, operandResult instanceof Constant); // unary numeric promotion
         }
         numberAsLong(operand); // only numbers
         return operandResult instanceof Constant ? new Constant(operand) : operand;
@@ -1150,6 +1181,7 @@ public final class JdiExpressionEvaluator {
             if (field == null || !field.isStatic()) {
                 throw new EvaluationException("No static field '" + name + "' in " + type.name());
             }
+            ensureInitialized(type);
             return fieldResult(field, type.getValue(field));
         }
         String declaredName = declaredTypeOf(target);
@@ -1159,6 +1191,7 @@ public final class JdiExpressionEvaluator {
         }
         Field staticField = value == null && declaredName != null ? staticFieldOf(declaredName, name) : null;
         if (staticField != null) {
+            ensureInitialized(staticField.declaringType());
             return fieldResult(staticField, staticField.declaringType().getValue(staticField));
         }
         if (!(value instanceof ObjectReference object)) {
@@ -1181,6 +1214,27 @@ public final class JdiExpressionEvaluator {
             return new Constant(value);
         }
         return typed(value, field.typeName());
+    }
+
+    /** A prepared class whose initializer has not run holds default static values: Java initializes it at the first static access (a branch that is not evaluated runs nothing). */
+    private void ensureInitialized(ReferenceType type) throws EvaluationException {
+        if (skipping > 0 || type.isInitialized()) {
+            return;
+        }
+        List<ReferenceType> classClasses = vm.classesByName("java.lang.Class");
+        Method forName = !classClasses.isEmpty() && classClasses.get(0) instanceof ClassType classClass
+            ? classClass.concreteMethodByName("forName", "(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;") : null;
+        if (forName == null) {
+            return;
+        }
+        try {
+            ((ClassType) classClasses.get(0)).invokeMethod(thread, forName,
+                java.util.Arrays.<Value>asList(vm.mirrorOf(type.name()), vm.mirrorOf(true), type.classLoader()), ObjectReference.INVOKE_SINGLE_THREADED);
+        } catch (InvocationException e) {
+            throw new EvaluationException("Exception in the initializer of " + type.name() + ": " + e.exception().referenceType().name());
+        } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException | RuntimeException e) {
+            throw new EvaluationException("Cannot initialize " + type.name() + ": " + e.getClass().getSimpleName());
+        }
     }
 
     /** Java reads a static field through a null reference without complaint. */
