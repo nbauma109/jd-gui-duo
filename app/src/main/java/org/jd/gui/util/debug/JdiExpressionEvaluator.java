@@ -661,7 +661,7 @@ public final class JdiExpressionEvaluator {
         if (accept("!")) {
             Object operand = parseUnary();
             if (skipping > 0) {
-                return vm.mirrorOf(false);
+                return skippedBoolean(operand, operand, () -> !asBoolean(operand)); // a constant keeps its value
             }
             Value negated = vm.mirrorOf(!asBoolean(operand));
             return operand instanceof Constant ? new Constant(negated) : negated;
@@ -1181,7 +1181,7 @@ public final class JdiExpressionEvaluator {
             if (field == null || !field.isStatic()) {
                 throw new EvaluationException("No static field '" + name + "' in " + type.name());
             }
-            ensureInitialized(type);
+            ensureInitialized(field);
             return fieldResult(field, type.getValue(field));
         }
         String declaredName = declaredTypeOf(target);
@@ -1191,7 +1191,7 @@ public final class JdiExpressionEvaluator {
         }
         Field staticField = value == null && declaredName != null ? staticFieldOf(declaredName, name) : null;
         if (staticField != null) {
-            ensureInitialized(staticField.declaringType());
+            ensureInitialized(staticField);
             return fieldResult(staticField, staticField.declaringType().getValue(staticField));
         }
         if (!(value instanceof ObjectReference object)) {
@@ -1208,17 +1208,22 @@ public final class JdiExpressionEvaluator {
      * A static final primitive or String field is read as a constant variable (narrowing, interning). The debugger cannot tell a
      * constant initializer from a computed one; the constants are by far the most common.
      */
-    private Object fieldResult(Field field, Value value) {
+    private static boolean isConstantVariable(Field field) {
         boolean constantType = isPrimitiveName(field.typeName()) || STRING_TYPE.equals(field.typeName());
-        if (value != null && field.isStatic() && field.isFinal() && constantType) {
+        return field.isStatic() && field.isFinal() && constantType;
+    }
+
+    private Object fieldResult(Field field, Value value) {
+        if (value != null && isConstantVariable(field)) {
             return new Constant(value);
         }
         return typed(value, field.typeName());
     }
 
     /** A prepared class whose initializer has not run holds default static values: Java initializes it at the first static access (a branch that is not evaluated runs nothing). */
-    private void ensureInitialized(ReferenceType type) throws EvaluationException {
-        if (skipping > 0 || type.isInitialized()) {
+    private void ensureInitialized(Field field) throws EvaluationException {
+        ReferenceType type = field.declaringType(); // only the class that declares the field is initialized, not the one that qualifies it
+        if (skipping > 0 || type.isInitialized() || isConstantVariable(field)) {
             return;
         }
         List<ReferenceType> classClasses = vm.classesByName("java.lang.Class");
