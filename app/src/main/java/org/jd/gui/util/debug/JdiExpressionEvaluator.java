@@ -510,13 +510,13 @@ public final class JdiExpressionEvaluator {
                 rejectNullUnboxingAgainstPrimitive(left);
                 Object right = parseRelational();
                 Object leftOperand = left;
-                left = skipping > 0 ? skippedBoolean(leftOperand, right, () -> valuesEqual(value(leftOperand), value(right)))
+                left = skipping > 0 ? skippedBoolean(leftOperand, right, () -> constantsEqual(value(leftOperand), value(right)))
                     : constantIf(left, right, vm.mirrorOf(valuesEqual(value(left), value(right))));
             } else if (accept("!=")) {
                 rejectNullUnboxingAgainstPrimitive(left);
                 Object right = parseRelational();
                 Object leftOperand = left;
-                left = skipping > 0 ? skippedBoolean(leftOperand, right, () -> !valuesEqual(value(leftOperand), value(right)))
+                left = skipping > 0 ? skippedBoolean(leftOperand, right, () -> !constantsEqual(value(leftOperand), value(right)))
                     : constantIf(left, right, vm.mirrorOf(!valuesEqual(value(left), value(right))));
             } else {
                 return left;
@@ -1273,7 +1273,7 @@ public final class JdiExpressionEvaluator {
         try {
             if ("+".equals(op) && (isStringOperand(left) || isStringOperand(right))) {
                 if (left instanceof Constant && right instanceof Constant) {
-                    return new Constant(pin(vm.mirrorOf(""))); // a constant expression: only its type and constness matter, it is not interned
+                    return new Constant(pin(vm.mirrorOf(text(value(left)) + text(value(right))))); // a constant expression, not interned: its contents are compared by value
                 }
                 return placeholder(STRING_TYPE); // a concatenation is a String whatever it joins
             }
@@ -1793,6 +1793,14 @@ public final class JdiExpressionEvaluator {
             }
         }
         return value;
+    }
+
+    /** Java interns the string constants: two of them are equal when their contents are (the skipped ones are not interned). */
+    private static boolean constantsEqual(Value left, Value right) throws EvaluationException {
+        if (left instanceof StringReference l && right instanceof StringReference r) {
+            return l.value().equals(r.value());
+        }
+        return valuesEqual(left, right);
     }
 
     private static boolean valuesEqual(Value originalLeft, Value originalRight) throws EvaluationException {
