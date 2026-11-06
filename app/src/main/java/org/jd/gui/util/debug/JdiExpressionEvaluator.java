@@ -408,7 +408,7 @@ public final class JdiExpressionEvaluator {
             return first;
         }
         if (first.contains("&") || second.contains("&")) {
-            return OBJECT_TYPE;
+            return commonIntersection(first, second);
         }
         if (first.endsWith("[]") && second.endsWith("[]")) {
             return commonArrayType(first, second);
@@ -418,6 +418,22 @@ public final class JdiExpressionEvaluator {
             return commonSuperType(type, second);
         }
         return firstType instanceof com.sun.jdi.InterfaceType ? sharedInterfaces(firstType, second) : OBJECT_TYPE;
+    }
+
+    /** The parts of either type (A&B is a subtype of A and of B) that the other type is a subtype of, as an intersection. */
+    private String commonIntersection(String first, String second) {
+        java.util.Set<String> shared = new java.util.LinkedHashSet<>();
+        for (String part : first.split("&")) {
+            if (isSubtype(second, part)) {
+                shared.add(part);
+            }
+        }
+        for (String part : second.split("&")) {
+            if (isSubtype(first, part)) {
+                shared.add(part);
+            }
+        }
+        return shared.isEmpty() ? OBJECT_TYPE : String.join("&", shared);
     }
 
     /** Arrays of references have the array of the common type of their components (String[] and Integer[] give Object[]...); primitive components share only Object. */
@@ -1639,6 +1655,12 @@ public final class JdiExpressionEvaluator {
     private boolean isSubtype(String typeName, String superName) {
         if (typeName.equals(superName) || OBJECT_TYPE.equals(superName)) {
             return true;
+        }
+        if (superName.indexOf('&') >= 0) { // a subtype of an intersection is a subtype of every part
+            return java.util.Arrays.stream(superName.split("&")).allMatch(part -> isSubtype(typeName, part));
+        }
+        if (typeName.indexOf('&') >= 0) { // an intersection is a subtype of what any of its parts is a subtype of
+            return java.util.Arrays.stream(typeName.split("&")).anyMatch(part -> isSubtype(part, superName));
         }
         if (typeName.endsWith("[]")) {
             // arrays are Cloneable and Serializable, and covariant when their elements are references
