@@ -110,7 +110,9 @@ public class RemoteDebugController {
     private final Map<ThreadReference, Location> queuedThreads = new LinkedHashMap<>();
     private int selectedFrameIndex; // frame shown in Variables/Expressions, 0 = top frame
     private final List<String> watchExpressions = new CopyOnWriteArrayList<>();
-    private final Object evaluationLock = new Object();
+    /** Held by the evaluation of a thread and by the steps and resumes of that same thread; the other stopped threads stay free to resume. */
+    private final Map<ThreadReference, Object> evaluationLocks = new ConcurrentHashMap<>();
+    private final Object noThreadLock = new Object();
     /** The thread that runs the methods of the evaluation in progress; its breakpoint and exception events are not stops. */
     private volatile ThreadReference evaluatingThread;
     /** Results of the last Inspect and of the last watch evaluation: pinned in the debuggee while the views may still read them. */
@@ -451,7 +453,7 @@ public class RemoteDebugController {
             protected Void doInBackground() {
                 try {
                     pendingSteps.remove(thread);
-                    synchronized (evaluationLock) { // resuming during an invocation would be undone when it suspends the thread again
+                    synchronized (evaluationLockOf(thread)) { // resuming during an invocation would be undone when it suspends the thread again
                         deleteStepRequests(thread);
                         thread.resume();
                     }
@@ -758,6 +760,7 @@ public class RemoteDebugController {
     }
 
     private void resetThreads() {
+        evaluationLocks.clear();
         runToLineRequests.clear();
         runToLineTargets.clear();
         pendingSteps.clear();
@@ -941,9 +944,7 @@ public class RemoteDebugController {
         new SwingWorker<DebugVariableNode, Void>() {
             @Override
             protected DebugVariableNode doInBackground() {
-                synchronized (evaluationLock) {
-                    return withoutSuspendingRequests(() -> inspect(expression));
-                }
+                return withEvaluationLock(thread -> withoutSuspendingRequests(() -> inspect(expression, thread)));
             }
 
             @Override
@@ -962,11 +963,9 @@ public class RemoteDebugController {
         }.execute();
     }
 
-    private DebugVariableNode inspect(String expression) {
-        ThreadReference thread;
+    private DebugVariableNode inspect(String expression, ThreadReference thread) {
         int frameIndex;
         synchronized (threadLock) {
-            thread = activeRunning ? null : activeThread;
             frameIndex = selectedFrameIndex;
         }
         if (thread == null) {
@@ -1037,9 +1036,29 @@ public class RemoteDebugController {
 
     /** Evaluates every watch expression in the selected frame; blank values when nothing is stopped. */
     private List<DebugVariableNode> evaluateExpressions() {
-        // Evaluations invoke methods in the debuggee thread: they must not overlap.
-        synchronized (evaluationLock) {
-            return withoutSuspendingRequests(this::evaluateExpressionsLocked);
+        // Evaluations invoke methods in the debuggee thread: they must not overlap, nor meet a step or resume of that thread.
+        return withEvaluationLock(thread -> withoutSuspendingRequests(() -> evaluateExpressionsLocked(thread)));
+    }
+
+    private Object evaluationLockOf(ThreadReference thread) {
+        return evaluationLocks.computeIfAbsent(thread, _ -> new Object());
+    }
+
+    private ThreadReference evaluationTarget() {
+        synchronized (threadLock) {
+            return activeRunning ? null : activeThread;
+        }
+    }
+
+    /** Runs an evaluation of the selected thread while holding that thread's lock only: resuming another stopped thread (which may hold a monitor the evaluation waits for) is not blocked. */
+    private <T> T withEvaluationLock(java.util.function.Function<ThreadReference, T> evaluation) {
+        while (true) {
+            ThreadReference target = evaluationTarget();
+            synchronized (target == null ? noThreadLock : evaluationLockOf(target)) {
+                if (java.util.Objects.equals(target, evaluationTarget())) {
+                    return evaluation.apply(target);
+                }
+            }
         }
     }
 
@@ -1057,11 +1076,9 @@ public class RemoteDebugController {
         }
     }
 
-    private List<DebugVariableNode> evaluateExpressionsLocked() {
-        ThreadReference thread;
+    private List<DebugVariableNode> evaluateExpressionsLocked(ThreadReference thread) {
         int frameIndex;
         synchronized (threadLock) {
-            thread = activeRunning ? null : activeThread;
             frameIndex = selectedFrameIndex;
         }
         List<DebugVariableNode> nodes = new ArrayList<>();
@@ -1183,7 +1200,7 @@ public class RemoteDebugController {
             protected Void doInBackground() {
                 try {
                     pendingSteps.remove(thread);
-                    synchronized (evaluationLock) { // a step reached inside a running evaluation would suspend the invoked method and wedge both
+                    synchronized (evaluationLockOf(thread)) { // a step reached inside a running evaluation would suspend the invoked method and wedge both
                         issueStep(vm, thread, depth);
                     }
                 } catch (RuntimeException e) {
@@ -1221,7 +1238,7 @@ public class RemoteDebugController {
             protected Void doInBackground() {
                 try {
                     pendingSteps.remove(thread);
-                    synchronized (evaluationLock) { // the temporary breakpoint must not be hit by a running evaluation
+                    synchronized (evaluationLockOf(thread)) { // the temporary breakpoint must not be hit by a running evaluation
                         deleteStepRequests(thread);
                         clearRunToLine(thread); // an earlier Run to Line of this thread; other threads keep theirs
                         List<BreakpointRequest> requests = new CopyOnWriteArrayList<>();
@@ -1328,7 +1345,7 @@ public class RemoteDebugController {
                 try {
                     pendingSteps.remove(thread);
                     deleteStepRequests(thread);
-                    synchronized (evaluationLock) {
+                    synchronized (evaluationLockOf(thread)) {
                         thread.popFrames(thread.frame(frameIndex));
                         issueStep(vm, thread, StepRequest.STEP_INTO);
                     }

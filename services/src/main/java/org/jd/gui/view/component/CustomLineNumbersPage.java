@@ -132,7 +132,8 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
         runToLine.setAccelerator(KeyBindings.getConfiguredKeyStroke(debugApi.getPreferences(), KeyBindings.Binding.RUN_TO_LINE));
         int clickedLine = 0;
         try {
-            clickedLine = getSourceLineNumber(textArea.getLineOfOffset(textArea.viewToModel2D(e.getPoint())) + 1);
+            int clickedTextLine = textArea.getLineOfOffset(textArea.viewToModel2D(e.getPoint()));
+            clickedLine = isCodeLine(clickedTextLine) ? getSourceLineNumber(clickedTextLine + 1) : 0;
         } catch (BadLocationException _) {
             // click below the last line
         }
@@ -364,12 +365,21 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
     protected void toggleBreakpointLineNumber(int sourceLineNumber) {
     }
 
+    /** The source line holding the caret; 0 for a blank or comment-only line, where no code can be reached. */
     public int getCaretSourceLine() {
         try {
-            return getSourceLineNumber(textArea.getLineOfOffset(textArea.getCaretPosition()) + 1);
+            int textLine = textArea.getLineOfOffset(textArea.getCaretPosition());
+            return isCodeLine(textLine) ? getSourceLineNumber(textLine + 1) : 0;
         } catch (BadLocationException _) {
             return 0;
         }
+    }
+
+    /** A line with something other than whitespace or a comment: the only kind that holds executable code. */
+    private boolean isCodeLine(int textLine) throws BadLocationException {
+        int start = textArea.getLineStartOffset(textLine);
+        String text = textArea.getText(start, textArea.getLineEndOffset(textLine) - start).trim();
+        return !text.isEmpty() && !text.startsWith("//") && !text.startsWith("/*") && !text.startsWith("*");
     }
 
     public void toggleBreakpointAtCaret() {

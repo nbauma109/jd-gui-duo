@@ -265,9 +265,7 @@ public final class JdiExpressionEvaluator {
             if (promoted != null) {
                 return promoted;
             }
-            if (selectedValue instanceof ObjectReference) {
-                return s;
-            }
+            return selectedValue instanceof ObjectReference ? s : selected; // unboxing, not boxing: the primitive keeps its type
         }
         // Boolean next to boolean (or a null-free mix of Boolean and boolean) is a primitive boolean
         if (!sameWrapper && selectedUnboxed instanceof BooleanValue && otherUnboxed instanceof BooleanValue) {
