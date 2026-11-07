@@ -443,7 +443,8 @@ public final class JdiExpressionEvaluator {
         if (isPrimitiveName(firstComponent) || isPrimitiveName(secondComponent)) {
             return OBJECT_TYPE;
         }
-        return commonType(firstComponent, secondComponent) + "[]";
+        // every part of an intersection becomes an array type (Serializable&Comparable gives Serializable[]&Comparable[])
+        return java.util.Arrays.stream(commonType(firstComponent, secondComponent).split("&")).map(part -> part + "[]").collect(java.util.stream.Collectors.joining("&"));
     }
 
     /** The common superclass together with the interfaces both classes implement that the superclass does not (Base&Extra). */
@@ -1239,7 +1240,8 @@ public final class JdiExpressionEvaluator {
     /** A prepared class whose initializer has not run holds default static values: Java initializes it at the first static access (a branch that is not evaluated runs nothing). */
     private void ensureInitialized(Field field) throws EvaluationException {
         ReferenceType type = field.declaringType(); // only the class that declares the field is initialized, not the one that qualifies it
-        if (skipping > 0 || type.isInitialized() || isConstantVariable(field)) {
+        // HotSpot may report a prepared interface as initialized before its fields are: an interface is always asked to initialize
+        if (skipping > 0 || isConstantVariable(field) || !(type instanceof com.sun.jdi.InterfaceType) && type.isInitialized()) {
             return;
         }
         List<ReferenceType> classClasses = vm.classesByName("java.lang.Class");

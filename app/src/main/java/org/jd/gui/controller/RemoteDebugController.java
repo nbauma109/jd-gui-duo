@@ -128,7 +128,7 @@ public class RemoteDebugController {
 
     private record RunToLineTarget(String typeName, int lineNumber) {
     }
-    /** Number of expression evaluations running: requests installed meanwhile stay disabled until they end. */
+    /** Number of expression evaluations running: the event loop ignores the requests hit by the evaluating thread only. */
     private final java.util.concurrent.atomic.AtomicInteger evaluations = new java.util.concurrent.atomic.AtomicInteger();
     /** Changes whenever the stop shown in the views stops being current (resume, step, other thread, disconnect). */
     private volatile long stopGeneration;
@@ -285,9 +285,8 @@ public class RemoteDebugController {
         try {
             ExceptionRequest request = vm.eventRequestManager().createExceptionRequest(referenceType, breakpoint.caught(), breakpoint.uncaught());
             request.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
-            // registered first, enabled after: an evaluation that ends in between still finds it (see restoreRequests)
             installedExceptions.computeIfAbsent(breakpoint.typeName(), _ -> new CopyOnWriteArrayList<>()).add(request);
-            request.setEnabled(evaluations.get() == 0 && !skipAllBreakpoints && !disabledExceptions.contains(breakpoint.typeName()));
+            request.setEnabled(!skipAllBreakpoints && !disabledExceptions.contains(breakpoint.typeName()));
         } catch (RuntimeException e) {
             assert ExceptionUtil.printStackTrace(e);
         }
@@ -1055,32 +1054,6 @@ public class RemoteDebugController {
             return action.get();
         } finally {
             evaluations.decrementAndGet();
-            restoreRequests();
-        }
-    }
-
-    /** Enables the requests that were installed while the evaluation ran, unless the user disabled or skipped them. */
-    private void restoreRequests() {
-        boolean idle = evaluations.get() == 0;
-        installedBreakpoints.forEach((key, requests) ->
-            restoreManaged(requests, idle, !skipAllBreakpoints && !disabledBreakpoints.contains(key)));
-        installedExceptions.forEach((typeName, requests) ->
-            restoreManaged(requests, idle, !skipAllBreakpoints && !disabledExceptions.contains(typeName)));
-    }
-
-    private static void restoreManaged(List<? extends EventRequest> requests, boolean idle, boolean enabled) {
-        for (EventRequest request : requests) {
-            if (idle) {
-                setEnabledQuietly(request, enabled);
-            }
-        }
-    }
-
-    private static void setEnabledQuietly(EventRequest request, boolean enabled) {
-        try {
-            request.setEnabled(enabled);
-        } catch (RuntimeException _) {
-            // the request was deleted meanwhile
         }
     }
 
@@ -1455,7 +1428,7 @@ public class RemoteDebugController {
         for (Map.Entry<String, List<ExceptionRequest>> entry : installedExceptions.entrySet()) {
             for (ExceptionRequest request : entry.getValue()) {
                 try {
-                    request.setEnabled(evaluations.get() == 0 && !skip && !disabledExceptions.contains(entry.getKey()));
+                    request.setEnabled(!skip && !disabledExceptions.contains(entry.getKey()));
                 } catch (RuntimeException e) {
                     assert ExceptionUtil.printStackTrace(e);
                 }
@@ -1464,7 +1437,7 @@ public class RemoteDebugController {
         for (Map.Entry<BreakpointKey, List<BreakpointRequest>> entry : installedBreakpoints.entrySet()) {
             for (BreakpointRequest request : entry.getValue()) {
                 try {
-                    request.setEnabled(evaluations.get() == 0 && !skip && !disabledBreakpoints.contains(entry.getKey()));
+                    request.setEnabled(!skip && !disabledBreakpoints.contains(entry.getKey()));
                 } catch (RuntimeException e) {
                     assert ExceptionUtil.printStackTrace(e);
                 }
@@ -1499,7 +1472,7 @@ public class RemoteDebugController {
             disabledExceptions.add(typeName);
         }
         for (ExceptionRequest request : installedExceptions.getOrDefault(typeName, List.of())) {
-            request.setEnabled(evaluations.get() == 0 && enabled && !skipAllBreakpoints);
+            request.setEnabled(enabled && !skipAllBreakpoints);
         }
         publishBreakpoints();
     }
@@ -1514,7 +1487,7 @@ public class RemoteDebugController {
             disabledBreakpoints.add(key);
         }
         for (BreakpointRequest request : installedBreakpoints.getOrDefault(key, List.of())) {
-            request.setEnabled(evaluations.get() == 0 && enabled && !skipAllBreakpoints);
+            request.setEnabled(enabled && !skipAllBreakpoints);
         }
         publishBreakpoints();
     }
@@ -1605,7 +1578,7 @@ public class RemoteDebugController {
                 BreakpointRequest request = vm.eventRequestManager().createBreakpointRequest(location);
                 request.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
                 installedBreakpoints.computeIfAbsent(breakpoint, _ -> new CopyOnWriteArrayList<>()).add(request);
-                request.setEnabled(evaluations.get() == 0 && !skipAllBreakpoints && !disabledBreakpoints.contains(breakpoint));
+                request.setEnabled(!skipAllBreakpoints && !disabledBreakpoints.contains(breakpoint));
             }
         } catch (AbsentInformationException | com.sun.jdi.ClassNotPreparedException e) {
             assert ExceptionUtil.printStackTrace(e);
