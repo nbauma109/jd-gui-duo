@@ -948,30 +948,29 @@ public final class JdiExpressionEvaluator {
         ReferenceType declaring = frame.location().declaringType();
         // the field the executing method sees: looked up in its class, not in the (sub)class of the receiver
         Field lexical = declaring.fieldByName(name);
-        if (lexical != null) {
-            if (lexical.isStatic()) {
-                ensureInitialized(lexical); // inherited from an interface that may not be initialized yet
-                return fieldResult(lexical, declaring.getValue(lexical));
-            }
-            if (self != null) {
-                return typed(self.getValue(lexical), lexical.typeName());
-            }
+        if (lexical != null && (lexical.isStatic() || self != null)) {
+            return readField(lexical, declaring, self);
         }
         if (self != null) {
             Field field = self.referenceType().fieldByName(name);
             if (field != null) {
-                if (field.isStatic()) {
-                    ensureInitialized(field);
-                }
-                return fieldResult(field, field.isStatic() ? self.referenceType().getValue(field) : self.getValue(field));
+                return readField(field, self.referenceType(), self);
             }
         }
         Field staticField = declaring.fieldByName(name);
         if (staticField != null && staticField.isStatic()) {
-            ensureInitialized(staticField);
-            return fieldResult(staticField, declaring.getValue(staticField));
+            return readField(staticField, declaring, null);
         }
         return NOT_FOUND;
+    }
+
+    /** A field read by its simple name: a static one first initializes the class or interface that declares it (it may be inherited). */
+    private Object readField(Field field, ReferenceType staticOwner, ObjectReference self) throws EvaluationException {
+        if (field.isStatic()) {
+            ensureInitialized(field);
+            return fieldResult(field, staticOwner.getValue(field));
+        }
+        return typed(self.getValue(field), field.typeName());
     }
 
     private ClassRef parseClassName() throws EvaluationException {
