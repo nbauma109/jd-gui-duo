@@ -1537,7 +1537,10 @@ public final class JdiExpressionEvaluator {
         }
         // a null reference still reaches the static methods of its declared type; an array has only the methods of Object
         String receiverName = declaredName == null ? null : declaredName.split("&")[0];
-        ReferenceType declaredType = value != null || receiverName == null ? null : findClass(receiverName.endsWith("[]") ? OBJECT_TYPE : receiverName);
+        ReferenceType declaredType = null;
+        if (value == null && receiverName != null) {
+            declaredType = findClass(receiverName.endsWith("[]") ? OBJECT_TYPE : receiverName);
+        }
         if (declaredType == null) {
             throw new EvaluationException("Cannot call '" + name + "' on " + (value == null ? "null" : "a primitive value"));
         }
@@ -1550,7 +1553,7 @@ public final class JdiExpressionEvaluator {
         boolean declaredArray = declared != null && declared.endsWith("[]");
         boolean array = receiver.object() instanceof ArrayReference || receiver.nullReceiver() && declaredArray; // also a placeholder
         if (array && "clone".equals(chosen.name()) && chosen.argumentTypeNames().isEmpty()) {
-            return declaredArray ? declared : ((ArrayReference) receiver.object()).referenceType().name();
+            return declaredArray ? declared : receiver.object().referenceType().name();
         }
         return chosen.returnTypeName();
     }
