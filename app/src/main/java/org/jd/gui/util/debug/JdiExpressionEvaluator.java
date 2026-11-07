@@ -1535,19 +1535,22 @@ public final class JdiExpressionEvaluator {
             // an array has no methods of its own: the ones of Object are looked up in Object and run on the array
             return new Receiver(object.referenceType(), object, declaredReceiver(object, declaredName), false);
         }
-        // a null reference still reaches the static methods of its declared type
-        ReferenceType declaredType = value == null && declaredName != null ? findClass(declaredName.split("&")[0]) : null;
+        // a null reference still reaches the static methods of its declared type; an array has only the methods of Object
+        String receiverName = declaredName == null ? null : declaredName.split("&")[0];
+        ReferenceType declaredType = value != null || receiverName == null ? null : findClass(receiverName.endsWith("[]") ? OBJECT_TYPE : receiverName);
         if (declaredType == null) {
             throw new EvaluationException("Cannot call '" + name + "' on " + (value == null ? "null" : "a primitive value"));
         }
-        return new Receiver(declaredType, null, null, true);
+        return new Receiver(declaredType, null, declaredType, true); // declared: an interface placeholder still reaches the methods of Object
     }
 
     /** The clone of an array has the type of the array, not the Object of the method that was found. */
     private String returnTypeOf(Object target, Receiver receiver, Method chosen) {
-        if (receiver.object() instanceof ArrayReference array && "clone".equals(chosen.name()) && chosen.argumentTypeNames().isEmpty()) {
-            String declared = declaredTypeOf(target);
-            return declared != null && declared.endsWith("[]") ? declared : array.referenceType().name();
+        String declared = declaredTypeOf(target);
+        boolean declaredArray = declared != null && declared.endsWith("[]");
+        boolean array = receiver.object() instanceof ArrayReference || receiver.nullReceiver() && declaredArray; // also a placeholder
+        if (array && "clone".equals(chosen.name()) && chosen.argumentTypeNames().isEmpty()) {
+            return declaredArray ? declared : ((ArrayReference) receiver.object()).referenceType().name();
         }
         return chosen.returnTypeName();
     }

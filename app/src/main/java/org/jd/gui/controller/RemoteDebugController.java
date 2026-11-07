@@ -1077,17 +1077,21 @@ public class RemoteDebugController {
             frameIndex = selectedFrameIndex;
         }
         List<DebugVariableNode> nodes = new ArrayList<>();
-        watchedResults.forEach(JdiExpressionEvaluator::release);
-        watchedResults.clear();
+        List<com.sun.jdi.Value> results = new ArrayList<>(); // private to this evaluation: another thread's evaluation may run meanwhile
         startEvaluating(thread);
         try {
-            return evaluateWatches(thread, frameIndex, nodes);
+            return evaluateWatches(thread, frameIndex, nodes, results);
         } finally {
             stopEvaluating(thread);
+            synchronized (watchedResults) { // the results of the previous evaluation are released once these replace them
+                watchedResults.forEach(JdiExpressionEvaluator::release);
+                watchedResults.clear();
+                watchedResults.addAll(results);
+            }
         }
     }
 
-    private List<DebugVariableNode> evaluateWatches(ThreadReference thread, int frameIndex, List<DebugVariableNode> nodes) {
+    private List<DebugVariableNode> evaluateWatches(ThreadReference thread, int frameIndex, List<DebugVariableNode> nodes, List<com.sun.jdi.Value> results) {
         for (String expression : watchExpressions) {
             if (thread == null) {
                 nodes.add(new DebugVariableNode(expression, ""));
@@ -1095,7 +1099,7 @@ public class RemoteDebugController {
             }
             try {
                 com.sun.jdi.Value result = JdiExpressionEvaluator.evaluate(expression, thread, frameIndex);
-                watchedResults.add(result);
+                results.add(result);
                 nodes.add(JdiValues.toNode(expression, result));
             } catch (JdiExpressionEvaluator.EvaluationException e) {
                 nodes.add(new DebugVariableNode(expression, "<" + e.getMessage() + ">"));
