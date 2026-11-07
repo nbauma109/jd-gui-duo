@@ -446,17 +446,20 @@ public final class JdiExpressionEvaluator {
                 shared.add(part);
             }
         }
-        // different parts may still share a supertype of their own (Left&Tag and Right&Tag share Base through Left and Right)
+        shared.addAll(commonOfParts(first, second));
+        return shared.isEmpty() ? OBJECT_TYPE : String.join("&", shared);
+    }
+
+    /** Different parts may still share a supertype of their own (Left&Tag and Right&Tag share Base through Left and Right). */
+    private java.util.Set<String> commonOfParts(String first, String second) {
+        java.util.Set<String> common = new java.util.LinkedHashSet<>();
         for (String firstPart : first.split("&")) {
             for (String secondPart : second.split("&")) {
-                for (String common : commonType(firstPart, secondPart).split("&")) {
-                    if (!OBJECT_TYPE.equals(common)) {
-                        shared.add(common);
-                    }
-                }
+                common.addAll(java.util.Arrays.asList(commonType(firstPart, secondPart).split("&")));
             }
         }
-        return shared.isEmpty() ? OBJECT_TYPE : String.join("&", shared);
+        common.remove(OBJECT_TYPE);
+        return common;
     }
 
     /** Arrays of references have the array of the common type of their components (String[] and Integer[] give Object[]...); primitive components share only Object. */
