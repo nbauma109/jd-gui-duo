@@ -61,7 +61,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Supplier;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -113,8 +112,8 @@ public class RemoteDebugController {
     /** Held by the evaluation of a thread and by the steps and resumes of that same thread; the other stopped threads stay free to resume. */
     private final Map<ThreadReference, Object> evaluationLocks = new ConcurrentHashMap<>();
     private final Object noThreadLock = new Object();
-    /** The thread that runs the methods of the evaluation in progress; its breakpoint and exception events are not stops. */
-    private volatile ThreadReference evaluatingThread;
+    /** The threads that run the methods of an evaluation in progress; their breakpoint and exception events are not stops. */
+    private final java.util.Set<ThreadReference> evaluatingThreads = ConcurrentHashMap.newKeySet();
     /** Results of the last Inspect and of the last watch evaluation: pinned in the debuggee while the views may still read them. */
     private com.sun.jdi.Value inspectedResult;
     private final List<com.sun.jdi.Value> watchedResults = new ArrayList<>();
@@ -130,8 +129,6 @@ public class RemoteDebugController {
 
     private record RunToLineTarget(String typeName, int lineNumber) {
     }
-    /** Number of expression evaluations running: the event loop ignores the requests hit by the evaluating thread only. */
-    private final java.util.concurrent.atomic.AtomicInteger evaluations = new java.util.concurrent.atomic.AtomicInteger();
     /** Changes whenever the stop shown in the views stops being current (resume, step, other thread, disconnect). */
     private volatile long stopGeneration;
     /** Reads the stack and evaluates the watch expressions after a stop, away from the event loop. */
@@ -642,8 +639,20 @@ public class RemoteDebugController {
         return false;
     }
 
+    private void startEvaluating(ThreadReference thread) {
+        if (thread != null) {
+            evaluatingThreads.add(thread);
+        }
+    }
+
+    private void stopEvaluating(ThreadReference thread) {
+        if (thread != null) {
+            evaluatingThreads.remove(thread);
+        }
+    }
+
     private boolean isEvaluating(ThreadReference thread) {
-        return evaluations.get() > 0 && thread.equals(evaluatingThread);
+        return evaluatingThreads.contains(thread);
     }
 
     private void handleStep(StepEvent stepEvent, Set<ThreadReference> reported, Set<ThreadReference> stoppedByRequest) {
@@ -944,7 +953,7 @@ public class RemoteDebugController {
         new SwingWorker<DebugVariableNode, Void>() {
             @Override
             protected DebugVariableNode doInBackground() {
-                return withEvaluationLock(thread -> withoutSuspendingRequests(() -> inspect(expression, thread)));
+                return withEvaluationLock(thread -> inspect(expression, thread));
             }
 
             @Override
@@ -974,7 +983,7 @@ public class RemoteDebugController {
         try {
             JdiExpressionEvaluator.release(inspectedResult);
             inspectedResult = null;
-            evaluatingThread = thread;
+            startEvaluating(thread);
             com.sun.jdi.Value value = JdiExpressionEvaluator.evaluate(expression, thread, frameIndex);
             inspectedResult = value;
             DebugVariableNode node = JdiValues.toNode(expression, value);
@@ -983,7 +992,7 @@ public class RemoteDebugController {
         } catch (JdiExpressionEvaluator.EvaluationException e) {
             return new DebugVariableNode(expression, "<" + e.getMessage() + ">");
         } finally {
-            evaluatingThread = null;
+            stopEvaluating(thread);
         }
     }
 
@@ -1037,7 +1046,7 @@ public class RemoteDebugController {
     /** Evaluates every watch expression in the selected frame; blank values when nothing is stopped. */
     private List<DebugVariableNode> evaluateExpressions() {
         // Evaluations invoke methods in the debuggee thread: they must not overlap, nor meet a step or resume of that thread.
-        return withEvaluationLock(thread -> withoutSuspendingRequests(() -> evaluateExpressionsLocked(thread)));
+        return withEvaluationLock(this::evaluateExpressionsLocked);
     }
 
     private Object evaluationLockOf(ThreadReference thread) {
@@ -1062,20 +1071,6 @@ public class RemoteDebugController {
         }
     }
 
-    /**
-     * Evaluations invoke methods in the debuggee. A breakpoint or exception reached by such a call on the
-     * evaluating thread would stop the invocation half-way: the event loop ignores those (see
-     * {@link #evaluatingThread}), while the other threads keep stopping at the requests.
-     */
-    private <T> T withoutSuspendingRequests(Supplier<T> action) {
-        evaluations.incrementAndGet();
-        try {
-            return action.get();
-        } finally {
-            evaluations.decrementAndGet();
-        }
-    }
-
     private List<DebugVariableNode> evaluateExpressionsLocked(ThreadReference thread) {
         int frameIndex;
         synchronized (threadLock) {
@@ -1084,11 +1079,11 @@ public class RemoteDebugController {
         List<DebugVariableNode> nodes = new ArrayList<>();
         watchedResults.forEach(JdiExpressionEvaluator::release);
         watchedResults.clear();
-        evaluatingThread = thread;
+        startEvaluating(thread);
         try {
             return evaluateWatches(thread, frameIndex, nodes);
         } finally {
-            evaluatingThread = null;
+            stopEvaluating(thread);
         }
     }
 
