@@ -273,6 +273,10 @@ public final class JdiExpressionEvaluator {
         if (!sameWrapper && selectedUnboxed instanceof BooleanValue && otherUnboxed instanceof BooleanValue) {
             return selectedUnboxed;
         }
+        if (selectedValue instanceof PrimitiveValue != otherValue instanceof PrimitiveValue) {
+            // Java boxes the primitive and gives the conditional a reference type; the evaluator cannot box, and keeping the primitive would pick another overload
+            throw new EvaluationException("A conditional of a primitive and a reference is not supported");
+        }
         return promoteReferences(selected, other);
     }
 
@@ -440,6 +444,16 @@ public final class JdiExpressionEvaluator {
         for (String part : second.split("&")) {
             if (isSubtype(first, part)) {
                 shared.add(part);
+            }
+        }
+        // different parts may still share a supertype of their own (Left&Tag and Right&Tag share Base through Left and Right)
+        for (String firstPart : first.split("&")) {
+            for (String secondPart : second.split("&")) {
+                for (String common : commonType(firstPart, secondPart).split("&")) {
+                    if (!OBJECT_TYPE.equals(common)) {
+                        shared.add(common);
+                    }
+                }
             }
         }
         return shared.isEmpty() ? OBJECT_TYPE : String.join("&", shared);
@@ -1291,9 +1305,15 @@ public final class JdiExpressionEvaluator {
 
     /** Java picks the field from the declared type (Base b = new Child(): b.x is Base.x), the receiver only holds the value. */
     private Field instanceField(ObjectReference object, String declaredName, String name) {
-        ReferenceType declaredType = declaredName == null ? null : resolveType(declaredName, object);
-        Field field = declaredType == null ? null : declaredType.fieldByName(name);
-        return field != null ? field : object.referenceType().fieldByName(name);
+        // an intersection type (A&B) has the fields of every part
+        for (String part : declaredName == null ? new String[0] : declaredName.split("&")) {
+            ReferenceType declaredType = resolveType(part, object);
+            Field field = declaredType == null ? null : declaredType.fieldByName(name);
+            if (field != null) {
+                return field;
+            }
+        }
+        return object.referenceType().fieldByName(name);
     }
 
     private Object invokeImplicit(String name, Arguments arguments, boolean dryRun) throws EvaluationException, IncompatibleThreadStateException {
