@@ -1243,6 +1243,9 @@ public class RemoteDebugController {
                         for (ReferenceType referenceType : loaded) {
                             addRunToLineRequests(vm, thread, referenceType, lineNumber);
                         }
+                        if (requests.isEmpty() && !mayBeInUnloadedClass(vm, loaded, typeName)) {
+                            throw new IllegalStateException("No executable code on line " + lineNumber);
+                        }
                         thread.resume();
                     }
                 } catch (RuntimeException e) {
@@ -1259,6 +1262,30 @@ public class RemoteDebugController {
                 return null;
             }
         }.execute();
+    }
+
+    /**
+     * Whether a class that is not loaded yet may hold the line: the constant pool of a loaded class names its nested
+     * classes (anonymous and local ones included); when all of them are loaded, the line has no code at all.
+     */
+    private static boolean mayBeInUnloadedClass(VirtualMachine vm, List<ReferenceType> loaded, String typeName) {
+        if (loaded.isEmpty() || !vm.canGetConstantPool()) {
+            return true;
+        }
+        java.util.regex.Pattern nestedName = java.util.regex.Pattern.compile(java.util.regex.Pattern.quote(typeName.replace('.', '/') + "$") + "[\\w$]+");
+        for (ReferenceType type : loaded) {
+            try {
+                java.util.regex.Matcher matcher = nestedName.matcher(new String(type.constantPool(), java.nio.charset.StandardCharsets.ISO_8859_1));
+                while (matcher.find()) {
+                    if (vm.classesByName(matcher.group().replace('/', '.')).isEmpty()) {
+                        return true;
+                    }
+                }
+            } catch (RuntimeException _) {
+                return true; // unreadable: do not reject what may be valid
+            }
+        }
+        return false;
     }
 
     private void addRunToLineRequests(VirtualMachine vm, ThreadReference thread, ReferenceType referenceType, int lineNumber) {

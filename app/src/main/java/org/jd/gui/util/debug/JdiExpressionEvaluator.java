@@ -655,13 +655,17 @@ public final class JdiExpressionEvaluator {
     /** -2147483648 and -9223372036854775808L: only the negated literal fits its type (an int and a long). */
     private Object minimumLiteral() {
         skipWs();
-        if (src.startsWith("2147483648", pos) && literalEnds(pos + 10)) {
-            pos += 10;
+        int end = pos;
+        while (end < src.length() && (Character.isDigit(src.charAt(end)) || src.charAt(end) == '_')) {
+            end++;
+        }
+        String digits = src.substring(pos, end).replace("_", ""); // 2_147_483_648 is the same literal
+        if ("2147483648".equals(digits) && literalEnds(end)) {
+            pos = end;
             return vm.mirrorOf(Integer.MIN_VALUE); // a primitive: nothing runs, and a skipped branch needs its type
         }
-        if (src.startsWith("9223372036854775808", pos) && pos + 19 < src.length()
-                && (src.charAt(pos + 19) == 'L' || src.charAt(pos + 19) == 'l') && literalEnds(pos + 20)) {
-            pos += 20;
+        if ("9223372036854775808".equals(digits) && end < src.length() && (src.charAt(end) == 'L' || src.charAt(end) == 'l') && literalEnds(end + 1)) {
+            pos = end + 1;
             return vm.mirrorOf(Long.MIN_VALUE);
         }
         return NOT_FOUND;
@@ -1491,12 +1495,12 @@ public final class JdiExpressionEvaluator {
     private List<ReferenceType> otherIntersectionParts(Object target, ObjectReference object) {
         String declared = declaredTypeOf(target);
         List<ReferenceType> parts = new ArrayList<>();
-        if (object == null || declared == null || declared.indexOf('&') < 0) {
+        if (declared == null || declared.indexOf('&') < 0) {
             return parts;
         }
         String[] names = declared.split("&");
         for (int i = 1; i < names.length; i++) {
-            ReferenceType part = resolveType(names[i], object);
+            ReferenceType part = object == null ? findClass(names[i]) : resolveType(names[i], object); // a placeholder receiver has no object
             if (part != null) {
                 parts.add(part);
             }
@@ -1527,7 +1531,7 @@ public final class JdiExpressionEvaluator {
             return new Receiver(object.referenceType(), object, declaredReceiver(object, declaredName), false);
         }
         // a null reference still reaches the static methods of its declared type
-        ReferenceType declaredType = value == null && declaredName != null ? findClass(declaredName) : null;
+        ReferenceType declaredType = value == null && declaredName != null ? findClass(declaredName.split("&")[0]) : null;
         if (declaredType == null) {
             throw new EvaluationException("Cannot call '" + name + "' on " + (value == null ? "null" : "a primitive value"));
         }
