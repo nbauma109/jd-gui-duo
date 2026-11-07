@@ -1227,6 +1227,9 @@ public final class JdiExpressionEvaluator {
         if (field == null) {
             throw new EvaluationException("No field '" + name + "' in " + object.referenceType().name());
         }
+        if (field.isStatic()) {
+            ensureInitialized(field); // an instance of an implementing class does not initialize the interface that declares the field
+        }
         return fieldResult(field, field.isStatic() ? field.declaringType().getValue(field) : object.getValue(field));
     }
 
