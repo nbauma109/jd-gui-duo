@@ -1400,9 +1400,14 @@ public final class JdiExpressionEvaluator {
             return placeholder("int");
         }
         try {
-            ReferenceType type = findClass(declared);
-            Field field = type == null ? null : type.fieldByName(name);
-            return field == null ? null : placeholder(field.typeName());
+            for (String part : declared.split("&")) { // an intersection type has the fields of every part
+                ReferenceType type = findClass(part);
+                Field field = type == null ? null : type.fieldByName(name);
+                if (field != null) {
+                    return placeholder(field.typeName());
+                }
+            }
+            return null;
         } catch (RuntimeException _) {
             return null;
         }
@@ -1554,6 +1559,9 @@ public final class JdiExpressionEvaluator {
         } catch (ClassNotLoadedException _) {
             // the loader of the method never resolved one of its parameter types (java.lang.CharSequence...): make it do so
             preloadParameterTypes(chosen);
+        } catch (com.sun.jdi.ClassNotPreparedException _) {
+            // an array argument whose component class is loaded but not prepared cannot be checked against a covariant parameter
+            prepareArrayComponents(arguments);
         }
         return call(receiver, chosen, arguments, returnType);
     }
@@ -1574,6 +1582,36 @@ public final class JdiExpressionEvaluator {
             result = ((ClassType) receiver.type()).invokeMethod(thread, chosen, coerced, ObjectReference.INVOKE_SINGLE_THREADED);
         }
         return typed(pin(result), returnType);
+    }
+
+    /** Links the component classes of array arguments (Class.getDeclaredFields() prepares a class without initializing it). */
+    private void prepareArrayComponents(List<Value> arguments) {
+        for (Value argument : arguments) {
+            if (argument instanceof ArrayReference array && array.referenceType() instanceof com.sun.jdi.ArrayType arrayType) {
+                String component = arrayType.componentTypeName();
+                while (component.endsWith("[]")) {
+                    component = component.substring(0, component.length() - 2);
+                }
+                for (ReferenceType type : vm.classesByName(component)) {
+                    prepare(type);
+                }
+            }
+        }
+    }
+
+    private void prepare(ReferenceType type) {
+        if (type.isPrepared()) {
+            return;
+        }
+        try {
+            com.sun.jdi.ClassObjectReference classObject = type.classObject();
+            List<Method> getFields = classObject.referenceType().methodsByName("getDeclaredFields", "()[Ljava/lang/reflect/Field;");
+            if (!getFields.isEmpty()) {
+                classObject.invokeMethod(thread, getFields.get(0), List.of(), ObjectReference.INVOKE_SINGLE_THREADED);
+            }
+        } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException | InvocationException | RuntimeException _) {
+            // not preparable that way: the retry reports the original failure
+        }
     }
 
     /** Class.forName(type, false, loader) for the parameter types: afterwards JDI sees them as loaded by that loader. */
@@ -1614,15 +1652,26 @@ public final class JdiExpressionEvaluator {
                 }
             }
         }
-        for (Method candidate : candidates) {
-            if (candidates.stream().allMatch(other -> isMoreSpecific(candidate.argumentTypeNames(), other.argumentTypeNames()))) {
-                return candidate;
-            }
+        List<Method> mostSpecific = candidates.stream()
+            .filter(candidate -> candidates.stream().allMatch(other -> isMoreSpecific(candidate.argumentTypeNames(), other.argumentTypeNames())))
+            .toList();
+        if (!mostSpecific.isEmpty()) {
+            return covariantReturn(mostSpecific);
         }
         if (candidates.size() > 1) {
             throw new EvaluationException("The call of " + name + " is ambiguous");
         }
         return null;
+    }
+
+    /** Override-equivalent methods of several types (A.value(): Object, B.value(): String): the one with the most specific return type. */
+    private Method covariantReturn(List<Method> equivalent) {
+        for (Method candidate : equivalent) {
+            if (equivalent.stream().allMatch(other -> isSubtype(candidate.returnTypeName(), other.returnTypeName()))) {
+                return candidate;
+            }
+        }
+        return equivalent.get(0);
     }
 
     private boolean isCandidate(Method method, List<Value> arguments, List<String> declaredTypes, boolean staticContext) {
