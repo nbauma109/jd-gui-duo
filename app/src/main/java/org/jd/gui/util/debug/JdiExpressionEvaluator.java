@@ -790,7 +790,7 @@ public final class JdiExpressionEvaluator {
             // not evaluated, but the element type matters to a ?: branch
             String component = null;
             if (declaredArray != null && declaredArray.endsWith("[]")) {
-                component = declaredArray.substring(0, declaredArray.length() - 2);
+                component = elementTypeOf(declaredArray);
             } else if (unwrap(target) instanceof ArrayReference array) {
                 component = componentTypeOf(null, array);
             }
@@ -811,10 +811,16 @@ public final class JdiExpressionEvaluator {
         return typed(arrayReference.getValue(i), componentTypeOf(declaredArray, arrayReference));
     }
 
+    /** The element type of an array type; every part of an intersection (A[]&B[]) loses its own suffix. */
+    private static String elementTypeOf(String arrayType) {
+        return java.util.Arrays.stream(arrayType.split("&")).map(part -> part.endsWith("[]") ? part.substring(0, part.length() - 2) : part)
+            .collect(java.util.stream.Collectors.joining("&"));
+    }
+
     /** Object[] a = new String[1]: a[0] is an Object for Java, whatever the array really is. */
     private static String componentTypeOf(String declaredArray, ArrayReference array) {
         if (declaredArray != null && declaredArray.endsWith("[]")) {
-            return declaredArray.substring(0, declaredArray.length() - 2);
+            return elementTypeOf(declaredArray);
         }
         return array.referenceType() instanceof com.sun.jdi.ArrayType arrayType ? arrayType.componentTypeName() : null;
     }
@@ -928,7 +934,7 @@ public final class JdiExpressionEvaluator {
     private static final String FLOAT_TYPE = "float";
     private static final Object NOT_FOUND = new Object();
 
-    private Object resolveName(String name) throws IncompatibleThreadStateException {
+    private Object resolveName(String name) throws EvaluationException, IncompatibleThreadStateException {
         StackFrame frame = frame();
         try {
             LocalVariable variable = frame.visibleVariableByName(name);
@@ -944,6 +950,7 @@ public final class JdiExpressionEvaluator {
         Field lexical = declaring.fieldByName(name);
         if (lexical != null) {
             if (lexical.isStatic()) {
+                ensureInitialized(lexical); // inherited from an interface that may not be initialized yet
                 return fieldResult(lexical, declaring.getValue(lexical));
             }
             if (self != null) {
@@ -953,11 +960,15 @@ public final class JdiExpressionEvaluator {
         if (self != null) {
             Field field = self.referenceType().fieldByName(name);
             if (field != null) {
+                if (field.isStatic()) {
+                    ensureInitialized(field);
+                }
                 return fieldResult(field, field.isStatic() ? self.referenceType().getValue(field) : self.getValue(field));
             }
         }
         Field staticField = declaring.fieldByName(name);
         if (staticField != null && staticField.isStatic()) {
+            ensureInitialized(staticField);
             return fieldResult(staticField, declaring.getValue(staticField));
         }
         return NOT_FOUND;
