@@ -192,11 +192,11 @@ public final class JdiExpressionEvaluator {
             boolean selectTrue = skipping == 0 && asBoolean(condition);
             int trueStart = pos;
             Object whenTrue = parseOperand(!selectTrue, this::parseTernary);
-            boolean trueIsNull = "null".equals(src.substring(trueStart, pos).trim());
+            boolean trueIsNull = isNullLiteral(src.substring(trueStart, pos));
             expect(":");
             int falseStart = pos;
             Object whenFalse = parseOperand(selectTrue, this::parseTernary);
-            boolean falseIsNull = "null".equals(src.substring(falseStart, pos).trim());
+            boolean falseIsNull = isNullLiteral(src.substring(falseStart, pos));
             if (skipping > 0) {
                 return skippedConditional(condition, whenTrue, whenFalse);
             }
@@ -210,6 +210,15 @@ public final class JdiExpressionEvaluator {
             return !constant && promoted instanceof Constant(Value plain) ? plain : promoted;
         }
         return condition;
+    }
+
+    /** The null literal, also in parentheses: (null) is as much a null branch as null. */
+    private static boolean isNullLiteral(String branch) {
+        String text = branch.trim();
+        while (text.length() > 1 && text.startsWith("(") && text.endsWith(")")) {
+            text = text.substring(1, text.length() - 1).trim();
+        }
+        return "null".equals(text);
     }
 
     /** A conditional that is not evaluated still has the promoted type of its branches (it may be a branch of another one). */
@@ -441,7 +450,7 @@ public final class JdiExpressionEvaluator {
         String firstComponent = first.substring(0, first.length() - 2);
         String secondComponent = second.substring(0, second.length() - 2);
         if (isPrimitiveName(firstComponent) || isPrimitiveName(secondComponent)) {
-            return OBJECT_TYPE;
+            return "java.lang.Cloneable&java.io.Serializable"; // every array is both
         }
         // every part of an intersection becomes an array type (Serializable&Comparable gives Serializable[]&Comparable[])
         return java.util.Arrays.stream(commonType(firstComponent, secondComponent).split("&")).map(part -> part + "[]").collect(java.util.stream.Collectors.joining("&"));
