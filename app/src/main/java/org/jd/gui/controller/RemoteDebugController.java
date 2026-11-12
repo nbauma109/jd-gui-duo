@@ -106,6 +106,8 @@ public class RemoteDebugController {
     private final Object threadLock = new Object();
     private ThreadReference activeThread;
     private boolean activeRunning; // a step is in flight on activeThread
+    /** Where activeThread stopped: its frames cannot be read while an evaluation has it running again. */
+    private Location activeLocation;
     private final Map<ThreadReference, Location> queuedThreads = new LinkedHashMap<>();
     private int selectedFrameIndex; // frame shown in Variables/Expressions, 0 = top frame
     private final List<String> watchExpressions = new CopyOnWriteArrayList<>();
@@ -485,6 +487,7 @@ public class RemoteDebugController {
                 next = entry.getKey();
                 location = entry.getValue();
                 activeThread = next;
+                activeLocation = location;
                 activeRunning = false;
                 token = ++stopGeneration;
             }
@@ -795,6 +798,7 @@ public class RemoteDebugController {
             takeOver = activeThread == null || activeThread.equals(thread);
             if (takeOver) {
                 activeThread = thread;
+                activeLocation = location;
                 activeRunning = false;
                 queuedThreads.remove(thread);
                 token = ++stopGeneration;
@@ -923,9 +927,9 @@ public class RemoteDebugController {
                 // A thread that is still stepping simply goes on in the background (it may be waiting for
                 // this very thread); its next stop is queued like any other.
                 if (activeThread != null && !activeRunning) {
-                    queuedThreads.put(activeThread, activeThread.frame(0).location());
+                    queuedThreads.put(activeThread, stoppedLocationOfActive());
                 }
-                queuedThreads.remove(target);
+                activeLocation = queuedThreads.remove(target);
                 activeThread = target;
                 activeRunning = false;
                 switched = true;
@@ -933,6 +937,15 @@ public class RemoteDebugController {
             selectedFrameIndex = frameIndex;
             stopGeneration++;
             return new FrameSelection(target, switched);
+        }
+    }
+
+    /** The top frame of the active thread; while an evaluation has it running (invoking a method) the location it stopped at is used. */
+    private Location stoppedLocationOfActive() {
+        try {
+            return activeThread.frame(0).location();
+        } catch (IncompatibleThreadStateException _) {
+            return activeLocation;
         }
     }
 
