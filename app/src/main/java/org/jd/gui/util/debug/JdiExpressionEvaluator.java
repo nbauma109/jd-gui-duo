@@ -1034,6 +1034,9 @@ public final class JdiExpressionEvaluator {
         List<ReferenceType> types = vm.classesByName(name);
         if (types.isEmpty() && name.indexOf('.') < 0) {
             types = vm.classesByName("java.lang." + name);
+            if (types.isEmpty()) {
+                types = vm.classesByName(currentPackagePrefix() + name); // a simple name of the package of the stopped class
+            }
         }
         if (types.size() > 1) {
             // the same name loaded by several class loaders: the one the executing code sees
@@ -1045,6 +1048,16 @@ public final class JdiExpressionEvaluator {
             }
         }
         return types.isEmpty() ? null : types.get(0);
+    }
+
+    private String currentPackagePrefix() {
+        try {
+            String className = frame().location().declaringType().name();
+            int dot = className.lastIndexOf('.');
+            return dot < 0 ? "" : className.substring(0, dot + 1);
+        } catch (IncompatibleThreadStateException | RuntimeException _) {
+            return "";
+        }
     }
 
     /** The declared type of a receiver: found in the receiver's own hierarchy, so it is the very class it was loaded as. */
@@ -1312,9 +1325,14 @@ public final class JdiExpressionEvaluator {
 
     /** Java reads a static field through a null reference without complaint. */
     private Field staticFieldOf(String declaredName, String name) {
-        ReferenceType declaredType = findClass(declaredName);
-        Field field = declaredType == null ? null : declaredType.fieldByName(name);
-        return field != null && field.isStatic() ? field : null;
+        for (String part : declaredName.split("&")) { // an intersection type has the fields of every part
+            ReferenceType declaredType = findClass(part);
+            Field field = declaredType == null ? null : declaredType.fieldByName(name);
+            if (field != null && field.isStatic()) {
+                return field;
+            }
+        }
+        return null;
     }
 
     /** Java picks the field from the declared type (Base b = new Child(): b.x is Base.x), the receiver only holds the value. */
