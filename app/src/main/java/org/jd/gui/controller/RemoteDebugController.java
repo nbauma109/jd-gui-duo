@@ -898,7 +898,7 @@ public class RemoteDebugController {
                     if (selection != null) {
                         showFrame(selection.thread(), frameIndex, selection.switched());
                     }
-                } catch (IncompatibleThreadStateException | RuntimeException e) {
+                } catch (RuntimeException e) {
                     assert ExceptionUtil.printStackTrace(e);
                 }
                 return null;
@@ -910,7 +910,7 @@ public class RemoteDebugController {
     }
 
     /** Makes the stopped thread with this id the active one; null when it is running a step or not stopped. */
-    private FrameSelection activateThread(String threadId, int frameIndex) throws IncompatibleThreadStateException {
+    private FrameSelection activateThread(String threadId, int frameIndex) {
         synchronized (threadLock) {
             ThreadReference target = null;
             boolean switched = false;
