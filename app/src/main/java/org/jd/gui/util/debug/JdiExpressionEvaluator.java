@@ -1234,6 +1234,10 @@ public final class JdiExpressionEvaluator {
         if (target instanceof ClassRef(ReferenceType type)) {
             Field field = type.fieldByName(name);
             if (field == null || !field.isStatic()) {
+                ReferenceType nested = findClass(type.name() + "$" + name); // Thread.State: a member type written with dots
+                if (nested != null) {
+                    return new ClassRef(nested);
+                }
                 throw new EvaluationException("No static field '" + name + "' in " + type.name());
             }
             ensureInitialized(field);

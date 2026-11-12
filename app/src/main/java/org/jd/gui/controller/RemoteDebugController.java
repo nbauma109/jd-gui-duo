@@ -853,7 +853,7 @@ public class RemoteDebugController {
         }
         List<DebugVariableNode> variables = readVariableNodes(thread, frameIndex);
         List<DebugThread> threads = refreshThreads ? collectAllThreadsFrames(thread) : null;
-        List<DebugVariableNode> expressions = evaluateExpressions();
+        // the stop is shown first: a watch that blocks in the debuggee must not hide it
         SwingUtil.invokeLater(() -> {
             if (generation != stopGeneration || virtualMachine == null) {
                 return; // resumed, disconnected or another frame selected while this was being read
@@ -861,9 +861,14 @@ public class RemoteDebugController {
             controller.setDebugStepActionsEnabled(true);
             controller.openDebugLocation(location.declaringType().name(), location.lineNumber());
             controller.showDebugVariables(location.declaringType().name() + ":" + location.lineNumber(), variables);
-            controller.showDebugExpressions(expressions);
             if (threads != null) {
                 controller.showDebugStackFrames(threads);
+            }
+        });
+        List<DebugVariableNode> expressions = evaluateExpressions(generation);
+        SwingUtil.invokeLater(() -> {
+            if (generation == stopGeneration && virtualMachine != null) {
+                controller.showDebugExpressions(expressions);
             }
         });
     }
@@ -1039,14 +1044,19 @@ public class RemoteDebugController {
     }
 
     private void publishExpressions() {
-        List<DebugVariableNode> nodes = evaluateExpressions();
-        SwingUtil.invokeLater(() -> controller.showDebugExpressions(nodes));
+        long generation = stopGeneration;
+        List<DebugVariableNode> nodes = evaluateExpressions(generation);
+        SwingUtil.invokeLater(() -> {
+            if (generation == stopGeneration) { // an overtaken evaluation released its own results: its nodes must not be shown
+                controller.showDebugExpressions(nodes);
+            }
+        });
     }
 
-    /** Evaluates every watch expression in the selected frame; blank values when nothing is stopped. */
-    private List<DebugVariableNode> evaluateExpressions() {
+    /** Evaluates every watch expression in the selected frame of the stop {@code generation}; blank values when nothing is stopped. */
+    private List<DebugVariableNode> evaluateExpressions(long generation) {
         // Evaluations invoke methods in the debuggee thread: they must not overlap, nor meet a step or resume of that thread.
-        return withEvaluationLock(this::evaluateExpressionsLocked);
+        return withEvaluationLock(thread -> evaluateExpressionsLocked(thread, generation));
     }
 
     private Object evaluationLockOf(ThreadReference thread) {
@@ -1071,7 +1081,7 @@ public class RemoteDebugController {
         }
     }
 
-    private List<DebugVariableNode> evaluateExpressionsLocked(ThreadReference thread) {
+    private List<DebugVariableNode> evaluateExpressionsLocked(ThreadReference thread, long generation) {
         int frameIndex;
         synchronized (threadLock) {
             frameIndex = selectedFrameIndex;
@@ -1083,10 +1093,14 @@ public class RemoteDebugController {
             return evaluateWatches(thread, frameIndex, nodes, results);
         } finally {
             stopEvaluating(thread);
-            synchronized (watchedResults) { // the results of the previous evaluation are released once these replace them
-                watchedResults.forEach(JdiExpressionEvaluator::release);
-                watchedResults.clear();
-                watchedResults.addAll(results);
+            synchronized (watchedResults) {
+                if (generation == stopGeneration) { // the results of the previous evaluation are released once these replace them
+                    watchedResults.forEach(JdiExpressionEvaluator::release);
+                    watchedResults.clear();
+                    watchedResults.addAll(results);
+                } else {
+                    results.forEach(JdiExpressionEvaluator::release); // overtaken: nothing will show them, keep the displayed results pinned
+                }
             }
         }
     }
@@ -1313,7 +1327,7 @@ public class RemoteDebugController {
             return;
         }
         runToLineTargets.forEach((thread, target) -> {
-            if (isTypeOrNested(referenceType.name(), target.typeName())) {
+            if (isInTypeOrSource(referenceType, target.typeName())) {
                 addRunToLineRequests(vm, thread, referenceType, target.lineNumber());
             }
         });
@@ -1595,16 +1609,34 @@ public class RemoteDebugController {
         }
         for (ReferenceType candidate : vm.allClasses()) {
             // an unprepared class has no line table yet: its ClassPrepareEvent installs the breakpoints later
-            if (candidate.isPrepared() && candidate.name().startsWith(typeName + "$")) {
+            if (candidate.isPrepared() && !result.contains(candidate) && isInTypeOrSource(candidate, typeName) && !candidate.name().equals(typeName)) {
                 result.add(candidate);
             }
         }
         return result;
     }
 
+    /** The type, its nested classes, and the other top-level classes declared in the same source file (their code reports that file as source). */
+    private static boolean isInTypeOrSource(ReferenceType type, String typeName) {
+        if (isTypeOrNested(type.name(), typeName)) {
+            return true;
+        }
+        int dot = typeName.lastIndexOf('.');
+        String className = type.name();
+        int classDot = className.lastIndexOf('.');
+        if (!typeName.substring(0, Math.max(dot, 0)).equals(className.substring(0, Math.max(classDot, 0)))) {
+            return false; // another package: a cheap test before asking the VM for the source name
+        }
+        try {
+            return (typeName.substring(dot + 1) + ".java").equals(type.sourceName());
+        } catch (AbsentInformationException | RuntimeException _) {
+            return false;
+        }
+    }
+
     private void installBreakpoints(ReferenceType referenceType) {
         for (BreakpointKey breakpoint : breakpoints) {
-            if (isTypeOrNested(referenceType.name(), breakpoint.typeName())) {
+            if (isInTypeOrSource(referenceType, breakpoint.typeName())) {
                 installBreakpoint(referenceType, breakpoint);
             }
         }
