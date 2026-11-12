@@ -1304,9 +1304,29 @@ public final class JdiExpressionEvaluator {
     private void ensureInitialized(Field field) throws EvaluationException {
         ReferenceType type = field.declaringType(); // only the class that declares the field is initialized, not the one that qualifies it
         // HotSpot may report a prepared interface as initialized before its fields are: an interface is always asked to initialize
-        if (skipping > 0 || isConstantVariable(field) || !(type instanceof com.sun.jdi.InterfaceType) && type.isInitialized()) {
+        if (skipping > 0 || isPreparedConstant(field) || !(type instanceof com.sun.jdi.InterfaceType) && type.isInitialized()) {
             return;
         }
+        initialize(type);
+    }
+
+    /**
+     * A constant variable is set when its class is prepared, before any initializer ran: reading a value that is not the default
+     * proves it (a computed final field still holds its default until the initializer runs, and is initialized first).
+     */
+    private static boolean isPreparedConstant(Field field) {
+        if (!isConstantVariable(field)) {
+            return false;
+        }
+        Value value = field.declaringType().getValue(field);
+        if (value instanceof BooleanValue flag) {
+            return flag.value();
+        }
+        return value instanceof StringReference || value instanceof PrimitiveValue number && number.doubleValue() != 0;
+    }
+
+    /** Class.forName(name, true, loader): runs the initializer, like the first active use in Java. */
+    private void initialize(ReferenceType type) throws EvaluationException {
         List<ReferenceType> classClasses = vm.classesByName("java.lang.Class");
         Method forName = !classClasses.isEmpty() && classClasses.get(0) instanceof ClassType classClass
             ? classClass.concreteMethodByName("forName", "(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;") : null;
@@ -1498,6 +1518,9 @@ public final class JdiExpressionEvaluator {
         String returnType = returnTypeOf(target, receiver, chosen);
         if (dryRun) {
             return placeholder(returnType);
+        }
+        if (chosen.isStatic() && chosen.declaringType() instanceof com.sun.jdi.InterfaceType) {
+            initialize(chosen.declaringType()); // invoking a static interface method through JDI does not initialize the interface
         }
         try {
             return callRetrying(receiver, chosen, arguments, returnType);
