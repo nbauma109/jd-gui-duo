@@ -1232,16 +1232,7 @@ public final class JdiExpressionEvaluator {
 
     private Object member(Object target, String name) throws EvaluationException {
         if (target instanceof ClassRef(ReferenceType type)) {
-            Field field = type.fieldByName(name);
-            if (field == null || !field.isStatic()) {
-                ReferenceType nested = findClass(type.name() + "$" + name); // Thread.State: a member type written with dots
-                if (nested != null) {
-                    return new ClassRef(nested);
-                }
-                throw new EvaluationException("No static field '" + name + "' in " + type.name());
-            }
-            ensureInitialized(field);
-            return fieldResult(field, type.getValue(field));
+            return staticMember(type, name);
         }
         String declaredName = declaredTypeOf(target);
         Value value = value(target);
@@ -1264,6 +1255,20 @@ public final class JdiExpressionEvaluator {
             ensureInitialized(field); // an instance of an implementing class does not initialize the interface that declares the field
         }
         return fieldResult(field, field.isStatic() ? field.declaringType().getValue(field) : object.getValue(field));
+    }
+
+    /** A static field of a type, or a member type written with dots (Thread.State). */
+    private Object staticMember(ReferenceType type, String name) throws EvaluationException {
+        Field field = type.fieldByName(name);
+        if (field == null || !field.isStatic()) {
+            ReferenceType nested = findClass(type.name() + "$" + name);
+            if (nested == null) {
+                throw new EvaluationException("No static field '" + name + "' in " + type.name());
+            }
+            return new ClassRef(nested);
+        }
+        ensureInitialized(field);
+        return fieldResult(field, type.getValue(field));
     }
 
     /**
