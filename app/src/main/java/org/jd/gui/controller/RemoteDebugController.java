@@ -131,13 +131,13 @@ public class RemoteDebugController {
     }
     /** Changes whenever the stop shown in the views stops being current (resume, step, other thread, disconnect). */
     private volatile long stopGeneration;
-    /** Reads the stack and evaluates the watch expressions after a stop, away from the event loop. */
     /** Evaluates the watches of a shown stop: one that blocks in the debuggee must not delay the stops shown by {@link #stopExecutor}. */
     private final ExecutorService watchExecutor = Executors.newCachedThreadPool(runnable -> {
         Thread thread = new Thread(runnable, "JD-GUI remote debug watches");
         thread.setDaemon(true);
         return thread;
     });
+    /** Reads the stack and shows the stop, away from the event loop. */
     private final ExecutorService stopExecutor = Executors.newSingleThreadExecutor(runnable -> {
         Thread thread = new Thread(runnable, "JD-GUI remote debug stop");
         thread.setDaemon(true);
