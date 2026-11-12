@@ -77,6 +77,9 @@ public class DynamicPage
         }
     }
 
+    /** The page currently displayed (decompiled class file or original source). */
+    public TypePage getPage() { return page; }
+
     // --- ContentCopyable --- //
     @Override
     public void copy() { page.copy(); }

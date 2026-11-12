@@ -2,7 +2,7 @@
 *.class
 
 # JD
-debug*
+/debug*
 
 # JD-GUI
 src-generated/
