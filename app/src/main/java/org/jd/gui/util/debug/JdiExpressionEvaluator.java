@@ -57,7 +57,7 @@ public final class JdiExpressionEvaluator {
     }
 
     private static Object typed(Value value, String declaredType) {
-        if (declaredType == null || !(value == null || value instanceof ObjectReference)) {
+        if (declaredType == null || ((value != null) && !(value instanceof ObjectReference))) {
             return value;
         }
         if (value instanceof ObjectReference object && declaredType.equals(object.referenceType().name())) {
@@ -694,7 +694,7 @@ public final class JdiExpressionEvaluator {
     }
 
     private boolean literalEnds(int end) {
-        return end >= src.length() || !(Character.isLetterOrDigit(src.charAt(end)) || src.charAt(end) == '.' || src.charAt(end) == '_');
+        return end >= src.length() || (!Character.isLetterOrDigit(src.charAt(end)) && (src.charAt(end) != '.') && (src.charAt(end) != '_'));
     }
 
     private Object parseUnary() throws EvaluationException, IncompatibleThreadStateException {
@@ -819,8 +819,8 @@ public final class JdiExpressionEvaluator {
             throw new EvaluationException("Not an array");
         }
         Value indexValue = unbox(value(index));
-        if (!(indexValue instanceof com.sun.jdi.IntegerValue || indexValue instanceof com.sun.jdi.ShortValue
-                || indexValue instanceof com.sun.jdi.ByteValue || indexValue instanceof CharValue)) {
+        if ((!(indexValue instanceof com.sun.jdi.IntegerValue) && !(indexValue instanceof com.sun.jdi.ShortValue) && !(indexValue instanceof com.sun.jdi.ByteValue)
+                && !(indexValue instanceof CharValue))) {
             throw new EvaluationException("An array index must be an int, short, byte or char"); // a long or a double does not index an array in Java
         }
         int i = (int) numberAsLong(indexValue);
@@ -1004,13 +1004,12 @@ public final class JdiExpressionEvaluator {
             while (q < src.length() && Character.isWhitespace(src.charAt(q))) {
                 q++;
             }
-            if (q + 1 < src.length() && src.charAt(q) == '.' && Character.isJavaIdentifierStart(src.charAt(q + 1))) {
-                pos = q + 1;
-                candidate.append('.').append(identifier());
-            } else {
+            if ((q + 1 >= src.length()) || (src.charAt(q) != '.') || !Character.isJavaIdentifierStart(src.charAt(q + 1))) {
                 pos = p;
                 return null;
             }
+            pos = q + 1;
+            candidate.append('.').append(identifier());
         }
     }
 
@@ -1920,8 +1919,8 @@ public final class JdiExpressionEvaluator {
     private static boolean compare(String op, Value originalLeft, Value originalRight) throws EvaluationException {
         Value left = unbox(originalLeft);
         Value right = unbox(originalRight);
-        if (isNumeric(left) && isNumeric(right) && !(left instanceof DoubleValue || left instanceof FloatValue
-                || right instanceof DoubleValue || right instanceof FloatValue)) {
+        if (isNumeric(left) && isNumeric(right) && (!(left instanceof DoubleValue) && !(left instanceof FloatValue) && !(right instanceof DoubleValue)
+                && !(right instanceof FloatValue))) {
             long l = numberAsLong(left);
             long r = numberAsLong(right);
             return switch (op) {
@@ -1931,7 +1930,7 @@ public final class JdiExpressionEvaluator {
                 default -> l > r;
             };
         }
-        if (!(left instanceof DoubleValue || right instanceof DoubleValue) && (left instanceof FloatValue || right instanceof FloatValue)) {
+        if ((!(left instanceof DoubleValue) && !(right instanceof DoubleValue)) && (left instanceof FloatValue || right instanceof FloatValue)) {
             number(left); // both must be numbers
             number(right);
             float l = asFloat(left);
@@ -2095,7 +2094,7 @@ public final class JdiExpressionEvaluator {
         }
         // Do not read "<" in "<=", "=" in "==", "&" in "&&", "!" in "!=" as the shorter token
         char next = pos + token.length() < src.length() ? src.charAt(pos + token.length()) : '\0';
-        if ((token.equals("!") || token.equals("<") || token.equals(">")) && next == '=') {
+        if (("!".equals(token) || "<".equals(token) || ">".equals(token)) && next == '=') {
             return false;
         }
         pos += token.length();
