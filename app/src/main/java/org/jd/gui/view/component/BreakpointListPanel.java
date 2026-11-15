@@ -243,7 +243,7 @@ public class BreakpointListPanel extends JPanel {
         removeAllButton.setEnabled(!model.isEmpty());
     }
 
-    private final class Renderer implements ListCellRenderer<Row> {
+    private static final class Renderer implements ListCellRenderer<Row> {
         private final JPanel panel = new JPanel(new BorderLayout());
         private final JCheckBox checkBox = new JCheckBox();
         private final JLabel label = new JLabel();

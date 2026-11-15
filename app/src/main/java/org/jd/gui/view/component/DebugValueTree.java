@@ -201,16 +201,16 @@ public class DebugValueTree extends LinelessTree {
                 }
                 panel.setToolTipText(variable.valueText == null || variable.valueText.isEmpty()
                     ? variable.name : variable.name + " = " + variable.valueText);
-            } else if (userObject == ADD_ROW) {
-                name.setText(ADD_ROW.toString());
-                name.setIcon(new PlusIcon());
-                name.setFont(tree.getFont().deriveFont(Font.ITALIC));
-                name.setForeground(selected ? foreground : Color.GRAY);
-                value.setText("");
-                panel.setToolTipText(null);
             } else {
-                name.setText(String.valueOf(userObject));
-                name.setIcon(null);
+                if (userObject == ADD_ROW) {
+                    name.setText(ADD_ROW.toString());
+                    name.setIcon(new PlusIcon());
+                    name.setFont(tree.getFont().deriveFont(Font.ITALIC));
+                    name.setForeground(selected ? foreground : Color.GRAY);
+                } else {
+                    name.setText(String.valueOf(userObject));
+                    name.setIcon(null);
+                }
                 value.setText("");
                 panel.setToolTipText(null);
             }
