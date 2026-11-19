@@ -362,9 +362,13 @@ exec "$JAVA" -ea \
               <outfile>${project.build.directory}/windows/jd-gui-duo.exe</outfile>
               <dontWrapJar>true</dontWrapJar>
               <jar>lib/jd-gui-duo-app.jar</jar>
+              <!-- No chdir: the working directory must stay untouched so that relative
+                   file arguments (jd-gui-duo.exe foo.jar) keep resolving against it.
+                   Classpath entries are anchored to the exe directory instead. -->
               <classPath>
                 <mainClass>${main.class}</mainClass>
                 <addDependencies>false</addDependencies>
+                <preCp>%EXEDIR%\lib\*</preCp>
               </classPath>
               <jre>
                 <path>jre</path>
