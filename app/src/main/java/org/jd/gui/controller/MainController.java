@@ -324,8 +324,13 @@ public class MainController implements API {
                 }
                 securedPreferencesController = new SecuredPreferencesController(configuration, mainFrame, SecuredPreferencesPanelService.getInstance().getProviders());
                 eclipsePreferencesController = new EclipsePreferencesController(configuration, mainFrame, EclipsePreferencesPanelService.getInstance().getProviders());
-                installDebugCallbacks(mainFrame);
-                checkDebuggablePage(currentPage);
+                try {
+                    installDebugCallbacks(mainFrame);
+                    checkDebuggablePage(currentPage);
+                } catch (NoClassDefFoundError e) {
+                    // The runtime has no JDI (jdk.jdi module missing): remote debugging is unavailable
+                    remoteDebugController = null;
+                }
                 selectLocationController = new SelectLocationController(MainController.this, mainFrame);
                 aboutController = new AboutController(mainFrame, isDarkMode());
                 sourceLoaderService = new SourceLoaderService();
