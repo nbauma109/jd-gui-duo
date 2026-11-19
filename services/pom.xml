@@ -7,6 +7,11 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>jd-gui-duo-services</artifactId>
+  <properties>
+    <!-- Skip network-dependent tests by default so builds/releases don't fail on flaky external services.
+         Run them with: mvn test -DexcludedGroups=none -->
+    <excludedGroups>integration</excludedGroups>
+  </properties>
   <build>
     <plugins>
       <plugin>
