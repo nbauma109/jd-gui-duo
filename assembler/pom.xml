@@ -366,11 +366,14 @@ exec "$JAVA" -ea \
               <jar>lib/jd-gui-duo-app.jar</jar>
               <!-- No chdir: the working directory must stay untouched so that relative
                    file arguments (jd-gui-duo.exe foo.jar) keep resolving against it.
-                   Classpath entries are anchored to the exe directory instead. -->
+                   The app jar is anchored to the exe directory instead; its manifest
+                   Class-Path pulls in the other libraries. Do not use a wildcard
+                   (%EXEDIR%\lib\*): the launch4j stub crashes (0xC0000005) when the
+                   exe directory contains spaces, e.g. C:\Program Files\JD-GUI Duo. -->
               <classPath>
                 <mainClass>${main.class}</mainClass>
                 <addDependencies>false</addDependencies>
-                <preCp>%EXEDIR%\lib\*</preCp>
+                <preCp>%EXEDIR%\lib\jd-gui-duo-app.jar</preCp>
               </classPath>
               <jre>
                 <path>jre</path>
