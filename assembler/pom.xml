@@ -392,6 +392,22 @@ exec "$JAVA" -ea \
                    from embedding ${project.version} and the current year into the
                    exe bytes, which would change the hash on every release. -->
               <disableVersionInfoDefaults>true</disableVersionInfoDefaults>
+              <!-- Constant, version-independent VERSIONINFO. Without it Windows lists the
+                   exe as "Unknown application" in Open with / Default apps (it takes the
+                   name from FileDescription). Keep every value free of ${project.version}
+                   and dates so the exe hash stays identical across releases. -->
+              <versionInfo>
+                <fileVersion>1.0.0.0</fileVersion>
+                <txtFileVersion>1.0.0.0</txtFileVersion>
+                <fileDescription>JD-GUI Duo</fileDescription>
+                <copyright>Nicolas Baumann</copyright>
+                <productVersion>1.0.0.0</productVersion>
+                <txtProductVersion>1.0.0.0</txtProductVersion>
+                <productName>JD-GUI Duo</productName>
+                <companyName>Nicolas Baumann</companyName>
+                <internalName>jd-gui-duo</internalName>
+                <originalFilename>jd-gui-duo.exe</originalFilename>
+              </versionInfo>
             </configuration>
           </execution>
         </executions>
