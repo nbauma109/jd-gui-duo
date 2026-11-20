@@ -36,7 +36,7 @@ New-Item -ItemType Directory -Force -Path $work | Out-Null
 $ExpectedTitle = 'packaged-smoke.jar - Java Decompiler'
 
 # The application must not touch the real user configuration
-$configDir = Join-Path $work 'config'
+$configDir = Join-Path $work 'config with spaces'
 New-Item -ItemType Directory -Force -Path $configDir | Out-Null
 @'
 <?xml version="1.0" encoding="UTF-8"?>

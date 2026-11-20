@@ -86,13 +86,15 @@ pkill -f "$root/jd-gui-duo.app" 2>/dev/null || true
 for i in $(seq 1 20); do [ -z "$(swift "$work/windows.swift" 2>/dev/null || true)" ] && break; sleep 1; done
 
 # Finder hands the file to the application as an "open document" event ("Open With", double-click), not as an
-# argument. Not a hard failure: the shell-script launcher of the bundle may not receive these events (a native
-# launcher would be needed), which is worth knowing but does not make the bundle unusable.
+# argument. `open -a app file` goes through the same LaunchServices path as Finder, so this is a hard check
+# that the shell-script launcher of the bundle receives these events.
 echo "--- launch through LaunchServices, file as an 'open document' event (Finder 'Open With')"
 open -n -a "$app" --env "JAVA_TOOL_OPTIONS=$config_opts" "$fixture"
 if wait_for_window 40 && [[ "$(swift "$work/windows.swift" 2>/dev/null)" == *"packaged-smoke.jar"* ]]; then
   echo "The open-document event opened the file"
 else
-  echo "::warning::The application did not open the file passed as an open-document event (Finder 'Open With')"
+  echo "The application did not open the file passed as an open-document event (Finder 'Open With')"
+  screencapture -x "$shots/macos-open-document-failure.png" || true
+  exit 1
 fi
-exit 0
+pkill -f "$root/jd-gui-duo.app" 2>/dev/null || true
