@@ -81,8 +81,11 @@ public final class GuiApp {
             robot.settings().delayBetweenEvents(30);
             robot.settings().idleTimeout(250);
             FrameFixture window = new FrameFixture(robot, findMainFrame(robot));
+            // show(size) brings the window to the front without pack()ing it to its preferred size, which is wider
+            // than a 1024x768 screen; the usable screen area is applied again afterwards
+            java.awt.Rectangle usable = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+            window.show(usable.getSize());
             fitToScreen(window.target());
-            window.show();
             return new GuiApp(workDir, fixtureJar, robot, window);
         } catch (IOException e) {
             throw new IllegalStateException("Could not prepare the GUI test environment", e);
