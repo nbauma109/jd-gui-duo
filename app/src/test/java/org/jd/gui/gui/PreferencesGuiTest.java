@@ -11,6 +11,8 @@ import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.JTextComponentFixture;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.awt.event.KeyEvent;
 
@@ -50,17 +52,50 @@ class PreferencesGuiTest extends GuiTestBase {
         }).requireVisible();
     }
 
+    @ParameterizedTest(name = "\"{0}\" is {1}")
+    @CsvSource({"1, valid", "15, valid", "30, valid", "0, refused", "31, refused", "99, refused", "abc, refused", "-1, refused", "1.5, refused"})
+    void directoryDepthMustBeAnIntegerFromOneToThirty(String value, String verdict) {
+        clickMenu("Help", "Preferences...");
+        DialogFixture dialog = dialog("Preferences");
+        try {
+            typeText(field(dialog, "15"), value);
+
+            assertThat(button(dialog, "Ok").target().isEnabled()).isEqualTo("valid".equals(verdict));
+        } finally {
+            button(dialog, "Cancel").click();
+            waitUntil("the dialog is closed", () -> !isDialogShowing("Preferences"));
+        }
+    }
+
+    @Test
+    void emptyDirectoryDepthIsRefused() {
+        clickMenu("Help", "Preferences...");
+        DialogFixture dialog = dialog("Preferences");
+        try {
+            field(dialog, "15").setText("");
+
+            assertThat(button(dialog, "Ok").target().isEnabled()).isFalse();
+        } finally {
+            button(dialog, "Cancel").click();
+            waitUntil("the dialog is closed", () -> !isDialogShowing("Preferences"));
+        }
+    }
+
     @Test
     void changedPreferenceIsKeptWhenConfirmedWithOk() {
         setDirectoryDepth("15", "16");
         try {
             clickMenu("Help", "Preferences...");
             DialogFixture dialog = dialog("Preferences");
-            assertThat(field(dialog, "16").target().isShowing()).isTrue();
+            assertThat(field(dialog, "16").text()).isEqualTo("16");
             button(dialog, "Cancel").click();
         } finally {
             setDirectoryDepth("16", "15");
         }
+        clickMenu("Help", "Preferences...");
+        DialogFixture restored = dialog("Preferences");
+        assertThat(field(restored, "15").text()).isEqualTo("15");
+        button(restored, "Cancel").click();
     }
 
     @Test
