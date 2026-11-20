@@ -69,11 +69,6 @@ public final class GuiApp {
                     <configuration>
                       <gui>
                         <lookAndFeel>com.formdev.flatlaf.FlatLightLaf</lookAndFeel>
-                        <!-- fits the 1024x768 screen of the CI runners: the Robot cannot click outside the screen -->
-                        <mainWindow>
-                          <location x="0" y="0"/>
-                          <size w="1000" h="700"/>
-                        </mainWindow>
                       </gui>
                     </configuration>
                     """.stripLeading(), StandardCharsets.UTF_8);
@@ -86,11 +81,21 @@ public final class GuiApp {
             robot.settings().delayBetweenEvents(30);
             robot.settings().idleTimeout(250);
             FrameFixture window = new FrameFixture(robot, findMainFrame(robot));
+            fitToScreen(window.target());
             window.show();
             return new GuiApp(workDir, fixtureJar, robot, window);
         } catch (IOException e) {
             throw new IllegalStateException("Could not prepare the GUI test environment", e);
         }
+    }
+
+    /**
+     * The CI runners have a 1024x768 screen (smaller still in device-independent pixels when the display is scaled)
+     * and the Robot cannot click outside the screen: the main window is made to fill the usable screen area.
+     */
+    private static void fitToScreen(java.awt.Frame frame) {
+        java.awt.Rectangle usable = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+        org.assertj.swing.edt.GuiActionRunner.execute(() -> frame.setBounds(usable));
     }
 
     private static JFrame findMainFrame(Robot robot) {
