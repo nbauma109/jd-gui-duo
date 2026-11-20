@@ -16,7 +16,7 @@ import java.util.Map;
  * The program debugged by the expression evaluator tests: it prepares locals of every kind, then stops in
  * {@link #breakHere()} where the test suspends it (the locals live in the frame below).
  */
-@SuppressWarnings({"unused", "java:S1144", "java:S1068", "java:S100"})
+@SuppressWarnings({"unused", "java:S1144", "java:S1068", "java:S100", "java:S1172"})
 public class EvalTarget implements Comparable<EvalTarget> {
 
     public enum Color { RED, GREEN, BLUE }
@@ -73,7 +73,7 @@ public class EvalTarget implements Comparable<EvalTarget> {
         return "Target(" + name + ")";
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         int i = 7;
         long l = 123456789012L;
         double d = 2.5;
@@ -103,7 +103,7 @@ public class EvalTarget implements Comparable<EvalTarget> {
         // the test suspends the program somewhere in this loop and reads the locals of this frame
         while (flag) {
             breakHere();
-            Thread.sleep(10);
+            java.util.concurrent.locks.LockSupport.parkNanos(10_000_000L);
         }
         System.out.println(i + l + d + f + c + b + sh + s + nul + arr.length + grid.length + words.length + list + map + boxed
                 + boxedLong + boxedDouble + boxedFlag + boxedChar + o + sb + obj + color);
