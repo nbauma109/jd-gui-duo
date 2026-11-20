@@ -23,6 +23,8 @@ import com.sun.jdi.request.MethodEntryRequest;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 
 /** Launches {@link EvalTarget} in a real JVM under JDI and keeps its main thread suspended in {@code main}. */
 final class DebuggeeSession implements AutoCloseable {
@@ -53,7 +55,6 @@ final class DebuggeeSession implements AutoCloseable {
         String classes = Paths.get(EvalTarget.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toString();
         arguments.get("options").setValue("-cp \"" + classes + "\"");
         VirtualMachine vm = connector.launch(arguments);
-        Process process = vm.process();
         vm.resume();
 
         // The program prepares its locals, then loops over breakHere(). Method calls can only be made on a thread
@@ -80,13 +81,13 @@ final class DebuggeeSession implements AutoCloseable {
         }
     }
 
-    private static ReferenceType waitForClass(VirtualMachine vm, String name) throws InterruptedException {
+    private static ReferenceType waitForClass(VirtualMachine vm, String name) {
         for (int attempt = 0; attempt < 600; attempt++) {
             List<ReferenceType> types = vm.classesByName(name);
             if (!types.isEmpty()) {
                 return types.get(0);
             }
-            Thread.sleep(50);
+            LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(50));
         }
         throw new IllegalStateException("The debuggee never loaded " + name);
     }

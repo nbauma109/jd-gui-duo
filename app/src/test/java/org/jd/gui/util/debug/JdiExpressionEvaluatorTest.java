@@ -46,7 +46,7 @@ class JdiExpressionEvaluatorTest {
             Value value = JdiExpressionEvaluator.evaluate(expression, session.thread(), session.mainFrame());
             String shown = JdiValues.format(value);
             JdiExpressionEvaluator.release(value);
-            return shown.replaceAll("\\s+\\(id=\\d+\\)", "");
+            return shown.replaceAll("\\s++\\(id=\\d++\\)", "");
         } catch (JdiExpressionEvaluator.EvaluationException e) {
             return "ERROR: " + e.getMessage();
         }
