@@ -69,6 +69,11 @@ public final class GuiApp {
                     <configuration>
                       <gui>
                         <lookAndFeel>com.formdev.flatlaf.FlatLightLaf</lookAndFeel>
+                        <!-- fits the 1024x768 screen of the CI runners: the Robot cannot click outside the screen -->
+                        <mainWindow>
+                          <location x="0" y="0"/>
+                          <size w="1000" h="700"/>
+                        </mainWindow>
                       </gui>
                     </configuration>
                     """.stripLeading(), StandardCharsets.UTF_8);

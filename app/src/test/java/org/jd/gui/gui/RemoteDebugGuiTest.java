@@ -82,7 +82,7 @@ class RemoteDebugGuiTest extends GuiTestBase {
         error.label(new org.assertj.swing.core.GenericTypeMatcher<javax.swing.JLabel>(javax.swing.JLabel.class) {
             @Override
             protected boolean isMatching(javax.swing.JLabel label) {
-                return label.isShowing() && label.getText() != null && !label.getText().isBlank();
+                return label.isShowing() && "OptionPane.label".equals(label.getName()) && label.getText() != null && !label.getText().isBlank();
             }
         }).requireVisible();
         optionButton(error, "OK").click();

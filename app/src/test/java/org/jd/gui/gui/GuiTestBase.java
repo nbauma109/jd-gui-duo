@@ -196,12 +196,13 @@ abstract class GuiTestBase {
     /** The "File > Recent Files" entry of a file (its label is a shortened path, the file is a client property). Opens the menu. */
     protected static JMenuItemFixture recentFileItem(Path file) {
         clickMenu("File", "Recent Files");
-        return new JMenuItemFixture(robot, robot.finder().find(new GenericTypeMatcher<JCheckBoxMenuItem>(JCheckBoxMenuItem.class) {
+        // the same file can be listed twice under different spellings (Windows 8.3 short and long names)
+        return new JMenuItemFixture(robot, robot.finder().findAll(new GenericTypeMatcher<JCheckBoxMenuItem>(JCheckBoxMenuItem.class) {
             @Override
             protected boolean isMatching(JCheckBoxMenuItem item) {
                 return item.isShowing() && sameFile(file.toFile(), item.getClientProperty("recentFile"));
             }
-        }));
+        }).stream().findFirst().orElseThrow(() -> new AssertionError("No recent file entry for " + file)));
     }
 
     /** Compares files by canonical path (Windows may hand out 8.3 short names for the temporary directory). */

@@ -140,11 +140,13 @@ class PreferencesGuiTest extends GuiTestBase {
 
     /** The text field of the dialog showing the given value. */
     private static JTextComponentFixture field(DialogFixture dialog, String value) {
-        return dialog.textBox(new GenericTypeMatcher<JTextField>(JTextField.class) {
+        // several fields can show the same value (the font sizes): the first one is the first in the panel
+        JTextField first = robot.finder().findAll(dialog.target(), new GenericTypeMatcher<JTextField>(JTextField.class) {
             @Override
             protected boolean isMatching(JTextField field) {
                 return field.isShowing() && value.equals(field.getText());
             }
-        });
+        }).stream().map(JTextField.class::cast).findFirst().orElseThrow(() -> new AssertionError("No field showing " + value));
+        return new JTextComponentFixture(robot, first);
     }
 }
