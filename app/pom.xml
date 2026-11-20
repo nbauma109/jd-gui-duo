@@ -17,6 +17,19 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludedGroups>${gui.excludedGroups}</excludedGroups>
+          <!-- JaCoCo's argLine is prepended; the add-opens are needed by AssertJ Swing on recent JDKs -->
+          <argLine>@{argLine} --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.desktop/java.awt=ALL-UNNAMED --add-opens java.desktop/javax.swing=ALL-UNNAMED --add-opens java.desktop/sun.awt=ALL-UNNAMED</argLine>
+          <!-- A real desktop is required: never force headless mode -->
+          <systemPropertyVariables>
+            <java.awt.headless>false</java.awt.headless>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
           <appendAssemblyId>false</appendAssemblyId>
@@ -85,6 +98,11 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-swing</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

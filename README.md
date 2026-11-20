@@ -3,6 +3,8 @@
 [![](https://jitci.com/gh/nbauma109/jd-gui-duo/svg)](https://jitci.com/gh/nbauma109/jd-gui-duo)
 [![Maven Release](https://github.com/nbauma109/jd-gui-duo/actions/workflows/maven.yml/badge.svg)](https://github.com/nbauma109/jd-gui-duo/actions/workflows/maven.yml)
 [![Github Release](https://github.com/nbauma109/jd-gui-duo/actions/workflows/release.yml/badge.svg)](https://github.com/nbauma109/jd-gui-duo/actions/workflows/release.yml)
+[![Tests](https://github.com/nbauma109/jd-gui-duo/actions/workflows/tests.yml/badge.svg)](https://github.com/nbauma109/jd-gui-duo/actions/workflows/tests.yml)
+[![codecov](https://codecov.io/gh/nbauma109/jd-gui-duo/graph/badge.svg)](https://codecov.io/gh/nbauma109/jd-gui-duo)
 
 Downloads from Github releases :
 

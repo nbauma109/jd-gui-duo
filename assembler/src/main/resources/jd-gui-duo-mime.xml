@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- File types of the archives JD-GUI Duo opens that shared-mime-info does not know (.jar and .class already exist) -->
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-java-war-archive">
+    <comment>Java web application archive</comment>
+    <sub-class-of type="application/zip"/>
+    <glob pattern="*.war"/>
+  </mime-type>
+  <mime-type type="application/x-java-enterprise-archive">
+    <comment>Java enterprise application archive</comment>
+    <sub-class-of type="application/zip"/>
+    <glob pattern="*.ear"/>
+  </mime-type>
+  <mime-type type="application/x-java-android-library">
+    <comment>Android library archive</comment>
+    <sub-class-of type="application/zip"/>
+    <glob pattern="*.aar"/>
+  </mime-type>
+  <mime-type type="application/x-java-module">
+    <comment>Java module file</comment>
+    <glob pattern="*.jmod"/>
+  </mime-type>
+  <mime-type type="application/x-java-karaf-archive">
+    <comment>Karaf feature archive</comment>
+    <sub-class-of type="application/zip"/>
+    <glob pattern="*.kar"/>
+  </mime-type>
+</mime-info>

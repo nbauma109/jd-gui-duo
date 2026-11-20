@@ -1,0 +1,140 @@
+name: "Packaging tests"
+
+# Checks the packaged applications themselves (not only the code): the Windows exe and installer (including the
+# .jar file association), the macOS application bundle and the Linux archive. Each one is unpacked in a folder
+# whose name contains spaces, started on a jar, and must show its main window.
+
+on:
+  pull_request:
+    paths:
+      - 'assembler/**'
+      - 'packaging/**'
+      - '.github/workflows/packaging-tests.yml'
+  push:
+    branches: [ master ]
+    paths:
+      - 'assembler/**'
+      - 'packaging/**'
+      - '.github/workflows/packaging-tests.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: packaging-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build the distributions
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@v7
+    - name: Set up JDK 25
+      uses: actions/setup-java@v6
+      with:
+        java-version: '25'
+        distribution: 'temurin'
+        cache: maven
+    - name: Package
+      run: mvn --no-transfer-progress -B -DskipTests package
+    - name: Create the fixture jar
+      run: packaging/test/make-fixture-jar.sh "$RUNNER_TEMP/fixture"
+    - uses: actions/upload-artifact@v4
+      with:
+        name: distributions
+        path: |
+          assembler/target/jd-gui-duo-*.tar.xz
+          ${{ runner.temp }}/fixture/packaged-smoke.jar
+        if-no-files-found: error
+
+  windows:
+    name: Windows exe and installer
+    needs: build
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+    - uses: actions/checkout@v7
+    - uses: actions/download-artifact@v4
+      with:
+        name: distributions
+        path: dist
+    - name: Install Inno Setup
+      shell: pwsh
+      run: choco install innosetup --no-progress -y
+    - name: Build the installer
+      shell: pwsh
+      run: |
+        $archive = Get-ChildItem dist -Recurse -Filter *windows*.tar.xz | Select-Object -First 1
+        .\packaging\windows\build-installer.ps1 -InputArchive $archive.FullName -OutputInstaller "$PWD\dist\setup.exe" -AppVersion "0.0.0-test"
+    - name: Test the exe, the installer and the file association
+      shell: pwsh
+      run: |
+        $archive = Get-ChildItem dist -Recurse -Filter *windows*.tar.xz | Select-Object -First 1
+        $fixture = Get-ChildItem dist -Recurse -Filter packaged-smoke.jar | Select-Object -First 1
+        .\packaging\windows\test-packaged.ps1 -Archive $archive.FullName -Fixture $fixture.FullName -Installer "$PWD\dist\setup.exe" -ShotsDir "$PWD\shots"
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: packaging-shots-windows
+        path: shots/
+        if-no-files-found: ignore
+
+  macos:
+    name: macOS application bundle
+    needs: build
+    # The bundled runtime is x64: use an Intel runner (an Apple-silicon one would need Rosetta)
+    runs-on: macos-15-intel
+    timeout-minutes: 20
+    continue-on-error: true   # experimental until a run proves the hosted runner lets the app show a window
+    steps:
+    - uses: actions/checkout@v7
+    - uses: actions/download-artifact@v4
+      with:
+        name: distributions
+        path: dist
+    - name: Test the .app bundle
+      run: |
+        archive="$(find dist -name '*macos*.tar.xz' | head -1)"
+        fixture="$(find dist -name packaged-smoke.jar | head -1)"
+        packaging/macos/test-packaged.sh "$archive" "$fixture" "$PWD/shots"
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: packaging-shots-macos
+        path: shots/
+        if-no-files-found: ignore
+
+  linux:
+    name: Linux archive
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+    - uses: actions/checkout@v7
+    - uses: actions/download-artifact@v4
+      with:
+        name: distributions
+        path: dist
+    - name: Start X server and window manager
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y xvfb openbox xdotool imagemagick x11-utils
+        nohup Xvfb :99 -screen 0 1920x1080x24 -ac +extension XTEST > /tmp/xvfb.log 2>&1 &
+        echo "DISPLAY=:99" >> "$GITHUB_ENV"
+        for i in $(seq 1 20); do DISPLAY=:99 xdpyinfo > /dev/null 2>&1 && break; sleep 0.5; done
+        DISPLAY=:99 nohup openbox > /tmp/openbox.log 2>&1 &
+        sleep 2
+    - name: Test the Linux archive
+      run: |
+        archive="$(find dist -name '*linux*.tar.xz' | head -1)"
+        fixture="$(find dist -name packaged-smoke.jar | head -1)"
+        packaging/linux/test-packaged.sh "$archive" "$fixture" "$PWD/shots"
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: packaging-shots-linux
+        path: shots/
+        if-no-files-found: ignore

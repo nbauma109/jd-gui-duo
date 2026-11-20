@@ -21,6 +21,10 @@
       <includes>
         <include>lib/**</include>
         <include>jd-gui-duo.sh</include>
+        <include>install-desktop-integration.sh</include>
+        <include>jd-gui-duo.desktop.template</include>
+        <include>jd-gui-duo-mime.xml</include>
+        <include>jd-gui-duo.png</include>
       </includes>
       <fileMode>0755</fileMode>
     </fileSet>
