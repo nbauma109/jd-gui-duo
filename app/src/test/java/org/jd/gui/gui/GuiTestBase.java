@@ -359,6 +359,15 @@ abstract class GuiTestBase {
         });
     }
 
+    /** Like {@link #findAll} but below another window, a dialog for instance. */
+    protected static <T extends Component> List<T> findIn(Container root, Class<T> type, java.util.function.Predicate<T> filter) {
+        return GuiActionRunner.execute(() -> {
+            List<T> found = new ArrayList<>();
+            collect(root, type, filter, found);
+            return found;
+        });
+    }
+
     private static <T extends Component> void collect(Component c, Class<T> type, java.util.function.Predicate<T> filter, List<T> found) {
         if (type.isInstance(c) && filter.test(type.cast(c))) {
             found.add(type.cast(c));
