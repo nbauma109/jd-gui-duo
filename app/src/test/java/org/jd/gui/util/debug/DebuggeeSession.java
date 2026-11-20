@@ -39,6 +39,12 @@ final class DebuggeeSession implements AutoCloseable {
         this.mainFrame = mainFrame;
     }
 
+    /** A formatted value without the object id ("text" (id=12) becomes "text"): ids change from one run to another. */
+    static String withoutId(String shown) {
+        int id = shown.lastIndexOf("(id=");
+        return id < 0 ? shown : shown.substring(0, id).stripTrailing();
+    }
+
     ThreadReference thread() {
         return thread;
     }
