@@ -1,0 +1,99 @@
+name: "Tests"
+
+# Unit tests + full-GUI tests (the real application driven by java.awt.Robot) on Windows, macOS and Linux,
+# with JaCoCo coverage uploaded to Codecov.
+#
+# - Windows and macOS: the GitHub-hosted runners provide an interactive desktop session.
+# - Linux: runners have no display, so a real X11 server (Xvfb, with the XTEST extension the Robot needs)
+#   and a window manager (openbox, for focus handling) are started. That is a full AWT/X11 toolkit,
+#   not java.awt.headless mode.
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Unit and GUI tests (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    # macOS needs Accessibility/Screen Recording permissions for the Robot: until a run proves they are
+    # granted on the hosted runner, a macOS failure does not fail the workflow.
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: Windows, os: windows-latest, experimental: false }
+          - { name: Linux,   os: ubuntu-latest,  experimental: false }
+          - { name: macOS,   os: macos-latest,   experimental: true }
+
+    steps:
+    - uses: actions/checkout@v7
+    - name: Set up JDK 25
+      uses: actions/setup-java@v6
+      with:
+        java-version: '25'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Start X server and window manager (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y xvfb openbox x11-utils xdotool imagemagick
+        nohup Xvfb :99 -screen 0 1920x1080x24 -ac +extension XTEST > /tmp/xvfb.log 2>&1 &
+        echo "DISPLAY=:99" >> "$GITHUB_ENV"
+        for i in $(seq 1 20); do DISPLAY=:99 xdpyinfo > /dev/null 2>&1 && break; sleep 0.5; done
+        DISPLAY=:99 nohup openbox > /tmp/openbox.log 2>&1 &
+        sleep 2
+
+    - name: Check that a real desktop is available
+      shell: bash
+      run: |
+        case "$RUNNER_OS" in
+          Windows)
+            powershell -NoProfile -Command "Add-Type -AssemblyName System.Windows.Forms; \$s=[System.Windows.Forms.Screen]::PrimaryScreen; Write-Host ('Primary screen: ' + \$s.Bounds.Width + 'x' + \$s.Bounds.Height); if (-not [Environment]::UserInteractive) { throw 'not an interactive session' }" ;;
+          macOS)
+            system_profiler SPDisplaysDataType | grep -i -E "resolution|display type" || true ;;
+          Linux)
+            xdpyinfo | grep -E "dimensions|XTEST" ; xdpyinfo -ext XTEST | head -3 ;;
+        esac
+
+    - name: Build and test (unit + GUI) with coverage
+      run: mvn --no-transfer-progress -B -Pgui-tests -pl api,services,app,coverage verify
+
+    - name: Upload coverage to Codecov
+      if: ${{ !cancelled() }}
+      uses: codecov/codecov-action@v5
+      with:
+        files: coverage/target/site/jacoco-aggregate/jacoco.xml
+        flags: ${{ runner.os }}
+        name: ${{ matrix.name }}
+        fail_ci_if_error: false
+
+    - name: Upload GUI failure screenshots
+      if: ${{ failure() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: gui-failures-${{ matrix.name }}
+        path: app/target/gui-failures/
+        if-no-files-found: ignore
+
+    - name: Upload test reports
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: surefire-reports-${{ matrix.name }}
+        path: |
+          **/target/surefire-reports/
+        if-no-files-found: ignore

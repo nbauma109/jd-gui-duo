@@ -124,6 +124,8 @@
                 <!-- Copy versioned JAR to version-agnostic name for stable exe -->
                 <copy file="${project.build.directory}/lib/jd-gui-duo-app-${project.version}.jar" tofile="${project.build.directory}/lib/jd-gui-duo-app.jar" overwrite="true" />
                 <delete file="${project.build.directory}/lib/jd-gui-duo-app-${project.version}.jar" />
+                <!-- icon of the Linux desktop entry (binary: not part of the filtered resources) -->
+                <copy file="../app/src/main/resources/org/jd/gui/images/jd_icon_128.png" tofile="${project.build.directory}/jd-gui-duo.png" overwrite="true" />
               </target>
             </configuration>
           </execution>
@@ -168,6 +170,26 @@
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>LSMinimumSystemVersion</key><string>11.0</string>
   <key>NSHighResolutionCapable</key><true/>
+  <!-- File associations: Finder offers JD-GUI Duo in "Open With" for these files (without taking over as the default) -->
+  <key>CFBundleDocumentTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleTypeName</key><string>Java Archive</string>
+      <key>CFBundleTypeExtensions</key>
+      <array><string>jar</string><string>war</string><string>ear</string><string>aar</string><string>jmod</string><string>kar</string></array>
+      <key>CFBundleTypeIconFile</key><string>JDGUI</string>
+      <key>CFBundleTypeRole</key><string>Viewer</string>
+      <key>LSHandlerRank</key><string>Alternate</string>
+    </dict>
+    <dict>
+      <key>CFBundleTypeName</key><string>Java Class File</string>
+      <key>CFBundleTypeExtensions</key>
+      <array><string>class</string></array>
+      <key>CFBundleTypeIconFile</key><string>JDGUI</string>
+      <key>CFBundleTypeRole</key><string>Viewer</string>
+      <key>LSHandlerRank</key><string>Alternate</string>
+    </dict>
+  </array>
 </dict></plist>
 ]]></echo>
 

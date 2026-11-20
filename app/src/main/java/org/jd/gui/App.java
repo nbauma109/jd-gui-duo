@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.awt.Desktop;
 import java.awt.GraphicsEnvironment;
 import java.net.URL;
 import java.nio.file.InvalidPathException;
@@ -35,6 +36,7 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 public class App {
@@ -90,6 +92,24 @@ public class App {
             // Create main controller and show main frame
             controller = new MainController(configuration);
             controller.show(newList(args));
+            registerOpenFileHandler();
+        }
+    }
+
+    /**
+     * On macOS, Finder passes the files to open ("Open With", double-click, drop on the Dock icon) to a running
+     * application as an "open document" event instead of command line arguments.
+     */
+    private static void registerOpenFileHandler() {
+        if (GraphicsEnvironment.isHeadless() || !Desktop.isDesktopSupported()) {
+            return;
+        }
+        Desktop desktop = Desktop.getDesktop();
+        if (desktop.isSupported(Desktop.Action.APP_OPEN_FILE)) {
+            desktop.setOpenFileHandler(event -> {
+                List<File> files = event.getFiles();
+                SwingUtilities.invokeLater(() -> controller.openFiles(files));
+            });
         }
     }
 

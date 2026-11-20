@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=JD-GUI Duo
+GenericName=Java Decompiler
+Comment=Browse and decompile Java archives and class files
+Exec="@INSTALL_DIR@/jd-gui-duo.sh" %F
+Icon=@ICON@
+Terminal=false
+Categories=Development;Utility;
+StartupWMClass=org-jd-gui-App
+MimeType=application/java-archive;application/x-java-archive;application/x-java-applet;application/x-java-war-archive;application/x-java-enterprise-archive;application/x-java-android-library;application/x-java-module;application/x-java-karaf-archive;
