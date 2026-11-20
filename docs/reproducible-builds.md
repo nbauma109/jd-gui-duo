@@ -53,38 +53,6 @@ versioned original so only one copy lands in the distribution:
 <delete file="${project.build.directory}/lib/jd-gui-duo-app-${project.version}.jar" />
 ```
 
-### 3. Post-Build PE Timestamp Patch (`FixPeTimestamp.java`)
-
-After launch4j generates the exe (in the `prepare-package` phase), a second Ant task in the
-`package` phase runs `assembler/src/scripts/FixPeTimestamp.java` via the Java 11+ single-file
-source launcher. This script neutralises every build-time timestamp in the binary:
-
-| Field | Offset | Action |
-|---|---|---|
-| COFF `TimeDateStamp` | `e_lfanew + 8` | Set to fixed epoch `1704067200` (2024-01-01) |
-| Every `IMAGE_RESOURCE_DIRECTORY.TimeDateStamp` in `.rsrc` | BFS-traversed | Zeroed |
-| Optional Header `CheckSum` | `optHdr + 64` | Zeroed (not validated by Windows for user-mode apps) |
-
-The script runs before `maven-assembly-plugin` packages the tar.xz, so the archive always
-contains the fully-patched exe.
-
-## Verification
-
-Build twice from the same commit and compare hashes:
-
-```bash
-mvn clean package
-sha256sum assembler/target/windows/jd-gui-duo.exe > build1.sha256
-
-mvn clean package
-sha256sum assembler/target/windows/jd-gui-duo.exe > build2.sha256
-
-diff build1.sha256 build2.sha256   # no output = identical
-```
-
-The exe also stays identical across different application versions (v2.0.112 → v2.0.113, etc.)
-because it contains no version-specific data.
-
 ## Notes
 
 - The **installer** (`jd-gui-duo-windows-${version}-setup.exe`, built by Inno Setup) still

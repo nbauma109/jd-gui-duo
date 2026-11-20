@@ -128,24 +128,6 @@
             </configuration>
           </execution>
           <execution>
-            <id>fix-pe-timestamp</id>
-            <phase>package</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <!-- Overwrite the PE COFF TimeDateStamp with a fixed epoch so the
-                     exe hash is identical across builds -->
-                <exec executable="${java.home}/bin/java" failonerror="true">
-                  <arg value="${project.basedir}/src/scripts/FixPeTimestamp.java" />
-                  <arg value="${project.build.directory}/windows/jd-gui-duo.exe" />
-                  <arg value="1704067200" />
-                </exec>
-              </target>
-            </configuration>
-          </execution>
-          <execution>
             <id>build-macos-app-bundle</id>
             <phase>package</phase>
             <goals>
@@ -367,9 +349,10 @@ exec "$JAVA" -ea \
               <!-- No chdir: the working directory must stay untouched so that relative
                    file arguments (jd-gui-duo.exe foo.jar) keep resolving against it.
                    The app jar is anchored to the exe directory instead; its manifest
-                   Class-Path pulls in the other libraries. Do not use a wildcard
-                   (%EXEDIR%\lib\*): the launch4j stub crashes (0xC0000005) when the
-                   exe directory contains spaces, e.g. C:\Program Files\JD-GUI Duo. -->
+                   Class-Path pulls in the other libraries. Avoid a wildcard
+                   (%EXEDIR%\lib\*): the launch4j stub expands it to one absolute path
+                   per jar and crashes (0xC0000005) once the expanded classpath
+                   exceeds ~32K characters, i.e. with a long install path. -->
               <classPath>
                 <mainClass>${main.class}</mainClass>
                 <addDependencies>false</addDependencies>
