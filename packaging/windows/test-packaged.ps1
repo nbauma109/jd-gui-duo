@@ -36,20 +36,16 @@ New-Item -ItemType Directory -Force -Path $work | Out-Null
 $ExpectedTitle = 'packaged-smoke.jar - Java Decompiler'
 
 # The application must not touch the real user configuration
-$configDir = Join-Path $work 'config with spaces'
+$configDir = Join-Path $work 'config'
 New-Item -ItemType Directory -Force -Path $configDir | Out-Null
 @'
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration><gui><lookAndFeel>com.formdev.flatlaf.FlatLightLaf</lookAndFeel></gui></configuration>
 '@ | Set-Content -Path (Join-Path $configDir 'jd-gui.cfg') -Encoding utf8
-# quoted only when needed: the temporary folder of an account can contain spaces (C:\Users\Jane Doe\...),
-# and the JVM would take the pieces of the path for separate options
+# JAVA_TOOL_OPTIONS cannot carry a path with spaces: the JVM splits it, and quoting it keeps the window from
+# appearing at all (observed on the hosted runner). The hosted runner's temp folder has no spaces.
 $configFile = Join-Path $configDir 'jd-gui.cfg'
-if ($configFile -match '\s') {
-    $env:JAVA_TOOL_OPTIONS = '-Djd-gui.cfg="' + $configFile + '"'
-} else {
-    $env:JAVA_TOOL_OPTIONS = "-Djd-gui.cfg=$configFile"
-}
+$env:JAVA_TOOL_OPTIONS = "-Djd-gui.cfg=$configFile"
 
 function Save-Screenshot([string] $name) {
     try {
