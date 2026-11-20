@@ -13,4 +13,9 @@ cat > "$dir/jd-gui.cfg" <<'XML'
   </gui>
 </configuration>
 XML
-echo "-Djd-gui.cfg=\"$dir/jd-gui.cfg\""
+# quoted only when the path contains whitespace (the JVM would split it into separate options)
+if [[ "$dir" =~ [[:space:]] ]]; then
+  echo "-Djd-gui.cfg=\"$dir/jd-gui.cfg\""
+else
+  echo "-Djd-gui.cfg=$dir/jd-gui.cfg"
+fi
