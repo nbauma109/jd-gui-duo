@@ -14,7 +14,7 @@ mkdir -p "$shots"
 work="$(mktemp -d)"
 root="$work/folder with spaces/JD GUI"
 mkdir -p "$root"
-trap 'kill "${pid:-0}" 2>/dev/null || true; rm -rf "$work"' EXIT
+trap '[ -z "${pid:-}" ] || kill "$pid" 2>/dev/null || true; rm -rf "$work"' EXIT
 
 tar -xJf "$archive" -C "$root"
 for required in jd-gui-duo.sh jre/bin/java lib install-desktop-integration.sh jd-gui-duo.desktop.template jd-gui-duo-mime.xml jd-gui-duo.png; do
