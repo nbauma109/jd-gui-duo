@@ -140,7 +140,7 @@ class JdiExpressionEvaluatorTest {
         assertEvaluates(
                 "EvalTarget.LIMIT", "10", "EvalTarget.GREETING", "\"hi\"", "EvalTarget.BIG", "1099511627776", "Integer.MAX_VALUE", "2147483647",
                 "Long.MAX_VALUE", "9223372036854775807", "Boolean.TRUE", "Boolean", "Math.max(i, 9)", "9", "java.lang.Math.abs(-3)", "3",
-                "Integer.parseInt(\"12\")", "12", "String.valueOf(i)", "\"7\"", "System.lineSeparator().length()", "1",
+                "Integer.parseInt(\"12\")", "12", "String.valueOf(i)", "\"7\"", "System.lineSeparator().length()", String.valueOf(System.lineSeparator().length()),
                 "color == EvalTarget.Color.GREEN", "true", "EvalTarget.Color.RED", "EvalTarget$Color", "EvalTarget.Color.RED.ordinal()", "0",
                 "EvalTarget.Color.valueOf(\"BLUE\")", "EvalTarget$Color");
     }
