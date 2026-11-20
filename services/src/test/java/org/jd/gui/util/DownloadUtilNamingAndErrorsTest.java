@@ -103,7 +103,8 @@ class DownloadUtilNamingAndErrorsTest {
     @Test
     void aMissingAddressIsRefused() {
         assertThatThrownBy(() -> DownloadUtil.downloadToTemp(null, null, (NexusConfig) null)).isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> DownloadUtil.downloadToTemp(URI.create("http://localhost/x"), (org.jd.gui.api.API) null, (java.awt.Component) null)).isInstanceOf(IllegalArgumentException.class);
+        URI address = URI.create("http://localhost/x");
+        assertThatThrownBy(() -> DownloadUtil.downloadToTemp(address, (org.jd.gui.api.API) null, (java.awt.Component) null)).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -116,7 +117,7 @@ class DownloadUtilNamingAndErrorsTest {
     void aRedirectIsFollowed() throws IOException {
         File file = download(URI.create("http://localhost:" + port + "/moved/redirected-1.jar"), null);
 
-        assertThat(file.getName()).isEqualTo("redirected-1.jar");
+        assertThat(file).hasName("redirected-1.jar");
         assertThat(Files.readString(file.toPath())).isEqualTo("content of /target-of-the-redirect");
     }
 
@@ -124,7 +125,7 @@ class DownloadUtilNamingAndErrorsTest {
     void anAddressWithoutAFileNameIsSavedAsDownloadBin() throws IOException {
         File file = download(URI.create("http://localhost:" + port + "/"), null);
 
-        assertThat(file.getName()).isEqualTo("download.bin");
+        assertThat(file).hasName("download.bin");
         assertThat(Files.readString(file.toPath())).isEqualTo("content of /");
     }
 

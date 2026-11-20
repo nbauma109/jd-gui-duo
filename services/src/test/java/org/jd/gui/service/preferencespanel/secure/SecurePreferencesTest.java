@@ -44,8 +44,7 @@ class SecurePreferencesTest {
         String first = SecurePreferences.encrypt(MASTER, "secret");
         String second = SecurePreferences.encrypt(MASTER, "secret");
 
-        assertThat(first).isNotEqualTo(second); // a random salt and a random initialization vector
-        assertThat(first).doesNotContain("secret");
+        assertThat(first).isNotEqualTo(second).doesNotContain("secret"); // a random salt and a random initialization vector
         assertThat(new String(Base64.getDecoder().decode(first), java.nio.charset.StandardCharsets.ISO_8859_1)).doesNotContain("secret");
     }
 
