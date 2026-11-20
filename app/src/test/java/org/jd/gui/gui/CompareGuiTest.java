@@ -24,6 +24,7 @@ class CompareGuiTest extends GuiTestBase {
         FrameFixture comparer = frame("Jar Comparer");
         comparer.requireVisible();
         dialog("Select files to compare - Drag and drop").requireVisible();
+        assertThat(comparer.target().isShowing()).isTrue();
     }
 
     @Test

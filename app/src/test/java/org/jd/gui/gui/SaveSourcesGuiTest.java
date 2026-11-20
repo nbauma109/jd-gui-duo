@@ -64,7 +64,7 @@ class SaveSourcesGuiTest extends GuiTestBase {
     private static long size(Path path) {
         try {
             return Files.size(path);
-        } catch (IOException e) {
+        } catch (IOException _) {
             return -1;
         }
     }
@@ -72,7 +72,7 @@ class SaveSourcesGuiTest extends GuiTestBase {
     private static boolean isCompleteZip(Path path) {
         try (ZipFile zip = new ZipFile(path.toFile())) {
             return zip.size() > 0;
-        } catch (IOException e) {
+        } catch (IOException _) {
             return false; // still being written
         }
     }

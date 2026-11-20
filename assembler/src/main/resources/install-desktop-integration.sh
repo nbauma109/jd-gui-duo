@@ -10,7 +10,7 @@
 set -e
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
-if [ -n "$XDG_DATA_HOME" ]; then DATA="$XDG_DATA_HOME"; else DATA="$HOME/.local/share"; fi
+if [[ -n "$XDG_DATA_HOME" ]]; then DATA="$XDG_DATA_HOME"; else DATA="$HOME/.local/share"; fi
 APPS="$DATA/applications"
 MIME="$DATA/mime"
 ICONS="$DATA/icons/hicolor/128x128/apps"
@@ -35,7 +35,7 @@ case "$1" in
     cp "$DIR/jd-gui-duo-mime.xml" "$MIME/packages/jd-gui-duo.xml"
     sed -e "s|@INSTALL_DIR@|$DIR|g" -e "s|@ICON@|jd-gui-duo|g" "$DIR/jd-gui-duo.desktop.template" > "$DESKTOP"
     refresh
-    if [ "$1" = "--set-default" ] && command -v xdg-mime > /dev/null 2>&1; then
+    if [[ "$1" = "--set-default" ]] && command -v xdg-mime > /dev/null 2>&1; then
       for type in $TYPES; do xdg-mime default jd-gui-duo.desktop "$type"; done
     fi
     echo "JD-GUI Duo registered: $DESKTOP"

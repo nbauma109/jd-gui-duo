@@ -36,6 +36,7 @@ class SearchGuiTest extends GuiTestBase {
 
         pressShortcut(KeyEvent.VK_S, KeyEvent.VK_SHIFT);
         dialog("Search").requireVisible();
+        assertThat(isDialogShowing("Search")).isTrue();
     }
 
     @Test

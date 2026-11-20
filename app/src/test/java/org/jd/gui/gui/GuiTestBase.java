@@ -211,7 +211,7 @@ abstract class GuiTestBase {
         }
         try {
             return expected.getCanonicalFile().equals(file.getCanonicalFile());
-        } catch (java.io.IOException e) {
+        } catch (java.io.IOException _) {
             return expected.equals(file);
         }
     }

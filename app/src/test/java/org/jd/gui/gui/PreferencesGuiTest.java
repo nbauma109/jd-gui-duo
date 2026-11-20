@@ -32,6 +32,7 @@ class PreferencesGuiTest extends GuiTestBase {
 
         pressShortcut(KeyEvent.VK_P, KeyEvent.VK_SHIFT);
         dialog("Preferences").requireVisible();
+        assertThat(isDialogShowing("Preferences")).isTrue();
     }
 
     @Test
@@ -55,7 +56,7 @@ class PreferencesGuiTest extends GuiTestBase {
         try {
             clickMenu("Help", "Preferences...");
             DialogFixture dialog = dialog("Preferences");
-            field(dialog, "16").requireVisible();
+            assertThat(field(dialog, "16").target().isShowing()).isTrue();
             button(dialog, "Cancel").click();
         } finally {
             setDirectoryDepth("16", "15");
@@ -71,7 +72,7 @@ class PreferencesGuiTest extends GuiTestBase {
         waitUntil("the dialog is closed", () -> !isDialogShowing("Preferences"));
 
         clickMenu("Help", "Preferences...");
-        field(dialog("Preferences"), "15").requireVisible();
+        assertThat(field(dialog("Preferences"), "15").target().isShowing()).isTrue();
     }
 
     @Test
@@ -93,6 +94,7 @@ class PreferencesGuiTest extends GuiTestBase {
         typeText(field(dialog, "20"), String.valueOf(original));
         button(dialog, "Ok").click();
         waitUntil("the font size is restored", () -> sourceArea().getFont().getSize() == original);
+        assertThat(GuiActionRunner.execute(() -> sourceArea().getFont().getSize())).isEqualTo(original);
     }
 
     @Test
@@ -124,6 +126,7 @@ class PreferencesGuiTest extends GuiTestBase {
             DialogFixture dialog = dialog(title);
             button(dialog, "Cancel").click();
             waitUntil("the " + title + " dialog is closed", () -> !isDialogShowing(title));
+            assertThat(isDialogShowing(title)).isFalse();
         }
     }
 

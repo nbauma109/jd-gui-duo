@@ -6,7 +6,6 @@
  */
 
 package org.jd.gui.gui;
-import org.assertj.swing.core.GenericTypeMatcher;
 import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.JListFixture;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import java.awt.event.KeyEvent;
 
 import javax.swing.JList;
-import javax.swing.JTextField;
 import javax.swing.JTree;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,6 +48,7 @@ class NavigationGuiTest extends GuiTestBase {
         button(dialog, "Ok").requireDisabled();
         button(dialog, "Cancel").click();
         waitUntil("the dialog is closed", () -> !isDialogShowing("Go to Line"));
+        assertThat(isDialogShowing("Go to Line")).isFalse();
     }
 
     @Test
@@ -57,6 +56,7 @@ class NavigationGuiTest extends GuiTestBase {
         pressShortcut(KeyEvent.VK_L);
 
         dialog("Go to Line").requireVisible();
+        assertThat(isDialogShowing("Go to Line")).isTrue();
     }
 
     @Test

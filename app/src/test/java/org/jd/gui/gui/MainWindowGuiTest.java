@@ -46,12 +46,14 @@ class MainWindowGuiTest extends GuiTestBase {
         about.label(org.assertj.swing.core.matcher.JLabelMatcher.withText("CFR")).requireVisible();
         button(about, "Ok").click();
         waitUntil("the About dialog is closed", () -> !isDialogShowing("About Java Decompiler"));
+        assertThat(isDialogShowing("About Java Decompiler")).isFalse();
     }
 
     @Test
     void aboutDialogOpensWithItsKeyboardShortcut() {
         pressKey(KeyEvent.VK_F1);
         dialog("About Java Decompiler").requireVisible();
+        assertThat(isDialogShowing("About Java Decompiler")).isTrue();
     }
 
     @Test
@@ -62,5 +64,6 @@ class MainWindowGuiTest extends GuiTestBase {
         waitUntil("the check box item flips", () -> item.target().isSelected() != initial);
         window.menuItemWithPath("Search", "Toggle Highlight").click();
         waitUntil("the check box item flips back", () -> item.target().isSelected() == initial);
+        assertThat(item.target().isSelected()).isEqualTo(initial);
     }
 }

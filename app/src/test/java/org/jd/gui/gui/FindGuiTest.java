@@ -74,6 +74,7 @@ class FindGuiTest extends GuiTestBase {
         pressKey(KeyEvent.VK_ENTER);
 
         waitUntil("the match is selected", () -> "Hello".equals(selectedText()));
+        assertThat(selectedText()).isEqualTo("Hello");
     }
 
     @Test

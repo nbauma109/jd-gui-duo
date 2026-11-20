@@ -61,7 +61,7 @@ class OpenFileGuiTest extends GuiTestBase {
     void openedFileIsListedInTheRecentFilesMenu() {
         openFixtureJar();
 
-        recentFileItem(app.fixtureJar()).requireVisible();
+        assertThat(recentFileItem(app.fixtureJar()).target().isShowing()).isTrue();
         robot.pressAndReleaseKey(KeyEvent.VK_ESCAPE);
         robot.pressAndReleaseKey(KeyEvent.VK_ESCAPE);
     }
@@ -85,6 +85,7 @@ class OpenFileGuiTest extends GuiTestBase {
         pressShortcut(KeyEvent.VK_O);
 
         window.fileChooser().requireVisible();
+        assertThat(window.fileChooser().target().isShowing()).isTrue();
         window.fileChooser().cancel();
     }
 
@@ -98,6 +99,7 @@ class OpenFileGuiTest extends GuiTestBase {
         }).click();
 
         window.fileChooser().requireVisible();
+        assertThat(window.fileChooser().target().isShowing()).isTrue();
         window.fileChooser().cancel();
     }
 
@@ -106,6 +108,7 @@ class OpenFileGuiTest extends GuiTestBase {
         openFile(app.fixtureClasses().resolve("demo").resolve("Greeter.class"));
 
         waitUntil("the decompiled class is displayed", () -> sourceText().contains("public class Greeter"));
+        assertThat(sourceText()).contains("public class Greeter");
     }
 
     @Test
@@ -116,6 +119,7 @@ class OpenFileGuiTest extends GuiTestBase {
         openFile(source);
 
         waitUntil("the source is displayed", () -> sourceText().contains("public class Hello"));
+        assertThat(sourceText()).contains("public class Hello");
     }
 
     @Test

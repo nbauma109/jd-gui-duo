@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 
 import javax.swing.JFormattedTextField;
 import javax.swing.JList;
-import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -67,6 +66,7 @@ class RemoteDebugGuiTest extends GuiTestBase {
         pressShortcut(java.awt.event.KeyEvent.VK_D, java.awt.event.KeyEvent.VK_SHIFT);
 
         dialog(TITLE).requireVisible();
+        assertThat(isDialogShowing(TITLE)).isTrue();
     }
 
     @Test
@@ -99,6 +99,7 @@ class RemoteDebugGuiTest extends GuiTestBase {
         waitUntil("the debugger is connected", () -> isMenuEnabled("Debug", "Disconnect"));
         clickMenu("Debug", "Disconnect");
         waitUntil("the debugger is disconnected", () -> !isMenuEnabled("Debug", "Disconnect"));
+        assertThat(isMenuEnabled("Debug", "Disconnect")).isFalse();
     }
 
     @Test
@@ -112,6 +113,7 @@ class RemoteDebugGuiTest extends GuiTestBase {
         DialogFixture info = dialog(TITLE);
         optionButton(info, "OK").click();
         waitUntil("the message is dismissed", () -> !isDialogShowing(TITLE));
+        assertThat(isDialogShowing(TITLE)).isFalse();
     }
 
     @Test
