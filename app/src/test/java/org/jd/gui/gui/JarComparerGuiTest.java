@@ -79,7 +79,18 @@ class JarComparerGuiTest extends GuiTestBase {
         Path variant = FixtureArchives.createVariantJar(app.workDir(), app.fixtureClasses());
         FrameFixture comparer = compare(app.fixtureJar(), variant);
 
-        new JTableFixture(robot, table(comparer)).cell(org.assertj.swing.data.TableCell.row(0).column(0)).doubleClick();
+        JTable table = table(comparer);
+        JTableFixture fixture = new JTableFixture(robot, table);
+        fixture.cell(org.assertj.swing.data.TableCell.row(0).column(0)).doubleClick();
+        if (!isShowingDiff()) {
+            // On some X11 set-ups the two clicks of the robot are not merged into a click count of 2: deliver that event itself
+            // to the table, which selects the row first, like a real double click does.
+            GuiActionRunner.execute(() -> {
+                java.awt.Rectangle cell = table.getCellRect(0, 0, true);
+                table.dispatchEvent(new java.awt.event.MouseEvent(table, java.awt.event.MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0,
+                        cell.x + cell.width / 2, cell.y + cell.height / 2, 2, false, java.awt.event.MouseEvent.BUTTON1));
+            });
+        }
 
         FrameFixture diff = WindowFinder.findFrame(new GenericTypeMatcher<JFrame>(JFrame.class) {
             @Override
@@ -128,6 +139,20 @@ class JarComparerGuiTest extends GuiTestBase {
         FrameFixture comparer = comparerFrame();
         waitUntil("the comparison is done", () -> labels(comparer).stream().anyMatch(text -> text.contains("the files")) && !rows(comparer).isEmpty());
         return comparer;
+    }
+
+    /** Whether the diff window is already shown (waits a moment, as it is built after the click). */
+    private static boolean isShowingDiff() {
+        long deadline = System.currentTimeMillis() + 4000;
+        while (System.currentTimeMillis() < deadline) {
+            boolean shown = GuiActionRunner.execute(() -> java.util.Arrays.stream(Window.getWindows())
+                    .anyMatch(w -> w.isShowing() && w instanceof JFrame f && f.getTitle() != null && f.getTitle().startsWith("Comparison view for class")));
+            if (shown) {
+                return true;
+            }
+            org.assertj.swing.timing.Pause.pause(200);
+        }
+        return false;
     }
 
     private static FrameFixture comparerFrame() {
