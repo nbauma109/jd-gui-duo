@@ -7,6 +7,7 @@
 
 package org.jd.gui.gui;
 import org.assertj.swing.fixture.DialogFixture;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,6 +26,30 @@ class SearchGuiTest extends GuiTestBase {
         openFixtureJar();
         // The search relies on the indexes, which are built in the background after the file is opened
         waitUntil("the search is enabled", () -> isMenuEnabled("Search", "Search..."));
+    }
+
+    /** The application (and the search view it retains) is shared by the whole suite: restore the defaults. */
+    @AfterEach
+    void restoreSearchDefaults() {
+        org.assertj.swing.edt.GuiActionRunner.execute(() -> {
+            for (java.awt.Window w : java.awt.Window.getWindows()) {
+                if (w instanceof java.awt.Dialog d && "Search".equals(d.getTitle())) {
+                    restoreDefaults(d);
+                }
+            }
+        });
+    }
+
+    private static void restoreDefaults(java.awt.Container container) {
+        for (java.awt.Component c : container.getComponents()) {
+            if (c instanceof JCheckBox box) {
+                box.setSelected(java.util.Set.of("Type", "Declarations", "References").contains(box.getText()));
+            } else if (c instanceof javax.swing.text.JTextComponent text) {
+                text.setText("");
+            } else if (c instanceof java.awt.Container child) {
+                restoreDefaults(child);
+            }
+        }
     }
 
     @Test
