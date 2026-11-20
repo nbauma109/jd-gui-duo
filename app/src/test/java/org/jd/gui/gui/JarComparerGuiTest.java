@@ -60,7 +60,7 @@ class JarComparerGuiTest extends GuiTestBase {
         assertThat(rows(comparer)).containsExactly(
                 "demo/Greeter.class | Changed size", "demo/Main.class | Left only", "demo/Shape.class | =", "added.txt | Right only");
         // the third column is the size change: bytes only on the left are negative, bytes only on the right positive
-        assertThat(table(comparer).getValueAt(3, 2).toString()).isEqualTo("+8");
+        assertThat(table(comparer).getValueAt(3, 2)).hasToString("+8");
         assertThat(table(comparer).getValueAt(1, 2).toString()).startsWith("-");
     }
 
