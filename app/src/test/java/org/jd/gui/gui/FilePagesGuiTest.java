@@ -75,7 +75,7 @@ class FilePagesGuiTest extends GuiTestBase {
     }
 
     /** Double-clicks the tree node with the given text and waits until a text page shows something. */
-    private static void openEntry(String text) {
+    static void openEntry(String text) {
         JTreeFixture tree = fileTree();
         expandAll(tree);
         int row = rowOf(tree.target(), text);
@@ -85,7 +85,7 @@ class FilePagesGuiTest extends GuiTestBase {
     }
 
     /** Text of the text page currently shown. */
-    private static String pageText() {
+    static String pageText() {
         return GuiActionRunner.execute(() -> findAll(RSyntaxTextArea.class, RSyntaxTextArea::isShowing).stream()
                 .map(RSyntaxTextArea::getText).filter(t -> !t.isEmpty()).findFirst().orElse(""));
     }

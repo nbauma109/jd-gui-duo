@@ -64,6 +64,8 @@ final class FixtureArchives {
             </web-app>
             """;
 
+    private static final java.util.concurrent.atomic.AtomicInteger COUNTER = new java.util.concurrent.atomic.AtomicInteger();
+
     private FixtureArchives() {
     }
 
@@ -108,6 +110,81 @@ final class FixtureArchives {
             jos.closeEntry();
         }
         return war;
+    }
+
+    /** One entry of every kind of text, source and image file the application has a page for, and two nested archives. */
+    static Path createAssorted(Path dir, Path nestedJar) throws IOException {
+        Path zip = dir.resolve("assorted-" + COUNTER.incrementAndGet() + ".zip"); // a path the application has not seen yet
+        java.util.Map<String, String> texts = new java.util.LinkedHashMap<>();
+        texts.put("readme.txt", "Plain text of the readme\nsecond line");
+        texts.put("notes.md", "# Notes\nSome markdown");
+        texts.put("config.yml", "server:\n  port: 8080\n");
+        texts.put("data.properties", "greeting=Hello\nanswer=42\n");
+        texts.put("app.cfg", "mode=fixture\n");
+        texts.put("style.css", "body { color: #336699; }\n");
+        texts.put("page.html", "<html><body><h1>Fixture page</h1></body></html>\n");
+        texts.put("doc.xhtml", "<html xmlns=\"http://www.w3.org/1999/xhtml\"><body>Fixture xhtml</body></html>\n");
+        texts.put("script.js", "function fixture() { return 'js'; }\n");
+        texts.put("data.json", "{\"fixture\": [1, 2, 3]}\n");
+        texts.put("query.sql", "SELECT fixture FROM table_one;\n");
+        texts.put("run.bat", "@echo fixture batch\n");
+        texts.put("build.gradle", "plugins { id 'java' }\n");
+        texts.put("Hello.groovy", "class HelloGroovy { String greet() { 'hi' } }\n");
+        texts.put("Hello.kt", "class HelloKotlin { fun greet() = \"hi\" }\n");
+        texts.put("Hello.scala", "class HelloScala { def greet = \"hi\" }\n");
+        texts.put("view.jsp", "<%@ page language=\"java\" %><p>Fixture jsp</p>\n");
+        texts.put("schema.xsd", "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"><xs:element name=\"fixtureElement\" type=\"xs:string\"/></xs:schema>\n");
+        texts.put("transform.xsl", "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"><xsl:template match=\"/\">fixtureXsl</xsl:template></xsl:stylesheet>\n");
+        texts.put("service.wsdl", "<definitions name=\"FixtureService\" xmlns=\"http://schemas.xmlsoap.org/wsdl/\"/>\n");
+        texts.put("tags.tld", "<taglib><tlib-version>1.0</tlib-version><short-name>fixtureTags</short-name></taglib>\n");
+        texts.put("config.xml", "<?xml version=\"1.0\"?>\n<config><entry key=\"fixture\">value</entry></config>\n");
+        texts.put("doctype.dtd", "<!ELEMENT fixture (#PCDATA)>\n");
+        texts.put("Hello.java", "package demo;\n\npublic class Hello {\n    public String greet() {\n        return \"hello from source\";\n    }\n}\n");
+        try (OutputStream out = Files.newOutputStream(zip); java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(out)) {
+            for (java.util.Map.Entry<String, String> entry : texts.entrySet()) {
+                zos.putNextEntry(new java.util.zip.ZipEntry(entry.getKey()));
+                zos.write(entry.getValue().getBytes(StandardCharsets.UTF_8));
+                zos.closeEntry();
+            }
+            zos.putNextEntry(new java.util.zip.ZipEntry("icon.png"));
+            java.awt.image.BufferedImage image = new java.awt.image.BufferedImage(8, 8, java.awt.image.BufferedImage.TYPE_INT_RGB);
+            javax.imageio.ImageIO.write(image, "png", zos);
+            zos.closeEntry();
+            zos.putNextEntry(new java.util.zip.ZipEntry("lib.jar"));
+            Files.copy(nestedJar, zos);
+            zos.closeEntry();
+        }
+        return zip;
+    }
+
+    /** The text entries of {@link #createAssorted}: name and a fragment that its page must show. */
+    static java.util.Map<String, String> assortedFragments() {
+        java.util.Map<String, String> fragments = new java.util.LinkedHashMap<>();
+        fragments.put("readme.txt", "Plain text of the readme");
+        fragments.put("notes.md", "Some markdown");
+        fragments.put("config.yml", "port: 8080");
+        fragments.put("data.properties", "answer=42");
+        fragments.put("app.cfg", "mode=fixture");
+        fragments.put("style.css", "#336699");
+        fragments.put("page.html", "Fixture page");
+        fragments.put("doc.xhtml", "Fixture xhtml");
+        fragments.put("script.js", "function fixture()");
+        fragments.put("data.json", "\"fixture\"");
+        fragments.put("query.sql", "SELECT fixture");
+        fragments.put("run.bat", "fixture batch");
+        fragments.put("build.gradle", "plugins");
+        fragments.put("Hello.groovy", "HelloGroovy");
+        fragments.put("Hello.kt", "HelloKotlin");
+        fragments.put("Hello.scala", "HelloScala");
+        fragments.put("view.jsp", "Fixture jsp");
+        fragments.put("schema.xsd", "fixtureElement");
+        fragments.put("transform.xsl", "fixtureXsl");
+        fragments.put("service.wsdl", "FixtureService");
+        fragments.put("tags.tld", "fixtureTags");
+        fragments.put("config.xml", "<entry key=\"fixture\">");
+        fragments.put("doctype.dtd", "ELEMENT fixture");
+        fragments.put("Hello.java", "hello from source");
+        return fragments;
     }
 
     private static void addTree(JarOutputStream jos, Path root) throws IOException {
