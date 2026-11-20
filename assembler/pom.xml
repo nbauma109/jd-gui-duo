@@ -370,9 +370,8 @@ exec "$JAVA" -ea \
                 </opts>
               </jre>
               <icon>${project.parent.basedir}/src/launch4j/resources/images/jd-gui.ico</icon>
-              <!-- Prevent auto-generated VERSIONINFO (FileVersion, Copyright, etc.)
-                   from embedding ${project.version} and the current year into the
-                   exe bytes, which would change the hash on every release. -->
+              <!-- Do not use the plugin's auto-generated VERSIONINFO (it embeds the
+                   current year as copyright); the explicit versionInfo below is used. -->
               <disableVersionInfoDefaults>true</disableVersionInfoDefaults>
               <!-- Explicit VERSIONINFO. Without it Windows lists the exe as "Unknown
                    application" in Open with / Default apps: it takes the displayed name
