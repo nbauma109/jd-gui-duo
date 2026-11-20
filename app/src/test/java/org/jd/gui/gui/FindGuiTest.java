@@ -41,7 +41,9 @@ class FindGuiTest extends GuiTestBase {
         if (!isFindPanelShowing()) {
             return;
         }
-        for (JToggleButton toggle : findAll(JToggleButton.class, b -> b.isShowing() && b.getToolTipText() != null)) {
+        // only the option toggles of the find panel (icon only, selected): not the "Mark All" toggle of the tool bar
+        for (JToggleButton toggle : findAll(JToggleButton.class, b -> b.isShowing() && b.isSelected() && b.getToolTipText() != null
+                && (b.getText() == null || b.getText().isEmpty()))) {
             new JToggleButtonFixture(robot, toggle).uncheck();
         }
         findField().deleteText();
