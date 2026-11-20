@@ -55,6 +55,10 @@ public class EvalTarget implements Comparable<EvalTarget> {
         return value * 2;
     }
 
+    public int fail() {
+        throw new IllegalStateException("on purpose");
+    }
+
     public EvalTarget self() {
         return this;
     }
