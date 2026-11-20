@@ -42,7 +42,8 @@ New-Item -ItemType Directory -Force -Path $configDir | Out-Null
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration><gui><lookAndFeel>com.formdev.flatlaf.FlatLightLaf</lookAndFeel></gui></configuration>
 '@ | Set-Content -Path (Join-Path $configDir 'jd-gui.cfg') -Encoding utf8
-$env:JAVA_TOOL_OPTIONS = "-Djd-gui.cfg=$(Join-Path $configDir 'jd-gui.cfg')"
+# quoted: the temporary folder of an account can contain spaces (C:\Users\Jane Doe\...)
+$env:JAVA_TOOL_OPTIONS = '-Djd-gui.cfg="' + (Join-Path $configDir 'jd-gui.cfg') + '"'
 
 function Save-Screenshot([string] $name) {
     try {

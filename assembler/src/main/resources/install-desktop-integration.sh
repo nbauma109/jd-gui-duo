@@ -33,7 +33,19 @@ case "$1" in
     mkdir -p "$APPS" "$MIME/packages" "$ICONS"
     cp "$DIR/jd-gui-duo.png" "$ICONS/jd-gui-duo.png"
     cp "$DIR/jd-gui-duo-mime.xml" "$MIME/packages/jd-gui-duo.xml"
-    sed -e "s|@INSTALL_DIR@|$DIR|g" -e "s|@ICON@|jd-gui-duo|g" "$DIR/jd-gui-duo.desktop.template" > "$DESKTOP"
+    # literal substitution (no sed: '&' or '|' in the path would be taken as syntax); the path is escaped for the
+    # double-quoted Exec argument of the desktop entry specification (and written with the string escaping on top)
+    shopt -u patsub_replacement 2> /dev/null || true
+    exec_dir="$DIR"
+    exec_dir="${exec_dir//\\/\\\\\\\\}"
+    exec_dir="${exec_dir//\"/\\\\\"}"
+    exec_dir="${exec_dir//\`/\\\\\`}"
+    exec_dir="${exec_dir//\$/\\\\\$}"
+    exec_dir="${exec_dir//%/%%}"
+    content="$(< "$DIR/jd-gui-duo.desktop.template")"
+    content="${content//@INSTALL_DIR@/$exec_dir}"
+    content="${content//@ICON@/jd-gui-duo}"
+    printf '%s\n' "$content" > "$DESKTOP"
     refresh
     if [[ "$1" = "--set-default" ]] && command -v xdg-mime > /dev/null 2>&1; then
       for type in $TYPES; do xdg-mime default jd-gui-duo.desktop "$type"; done

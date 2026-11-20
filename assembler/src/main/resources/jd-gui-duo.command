@@ -1,6 +1,6 @@
 #!/bin/bash
 DIR="$(dirname "$0")"
-"$DIR/jre/bin/java" -ea \
+exec "$DIR/jre/bin/java" -ea \
   --add-opens java.base/java.net=ALL-UNNAMED \
   --add-opens java.desktop/javax.swing.plaf.basic=ALL-UNNAMED \
   --add-opens java.desktop/javax.swing.text=ALL-UNNAMED \

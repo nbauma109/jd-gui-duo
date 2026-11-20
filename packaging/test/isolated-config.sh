@@ -13,4 +13,4 @@ cat > "$dir/jd-gui.cfg" <<'XML'
   </gui>
 </configuration>
 XML
-echo "-Djd-gui.cfg=$dir/jd-gui.cfg"
+echo "-Djd-gui.cfg=\"$dir/jd-gui.cfg\""

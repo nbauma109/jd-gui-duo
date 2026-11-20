@@ -44,11 +44,21 @@ echo "--- launch the script on a jar"
 pid=$!
 wait_for_window || { import -window root "$shots/linux-packaged-failure.png" || true; exit 1; }
 import -window root "$shots/linux-packaged.png" || true
-kill "$pid" 2>/dev/null || true
-wait "$pid" 2>/dev/null || true
+stop_application() {
+  # the launcher execs java, so $pid is the application itself
+  kill "$pid" 2>/dev/null || true
+  wait "$pid" 2>/dev/null || true
+  for i in $(seq 1 30); do
+    xdotool search --name "$title" > /dev/null 2>&1 || return 0
+    sleep 1
+  done
+  echo "The application window is still there after stopping the application"; exit 1
+}
+stop_application
 
 echo "--- desktop integration"
 export XDG_DATA_HOME="$work/xdg-data"
+export XDG_CONFIG_HOME="$work/xdg-config"   # xdg-mime default writes mimeapps.list here: never the user's own
 "$root/install-desktop-integration.sh"
 desktop="$XDG_DATA_HOME/applications/jd-gui-duo.desktop"
 [ -f "$desktop" ] || { echo "The menu entry was not installed"; exit 1; }
@@ -72,8 +82,7 @@ launcher="$(printf '%s' "$exec_line" | sed -e 's/^"\(.*\)" *%F$/\1/')"
 "$launcher" "$fixture" > "$work/app2.log" 2>&1 &
 pid=$!
 wait_for_window || exit 1
-kill "$pid" 2>/dev/null || true
-wait "$pid" 2>/dev/null || true
+stop_application
 
 if command -v xdg-mime > /dev/null 2>&1; then
   "$root/install-desktop-integration.sh" --set-default
