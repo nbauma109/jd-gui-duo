@@ -128,24 +128,6 @@
             </configuration>
           </execution>
           <execution>
-            <id>fix-pe-timestamp</id>
-            <phase>package</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <!-- Overwrite the PE COFF TimeDateStamp with a fixed epoch so the
-                     exe hash is identical across builds -->
-                <exec executable="${java.home}/bin/java" failonerror="true">
-                  <arg value="${project.basedir}/src/scripts/FixPeTimestamp.java" />
-                  <arg value="${project.build.directory}/windows/jd-gui-duo.exe" />
-                  <arg value="1704067200" />
-                </exec>
-              </target>
-            </configuration>
-          </execution>
-          <execution>
             <id>build-macos-app-bundle</id>
             <phase>package</phase>
             <goals>
@@ -367,9 +349,10 @@ exec "$JAVA" -ea \
               <!-- No chdir: the working directory must stay untouched so that relative
                    file arguments (jd-gui-duo.exe foo.jar) keep resolving against it.
                    The app jar is anchored to the exe directory instead; its manifest
-                   Class-Path pulls in the other libraries. Do not use a wildcard
-                   (%EXEDIR%\lib\*): the launch4j stub crashes (0xC0000005) when the
-                   exe directory contains spaces, e.g. C:\Program Files\JD-GUI Duo. -->
+                   Class-Path pulls in the other libraries. Avoid a wildcard
+                   (%EXEDIR%\lib\*): the launch4j stub expands it to one absolute path
+                   per jar and crashes (0xC0000005) once the expanded classpath
+                   exceeds ~32K characters, i.e. with a long install path. -->
               <classPath>
                 <mainClass>${main.class}</mainClass>
                 <addDependencies>false</addDependencies>
@@ -387,10 +370,24 @@ exec "$JAVA" -ea \
                 </opts>
               </jre>
               <icon>${project.parent.basedir}/src/launch4j/resources/images/jd-gui.ico</icon>
-              <!-- Prevent auto-generated VERSIONINFO (FileVersion, Copyright, etc.)
-                   from embedding ${project.version} and the current year into the
-                   exe bytes, which would change the hash on every release. -->
+              <!-- Do not use the plugin's auto-generated VERSIONINFO (it embeds the
+                   current year as copyright); the explicit versionInfo below is used. -->
               <disableVersionInfoDefaults>true</disableVersionInfoDefaults>
+              <!-- Explicit VERSIONINFO. Without it Windows lists the exe as "Unknown
+                   application" in Open with / Default apps: it takes the displayed name
+                   from FileDescription, so that carries the app name and version. -->
+              <versionInfo>
+                <fileVersion>1.0.0.0</fileVersion>
+                <txtFileVersion>1.0.0.0</txtFileVersion>
+                <fileDescription>JD-GUI Duo ${project.version}</fileDescription>
+                <copyright>Nicolas Baumann</copyright>
+                <productVersion>1.0.0.0</productVersion>
+                <txtProductVersion>1.0.0.0</txtProductVersion>
+                <productName>JD-GUI Duo</productName>
+                <companyName>Nicolas Baumann</companyName>
+                <internalName>jd-gui-duo</internalName>
+                <originalFilename>jd-gui-duo.exe</originalFilename>
+              </versionInfo>
             </configuration>
           </execution>
         </executions>
