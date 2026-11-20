@@ -59,9 +59,9 @@ grep -q "@INSTALL_DIR@\|@ICON@" "$desktop" && { echo "The desktop entry still ha
 grep -q "^MimeType=.*application/java-archive" "$desktop" || { echo "The desktop entry does not handle jar files"; exit 1; }
 if command -v desktop-file-validate > /dev/null 2>&1; then desktop-file-validate "$desktop"; fi
 if command -v update-mime-database > /dev/null 2>&1; then
-  printf 'x' > "$work/sample.war"
-  [ "$(xdg-mime query filetype "$work/sample.war" 2>/dev/null)" = "application/x-java-war-archive" ] \
-    || { echo "The .war file type was not registered"; exit 1; }
+  # xdg-mime may fall back to libmagic outside a desktop session, so read the generated database itself
+  grep -q "application/x-java-war-archive:\*.war" "$XDG_DATA_HOME/mime/globs2" \
+    || { echo "The .war file type was not registered in the mime database"; cat "$XDG_DATA_HOME/mime/globs2" 2>&1; exit 1; }
 fi
 
 # Run the Exec line of the entry, as the file manager does for "Open With" (%F = the files)

@@ -91,13 +91,14 @@ public final class GuiApp {
     private static JFrame findMainFrame(Robot robot) {
         long deadline = System.nanoTime() + STARTUP_TIMEOUT.toNanos();
         while (System.nanoTime() < deadline) {
-            for (java.awt.Component component : robot.finder().findAll(new GenericTypeMatcher<JFrame>(JFrame.class) {
+            java.util.Optional<java.awt.Component> frame = robot.finder().findAll(new GenericTypeMatcher<JFrame>(JFrame.class) {
                 @Override
-                protected boolean isMatching(JFrame frame) {
-                    return frame.isShowing() && frame.getJMenuBar() != null;
+                protected boolean isMatching(JFrame candidate) {
+                    return candidate.isShowing() && candidate.getJMenuBar() != null;
                 }
-            })) {
-                return (JFrame) component;
+            }).stream().findFirst();
+            if (frame.isPresent()) {
+                return (JFrame) frame.get();
             }
             Pause.pause(200);
         }
