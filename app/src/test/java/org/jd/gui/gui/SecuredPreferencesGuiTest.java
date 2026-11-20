@@ -7,7 +7,6 @@
 
 package org.jd.gui.gui;
 
-import org.assertj.swing.core.GenericTypeMatcher;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.JTextComponentFixture;
@@ -22,7 +21,6 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import javax.swing.text.JTextComponent;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
