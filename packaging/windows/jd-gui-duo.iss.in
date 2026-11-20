@@ -20,16 +20,25 @@ OutputDir=__OUTPUT_DIR__
 OutputBaseFilename=__OUTPUT_BASENAME__
 SetupIconFile=__SETUP_ICON_FILE__
 UninstallDisplayIcon={app}\__APP_EXE__
-ChangesAssociations=no
+ChangesAssociations=yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "associatejar"; Description: "Register JD-GUI Duo as an application for .jar files"; GroupDescription: "File associations:"; Flags: unchecked
 
 [Files]
 Source: "__SOURCE_DIR__\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+[Registry]
+; Registers a ProgId and lists it under "Open with" for .jar. Windows does not let an installer
+; silently take over the default app, so the user still confirms it once in Open with / Default apps.
+Root: HKA; Subkey: "Software\Classes\.jar\OpenWithProgids"; ValueType: string; ValueName: "JDGUIDuo.jar"; ValueData: ""; Flags: uninsdeletevalue; Tasks: associatejar
+Root: HKA; Subkey: "Software\Classes\JDGUIDuo.jar"; ValueType: string; ValueName: ""; ValueData: "Java Archive (JD-GUI Duo)"; Flags: uninsdeletekey; Tasks: associatejar
+Root: HKA; Subkey: "Software\Classes\JDGUIDuo.jar\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\__APP_EXE__,0"; Tasks: associatejar
+Root: HKA; Subkey: "Software\Classes\JDGUIDuo.jar\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\__APP_EXE__"" ""%1"""; Tasks: associatejar
 
 [Icons]
 Name: "{autoprograms}\JD-GUI Duo"; Filename: "{app}\__APP_EXE__"
