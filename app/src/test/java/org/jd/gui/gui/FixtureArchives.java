@@ -95,6 +95,33 @@ final class FixtureArchives {
         return jar;
     }
 
+    /**
+     * A variant of the fixture jar to compare with it: Greeter is changed, Shape is the same, Main is gone and a text file is added.
+     */
+    static Path createVariantJar(Path dir, Path fixtureClasses) throws IOException {
+        Path work = Files.createDirectories(dir.resolve("variant-classes"));
+        Path source = work.resolve("demo/Greeter.java");
+        Files.createDirectories(source.getParent());
+        Files.writeString(source, "package demo; public class Greeter implements Shape { public String greet() { return \"changed\"; } public double area() { return 1.0; } }");
+        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        if (compiler.run(null, null, null, "-cp", fixtureClasses.toString(), "-d", work.toString(), source.toString()) != 0) {
+            throw new IllegalStateException("Could not compile the variant of Greeter");
+        }
+        Path jar = dir.resolve("variant.jar");
+        try (OutputStream out = Files.newOutputStream(jar); java.util.zip.ZipOutputStream zip = new java.util.zip.ZipOutputStream(out)) {
+            zip.putNextEntry(new java.util.zip.ZipEntry("demo/Greeter.class"));
+            Files.copy(work.resolve("demo/Greeter.class"), zip);
+            zip.closeEntry();
+            zip.putNextEntry(new java.util.zip.ZipEntry("demo/Shape.class"));
+            Files.copy(fixtureClasses.resolve("demo/Shape.class"), zip);
+            zip.closeEntry();
+            zip.putNextEntry(new java.util.zip.ZipEntry("added.txt"));
+            zip.write("new file".getBytes(StandardCharsets.UTF_8));
+            zip.closeEntry();
+        }
+        return jar;
+    }
+
     /** A web archive with a deployment descriptor and a manifest. */
     static Path createWar(Path dir) throws IOException {
         Path war = dir.resolve("webapp.war");
