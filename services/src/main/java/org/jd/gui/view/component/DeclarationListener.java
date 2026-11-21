@@ -5,6 +5,8 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.RecordDeclaration;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -122,12 +124,33 @@ public class DeclarationListener extends AbstractJavaListener {
         return true;
     }
 
+    /**
+     * What a record declares by its header: a private final field and an accessor per component (at the name of the component) and the
+     * canonical constructor (at the name of the record). The members that the body declares itself are visited after, and replace them.
+     */
+    @Override
+    public boolean visit(RecordDeclaration node) {
+        boolean visited = super.visit(node);
+        for (Object component : node.recordComponents()) {
+            SingleVariableDeclaration declaration = (SingleVariableDeclaration) component;
+            String descriptor = createComponentDescriptor(declaration);
+            declare(declaration.getName(), declaration.getName().getIdentifier(), descriptor);
+            declare(declaration.getName(), declaration.getName().getIdentifier(), "()" + descriptor);
+        }
+        declare(node.getName(), StringConstants.INSTANCE_CONSTRUCTOR, createRecordParamDescriptors(node) + "V");
+        return visited;
+    }
+
+    private void declare(SimpleName at, String name, String descriptor) {
+        declarations.put(key(currentInternalTypeName, name, descriptor),
+                new DeclarationData(at.getStartPosition(), at.getLength(), currentInternalTypeName, name, descriptor));
+    }
+
     @Override
     public boolean visit(MethodDeclaration node) {
         SimpleName nodeName = node.getName();
         String name = nodeName.getIdentifier();
-        @SuppressWarnings("unchecked")
-        String paramDescriptors = createParamDescriptors(node.parameters());
+        String paramDescriptors = createParamDescriptors(node);
         String returnDescriptor = createDescriptor(node.getReturnType2(), 0);
         String descriptor = paramDescriptors + returnDescriptor;
         int position = nodeName.getStartPosition();
