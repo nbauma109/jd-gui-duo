@@ -411,6 +411,39 @@ class ReferenceListenerTest {
                 "nothing => demo/Hints#nothing#(~Ljava/util/Optional;?~Ldemo/Hints;)?");
     }
 
+    private static final String UNKNOWN_TYPES = """
+            package demo;
+
+            public class Unknown {
+                void takes(Missing m, String s) { }
+                void takesArray(Missing[] m) { }
+                void takesInt(int i) { }
+
+                void go(Missing missing, Missing[] many, Unknown other) {
+                    takes(missing, "s");
+                    takes(null, "s");
+                    takes("x", "s");
+                    takesArray(many);
+                    other.takesInt(missing);
+                    other.takesInt(undefinedVariable);
+                    other.nothing(missing, undefinedVariable, many, null);
+                }
+            }
+            """;
+
+    @Test
+    void anArgumentOrAParameterOfAnUnresolvedTypeIsGivenTheBenefitOfTheDoubt() {
+        java.util.List<String> links = links("demo/Unknown.java", UNKNOWN_TYPES);
+
+        // the parameter cannot be resolved: whatever the argument is, the binding is kept
+        assertThat(links).filteredOn(link -> link.startsWith("takes =>")).hasSize(3).noneMatch(link -> link.contains("~"));
+        assertThat(links).contains("takesArray => demo/Unknown#takesArray#([LMissing;)V");
+        // the argument cannot be resolved (the binding is kept for takesInt) and is a "?" in the call that has no binding
+        assertThat(links).filteredOn(link -> link.startsWith("takesInt =>")).hasSize(2).noneMatch(link -> link.contains("~"));
+        // all four arguments are unknown: an unresolved variable, a missing type, an array of it and null
+        assertThat(links).contains("nothing => demo/Unknown#nothing#(????)?");
+    }
+
     @Test
     void referencesToUnknownTypesAreSkippedWithoutFailing() {
         String broken = """
