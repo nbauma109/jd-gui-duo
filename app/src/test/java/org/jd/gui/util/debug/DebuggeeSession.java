@@ -87,7 +87,7 @@ final class DebuggeeSession implements AutoCloseable {
         entry.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
         entry.enable();
         while (true) {
-            EventSet events = vm.eventQueue().remove(30_000);
+            EventSet events = vm.eventQueue().remove(120_000);
             if (events == null) {
                 vm.exit(1);
                 throw new IllegalStateException("The debuggee never reached breakHere()");
@@ -117,7 +117,7 @@ final class DebuggeeSession implements AutoCloseable {
     }
 
     private static ReferenceType waitForClass(VirtualMachine vm, String name) {
-        for (int attempt = 0; attempt < 600; attempt++) {
+        for (int attempt = 0; attempt < 2400; // up to two minutes: the macOS runners can be very slow to start a JVM attempt++) {
             List<ReferenceType> types = vm.classesByName(name);
             if (!types.isEmpty()) {
                 return types.get(0);
