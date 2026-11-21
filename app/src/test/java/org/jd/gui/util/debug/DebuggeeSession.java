@@ -116,8 +116,9 @@ final class DebuggeeSession implements AutoCloseable {
         throw new IllegalStateException("main is not on the stack");
     }
 
+    /** Waits up to two minutes: the macOS runners can be very slow to start a JVM. */
     private static ReferenceType waitForClass(VirtualMachine vm, String name) {
-        for (int attempt = 0; attempt < 2400; // up to two minutes: the macOS runners can be very slow to start a JVM attempt++) {
+        for (int attempt = 0; attempt < 2400; attempt++) {
             List<ReferenceType> types = vm.classesByName(name);
             if (!types.isEmpty()) {
                 return types.get(0);
