@@ -277,8 +277,8 @@ class ReferenceListenerTest {
 
         java.util.List<String> links = links("demo/Box.java", generic);
 
-        assertThat(links).contains("COUNT => demo/Box#COUNT#?", "value => demo/Box#value#?", "Box => demo/Box#null#null");
-        assertThat(links).noneMatch(link -> link.substring(link.indexOf("=> ")).split("#")[0].contains("<"));
+        assertThat(links).contains("COUNT => demo/Box#COUNT#?", "value => demo/Box#value#?", "Box => demo/Box#null#null")
+                .noneMatch(link -> link.substring(link.indexOf("=> ")).split("#")[0].contains("<"));
     }
 
     @Test
