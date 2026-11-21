@@ -58,6 +58,18 @@ class LogAndServicePagesGuiTest extends GuiTestBase {
     }
 
     @Test
+    void findIsDisabledAgainWhenTheLastTabIsClosed() throws IOException {
+        openLog(logFile());
+        assertThat(isMenuEnabled("Edit", "Find...")).as("a log is a text page that can be searched").isTrue();
+
+        clickMenu("File", "Close");
+
+        waitUntil("no tab is left", () -> mainTabTitles().isEmpty());
+        waitUntil("Find is disabled", () -> !isMenuEnabled("Edit", "Find..."));
+        assertThat(isMenuEnabled("Edit", "Find...")).isFalse();
+    }
+
+    @Test
     void aFrameOfAnUnknownTypeIsNotALink() throws IOException {
         openFixtureJar();
         waitUntil("the indexes are built", () -> isMenuEnabled("Search", "Search..."));
