@@ -176,7 +176,7 @@ class ProxyPreferencesProviderTest {
         PanelSupport.click(PanelSupport.button(panel, "Clear")); // a click
 
         assertThat(notified).isNotEmpty().allSatisfy(source -> assertThat(source).isSameAs(panel));
-        assertThat(notified.size()).isGreaterThanOrEqualTo(2);
+        assertThat(notified).hasSizeGreaterThanOrEqualTo(2);
     }
 
     @Test

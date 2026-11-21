@@ -180,7 +180,7 @@ class EclipsePreferencesPanelBehaviourTest {
         panel.jreSystemLibraryPathTextField.setText("/somewhere");
         panel.sourceComboBox.setSelectedItem(JavaCore.VERSION_11);
 
-        assertThat(first.size()).isGreaterThanOrEqualTo(4);
+        assertThat(first).hasSizeGreaterThanOrEqualTo(4);
         assertThat(second).hasSameSizeAs(first);
         assertThat(first).isNotEmpty().allSatisfy(source -> assertThat(source).isSameAs(panel));
     }
