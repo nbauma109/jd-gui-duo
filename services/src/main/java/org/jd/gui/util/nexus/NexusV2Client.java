@@ -104,11 +104,12 @@ final class NexusV2Client extends AbstractNexusClient implements NexusSearch {
         path.append(FROM).append(from).append(COUNT).append(PAGE_SIZE);
         String body = get(buildUrl(config.baseUrl, path.toString()), 8000, 15000);
         NexusSearchResult nexusSearchResult = parse(body);
-        if (classifier != null) {
-        	nexusSearchResult.artifacts().removeIf(a -> !classifier.equals(a.classifier()));
+        // a blank classifier or packaging is no constraint, as in the query (it is not sent): it must not drop every artifact
+        if (classifier != null && !classifier.isBlank()) {
+        	nexusSearchResult.artifacts().removeIf(a -> !classifier.trim().equals(a.classifier()));
         }
-        if (packaging != null) {
-        	nexusSearchResult.artifacts().removeIf(a -> !packaging.equals(a.extension()));
+        if (packaging != null && !packaging.isBlank()) {
+        	nexusSearchResult.artifacts().removeIf(a -> !packaging.trim().equals(a.extension()));
         }
 		return nexusSearchResult;
     }

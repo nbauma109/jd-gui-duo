@@ -123,11 +123,12 @@ public final class SolrCentralSearchClient implements NexusSearch, ProxyCapable 
         	expr.append("p:").append(packaging.trim());
         }
         NexusSearchResult nexusSearchResult = executeQuery(expr.toString(), pageNo, true);
-        if (classifier != null) {
-        	nexusSearchResult.artifacts().removeIf(a -> !classifier.equals(a.classifier()));
+        // a blank classifier or packaging is no constraint, as in the query (it is not sent): it must not drop every artifact
+        if (classifier != null && !classifier.isBlank()) {
+        	nexusSearchResult.artifacts().removeIf(a -> !classifier.trim().equals(a.classifier()));
         }
-        if (packaging != null) {
-        	nexusSearchResult.artifacts().removeIf(a -> !packaging.equals(a.extension()));
+        if (packaging != null && !packaging.isBlank()) {
+        	nexusSearchResult.artifacts().removeIf(a -> !packaging.trim().equals(a.extension()));
         }
 		return nexusSearchResult;
     }

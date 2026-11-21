@@ -136,6 +136,17 @@ class NexusClientsLocalTest {
     }
 
     @Test
+    void nexus2BlankClassifierAndPackagingAreNoConstraint() throws Exception {
+        server.answer(V2_SEARCH, 200, V2_XML);
+        NexusV2Client client = new NexusV2Client(config());
+
+        assertThat(client.searchByGav("org.demo", "demo-lib", null, "", "", 0).artifacts()).hasSize(3);
+        assertThat(client.searchByGav("org.demo", "demo-lib", null, " ", " ", 0).artifacts()).hasSize(3);
+        assertThat(client.searchByGav("org.demo", "demo-lib", null, " sources ", " jar ", 0).artifacts())
+                .extracting(NexusArtifact::classifier).containsExactly("sources");
+    }
+
+    @Test
     void nexus2ToleratesEmptyAndMalformedBodies() throws Exception {
         NexusV2Client client = new NexusV2Client(config());
         server.answer(V2_SEARCH, 200, "<searchNGResponse></searchNGResponse>");
@@ -197,6 +208,17 @@ class NexusClientsLocalTest {
 
         assertThat(server.requests()).containsExactly(
                 V3_SEARCH + "?group=org.demo&name=demo-lib&version=1.2.3", V3_SEARCH + "?name=demo-lib", V3_SEARCH + "?group=org.demo&version=1.2.3");
+    }
+
+    @Test
+    void nexus3BlankClassifierAndPackagingAreNoConstraint() throws Exception {
+        server.answer(V3_SEARCH, 200, V3_COMPONENTS);
+        NexusV3Client client = new NexusV3Client(config());
+
+        assertThat(client.searchByGav("org.demo", "demo-lib", null, "", "", 0).artifacts()).hasSize(2);
+        assertThat(client.searchByGav("org.demo", "demo-lib", null, " ", " ", 0).artifacts()).hasSize(2);
+        assertThat(client.searchByGav("org.demo", "demo-lib", null, " sources ", " jar ", 0).artifacts())
+                .extracting(NexusArtifact::classifier).containsExactly("sources");
     }
 
     @Test

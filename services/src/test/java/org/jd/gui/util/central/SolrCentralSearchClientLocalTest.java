@@ -132,6 +132,14 @@ class SolrCentralSearchClientLocalTest {
     }
 
     @Test
+    void blankClassifierAndPackagingAreNoConstraint() throws Exception {
+        assertThat(client.searchByGav("org.demo", "demo-lib", "1.0", "", "", 0).artifacts()).hasSize(6);
+        assertThat(client.searchByGav("org.demo", "demo-lib", "1.0", " ", " ", 0).artifacts()).hasSize(6);
+        assertThat(client.searchByGav("org.demo", "demo-lib", "1.0", " sources ", " jar ", 0).artifacts())
+                .extracting(NexusArtifact::classifier).containsExactly("sources");
+    }
+
+    @Test
     void emptyOrMalformedAnswersGiveNoArtifact() throws Exception {
         body = "{\"responseHeader\": {\"status\": 0}}";
         assertThat(client.searchByKeyword("none", 0).artifacts()).isEmpty();
