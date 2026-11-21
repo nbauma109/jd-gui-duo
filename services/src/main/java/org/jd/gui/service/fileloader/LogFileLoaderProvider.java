@@ -9,13 +9,18 @@
 package org.jd.gui.service.fileloader;
 
 import org.jd.gui.api.API;
+import org.jd.gui.util.ImageUtil;
 import org.jd.gui.util.io.TextReader;
 import org.jd.gui.view.component.LogPage;
 
 import java.io.File;
 
+import javax.swing.ImageIcon;
+
 public class LogFileLoaderProvider extends ZipFileLoaderProvider {
     protected static final String[] EXTENSIONS = { "log" };
+    /** The tab needs an icon supplier: without one, opening a log file fails with a NullPointerException. */
+    protected static final ImageIcon ICON = new ImageIcon(ImageUtil.getImage("/org/jd/gui/images/file_obj.png"));
 
     @Override
     public String[] getExtensions() { return EXTENSIONS; }
@@ -29,7 +34,7 @@ public class LogFileLoaderProvider extends ZipFileLoaderProvider {
 
     @Override
     public boolean load(API api, File file) {
-        api.addPanel(file, file.getName(), null, "Location: " + file.getAbsolutePath(), new LogPage(api, file.toURI(), TextReader.getText(file)));
+        api.addPanel(file, file.getName(), () -> ICON, "Location: " + file.getAbsolutePath(), new LogPage(api, file.toURI(), TextReader.getText(file)));
         return true;
     }
 }
