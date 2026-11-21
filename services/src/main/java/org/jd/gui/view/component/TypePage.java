@@ -193,6 +193,20 @@ public abstract class TypePage extends CustomLineNumbersPage
 
     public static void matchFragmentAndAddDocumentRange(String fragment, Map<String, DeclarationData> declarations,
             List<DocumentRange> ranges) {
+        if (DescriptorMatcher.hasHints(fragment)) {
+            // The call has no binding: the types of its arguments are hints. Look for a method that has them, else for the ones that have as many parameters
+            int found = ranges.size();
+            matchExactFragmentAndAddDocumentRange(DescriptorMatcher.confirmHints(fragment), declarations, ranges);
+            if (ranges.size() == found) {
+                matchExactFragmentAndAddDocumentRange(DescriptorMatcher.dropHints(fragment), declarations, ranges);
+            }
+        } else {
+            matchExactFragmentAndAddDocumentRange(fragment, declarations, ranges);
+        }
+    }
+
+    private static void matchExactFragmentAndAddDocumentRange(String fragment, Map<String, DeclarationData> declarations,
+            List<DocumentRange> ranges) {
         if (fragment.indexOf('?') != -1 || fragment.indexOf('*') != -1) {
             // Unknown type and/or descriptor ==> Select all and scroll to the first one
             int lastDash = fragment.lastIndexOf('-');
@@ -497,13 +511,13 @@ public abstract class TypePage extends CustomLineNumbersPage
                         }
                     }
                 } else {
-                    // Search a method
-                    for (Type.Method method : type.getMethods()) {
-                        if (method.getName().equals(name)
-                                && DescriptorMatcher.matchMethodDescriptors(method.getDescriptor(), descriptor)) {
-                            // Method found
-                            return typeName;
-                        }
+                    // Search a method: when the types of the arguments are only hints (a call without binding), a method having
+                    // them is looked for first, then one having as many parameters
+                    boolean hints = DescriptorMatcher.hasHints(descriptor);
+                    String required = hints ? DescriptorMatcher.confirmHints(descriptor) : descriptor;
+                    if (hasMethod(type, name, required) || (hints && hasMethod(type, name, DescriptorMatcher.dropHints(descriptor)))) {
+                        // Method found
+                        return typeName;
                     }
                 }
 
@@ -516,6 +530,15 @@ public abstract class TypePage extends CustomLineNumbersPage
         }
 
         return null;
+    }
+
+    private static boolean hasMethod(Type type, String name, String descriptor) {
+        for (Type.Method method : type.getMethods()) {
+            if (method.getName().equals(name) && DescriptorMatcher.matchMethodDescriptors(method.getDescriptor(), descriptor)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void parseAndSetText(String text) {
