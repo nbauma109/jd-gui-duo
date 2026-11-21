@@ -52,15 +52,24 @@ import jakarta.json.bind.JsonbBuilder;
  */
 public final class SolrCentralSearchClient implements NexusSearch, ProxyCapable {
 
-	private static final String SELECT_ENDPOINT = "https://search.maven.org/solrsearch/select";
-    private static final String REMOTE_CONTENT_ENDPOINT = "https://search.maven.org/remotecontent?filepath=";
+    private static final String DEFAULT_SELECT_ENDPOINT = "https://search.maven.org/solrsearch/select";
+    private static final String DEFAULT_REMOTE_CONTENT_ENDPOINT = "https://search.maven.org/remotecontent?filepath=";
     private static final int ROWS = 200;
     private static final String AND = " AND ";
 
     private final ProxyConfig proxyConfig;
+    private final String selectEndpoint;
+    private final String remoteContentEndpoint;
 
     public SolrCentralSearchClient(ProxyConfig proxyConfig) {
+        this(proxyConfig, DEFAULT_SELECT_ENDPOINT, DEFAULT_REMOTE_CONTENT_ENDPOINT);
+    }
+
+    /** Package-private so that the tests can point the client at a local server instead of search.maven.org. */
+    SolrCentralSearchClient(ProxyConfig proxyConfig, String selectEndpoint, String remoteContentEndpoint) {
         this.proxyConfig = proxyConfig;
+        this.selectEndpoint = selectEndpoint;
+        this.remoteContentEndpoint = remoteContentEndpoint;
     }
 
     @Override
@@ -141,7 +150,7 @@ public final class SolrCentralSearchClient implements NexusSearch, ProxyCapable 
 
         String qParam = java.net.URLEncoder.encode(queryExpression, StandardCharsets.UTF_8);
         StringBuilder urlBuilder = new StringBuilder();
-		urlBuilder.append(SELECT_ENDPOINT);
+		urlBuilder.append(selectEndpoint);
 		urlBuilder.append("?q=");
 		urlBuilder.append(qParam);
 		urlBuilder.append("&rows=");
@@ -273,7 +282,7 @@ public final class SolrCentralSearchClient implements NexusSearch, ProxyCapable 
      * We build a download link using the documented remotecontent service, which is a stable
      * endpoint for downloads rather than a raw repository path.
      */
-    private static String buildRemoteContentUrl(String groupId,
+    private String buildRemoteContentUrl(String groupId,
                                                 String artifactId,
                                                 String version,
                                                 String classifier,
@@ -293,7 +302,7 @@ public final class SolrCentralSearchClient implements NexusSearch, ProxyCapable 
         }
         String ext = (extension == null || extension.isBlank()) ? "jar" : extension.trim();
         path.append('.').append(ext);
-        return REMOTE_CONTENT_ENDPOINT
+        return remoteContentEndpoint
                 + java.net.URLEncoder.encode(path.toString(), StandardCharsets.UTF_8);
     }
 
