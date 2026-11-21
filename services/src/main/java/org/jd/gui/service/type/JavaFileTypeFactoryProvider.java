@@ -13,6 +13,8 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.RecordDeclaration;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.StringConstants;
@@ -34,7 +36,12 @@ import java.util.Map;
 
 import javax.swing.Icon;
 
+import static org.apache.bcel.Const.ACC_ANNOTATION;
+import static org.apache.bcel.Const.ACC_FINAL;
 import static org.apache.bcel.Const.ACC_INTERFACE;
+import static org.apache.bcel.Const.ACC_PRIVATE;
+import static org.apache.bcel.Const.ACC_PROTECTED;
+import static org.apache.bcel.Const.ACC_PUBLIC;
 import static org.apache.bcel.Const.ACC_STATIC;
 
 public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
@@ -320,13 +327,17 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
             org.eclipse.jdt.core.dom.Type superType = getSuperType(node);
             String superQualifiedTypeName;
 
-            if (superType == null) {
-                superQualifiedTypeName = (access & ACC_INTERFACE) == 0 ? StringConstants.JAVA_LANG_OBJECT : "";
+            if (node instanceof RecordDeclaration) {
+                superQualifiedTypeName = "java/lang/Record";
+                access |= ACC_FINAL; // a record is final
+            } else if (superType == null) {
+                // like the model of a class file: an interface has no super class to show
+                superQualifiedTypeName = (access & (ACC_INTERFACE | ACC_ANNOTATION)) == 0 ? StringConstants.JAVA_LANG_OBJECT : null;
             } else {
                 superQualifiedTypeName = resolveInternalTypeName(superType);
             }
 
-            access += node.getModifiers();
+            access |= node.getModifiers();
 
             if (currentType == null) {
                 String internalTypeName = packageName.isEmpty() ? name : packageName + "/" + name;
@@ -374,6 +385,53 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
         }
 
         @Override
+        public boolean visit(RecordDeclaration node) {
+            boolean visited = super.visit(node);
+            // the components are private final fields
+            for (Object component : node.recordComponents()) {
+                SingleVariableDeclaration declaration = (SingleVariableDeclaration) component;
+                currentType.getFields().add(new JavaField(ACC_PRIVATE | ACC_FINAL, declaration.getName().getIdentifier(), componentDescriptor(declaration)));
+            }
+            return visited;
+        }
+
+        @Override
+        public void endVisit(RecordDeclaration node) {
+            // what the compiler adds when the record does not declare it: an accessor per component and the canonical constructor
+            for (Object component : node.recordComponents()) {
+                SingleVariableDeclaration declaration = (SingleVariableDeclaration) component;
+                String name = declaration.getName().getIdentifier();
+                String accessor = "()" + componentDescriptor(declaration);
+                if (!declaresMethod(name, accessor)) {
+                    currentType.getMethods().add(new JavaMethod(currentType, ACC_PUBLIC, name, accessor));
+                }
+            }
+            String canonical = recordParameterDescriptors(node) + "V";
+            if (!declaresMethod(StringConstants.INSTANCE_CONSTRUCTOR, canonical)) {
+                int visibility = currentType.getFlags() & (ACC_PUBLIC | ACC_PROTECTED | ACC_PRIVATE);
+                currentType.getMethods().add(new JavaMethod(currentType, visibility, StringConstants.INSTANCE_CONSTRUCTOR, canonical));
+            }
+            super.endVisit(node);
+        }
+
+        private boolean declaresMethod(String name, String descriptor) {
+            return currentType.getMethods().stream().anyMatch(method -> method.getName().equals(name) && method.getDescriptor().equals(descriptor));
+        }
+
+        private String componentDescriptor(SingleVariableDeclaration component) {
+            return createDescriptor(component.getType(), component.getExtraDimensions() + (component.isVarargs() ? 1 : 0));
+        }
+
+        /** The parameters of the canonical constructor of a record: its components. */
+        private String recordParameterDescriptors(RecordDeclaration record) {
+            StringBuilder descriptors = new StringBuilder("(");
+            for (Object component : record.recordComponents()) {
+                descriptors.append(componentDescriptor((SingleVariableDeclaration) component));
+            }
+            return descriptors.append(')').toString();
+        }
+
+        @Override
         public boolean visit(Initializer node) {
             currentType.getMethods().add(new JavaMethod(currentType, ACC_STATIC, "<clinit>", "()V"));
             return true;
@@ -397,8 +455,10 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
         public boolean visit(MethodDeclaration node) {
             int access = node.getModifiers();
             String name = node.isConstructor() ? StringConstants.INSTANCE_CONSTRUCTOR : node.getName().getIdentifier();
+            // a compact constructor (R { ... }) has the parameters of the components of its record
             @SuppressWarnings("unchecked")
-            String paramDescriptors = createParamDescriptors(node.parameters());
+            String paramDescriptors = node.isCompactConstructor() && node.getParent() instanceof RecordDeclaration record
+                    ? recordParameterDescriptors(record) : createParamDescriptors(node.parameters());
             String returnDescriptor = createDescriptor(node.getReturnType2(), 0);
             String descriptor = paramDescriptors + returnDescriptor;
 

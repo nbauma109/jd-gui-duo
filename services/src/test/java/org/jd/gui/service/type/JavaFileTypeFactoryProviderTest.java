@@ -86,12 +86,16 @@ class JavaFileTypeFactoryProviderTest {
     }
 
     static FakeEntry sourceEntry() {
+        return sourceEntry("demo/model/Shapes.java", SOURCE);
+    }
+
+    static FakeEntry sourceEntry(String path, String text) {
         FakeEntry jar = new FakeEntry("", null, URI.create("file:/nonexistent/fixture.jar"));
         FakeEntry root = new FakeEntry("", null, URI.create("jar:file:/nonexistent/fixture.jar!/"));
         root.parent = jar;
         FakeContainer container = new FakeContainer(root);
         root.container = container;
-        FakeEntry source = new FakeEntry("demo/model/Shapes.java", SOURCE.getBytes(StandardCharsets.UTF_8), URI.create("jar:file:/nonexistent/fixture.jar!/demo/model/Shapes.java"));
+        FakeEntry source = new FakeEntry(path, text.getBytes(StandardCharsets.UTF_8), URI.create("jar:file:/nonexistent/fixture.jar!/" + path));
         source.container = container;
         source.parent = root;
         return source;
@@ -147,7 +151,7 @@ class JavaFileTypeFactoryProviderTest {
     void theNestedTypesAreListedAtEveryLevel() {
         Type shapes = new JavaFileTypeFactoryProvider().make(api(), sourceEntry(), null);
 
-        assertThat(shapes.getInnerTypes()).extracting(Type::getDisplayTypeName).containsExactly("Shapes.Nested", "Shapes.Color", "Shapes.Visitor", "Shapes.Marker");
+        assertThat(shapes.getInnerTypes()).extracting(Type::getDisplayTypeName).containsExactly("Shapes.Nested", "Shapes.Color", "Shapes.Visitor", "Shapes.Marker", "Shapes.Pair");
         Type nested = innerType(shapes, "Shapes.Nested");
         assertThat(nested.getName()).isEqualTo("demo/model/Shapes$Nested");
         assertThat(nested.getOuterName()).isEqualTo("demo/model/Shapes");
@@ -171,6 +175,73 @@ class JavaFileTypeFactoryProviderTest {
         assertThat(methods(visitor)).containsExactly("visit() : void");
         assertThat(marker.getFlags() & Opcodes.ACC_ANNOTATION).isNotZero();
         assertThat(java.util.List.of(color, visitor, marker)).hasSize(3).allSatisfy(type -> assertThat(type.getIcon()).isNotNull());
+    }
+
+    @Test
+    void aVariableArityParameterIsAnArrayInTheDescriptor() {
+        Type shapes = new JavaFileTypeFactoryProvider().make(api(), sourceEntry(), null);
+
+        // Shapes(String label, int... n) is <init>(String, int[]) like in the class file
+        assertThat(shapes.getMethods()).extracting(Type.Method::getName, Type.Method::getDescriptor)
+                .contains(tuple("<init>", "()V"), tuple("<init>", "(Ljava/lang/String;[I)V"));
+    }
+
+    @Test
+    void anInterfaceAndAnAnnotationHaveNoSuperClassAsInTheModelOfAClassFile() {
+        Type shapes = new JavaFileTypeFactoryProvider().make(api(), sourceEntry(), null);
+
+        assertThat(innerType(shapes, "Shapes.Visitor").getSuperName()).isNull();
+        assertThat(innerType(shapes, "Shapes.Marker").getSuperName()).isNull();
+        assertThat(innerType(shapes, "Shapes.Nested").getSuperName()).isEqualTo("java/lang/Object");
+    }
+
+    @Test
+    void aRecordIsATypeWithItsComponentsItsAccessorsAndItsCanonicalConstructor() {
+        Type shapes = new JavaFileTypeFactoryProvider().make(api(), sourceEntry(), null);
+
+        Type pair = innerType(shapes, "Shapes.Pair");
+
+        assertThat(pair.getName()).isEqualTo("demo/model/Shapes$Pair");
+        assertThat(pair.getSuperName()).isEqualTo("java/lang/Record");
+        assertThat(pair.getFlags() & Opcodes.ACC_FINAL).isNotZero();
+        assertThat(pair.getIcon()).isNotNull();
+        assertThat(pair.getFields()).extracting(Type.Field::getName, Type.Field::getDescriptor, Type.Field::getFlags)
+                .containsExactly(tuple("a", "I", Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL), tuple("b", "Ljava/lang/String;", Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL));
+        assertThat(pair.getMethods()).extracting(Type.Method::getName, Type.Method::getDescriptor)
+                .containsExactlyInAnyOrder(tuple("a", "()I"), tuple("b", "()Ljava/lang/String;"), tuple("<init>", "(ILjava/lang/String;)V"));
+    }
+
+    @Test
+    void aRecordWhichDeclaresSomeOfItsMembersIsNotGivenThemTwice() {
+        String text = """
+                package demo;
+
+                public record Range(int lo, int hi, String... tags) {
+                    public Range {
+                        if (lo > hi) {
+                            throw new IllegalArgumentException();
+                        }
+                    }
+
+                    public int lo() {
+                        return lo;
+                    }
+
+                    static Range of(int n) {
+                        return new Range(n, n);
+                    }
+                }
+                """;
+
+        Type range = new JavaFileTypeFactoryProvider().make(api(), sourceEntry("demo/Range.java", text), null);
+
+        assertThat(range.getSuperName()).isEqualTo("java/lang/Record");
+        assertThat(range.getFlags() & Opcodes.ACC_PUBLIC).isNotZero();
+        assertThat(range.getFields()).extracting(Type.Field::getName, Type.Field::getDescriptor)
+                .containsExactly(tuple("lo", "I"), tuple("hi", "I"), tuple("tags", "[Ljava/lang/String;"));
+        assertThat(range.getMethods()).extracting(Type.Method::getName, Type.Method::getDescriptor)
+                .containsExactlyInAnyOrder(tuple("<init>", "(II[Ljava/lang/String;)V"), tuple("lo", "()I"), tuple("of", "(I)Ldemo/Range;"),
+                        tuple("hi", "()I"), tuple("tags", "()[Ljava/lang/String;"));
     }
 
     @Test

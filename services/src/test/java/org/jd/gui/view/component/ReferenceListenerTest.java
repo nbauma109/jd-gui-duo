@@ -214,6 +214,92 @@ class ReferenceListenerTest {
                 "length => java/lang/String#length#()I");
     }
 
+    /**
+     * Where each call of {@code f} navigates to, as TypePage does it: the key of the reference (type, name and descriptor) is looked up
+     * among the declarations. Gives "call line -> declaration line", or "call line -> none" when no declaration has that key.
+     */
+    private static java.util.List<String> targetsOfCalls(String path, String text, String method) {
+        Container.Entry entry = entry(path);
+        ReferenceListener listener = new ReferenceListener(entry);
+        SortedMap<Integer, HyperlinkData> hyperlinks = new TreeMap<>();
+        listener.setHyperlinks(hyperlinks);
+        char[] source = text.toCharArray();
+        URI jarURI = entry.getContainer().getRoot().getParent().getUri();
+        ASTParserFactory.getInstance().newASTParser(api(), source, path, jarURI).createAST(null).accept(listener.getDeclarationListener());
+        listener.init();
+        ASTParserFactory.getInstanceWithBindings().newASTParser(api(), source, path, jarURI).createAST(null).accept(listener);
+        java.util.List<String> targets = new java.util.ArrayList<>();
+        for (Map.Entry<Integer, HyperlinkData> hyperlink : hyperlinks.entrySet()) {
+            if (hyperlink.getValue() instanceof HyperlinkReferenceData data && method.equals(data.getReference().getName())) {
+                jd.core.links.DeclarationData target = listener.getDeclarations()
+                        .get(data.getReference().getTypeName() + "-" + method + "-" + data.getReference().getDescriptor());
+                targets.add(lineOf(text, hyperlink.getKey()) + " -> " + (target == null ? "none" : String.valueOf(lineOf(text, target.getStartPosition()))));
+            }
+        }
+        return targets;
+    }
+
+    private static int lineOf(String text, int offset) {
+        return (int) text.substring(0, offset).chars().filter(c -> c == '\n').count() + 1;
+    }
+
+    private static final String OVERLOADS = """
+            package demo;
+
+            import java.util.List;
+
+            public class Over {
+                void f(int a) {}
+                void f(long a) {}
+                void f(Object a) {}
+                void f(String a) {}
+                void f(List<String> a) {}
+                <T> void f(T a, int b) {}
+                void f(String... a) {}
+                void f(int[] a) {}
+                void f(Inner a) {}
+                void f(char a, double b) {}
+                void f(Integer a) {}
+                void f(Over... a) {}
+                static class Inner {}
+
+                void calls(List<String> list, int[] arr, Inner inner) {
+                    f(1);
+                    f(1L);
+                    f((Object) "x");
+                    f("s");
+                    f(list);
+                    f("t", 2);
+                    f("a", "b");
+                    f(arr);
+                    f(inner);
+                    f('c', 1.0);
+                    f(Integer.valueOf(3));
+                    f(new Over(), new Over());
+                    f();
+                }
+            }
+            """;
+
+    @Test
+    void everyOverloadIsLinkedToItsOwnDeclaration() {
+        java.util.List<String> targets = targetsOfCalls("demo/Over.java", OVERLOADS, "f");
+
+        // f("s") must reach f(String) (line 9), not the variable arity f(String...) (line 12) that lost its "..." and so had the same key
+        assertThat(targets).contains("21 -> 6", "22 -> 7", "23 -> 8", "24 -> 9", "27 -> 12", "28 -> 13", "30 -> 15", "31 -> 16", "32 -> 17", "33 -> 12");
+    }
+
+    @Test
+    void theOverloadsOfVariableArityAndOfTheSameParameterTypeKeepDistinctDeclarations() {
+        Container.Entry entry = entry("demo/Over.java");
+        ReferenceListener listener = new ReferenceListener(entry);
+        URI jarURI = entry.getContainer().getRoot().getParent().getUri();
+        ASTParserFactory.getInstance().newASTParser(api(), OVERLOADS.toCharArray(), "demo/Over.java", jarURI).createAST(null).accept(listener.getDeclarationListener());
+
+        assertThat(listener.getDeclarations().keySet()).contains("demo/Over-f-(Ljava/lang/String;)V", "demo/Over-f-([Ljava/lang/String;)V", "demo/Over-f-([Ldemo/Over;)V");
+        assertThat(listener.getDeclarations().keySet().stream().filter(key -> key.contains("-f-"))).hasSize(12);
+    }
+
     @Test
     void referencesToUnknownTypesAreSkippedWithoutFailing() {
         String broken = """
