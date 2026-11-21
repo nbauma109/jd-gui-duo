@@ -188,7 +188,7 @@ class ReferenceListenerTest {
                 "ArrayList => java/util/ArrayList#null#null", "new ArrayList<>() => java/util/ArrayList#<init>#()V",
                 "super => java/util/ArrayList#<init>#()V", "this => demo/Sample#<init>#()V",
                 "new Sample<>(\"x\") => demo/Sample#<init>#(Ljava/lang/String;)V", "new Nested() => demo/Sample$Nested#<init>#()V",
-                "Mode => demo/Sample$Mode#null#null", "ON => demo/Sample$Mode#null#null", "Comparable => java/lang/Comparable#null#null");
+                "Mode => demo/Sample$Mode#null#null", "ON => demo/Sample$Mode#ON#?", "Comparable => java/lang/Comparable#null#null");
     }
 
     @Test
@@ -196,7 +196,7 @@ class ReferenceListenerTest {
         assertThat(links("demo/Sample.java", SOURCE)).contains(
                 "values => demo/Sample#values#?", "field => demo/Sample$Nested#field#?", "length => java/lang/String#length#()I",
                 "max => java/lang/Math#max#(II)I", "valueOf => java/lang/String#valueOf#(I)Ljava/lang/String;",
-                "out => java/io/PrintStream#null#null", "println => java/io/PrintStream#println#(Ljava/lang/String;)V",
+                "System => java/lang/System#null#null", "out => java/lang/System#out#?", "println => java/io/PrintStream#println#(Ljava/lang/String;)V",
                 "add => java/util/List#add#(Ljava/lang/String;)Z", "run => java/lang/Runnable#run#()V", "size => java/util/ArrayList#size#()I",
                 "toUpperCase => java/lang/String#toUpperCase#()Ljava/lang/String;");
     }
@@ -207,11 +207,78 @@ class ReferenceListenerTest {
                 "java.io.IOException => java/io/IOException#null#null", "Function => java/util/function/Function#null#null",
                 "Callable => java/util/concurrent/Callable#null#null", "Number => java/lang/Number#null#null",
                 "valueOf => java/lang/String#valueOf#(Ljava/lang/Object;)Ljava/lang/String;",
-                "Inner => demo/Other$Inner#null#null", "A => demo/Other$Inner$Kind#null#null",
+                "Inner => demo/Other$Inner#null#null", "A => demo/Other$Inner$Kind#A#?", "NAME => demo/Other#NAME#?",
                 "new IllegalArgumentException(NAME) => java/lang/IllegalArgumentException#<init>#(Ljava/lang/String;)V",
                 "IllegalStateException => java/lang/IllegalStateException#null#null", "NullPointerException => java/lang/NullPointerException#null#null",
                 "currentThread => java/lang/Thread#currentThread#()Ljava/lang/Thread;", "interrupt => java/lang/Thread#interrupt#()V",
                 "length => java/lang/String#length#()I");
+    }
+
+    private static final String REPRO = """
+            package demo;
+
+            public class Repro {
+
+                interface Consts {
+                    String NAME = "n";
+                    int SIZE = 3;
+                }
+
+                static final int LIMIT = 10;
+
+                int[] values = new int[LIMIT];
+                String[] names = {"a"};
+
+                void run() {
+                    int a = values.length;
+                    int b = names.length;
+                    int[] local = values;
+                    int c = local.length;
+                    values[0]++;
+                    String d = Consts.NAME;
+                    int e = Consts.SIZE;
+                    int f = LIMIT;
+                    String g = names[0].trim();
+                }
+            }
+            """;
+
+    @Test
+    void constantsAndFieldsUsedByTheirNameOrQualifiedByTheirTypeAreLinkedToTheirDeclaration() {
+        assertThat(links("demo/Repro.java", REPRO)).contains(
+                "NAME => demo/Repro$Consts#NAME#?", "SIZE => demo/Repro$Consts#SIZE#?", "LIMIT => demo/Repro#LIMIT#?",
+                "values => demo/Repro#values#?", "names => demo/Repro#names#?", "Consts => demo/Repro$Consts#null#null",
+                "trim => java/lang/String#trim#()Ljava/lang/String;")
+                .doesNotContain("NAME => java/lang/String#null#null", "SIZE => I#null#null");
+    }
+
+    @Test
+    void theLengthOfAnArrayIsNotLinkedToAnything() {
+        assertThat(links("demo/Repro.java", REPRO)).noneMatch(link -> link.startsWith("length =>")).noneMatch(link -> link.endsWith("=> I#null#null"));
+    }
+
+    @Test
+    void fieldsOfGenericClassesAreLinkedToTheClassNotToItsParameterizedForm() {
+        String generic = """
+                package demo;
+
+                public class Box<T> {
+                    static int COUNT;
+                    T value;
+
+                    void m(Box<String> other, Box<Integer> third) {
+                        other.value = null;
+                        int c = Box.COUNT;
+                        third.COUNT++;
+                        COUNT = value == null ? 1 : 2;
+                    }
+                }
+                """;
+
+        java.util.List<String> links = links("demo/Box.java", generic);
+
+        assertThat(links).contains("COUNT => demo/Box#COUNT#?", "value => demo/Box#value#?", "Box => demo/Box#null#null");
+        assertThat(links).noneMatch(link -> link.substring(link.indexOf("=> ")).split("#")[0].contains("<"));
     }
 
     @Test
