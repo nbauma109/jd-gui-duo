@@ -423,9 +423,9 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
         }
 
         /** The parameters of the canonical constructor of a record: its components. */
-        private String recordParameterDescriptors(RecordDeclaration record) {
+        private String recordParameterDescriptors(RecordDeclaration recordDeclaration) {
             StringBuilder descriptors = new StringBuilder("(");
-            for (Object component : record.recordComponents()) {
+            for (Object component : recordDeclaration.recordComponents()) {
                 descriptors.append(componentDescriptor((SingleVariableDeclaration) component));
             }
             return descriptors.append(')').toString();
@@ -457,8 +457,8 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
             String name = node.isConstructor() ? StringConstants.INSTANCE_CONSTRUCTOR : node.getName().getIdentifier();
             // a compact constructor (R { ... }) has the parameters of the components of its record
             @SuppressWarnings("unchecked")
-            String paramDescriptors = node.isCompactConstructor() && node.getParent() instanceof RecordDeclaration record
-                    ? recordParameterDescriptors(record) : createParamDescriptors(node.parameters());
+            String paramDescriptors = node.isCompactConstructor() && node.getParent() instanceof RecordDeclaration recordDeclaration
+                    ? recordParameterDescriptors(recordDeclaration) : createParamDescriptors(node.parameters());
             String returnDescriptor = createDescriptor(node.getReturnType2(), 0);
             String descriptor = paramDescriptors + returnDescriptor;
 

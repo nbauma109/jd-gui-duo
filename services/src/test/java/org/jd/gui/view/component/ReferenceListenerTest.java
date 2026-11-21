@@ -296,7 +296,7 @@ class ReferenceListenerTest {
         URI jarURI = entry.getContainer().getRoot().getParent().getUri();
         ASTParserFactory.getInstance().newASTParser(api(), OVERLOADS.toCharArray(), "demo/Over.java", jarURI).createAST(null).accept(listener.getDeclarationListener());
 
-        assertThat(listener.getDeclarations().keySet()).contains("demo/Over-f-(Ljava/lang/String;)V", "demo/Over-f-([Ljava/lang/String;)V", "demo/Over-f-([Ldemo/Over;)V");
+        assertThat(listener.getDeclarations()).containsKeys("demo/Over-f-(Ljava/lang/String;)V", "demo/Over-f-([Ljava/lang/String;)V", "demo/Over-f-([Ldemo/Over;)V");
         assertThat(listener.getDeclarations().keySet().stream().filter(key -> key.contains("-f-"))).hasSize(12);
     }
 
