@@ -157,7 +157,9 @@ public class ReferenceListener extends AbstractJavaListener {
     @Override
     public boolean visit(QualifiedName node) {
         ITypeBinding resolvedTypeBinding = node.resolveTypeBinding();
-        if (resolvedTypeBinding != null) {
+        // only a qualified name that denotes a type (java.util.List, Map.Entry) is a link to that type: for a field (Consts.NAME,
+        // values.length) the type binding is the one of its value, which is not what the name refers to
+        if (resolvedTypeBinding != null && node.resolveBinding() instanceof ITypeBinding) {
             String internalTypeName = resolveInternalTypeName(resolvedTypeBinding);
             if (internalTypeName != null) {
                 Name qualifier = node.getQualifier();
@@ -178,9 +180,11 @@ public class ReferenceListener extends AbstractJavaListener {
         Name qualifier = node.getQualifier();
         if (qualifier instanceof SimpleName qualifierSimpleName) {
             String qualifierDescriptor = null;
+            ITypeBinding qualifierType = null;
             IBinding binding = qualifier.resolveBinding();
-            if (binding instanceof ITypeBinding) {
+            if (binding instanceof ITypeBinding typeBinding) {
                 qualifierDescriptor = binding.getKey();
+                qualifierType = typeBinding;
             }
             IVariableBinding variableBinding = null;
             if (binding instanceof IVariableBinding) {
@@ -188,11 +192,14 @@ public class ReferenceListener extends AbstractJavaListener {
                 ITypeBinding typeBinding = qualifier.resolveTypeBinding();
                 if (typeBinding != null) {
                     qualifierDescriptor = typeBinding.getKey();
+                    qualifierType = typeBinding;
                 }
             }
             if (qualifierDescriptor != null) {
                 if (qualifierDescriptor.charAt(0) == 'L') {
-                    String qualifierTypeName = qualifierDescriptor.substring(1, qualifierDescriptor.length() - 1);
+                    // the erasure: the key of a generic type carries its type parameters (demo/Sample<TT;>)
+                    String erasedName = qualifierType == null ? null : qualifierType.getErasure().getBinaryName();
+                    String qualifierTypeName = erasedName != null ? erasedName.replace('.', '/') : qualifierDescriptor.substring(1, qualifierDescriptor.length() - 1);
                     ReferenceData refData = newReferenceData(qualifierTypeName, fieldName, "?");
                     if (binding instanceof ITypeBinding || (variableBinding != null && variableBinding.isField())) {
                         ReferenceData qualifierRefData = newReferenceData(qualifierTypeName, null, null);
@@ -203,7 +210,7 @@ public class ReferenceListener extends AbstractJavaListener {
                 if (qualifierDescriptor.charAt(0) == '[' && variableBinding != null) {
                     ITypeBinding declaringClass = variableBinding.getDeclaringClass();
                     if (declaringClass != null) {
-                        String declaringBinaryName = declaringClass.getBinaryName();
+                        String declaringBinaryName = declaringClass.getErasure().getBinaryName();
                         if (declaringBinaryName != null) {
                             String declaringInternalTypeName = declaringBinaryName.replace('.', '/');
                             String qualifierIdentifier = qualifierSimpleName.getIdentifier();
@@ -287,7 +294,7 @@ public class ReferenceListener extends AbstractJavaListener {
         if (variableBinding != null && variableBinding.isField()) {
             ITypeBinding declaringClass = variableBinding.getDeclaringClass();
             if (declaringClass != null) {
-                String binaryName = declaringClass.getBinaryName();
+                String binaryName = declaringClass.getErasure().getBinaryName();
                 if (binaryName != null) {
                     String varTypeName = binaryName.replace('.', '/');
                     int position = simpleName.getStartPosition();
@@ -297,6 +304,18 @@ public class ReferenceListener extends AbstractJavaListener {
                 }
             }
         }
+    }
+
+    /** A field used by its simple name (LIMIT, values): a link to its declaration, unless the name is part of a qualified name or a field access, which link it themselves. */
+    @Override
+    public boolean visit(SimpleName node) {
+        if (!node.isDeclaration() && node.resolveBinding() instanceof IVariableBinding variableBinding
+                && node.getLocationInParent() != QualifiedName.NAME_PROPERTY
+                && node.getLocationInParent() != FieldAccess.NAME_PROPERTY
+                && node.getLocationInParent() != org.eclipse.jdt.core.dom.SuperFieldAccess.NAME_PROPERTY) {
+            createLinkToVariable(node, variableBinding);
+        }
+        return true;
     }
 
     @Override
