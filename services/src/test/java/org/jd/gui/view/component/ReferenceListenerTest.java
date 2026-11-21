@@ -438,6 +438,52 @@ class ReferenceListenerTest {
         assertThat(listener.getDeclarations()).containsKey("demo/Range-<init>-(II[Ljava/lang/String;)V").doesNotContainKey("demo/Range-<init>-()V");
     }
 
+    private static final String RECORDS = """
+            package demo;
+
+            public class Recs {
+                record Pt(int x, int y) { int sum() { return x + y; } }
+                record Range(int lo, int hi) {
+                    Range { }
+                    public int lo() { return lo; }
+                }
+
+                void go(Pt pt, Range r) {
+                    pt.x();
+                    pt.y();
+                    r.lo();
+                    r.hi();
+                    new Pt(1, 2);
+                    new Range(1, 2);
+                }
+            }
+            """;
+
+    @Test
+    void theMembersThatARecordDeclaresByItsHeaderAreDeclaredAtItsComponentsAndAtItsName() {
+        Container.Entry entry = entry("demo/Recs.java");
+        ReferenceListener listener = new ReferenceListener(entry);
+        URI jarURI = entry.getContainer().getRoot().getParent().getUri();
+        ASTParserFactory.getInstance().newASTParser(api(), RECORDS.toCharArray(), "demo/Recs.java", jarURI).createAST(null).accept(listener.getDeclarationListener());
+
+        assertThat(listener.getDeclarations()).containsKeys(
+                "demo/Recs$Pt-x-I", "demo/Recs$Pt-x-()I", "demo/Recs$Pt-y-I", "demo/Recs$Pt-y-()I", "demo/Recs$Pt-<init>-(II)V");
+        // the members that the body declares itself are at their own place: the accessor lo() and the compact constructor
+        assertThat(lineOf(RECORDS, listener.getDeclarations().get("demo/Recs$Range-lo-()I").getStartPosition())).isEqualTo(7);
+        assertThat(lineOf(RECORDS, listener.getDeclarations().get("demo/Recs$Range-hi-()I").getStartPosition())).isEqualTo(5);
+        assertThat(lineOf(RECORDS, listener.getDeclarations().get("demo/Recs$Range-<init>-(II)V").getStartPosition())).isEqualTo(6);
+        assertThat(lineOf(RECORDS, listener.getDeclarations().get("demo/Recs$Pt-<init>-(II)V").getStartPosition())).isEqualTo(4);
+    }
+
+    @Test
+    void callsOfTheMembersOfARecordNavigateToThem() {
+        assertThat(targetsOfCalls("demo/Recs.java", RECORDS, "x")).contains("11 -> 4");
+        assertThat(targetsOfCalls("demo/Recs.java", RECORDS, "y")).contains("12 -> 4");
+        assertThat(targetsOfCalls("demo/Recs.java", RECORDS, "lo")).contains("13 -> 7");
+        assertThat(targetsOfCalls("demo/Recs.java", RECORDS, "hi")).contains("14 -> 5");
+        assertThat(targetsOfCalls("demo/Recs.java", RECORDS, "<init>")).containsExactly("15 -> 4", "16 -> 6");
+    }
+
     @Test
     void referencesToUnknownTypesAreSkippedWithoutFailing() {
         String broken = """
