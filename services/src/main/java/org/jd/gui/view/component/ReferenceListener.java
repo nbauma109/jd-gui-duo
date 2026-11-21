@@ -6,6 +6,9 @@ import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.CreationReference;
+import org.eclipse.jdt.core.dom.SuperMethodReference;
+import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -446,7 +449,10 @@ public class ReferenceListener extends AbstractJavaListener {
     }
 
     private static String internalTypeNameOf(Expression expression) {
-        ITypeBinding type = expression.resolveTypeBinding();
+        return internalTypeNameOf(expression.resolveTypeBinding());
+    }
+
+    private static String internalTypeNameOf(ITypeBinding type) {
         String binaryName = type == null ? null : type.getErasure().getBinaryName();
         return binaryName == null ? null : binaryName.replace('.', '/');
     }
@@ -460,9 +466,53 @@ public class ReferenceListener extends AbstractJavaListener {
         }
     }
 
+    /**
+     * The references to a method (x::m, String::valueOf, Type::m, super::m): the binding when there is one; a reference has no arguments, so
+     * without a binding the link is made from the type and the name, to any method of that name.
+     */
     @Override
     public boolean visit(ExpressionMethodReference node) {
-        return visitMethodBinding(node.getName(), node.resolveMethodBinding());
+        return visitMethodReference(node.getName(), node.resolveMethodBinding(), internalTypeNameOf(node.getExpression()));
+    }
+
+    @Override
+    public boolean visit(TypeMethodReference node) {
+        ITypeBinding type = node.getType().resolveBinding();
+        return visitMethodReference(node.getName(), node.resolveMethodBinding(), internalTypeNameOf(type));
+    }
+
+    @Override
+    public boolean visit(SuperMethodReference node) {
+        String superTypeName = getDeclarations().get(currentInternalTypeName) instanceof TypeDeclarationData tdd ? tdd.getSuperTypeName() : null;
+        return visitMethodReference(node.getName(), node.resolveMethodBinding(), superTypeName);
+    }
+
+    private boolean visitMethodReference(SimpleName name, IMethodBinding binding, String fallbackTypeName) {
+        if (binding != null && !binding.isRecovered()) {
+            return visitMethodBinding(name, binding);
+        }
+        if (fallbackTypeName != null && !fallbackTypeName.isEmpty()) {
+            ReferenceData refData = newReferenceData(fallbackTypeName, name.getIdentifier(), "(*)?");
+            addHyperlink(new HyperlinkReferenceData(name.getStartPosition(), name.getLength(), refData));
+        }
+        return true;
+    }
+
+    /** A reference to a constructor (Type::new): the link is on "new", to the constructor of the binding or, without one, to any constructor of the type. */
+    @Override
+    public boolean visit(CreationReference node) {
+        IMethodBinding binding = node.resolveMethodBinding();
+        ITypeBinding type = node.getType().resolveBinding();
+        String typeName = binding != null && !binding.isRecovered() && binding.getDeclaringClass().getBinaryName() != null
+                ? binding.getDeclaringClass().getErasure().getBinaryName().replace('.', '/')
+                : resolveInternalTypeName(node.getType());
+        if (typeName != null && !typeName.isEmpty() && type != null && !type.isArray()) {
+            String descriptor = binding != null && !binding.isRecovered() ? getParametersDescriptor(binding.getParameterTypes()).append('V').toString() : "(*)V";
+            ReferenceData refData = newReferenceData(typeName, StringConstants.INSTANCE_CONSTRUCTOR, descriptor);
+            int length = "new".length();
+            addHyperlink(new HyperlinkReferenceData(node.getStartPosition() + node.getLength() - length, length, refData));
+        }
+        return true;
     }
 
     private boolean visitMethodBinding(SimpleName name, IMethodBinding methodBinding) {
