@@ -43,6 +43,18 @@ class DebugExtrasGuiTest extends DebugGuiTestBase {
         return rows;
     }
 
+    /** Right-clicks the text at the given offset of the matched text of the source: the menu of a suspended debuggee opens. */
+    private static org.assertj.swing.fixture.JPopupMenuFixture rightClickIn(String text, int offsetInText) {
+        javax.swing.text.JTextComponent area = sourceArea();
+        java.awt.Point point = GuiActionRunner.execute(() -> {
+            int index = area.getText().indexOf(text) + offsetInText;
+            assertThat(index).isGreaterThanOrEqualTo(offsetInText);
+            java.awt.geom.Rectangle2D rectangle = area.modelToView2D(index);
+            return new java.awt.Point((int) rectangle.getCenterX(), (int) rectangle.getCenterY());
+        });
+        return new org.assertj.swing.fixture.JTextComponentFixture(robot, area).showPopupMenuAt(point);
+    }
+
     private static JTree threadTree() {
         return findAll(JTree.class, t -> t.isShowing() && t.getClass() == JTree.class).get(0);
     }
@@ -120,5 +132,24 @@ class DebugExtrasGuiTest extends DebugGuiTestBase {
         breakpointButton("Remove Selected Breakpoints").click();
 
         waitUntil("the breakpoint is removed", () -> breakpointRows().isEmpty());
+    }
+
+    @Test
+    void theEditorMenuOfASuspendedDebuggeeOffersWatchInspectAndRunToLine() throws IOException {
+        stopAtTheBreakpoint();
+
+        rightClickIn("greeter.greet()", 3).menuItemWithPath("Watch").click();
+        selectDebugTab("Expressions");
+        waitUntil("the identifier under the pointer is watched", () -> variableRows().stream().anyMatch(row -> row.startsWith("greeter")));
+        breakpointButton("Remove all watch expressions").click();
+
+        rightClickIn("greeter.greet()", 3).menuItemWithPath("Inspect").click();
+        waitUntil("the popup shows the expression", () -> popupRows().stream().anyMatch(row -> row.contains("greeter")));
+        robot.pressAndReleaseKey(java.awt.event.KeyEvent.VK_ESCAPE);
+        waitUntil("the popup is closed", () -> popupRows().isEmpty());
+
+        rightClickIn("Thread.sleep", 2).menuItemWithPath("Run to Line").click();
+        waitUntil("the thread is suspended again in main", () -> threadRows().stream().anyMatch(row -> row.startsWith("Thread \"main\" (Suspended"))
+                && threadRows().stream().anyMatch(row -> row.startsWith("demo.Main.main() line:")));
     }
 }
