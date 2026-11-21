@@ -90,10 +90,21 @@ class MethodPatcherTest {
 
         String patched = MethodPatcher.patchCode(api(), v1, v0, entry());
 
-        assertThat(patched).isEqualTo(
-                "package demo;\n\npublic class Calc {\n    public int ok() {\n        return 1;\n    }\n\n"
-                        + "    public int broken(int a) /* Patched from JD-Core V0 */{\n        return a * 2;\n    }\n\n}\n");
-        assertThat(patched).doesNotContain(FAILED);
+        // the padding that keeps the line count is added with the line separator of the platform
+        String expected = """
+                package demo;
+
+                public class Calc {
+                    public int ok() {
+                        return 1;
+                    }
+
+                    public int broken(int a) /* Patched from JD-Core V0 */{
+                        return a * 2;
+                    }@PAD
+                }
+                """.replace("@PAD", System.lineSeparator());
+        assertThat(patched).isEqualTo(expected).doesNotContain(FAILED);
     }
 
     @Test
