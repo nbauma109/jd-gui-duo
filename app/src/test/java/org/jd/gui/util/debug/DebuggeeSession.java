@@ -45,6 +45,22 @@ final class DebuggeeSession implements AutoCloseable {
         return id < 0 ? shown : shown.substring(0, id).stripTrailing();
     }
 
+    /** The index of the frame of the method with the given name (0 is the top of the stack), or -1. */
+    int frameOf(String method) {
+        try {
+            int index = 0;
+            for (com.sun.jdi.StackFrame frame : thread.frames()) {
+                if (method.equals(frame.location().method().name())) {
+                    return index;
+                }
+                index++;
+            }
+        } catch (com.sun.jdi.IncompatibleThreadStateException e) {
+            throw new IllegalStateException(e);
+        }
+        return -1;
+    }
+
     ThreadReference thread() {
         return thread;
     }
@@ -78,13 +94,26 @@ final class DebuggeeSession implements AutoCloseable {
             }
             for (Event event : events) {
                 if (event instanceof MethodEntryEvent hit && "breakHere".equals(hit.method().name())) {
+                    int main = frameIndexOfMain(hit.thread()); // before the request goes: deleting it may let the thread run
                     // the calls the evaluator makes in the debuggee must not stop it again
                     vm.eventRequestManager().deleteEventRequest(entry);
-                    return new DebuggeeSession(vm, hit.thread(), 1);
+                    return new DebuggeeSession(vm, hit.thread(), main);
                 }
             }
             events.resume();
         }
+    }
+
+    /** The frame of main: the stack is breakHere, then hold or main (the program calls hold first, then breakHere itself). */
+    private static int frameIndexOfMain(ThreadReference thread) throws com.sun.jdi.IncompatibleThreadStateException {
+        int index = 0;
+        for (com.sun.jdi.StackFrame frame : thread.frames()) {
+            if ("main".equals(frame.location().method().name())) {
+                return index;
+            }
+            index++;
+        }
+        throw new IllegalStateException("main is not on the stack");
     }
 
     private static ReferenceType waitForClass(VirtualMachine vm, String name) {

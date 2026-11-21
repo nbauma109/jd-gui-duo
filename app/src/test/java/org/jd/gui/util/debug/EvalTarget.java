@@ -55,6 +55,11 @@ public class EvalTarget implements Comparable<EvalTarget> {
         return value * 2;
     }
 
+    /** An instance frame for the evaluator to read: the debuggee stops here (before the loop calls breakHere itself). */
+    public void hold() {
+        breakHere();
+    }
+
     public int fail() {
         throw new IllegalStateException("on purpose");
     }
@@ -95,6 +100,8 @@ public class EvalTarget implements Comparable<EvalTarget> {
         Map<String, Integer> map = new HashMap<>();
         map.put("k", 1);
         Integer boxed = 42;
+        Integer boxedNull = null;
+        Long longNull = null;
         Long boxedLong = 5L;
         Double boxedDouble = 1.5;
         Boolean boxedFlag = Boolean.TRUE;
@@ -106,11 +113,12 @@ public class EvalTarget implements Comparable<EvalTarget> {
         Color color = Color.GREEN;
         // the test suspends the program somewhere in this loop and reads the locals of this frame
         while (flag) {
+            obj.hold();
             breakHere();
             java.util.concurrent.locks.LockSupport.parkNanos(10_000_000L);
         }
         System.out.println(i + l + d + f + c + b + sh + s + nul + arr.length + grid.length + words.length + list + map + boxed
-                + boxedLong + boxedDouble + boxedFlag + boxedChar + o + sb + obj + color);
+                + boxedNull + longNull + boxedLong + boxedDouble + boxedFlag + boxedChar + o + sb + obj + color);
     }
 
     public static void breakHere() {
