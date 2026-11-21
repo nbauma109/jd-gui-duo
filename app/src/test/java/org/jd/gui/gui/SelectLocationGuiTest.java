@@ -21,7 +21,7 @@ import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.Path;
 import java.util.List;
 
 import javax.swing.JDialog;
@@ -35,10 +35,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 /** A type that exists in several open archives: the user can compare two copies or choose the location to open. */
 class SelectLocationGuiTest extends GuiTestBase {
 
+    private static final java.util.concurrent.atomic.AtomicInteger COPIES = new java.util.concurrent.atomic.AtomicInteger();
+
+    /** The name of the twin opened by the current test: a file the application has opened cannot be replaced on Windows. */
+    private String twin;
+
+    private Path copyOfTheFixture(String prefix) throws IOException {
+        return Files.copy(app.fixtureJar(), app.workDir().resolve(prefix + "-" + COPIES.incrementAndGet() + ".jar"));
+    }
+
     @BeforeEach
     void openTheArchiveAndATwin() throws IOException {
         openFixtureJar();
-        openFile(Files.copy(app.fixtureJar(), app.workDir().resolve("fixture-twin.jar"), StandardCopyOption.REPLACE_EXISTING));
+        Path copy = copyOfTheFixture("twin");
+        twin = copy.getFileName().toString();
+        openFile(copy);
         waitUntil("the types can be opened", () -> isMenuEnabled("Navigation", "Open Type..."));
     }
 
@@ -78,7 +89,7 @@ class SelectLocationGuiTest extends GuiTestBase {
         JTree tree = tree(picker);
 
         assertThat(labels(picker)).contains("2 locations:");
-        assertThat(rows(tree)).containsExactlyInAnyOrder("fixture-twin.jar", "demo", "Greeter.class", "fixture.jar", "demo", "Greeter.class")
+        assertThat(rows(tree)).containsExactlyInAnyOrder(twin, "demo", "Greeter.class", "fixture.jar", "demo", "Greeter.class")
                 .containsSubsequence("fixture.jar", "demo", "Greeter.class"); // each archive is followed by its own folder and class
     }
 
@@ -115,7 +126,7 @@ class SelectLocationGuiTest extends GuiTestBase {
 
     @Test
     void threeCopiesGoStraightToThePicker() throws IOException {
-        openFile(Files.copy(app.fixtureJar(), app.workDir().resolve("fixture-triplet.jar"), StandardCopyOption.REPLACE_EXISTING));
+        openFile(copyOfTheFixture("triplet"));
         waitUntil("the types can be opened", () -> isMenuEnabled("Navigation", "Open Type..."));
 
         chooseGreeterInOpenType();
