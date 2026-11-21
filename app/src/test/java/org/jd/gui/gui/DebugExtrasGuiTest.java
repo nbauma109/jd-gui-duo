@@ -30,6 +30,19 @@ class DebugExtrasGuiTest extends DebugGuiTestBase {
         waitForLocation("demo.Main.main() line: 7");
     }
 
+    /** Rows of the trees of the other windows (the Inspect popup is a dialog of its own, outside the component tree of the main window). */
+    private static java.util.List<String> popupRows() {
+        java.util.List<java.awt.Window> windows = GuiActionRunner.execute(() -> java.util.Arrays.stream(java.awt.Window.getWindows())
+                .filter(w -> w.isShowing() && w != window.target()).toList());
+        java.util.List<String> rows = new java.util.ArrayList<>();
+        for (java.awt.Window w : windows) {
+            for (JTree tree : findIn(w, JTree.class, JTree::isShowing)) {
+                rows.addAll(rows(tree));
+            }
+        }
+        return rows;
+    }
+
     private static JTree threadTree() {
         return findAll(JTree.class, t -> t.isShowing() && t.getClass() == JTree.class).get(0);
     }
@@ -66,7 +79,12 @@ class DebugExtrasGuiTest extends DebugGuiTestBase {
         assertThat(isMenuEnabled("Debug", "Drop to Frame")).isTrue();
         clickMenu("Debug", "Drop to Frame");
 
-        waitUntil("the callee frame is dropped", () -> threadRows().stream().noneMatch(row -> row.startsWith("demo.Greeter.greet()"))
+        // the selected frame is popped and entered again, so the callee is on top once more and the steps are enabled again
+        waitUntil("the callee is entered again", () -> isMenuEnabled("Debug", "Step Over")
+                && threadRows().stream().anyMatch(row -> row.startsWith("demo.Greeter.greet()")));
+        assertThat(isDialogShowing("Drop to Frame")).isFalse();
+        clickMenu("Debug", "Step Return");
+        waitUntil("the caller is shown again", () -> threadRows().stream().noneMatch(row -> row.startsWith("demo.Greeter.greet()"))
                 && threadRows().stream().anyMatch(row -> row.startsWith("demo.Main.main() line:")));
     }
 
@@ -83,8 +101,9 @@ class DebugExtrasGuiTest extends DebugGuiTestBase {
 
         clickMenu("Debug", "Inspect");
 
-        waitUntil("the popup shows the value", () -> findAll(JTree.class, t -> t.isShowing() && rows(t).stream().anyMatch(r -> r.contains("Hello, debugger!"))).size() > 0);
+        waitUntil("the popup shows the expression", () -> popupRows().stream().anyMatch(row -> row.contains("greeter.greet()")));
         robot.pressAndReleaseKey(java.awt.event.KeyEvent.VK_ESCAPE);
+        waitUntil("the popup is closed", () -> popupRows().isEmpty());
     }
 
     @Test
