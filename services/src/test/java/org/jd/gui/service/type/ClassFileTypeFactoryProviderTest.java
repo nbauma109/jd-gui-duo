@@ -132,8 +132,8 @@ class ClassFileTypeFactoryProviderTest {
                 "flag : boolean", "b : byte", "s : short", "c : char", "f : float", "d : double");
         assertThat(methods(sample)).containsExactly("Sample()", "Sample(String, int...)", "util(String[], boolean, byte, short, char, float, double, long, Object) : void",
                 "arrays(long[][]) : int[]", "hidden() : void", "generic(Object) : Object");
-        assertThat(sample.getFields()).allSatisfy(field -> assertThat(field.getIcon()).isNotNull());
-        assertThat(sample.getMethods()).allSatisfy(method -> assertThat(method.getIcon()).isNotNull());
+        assertThat(sample.getFields()).isNotEmpty().allSatisfy(field -> assertThat(field.getIcon()).isNotNull());
+        assertThat(sample.getMethods()).isNotEmpty().allSatisfy(method -> assertThat(method.getIcon()).isNotNull());
     }
 
     @Test
@@ -186,7 +186,7 @@ class ClassFileTypeFactoryProviderTest {
         assertThat(callback.getFlags() & Opcodes.ACC_INTERFACE).isNotZero();
         assertThat(methods(callback)).containsExactly("done() : void");
         assertThat(marker.getFlags() & Opcodes.ACC_ANNOTATION).isNotZero();
-        assertThat(java.util.List.of(mode, callback, marker)).allSatisfy(type -> assertThat(type.getIcon()).isNotNull());
+        assertThat(java.util.List.of(mode, callback, marker)).hasSize(3).allSatisfy(type -> assertThat(type.getIcon()).isNotNull());
     }
 
     @Test

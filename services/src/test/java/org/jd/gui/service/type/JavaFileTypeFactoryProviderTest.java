@@ -139,8 +139,8 @@ class JavaFileTypeFactoryProviderTest {
         assertThat(methods(shapes)).contains("Shapes()", "run() : void", "pick(List, long) : E");
         assertThat(shapes.getMethods()).extracting(Type.Method::getName, Type.Method::getFlags)
                 .contains(tuple("run", Opcodes.ACC_PUBLIC), tuple("pick", Opcodes.ACC_STATIC));
-        assertThat(shapes.getMethods()).allSatisfy(method -> assertThat(method.getIcon()).isNotNull());
-        assertThat(shapes.getFields()).allSatisfy(field -> assertThat(field.getIcon()).isNotNull());
+        assertThat(shapes.getMethods()).isNotEmpty().allSatisfy(method -> assertThat(method.getIcon()).isNotNull());
+        assertThat(shapes.getFields()).isNotEmpty().allSatisfy(field -> assertThat(field.getIcon()).isNotNull());
     }
 
     @Test
@@ -170,7 +170,7 @@ class JavaFileTypeFactoryProviderTest {
         assertThat(visitor.getFlags() & Opcodes.ACC_INTERFACE).isNotZero();
         assertThat(methods(visitor)).containsExactly("visit() : void");
         assertThat(marker.getFlags() & Opcodes.ACC_ANNOTATION).isNotZero();
-        assertThat(java.util.List.of(color, visitor, marker)).allSatisfy(type -> assertThat(type.getIcon()).isNotNull());
+        assertThat(java.util.List.of(color, visitor, marker)).hasSize(3).allSatisfy(type -> assertThat(type.getIcon()).isNotNull());
     }
 
     @Test
