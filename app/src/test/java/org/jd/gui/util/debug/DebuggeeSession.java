@@ -70,7 +70,20 @@ final class DebuggeeSession implements AutoCloseable {
         return mainFrame;
     }
 
+    /** Starts the debuggee, trying again when its JVM never gets going (it happens on busy CI runners). */
     static DebuggeeSession start(String mainClass) throws Exception {
+        IllegalStateException last = null;
+        for (int attempt = 0; attempt < 3; attempt++) {
+            try {
+                return startOnce(mainClass);
+            } catch (IllegalStateException e) {
+                last = e;
+            }
+        }
+        throw last;
+    }
+
+    private static DebuggeeSession startOnce(String mainClass) throws Exception {
         LaunchingConnector connector = Bootstrap.virtualMachineManager().defaultConnector();
         Map<String, Connector.Argument> arguments = connector.defaultArguments();
         arguments.get("main").setValue(mainClass);
@@ -87,7 +100,7 @@ final class DebuggeeSession implements AutoCloseable {
         entry.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
         entry.enable();
         while (true) {
-            EventSet events = vm.eventQueue().remove(120_000);
+            EventSet events = vm.eventQueue().remove(60_000);
             if (events == null) {
                 vm.exit(1);
                 throw new IllegalStateException("The debuggee never reached breakHere()");
@@ -116,15 +129,16 @@ final class DebuggeeSession implements AutoCloseable {
         throw new IllegalStateException("main is not on the stack");
     }
 
-    /** Waits up to two minutes: the macOS runners can be very slow to start a JVM. */
+    /** Waits up to 40 seconds for the class; the caller then launches another JVM. */
     private static ReferenceType waitForClass(VirtualMachine vm, String name) {
-        for (int attempt = 0; attempt < 2400; attempt++) {
+        for (int attempt = 0; attempt < 800; attempt++) {
             List<ReferenceType> types = vm.classesByName(name);
             if (!types.isEmpty()) {
                 return types.get(0);
             }
             LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(50));
         }
+        vm.exit(1);
         throw new IllegalStateException("The debuggee never loaded " + name);
     }
 
