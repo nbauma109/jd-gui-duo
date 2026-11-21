@@ -175,6 +175,18 @@ final class FixtureArchives {
         return jar;
     }
 
+    /** A jar with the fixture classes and a service registration that lists one of them. */
+    static Path createServicesJar(Path dir, Path fixtureClasses) throws IOException {
+        Path jar = dir.resolve("services-" + COUNTER.incrementAndGet() + ".jar");
+        try (OutputStream out = Files.newOutputStream(jar); java.util.zip.ZipOutputStream zip = new java.util.zip.ZipOutputStream(out)) {
+            zip.putNextEntry(new java.util.zip.ZipEntry("META-INF/services/demo.Shape"));
+            zip.write("# the implementations of Shape\ndemo.Greeter\n".getBytes(StandardCharsets.UTF_8));
+            zip.closeEntry();
+            addFixtureClasses(zip, fixtureClasses, "");
+        }
+        return jar;
+    }
+
     /** A web archive whose descriptor names a class that the archive holds. */
     static Path createWarWithClasses(Path dir, Path fixtureClasses) throws IOException {
         Path war = dir.resolve("webapp-" + COUNTER.incrementAndGet() + ".war");

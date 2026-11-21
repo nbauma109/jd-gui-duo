@@ -539,6 +539,7 @@ public class MainView<T extends JComponent & UriGettable> implements UriOpenable
                                 saveAction.setEnabled(false);
                                 copyAction.setEnabled(false);
                                 selectAllAction.setEnabled(false);
+                                findAction.setEnabled(false);
                                 openTypeHierarchyAction.setEnabled(false);
                                 quickOutlineAction.setEnabled(false);
                                 goToAction.setEnabled(false);
