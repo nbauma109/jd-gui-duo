@@ -245,6 +245,26 @@ class JavaFileTypeFactoryProviderTest {
     }
 
     @Test
+    void theConstructorsOfNestedTypesShowAllTheirParameters() {
+        String text = """
+                package demo;
+
+                public class Outer {
+                    public record Pair(int a, String b) { }
+                    public static class Nested { Nested(long l, String s) { } }
+                    public class Inner { Inner(int n) { } }
+                }
+                """;
+
+        Type outer = new JavaFileTypeFactoryProvider().make(api(), sourceEntry("demo/Outer.java", text), null);
+
+        // the descriptors of a source have no parameter for the outer instance: none is skipped, whether the nested type is static or not
+        assertThat(methods(innerType(outer, "Outer.Pair"))).contains("Pair(int, String)");
+        assertThat(methods(innerType(outer, "Outer.Nested"))).containsExactly("Nested(long, String)");
+        assertThat(methods(innerType(outer, "Outer.Inner"))).containsExactly("Inner(int)");
+    }
+
+    @Test
     void aFragmentSelectsATypeOfTheFileAndIgnoresTheMemberAfterTheDash() {
         JavaFileTypeFactoryProvider provider = new JavaFileTypeFactoryProvider();
         FakeEntry entry = sourceEntry();

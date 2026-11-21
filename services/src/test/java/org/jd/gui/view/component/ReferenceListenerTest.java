@@ -301,6 +301,27 @@ class ReferenceListenerTest {
     }
 
     @Test
+    void aCompactConstructorIsDeclaredWithTheParametersOfTheComponentsOfItsRecord() {
+        String text = """
+                package demo;
+
+                public record Range(int lo, int hi, String... tags) {
+                    public Range {
+                        if (lo > hi) {
+                            throw new IllegalArgumentException();
+                        }
+                    }
+                }
+                """;
+        Container.Entry entry = entry("demo/Range.java");
+        ReferenceListener listener = new ReferenceListener(entry);
+        URI jarURI = entry.getContainer().getRoot().getParent().getUri();
+        ASTParserFactory.getInstance().newASTParser(api(), text.toCharArray(), "demo/Range.java", jarURI).createAST(null).accept(listener.getDeclarationListener());
+
+        assertThat(listener.getDeclarations()).containsKey("demo/Range-<init>-(II[Ljava/lang/String;)V").doesNotContainKey("demo/Range-<init>-()V");
+    }
+
+    @Test
     void referencesToUnknownTypesAreSkippedWithoutFailing() {
         String broken = """
                 package demo;

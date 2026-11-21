@@ -273,14 +273,14 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
         @Override
         public String getDisplayName() {
             String constructorName = type.getDisplayInnerTypeName();
-            boolean isInnerClass = constructorName != null;
 
             if (constructorName == null) {
                 constructorName = type.getDisplayTypeName();
             }
 
             StringBuilder sb = new StringBuilder();
-            writeMethodSignature(sb, access, access, isInnerClass, constructorName, name, descriptor);
+            // no synthetic parameter for the outer instance in the descriptors of a source: none of the parameters of a constructor is skipped
+            writeMethodSignature(sb, type.getFlags(), access, false, constructorName, name, descriptor);
             return sb.toString();
         }
     }
@@ -390,7 +390,7 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
             // the components are private final fields
             for (Object component : node.recordComponents()) {
                 SingleVariableDeclaration declaration = (SingleVariableDeclaration) component;
-                currentType.getFields().add(new JavaField(ACC_PRIVATE | ACC_FINAL, declaration.getName().getIdentifier(), componentDescriptor(declaration)));
+                currentType.getFields().add(new JavaField(ACC_PRIVATE | ACC_FINAL, declaration.getName().getIdentifier(), createComponentDescriptor(declaration)));
             }
             return visited;
         }
@@ -401,12 +401,12 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
             for (Object component : node.recordComponents()) {
                 SingleVariableDeclaration declaration = (SingleVariableDeclaration) component;
                 String name = declaration.getName().getIdentifier();
-                String accessor = "()" + componentDescriptor(declaration);
+                String accessor = "()" + createComponentDescriptor(declaration);
                 if (!declaresMethod(name, accessor)) {
                     currentType.getMethods().add(new JavaMethod(currentType, ACC_PUBLIC, name, accessor));
                 }
             }
-            String canonical = recordParameterDescriptors(node) + "V";
+            String canonical = createRecordParamDescriptors(node) + "V";
             if (!declaresMethod(StringConstants.INSTANCE_CONSTRUCTOR, canonical)) {
                 int visibility = currentType.getFlags() & (ACC_PUBLIC | ACC_PROTECTED | ACC_PRIVATE);
                 currentType.getMethods().add(new JavaMethod(currentType, visibility, StringConstants.INSTANCE_CONSTRUCTOR, canonical));
@@ -416,19 +416,6 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
 
         private boolean declaresMethod(String name, String descriptor) {
             return currentType.getMethods().stream().anyMatch(method -> method.getName().equals(name) && method.getDescriptor().equals(descriptor));
-        }
-
-        private String componentDescriptor(SingleVariableDeclaration component) {
-            return createDescriptor(component.getType(), component.getExtraDimensions() + (component.isVarargs() ? 1 : 0));
-        }
-
-        /** The parameters of the canonical constructor of a record: its components. */
-        private String recordParameterDescriptors(RecordDeclaration recordDeclaration) {
-            StringBuilder descriptors = new StringBuilder("(");
-            for (Object component : recordDeclaration.recordComponents()) {
-                descriptors.append(componentDescriptor((SingleVariableDeclaration) component));
-            }
-            return descriptors.append(')').toString();
         }
 
         @Override
@@ -455,10 +442,7 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
         public boolean visit(MethodDeclaration node) {
             int access = node.getModifiers();
             String name = node.isConstructor() ? StringConstants.INSTANCE_CONSTRUCTOR : node.getName().getIdentifier();
-            // a compact constructor (R { ... }) has the parameters of the components of its record
-            @SuppressWarnings("unchecked")
-            String paramDescriptors = node.isCompactConstructor() && node.getParent() instanceof RecordDeclaration recordDeclaration
-                    ? recordParameterDescriptors(recordDeclaration) : createParamDescriptors(node.parameters());
+            String paramDescriptors = createParamDescriptors(node);
             String returnDescriptor = createDescriptor(node.getReturnType2(), 0);
             String descriptor = paramDescriptors + returnDescriptor;
 

@@ -126,8 +126,7 @@ public class DeclarationListener extends AbstractJavaListener {
     public boolean visit(MethodDeclaration node) {
         SimpleName nodeName = node.getName();
         String name = nodeName.getIdentifier();
-        @SuppressWarnings("unchecked")
-        String paramDescriptors = createParamDescriptors(node.parameters());
+        String paramDescriptors = createParamDescriptors(node);
         String returnDescriptor = createDescriptor(node.getReturnType2(), 0);
         String descriptor = paramDescriptors + returnDescriptor;
         int position = nodeName.getStartPosition();
