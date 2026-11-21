@@ -281,6 +281,56 @@ class ReferenceListenerTest {
                 .noneMatch(link -> link.substring(link.indexOf("=> ")).split("#")[0].contains("<"));
     }
 
+    private static final String CALLS = """
+            package demo;
+
+            public class Calls {
+                static class Foo {
+                    Foo(String s) { }
+                    Foo(int a, int b) { }
+                    void m(String s) { }
+                    void m(int a, int b) { }
+                    static void s(long x) { }
+                }
+
+                static class Sub extends Foo {
+                    Sub() { super(1, 2, 3); }
+                    Sub(int x) { this(x, "y", null); }
+                    Sub(String s) { super(s); }
+                    Sub(String a, String b, String c) { super(a); }
+                    void sup() { super.m("x"); super.m(1, 2, 3); }
+                }
+
+                void go(Foo foo) {
+                    foo.m("a");
+                    foo.m(1, 2, 3);
+                    foo.m(1, "x", foo);
+                    foo.nothing(null, 1);
+                    m2(1);
+                    new Foo(1, 2, 3);
+                    new Foo(foo, null);
+                    Foo.s("x");
+                }
+            }
+            """;
+
+    @Test
+    void callsThatResolveKeepTheExactDescriptorOfTheirBinding() {
+        assertThat(links("demo/Calls.java", CALLS)).contains(
+                "m => demo/Calls$Foo#m#(Ljava/lang/String;)V", "super => demo/Calls$Foo#<init>#(Ljava/lang/String;)V")
+                .doesNotContain("m => demo/Calls$Foo#m#(II)V", "new Foo(1, 2, 3) => demo/Calls$Foo#<init>#(Ljava/lang/String;)V");
+    }
+
+    @Test
+    void callsWithoutApplicableMethodAreLinkedFromWhatTheirArgumentsTell() {
+        assertThat(links("demo/Calls.java", CALLS)).contains(
+                // methods, like constructors: the types of the arguments that are known are hints, ? stands for the others and for the return type
+                "m => demo/Calls$Foo#m#(~I~I~I)?", "m => demo/Calls$Foo#m#(~I~Ljava/lang/String;~Ldemo/Calls$Foo;)?",
+                "nothing => demo/Calls$Foo#nothing#(?~I)?", "m2 => demo/Calls#m2#(~I)?", "s => demo/Calls$Foo#s#(~Ljava/lang/String;)?",
+                "new Foo(1, 2, 3) => demo/Calls$Foo#<init>#(~I~I~I)V", "new Foo(foo, null) => demo/Calls$Foo#<init>#(~Ldemo/Calls$Foo;?)V",
+                "super => demo/Calls$Foo#<init>#(~I~I~I)V", "this => demo/Calls$Sub#<init>#(~I~Ljava/lang/String;?)V");
+    }
+
     /**
      * Where each call of {@code f} navigates to, as TypePage does it: the key of the reference (type, name and descriptor) is looked up
      * among the declarations. Gives "call line -> declaration line", or "call line -> none" when no declaration has that key.

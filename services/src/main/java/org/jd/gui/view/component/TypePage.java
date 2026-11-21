@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -193,72 +194,80 @@ public abstract class TypePage extends CustomLineNumbersPage
 
     public static void matchFragmentAndAddDocumentRange(String fragment, Map<String, DeclarationData> declarations,
             List<DocumentRange> ranges) {
-        if (fragment.indexOf('?') != -1 || fragment.indexOf('*') != -1) {
-            // Unknown type and/or descriptor ==> Select all and scroll to the first one
-            int lastDash = fragment.lastIndexOf('-');
-
-            if (lastDash == -1) {
-                // Search types
-                String slashAndTypeName = fragment.substring(1);
-                String typeName = fragment.substring(2);
-
-                for (Map.Entry<String, DeclarationData> entry : declarations.entrySet()) {
-                    if (entry.getKey().endsWith(slashAndTypeName) || entry.getKey().equals(typeName)) {
-                        ranges.add(new DocumentRange(entry.getValue().getStartPosition(),
-                                entry.getValue().getEndPosition()));
-                    }
-                }
-            } else {
-                String prefix = fragment.substring(0, lastDash + 1);
-                String suffix = fragment.substring(lastDash + 1);
-                BiPredicate<String, String> matchDescriptors;
-
-                if (suffix.charAt(0) == '(') {
-                    matchDescriptors = DescriptorMatcher::matchMethodDescriptors;
-                } else {
-                    matchDescriptors = DescriptorMatcher::matchFieldDescriptors;
-                }
-
-                if (fragment.charAt(0) == '*') {
-                    // Unknown type
-                    String slashAndTypeNameAndName = prefix.substring(1);
-                    String typeNameAndName = prefix.substring(2);
-
-                    for (Map.Entry<String, DeclarationData> entry : declarations.entrySet()) {
-                        String key = entry.getKey();
-                        if (key.indexOf(slashAndTypeNameAndName) != -1 || key.startsWith(typeNameAndName)) {
-                            int index = key.lastIndexOf('-') + 1;
-                            if (matchDescriptors.test(suffix, key.substring(index))) {
-                                ranges.add(new DocumentRange(entry.getValue().getStartPosition(),
-                                        entry.getValue().getEndPosition()));
-                            }
-                        }
-                    }
-                } else {
-                    // Known type
-                    for (Map.Entry<String, DeclarationData> entry : declarations.entrySet()) {
-                        String key = entry.getKey();
-                        if (key.startsWith(prefix)) {
-                            int index = key.lastIndexOf('-') + 1;
-                            if (matchDescriptors.test(suffix, key.substring(index))) {
-                                ranges.add(new DocumentRange(entry.getValue().getStartPosition(),
-                                        entry.getValue().getEndPosition()));
-                            }
-                        }
-                    }
-                }
+        if (DescriptorMatcher.hasHints(fragment)) {
+            // The call has no binding: the types of its arguments are hints. Look for a method that has them, else for the ones that have as many parameters
+            int found = ranges.size();
+            matchExactFragmentAndAddDocumentRange(DescriptorMatcher.confirmHints(fragment), declarations, ranges);
+            if (ranges.size() == found) {
+                matchExactFragmentAndAddDocumentRange(DescriptorMatcher.dropHints(fragment), declarations, ranges);
             }
         } else {
-            // Known type and descriptor ==> Search and high light item
-            DeclarationData data = declarations.get(fragment);
-            if (data != null) {
-                ranges.add(new DocumentRange(data.getStartPosition(), data.getEndPosition()));
-            } else if (fragment.endsWith("-<clinit>-()V")) {
-                // 'static' bloc not found ==> Select type declaration
-                String typeName = fragment.substring(0, fragment.indexOf('-'));
-                data = declarations.get(typeName);
-                ranges.add(new DocumentRange(data.getStartPosition(), data.getEndPosition()));
+            matchExactFragmentAndAddDocumentRange(fragment, declarations, ranges);
+        }
+    }
+
+    private static void matchExactFragmentAndAddDocumentRange(String fragment, Map<String, DeclarationData> declarations,
+            List<DocumentRange> ranges) {
+        if (fragment.indexOf('?') == -1 && fragment.indexOf('*') == -1) {
+            addDeclaration(fragment, declarations, ranges);
+            return;
+        }
+        // Unknown type and/or descriptor ==> Select all and scroll to the first one
+        int lastDash = fragment.lastIndexOf('-');
+        if (lastDash == -1) {
+            addTypeDeclarations(fragment, declarations, ranges);
+        } else {
+            String prefix = fragment.substring(0, lastDash + 1);
+            String suffix = fragment.substring(lastDash + 1);
+            BiPredicate<String, String> matchDescriptors = suffix.charAt(0) == '(' ? DescriptorMatcher::matchMethodDescriptors : DescriptorMatcher::matchFieldDescriptors;
+            Predicate<String> sameMember;
+
+            if (fragment.charAt(0) == '*') {
+                // Unknown type
+                String slashAndTypeNameAndName = prefix.substring(1);
+                String typeNameAndName = prefix.substring(2);
+                sameMember = key -> key.contains(slashAndTypeNameAndName) || key.startsWith(typeNameAndName);
+            } else {
+                // Known type
+                sameMember = key -> key.startsWith(prefix);
             }
+            addMembers(declarations, sameMember, suffix, matchDescriptors, ranges);
+        }
+    }
+
+    /** Types: the name of the type, preceded by any package (the fragment starts with the wildcard for the package). */
+    private static void addTypeDeclarations(String fragment, Map<String, DeclarationData> declarations, List<DocumentRange> ranges) {
+        String slashAndTypeName = fragment.substring(1);
+        String typeName = fragment.substring(2);
+
+        for (Map.Entry<String, DeclarationData> entry : declarations.entrySet()) {
+            if (entry.getKey().endsWith(slashAndTypeName) || entry.getKey().equals(typeName)) {
+                ranges.add(new DocumentRange(entry.getValue().getStartPosition(), entry.getValue().getEndPosition()));
+            }
+        }
+    }
+
+    /** The members of the same type and name (as the keys say) whose descriptor matches. */
+    private static void addMembers(Map<String, DeclarationData> declarations, Predicate<String> sameMember, String suffix,
+            BiPredicate<String, String> matchDescriptors, List<DocumentRange> ranges) {
+        for (Map.Entry<String, DeclarationData> entry : declarations.entrySet()) {
+            String key = entry.getKey();
+            if (sameMember.test(key) && matchDescriptors.test(suffix, key.substring(key.lastIndexOf('-') + 1))) {
+                ranges.add(new DocumentRange(entry.getValue().getStartPosition(), entry.getValue().getEndPosition()));
+            }
+        }
+    }
+
+    /** Known type and descriptor ==> Search and high light item. */
+    private static void addDeclaration(String fragment, Map<String, DeclarationData> declarations, List<DocumentRange> ranges) {
+        DeclarationData data = declarations.get(fragment);
+        if (data != null) {
+            ranges.add(new DocumentRange(data.getStartPosition(), data.getEndPosition()));
+        } else if (fragment.endsWith("-<clinit>-()V")) {
+            // 'static' bloc not found ==> Select type declaration
+            String typeName = fragment.substring(0, fragment.indexOf('-'));
+            data = declarations.get(typeName);
+            ranges.add(new DocumentRange(data.getStartPosition(), data.getEndPosition()));
         }
     }
 
@@ -497,13 +506,13 @@ public abstract class TypePage extends CustomLineNumbersPage
                         }
                     }
                 } else {
-                    // Search a method
-                    for (Type.Method method : type.getMethods()) {
-                        if (method.getName().equals(name)
-                                && DescriptorMatcher.matchMethodDescriptors(method.getDescriptor(), descriptor)) {
-                            // Method found
-                            return typeName;
-                        }
+                    // Search a method: when the types of the arguments are only hints (a call without binding), a method having
+                    // them is looked for first, then one having as many parameters
+                    boolean hints = DescriptorMatcher.hasHints(descriptor);
+                    String required = hints ? DescriptorMatcher.confirmHints(descriptor) : descriptor;
+                    if (hasMethod(type, name, required) || (hints && hasMethod(type, name, DescriptorMatcher.dropHints(descriptor)))) {
+                        // Method found
+                        return typeName;
                     }
                 }
 
@@ -516,6 +525,15 @@ public abstract class TypePage extends CustomLineNumbersPage
         }
 
         return null;
+    }
+
+    private static boolean hasMethod(Type type, String name, String descriptor) {
+        for (Type.Method method : type.getMethods()) {
+            if (method.getName().equals(name) && DescriptorMatcher.matchMethodDescriptors(method.getDescriptor(), descriptor)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void parseAndSetText(String text) {

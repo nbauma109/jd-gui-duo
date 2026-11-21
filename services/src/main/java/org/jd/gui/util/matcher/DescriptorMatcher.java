@@ -13,7 +13,62 @@ package org.jd.gui.util.matcher;
  */
 public final class DescriptorMatcher {
 
+    /**
+     * Marks the type of an argument that is only a hint in the descriptor of a call that has no binding: the types of the arguments
+     * are often subtypes of (or widened to) the types of the parameters, so they may not be required to be equal.
+     */
+    public static final char HINT = '~';
+
     private DescriptorMatcher() {
+    }
+
+    public static boolean hasHints(String descriptor) {
+        return descriptor != null && descriptor.indexOf(HINT) != -1;
+    }
+
+    /** The descriptor in which the hints are required types: (~I~Ljava/lang/String;)? becomes (ILjava/lang/String;)?. */
+    public static String confirmHints(String descriptor) {
+        return descriptor.replace(String.valueOf(HINT), "");
+    }
+
+    /** The descriptor in which the hints are unknown types: (~I~Ljava/lang/String;)? becomes (??)?. */
+    public static String dropHints(String descriptor) {
+        StringBuilder sb = new StringBuilder(descriptor.length());
+        int i = 0;
+        while (i < descriptor.length()) {
+            char c = descriptor.charAt(i);
+            if (c == HINT) {
+                i = endOfType(descriptor, i + 1);
+                sb.append('?');
+            } else {
+                sb.append(c);
+                i++;
+            }
+        }
+        return sb.toString();
+    }
+
+    /** The index just after the type that starts at {@code start}: arrays, primitives, and classes (which may have type arguments). */
+    private static int endOfType(String descriptor, int start) {
+        int i = start;
+        while (i < descriptor.length() && descriptor.charAt(i) == '[') {
+            i++;
+        }
+        if (i < descriptor.length() && descriptor.charAt(i) == 'L') {
+            int depth = 0;
+            while (i < descriptor.length()) {
+                char c = descriptor.charAt(i++);
+                if (c == '<') {
+                    depth++;
+                } else if (c == '>') {
+                    depth--;
+                } else if (c == ';' && depth == 0) {
+                    break;
+                }
+            }
+            return i;
+        }
+        return Math.min(i + 1, descriptor.length());
     }
 
     public static boolean matchFieldDescriptors(String d1, String d2) {
