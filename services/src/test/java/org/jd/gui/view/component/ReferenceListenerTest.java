@@ -331,6 +331,61 @@ class ReferenceListenerTest {
                 "super => demo/Calls$Foo#<init>#(~I~I~I)V", "this => demo/Calls$Sub#<init>#(~I~Ljava/lang/String;?)V");
     }
 
+    private static final String REFERENCES = """
+            package demo;
+
+            import java.util.function.*;
+
+            public class Refs {
+                static class Foo {
+                    Foo() { }
+                    Foo(String s) { }
+                    void m(String s) { }
+                    static int len(String s) { return 0; }
+                }
+
+                static class Sub extends Foo {
+                    void go() {
+                        Consumer<String> sup = super::m;
+                    }
+                }
+
+                void go(java.util.List<String> list) {
+                    Supplier<Foo> a = Foo::new;
+                    Function<String, Foo> b = Foo::new;
+                    Function<String, Integer> c = Foo::len;
+                    Foo foo = new Foo();
+                    Consumer<String> d = foo::m;
+                    Function<String, Integer> e = String::length;
+                    Runnable r = foo::nothing;
+                    Runnable r2 = Foo::missing;
+                    Supplier<Foo> missing = Foo::zzz;
+                    Function<Integer, int[]> arr = int[]::new;
+                    Supplier<Missing> m = Missing::new;
+                    ToIntFunction<java.util.List<String>> size = java.util.List<String>::size;
+                }
+            }
+            """;
+
+    @Test
+    void referencesToMethodsAndConstructorsAreLinkedThroughTheirBinding() {
+        assertThat(links("demo/Refs.java", REFERENCES)).contains(
+                // Type::new links "new" to the constructor that the target type selects
+                "new => demo/Refs$Foo#<init>#()V", "new => demo/Refs$Foo#<init>#(Ljava/lang/String;)V",
+                "len => demo/Refs$Foo#len#(Ljava/lang/String;)I", "m => demo/Refs$Foo#m#(Ljava/lang/String;)V",
+                "length => java/lang/String#length#()I", "size => java/util/List#size#()I");
+    }
+
+    @Test
+    void referencesWithoutBindingAreLinkedToAnyMethodOfThatNameAndUnknownTypesToNothing() {
+        java.util.List<String> links = links("demo/Refs.java", REFERENCES);
+
+        // a reference has no arguments: (*) stands for any parameters
+        assertThat(links).contains("nothing => demo/Refs$Foo#nothing#(*)?", "missing => demo/Refs$Foo#missing#(*)?", "zzz => demo/Refs$Foo#zzz#(*)?");
+        // Missing::new: the type cannot be resolved; int[]::new: an array is not a constructor
+        assertThat(links).noneMatch(link -> link.contains("Missing") && link.contains("<init>")).noneMatch(link -> link.contains("[I"));
+    }
+
     @Test
     void referencesToUnknownTypesAreSkippedWithoutFailing() {
         String broken = """
