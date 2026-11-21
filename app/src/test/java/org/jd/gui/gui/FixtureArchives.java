@@ -122,6 +122,84 @@ final class FixtureArchives {
         return jar;
     }
 
+    /** The fixture classes, copied into the given archive under the given prefix ("" or "WEB-INF/classes/"). */
+    private static void addFixtureClasses(java.util.zip.ZipOutputStream zip, Path fixtureClasses, String prefix) throws IOException {
+        for (String name : new String[] {"Greeter", "Shape", "Main"}) {
+            zip.putNextEntry(new java.util.zip.ZipEntry(prefix + "demo/" + name + ".class"));
+            Files.copy(fixtureClasses.resolve("demo/" + name + ".class"), zip);
+            zip.closeEntry();
+        }
+    }
+
+    /** A jar with the fixture classes and an EJB deployment descriptor that names two of them. */
+    static Path createEjbJar(Path dir, Path fixtureClasses) throws IOException {
+        Path jar = dir.resolve("ejb-" + COUNTER.incrementAndGet() + ".jar");
+        String descriptor = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <ejb-jar xmlns="http://java.sun.com/xml/ns/javaee" version="3.0">
+                  <enterprise-beans>
+                    <session>
+                      <ejb-name>GreeterBean</ejb-name>
+                      <remote>demo.Shape</remote>
+                      <ejb-class>demo.Greeter</ejb-class>
+                      <session-type>Stateless</session-type>
+                    </session>
+                  </enterprise-beans>
+                </ejb-jar>
+                """;
+        try (OutputStream out = Files.newOutputStream(jar); java.util.zip.ZipOutputStream zip = new java.util.zip.ZipOutputStream(out)) {
+            zip.putNextEntry(new java.util.zip.ZipEntry("META-INF/ejb-jar.xml"));
+            zip.write(descriptor.getBytes(StandardCharsets.UTF_8));
+            zip.closeEntry();
+            addFixtureClasses(zip, fixtureClasses, "");
+        }
+        return jar;
+    }
+
+    /** A jar with the fixture classes and a manifest whose Premain-Class is long enough to be wrapped over several lines. */
+    static Path createManifestJar(Path dir, Path fixtureClasses) throws IOException {
+        Path jar = dir.resolve("manifest-" + COUNTER.incrementAndGet() + ".jar");
+        Manifest manifest = new Manifest();
+        Attributes main = manifest.getMainAttributes();
+        main.put(Attributes.Name.MANIFEST_VERSION, "1.0");
+        main.put(Attributes.Name.MAIN_CLASS, "demo.Main");
+        main.putValue("Premain-Class", "org.example.agents.with.a.deliberately.very.long.package.name.that.the.manifest.wraps.LongNamedJavaAgent");
+        main.putValue("Created-By", "the GUI tests");
+        try (OutputStream out = Files.newOutputStream(jar); JarOutputStream zip = new JarOutputStream(out, manifest)) {
+            for (String name : new String[] {"Greeter", "Shape", "Main"}) {
+                zip.putNextEntry(new JarEntry("demo/" + name + ".class"));
+                Files.copy(fixtureClasses.resolve("demo/" + name + ".class"), zip);
+                zip.closeEntry();
+            }
+        }
+        return jar;
+    }
+
+    /** A web archive whose descriptor names a class that the archive holds. */
+    static Path createWarWithClasses(Path dir, Path fixtureClasses) throws IOException {
+        Path war = dir.resolve("webapp-" + COUNTER.incrementAndGet() + ".war");
+        String descriptor = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="4.0">
+                  <servlet>
+                    <servlet-name>greeter</servlet-name>
+                    <servlet-class>demo.Greeter</servlet-class>
+                  </servlet>
+                  <servlet-mapping>
+                    <servlet-name>greeter</servlet-name>
+                    <url-pattern>/greet</url-pattern>
+                  </servlet-mapping>
+                </web-app>
+                """;
+        try (OutputStream out = Files.newOutputStream(war); java.util.zip.ZipOutputStream zip = new java.util.zip.ZipOutputStream(out)) {
+            zip.putNextEntry(new java.util.zip.ZipEntry("WEB-INF/web.xml"));
+            zip.write(descriptor.getBytes(StandardCharsets.UTF_8));
+            zip.closeEntry();
+            addFixtureClasses(zip, fixtureClasses, "WEB-INF/classes/");
+        }
+        return war;
+    }
+
     /** A web archive with a deployment descriptor and a manifest. */
     static Path createWar(Path dir) throws IOException {
         Path war = dir.resolve("webapp.war");
