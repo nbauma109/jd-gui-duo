@@ -175,8 +175,7 @@ class ProxyPreferencesProviderTest {
         host(panel).setText("proxy.example.com"); // a text change
         PanelSupport.click(PanelSupport.button(panel, "Clear")); // a click
 
-        assertThat(notified).isNotEmpty().allSatisfy(source -> assertThat(source).isSameAs(panel));
-        assertThat(notified).hasSizeGreaterThanOrEqualTo(2);
+        assertThat(notified).isNotEmpty().hasSizeGreaterThanOrEqualTo(2).allSatisfy(source -> assertThat(source).isSameAs(panel));
     }
 
     @Test
