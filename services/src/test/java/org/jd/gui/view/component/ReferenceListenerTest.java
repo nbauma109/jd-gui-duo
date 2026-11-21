@@ -331,6 +331,119 @@ class ReferenceListenerTest {
                 "super => demo/Calls$Foo#<init>#(~I~I~I)V", "this => demo/Calls$Sub#<init>#(~I~Ljava/lang/String;?)V");
     }
 
+    private static final String GENERIC_CALLS = """
+            package demo;
+
+            import java.util.*;
+            import java.util.function.*;
+            import java.util.stream.*;
+
+            public class GenericCalls {
+                static <T> T first(List<? extends T> l) { return l.get(0); }
+                static <T extends Comparable<T>> T max(Collection<? extends T> c) { return null; }
+                static void takesLong(long l) { }
+                static void takesObj(Object o) { }
+                static void takesBox(Integer i) { }
+                static void takesList(List<? extends Number> l) { }
+                static void vs(String fmt, Object... args) { }
+                static void run(Runnable r) { }
+                static <A, B> B apply(Function<A, B> f, A a) { return f.apply(a); }
+                GenericCalls(Collection<String> c) { }
+                GenericCalls(int... xs) { }
+
+                void go(List<String> ls, ArrayList<Integer> al, Map<String, List<Integer>> m, int i, Integer boxed, char c, String s) {
+                    first(ls);
+                    max(al);
+                    takesLong(i);
+                    takesLong(c);
+                    takesObj(i);
+                    takesObj(ls);
+                    takesBox(i);
+                    takesList(al);
+                    vs("x");
+                    vs("x", 1, "two", ls);
+                    vs("x", (Object[]) new String[0]);
+                    run(() -> { });
+                    run(this::go2);
+                    apply(String::length, s);
+                    apply(x -> x + 1, i);
+                    new GenericCalls(ls);
+                    new GenericCalls(1, 2, 3);
+                    new GenericCalls();
+                    Stream.of(1, 2).map(x -> x * 2).collect(Collectors.toList());
+                    ls.stream().filter(x -> !x.isEmpty()).forEach(System.out::println);
+                    Collections.sort(ls);
+                    Arrays.asList(1, 2, 3);
+                    String.format("%d", i);
+                    Math.max(i, boxed);
+                    new HashMap<String, List<Integer>>().put("k", al.subList(0, 1));
+                    Objects.requireNonNull(s);
+                    m.computeIfAbsent("k", k -> new ArrayList<>()).add(i);
+                }
+
+                void go2() { }
+            }
+            """;
+
+    @Test
+    void validCallsOfGenericMethodsLambdasAndVarargsAreNeverTakenForUnresolved() {
+        // a hint (~) in a link would mean that the binding was refused: not for code that compiles
+        assertThat(links("demo/GenericCalls.java", GENERIC_CALLS)).isNotEmpty().noneMatch(link -> link.contains("~"));
+    }
+
+    @Test
+    void theHintsOfAnUnresolvedCallAreErasedAndWellFormed() {
+        String text = """
+                package demo;
+
+                import java.util.*;
+
+                public class Hints {
+                    void go(Hints other, List<String> ls, ArrayList<Integer> al, String[][] grid, Map.Entry<String, Integer> entry) {
+                        other.nothing(ls, al, grid, entry, 'c', 1.5f, null);
+                        other.nothing(Optional.of(ls), new Object() { }, other);
+                    }
+                }
+                """;
+
+        assertThat(links("demo/Hints.java", text)).contains(
+                "nothing => demo/Hints#nothing#(~Ljava/util/List;~Ljava/util/ArrayList;~[[Ljava/lang/String;~Ljava/util/Map$Entry;~C~F?)?",
+                "nothing => demo/Hints#nothing#(~Ljava/util/Optional;?~Ldemo/Hints;)?");
+    }
+
+    private static final String UNKNOWN_TYPES = """
+            package demo;
+
+            public class Unknown {
+                void takes(Missing m, String s) { }
+                void takesArray(Missing[] m) { }
+                void takesInt(int i) { }
+
+                void go(Missing missing, Missing[] many, Unknown other) {
+                    takes(missing, "s");
+                    takes(null, "s");
+                    takes("x", "s");
+                    takesArray(many);
+                    other.takesInt(missing);
+                    other.takesInt(undefinedVariable);
+                    other.nothing(missing, undefinedVariable, many, null);
+                }
+            }
+            """;
+
+    @Test
+    void anArgumentOrAParameterOfAnUnresolvedTypeIsGivenTheBenefitOfTheDoubt() {
+        java.util.List<String> links = links("demo/Unknown.java", UNKNOWN_TYPES);
+
+        // the parameter cannot be resolved: whatever the argument is, the binding is kept
+        assertThat(links).filteredOn(link -> link.startsWith("takes =>")).hasSize(3).noneMatch(link -> link.contains("~"));
+        assertThat(links).contains("takesArray => demo/Unknown#takesArray#([LMissing;)V");
+        // the argument cannot be resolved (the binding is kept for takesInt) and is a "?" in the call that has no binding
+        assertThat(links).filteredOn(link -> link.startsWith("takesInt =>")).hasSize(2).noneMatch(link -> link.contains("~"));
+        // all four arguments are unknown: an unresolved variable, a missing type, an array of it and null
+        assertThat(links).contains("nothing => demo/Unknown#nothing#(????)?");
+    }
+
     @Test
     void referencesToUnknownTypesAreSkippedWithoutFailing() {
         String broken = """
