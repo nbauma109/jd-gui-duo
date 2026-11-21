@@ -21,6 +21,38 @@ public class EvalTarget implements Comparable<EvalTarget> {
 
     public enum Color { RED, GREEN, BLUE }
 
+    public interface Tag {
+        default String tag() {
+            return "tag";
+        }
+    }
+
+    public static class Base {
+        public String base() {
+            return "base";
+        }
+    }
+
+    public static class Left extends Base implements Tag {
+    }
+
+    public static class Right extends Base implements Tag {
+    }
+
+    public static class Other implements Tag {
+    }
+
+    /** Reading a static field of this class makes the evaluator run its initializer, which fails. */
+    public static class Boom {
+        public static int x;
+
+        static {
+            if (counter >= 0) {
+                throw new IllegalStateException("boom");
+            }
+        }
+    }
+
     public static final int LIMIT = 10;
     public static final String GREETING = "hi";
     public static final long BIG = 1L << 40;
@@ -49,6 +81,42 @@ public class EvalTarget implements Comparable<EvalTarget> {
 
     public String join(String... parts) {
         return String.join("+", parts);
+    }
+
+    public byte byteOne() {
+        return 1;
+    }
+
+    public short shortOne() {
+        return 2;
+    }
+
+    public char charOne() {
+        return 'c';
+    }
+
+    public boolean boolOne() {
+        return true;
+    }
+
+    public long longOne() {
+        return 4L;
+    }
+
+    public float floatOne() {
+        return 5f;
+    }
+
+    public double doubleOne() {
+        return 6d;
+    }
+
+    public void nothing() {
+        counter++;
+    }
+
+    public String text() {
+        return "txt";
     }
 
     public static int twice(int value) {
@@ -111,6 +179,13 @@ public class EvalTarget implements Comparable<EvalTarget> {
         EvalTarget obj = new EvalTarget("n", 3);
         obj.next = new EvalTarget("m", 4);
         Color color = Color.GREEN;
+        Left left = new Left();
+        Right right = new Right();
+        Other other = new Other();
+        Class<?> boomClass = Boom.class; // loads the class without initializing it
+        int boomFields = boomClass.getDeclaredFields().length; // and links it, so that the debugger sees it
+        Left[] lefts = {left};
+        Right[] rights = {right};
         // the test suspends the program somewhere in this loop and reads the locals of this frame
         while (flag) {
             obj.hold();
@@ -118,7 +193,8 @@ public class EvalTarget implements Comparable<EvalTarget> {
             java.util.concurrent.locks.LockSupport.parkNanos(10_000_000L);
         }
         System.out.println(i + l + d + f + c + b + sh + s + nul + arr.length + grid.length + words.length + list + map + boxed
-                + boxedNull + longNull + boxedLong + boxedDouble + boxedFlag + boxedChar + o + sb + obj + color);
+                + boxedNull + longNull + boxedLong + boxedDouble + boxedFlag + boxedChar + o + sb + obj + color + left + right + other
+                + lefts.length + rights.length + boomClass + boomFields);
     }
 
     public static void breakHere() {
