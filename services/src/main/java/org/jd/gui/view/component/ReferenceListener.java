@@ -21,11 +21,13 @@ import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.jd.core.v1.util.StringConstants;
+import org.jd.gui.util.matcher.DescriptorMatcher;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.util.parser.jdt.core.AbstractJavaListener;
 import org.jd.gui.util.parser.jdt.core.TypeDeclarationData;
@@ -232,18 +234,7 @@ public class ReferenceListener extends AbstractJavaListener {
         // Constructor call -> Add a link to the constructor declaration
         @SuppressWarnings("unchecked")
         List<Expression> expressionList = node.arguments();
-        String descriptor;
-        if (expressionList != null) {
-            IMethodBinding constructorBinding = node.resolveConstructorBinding();
-            if (constructorBinding != null) {
-                ITypeBinding[] parameterTypes = constructorBinding.getParameterTypes();
-                descriptor = getParametersDescriptor(parameterTypes).append('V').toString();
-            } else {
-                descriptor = getParametersDescriptor(expressionList.size()).append('V').toString();
-            }
-        } else {
-            descriptor = "()V";
-        }
+        String descriptor = getParametersDescriptor(node.resolveConstructorBinding(), expressionList).append('V').toString();
 
 
         ReferenceData refData = newReferenceData(internalTypeName, StringConstants.INSTANCE_CONSTRUCTOR, descriptor);
@@ -260,13 +251,69 @@ public class ReferenceListener extends AbstractJavaListener {
         return sb;
     }
 
-    private static StringBuilder getParametersDescriptor(int paramCount) {
-        StringBuilder sb = new StringBuilder("(");
-        for (int i = 0; i < paramCount; i++) {
-            sb.append('?');
+    /**
+     * The parameters of a call: those of its binding or, when the call has none (a type that cannot be resolved, no applicable method...),
+     * what its arguments tell: a hint (~) of the type of each one that is known, ? for the others.
+     */
+    private static StringBuilder getParametersDescriptor(IMethodBinding binding, List<Expression> arguments) {
+        if (isResolution(binding, arguments)) {
+            return getParametersDescriptor(binding.getParameterTypes());
         }
-        sb.append(')');
-        return sb;
+        StringBuilder sb = new StringBuilder("(");
+        if (arguments != null) {
+            for (Expression argument : arguments) {
+                sb.append(argumentDescriptor(argument));
+            }
+        }
+        return sb.append(')');
+    }
+
+    /**
+     * Whether the binding is what the call resolves to. With the recovery of the bindings, a call that has no applicable method
+     * still gets the compiler's closest match (the first one of that name): its parameters are not the ones of the call.
+     */
+    private static boolean isResolution(IMethodBinding binding, List<Expression> arguments) {
+        if (binding == null || binding.isRecovered()) {
+            return false;
+        }
+        if (arguments == null) {
+            return true;
+        }
+        ITypeBinding[] parameters = binding.getParameterTypes();
+        boolean varargs = binding.isVarargs();
+        if (varargs ? arguments.size() < parameters.length - 1 : arguments.size() != parameters.length) {
+            return false;
+        }
+        for (int i = 0; i < arguments.size(); i++) {
+            ITypeBinding parameter = i < parameters.length ? parameters[i] : parameters[parameters.length - 1];
+            if (varargs && i >= parameters.length - 1 && parameter.isArray()
+                    && !(arguments.size() == parameters.length && i == parameters.length - 1 && argumentAssignableTo(arguments.get(i), parameter))) {
+                parameter = parameter.getComponentType(); // the trailing arguments are the elements of the array
+            }
+            if (!argumentAssignableTo(arguments.get(i), parameter)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** An argument of unknown type (or null) is given the benefit of the doubt. */
+    private static boolean argumentAssignableTo(Expression argument, ITypeBinding parameter) {
+        ITypeBinding type = argument.resolveTypeBinding();
+        return type == null || type.isNullType() || type.isRecovered() || parameter.isRecovered() || type.isAssignmentCompatible(parameter);
+    }
+
+    /** A hint of the type of an argument when its erasure can be written as a descriptor (not a capture, an intersection or an anonymous class). */
+    private static String argumentDescriptor(Expression argument) {
+        ITypeBinding type = argument.resolveTypeBinding();
+        if (type == null || type.isNullType() || type.isRecovered()) {
+            return "?";
+        }
+        ITypeBinding erasure = type.getErasure();
+        ITypeBinding element = erasure.isArray() ? erasure.getElementType() : erasure;
+        boolean describable = element.isPrimitive() || ((element.isClass() || element.isInterface() || element.isEnum() || element.isRecord()
+                || element.isAnnotation()) && element.getBinaryName() != null && !element.isAnonymous());
+        return describable ? DescriptorMatcher.HINT + erasure.getKey() : "?";
     }
 
     @Override
@@ -344,18 +391,7 @@ public class ReferenceListener extends AbstractJavaListener {
     public boolean visit(ConstructorInvocation node) {
         @SuppressWarnings("unchecked")
         List<Expression> args = node.arguments();
-        String constructorDescriptor;
-        if (args != null) {
-            IMethodBinding constructorBinding = node.resolveConstructorBinding();
-            if (constructorBinding != null) {
-                ITypeBinding[] parameterTypes = constructorBinding.getParameterTypes();
-                constructorDescriptor = getParametersDescriptor(parameterTypes).append('V').toString();
-            } else {
-                constructorDescriptor = getParametersDescriptor(args.size()).append('V').toString();
-            }
-        } else {
-            constructorDescriptor = "()V";
-        }
+        String constructorDescriptor = getParametersDescriptor(node.resolveConstructorBinding(), args).append('V').toString();
         ReferenceData refData = newReferenceData(currentInternalTypeName, StringConstants.INSTANCE_CONSTRUCTOR, constructorDescriptor);
         int position = node.getStartPosition();
         addHyperlink(new HyperlinkReferenceData(position, 4 /* this */, refData));
@@ -366,18 +402,7 @@ public class ReferenceListener extends AbstractJavaListener {
     public boolean visit(SuperConstructorInvocation node) {
         @SuppressWarnings("unchecked")
         List<Expression> args = node.arguments();
-        String constructorDescriptor;
-        if (args != null) {
-            IMethodBinding constructorBinding = node.resolveConstructorBinding();
-            if (constructorBinding != null) {
-                ITypeBinding[] parameterTypes = constructorBinding.getParameterTypes();
-                constructorDescriptor = getParametersDescriptor(parameterTypes).append('V').toString();
-            } else {
-                constructorDescriptor = getParametersDescriptor(args.size()).append('V').toString();
-            }
-        } else {
-            constructorDescriptor = "()V";
-        }
+        String constructorDescriptor = getParametersDescriptor(node.resolveConstructorBinding(), args).append('V').toString();
         DeclarationData data = getDeclarations().get(currentInternalTypeName);
 
         if (data instanceof TypeDeclarationData tdd) {
@@ -391,7 +416,13 @@ public class ReferenceListener extends AbstractJavaListener {
 
     @Override
     public boolean visit(MethodInvocation node) {
-        visitMethodBinding(node.getName(), node.resolveMethodBinding());
+        IMethodBinding methodBinding = node.resolveMethodBinding();
+        if (isResolution(methodBinding, node.arguments())) {
+            visitMethodBinding(node.getName(), methodBinding);
+        } else {
+            Expression receiver = node.getExpression();
+            visitCallWithoutBinding(node.getName(), receiver == null ? currentInternalTypeName : internalTypeNameOf(receiver), node.arguments());
+        }
         Expression subject = node.getExpression();
         if (subject instanceof SimpleName subjectName) {
             String internalTypeName = nameToInternalTypeName.get(subjectName.getIdentifier());
@@ -401,6 +432,32 @@ public class ReferenceListener extends AbstractJavaListener {
             }
         }
         return true;
+    }
+
+    @Override
+    public boolean visit(SuperMethodInvocation node) {
+        IMethodBinding methodBinding = node.resolveMethodBinding();
+        if (isResolution(methodBinding, node.arguments())) {
+            visitMethodBinding(node.getName(), methodBinding);
+        } else if (getDeclarations().get(currentInternalTypeName) instanceof TypeDeclarationData tdd) {
+            visitCallWithoutBinding(node.getName(), tdd.getSuperTypeName(), node.arguments());
+        }
+        return true;
+    }
+
+    private static String internalTypeNameOf(Expression expression) {
+        ITypeBinding type = expression.resolveTypeBinding();
+        String binaryName = type == null ? null : type.getErasure().getBinaryName();
+        return binaryName == null ? null : binaryName.replace('.', '/');
+    }
+
+    /** As for a constructor without binding: the link is made from the type, the name and what the arguments tell; the return type is unknown. */
+    private void visitCallWithoutBinding(SimpleName name, String internalTypeName, List<Expression> arguments) {
+        if (internalTypeName != null && !internalTypeName.isEmpty()) {
+            String descriptor = getParametersDescriptor(null, arguments).append('?').toString();
+            ReferenceData refData = newReferenceData(internalTypeName, name.getIdentifier(), descriptor);
+            addHyperlink(new HyperlinkReferenceData(name.getStartPosition(), name.getLength(), refData));
+        }
     }
 
     @Override
