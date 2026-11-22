@@ -190,6 +190,11 @@ public final class DescriptorMatcher {
                 return false;
             }
 
+            if (c == '[') {
+                // an array: its element type (or its next dimension) must be the same too, ([I is not [J nor [Ljava/lang/String;)
+                return compareTypeWith(other);
+            }
+
             if (c == 'L') {
                 if (offset >= length || other.offset >= other.length) {
                     return false;
@@ -232,13 +237,21 @@ public final class DescriptorMatcher {
                     if (otherC == '*') {
                         return true;
                     }
-                    if (c != otherC) {
+                    // L*/Inner; is a class of that name in any package, and a nested class: the '/' that follows the wildcard stands for the '$' that
+                    // follows the name of the outer class (the other separators of the names are not interchangeable: pkg/Outer/Inner is not Outer$Inner)
+                    if (c != otherC && !(isWildcardBoundary(buffer, current, c) && otherC == '$')
+                            && !(isWildcardBoundary(otherBuffer, otherCurrent, otherC) && c == '$')) {
                         return false;
                     }
                 }
             }
 
             return true;
+        }
+
+        /** Whether the character at the index is the '/' that follows the wildcard of a name (the one of "*\/Name"). */
+        private static boolean isWildcardBoundary(char[] buffer, int index, char c) {
+            return c == '/' && buffer[index - 1] == '*'; // the name of a type follows its 'L': the index is never 0
         }
 
         protected boolean searchEndOfType() {
