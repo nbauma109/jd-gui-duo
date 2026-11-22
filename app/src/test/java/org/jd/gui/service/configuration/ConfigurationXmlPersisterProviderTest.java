@@ -132,19 +132,24 @@ class ConfigurationXmlPersisterProviderTest {
     }
 
     @Test
-    void aWindowOutsideOfTheScreenIsReplacedByTheDefaultOne() {
+    void aWindowOutsideOfTheScreenIsReplacedByTheDefaultOne() throws IOException {
         needsAScreen();
         ConfigurationXmlPersisterProvider persister = persister();
-        Configuration config = new Configuration();
+        // a valid configuration (the directories are needed to save it), whose window is outside of the screen
+        Configuration config = persister.load();
         config.setMainWindowLocation(new Point(-50, 10));
         config.setMainWindowSize(new Dimension(300, 200));
         config.setMainWindowMaximize(true);
         persister.save(config);
+        assertThat(Files.readString(file)).contains("x=\"-50\"").contains("</configuration>");
 
         Configuration read = persister.load();
 
+        // the bounds are refused, not the file: the rest of the configuration is read
         assertThat(read.getMainWindowLocation()).isNotEqualTo(new Point(-50, 10));
+        assertThat(read.getMainWindowSize()).isNotEqualTo(new Dimension(300, 200));
         assertThat(read.isMainWindowMaximize()).isFalse();
+        assertThat(read.getPreferences()).containsKey(GuiPreferences.ERROR_BACKGROUND_COLOR);
     }
 
     @Test
