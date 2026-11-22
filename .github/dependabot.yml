@@ -12,6 +12,7 @@ updates:
       time: "18:00"
       timezone: "Europe/Paris"
     cooldown:
+      default-days: 3
       exclude:
         - "io.github.nbauma109:*"
   - package-ecosystem: "github-actions"
