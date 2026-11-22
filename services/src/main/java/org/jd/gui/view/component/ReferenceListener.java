@@ -298,13 +298,14 @@ public class ReferenceListener extends AbstractJavaListener {
     }
 
     /**
-     * An argument of unknown type (or null) is given the benefit of the doubt, and the erasures are compared: the type of an argument that is
+     * An argument of unknown type (or null) is given the benefit of the doubt. The types are compared as they are (the erasure of a type variable
+     * with several bounds keeps only the first: T extends Number & Runnable is a Runnable), and else by their erasures: the type of an argument that is
      * itself a generic call (stream.collect(Collectors.toList())) is not inferred yet, so its type arguments cannot be compared with the ones of the parameter.
      */
     private static boolean argumentAssignableTo(Expression argument, ITypeBinding parameter) {
         ITypeBinding type = argument.resolveTypeBinding();
         return type == null || type.isNullType() || type.isRecovered() || parameter.isRecovered()
-                || type.getErasure().isAssignmentCompatible(parameter.getErasure());
+                || type.isAssignmentCompatible(parameter) || type.getErasure().isAssignmentCompatible(parameter.getErasure());
     }
 
     /** A hint of the type of an argument when its erasure can be written as a descriptor (not a capture, an intersection or an anonymous class). */
