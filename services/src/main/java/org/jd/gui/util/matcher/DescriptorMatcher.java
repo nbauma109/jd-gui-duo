@@ -237,8 +237,10 @@ public final class DescriptorMatcher {
                     if (otherC == '*') {
                         return true;
                     }
-                    // the name of a nested class follows the one of its outer class after a '$' where a package name has a '/'
-                    if (c != otherC && !(isNameSeparator(c) && isNameSeparator(otherC))) {
+                    // L*/Inner; is a class of that name in any package, and a nested class: the '/' that follows the wildcard stands for the '$' that
+                    // follows the name of the outer class (the other separators of the names are not interchangeable: pkg/Outer/Inner is not Outer$Inner)
+                    if (c != otherC && !(isWildcardBoundary(buffer, current, c) && otherC == '$')
+                            && !(isWildcardBoundary(otherBuffer, otherCurrent, otherC) && c == '$')) {
                         return false;
                     }
                 }
@@ -247,8 +249,9 @@ public final class DescriptorMatcher {
             return true;
         }
 
-        private static boolean isNameSeparator(char c) {
-            return c == '/' || c == '$';
+        /** Whether the character at the index is the '/' that follows the wildcard of a name (the one of "*\/Name"). */
+        private static boolean isWildcardBoundary(char[] buffer, int index, char c) {
+            return c == '/' && index > 0 && buffer[index - 1] == '*';
         }
 
         protected boolean searchEndOfType() {

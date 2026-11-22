@@ -139,6 +139,12 @@ public class DescriptorMatcherTest {
         assertFalse(DescriptorMatcher.matchFieldDescriptors("Lfoo/A;", "L*/A"));
         // the wildcard also covers an inner class name
         assertTrue(DescriptorMatcher.matchFieldDescriptors("L*/Inner;", "Ldemo/Over$Inner;"));
+        assertTrue(DescriptorMatcher.matchFieldDescriptors("Ldemo/Over$Mid$Inner;", "L*/Inner;"));
+        // ... but only at the wildcard: a top-level class of a package is not a nested class, and the other way round
+        assertFalse(DescriptorMatcher.matchMethodDescriptors("(Lpkg/Outer/Inner;)V", "(L*/Outer$Inner;)V"));
+        assertFalse(DescriptorMatcher.matchMethodDescriptors("(L*/Outer$Inner;)V", "(Lpkg/Outer/Inner;)V"));
+        assertTrue(DescriptorMatcher.matchMethodDescriptors("(Lpkg/Outer$Inner;)V", "(L*/Outer$Inner;)V"));
+        assertFalse(DescriptorMatcher.matchMethodDescriptors("(Lpkg/Outer$Inner;)V", "(L*/Other$Inner;)V"));
     }
 
     @Test
