@@ -199,4 +199,45 @@ public class DescriptorMatcherTest {
             assertFalse(DescriptorMatcher.matchMethodDescriptors("(I)V", "(I)"));
         });
     }
+
+    @Test
+    public void testNestedClassWildcardAgainstOtherSeparators() {
+        // the '/' after the wildcard is the boundary of the nested class only: not a '.', not another character
+        assertFalse(DescriptorMatcher.matchFieldDescriptors("L*/Inner;", "Ldemo/Over.Inner;"));
+        assertFalse(DescriptorMatcher.matchFieldDescriptors("Ldemo/Over.Inner;", "L*/Inner;"));
+        assertFalse(DescriptorMatcher.matchFieldDescriptors("L*/Inner;", "Ldemo/Over#Inner;"));
+    }
+
+    @Test
+    public void testCharBuffer() {
+        DescriptorMatcher.CharBuffer buffer = new DescriptorMatcher.CharBuffer("(I)V");
+
+        assertFalse(buffer.unread());
+        assertEquals('(', buffer.get());
+        assertEquals('(', buffer.read());
+        assertEquals("I)V", buffer.toString());
+        assertTrue(buffer.unread());
+        assertEquals("(I)V", buffer.toString());
+        buffer.read();
+        buffer.read();
+        buffer.read();
+        buffer.read();
+        // past the end: nothing is read, and the offset is where it was
+        assertEquals((char) 0, buffer.read());
+        assertEquals((char) 0, buffer.get());
+        assertEquals("", buffer.toString());
+    }
+
+    @Test
+    public void testSkipType() {
+        assertTrue(new DescriptorMatcher.CharBuffer("I").skipType());
+        assertTrue(new DescriptorMatcher.CharBuffer("[[J").skipType());
+        assertTrue(new DescriptorMatcher.CharBuffer("[Lfoo/A;I").skipType());
+        assertFalse(new DescriptorMatcher.CharBuffer("Lfoo/A").skipType());
+        assertFalse(new DescriptorMatcher.CharBuffer("[").skipType());
+        assertFalse(new DescriptorMatcher.CharBuffer("").skipType());
+        DescriptorMatcher.CharBuffer two = new DescriptorMatcher.CharBuffer("Lfoo/A;I");
+        assertTrue(two.skipType());
+        assertEquals("I", two.toString());
+    }
 }

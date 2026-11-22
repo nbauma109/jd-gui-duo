@@ -251,7 +251,7 @@ public final class DescriptorMatcher {
 
         /** Whether the character at the index is the '/' that follows the wildcard of a name (the one of "*\/Name"). */
         private static boolean isWildcardBoundary(char[] buffer, int index, char c) {
-            return c == '/' && index > 0 && buffer[index - 1] == '*';
+            return c == '/' && buffer[index - 1] == '*'; // the name of a type follows its 'L': the index is never 0
         }
 
         protected boolean searchEndOfType() {
