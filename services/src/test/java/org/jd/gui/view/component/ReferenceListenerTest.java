@@ -331,6 +331,159 @@ class ReferenceListenerTest {
                 "super => demo/Calls$Foo#<init>#(~I~I~I)V", "this => demo/Calls$Sub#<init>#(~I~Ljava/lang/String;?)V");
     }
 
+    /**
+     * Where each call of {@code f} navigates to, as TypePage does it: the key of the reference (type, name and descriptor) is looked up
+     * among the declarations. Gives "call line -> declaration line", or "call line -> none" when no declaration has that key.
+     */
+    private static java.util.List<String> targetsOfCalls(String path, String text, String method) {
+        Container.Entry entry = entry(path);
+        ReferenceListener listener = new ReferenceListener(entry);
+        SortedMap<Integer, HyperlinkData> hyperlinks = new TreeMap<>();
+        listener.setHyperlinks(hyperlinks);
+        char[] source = text.toCharArray();
+        URI jarURI = entry.getContainer().getRoot().getParent().getUri();
+        ASTParserFactory.getInstance().newASTParser(api(), source, path, jarURI).createAST(null).accept(listener.getDeclarationListener());
+        listener.init();
+        ASTParserFactory.getInstanceWithBindings().newASTParser(api(), source, path, jarURI).createAST(null).accept(listener);
+        java.util.List<String> targets = new java.util.ArrayList<>();
+        for (Map.Entry<Integer, HyperlinkData> hyperlink : hyperlinks.entrySet()) {
+            if (hyperlink.getValue() instanceof HyperlinkReferenceData data && method.equals(data.getReference().getName())) {
+                jd.core.links.DeclarationData target = listener.getDeclarations()
+                        .get(data.getReference().getTypeName() + "-" + method + "-" + data.getReference().getDescriptor());
+                targets.add(lineOf(text, hyperlink.getKey()) + " -> " + (target == null ? "none" : String.valueOf(lineOf(text, target.getStartPosition()))));
+            }
+        }
+        return targets;
+    }
+
+    private static int lineOf(String text, int offset) {
+        return (int) text.substring(0, offset).chars().filter(c -> c == '\n').count() + 1;
+    }
+
+    private static final String OVERLOADS = """
+            package demo;
+
+            import java.util.List;
+
+            public class Over {
+                void f(int a) {}
+                void f(long a) {}
+                void f(Object a) {}
+                void f(String a) {}
+                void f(List<String> a) {}
+                <T> void f(T a, int b) {}
+                void f(String... a) {}
+                void f(int[] a) {}
+                void f(Inner a) {}
+                void f(char a, double b) {}
+                void f(Integer a) {}
+                void f(Over... a) {}
+                static class Inner {}
+
+                void calls(List<String> list, int[] arr, Inner inner) {
+                    f(1);
+                    f(1L);
+                    f((Object) "x");
+                    f("s");
+                    f(list);
+                    f("t", 2);
+                    f("a", "b");
+                    f(arr);
+                    f(inner);
+                    f('c', 1.0);
+                    f(Integer.valueOf(3));
+                    f(new Over(), new Over());
+                    f();
+                }
+            }
+            """;
+
+    @Test
+    void everyOverloadIsLinkedToItsOwnDeclaration() {
+        java.util.List<String> targets = targetsOfCalls("demo/Over.java", OVERLOADS, "f");
+
+        // f("s") must reach f(String) (line 9), not the variable arity f(String...) (line 12) that lost its "..." and so had the same key
+        assertThat(targets).contains("21 -> 6", "22 -> 7", "23 -> 8", "24 -> 9", "27 -> 12", "28 -> 13", "30 -> 15", "31 -> 16", "32 -> 17", "33 -> 12");
+    }
+
+    @Test
+    void theOverloadsOfVariableArityAndOfTheSameParameterTypeKeepDistinctDeclarations() {
+        Container.Entry entry = entry("demo/Over.java");
+        ReferenceListener listener = new ReferenceListener(entry);
+        URI jarURI = entry.getContainer().getRoot().getParent().getUri();
+        ASTParserFactory.getInstance().newASTParser(api(), OVERLOADS.toCharArray(), "demo/Over.java", jarURI).createAST(null).accept(listener.getDeclarationListener());
+
+        assertThat(listener.getDeclarations()).containsKeys("demo/Over-f-(Ljava/lang/String;)V", "demo/Over-f-([Ljava/lang/String;)V", "demo/Over-f-([Ldemo/Over;)V");
+        assertThat(listener.getDeclarations().keySet().stream().filter(key -> key.contains("-f-"))).hasSize(12);
+    }
+
+    @Test
+    void aCompactConstructorIsDeclaredWithTheParametersOfTheComponentsOfItsRecord() {
+        String text = """
+                package demo;
+
+                public record Range(int lo, int hi, String... tags) {
+                    public Range {
+                        if (lo > hi) {
+                            throw new IllegalArgumentException();
+                        }
+                    }
+                }
+                """;
+        Container.Entry entry = entry("demo/Range.java");
+        ReferenceListener listener = new ReferenceListener(entry);
+        URI jarURI = entry.getContainer().getRoot().getParent().getUri();
+        ASTParserFactory.getInstance().newASTParser(api(), text.toCharArray(), "demo/Range.java", jarURI).createAST(null).accept(listener.getDeclarationListener());
+
+        assertThat(listener.getDeclarations()).containsKey("demo/Range-<init>-(II[Ljava/lang/String;)V").doesNotContainKey("demo/Range-<init>-()V");
+    }
+
+    private static final String RECORDS = """
+            package demo;
+
+            public class Recs {
+                record Pt(int x, int y) { int sum() { return x + y; } }
+                record Range(int lo, int hi) {
+                    Range { }
+                    public int lo() { return lo; }
+                }
+
+                void go(Pt pt, Range r) {
+                    pt.x();
+                    pt.y();
+                    r.lo();
+                    r.hi();
+                    new Pt(1, 2);
+                    new Range(1, 2);
+                }
+            }
+            """;
+
+    @Test
+    void theMembersThatARecordDeclaresByItsHeaderAreDeclaredAtItsComponentsAndAtItsName() {
+        Container.Entry entry = entry("demo/Recs.java");
+        ReferenceListener listener = new ReferenceListener(entry);
+        URI jarURI = entry.getContainer().getRoot().getParent().getUri();
+        ASTParserFactory.getInstance().newASTParser(api(), RECORDS.toCharArray(), "demo/Recs.java", jarURI).createAST(null).accept(listener.getDeclarationListener());
+
+        assertThat(listener.getDeclarations()).containsKeys(
+                "demo/Recs$Pt-x-I", "demo/Recs$Pt-x-()I", "demo/Recs$Pt-y-I", "demo/Recs$Pt-y-()I", "demo/Recs$Pt-<init>-(II)V");
+        // the members that the body declares itself are at their own place: the accessor lo() and the compact constructor
+        assertThat(lineOf(RECORDS, listener.getDeclarations().get("demo/Recs$Range-lo-()I").getStartPosition())).isEqualTo(7);
+        assertThat(lineOf(RECORDS, listener.getDeclarations().get("demo/Recs$Range-hi-()I").getStartPosition())).isEqualTo(5);
+        assertThat(lineOf(RECORDS, listener.getDeclarations().get("demo/Recs$Range-<init>-(II)V").getStartPosition())).isEqualTo(6);
+        assertThat(lineOf(RECORDS, listener.getDeclarations().get("demo/Recs$Pt-<init>-(II)V").getStartPosition())).isEqualTo(4);
+    }
+
+    @Test
+    void callsOfTheMembersOfARecordNavigateToThem() {
+        assertThat(targetsOfCalls("demo/Recs.java", RECORDS, "x")).contains("11 -> 4");
+        assertThat(targetsOfCalls("demo/Recs.java", RECORDS, "y")).contains("12 -> 4");
+        assertThat(targetsOfCalls("demo/Recs.java", RECORDS, "lo")).contains("13 -> 7");
+        assertThat(targetsOfCalls("demo/Recs.java", RECORDS, "hi")).contains("14 -> 5");
+        assertThat(targetsOfCalls("demo/Recs.java", RECORDS, "<init>")).containsExactly("15 -> 4", "16 -> 6");
+    }
+
     private static final String REFERENCES = """
             package demo;
 

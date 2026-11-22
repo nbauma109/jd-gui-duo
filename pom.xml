@@ -87,7 +87,7 @@
           <!-- pinned: the Maven versions of the CI runners bundle different surefire versions -->
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.5.4</version>
+          <version>3.6.1</version>
         </plugin>
       </plugins>
     </pluginManagement>
