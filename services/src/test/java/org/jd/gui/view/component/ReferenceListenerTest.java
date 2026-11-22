@@ -738,6 +738,55 @@ class ReferenceListenerTest {
                 "size => java/util/List#size#()I", "addAll => java/util/ArrayList#addAll#(Ljava/util/Collection;)Z");
     }
 
+    private static final String UNRESOLVED_REFERENCES = """
+            package demo;
+
+            import java.util.List;
+            import java.util.function.Consumer;
+            import java.util.function.Function;
+            import java.util.function.Supplier;
+
+            public class Unresolved {
+                static class Foo {
+                    Foo(String s) { }
+                    void m(String s) { }
+                }
+
+                static class Sub extends Foo {
+                    Sub() { super("x"); }
+                    void go() {
+                        Consumer<String> missing = super::nothing;
+                        Consumer<String> present = super::m;
+                    }
+                }
+
+                Missing make() { return null; }
+
+                void go() {
+                    Function<List<String>, String> a = List<String>::missing;
+                    Function<Foo, String> b = Missing<String>::unknown;
+                    Function<Integer, Foo> c = Foo::new;
+                    Supplier<Missing> d = Missing::new;
+                    make();
+                }
+            }
+            """;
+
+    @Test
+    void unresolvedReferencesAreLinkedFromTheirTypeAndUnresolvedTypesToNothing() {
+        assertThat(links("demo/Unresolved.java", UNRESOLVED_REFERENCES)).contains(
+                // super::nothing: the name is looked for in the super class; List<String>::missing in List; Foo::new, no constructor takes an Integer: any constructor
+                "nothing => demo/Unresolved$Foo#nothing#(*)?", "m => demo/Unresolved$Foo#m#(Ljava/lang/String;)V", "missing => java/util/List#missing#(*)?",
+                "new => demo/Unresolved$Foo#<init>#(*)V")
+                .noneMatch(link -> link.startsWith("unknown =>")).noneMatch(link -> link.contains("Missing") && link.contains("<init>"));
+    }
+
+    @Test
+    void aCallOfAMethodWhoseReturnTypeIsUnresolvedKeepsItsLink() {
+        // the return type has no binary name: its key stands for it
+        assertThat(links("demo/Unresolved.java", UNRESOLVED_REFERENCES)).anyMatch(link -> link.startsWith("make => demo/Unresolved#make#()"));
+    }
+
     @Test
     void referencesToUnknownTypesAreSkippedWithoutFailing() {
         String broken = """
