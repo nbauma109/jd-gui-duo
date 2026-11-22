@@ -83,7 +83,7 @@ jobs:
 
     - name: Upload GUI failure screenshots
       if: ${{ failure() }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: gui-failures-${{ matrix.name }}
         path: app/target/gui-failures/
@@ -91,7 +91,7 @@ jobs:
 
     - name: Upload test reports
       if: ${{ !cancelled() }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: surefire-reports-${{ matrix.name }}
         path: |

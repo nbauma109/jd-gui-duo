@@ -42,7 +42,7 @@ jobs:
       run: mvn --no-transfer-progress -B -DskipTests package
     - name: Create the fixture jar
       run: packaging/test/make-fixture-jar.sh "$RUNNER_TEMP/fixture"
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: distributions
         path: |
@@ -75,7 +75,7 @@ jobs:
         $archive = Get-ChildItem dist -Recurse -Filter *windows*.tar.xz | Select-Object -First 1
         $fixture = Get-ChildItem dist -Recurse -Filter packaged-smoke.jar | Select-Object -First 1
         .\packaging\windows\test-packaged.ps1 -Archive $archive.FullName -Fixture $fixture.FullName -Installer "$PWD\dist\setup.exe" -ShotsDir "$PWD\shots"
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: ${{ !cancelled() }}
       with:
         name: packaging-shots-windows
@@ -100,7 +100,7 @@ jobs:
         archive="$(find dist -name '*macos*.tar.xz' | head -1)"
         fixture="$(find dist -name packaged-smoke.jar | head -1)"
         packaging/macos/test-packaged.sh "$archive" "$fixture" "$PWD/shots"
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: ${{ !cancelled() }}
       with:
         name: packaging-shots-macos
@@ -132,7 +132,7 @@ jobs:
         archive="$(find dist -name '*linux*.tar.xz' | head -1)"
         fixture="$(find dist -name packaged-smoke.jar | head -1)"
         packaging/linux/test-packaged.sh "$archive" "$fixture" "$PWD/shots"
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: ${{ !cancelled() }}
       with:
         name: packaging-shots-linux
