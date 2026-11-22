@@ -245,6 +245,31 @@ public class ReferenceListener extends AbstractJavaListener {
         return true;
     }
 
+    /** The parameters of the declaration of the method, erased as the declarations are keyed (List<String> is Ljava/util/List;). */
+    private static StringBuilder getErasedParametersDescriptor(IMethodBinding binding) {
+        StringBuilder sb = new StringBuilder("(");
+        for (ITypeBinding parameterType : binding.getMethodDeclaration().getParameterTypes()) {
+            String erased = erasedDescriptor(parameterType);
+            sb.append(erased != null ? erased : parameterType.getErasure().getKey());
+        }
+        return sb.append(')');
+    }
+
+    /** The descriptor of the erasure of a type, from the binary name (the erasure of List<String> is the generic type, whose key carries its type parameters), or null. */
+    private static String erasedDescriptor(ITypeBinding type) {
+        ITypeBinding erasure = type.getErasure();
+        if (erasure.isPrimitive()) {
+            return erasure.getKey();
+        }
+        if (erasure.isArray()) {
+            String element = erasedDescriptor(erasure.getElementType());
+            return element == null ? null : "[".repeat(erasure.getDimensions()) + element;
+        }
+        boolean describable = (erasure.isClass() || erasure.isInterface() || erasure.isEnum() || erasure.isRecord() || erasure.isAnnotation())
+                && !erasure.isAnonymous() && erasure.getBinaryName() != null;
+        return describable ? "L" + erasure.getBinaryName().replace('.', '/') + ";" : null;
+    }
+
     private static StringBuilder getParametersDescriptor(ITypeBinding[] argTypes) {
         StringBuilder sb = new StringBuilder("(");
         for (ITypeBinding argType : argTypes) {
@@ -507,7 +532,7 @@ public class ReferenceListener extends AbstractJavaListener {
                 ? binding.getDeclaringClass().getErasure().getBinaryName().replace('.', '/')
                 : resolveInternalTypeName(node.getType());
         if (typeName != null && !typeName.isEmpty() && type != null && !type.isArray()) {
-            String descriptor = binding != null && !binding.isRecovered() ? getParametersDescriptor(binding.getParameterTypes()).append('V').toString() : "(*)V";
+            String descriptor = binding != null && !binding.isRecovered() ? getErasedParametersDescriptor(binding).append('V').toString() : "(*)V";
             ReferenceData refData = newReferenceData(typeName, StringConstants.INSTANCE_CONSTRUCTOR, descriptor);
             int length = "new".length();
             addHyperlink(new HyperlinkReferenceData(node.getStartPosition() + node.getLength() - length, length, refData));

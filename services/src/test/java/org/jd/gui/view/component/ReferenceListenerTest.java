@@ -539,6 +539,33 @@ class ReferenceListenerTest {
     }
 
     @Test
+    void aReferenceToAConstructorWithGenericParametersNavigatesToItsDeclaration() {
+        String text = """
+                package demo;
+
+                import java.util.List;
+                import java.util.Map;
+                import java.util.function.BiFunction;
+                import java.util.function.Function;
+
+                public class CtorRefs {
+                    static class Foo {
+                        Foo(List<String> values) { }
+                        Foo(Map<String, List<Integer>> map, int n) { }
+                    }
+
+                    void go() {
+                        Function<List<String>, Foo> a = Foo::new;
+                        BiFunction<Map<String, List<Integer>>, Integer, Foo> b = Foo::new;
+                    }
+                }
+                """;
+
+        // "new" of each reference: the line of the call -> the line of the constructor that the target type selects
+        assertThat(targetsOfCalls("demo/CtorRefs.java", text, "<init>")).containsExactly("15 -> 10", "16 -> 11");
+    }
+
+    @Test
     void referencesToUnknownTypesAreSkippedWithoutFailing() {
         String broken = """
                 package demo;
