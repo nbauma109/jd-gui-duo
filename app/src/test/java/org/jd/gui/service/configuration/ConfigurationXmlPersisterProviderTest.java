@@ -132,7 +132,7 @@ class ConfigurationXmlPersisterProviderTest {
     }
 
     @Test
-    void aWindowOutsideOfTheScreenIsReplacedByTheDefaultOne() throws IOException {
+    void aWindowOutsideOfTheScreenIsReplacedByTheDefaultOne() {
         needsAScreen();
         ConfigurationXmlPersisterProvider persister = persister();
         Configuration config = new Configuration();
