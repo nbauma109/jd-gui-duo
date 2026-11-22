@@ -79,4 +79,14 @@ class TypePageFragmentTest {
         assertThat(starts("demo/A-<init>-(~I)V", OVERLOADS)).containsExactly(50);
         assertThat(starts("demo/A-<init>-(~I~I)V", OVERLOADS)).isEmpty();
     }
+
+    @Test
+    void aReferenceWithoutBindingSelectsAllTheMethodsOfThatNameOrAllTheConstructors() {
+        Map<String, DeclarationData> declarations = declarations(
+                10, "f", "(Ljava/lang/String;)V", 20, "f", "(J)V", 30, "g", "(I)V", 40, "<init>", "(Ljava/lang/String;)V", 50, "<init>", "()V");
+
+        assertThat(starts("demo/A-f-(*)?", declarations)).containsExactly(10, 20);
+        assertThat(starts("demo/A-<init>-(*)V", declarations)).containsExactly(40, 50);
+        assertThat(starts("demo/A-nothing-(*)?", declarations)).isEmpty();
+    }
 }

@@ -197,7 +197,7 @@ class ReferenceListenerTest {
                 "values => demo/Sample#values#?", "field => demo/Sample$Nested#field#?", "length => java/lang/String#length#()I",
                 "max => java/lang/Math#max#(II)I", "valueOf => java/lang/String#valueOf#(I)Ljava/lang/String;",
                 "System => java/lang/System#null#null", "out => java/lang/System#out#?", "println => java/io/PrintStream#println#(Ljava/lang/String;)V",
-                "add => java/util/List#add#(Ljava/lang/String;)Z", "run => java/lang/Runnable#run#()V", "size => java/util/ArrayList#size#()I",
+                "add => java/util/List#add#(Ljava/lang/Object;)Z", "run => java/lang/Runnable#run#()V", "size => java/util/ArrayList#size#()I",
                 "toUpperCase => java/lang/String#toUpperCase#()Ljava/lang/String;");
     }
 
@@ -620,6 +620,171 @@ class ReferenceListenerTest {
         // the exact bindings: no hint for what the bounds cover; takesString does not fit and has only hints
         assertThat(links).contains("takesRunnable => demo/Bounds#takesRunnable#(Ljava/lang/Runnable;)V", "takesNumber => demo/Bounds#takesNumber#(Ljava/lang/Number;)V")
                 .doesNotContain("takesString => demo/Bounds#takesString#(Ljava/lang/String;)V");
+    }
+
+    private static final String REFERENCES = """
+            package demo;
+
+            import java.util.function.*;
+
+            public class Refs {
+                static class Foo {
+                    Foo() { }
+                    Foo(String s) { }
+                    void m(String s) { }
+                    static int len(String s) { return 0; }
+                }
+
+                static class Sub extends Foo {
+                    void go() {
+                        Consumer<String> sup = super::m;
+                    }
+                }
+
+                void go(java.util.List<String> list) {
+                    Supplier<Foo> a = Foo::new;
+                    Function<String, Foo> b = Foo::new;
+                    Function<String, Integer> c = Foo::len;
+                    Foo foo = new Foo();
+                    Consumer<String> d = foo::m;
+                    Function<String, Integer> e = String::length;
+                    Runnable r = foo::nothing;
+                    Runnable r2 = Foo::missing;
+                    Supplier<Foo> missing = Foo::zzz;
+                    Function<Integer, int[]> arr = int[]::new;
+                    Supplier<Missing> m = Missing::new;
+                    ToIntFunction<java.util.List<String>> size = java.util.List<String>::size;
+                }
+            }
+            """;
+
+    @Test
+    void referencesToMethodsAndConstructorsAreLinkedThroughTheirBinding() {
+        assertThat(links("demo/Refs.java", REFERENCES)).contains(
+                // Type::new links "new" to the constructor that the target type selects
+                "new => demo/Refs$Foo#<init>#()V", "new => demo/Refs$Foo#<init>#(Ljava/lang/String;)V",
+                "len => demo/Refs$Foo#len#(Ljava/lang/String;)I", "m => demo/Refs$Foo#m#(Ljava/lang/String;)V",
+                "length => java/lang/String#length#()I", "size => java/util/List#size#()I");
+    }
+
+    @Test
+    void referencesWithoutBindingAreLinkedToAnyMethodOfThatNameAndUnknownTypesToNothing() {
+        java.util.List<String> links = links("demo/Refs.java", REFERENCES);
+
+        // a reference has no arguments: (*) stands for any parameters; Missing::new: the type cannot be resolved; int[]::new: an array is not a constructor
+        assertThat(links).contains("nothing => demo/Refs$Foo#nothing#(*)?", "missing => demo/Refs$Foo#missing#(*)?", "zzz => demo/Refs$Foo#zzz#(*)?")
+                .noneMatch(link -> link.contains("Missing") && link.contains("<init>")).noneMatch(link -> link.contains("[I"));
+    }
+
+    @Test
+    void aReferenceToAConstructorWithGenericParametersNavigatesToItsDeclaration() {
+        String text = """
+                package demo;
+
+                import java.util.List;
+                import java.util.Map;
+                import java.util.function.BiFunction;
+                import java.util.function.Function;
+
+                public class CtorRefs {
+                    static class Foo {
+                        Foo(List<String> values) { }
+                        Foo(Map<String, List<Integer>> map, int n) { }
+                    }
+
+                    void go() {
+                        Function<List<String>, Foo> a = Foo::new;
+                        BiFunction<Map<String, List<Integer>>, Integer, Foo> b = Foo::new;
+                    }
+                }
+                """;
+
+        // "new" of each reference: the line of the call -> the line of the constructor that the target type selects
+        assertThat(targetsOfCalls("demo/CtorRefs.java", text, "<init>")).containsExactly("15 -> 10", "16 -> 11");
+    }
+
+    @Test
+    void callsAndReferencesToMethodsOfGenericTypesAreLinkedWithTheErasedDescriptorOfTheirDeclaration() {
+        String text = """
+                package demo;
+
+                import java.util.ArrayList;
+                import java.util.List;
+                import java.util.Map;
+                import java.util.Optional;
+                import java.util.function.BiFunction;
+                import java.util.function.Function;
+
+                public class GenericDescriptors {
+                    void go(List<String> list, Map<String, Integer> map, Optional<String> optional) {
+                        list.add("a");
+                        String first = list.get(0);
+                        map.put("k", 1);
+                        Integer count = map.get("k");
+                        optional.orElse("x");
+                        BiFunction<List<String>, Integer, String> get = List<String>::get;
+                        Function<String, Optional<String>> of = Optional::of;
+                        Function<List<String>, Integer> size = List::size;
+                        new ArrayList<String>().addAll(list);
+                    }
+                }
+                """;
+
+        // as in a class file: the type variables are erased (to Object here), the instantiation of the type does not show
+        assertThat(links("demo/GenericDescriptors.java", text)).contains(
+                "add => java/util/List#add#(Ljava/lang/Object;)Z", "get => java/util/List#get#(I)Ljava/lang/Object;",
+                "put => java/util/Map#put#(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", "get => java/util/Map#get#(Ljava/lang/Object;)Ljava/lang/Object;",
+                "orElse => java/util/Optional#orElse#(Ljava/lang/Object;)Ljava/lang/Object;", "of => java/util/Optional#of#(Ljava/lang/Object;)Ljava/util/Optional;",
+                "size => java/util/List#size#()I", "addAll => java/util/ArrayList#addAll#(Ljava/util/Collection;)Z");
+    }
+
+    private static final String UNRESOLVED_REFERENCES = """
+            package demo;
+
+            import java.util.List;
+            import java.util.function.Consumer;
+            import java.util.function.Function;
+            import java.util.function.Supplier;
+
+            public class Unresolved {
+                static class Foo {
+                    Foo(String s) { }
+                    void m(String s) { }
+                }
+
+                static class Sub extends Foo {
+                    Sub() { super("x"); }
+                    void go() {
+                        Consumer<String> missing = super::nothing;
+                        Consumer<String> present = super::m;
+                    }
+                }
+
+                Missing make() { return null; }
+
+                void go() {
+                    Function<List<String>, String> a = List<String>::missing;
+                    Function<Foo, String> b = Missing<String>::unknown;
+                    Function<Integer, Foo> c = Foo::new;
+                    Supplier<Missing> d = Missing::new;
+                    make();
+                }
+            }
+            """;
+
+    @Test
+    void unresolvedReferencesAreLinkedFromTheirTypeAndUnresolvedTypesToNothing() {
+        assertThat(links("demo/Unresolved.java", UNRESOLVED_REFERENCES)).contains(
+                // super::nothing: the name is looked for in the super class; List<String>::missing in List; Foo::new, no constructor takes an Integer: any constructor
+                "nothing => demo/Unresolved$Foo#nothing#(*)?", "m => demo/Unresolved$Foo#m#(Ljava/lang/String;)V", "missing => java/util/List#missing#(*)?",
+                "new => demo/Unresolved$Foo#<init>#(*)V")
+                .noneMatch(link -> link.startsWith("unknown =>")).noneMatch(link -> link.contains("Missing") && link.contains("<init>"));
+    }
+
+    @Test
+    void aCallOfAMethodWhoseReturnTypeIsUnresolvedKeepsItsLink() {
+        // the return type has no binary name: its key stands for it
+        assertThat(links("demo/Unresolved.java", UNRESOLVED_REFERENCES)).anyMatch(link -> link.startsWith("make => demo/Unresolved#make#()"));
     }
 
     @Test
