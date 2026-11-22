@@ -255,21 +255,6 @@ public class ReferenceListener extends AbstractJavaListener {
         return sb.append(')');
     }
 
-    /** The descriptor of the erasure of a type, from the binary name (the erasure of List<String> is the generic type, whose key carries its type parameters), or null. */
-    private static String erasedDescriptor(ITypeBinding type) {
-        ITypeBinding erasure = type.getErasure();
-        if (erasure.isPrimitive()) {
-            return erasure.getKey();
-        }
-        if (erasure.isArray()) {
-            String element = erasedDescriptor(erasure.getElementType());
-            return element == null ? null : "[".repeat(erasure.getDimensions()) + element;
-        }
-        boolean describable = (erasure.isClass() || erasure.isInterface() || erasure.isEnum() || erasure.isRecord() || erasure.isAnnotation())
-                && !erasure.isAnonymous() && erasure.getBinaryName() != null;
-        return describable ? "L" + erasure.getBinaryName().replace('.', '/') + ";" : null;
-    }
-
     private static StringBuilder getParametersDescriptor(ITypeBinding[] argTypes) {
         StringBuilder sb = new StringBuilder("(");
         for (ITypeBinding argType : argTypes) {
@@ -325,10 +310,15 @@ public class ReferenceListener extends AbstractJavaListener {
         return true;
     }
 
-    /** An argument of unknown type (or null) is given the benefit of the doubt. */
+    /**
+     * An argument of unknown type (or null) is given the benefit of the doubt. The types are compared as they are (the erasure of a type variable
+     * with several bounds keeps only the first: T extends Number & Runnable is a Runnable), and else by their erasures: the type of an argument that is
+     * itself a generic call (stream.collect(Collectors.toList())) is not inferred yet, so its type arguments cannot be compared with the ones of the parameter.
+     */
     private static boolean argumentAssignableTo(Expression argument, ITypeBinding parameter) {
         ITypeBinding type = argument.resolveTypeBinding();
-        return type == null || type.isNullType() || type.isRecovered() || parameter.isRecovered() || type.isAssignmentCompatible(parameter);
+        return type == null || type.isNullType() || type.isRecovered() || parameter.isRecovered()
+                || type.isAssignmentCompatible(parameter) || type.getErasure().isAssignmentCompatible(parameter.getErasure());
     }
 
     /** A hint of the type of an argument when its erasure can be written as a descriptor (not a capture, an intersection or an anonymous class). */
@@ -337,11 +327,23 @@ public class ReferenceListener extends AbstractJavaListener {
         if (type == null || type.isNullType() || type.isRecovered()) {
             return "?";
         }
+        String descriptor = erasedDescriptor(type);
+        return descriptor == null ? "?" : DescriptorMatcher.HINT + descriptor;
+    }
+
+    /** The descriptor of the erasure of a type, from the binary name (the key of a generic type declaration carries its type parameters), or null. */
+    private static String erasedDescriptor(ITypeBinding type) {
         ITypeBinding erasure = type.getErasure();
-        ITypeBinding element = erasure.isArray() ? erasure.getElementType() : erasure;
-        boolean describable = element.isPrimitive() || ((element.isClass() || element.isInterface() || element.isEnum() || element.isRecord()
-                || element.isAnnotation()) && element.getBinaryName() != null && !element.isAnonymous());
-        return describable ? DescriptorMatcher.HINT + erasure.getKey() : "?";
+        if (erasure.isPrimitive()) {
+            return erasure.getKey();
+        }
+        if (erasure.isArray()) {
+            String element = erasedDescriptor(erasure.getElementType());
+            return element == null ? null : "[".repeat(erasure.getDimensions()) + element;
+        }
+        boolean describable = (erasure.isClass() || erasure.isInterface() || erasure.isEnum() || erasure.isRecord() || erasure.isAnnotation())
+                && !erasure.isAnonymous() && erasure.getBinaryName() != null;
+        return describable ? "L" + erasure.getBinaryName().replace('.', '/') + ";" : null;
     }
 
     @Override
