@@ -15,7 +15,6 @@ import org.jd.gui.util.nexus.model.NexusArtifact;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,11 +30,11 @@ class NexusModelTest {
         List<NexusArtifact> artifacts = new ArrayList<>(List.of(
                 artifact("org.b", "a", "1"), artifact("org.a", "z", "1"), artifact("org.a", "a", "2"), artifact("org.a", "a", "1")));
 
-        Collections.sort(artifacts);
+        artifacts.sort(null);
 
         assertThat(artifacts).extracting(a -> a.groupId() + ":" + a.artifactId() + ":" + a.version())
                 .containsExactly("org.a:a:1", "org.a:a:2", "org.a:z:1", "org.b:a:1");
-        assertThat(artifact("g", "a", "1").compareTo(artifact("g", "a", "1"))).isZero();
+        assertThat(artifact("g", "a", "1")).isEqualByComparingTo(artifact("g", "a", "1"));
     }
 
     @Test
