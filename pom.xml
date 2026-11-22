@@ -219,7 +219,7 @@
     <main.class>org.jd.gui.App</main.class>
     <project.scm.id>github.com</project.scm.id>
     <flatlaf.version>3.8</flatlaf.version>
-    <jacoco.version>0.8.14</jacoco.version>
+    <jacoco.version>0.8.16</jacoco.version>
     <!-- GUI tests (tag 'gui') drive the real application with java.awt.Robot on a real desktop.
          They are skipped by default; run them with -Pgui-tests (this is what CI does). -->
     <gui.excludedGroups>gui</gui.excludedGroups>
