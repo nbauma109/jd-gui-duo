@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
@@ -26,6 +27,7 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -95,6 +97,16 @@ public abstract class AbstractJavaListener extends ASTVisitor {
     @Override
     public boolean visit(EnumDeclaration node) {
         return enterTypeDeclaration(node, ACC_ENUM);
+    }
+
+    @Override
+    public boolean visit(RecordDeclaration node) {
+        return enterTypeDeclaration(node, 0);
+    }
+
+    @Override
+    public void endVisit(RecordDeclaration node) {
+        exitTypeDeclaration();
     }
 
     @Override
@@ -448,12 +460,36 @@ public abstract class AbstractJavaListener extends ASTVisitor {
             paramDescriptors = new StringBuilder("(");
 
             for (SingleVariableDeclaration formalParameter : formalParameterList) {
-                int dimensionOnParameter = formalParameter.getExtraDimensions();
+                // the "..." of a variable arity parameter is one more array dimension in the descriptor (String... is [Ljava/lang/String;)
+                int dimensionOnParameter = formalParameter.getExtraDimensions() + (formalParameter.isVarargs() ? 1 : 0);
                 paramDescriptors.append(createDescriptor(formalParameter.getType(), dimensionOnParameter));
             }
         }
 
         return paramDescriptors == null ? "()" : paramDescriptors.append(')').toString();
+    }
+
+    /** The parameters of a method; a compact constructor (R { ... }) has those of the components of its record. */
+    protected String createParamDescriptors(MethodDeclaration node) {
+        if (node.isCompactConstructor() && node.getParent() instanceof RecordDeclaration recordDeclaration) {
+            return createRecordParamDescriptors(recordDeclaration);
+        }
+        @SuppressWarnings("unchecked")
+        List<SingleVariableDeclaration> parameters = node.parameters();
+        return createParamDescriptors(parameters);
+    }
+
+    /** The parameters of the canonical constructor of a record: its components. */
+    protected String createRecordParamDescriptors(RecordDeclaration recordDeclaration) {
+        StringBuilder descriptors = new StringBuilder("(");
+        for (Object component : recordDeclaration.recordComponents()) {
+            descriptors.append(createComponentDescriptor((SingleVariableDeclaration) component));
+        }
+        return descriptors.append(')').toString();
+    }
+
+    protected String createComponentDescriptor(SingleVariableDeclaration component) {
+        return createDescriptor(component.getType(), component.getExtraDimensions() + (component.isVarargs() ? 1 : 0));
     }
 
     protected int countDimension(Type type) {
