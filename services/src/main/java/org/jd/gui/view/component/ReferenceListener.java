@@ -548,10 +548,12 @@ public class ReferenceListener extends AbstractJavaListener {
             ITypeBinding declaringClass = methodBinding.getDeclaringClass();
             String binaryName = declaringClass.getBinaryName();
             if (binaryName != null) {
-                String methodTypeName = binaryName.replace('.', '/');
-                ITypeBinding[] args = methodBinding.getParameterTypes();
-                ITypeBinding returnType = methodBinding.getReturnType();
-                String methodDescriptor = args.length > 0 ? getParametersDescriptor(args).append(returnType.getKey()).toString() : "()" + returnType.getKey();
+                String methodTypeName = declaringClass.getErasure().getBinaryName().replace('.', '/');
+                // the descriptor of the declaration, erased like the one of a class file: the binding of a call or of a reference is the one of the
+                // instantiated method (List<String>.get has (I)Ljava/lang/String; where List.get is (I)Ljava/lang/Object;)
+                IMethodBinding declaration = methodBinding.getMethodDeclaration();
+                String returnDescriptor = erasedDescriptor(declaration.getReturnType());
+                String methodDescriptor = getErasedParametersDescriptor(methodBinding).append(returnDescriptor != null ? returnDescriptor : declaration.getReturnType().getErasure().getKey()).toString();
                 ReferenceData refData = newReferenceData(methodTypeName, methodName, methodDescriptor);
                 int position = name.getStartPosition();
                 addHyperlink(new HyperlinkReferenceData(position, methodName.length(), refData));

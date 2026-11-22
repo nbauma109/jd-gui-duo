@@ -197,7 +197,7 @@ class ReferenceListenerTest {
                 "values => demo/Sample#values#?", "field => demo/Sample$Nested#field#?", "length => java/lang/String#length#()I",
                 "max => java/lang/Math#max#(II)I", "valueOf => java/lang/String#valueOf#(I)Ljava/lang/String;",
                 "System => java/lang/System#null#null", "out => java/lang/System#out#?", "println => java/io/PrintStream#println#(Ljava/lang/String;)V",
-                "add => java/util/List#add#(Ljava/lang/String;)Z", "run => java/lang/Runnable#run#()V", "size => java/util/ArrayList#size#()I",
+                "add => java/util/List#add#(Ljava/lang/Object;)Z", "run => java/lang/Runnable#run#()V", "size => java/util/ArrayList#size#()I",
                 "toUpperCase => java/lang/String#toUpperCase#()Ljava/lang/String;");
     }
 
@@ -701,6 +701,41 @@ class ReferenceListenerTest {
 
         // "new" of each reference: the line of the call -> the line of the constructor that the target type selects
         assertThat(targetsOfCalls("demo/CtorRefs.java", text, "<init>")).containsExactly("15 -> 10", "16 -> 11");
+    }
+
+    @Test
+    void callsAndReferencesToMethodsOfGenericTypesAreLinkedWithTheErasedDescriptorOfTheirDeclaration() {
+        String text = """
+                package demo;
+
+                import java.util.ArrayList;
+                import java.util.List;
+                import java.util.Map;
+                import java.util.Optional;
+                import java.util.function.BiFunction;
+                import java.util.function.Function;
+
+                public class GenericDescriptors {
+                    void go(List<String> list, Map<String, Integer> map, Optional<String> optional) {
+                        list.add("a");
+                        String first = list.get(0);
+                        map.put("k", 1);
+                        Integer count = map.get("k");
+                        optional.orElse("x");
+                        BiFunction<List<String>, Integer, String> get = List<String>::get;
+                        Function<String, Optional<String>> of = Optional::of;
+                        Function<List<String>, Integer> size = List::size;
+                        new ArrayList<String>().addAll(list);
+                    }
+                }
+                """;
+
+        // as in a class file: the type variables are erased (to Object here), the instantiation of the type does not show
+        assertThat(links("demo/GenericDescriptors.java", text)).contains(
+                "add => java/util/List#add#(Ljava/lang/Object;)Z", "get => java/util/List#get#(I)Ljava/lang/Object;",
+                "put => java/util/Map#put#(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", "get => java/util/Map#get#(Ljava/lang/Object;)Ljava/lang/Object;",
+                "orElse => java/util/Optional#orElse#(Ljava/lang/Object;)Ljava/lang/Object;", "of => java/util/Optional#of#(Ljava/lang/Object;)Ljava/util/Optional;",
+                "size => java/util/List#size#()I", "addAll => java/util/ArrayList#addAll#(Ljava/util/Collection;)Z");
     }
 
     @Test
