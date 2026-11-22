@@ -190,6 +190,11 @@ public final class DescriptorMatcher {
                 return false;
             }
 
+            if (c == '[') {
+                // an array: its element type (or its next dimension) must be the same too, ([I is not [J nor [Ljava/lang/String;)
+                return compareTypeWith(other);
+            }
+
             if (c == 'L') {
                 if (offset >= length || other.offset >= other.length) {
                     return false;
@@ -232,13 +237,18 @@ public final class DescriptorMatcher {
                     if (otherC == '*') {
                         return true;
                     }
-                    if (c != otherC) {
+                    // the name of a nested class follows the one of its outer class after a '$' where a package name has a '/'
+                    if (c != otherC && !(isNameSeparator(c) && isNameSeparator(otherC))) {
                         return false;
                     }
                 }
             }
 
             return true;
+        }
+
+        private static boolean isNameSeparator(char c) {
+            return c == '/' || c == '$';
         }
 
         protected boolean searchEndOfType() {

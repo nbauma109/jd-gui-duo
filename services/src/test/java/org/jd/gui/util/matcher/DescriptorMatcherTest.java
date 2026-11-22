@@ -108,4 +108,89 @@ public class DescriptorMatcherTest {
         assertTrue(DescriptorMatcher.matchMethodDescriptors("(JLjava/lang/String;)V", DescriptorMatcher.dropHints("(~I~Ljava/lang/String;)?")));
         assertFalse(DescriptorMatcher.matchMethodDescriptors("(J)V", DescriptorMatcher.dropHints("(~I~Ljava/lang/String;)?")));
     }
+
+    @Test
+    public void testFieldDescriptorsOfArraysAndClasses() {
+        assertTrue(DescriptorMatcher.matchFieldDescriptors("[I", "[I"));
+        assertFalse(DescriptorMatcher.matchFieldDescriptors("[I", "[J"));
+        assertTrue(DescriptorMatcher.matchFieldDescriptors("[[Ljava/lang/String;", "[[Ljava/lang/String;"));
+        assertFalse(DescriptorMatcher.matchFieldDescriptors("[[Ljava/lang/String;", "[Ljava/lang/String;"));
+        assertFalse(DescriptorMatcher.matchFieldDescriptors("Lfoo/A;", "Lfoo/B;"));
+        assertFalse(DescriptorMatcher.matchFieldDescriptors("Lfoo/A;", "Lfoo/AB;"));
+        assertFalse(DescriptorMatcher.matchFieldDescriptors("Lfoo/A;", "I"));
+        // an incomplete descriptor never matches
+        assertFalse(DescriptorMatcher.matchFieldDescriptors("Lfoo/A", "Lfoo/A;"));
+        assertFalse(DescriptorMatcher.matchFieldDescriptors("Lfoo/A;", "Lfoo/A"));
+        assertFalse(DescriptorMatcher.matchFieldDescriptors("", ""));
+        assertFalse(DescriptorMatcher.matchFieldDescriptors("L", "L"));
+    }
+
+    @Test
+    public void testFieldDescriptorsWithAnUnknownPackage() {
+        // L*/Name; stands for a class of that name in any package, on either side
+        assertTrue(DescriptorMatcher.matchFieldDescriptors("L*/A;", "Lfoo/A;"));
+        assertTrue(DescriptorMatcher.matchFieldDescriptors("Lfoo/A;", "L*/A;"));
+        assertTrue(DescriptorMatcher.matchFieldDescriptors("L*/A;", "L*/A;"));
+        assertTrue(DescriptorMatcher.matchFieldDescriptors("L*/A;", "Lx/y/z/A;"));
+        assertTrue(DescriptorMatcher.matchFieldDescriptors("L*/A;", "LA;"));
+        assertFalse(DescriptorMatcher.matchFieldDescriptors("L*/A;", "Lfoo/B;"));
+        assertFalse(DescriptorMatcher.matchFieldDescriptors("L*/A;", "Lfoo/AA;"));
+        assertFalse(DescriptorMatcher.matchFieldDescriptors("L*/A", "Lfoo/A;"));
+        assertFalse(DescriptorMatcher.matchFieldDescriptors("Lfoo/A;", "L*/A"));
+        // the wildcard also covers an inner class name
+        assertTrue(DescriptorMatcher.matchFieldDescriptors("L*/Inner;", "Ldemo/Over$Inner;"));
+    }
+
+    @Test
+    public void testFieldDescriptorsWithAnUnknownType() {
+        assertTrue(DescriptorMatcher.matchFieldDescriptors("?", "[I"));
+        assertTrue(DescriptorMatcher.matchFieldDescriptors("[[Ljava/lang/String;", "?"));
+        assertTrue(DescriptorMatcher.matchFieldDescriptors("?", "Lfoo/A;"));
+        assertTrue(DescriptorMatcher.matchFieldDescriptors("J", "?"));
+        // there must be a whole type for it to stand for
+        assertFalse(DescriptorMatcher.matchFieldDescriptors("?", ""));
+        assertFalse(DescriptorMatcher.matchFieldDescriptors("", "?"));
+        assertFalse(DescriptorMatcher.matchFieldDescriptors("?", "["));
+        assertFalse(DescriptorMatcher.matchFieldDescriptors("[", "?"));
+        assertFalse(DescriptorMatcher.matchFieldDescriptors("?", "Lfoo/A"));
+        assertFalse(DescriptorMatcher.matchFieldDescriptors("[Lfoo/A", "?"));
+    }
+
+    @Test
+    public void testMethodDescriptorsParametersAndReturnType() {
+        assertTrue(DescriptorMatcher.matchMethodDescriptors("()V", "()V"));
+        assertTrue(DescriptorMatcher.matchMethodDescriptors("(I[Ljava/lang/String;)Z", "(I[Ljava/lang/String;)Z"));
+        assertFalse(DescriptorMatcher.matchMethodDescriptors("(I)V", "(J)V"));
+        assertFalse(DescriptorMatcher.matchMethodDescriptors("(II)V", "(I)V"));
+        assertFalse(DescriptorMatcher.matchMethodDescriptors("(I)V", "(II)V"));
+        assertFalse(DescriptorMatcher.matchMethodDescriptors("(I)V", "(I)I"));
+        assertFalse(DescriptorMatcher.matchMethodDescriptors("(Lfoo/A;)V", "(Lfoo/B;)V"));
+        assertFalse(DescriptorMatcher.matchMethodDescriptors("I", "()V"));
+        assertFalse(DescriptorMatcher.matchMethodDescriptors("()V", "I"));
+        assertFalse(DescriptorMatcher.matchMethodDescriptors("", ""));
+    }
+
+    @Test
+    public void testMethodDescriptorsWithUnknownParts() {
+        // ? is an unknown parameter or return type; (*) is any parameters
+        assertTrue(DescriptorMatcher.matchMethodDescriptors("(I)V", "(?)V"));
+        assertTrue(DescriptorMatcher.matchMethodDescriptors("(?I)V", "(JI)?"));
+        assertTrue(DescriptorMatcher.matchMethodDescriptors("(IJ)V", "(I)V".replace("(I)", "(I?)")));
+        assertFalse(DescriptorMatcher.matchMethodDescriptors("(I)V", "(??)V"));
+        assertTrue(DescriptorMatcher.matchMethodDescriptors("(*)V", "(IJ)Z"));
+        assertTrue(DescriptorMatcher.matchMethodDescriptors("(IJ)Z", "(*)?"));
+        assertTrue(DescriptorMatcher.matchMethodDescriptors("(L*/A;)V", "(Lfoo/A;)V"));
+        assertFalse(DescriptorMatcher.matchMethodDescriptors("(L*/A;)V", "(Lfoo/B;)V"));
+    }
+
+    @Test
+    public void testIncompleteMethodDescriptorsEndWithoutLooping() {
+        org.junit.jupiter.api.Assertions.assertTimeoutPreemptively(java.time.Duration.ofSeconds(5), () -> {
+            assertFalse(DescriptorMatcher.matchMethodDescriptors("(I)V", "(I"));
+            assertFalse(DescriptorMatcher.matchMethodDescriptors("(I", "(I)V"));
+            assertFalse(DescriptorMatcher.matchMethodDescriptors("(I)V", "("));
+            assertFalse(DescriptorMatcher.matchMethodDescriptors("(", "(I)V"));
+            assertFalse(DescriptorMatcher.matchMethodDescriptors("(I)V", "(I)"));
+        });
+    }
 }
