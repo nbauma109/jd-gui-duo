@@ -287,7 +287,7 @@ public class ReferenceListener extends AbstractJavaListener {
         for (int i = 0; i < arguments.size(); i++) {
             ITypeBinding parameter = i < parameters.length ? parameters[i] : parameters[parameters.length - 1];
             if (varargs && i >= parameters.length - 1 && parameter.isArray()
-                    && !(arguments.size() == parameters.length && i == parameters.length - 1 && argumentAssignableTo(arguments.get(i), parameter))) {
+                    && ((arguments.size() != parameters.length) || (i != parameters.length - 1) || !argumentAssignableTo(arguments.get(i), parameter))) {
                 parameter = parameter.getComponentType(); // the trailing arguments are the elements of the array
             }
             if (!argumentAssignableTo(arguments.get(i), parameter)) {
