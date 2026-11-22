@@ -57,7 +57,7 @@ jobs:
     timeout-minutes: 20
     steps:
     - uses: actions/checkout@v7
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: distributions
         path: dist
@@ -91,7 +91,7 @@ jobs:
     continue-on-error: true   # experimental until a run proves the hosted runner lets the app show a window
     steps:
     - uses: actions/checkout@v7
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: distributions
         path: dist
@@ -114,7 +114,7 @@ jobs:
     timeout-minutes: 20
     steps:
     - uses: actions/checkout@v7
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: distributions
         path: dist
