@@ -533,10 +533,9 @@ class ReferenceListenerTest {
     void referencesWithoutBindingAreLinkedToAnyMethodOfThatNameAndUnknownTypesToNothing() {
         java.util.List<String> links = links("demo/Refs.java", REFERENCES);
 
-        // a reference has no arguments: (*) stands for any parameters
-        assertThat(links).contains("nothing => demo/Refs$Foo#nothing#(*)?", "missing => demo/Refs$Foo#missing#(*)?", "zzz => demo/Refs$Foo#zzz#(*)?");
-        // Missing::new: the type cannot be resolved; int[]::new: an array is not a constructor
-        assertThat(links).noneMatch(link -> link.contains("Missing") && link.contains("<init>")).noneMatch(link -> link.contains("[I"));
+        // a reference has no arguments: (*) stands for any parameters; Missing::new: the type cannot be resolved; int[]::new: an array is not a constructor
+        assertThat(links).contains("nothing => demo/Refs$Foo#nothing#(*)?", "missing => demo/Refs$Foo#missing#(*)?", "zzz => demo/Refs$Foo#zzz#(*)?")
+                .noneMatch(link -> link.contains("Missing") && link.contains("<init>")).noneMatch(link -> link.contains("[I"));
     }
 
     @Test
