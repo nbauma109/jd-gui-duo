@@ -36,16 +36,18 @@ public class NewlineOutputStream extends FilterOutputStream {
 
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
-        int i;
+        // the part of the buffer is [off, off + len): its end is not len (it is when off is 0 only)
+        int end = off + len;
+        int start = off;
 
-        for (i=off; i<len; i++) {
+        for (int i = off; i < end; i++) {
             if (b[i] == '\n') {
-                out.write(b, off, i-off);
+                out.write(b, start, i - start);
                 out.write(lineSeparator);
-                off = i+1;
+                start = i + 1;
             }
         }
 
-        out.write(b, off, i-off);
+        out.write(b, start, end - start);
     }
 }
