@@ -55,6 +55,11 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
     private static final String NEW_LINE_3_TABS = "\n\t\t\t";
     protected static final File FILE = ConfigFileUtil.getJDGUIConfigFile();
 
+    /** The file of the configuration (the one of the user; a test gives another one). */
+    protected File getFile() {
+        return FILE;
+    }
+
     @Override
     public Configuration load() {
         // Default values
@@ -77,8 +82,8 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
         config.setRecentLoadDirectory(recentSaveDirectory);
         config.setRecentSaveDirectory(recentSaveDirectory);
 
-        if (FILE.exists()) {
-            try (FileInputStream fis = new FileInputStream(FILE)) {
+        if (getFile().exists()) {
+            try (FileInputStream fis = new FileInputStream(getFile())) {
                 XMLInputFactory factory = XMLInputFactory.newInstance();
                 factory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
                 factory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
@@ -221,7 +226,7 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
         Point l = configuration.getMainWindowLocation();
         Dimension s = configuration.getMainWindowSize();
 
-        try (FileOutputStream fos = new FileOutputStream(FILE)) {
+        try (FileOutputStream fos = new FileOutputStream(getFile())) {
             XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(fos);
 
             // Save values
