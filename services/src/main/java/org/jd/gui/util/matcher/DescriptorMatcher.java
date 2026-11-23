@@ -239,8 +239,8 @@ public final class DescriptorMatcher {
                     }
                     // L*/Inner; is a class of that name in any package, and a nested class: the '/' that follows the wildcard stands for the '$' that
                     // follows the name of the outer class (the other separators of the names are not interchangeable: pkg/Outer/Inner is not Outer$Inner)
-                    if (c != otherC && !(isWildcardBoundary(buffer, current, c) && otherC == '$')
-                            && !(isWildcardBoundary(otherBuffer, otherCurrent, otherC) && c == '$')) {
+                    if (c != otherC && (!isWildcardBoundary(buffer, current, c) || (otherC != '$'))
+                            && (!isWildcardBoundary(otherBuffer, otherCurrent, otherC) || (c != '$'))) {
                         return false;
                     }
                 }
