@@ -276,6 +276,10 @@ public class MainController implements API {
     @SuppressWarnings("unchecked")
     public void show(List<File> files) {
         SwingUtil.invokeLater(() -> {
+            // Initialize source loading before opening files. Opening a CLASS entry can
+            // create a DynamicPage immediately, which calls getSource().
+            sourceLoaderService = new SourceLoaderService();
+
             // Show main frame
             mainView.show(configuration.getMainWindowLocation(), configuration.getMainWindowSize(), configuration.isMainWindowMaximize());
             mainView.getMainFrame().addWindowListener(new WindowAdapter() {
@@ -328,7 +332,6 @@ public class MainController implements API {
                 checkDebuggablePage(currentPage);
                 selectLocationController = new SelectLocationController(MainController.this, mainFrame);
                 aboutController = new AboutController(mainFrame, isDarkMode());
-                sourceLoaderService = new SourceLoaderService();
                 // Add listeners
                 mainFrame.addComponentListener(new MainFrameListener(configuration));
                 // Set drag and drop (DnD) files transfer handler
