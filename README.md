@@ -38,9 +38,6 @@ Looking for an Eclipse plugin ? Try [ECD++](https://github.com/nbauma109/ecd)
 
 # jd-gui-duo
 
-## Eclipse JDT licensing
-
-The application includes Eclipse JDT Core and Core Manipulation libraries licensed under the Eclipse Public License 2.0. Their combination with the GPLv3-covered JD-GUI-derived application requires a copyright-holder compatibility and redistribution review before release. See [Eclipse JDT licensing and distribution review](docs/eclipse-jdt-licensing.md). This documentation does not itself grant a linking exception.
 A 2-in-1 JAVA decompiler based on JD-CORE v0 and v1.
 
 Initially a duo of decompilers were supported (JD-Core v0 & v1), but now other decompilers are supported with the [transformer-api](https://github.com/nbauma109/transformer-api) project.
