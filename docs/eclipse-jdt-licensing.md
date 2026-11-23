@@ -11,7 +11,7 @@ These Eclipse components are distributed under the Eclipse Public License versio
 
 ## Compatibility issue
 
-EPL-2.0 and GPLv3 are not automatically compatible for combined distribution merely because both licenses are open source. We must not assume that Eclipse JDT artifacts carry the optional GPL secondary-license designation. In particular, copying the GPLv3 section 7 linking exception from [static-analysis-maven-plugin](https://github.com/nbauma109/static-analysis-maven-plugin/blob/master/ECLIPSE-JDT-LINKING-EXCEPTION.md) would **not** automatically resolve this project's situation: JD-GUI Duo is derived from the original JD-GUI, and only the copyright holders of the relevant GPL-covered contributions can authorize an additional permission for their code.
+EPL-2.0 and GPLv3 are not automatically compatible for combined distribution merely because both licenses are open source. We must not assume that Eclipse JDT artifacts carry the optional GPL secondary-license designation. JD-GUI Duo is derived from the original JD-GUI, so a GPLv3 section 7 linking exception can apply to its GPL-covered contributions only when the relevant copyright holders authorize that additional permission. A project maintainer cannot grant it on behalf of unrelated copyright holders.
 
 ## Release review
 
