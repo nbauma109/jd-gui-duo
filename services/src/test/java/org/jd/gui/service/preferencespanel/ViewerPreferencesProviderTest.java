@@ -80,10 +80,11 @@ class ViewerPreferencesProviderTest {
     @Test
     void fontFamilyPreference_retainsUnavailableFamily() {
         ViewerPreferencesProvider provider = new ViewerPreferencesProvider();
-        String family = "Unavailable test font family";
-        while (Arrays.asList(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()).contains(family)) {
-            family += " unavailable";
+        StringBuilder familyBuilder = new StringBuilder("Unavailable test font family");
+        while (Arrays.asList(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()).contains(familyBuilder.toString())) {
+            familyBuilder.append(" unavailable");
         }
+        String family = familyBuilder.toString();
         Map<String, String> preferences = new HashMap<>();
         preferences.put(FONT_FAMILY_KEY, family);
 
