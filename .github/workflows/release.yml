@@ -58,7 +58,6 @@ jobs:
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         prerelease: false
-        automatic_release_tag: "${{ steps.release.outputs.tag }}"
         files: |
           **/jd-*.tar.xz
           **/jd-gui-duo-windows-*-setup.exe
