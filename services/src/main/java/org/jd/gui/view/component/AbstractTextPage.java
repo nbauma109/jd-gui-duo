@@ -481,15 +481,7 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
         boolean enabled = isSelectedWordHighlightEnabled(preferences);
         errorStrip.setShowMarkAll(enabled);
 
-        String fontSize = preferences.get(FONT_SIZE_KEY);
-
-        if (fontSize != null) {
-            try {
-                textArea.setFont(textArea.getFont().deriveFont(Float.parseFloat(fontSize)));
-            } catch (Exception e) {
-                assert ExceptionUtil.printStackTrace(e);
-            }
-        }
+        ThemeUtil.applyFontPreferences(preferences, textArea);
 
         if (!enabled && selectedWordHighlightActive) {
             clearActiveHighlights();

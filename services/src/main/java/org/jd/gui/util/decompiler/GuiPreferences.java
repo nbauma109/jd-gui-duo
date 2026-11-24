@@ -12,6 +12,7 @@ public final class GuiPreferences {
 
     public static final String MAXIMUM_DEPTH_KEY                 = "DirectoryIndexerPreferences.maximumDepth";
     public static final String FONT_SIZE_KEY                     = "ViewerPreferences.fontSize";
+    public static final String FONT_FAMILY_KEY                   = "ViewerPreferences.fontFamily";
     public static final String TREE_NODE_FONT_SIZE_KEY           = "ViewerPreferences.treeNodeFontSize";
     public static final String SELECTED_WORD_HIGHLIGHT_ENABLED   = "ViewerPreferences.selectedWordHighlight.enabled";
     public static final String SELECTED_WORD_HIGHLIGHT_COLOR     = "ViewerPreferences.selectedWordHighlight.color";

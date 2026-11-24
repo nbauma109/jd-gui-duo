@@ -14,7 +14,9 @@ import org.jd.gui.util.KeyBindings.Binding;
 import org.jd.gui.util.decompiler.GuiPreferences;
 
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.font.TextAttribute;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -28,6 +30,8 @@ import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 
 public class ThemeUtil {
+
+    private static final String DEFAULT_FONT_FAMILY_PROPERTY = "jd.defaultFontFamily";
 
     private ThemeUtil() {
     }
@@ -49,16 +53,30 @@ public class ThemeUtil {
         } catch (IOException e) {
             assert ExceptionUtil.printStackTrace(e);
         }
+        rSyntaxTextArea.putClientProperty(DEFAULT_FONT_FAMILY_PROPERTY, rSyntaxTextArea.getFont().getFamily());
+        applyFontPreferences(preferences, rSyntaxTextArea);
+        releaseDebugShortcuts(preferences, rSyntaxTextArea);
+        return rSyntaxTextArea;
+    }
+
+    public static void applyFontPreferences(Map<String, String> preferences, RSyntaxTextArea rSyntaxTextArea) {
+        String family = preferences.get(GuiPreferences.FONT_FAMILY_KEY);
+        if (family == null || family.isBlank()) {
+            family = (String) rSyntaxTextArea.getClientProperty(DEFAULT_FONT_FAMILY_PROPERTY);
+        }
+        Font font = rSyntaxTextArea.getFont();
+        if (family != null && !family.isBlank()) {
+            font = font.deriveFont(Map.of(TextAttribute.FAMILY, family));
+        }
         String fontSize = preferences.get(GuiPreferences.FONT_SIZE_KEY);
         if (fontSize != null) {
             try {
-                rSyntaxTextArea.setFont(rSyntaxTextArea.getFont().deriveFont(Float.parseFloat(fontSize)));
+                font = font.deriveFont(Float.parseFloat(fontSize));
             } catch (Exception e) {
                 assert ExceptionUtil.printStackTrace(e);
             }
         }
-        releaseDebugShortcuts(preferences, rSyntaxTextArea);
-        return rSyntaxTextArea;
+        rSyntaxTextArea.setFont(font);
     }
 
     private static final Binding[] DEBUG_BINDINGS = {

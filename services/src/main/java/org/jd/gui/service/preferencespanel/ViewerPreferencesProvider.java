@@ -16,6 +16,7 @@ import org.jd.gui.util.ThemeUtil;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 import java.util.Map;
 
@@ -23,6 +24,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
+import javax.swing.JComboBox;
 import javax.swing.JTree;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -35,6 +37,7 @@ import static org.jd.gui.util.decompiler.GuiPreferences.DEFAULT_SELECTED_WORD_HI
 import static org.jd.gui.util.decompiler.GuiPreferences.DEFAULT_SEARCH_HIGHLIGHT_COLOR;
 import static org.jd.gui.util.decompiler.GuiPreferences.DEFAULT_SELECTION_HIGHLIGHT_COLOR;
 import static org.jd.gui.util.decompiler.GuiPreferences.FONT_SIZE_KEY;
+import static org.jd.gui.util.decompiler.GuiPreferences.FONT_FAMILY_KEY;
 import static org.jd.gui.util.decompiler.GuiPreferences.SEARCH_HIGHLIGHT_COLOR;
 import static org.jd.gui.util.decompiler.GuiPreferences.SELECTION_HIGHLIGHT_COLOR;
 import static org.jd.gui.util.decompiler.GuiPreferences.SELECTED_WORD_HIGHLIGHT_COLOR;
@@ -46,9 +49,11 @@ public class ViewerPreferencesProvider extends JPanel implements PreferencesPane
     private static final long serialVersionUID = 1L;
     protected static final int MIN_VALUE = 2;
     protected static final int MAX_VALUE = 40;
+    protected static final String DEFAULT_FONT_FAMILY = "Default";
 
     protected transient PreferencesPanel.PreferencesPanelChangeListener listener;
     protected JTextField fontSizeTextField;
+    protected JComboBox<String> fontFamilyComboBox;
     protected JTextField treeNodeFontSizeTextField;
     protected JCheckBox selectedWordHighlightCheckBox;
     protected JButton selectedWordHighlightColorButton;
@@ -64,7 +69,16 @@ public class ViewerPreferencesProvider extends JPanel implements PreferencesPane
     protected Color selectionHighlightColor = Color.decode(DEFAULT_SELECTION_HIGHLIGHT_COLOR);
 
     public ViewerPreferencesProvider() {
-        super(new GridLayout(6, 2, 6, 4));
+        super(new GridLayout(7, 2, 6, 4));
+
+        add(new JLabel("Font Family Of Text Area: "));
+        fontFamilyComboBox = new JComboBox<>();
+        fontFamilyComboBox.addItem(DEFAULT_FONT_FAMILY);
+        for (String family : GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()) {
+            fontFamilyComboBox.addItem(family);
+        }
+        fontFamilyComboBox.addActionListener(_ -> firePreferencesChanged());
+        add(fontFamilyComboBox);
 
         add(new JLabel("Font Size Of Text Area (" + MIN_VALUE + ".." + MAX_VALUE + "): "));
 
@@ -127,6 +141,22 @@ public class ViewerPreferencesProvider extends JPanel implements PreferencesPane
 
     @Override
     public void loadPreferences(Map<String, String> preferences) {
+        String fontFamily = preferences.get(FONT_FAMILY_KEY);
+        if (fontFamily != null && !fontFamily.isBlank()) {
+            boolean found = false;
+            for (int i = 1; i < fontFamilyComboBox.getItemCount(); i++) {
+                if (fontFamily.equals(fontFamilyComboBox.getItemAt(i))) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                fontFamilyComboBox.addItem(fontFamily);
+            }
+            fontFamilyComboBox.setSelectedItem(fontFamily);
+        } else {
+            fontFamilyComboBox.setSelectedIndex(0);
+        }
         String fontSize = preferences.get(FONT_SIZE_KEY);
         String treeNodeFontSize = preferences.get(TREE_NODE_FONT_SIZE_KEY);
 
@@ -164,6 +194,11 @@ public class ViewerPreferencesProvider extends JPanel implements PreferencesPane
 
     @Override
     public void savePreferences(Map<String, String> preferences) {
+        if (fontFamilyComboBox.getSelectedIndex() == 0) {
+            preferences.remove(FONT_FAMILY_KEY);
+        } else {
+            preferences.put(FONT_FAMILY_KEY, (String) fontFamilyComboBox.getSelectedItem());
+        }
         preferences.put(FONT_SIZE_KEY, fontSizeTextField.getText());
         preferences.put(TREE_NODE_FONT_SIZE_KEY, treeNodeFontSizeTextField.getText());
         preferences.put(SELECTED_WORD_HIGHLIGHT_ENABLED, Boolean.toString(selectedWordHighlightCheckBox.isSelected()));
@@ -217,6 +252,7 @@ public class ViewerPreferencesProvider extends JPanel implements PreferencesPane
 
     @Override
     public void restoreDefaults() {
+        fontFamilyComboBox.setSelectedIndex(0);
         fontSizeTextField.setText("12");
         treeNodeFontSizeTextField.setText(String.valueOf(new JTree().getFont().getSize()));
         selectedWordHighlightCheckBox.setSelected(Boolean.parseBoolean(DEFAULT_SELECTED_WORD_HIGHLIGHT_ENABLED));
