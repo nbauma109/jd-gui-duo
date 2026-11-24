@@ -48,7 +48,7 @@ This project is built on top of original [JD-GUI](https://github.com/java-decomp
 
 The binaries are built and hosted at [jitpack.io](https://jitpack.io/p/nbauma109/jd-gui-duo) (identifiable with rocket logo) and the download buttons below retrieve the distributions directly from Jitpack servers :
 
-<a href="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/2.0.117/jd-gui-duo-2.0.117-windows.tar.xz?" target="_blank">
+<a href="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/2.0.118/jd-gui-duo-2.0.118-windows.tar.xz?" target="_blank">
   <img
     src="assets/badges/jitpack-download-windows.svg"
     width="200"
@@ -56,7 +56,7 @@ The binaries are built and hosted at [jitpack.io](https://jitpack.io/p/nbauma109
     alt="Download Windows archive">
 </a>
 <br>
-<a href="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/2.0.117/jd-gui-duo-2.0.117-linux.tar.xz?" target="_blank">
+<a href="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/2.0.118/jd-gui-duo-2.0.118-linux.tar.xz?" target="_blank">
   <img
     src="assets/badges/jitpack-download-linux.svg"
     width="200"
@@ -64,7 +64,7 @@ The binaries are built and hosted at [jitpack.io](https://jitpack.io/p/nbauma109
     alt="Download Linux archive">
 </a>
 <br>
-<a href="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/2.0.117/jd-gui-duo-2.0.117-macos.tar.xz?" target="_blank">
+<a href="https://jitpack.io/com/github/nbauma109/jd-gui-duo/jd-gui-duo/2.0.118/jd-gui-duo-2.0.118-macos.tar.xz?" target="_blank">
   <img
     src="assets/badges/jitpack-download-macos.svg"
     width="200"
