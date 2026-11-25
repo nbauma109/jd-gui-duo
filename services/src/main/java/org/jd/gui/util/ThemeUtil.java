@@ -32,7 +32,7 @@ import javax.swing.UIManager;
 
 public class ThemeUtil {
 
-    private static final String DEFAULT_FONT_FAMILY_PROPERTY = "jd.defaultFontFamily";
+    private static final String DEFAULT_FONT_PROPERTY = "jd.defaultFont";
 
     private ThemeUtil() {
     }
@@ -54,7 +54,7 @@ public class ThemeUtil {
         } catch (IOException e) {
             ExceptionUtil.printStackTrace(e);
         }
-        rSyntaxTextArea.putClientProperty(DEFAULT_FONT_FAMILY_PROPERTY, rSyntaxTextArea.getFont().getFamily());
+        rSyntaxTextArea.putClientProperty(DEFAULT_FONT_PROPERTY, rSyntaxTextArea.getFont());
         applyFontPreferences(preferences, rSyntaxTextArea);
         releaseDebugShortcuts(preferences, rSyntaxTextArea);
         return rSyntaxTextArea;
@@ -62,11 +62,12 @@ public class ThemeUtil {
 
     public static void applyFontPreferences(Map<String, String> preferences, RSyntaxTextArea rSyntaxTextArea) {
         String family = preferences.get(GuiPreferences.FONT_FAMILY_KEY);
-        if (family == null || family.isBlank()) {
-            family = (String) rSyntaxTextArea.getClientProperty(DEFAULT_FONT_FAMILY_PROPERTY);
-        }
         Font font = rSyntaxTextArea.getFont();
-        if (family != null && !family.isBlank()) {
+        if (family == null || family.isBlank()) {
+            if (rSyntaxTextArea.getClientProperty(DEFAULT_FONT_PROPERTY) instanceof Font defaultFont) {
+                font = defaultFont.deriveFont(font.getSize2D());
+            }
+        } else {
             Map<TextAttribute, Object> attributes = new HashMap<>(font.getAttributes());
             attributes.put(TextAttribute.FAMILY, family);
             font = new Font(attributes);
