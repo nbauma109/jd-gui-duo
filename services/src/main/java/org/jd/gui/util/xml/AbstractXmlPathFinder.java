@@ -105,8 +105,8 @@ public abstract class AbstractXmlPathFinder {
 
     /** The offset just after the tag that the location (a line and a column, from 1) is at. */
     private static int offsetOf(Location location, int[] lineStarts, int length) {
-        int line = Math.min(Math.max(location.getLineNumber(), 1), lineStarts.length);
-        return Math.min(Math.max(lineStarts[line - 1] + location.getColumnNumber() - 1, 0), length);
+        int line = Math.clamp(location.getLineNumber(), 1, lineStarts.length);
+        return Math.clamp(lineStarts[line - 1] + location.getColumnNumber() - 1L, 0, length);
     }
 
     /**
