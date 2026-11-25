@@ -195,12 +195,13 @@ class NexusSearchPanelTest {
         assertThat(snippets.get("Maven")).contains("<groupId>org.demo</groupId>", "<artifactId>tool</artifactId>", "<version>1.2</version>")
                 .doesNotContain("<classifier>", "<type>");
         assertThat(snippets.get("Gradle")).contains("implementation \"org.demo:tool:1.2\"");
-        assertThat(snippets).containsEntry("Ivy", "<dependency org=\"org.demo\" name=\"tool\" rev=\"1.2\" type=\"jar\" />\n");
-        assertThat(snippets).containsEntry("SBT", "libraryDependencies += \"org.demo\" % \"tool\" % \"1.2\"\n");
-        assertThat(snippets).containsEntry("Leiningen", "[\"org.demo/tool\" \"1.2\"]\n");
         assertThat(snippets.get("Grape")).contains("@Grab(group='org.demo', module='tool', version='1.2')");
-        assertThat(snippets).containsEntry("Buildr", "compile 'org.demo:tool:jar:1.2'\n");
-        assertThat(snippets).containsEntry("bld", "dependency(\"org.demo\", \"tool\", \"1.2\");\n");
+        assertThat(snippets)
+                .containsEntry("Ivy", "<dependency org=\"org.demo\" name=\"tool\" rev=\"1.2\" type=\"jar\" />\n")
+                .containsEntry("SBT", "libraryDependencies += \"org.demo\" % \"tool\" % \"1.2\"\n")
+                .containsEntry("Leiningen", "[\"org.demo/tool\" \"1.2\"]\n")
+                .containsEntry("Buildr", "compile 'org.demo:tool:jar:1.2'\n")
+                .containsEntry("bld", "dependency(\"org.demo\", \"tool\", \"1.2\");\n");
     }
 
     @Test
