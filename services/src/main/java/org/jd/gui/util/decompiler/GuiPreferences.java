@@ -18,7 +18,7 @@ public final class GuiPreferences {
     public static final String SELECTED_WORD_HIGHLIGHT_COLOR     = "ViewerPreferences.selectedWordHighlight.color";
     public static final String SEARCH_HIGHLIGHT_COLOR            = "ViewerPreferences.searchHighlight.color";
     public static final String SELECTION_HIGHLIGHT_COLOR         = "ViewerPreferences.selectionHighlight.color";
-    public static final String DEFAULT_SELECTED_WORD_HIGHLIGHT_ENABLED = Boolean.TRUE.toString();
+    public static final String DEFAULT_SELECTED_WORD_HIGHLIGHT_ENABLED = "true";
     public static final String DEFAULT_SELECTED_WORD_HIGHLIGHT_COLOR   = "0x66FF66";
     public static final String DEFAULT_SEARCH_HIGHLIGHT_COLOR          = "0xFFFF66";
     public static final String DEFAULT_SELECTION_HIGHLIGHT_COLOR       = "0xF49810";

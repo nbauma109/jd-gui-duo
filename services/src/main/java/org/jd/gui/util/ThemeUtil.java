@@ -73,7 +73,7 @@ public class ThemeUtil {
             try {
                 font = font.deriveFont(Float.parseFloat(fontSize));
             } catch (Exception e) {
-                assert ExceptionUtil.printStackTrace(e);
+                ExceptionUtil.printStackTrace(e);
             }
         }
         rSyntaxTextArea.setFont(font);
