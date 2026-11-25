@@ -9,12 +9,10 @@
 package org.jd.gui.service.preferencespanel;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
-import org.jd.gui.spi.PreferencesPanel;
 
 import com.beust.jcommander.Parameter;
 import com.strobel.decompiler.CommandLineOptions;
 
-import java.awt.GridLayout;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -26,21 +24,19 @@ import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public class ProcyonDecompilerPreferencesProvider extends JPanel implements PreferencesPanel {
+public class ProcyonDecompilerPreferencesProvider extends AbstractDecompilerPreferencesProvider {
 
     private static final long serialVersionUID = 1L;
 
     private static final Class<?>[] BOOLEAN_PARAM = { boolean.class };
     private static final Class<?>[] INT_PARAM = { int.class };
 
-    private Map<String, JComponent> components = new HashMap<>();
     private Map<String, String> defaults = new HashMap<>();
 
     public ProcyonDecompilerPreferencesProvider() {
-        super(new GridLayout(0, 2));
+        super(2, "true", "false");
         CommandLineOptions defaultOptions = new CommandLineOptions();
         Map<String, Field> fields = findFields();
         Map<String, Method> getters = findGetters();
@@ -68,7 +64,7 @@ public class ProcyonDecompilerPreferencesProvider extends JPanel implements Pref
                         JLabel label = new JLabel(optionKey);
                         label.setLabelFor(component);
                         label.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-                        components.put(optionKey, component);
+                        register(optionKey, component);
                         add(label);
                         add(component);
                         String fieldName = '_' + optionKey.substring(0, 1).toLowerCase() + optionKey.substring(1);
@@ -113,75 +109,7 @@ public class ProcyonDecompilerPreferencesProvider extends JPanel implements Pref
     }
 
     @Override
-    public void restoreDefaults() {
-        components.forEach(this::restoreDefault);
-    }
-
-    private void restoreDefault(String key, JComponent component) {
-        show(component, defaults.getOrDefault(key, ""));
-    }
-
-    // --- PreferencesPanel --- //
-    @Override
-    public String getPreferencesGroupTitle() {
-        return "Decompiler";
-    }
-
-    @Override
-    public String getPreferencesPanelTitle() {
-        return "Class file";
-    }
-
-    /** Shows the saved value of every option, and the default of an option that none is saved for: saving writes them all. */
-    @Override
-    public void loadPreferences(Map<String, String> preferences) {
-        restoreDefaults();
-        components.forEach((key, component) -> {
-            String value = preferences.get(key);
-            if (value != null) {
-                show(component, value);
-            }
-        });
-    }
-
-    private static void show(JComponent component, String value) {
-        if (component instanceof JCheckBox checkBox) {
-            checkBox.setSelected("true".equals(value));
-        } else if (component instanceof JTextField textField) {
-            textField.setText(value);
-        }
-    }
-
-    @Override
-    public void savePreferences(Map<String, String> preferences) {
-        for (Map.Entry<String, JComponent> componentEntry : components.entrySet()) {
-            String componentKey = componentEntry.getKey();
-            JComponent component = componentEntry.getValue();
-            if (component instanceof JCheckBox checkBox) {
-                preferences.put(componentKey, Boolean.toString(checkBox.isSelected()));
-            } else if (component instanceof JTextField textField) {
-                String text = textField.getText();
-                if (text.isEmpty()) {
-                    preferences.remove(componentKey);
-                } else {
-                    preferences.put(componentKey, text);
-                }
-            }
-        }
-    }
-
-    @Override
-    public boolean arePreferencesValid() {
-        return true;
-    }
-
-    @Override
-    public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {
-        // nothing to do
-    }
-
-    @Override
-    public boolean useCompactDisplay() {
-        return false;
+    protected String defaultValue(String key, JComponent component) {
+        return defaults.getOrDefault(key, "");
     }
 }

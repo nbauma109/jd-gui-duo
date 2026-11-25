@@ -12,7 +12,6 @@ import org.benf.cfr.reader.util.Troolean;
 import org.benf.cfr.reader.util.getopt.OptionDecoderParam;
 import org.benf.cfr.reader.util.getopt.OptionsImpl;
 import org.benf.cfr.reader.util.getopt.PermittedOptionProvider.ArgumentParam;
-import org.jd.gui.spi.PreferencesPanel;
 
 import com.strobel.reflection.BindingFlags;
 import com.strobel.reflection.FieldInfo;
@@ -20,7 +19,6 @@ import com.strobel.reflection.MethodInfo;
 import com.strobel.reflection.Type;
 import com.strobel.reflection.TypeList;
 
-import java.awt.GridLayout;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,20 +27,18 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public class CFRDecompilerPreferencesProvider extends JPanel implements PreferencesPanel {
+public class CFRDecompilerPreferencesProvider extends AbstractDecompilerPreferencesProvider {
 
     private static final long serialVersionUID = 1L;
 
     private static final String AUTO = "auto";
 
-    private Map<String, JComponent> components = new HashMap<>();
     private Map<String, String> defaults = new HashMap<>();
 
     public CFRDecompilerPreferencesProvider() {
-        super(new GridLayout(0, 6));
+        super(6, "true", "false");
         for (FieldInfo fieldInfo : Type.of(OptionsImpl.class).getFields()) {
             Type<?> fieldType = fieldInfo.getFieldType();
             if (fieldType.getName().startsWith("Argument")) {
@@ -74,7 +70,7 @@ public class CFRDecompilerPreferencesProvider extends JPanel implements Preferen
                 component.setToolTipText(helpTextHTML);
                 add(label);
                 add(component);
-                components.put(argInstance.getName(), component);
+                register(argInstance.getName(), component);
                 if (defaultValue != null && defaultValue.matches("\\w+")) {
                     defaults.put(argInstance.getName(), defaultValue);
                 } else if (component instanceof JComboBox) {
@@ -85,91 +81,16 @@ public class CFRDecompilerPreferencesProvider extends JPanel implements Preferen
     }
 
     @Override
-    public void restoreDefaults() {
-        components.forEach(this::restoreDefault);
-    }
-
-    private void restoreDefault(String key, JComponent component) {
-        if (component instanceof JComboBox<?> comboBox) {
-            // an option that can be "auto" is not saved when it is: none saved means "auto" (the first item)
-            comboBox.setSelectedIndex(0);
-            if (!AUTO.equals(comboBox.getSelectedItem())) {
-                comboBox.setSelectedItem(defaults.get(key));
-            }
-        } else {
-            show(component, defaults.getOrDefault(key, ""));
+    protected String defaultValue(String key, JComponent component) {
+        // an option that can be "auto" is not saved when it is: none saved means "auto"
+        if (component instanceof JComboBox<?> comboBox && AUTO.equals(comboBox.getItemAt(0))) {
+            return AUTO;
         }
-    }
-
-    // --- PreferencesPanel --- //
-    @Override
-    public String getPreferencesGroupTitle() {
-        return "Decompiler";
+        return defaults.getOrDefault(key, "");
     }
 
     @Override
-    public String getPreferencesPanelTitle() {
-        return "Class file";
-    }
-
-    /** Shows the saved value of every option, and the default of an option that none is saved for: saving writes them all. */
-    @Override
-    public void loadPreferences(Map<String, String> preferences) {
-        restoreDefaults();
-        components.forEach((key, component) -> {
-            String value = preferences.get(key);
-            if (value != null) {
-                show(component, value);
-            }
-        });
-    }
-
-    private static void show(JComponent component, String value) {
-        if (component instanceof JComboBox<?> comboBox) {
-            comboBox.setSelectedItem(value);
-        } else if (component instanceof JCheckBox checkBox) {
-            checkBox.setSelected("true".equals(value));
-        } else if (component instanceof JTextField textField) {
-            textField.setText(value);
-        }
-    }
-
-    @Override
-    public void savePreferences(Map<String, String> preferences) {
-        for (Map.Entry<String, JComponent> componentEntry : components.entrySet()) {
-            String componentKey = componentEntry.getKey();
-            JComponent component = componentEntry.getValue();
-            if (component instanceof JComboBox<?> comboBox) {
-                if (AUTO.equals(comboBox.getSelectedItem().toString())) {
-                    preferences.remove(componentKey);
-                } else {
-                    preferences.put(componentKey, comboBox.getSelectedItem().toString());
-                }
-            } else if (component instanceof JCheckBox checkBox) {
-                preferences.put(componentKey, Boolean.toString(checkBox.isSelected()));
-            } else if (component instanceof JTextField textField) {
-                String text = textField.getText();
-                if (text.isEmpty()) {
-                    preferences.remove(componentKey);
-                } else {
-                    preferences.put(componentKey, text);
-                }
-            }
-        }
-    }
-
-    @Override
-    public boolean arePreferencesValid() {
-        return true;
-    }
-
-    @Override
-    public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {
-        // nothing to do
-    }
-
-    @Override
-    public boolean useCompactDisplay() {
-        return false;
+    protected boolean isUnset(JComponent component, String value) {
+        return component instanceof JComboBox && AUTO.equals(value) || super.isUnset(component, value);
     }
 }
