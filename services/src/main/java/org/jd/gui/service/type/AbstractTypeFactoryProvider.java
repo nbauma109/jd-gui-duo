@@ -288,7 +288,7 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
                     }
 
                     // Write parameters
-                    index = writeSignature(sb, descriptor, length, index, false);
+                    index = writeSignature(sb, descriptor, length, index, varargsParameterIndex == 0);
 
                     int parameterIndex = 1;
 
