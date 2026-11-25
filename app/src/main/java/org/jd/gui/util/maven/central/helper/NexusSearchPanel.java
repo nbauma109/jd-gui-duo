@@ -781,15 +781,12 @@ public final class NexusSearchPanel extends JPanel {
     }
 
     private static String buildGradleSnippet(String g, String a, String v, String c, String p) {
-        String coords;
+        StringBuilder coords = new StringBuilder(g).append(':').append(a).append(':').append(v);
         if (StringUtils.isNotBlank(c)) {
-            if (StringUtils.isNotBlank(p) && !"jar".equalsIgnoreCase(p)) {
-                coords = g + ":" + a + ":" + v + ":" + c + "@" + p;
-            } else {
-                coords = g + ":" + a + ":" + v + ":" + c;
-            }
-        } else {
-            coords = g + ":" + a + ":" + v;
+            coords.append(':').append(c);
+        }
+        if (StringUtils.isNotBlank(p) && !"jar".equalsIgnoreCase(p)) {
+            coords.append('@').append(p);
         }
         return "dependencies {\n    implementation \"" + coords + "\"\n}\n";
     }
@@ -851,11 +848,12 @@ public final class NexusSearchPanel extends JPanel {
     private static String buildBuildrSnippet(String g, String a, String v, String c, String p) {
         StringBuilder sb = new StringBuilder();
         String packaging = (p == null || p.isBlank()) ? "jar" : p;
-        sb.append("compile '").append(g).append(":").append(a).append(":").append(packaging).append(":").append(v);
+        sb.append("compile '").append(g).append(":").append(a).append(":").append(packaging);
+        // the classifier comes before the version: group:id:type:classifier:version
         if (StringUtils.isNotBlank(c)) {
             sb.append(":").append(c);
         }
-        sb.append("'\n");
+        sb.append(":").append(v).append("'\n");
         return sb.toString();
     }
 
