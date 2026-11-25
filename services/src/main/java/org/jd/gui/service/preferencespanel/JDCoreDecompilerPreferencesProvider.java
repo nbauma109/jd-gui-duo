@@ -1,6 +1,5 @@
 package org.jd.gui.service.preferencespanel;
 
-import org.jd.gui.spi.PreferencesPanel;
 
 import java.awt.GridLayout;
 import java.util.Map;
@@ -18,7 +17,7 @@ import static jd.core.preferences.Preferences.REALIGN_LINE_NUMBERS;
 import static jd.core.preferences.Preferences.WRITE_LINE_NUMBERS;
 import static jd.core.preferences.Preferences.WRITE_METADATA;
 
-public class JDCoreDecompilerPreferencesProvider extends JPanel implements PreferencesPanel {
+public class JDCoreDecompilerPreferencesProvider extends JPanel implements DecompilerOptionsPanel {
 
     private static final long serialVersionUID = 1L;
     protected JCheckBox writeLineNumbersCheckBox;
@@ -81,34 +80,8 @@ public class JDCoreDecompilerPreferencesProvider extends JPanel implements Prefe
         preferences.put(DISPLAY_DEFAULT_CONSTRUCTOR, Boolean.toString(displayDefaultConstructorCheckBox.isSelected()));
     }
 
-    // --- PreferencesPanel --- //
-    @Override
-    public String getPreferencesGroupTitle() {
-        return "Decompiler";
-    }
-
-    @Override
-    public String getPreferencesPanelTitle() {
-        return "Class file";
-    }
-
-    @Override
-    public boolean arePreferencesValid() {
-        return true;
-    }
-
-    @Override
-    public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {
-        // nothing to do
-    }
-
     public void toggleOldOptions() {
         omitThisPrefixCheckBox.setEnabled(ENGINE_JD_CORE_V0.equals(decompileEngine.getSelectedItem()));
         displayDefaultConstructorCheckBox.setEnabled(ENGINE_JD_CORE_V0.equals(decompileEngine.getSelectedItem()));
-    }
-
-    @Override
-    public boolean useCompactDisplay() {
-        return false;
     }
 }

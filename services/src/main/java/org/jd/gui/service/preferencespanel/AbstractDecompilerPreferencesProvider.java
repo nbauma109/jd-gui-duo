@@ -8,21 +8,22 @@
 package org.jd.gui.service.preferencespanel;
 
 import org.apache.commons.lang3.math.NumberUtils;
-import org.jd.gui.spi.PreferencesPanel;
 
 import java.awt.GridLayout;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 
 /** The options of a decompiler, each one shown by a component: a check box, a combo box, a spinner or a text field. */
-abstract class AbstractDecompilerPreferencesProvider extends JPanel implements PreferencesPanel {
+abstract class AbstractDecompilerPreferencesProvider extends JPanel implements DecompilerOptionsPanel {
 
     private static final long serialVersionUID = 1L;
 
@@ -40,6 +41,17 @@ abstract class AbstractDecompilerPreferencesProvider extends JPanel implements P
 
     protected void register(String key, JComponent component) {
         components.put(key, component);
+    }
+
+    /** Adds the component of an option after a label with its name, and gives the label. */
+    protected JLabel addOption(String key, JComponent component) {
+        JLabel label = new JLabel(key);
+        label.setLabelFor(component);
+        label.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+        register(key, component);
+        add(label);
+        add(component);
+        return label;
     }
 
     /** What the component of an option shows when nothing is saved for it; empty when the option has no default. */
@@ -105,30 +117,5 @@ abstract class AbstractDecompilerPreferencesProvider extends JPanel implements P
                 preferences.put(key, value);
             }
         });
-    }
-
-    @Override
-    public String getPreferencesGroupTitle() {
-        return "Decompiler";
-    }
-
-    @Override
-    public String getPreferencesPanelTitle() {
-        return "Class file";
-    }
-
-    @Override
-    public boolean arePreferencesValid() {
-        return true;
-    }
-
-    @Override
-    public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {
-        // nothing to do
-    }
-
-    @Override
-    public boolean useCompactDisplay() {
-        return false;
     }
 }

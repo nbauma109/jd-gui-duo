@@ -14,10 +14,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
@@ -55,12 +53,7 @@ public class JadxDecompilerPreferencesProvider extends AbstractDecompilerPrefere
                         defaults.put(optionKey, Integer.toString(defaultValue));
                     }
                     if (component != null) {
-                        JLabel label = new JLabel(optionKey);
-                        label.setLabelFor(component);
-                        label.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-                        register(optionKey, component);
-                        add(label);
-                        add(component);
+                        addOption(optionKey, component);
                     }
                 } catch (Exception e) {
                     assert ExceptionUtil.printStackTrace(e);

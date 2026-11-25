@@ -20,7 +20,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -61,12 +60,7 @@ public class ProcyonDecompilerPreferencesProvider extends AbstractDecompilerPref
                         defaults.put(optionKey, Integer.toString(defaultValue));
                     }
                     if (component != null) {
-                        JLabel label = new JLabel(optionKey);
-                        label.setLabelFor(component);
-                        label.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-                        register(optionKey, component);
-                        add(label);
-                        add(component);
+                        JLabel label = addOption(optionKey, component);
                         String fieldName = '_' + optionKey.substring(0, 1).toLowerCase() + optionKey.substring(1);
                         Field field = fields.get(fieldName);
                         if (field == null) {
