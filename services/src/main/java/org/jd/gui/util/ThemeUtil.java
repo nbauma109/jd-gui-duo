@@ -14,9 +14,12 @@ import org.jd.gui.util.KeyBindings.Binding;
 import org.jd.gui.util.decompiler.GuiPreferences;
 
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.font.TextAttribute;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -28,6 +31,8 @@ import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 
 public class ThemeUtil {
+
+    private static final String DEFAULT_FONT_PROPERTY = "jd.defaultFont";
 
     private ThemeUtil() {
     }
@@ -47,18 +52,35 @@ public class ThemeUtil {
             Theme theme = Theme.load(resourceAsStream);
             theme.apply(rSyntaxTextArea);
         } catch (IOException e) {
-            assert ExceptionUtil.printStackTrace(e);
+            ExceptionUtil.printStackTrace(e);
+        }
+        rSyntaxTextArea.putClientProperty(DEFAULT_FONT_PROPERTY, rSyntaxTextArea.getFont());
+        applyFontPreferences(preferences, rSyntaxTextArea);
+        releaseDebugShortcuts(preferences, rSyntaxTextArea);
+        return rSyntaxTextArea;
+    }
+
+    public static void applyFontPreferences(Map<String, String> preferences, RSyntaxTextArea rSyntaxTextArea) {
+        String family = preferences.get(GuiPreferences.FONT_FAMILY_KEY);
+        Font font = rSyntaxTextArea.getFont();
+        if (family == null || family.isBlank()) {
+            if (rSyntaxTextArea.getClientProperty(DEFAULT_FONT_PROPERTY) instanceof Font defaultFont) {
+                font = defaultFont.deriveFont(font.getSize2D());
+            }
+        } else {
+            Map<TextAttribute, Object> attributes = new HashMap<>(font.getAttributes());
+            attributes.put(TextAttribute.FAMILY, family);
+            font = new Font(attributes);
         }
         String fontSize = preferences.get(GuiPreferences.FONT_SIZE_KEY);
         if (fontSize != null) {
             try {
-                rSyntaxTextArea.setFont(rSyntaxTextArea.getFont().deriveFont(Float.parseFloat(fontSize)));
+                font = font.deriveFont(Float.parseFloat(fontSize));
             } catch (Exception e) {
-                assert ExceptionUtil.printStackTrace(e);
+                ExceptionUtil.printStackTrace(e);
             }
         }
-        releaseDebugShortcuts(preferences, rSyntaxTextArea);
-        return rSyntaxTextArea;
+        rSyntaxTextArea.setFont(font);
     }
 
     private static final Binding[] DEBUG_BINDINGS = {
@@ -131,12 +153,12 @@ public class ThemeUtil {
      * Workaround for JDK-8370945: Windows LAF in Java 24+ lets the check-icon factory reserve
      * non-zero column space for regular JMenuItems, causing unwanted left padding in menus that
      * contain no checkboxes or radio buttons.
-     *
+
      * Fix: after the LAF is installed, replace the "MenuItem.checkIconFactory" UIManager key with
      * null (so the factory's instanceof-guard in BasicMenuItemUI fails) and set "MenuItem.checkIcon"
      * to a zero-width placeholder.  JCheckBoxMenuItem and JRadioButtonMenuItem are unaffected
      * because they read "CheckBoxMenuItem.*" / "RadioButtonMenuItem.*" keys, not "MenuItem.*".
-     *
+
      * Remove once OpenJDK PR #29730 ships in a released JDK.
      */
     public static void applyMenuItemPaddingFix() {
