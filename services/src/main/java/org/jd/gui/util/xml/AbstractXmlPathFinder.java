@@ -16,8 +16,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 import javax.xml.XMLConstants;
+import javax.xml.stream.Location;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -43,13 +45,16 @@ public abstract class AbstractXmlPathFinder {
 
     public void find(String text) {
         sb.setLength(0);
+        // the parser miscounts the columns after a lone CR: it reads LF instead, which keeps every position
+        String document = text.replaceAll("\r(?!\n)", "\n");
+        int[] lineStarts = lineStartOffsets(document);
 
         try {
             XMLInputFactory factory = XMLInputFactory.newInstance();
             factory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
             factory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
 
-            XMLStreamReader reader = factory.createXMLStreamReader(new StringReader(text));
+            XMLStreamReader reader = factory.createXMLStreamReader(new StringReader(document));
 
             String tagName = "";
             int offset = 0;
@@ -62,7 +67,8 @@ public abstract class AbstractXmlPathFinder {
                 case XMLStreamConstants.START_ELEMENT:
                     tagName = reader.getLocalName();
                     sb.append('/').append(tagName);
-                    offset = reader.getLocation().getCharacterOffset();
+                    // from the line and the column: the character offset that the parser of the JDK gives is wrong after some line breaks
+                    offset = offsetOf(reader.getLocation(), lineStarts, document.length());
                     break;
                 case XMLStreamConstants.END_ELEMENT:
                     sb.setLength(sb.length() - reader.getLocalName().length() - 1);
@@ -74,15 +80,10 @@ public abstract class AbstractXmlPathFinder {
                         String path = sb.toString();
 
                         if (setOfPaths.contains(path)) {
-                            // Search start offset
-                            while (offset > 0) {
-                                if (text.charAt(offset) == '>') {
-                                    break;
-                                }
-                                offset--;
+                            String value = reader.getText();
+                            if (!value.isBlank()) {
+                                handle(path.substring(1), value, positionOf(document, offset, value));
                             }
-
-                            handle(path.substring(1), reader.getText(), offset+1);
                         }
                     }
                     break;
@@ -93,5 +94,43 @@ public abstract class AbstractXmlPathFinder {
         }
     }
 
+    /** The offset of each line of the text; lines end with LF (or CR LF). */
+    private static int[] lineStartOffsets(String text) {
+        IntStream.Builder starts = IntStream.builder().add(0);
+        for (int i = text.indexOf('\n'); i != -1; i = text.indexOf('\n', i + 1)) {
+            starts.add(i + 1);
+        }
+        return starts.build().toArray();
+    }
+
+    /** The offset just after the tag that the location (a line and a column, from 1) is at. */
+    private static int offsetOf(Location location, int[] lineStarts, int length) {
+        int line = Math.min(Math.max(location.getLineNumber(), 1), lineStarts.length);
+        return Math.min(Math.max(lineStarts[line - 1] + location.getColumnNumber() - 1, 0), length);
+    }
+
+    /**
+     * The position to give with the value of an element that starts at the offset, so that the position plus the index of the trimmed value
+     * in the value is where the trimmed value is in the text. The text may differ from the value before it: comments, and line breaks that
+     * the parser normalizes.
+     */
+    private static int positionOf(String text, int offset, String value) {
+        int start = offset;
+        while (start < text.length()) {
+            if (Character.isWhitespace(text.charAt(start))) {
+                start++;
+            } else if (text.startsWith("<!--", start) && text.indexOf("-->", start + 4) != -1) {
+                start = text.indexOf("-->", start + 4) + 3;
+            } else {
+                break;
+            }
+        }
+        return start - value.indexOf(value.trim());
+    }
+
+    /**
+     * Called for the value, which is not blank, of every element at one of the paths: the trimmed value starts at
+     * {@code position + text.indexOf(text.trim())} in the document.
+     */
     public abstract void handle(String path, String text, int position);
 }
