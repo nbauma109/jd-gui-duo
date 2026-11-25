@@ -19,6 +19,7 @@ import java.awt.Graphics;
 import java.awt.font.TextAttribute;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -66,7 +67,9 @@ public class ThemeUtil {
         }
         Font font = rSyntaxTextArea.getFont();
         if (family != null && !family.isBlank()) {
-            font = font.deriveFont(Map.of(TextAttribute.FAMILY, family));
+            Map<TextAttribute, Object> attributes = new HashMap<>(font.getAttributes());
+            attributes.put(TextAttribute.FAMILY, family);
+            font = new Font(attributes);
         }
         String fontSize = preferences.get(GuiPreferences.FONT_SIZE_KEY);
         if (fontSize != null) {
