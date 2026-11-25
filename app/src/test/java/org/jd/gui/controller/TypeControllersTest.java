@@ -175,7 +175,7 @@ class TypeControllersTest {
     }
 
     @Test
-    void theOutlineOfATypeListsItsFieldsAndItsMethods() throws Exception {
+    void theOutlineOfATypeListsItsFieldsAndItsMethods() {
         QuickOutlineController controller = new QuickOutlineController(api, null);
         Container.Entry widget = entry("demo/Widget");
         Type type = factory.make(api, widget, "demo/Widget");
