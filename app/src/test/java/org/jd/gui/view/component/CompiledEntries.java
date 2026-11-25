@@ -33,12 +33,12 @@ import javax.tools.ToolProvider;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /** What the tests of the pages of class files share: sources compiled into the entries of an archive, and the API they are shown with. */
-final class CompiledEntries {
+public final class CompiledEntries {
 
     private CompiledEntries() {
     }
 
-    static final class FakeEntry implements Container.Entry {
+    public static final class FakeEntry implements Container.Entry {
         private final String path;
         private final byte[] bytes;
         private FakeEntry parent;
@@ -62,7 +62,7 @@ final class CompiledEntries {
     }
 
     /** An entry in an archive that holds it, together with the other entries given. */
-    static FakeEntry archive(Map<String, byte[]> files, String path) {
+    public static FakeEntry archive(Map<String, byte[]> files, String path) {
         FakeEntry root = new FakeEntry("", null);
         Container container = new Container() {
             public String getType() { return "jar"; }
@@ -86,7 +86,7 @@ final class CompiledEntries {
     }
 
     /** Compiles the sources (path and text) and gives the class files by their path. */
-    static Map<String, byte[]> compile(Path directory, Map<String, String> sources) throws IOException {
+    public static Map<String, byte[]> compile(Path directory, Map<String, String> sources) throws IOException {
         Path classes = directory.resolve("classes");
         List<String> arguments = new ArrayList<>(List.of("-g", "-d", classes.toString()));
         for (Map.Entry<String, String> source : sources.entrySet()) {
@@ -106,19 +106,19 @@ final class CompiledEntries {
         return compiled;
     }
 
-    static Map<String, String> preferences() {
+    public static Map<String, String> preferences() {
         Map<String, String> preferences = new HashMap<>();
         preferences.put(GuiPreferences.ERROR_BACKGROUND_COLOR, "0xFF6666");
         return preferences;
     }
 
-    static API api(Map<String, String> preferences) {
+    public static API api(Map<String, String> preferences) {
         return (API) Proxy.newProxyInstance(CompiledEntries.class.getClassLoader(), new Class<?>[] {API.class},
                 (proxy, method, args) -> "getPreferences".equals(method.getName()) ? preferences : null);
     }
 
     /** Indexes that are ready, where the index of a name has the keys given. */
-    static List<Future<Indexes>> indexes(Map<String, List<String>> keys) {
+    public static List<Future<Indexes>> indexes(Map<String, List<String>> keys) {
         @SuppressWarnings({"unchecked", "rawtypes"})
         Indexes indexes = name -> {
             Map<String, Object> index = new HashMap<>();
