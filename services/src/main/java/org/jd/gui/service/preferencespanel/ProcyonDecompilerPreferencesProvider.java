@@ -9,12 +9,10 @@
 package org.jd.gui.service.preferencespanel;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
-import org.jd.gui.spi.PreferencesPanel;
 
 import com.beust.jcommander.Parameter;
 import com.strobel.decompiler.CommandLineOptions;
 
-import java.awt.GridLayout;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -22,25 +20,22 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public class ProcyonDecompilerPreferencesProvider extends JPanel implements PreferencesPanel {
+public class ProcyonDecompilerPreferencesProvider extends AbstractDecompilerPreferencesProvider {
 
     private static final long serialVersionUID = 1L;
 
     private static final Class<?>[] BOOLEAN_PARAM = { boolean.class };
     private static final Class<?>[] INT_PARAM = { int.class };
 
-    private Map<String, JComponent> components = new HashMap<>();
     private Map<String, String> defaults = new HashMap<>();
 
     public ProcyonDecompilerPreferencesProvider() {
-        super(new GridLayout(0, 2));
+        super(2, "true", "false");
         CommandLineOptions defaultOptions = new CommandLineOptions();
         Map<String, Field> fields = findFields();
         Map<String, Method> getters = findGetters();
@@ -65,12 +60,7 @@ public class ProcyonDecompilerPreferencesProvider extends JPanel implements Pref
                         defaults.put(optionKey, Integer.toString(defaultValue));
                     }
                     if (component != null) {
-                        JLabel label = new JLabel(optionKey);
-                        label.setLabelFor(component);
-                        label.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-                        components.put(optionKey, component);
-                        add(label);
-                        add(component);
+                        JLabel label = addOption(optionKey, component);
                         String fieldName = '_' + optionKey.substring(0, 1).toLowerCase() + optionKey.substring(1);
                         Field field = fields.get(fieldName);
                         if (field == null) {
@@ -113,82 +103,7 @@ public class ProcyonDecompilerPreferencesProvider extends JPanel implements Pref
     }
 
     @Override
-    public void restoreDefaults() {
-        for (Map.Entry<String, String> defaultEntry : defaults.entrySet()) {
-            String componentKey = defaultEntry.getKey();
-            String defaultValue = defaultEntry.getValue();
-            JComponent component = components.get(componentKey);
-            if (component != null) {
-                if (component instanceof JCheckBox checkBox) {
-                    checkBox.setSelected("true".equals(defaultValue));
-                } else if (component instanceof JTextField textField) {
-                    textField.setText(defaultValue);
-                }
-            }
-        }
-    }
-
-    // --- PreferencesPanel --- //
-    @Override
-    public String getPreferencesGroupTitle() {
-        return "Decompiler";
-    }
-
-    @Override
-    public String getPreferencesPanelTitle() {
-        return "Class file";
-    }
-
-    @Override
-    public void loadPreferences(Map<String, String> preferences) {
-        for (Map.Entry<String, String> preference : preferences.entrySet()) {
-            String preferenceKey = preference.getKey();
-            String preferenceValue = preference.getValue();
-            JComponent component = components.get(preferenceKey);
-            if (preferenceValue != null) {
-                if (component instanceof JCheckBox checkBox) {
-                    checkBox.setSelected("true".equals(preferenceValue));
-                } else if (component instanceof JTextField textField) {
-                    textField.setText(preferenceValue);
-                }
-            } else if (component instanceof JCheckBox checkBox) {
-                checkBox.setSelected("true".equals(defaults.get(preferenceKey)));
-            } else if (component instanceof JTextField textField) {
-                textField.setText(defaults.getOrDefault(preferenceKey, ""));
-            }
-        }
-    }
-
-    @Override
-    public void savePreferences(Map<String, String> preferences) {
-        for (Map.Entry<String, JComponent> componentEntry : components.entrySet()) {
-            String componentKey = componentEntry.getKey();
-            JComponent component = componentEntry.getValue();
-            if (component instanceof JCheckBox checkBox) {
-                preferences.put(componentKey, Boolean.toString(checkBox.isSelected()));
-            } else if (component instanceof JTextField textField) {
-                String text = textField.getText();
-                if (text.isEmpty()) {
-                    preferences.remove(componentKey);
-                } else {
-                    preferences.put(componentKey, text);
-                }
-            }
-        }
-    }
-
-    @Override
-    public boolean arePreferencesValid() {
-        return true;
-    }
-
-    @Override
-    public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {
-        // nothing to do
-    }
-
-    @Override
-    public boolean useCompactDisplay() {
-        return false;
+    protected String defaultValue(String key, JComponent component) {
+        return defaults.getOrDefault(key, "");
     }
 }

@@ -8,21 +8,24 @@
 
 package org.jd.gui.service.preferencespanel;
 
-import org.jd.gui.spi.PreferencesPanel;
 import org.vineflower.java.decompiler.api.DecompilerOption;
 import org.vineflower.java.decompiler.main.Init;
 import org.vineflower.java.decompiler.main.extern.IFernflowerLogger.Severity;
 import org.vineflower.java.decompiler.main.extern.IFernflowerPreferences;
 
 import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JSpinner;
+import javax.swing.JTextField;
 
-public class VineflowerDecompilerPreferencesProvider extends JPanel implements PreferencesPanel {
+public class VineflowerDecompilerPreferencesProvider extends AbstractDecompilerPreferencesProvider {
 
     private static final long serialVersionUID = 1L;
 
@@ -32,10 +35,8 @@ public class VineflowerDecompilerPreferencesProvider extends JPanel implements P
     private static final String[] LOG_LEVELS = Arrays.stream(Severity.values()).map(Severity::name).toArray(String[]::new);
     private static final Dimension FIELD_DIMENSION = new Dimension(250, 20);
 
-    private final Map<String, JComponent> components = new HashMap<>();
-
     public VineflowerDecompilerPreferencesProvider() {
-        super(new GridLayout(0, 4));
+        super(4, TRUE, FALSE);
 
         // Initialize Vineflower (to load plugins)
         Init.init();
@@ -57,7 +58,7 @@ public class VineflowerDecompilerPreferencesProvider extends JPanel implements P
                 }
             };
 
-            components.put(option.id(), component);
+            register(option.id(), component);
             JLabel label = new JLabel(option.name());
             label.setToolTipText(option.description());
             label.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
@@ -67,7 +68,7 @@ public class VineflowerDecompilerPreferencesProvider extends JPanel implements P
         }
 
         JComponent dumpLines = new JCheckBox();
-        components.put(IFernflowerPreferences.DUMP_ORIGINAL_LINES, dumpLines);
+        register(IFernflowerPreferences.DUMP_ORIGINAL_LINES, dumpLines);
         JLabel linesLabel = new JLabel("Dump Line Numbers");
         linesLabel.setToolTipText("Dump original line numbers in the output");
         linesLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
@@ -75,98 +76,10 @@ public class VineflowerDecompilerPreferencesProvider extends JPanel implements P
         add(dumpLines);
     }
 
+    /** An option without a default (and the dump of the line numbers, which is not an option of the decompiler) is off, or empty. */
     @Override
-    public void restoreDefaults() {
-        for (DecompilerOption option : DecompilerOption.getAll()) {
-            JComponent component = components.get(option.id());
-            if ("log-level".equals(option.id())) {
-                ((JComboBox<?>) component).setSelectedItem(option.defaultValue());
-                continue;
-            }
-
-            switch (option.type()) {
-                case BOOLEAN -> ((JCheckBox) component).setSelected(TRUE.equals(option.defaultValue()));
-                case STRING -> ((JTextField) component).setText(option.defaultValue());
-                case INTEGER -> ((JSpinner) component).setValue(Integer.parseInt(option.defaultValue()));
-            }
-        }
-
-        JCheckBox dumpLines = (JCheckBox) components.get(IFernflowerPreferences.DUMP_ORIGINAL_LINES);
-        dumpLines.setSelected(false);
-    }
-
-    // --- PreferencesPanel --- //
-    @Override
-    public String getPreferencesGroupTitle() {
-        return "Decompiler";
-    }
-
-    @Override
-    public String getPreferencesPanelTitle() {
-        return "Class file";
-    }
-
-    @Override
-    public void loadPreferences(Map<String, String> preferences) {
-        Map<String, String> defaults = new HashMap<>();
-        for (DecompilerOption option : DecompilerOption.getAll()) {
-            defaults.put(option.id(), option.defaultValue());
-        }
-
-        for (Map.Entry<String, String> preference : preferences.entrySet()) {
-            String preferenceKey = preference.getKey();
-            String preferenceValue = preference.getValue();
-            JComponent component = components.get(preferenceKey);
-            if (preferenceValue != null) {
-                if (component instanceof JComboBox<?> comboBox) {
-                    comboBox.setSelectedItem(preferenceValue);
-                } else if (component instanceof JCheckBox checkBox) {
-                    checkBox.setSelected(TRUE.equals(preferenceValue));
-                } else if (component instanceof JTextField textField) {
-                    textField.setText(preferenceValue);
-                }
-            } else if (component instanceof JComboBox<?> comboBox) {
-                comboBox.setSelectedItem(defaults.get(preferenceKey));
-            } else if (component instanceof JCheckBox checkBox) {
-                checkBox.setSelected(TRUE.equals(defaults.get(preferenceKey)));
-            } else if (component instanceof JTextField textField) {
-                textField.setText(defaults.getOrDefault(preferenceKey, ""));
-            }
-        }
-    }
-
-    @Override
-    public void savePreferences(Map<String, String> preferences) {
-        for (Map.Entry<String, JComponent> componentEntry : components.entrySet()) {
-            String componentKey = componentEntry.getKey();
-            JComponent component = componentEntry.getValue();
-            if (component instanceof JComboBox<?> comboBox) {
-                preferences.put(componentKey, comboBox.getSelectedItem().toString());
-            } else if (component instanceof JCheckBox checkBox) {
-                preferences.put(componentKey, checkBox.isSelected() ? TRUE : FALSE);
-            } else if (component instanceof JTextField textField) {
-                String text = textField.getText();
-                if (text.isEmpty()) {
-                    preferences.remove(componentKey);
-                } else {
-                    preferences.put(componentKey, text);
-                }
-            }
-        }
-    }
-
-    @Override
-    public boolean arePreferencesValid() {
-        return true;
-    }
-
-    @Override
-    public void addPreferencesChangeListener(PreferencesPanel.PreferencesPanelChangeListener listener) {
-        // nothing to do
-    }
-
-    @Override
-    public boolean useCompactDisplay() {
-        return false;
+    protected String defaultValue(String key, JComponent component) {
+        return DecompilerOption.getAll().stream().filter(option -> option.id().equals(key))
+                .map(option -> Objects.toString(option.defaultValue(), "")).findFirst().orElse("");
     }
 }
