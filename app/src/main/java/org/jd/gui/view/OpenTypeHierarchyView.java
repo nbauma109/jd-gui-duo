@@ -262,7 +262,7 @@ public class OpenTypeHierarchyView {
         TreeNode treeNode = new TreeNode(entry, typeName, entries, new TreeNodeBean(type));
         List<String> childTypeNames = getSubTypeNames(typeName);
 
-        if (childTypeNames != null) {
+        if (!childTypeNames.isEmpty()) {
             // Add dummy node
             treeNode.add(new DefaultMutableTreeNode());
         }
@@ -307,13 +307,13 @@ public class OpenTypeHierarchyView {
             }
             // Entry not found --> Most probable hypothesis : Java type entry
             int lastPackageSeparatorIndex = superTypeName.lastIndexOf('/');
-            String packaze = superTypeName.substring(0, lastPackageSeparatorIndex).replace('/', '.');
+            String packaze = superTypeName.substring(0, Math.max(lastPackageSeparatorIndex, 0)).replace('/', '.');
             String name = superTypeName.substring(lastPackageSeparatorIndex + 1).replace('$', '.');
-            String label = packaze != null ? name + " - " + packaze : name;
+            String label = packaze.isEmpty() ? name : name + " - " + packaze;
             Icon icon = (type.getFlags() & Type.FLAG_INTERFACE) == 0 ? ROOT_CLASS_ICON : ROOT_INTERFACE_ICON;
             TreeNode rootTreeNode = new TreeNode(null, superTypeName, null, new TreeNodeBean(label, icon));
 
-            if (packaze != null && packaze.startsWith("java.")) {
+            if (packaze.startsWith("java.")) {
                 // If root type is a JDK type, do not create a tree node for each child types
                 rootTreeNode.add(treeNode);
             } else {
@@ -365,7 +365,7 @@ public class OpenTypeHierarchyView {
                     }
                 }
 
-                if (entry == null) {
+                if (entry == null && !entries.isEmpty()) {
                     // Not found -> Choose 1st one
                     entry = entries.get(0);
                 }
@@ -492,7 +492,8 @@ public class OpenTypeHierarchyView {
         private final Icon icon;
 
         TreeNodeBean(Type type) {
-            this.label = type.getDisplayPackageName() != null ? type.getDisplayTypeName() + " - " + type.getDisplayPackageName() : type.getDisplayTypeName();
+            String packaze = type.getDisplayPackageName();
+            this.label = packaze == null || packaze.isEmpty() ? type.getDisplayTypeName() : type.getDisplayTypeName() + " - " + packaze;
             this.icon = type.getIcon();
         }
 
