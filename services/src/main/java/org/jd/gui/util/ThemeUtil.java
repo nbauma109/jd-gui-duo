@@ -51,7 +51,7 @@ public class ThemeUtil {
             Theme theme = Theme.load(resourceAsStream);
             theme.apply(rSyntaxTextArea);
         } catch (IOException e) {
-            assert ExceptionUtil.printStackTrace(e);
+            ExceptionUtil.printStackTrace(e);
         }
         rSyntaxTextArea.putClientProperty(DEFAULT_FONT_FAMILY_PROPERTY, rSyntaxTextArea.getFont().getFamily());
         applyFontPreferences(preferences, rSyntaxTextArea);
@@ -149,12 +149,12 @@ public class ThemeUtil {
      * Workaround for JDK-8370945: Windows LAF in Java 24+ lets the check-icon factory reserve
      * non-zero column space for regular JMenuItems, causing unwanted left padding in menus that
      * contain no checkboxes or radio buttons.
-     *
+
      * Fix: after the LAF is installed, replace the "MenuItem.checkIconFactory" UIManager key with
      * null (so the factory's instanceof-guard in BasicMenuItemUI fails) and set "MenuItem.checkIcon"
      * to a zero-width placeholder.  JCheckBoxMenuItem and JRadioButtonMenuItem are unaffected
      * because they read "CheckBoxMenuItem.*" / "RadioButtonMenuItem.*" keys, not "MenuItem.*".
-     *
+
      * Remove once OpenJDK PR #29730 ships in a released JDK.
      */
     public static void applyMenuItemPaddingFix() {
