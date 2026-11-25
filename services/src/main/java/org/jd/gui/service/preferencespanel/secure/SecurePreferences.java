@@ -22,6 +22,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -98,22 +99,21 @@ public final class SecurePreferences {
 
     /**
      * Decrypts an envelope produced by encrypt.
+     *
+     * @throws GeneralSecurityException also when the value is not such an envelope, for instance after the preferences were edited
      */
     public static String decrypt(char[] masterPassword, String base64Envelope) throws GeneralSecurityException {
-        byte[] envelope = Base64.getDecoder().decode(base64Envelope);
-        ByteBuffer bb = ByteBuffer.wrap(envelope).order(ByteOrder.BIG_ENDIAN);
-
-        int saltLen = Short.toUnsignedInt(bb.getShort());
-        byte[] salt = new byte[saltLen];
-        bb.get(salt);
-
-        int ivLen = Short.toUnsignedInt(bb.getShort());
-        byte[] iv = new byte[ivLen];
-        bb.get(iv);
-
-        int ctLen = bb.getInt();
-        byte[] ct = new byte[ctLen];
-        bb.get(ct);
+        byte[] salt;
+        byte[] iv;
+        byte[] ct;
+        try {
+            ByteBuffer bb = ByteBuffer.wrap(Base64.getDecoder().decode(base64Envelope)).order(ByteOrder.BIG_ENDIAN);
+            salt = readBytes(bb, Short.toUnsignedInt(bb.getShort()));
+            iv = readBytes(bb, Short.toUnsignedInt(bb.getShort()));
+            ct = readBytes(bb, bb.getInt());
+        } catch (IllegalArgumentException | BufferUnderflowException e) {
+            throw new GeneralSecurityException("Not an encrypted value", e);
+        }
 
         SecretKeySpec key = deriveKey(masterPassword, salt);
         Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
@@ -147,6 +147,15 @@ public final class SecurePreferences {
         bb.putShort((short) iv.length).put(iv);
         bb.putInt(ct.length).put(ct);
         return bb.array();
+    }
+
+    private static byte[] readBytes(ByteBuffer bb, int length) {
+        if (length < 0 || length > bb.remaining()) {
+            throw new BufferUnderflowException();
+        }
+        byte[] bytes = new byte[length];
+        bb.get(bytes);
+        return bytes;
     }
 
     private static byte[] randomBytes(int n) {
