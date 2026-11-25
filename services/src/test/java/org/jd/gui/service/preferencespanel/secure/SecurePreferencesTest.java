@@ -66,7 +66,9 @@ class SecurePreferencesTest {
 
     @Test
     void anEnvelopeThatIsNotBase64IsRejected() {
-        assertThatThrownBy(() -> SecurePreferences.decrypt(MASTER, "not base64 !!")).isInstanceOf(IllegalArgumentException.class);
+        // refused like a value that cannot be decrypted, which is what the callers handle
+        assertThatThrownBy(() -> SecurePreferences.decrypt(MASTER, "not base64 !!")).isInstanceOf(GeneralSecurityException.class)
+                .hasCauseInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
