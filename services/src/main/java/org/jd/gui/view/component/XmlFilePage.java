@@ -50,7 +50,8 @@ public class XmlFilePage extends TypeReferencePage implements UriGettable, Index
             String text = TextReader.getText(inputStream);
             // Create hyperlinks
             Pattern pattern = Pattern.compile("(?s)<\\s*bean[^<]+class\\s*=\\s*\"([^\"]*)\"");
-            Matcher matcher = pattern.matcher(textArea.getText());
+            // the text of the file: the text area is still empty at this point
+            Matcher matcher = pattern.matcher(text);
 
             while (matcher.find()) {
                 // Spring type reference found
