@@ -379,6 +379,10 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
     private boolean isCodeLine(int textLine) throws BadLocationException {
         int start = textArea.getLineStartOffset(textLine);
         String text = textArea.getText(start, textArea.getLineEndOffset(textLine) - start).trim();
+        // the code may follow comments, such as the one that holds the number of the original line
+        while (text.startsWith("/*") && text.indexOf("*/", 2) != -1) {
+            text = text.substring(text.indexOf("*/", 2) + 2).trim();
+        }
         return !text.isEmpty() && !text.startsWith("//") && !text.startsWith("/*") && !text.startsWith("*");
     }
 
