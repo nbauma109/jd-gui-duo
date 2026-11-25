@@ -142,20 +142,18 @@ class ContainerPanelFactoryProviderTest {
         map.put("a", "1");
         map.putAll(Map.of("b", "2"));
 
-        assertThat(map).hasSize(2).containsEntry("a", "1").containsKey("b").containsValue("2");
+        assertThat(map).isNotEmpty().hasSize(2).containsEntry("a", "1").containsKey("b").containsValue("2");
         assertThat(map.keySet()).containsExactlyInAnyOrder("a", "b");
         assertThat(map.values()).containsExactlyInAnyOrder("1", "2");
         assertThat(map.entrySet()).hasSize(2);
-        assertThat(map.isEmpty()).isFalse();
-        assertThat(map.equals(Map.of("a", "1", "b", "2"))).isTrue();
-        assertThat(map.hashCode()).isEqualTo(Map.of("a", "1", "b", "2").hashCode());
+        assertThat((Object) map).isEqualTo(Map.of("a", "1", "b", "2")).hasSameHashCodeAs(Map.of("a", "1", "b", "2"));
         assertThat(map.remove("a")).isEqualTo("1");
         map.clear();
         assertThat(map).isEmpty();
 
         ContainerPanelFactoryProvider.DelegatedMapMapWithDefault first = new ContainerPanelFactoryProvider.DelegatedMapMapWithDefault(new java.util.HashMap<>());
         ContainerPanelFactoryProvider.DelegatedMapMapWithDefault same = new ContainerPanelFactoryProvider.DelegatedMapMapWithDefault(new java.util.HashMap<>());
-        assertThat(first).isEqualTo(first).isEqualTo(same).hasSameHashCodeAs(same);
+        assertThat(first).isEqualTo(same).hasSameHashCodeAs(same);
         assertThat(first.get("strings")).isSameAs(first.get("strings"));
         assertThat(first).isNotEqualTo(same);
     }
