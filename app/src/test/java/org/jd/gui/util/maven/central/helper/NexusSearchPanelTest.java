@@ -160,9 +160,8 @@ class NexusSearchPanelTest {
             search(mode, first);
         }
 
-        assertThat(asked).startsWith(call);
         // the search of a hash has one page only, the others go on until an empty one
-        assertThat(asked).hasSize(mode == 1 ? 1 : 2);
+        assertThat(asked).startsWith(call).hasSize(mode == 1 ? 1 : 2);
         assertThat(table().getRowCount()).isEqualTo(1);
         assertThat(table().getSelectedRow()).isZero();
     }
@@ -196,12 +195,12 @@ class NexusSearchPanelTest {
         assertThat(snippets.get("Maven")).contains("<groupId>org.demo</groupId>", "<artifactId>tool</artifactId>", "<version>1.2</version>")
                 .doesNotContain("<classifier>", "<type>");
         assertThat(snippets.get("Gradle")).contains("implementation \"org.demo:tool:1.2\"");
-        assertThat(snippets.get("Ivy")).isEqualTo("<dependency org=\"org.demo\" name=\"tool\" rev=\"1.2\" type=\"jar\" />\n");
-        assertThat(snippets.get("SBT")).isEqualTo("libraryDependencies += \"org.demo\" % \"tool\" % \"1.2\"\n");
-        assertThat(snippets.get("Leiningen")).isEqualTo("[\"org.demo/tool\" \"1.2\"]\n");
+        assertThat(snippets).containsEntry("Ivy", "<dependency org=\"org.demo\" name=\"tool\" rev=\"1.2\" type=\"jar\" />\n");
+        assertThat(snippets).containsEntry("SBT", "libraryDependencies += \"org.demo\" % \"tool\" % \"1.2\"\n");
+        assertThat(snippets).containsEntry("Leiningen", "[\"org.demo/tool\" \"1.2\"]\n");
         assertThat(snippets.get("Grape")).contains("@Grab(group='org.demo', module='tool', version='1.2')");
-        assertThat(snippets.get("Buildr")).isEqualTo("compile 'org.demo:tool:jar:1.2'\n");
-        assertThat(snippets.get("bld")).isEqualTo("dependency(\"org.demo\", \"tool\", \"1.2\");\n");
+        assertThat(snippets).containsEntry("Buildr", "compile 'org.demo:tool:jar:1.2'\n");
+        assertThat(snippets).containsEntry("bld", "dependency(\"org.demo\", \"tool\", \"1.2\");\n");
     }
 
     @Test
@@ -218,7 +217,7 @@ class NexusSearchPanelTest {
         assertThat(snippets.get("SBT")).contains("classifier \"linux\"");
         assertThat(snippets.get("Leiningen")).contains(":classifier \"linux\" :extension \"war\"");
         assertThat(snippets.get("Grape")).contains("classifier='linux', type='war'");
-        assertThat(snippets.get("Buildr")).isEqualTo("compile 'org.demo:tool:war:linux:1.3'\n");
+        assertThat(snippets).containsEntry("Buildr", "compile 'org.demo:tool:war:linux:1.3'\n");
         assertThat(snippets.get("bld")).contains("classifier=\"linux\", type=\"war\"");
         SwingUtilities.invokeAndWait(() -> table().clearSelection());
         assertThat(snippets().values()).containsOnly("");
