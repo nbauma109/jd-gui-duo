@@ -79,6 +79,9 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
                 e.printStackTrace();
             }
         }
+        // the links of the text shown before (the checkbox rebuilds the text) are not those of this one
+        hyperlinks.clear();
+
         // Parse hyperlinks. Docs:
         // - http://docs.oracle.com/javase/7/docs/technotes/guides/jar/jar.html
         // - http://docs.oracle.com/javase/7/docs/api/java/lang/instrument/package-summary.html
@@ -87,7 +90,7 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
             // Example: Main-Class: jd.gui.App
             int startIndex = skipSeparators(text, startLineIndex + "Main-Class:".length());
             int endIndex = searchEndIndexOfValue(text, startLineIndex, startIndex);
-            String typeName = text.substring(startIndex, endIndex);
+            String typeName = getValue(text, startIndex, endIndex); // a long value goes on over several lines
             String internalTypeName = typeName.replace('.', '/');
             addHyperlink(new ManifestHyperlinkData(startIndex, endIndex, internalTypeName + "-main-([Ljava/lang/String;)V"));
         }
@@ -97,7 +100,7 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
             // Example: Premain-Class: package.JavaAgent
             int startIndex = skipSeparators(text, startLineIndex + "Premain-Class:".length());
             int endIndex = searchEndIndexOfValue(text, startLineIndex, startIndex);
-            String typeName = text.substring(startIndex, endIndex);
+            String typeName = getValue(text, startIndex, endIndex); // a long value goes on over several lines
             String internalTypeName = typeName.replace('.', '/');
             // Undefined parameters : 2 candidate methods
             // http://docs.oracle.com/javase/6/docs/api/java/lang/instrument/package-summary.html
@@ -105,6 +108,8 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
         }
         // Display
         setText(text);
+        // the new links are enabled as the indexes say
+        indexesChanged(collectionOfFutureIndexes);
     }
 
     public int skipSeparators(String text, int index) {
