@@ -71,18 +71,11 @@ public class FernflowerDecompilerPreferencesProvider extends JPanel implements P
 
     @Override
     public void restoreDefaults() {
-        for (Map.Entry<String, String> defaultEntry : IFernflowerPreferences.DEFAULTS.entrySet()) {
-            String componentKey = defaultEntry.getKey();
-            Object defaultValue = defaultEntry.getValue();
-            JComponent component = components.get(componentKey);
-            if (component instanceof JComboBox<?> comboBox) {
-                comboBox.setSelectedItem(defaultValue);
-            } else if (component instanceof JCheckBox checkBox) {
-                checkBox.setSelected(TRUE.equals(defaultValue));
-            } else if (component instanceof JTextField textField) {
-                textField.setText(defaultValue.toString());
-            }
-        }
+        components.forEach(this::restoreDefault);
+    }
+
+    private void restoreDefault(String key, JComponent component) {
+        show(component, String.valueOf(IFernflowerPreferences.DEFAULTS.getOrDefault(key, "")));
     }
 
     // --- PreferencesPanel --- //
@@ -96,27 +89,25 @@ public class FernflowerDecompilerPreferencesProvider extends JPanel implements P
         return "Class file";
     }
 
+    /** Shows the saved value of every option, and the default of an option that none is saved for: saving writes them all. */
     @Override
     public void loadPreferences(Map<String, String> preferences) {
-        for (Map.Entry<String, String> preference : preferences.entrySet()) {
-            String preferenceKey = preference.getKey();
-            String preferenceValue = preference.getValue();
-            JComponent component = components.get(preferenceKey);
-            if (preferenceValue != null) {
-                if (component instanceof JComboBox<?> comboBox) {
-                    comboBox.setSelectedItem(preferenceValue);
-                } else if (component instanceof JCheckBox checkBox) {
-                    checkBox.setSelected(TRUE.equals(preferenceValue));
-                } else if (component instanceof JTextField textField) {
-                    textField.setText(preferenceValue);
-                }
-            } else if (component instanceof JComboBox<?> comboBox) {
-                comboBox.setSelectedItem(IFernflowerPreferences.DEFAULTS.get(preferenceKey));
-            } else if (component instanceof JCheckBox checkBox) {
-                checkBox.setSelected(TRUE.equals(IFernflowerPreferences.DEFAULTS.get(preferenceKey)));
-            } else if (component instanceof JTextField textField) {
-                textField.setText(IFernflowerPreferences.DEFAULTS.getOrDefault(preferenceKey, ""));
+        restoreDefaults();
+        components.forEach((key, component) -> {
+            String value = preferences.get(key);
+            if (value != null) {
+                show(component, value);
             }
+        });
+    }
+
+    private static void show(JComponent component, String value) {
+        if (component instanceof JComboBox<?> comboBox) {
+            comboBox.setSelectedItem(value);
+        } else if (component instanceof JCheckBox checkBox) {
+            checkBox.setSelected(TRUE.equals(value));
+        } else if (component instanceof JTextField textField) {
+            textField.setText(value);
         }
     }
 

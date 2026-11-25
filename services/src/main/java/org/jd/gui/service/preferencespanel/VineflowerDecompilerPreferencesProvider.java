@@ -8,6 +8,7 @@
 
 package org.jd.gui.service.preferencespanel;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.jd.gui.spi.PreferencesPanel;
 import org.vineflower.java.decompiler.api.DecompilerOption;
 import org.vineflower.java.decompiler.main.Init;
@@ -19,6 +20,7 @@ import java.awt.GridLayout;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.swing.*;
 
@@ -77,22 +79,12 @@ public class VineflowerDecompilerPreferencesProvider extends JPanel implements P
 
     @Override
     public void restoreDefaults() {
+        Map<String, String> defaults = new HashMap<>();
         for (DecompilerOption option : DecompilerOption.getAll()) {
-            JComponent component = components.get(option.id());
-            if ("log-level".equals(option.id())) {
-                ((JComboBox<?>) component).setSelectedItem(option.defaultValue());
-                continue;
-            }
-
-            switch (option.type()) {
-                case BOOLEAN -> ((JCheckBox) component).setSelected(TRUE.equals(option.defaultValue()));
-                case STRING -> ((JTextField) component).setText(option.defaultValue());
-                case INTEGER -> ((JSpinner) component).setValue(Integer.parseInt(option.defaultValue()));
-            }
+            defaults.put(option.id(), option.defaultValue());
         }
-
-        JCheckBox dumpLines = (JCheckBox) components.get(IFernflowerPreferences.DUMP_ORIGINAL_LINES);
-        dumpLines.setSelected(false);
+        // an option without a default (and the dump of the line numbers, which is not an option of the decompiler) is off, or empty
+        components.forEach((key, component) -> show(component, Objects.toString(defaults.get(key), "")));
     }
 
     // --- PreferencesPanel --- //
@@ -106,32 +98,27 @@ public class VineflowerDecompilerPreferencesProvider extends JPanel implements P
         return "Class file";
     }
 
+    /** Shows the saved value of every option, and the default of an option that none is saved for: saving writes them all. */
     @Override
     public void loadPreferences(Map<String, String> preferences) {
-        Map<String, String> defaults = new HashMap<>();
-        for (DecompilerOption option : DecompilerOption.getAll()) {
-            defaults.put(option.id(), option.defaultValue());
-        }
-
-        for (Map.Entry<String, String> preference : preferences.entrySet()) {
-            String preferenceKey = preference.getKey();
-            String preferenceValue = preference.getValue();
-            JComponent component = components.get(preferenceKey);
-            if (preferenceValue != null) {
-                if (component instanceof JComboBox<?> comboBox) {
-                    comboBox.setSelectedItem(preferenceValue);
-                } else if (component instanceof JCheckBox checkBox) {
-                    checkBox.setSelected(TRUE.equals(preferenceValue));
-                } else if (component instanceof JTextField textField) {
-                    textField.setText(preferenceValue);
-                }
-            } else if (component instanceof JComboBox<?> comboBox) {
-                comboBox.setSelectedItem(defaults.get(preferenceKey));
-            } else if (component instanceof JCheckBox checkBox) {
-                checkBox.setSelected(TRUE.equals(defaults.get(preferenceKey)));
-            } else if (component instanceof JTextField textField) {
-                textField.setText(defaults.getOrDefault(preferenceKey, ""));
+        restoreDefaults();
+        components.forEach((key, component) -> {
+            String value = preferences.get(key);
+            if (value != null) {
+                show(component, value);
             }
+        });
+    }
+
+    private static void show(JComponent component, String value) {
+        if (component instanceof JComboBox<?> comboBox) {
+            comboBox.setSelectedItem(value);
+        } else if (component instanceof JCheckBox checkBox) {
+            checkBox.setSelected(TRUE.equals(value));
+        } else if (component instanceof JTextField textField) {
+            textField.setText(value);
+        } else if (component instanceof JSpinner spinner) {
+            spinner.setValue(NumberUtils.toInt(value));
         }
     }
 
@@ -144,6 +131,8 @@ public class VineflowerDecompilerPreferencesProvider extends JPanel implements P
                 preferences.put(componentKey, comboBox.getSelectedItem().toString());
             } else if (component instanceof JCheckBox checkBox) {
                 preferences.put(componentKey, checkBox.isSelected() ? TRUE : FALSE);
+            } else if (component instanceof JSpinner spinner) {
+                preferences.put(componentKey, spinner.getValue().toString());
             } else if (component instanceof JTextField textField) {
                 String text = textField.getText();
                 if (text.isEmpty()) {

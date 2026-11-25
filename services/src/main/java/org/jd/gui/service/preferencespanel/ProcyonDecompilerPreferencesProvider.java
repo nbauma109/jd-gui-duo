@@ -114,18 +114,11 @@ public class ProcyonDecompilerPreferencesProvider extends JPanel implements Pref
 
     @Override
     public void restoreDefaults() {
-        for (Map.Entry<String, String> defaultEntry : defaults.entrySet()) {
-            String componentKey = defaultEntry.getKey();
-            String defaultValue = defaultEntry.getValue();
-            JComponent component = components.get(componentKey);
-            if (component != null) {
-                if (component instanceof JCheckBox checkBox) {
-                    checkBox.setSelected("true".equals(defaultValue));
-                } else if (component instanceof JTextField textField) {
-                    textField.setText(defaultValue);
-                }
-            }
-        }
+        components.forEach(this::restoreDefault);
+    }
+
+    private void restoreDefault(String key, JComponent component) {
+        show(component, defaults.getOrDefault(key, ""));
     }
 
     // --- PreferencesPanel --- //
@@ -139,23 +132,23 @@ public class ProcyonDecompilerPreferencesProvider extends JPanel implements Pref
         return "Class file";
     }
 
+    /** Shows the saved value of every option, and the default of an option that none is saved for: saving writes them all. */
     @Override
     public void loadPreferences(Map<String, String> preferences) {
-        for (Map.Entry<String, String> preference : preferences.entrySet()) {
-            String preferenceKey = preference.getKey();
-            String preferenceValue = preference.getValue();
-            JComponent component = components.get(preferenceKey);
-            if (preferenceValue != null) {
-                if (component instanceof JCheckBox checkBox) {
-                    checkBox.setSelected("true".equals(preferenceValue));
-                } else if (component instanceof JTextField textField) {
-                    textField.setText(preferenceValue);
-                }
-            } else if (component instanceof JCheckBox checkBox) {
-                checkBox.setSelected("true".equals(defaults.get(preferenceKey)));
-            } else if (component instanceof JTextField textField) {
-                textField.setText(defaults.getOrDefault(preferenceKey, ""));
+        restoreDefaults();
+        components.forEach((key, component) -> {
+            String value = preferences.get(key);
+            if (value != null) {
+                show(component, value);
             }
+        });
+    }
+
+    private static void show(JComponent component, String value) {
+        if (component instanceof JCheckBox checkBox) {
+            checkBox.setSelected("true".equals(value));
+        } else if (component instanceof JTextField textField) {
+            textField.setText(value);
         }
     }
 
