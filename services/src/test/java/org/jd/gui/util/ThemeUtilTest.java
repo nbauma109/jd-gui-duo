@@ -106,7 +106,7 @@ class ThemeUtilTest {
             assertSame(area, result);
             assertTrue(readAttempted.get());
             assertEquals(17, ((JComponent) area).getFont().getSize());
-            assertNotNull(((JComponent) area).getClientProperty("jd.defaultFontFamily"));
+            assertInstanceOf(Font.class, ((JComponent) area).getClientProperty("jd.defaultFont"));
         }
     }
 
@@ -134,12 +134,39 @@ class ThemeUtilTest {
     }
 
     @Test
+    void preservesThemeFontFallbackWhenChangingSizeAndRestoringDefault() {
+        RSyntaxTextArea area = ThemeUtil.applyTheme(Map.of(), new RSyntaxTextArea());
+        Font themeFont = assertInstanceOf(Font.class, area.getClientProperty("jd.defaultFont"));
+        Font expected = themeFont.deriveFont(17.5f);
+
+        ThemeUtil.applyFontPreferences(Map.of(FONT_SIZE_KEY, "17.5"), area);
+        assertFontWithFallback(expected, area.getFont());
+
+        String selectedFamily = Font.SERIF;
+        if (Font.SERIF.equals(themeFont.getFamily())) {
+            selectedFamily = Font.MONOSPACED;
+        }
+        ThemeUtil.applyFontPreferences(Map.of(FONT_FAMILY_KEY, selectedFamily), area);
+        assertEquals(selectedFamily, area.getFont().getFamily());
+
+        ThemeUtil.applyFontPreferences(Map.of(FONT_FAMILY_KEY, " "), area);
+        assertFontWithFallback(expected, area.getFont());
+    }
+
+    private static void assertFontWithFallback(Font expected, Font actual) {
+        assertEquals(expected, actual);
+        for (char character : "A\u01c4\u03a9\u4e2d".toCharArray()) {
+            assertEquals(expected.canDisplay(character), actual.canDisplay(character),
+                    "Glyph availability for " + character);
+        }
+    }
+
+    @Test
     void handlesMissingBlankAndInvalidFontPreferences() {
         RSyntaxTextArea area = new RSyntaxTextArea();
         Font original = area.getFont();
         ThemeUtil.applyFontPreferences(Map.of(FONT_FAMILY_KEY, " ", FONT_SIZE_KEY, "invalid"), area);
         assertEquals(original, area.getFont());
-        area.putClientProperty("jd.defaultFontFamily", " ");
         ThemeUtil.applyFontPreferences(Map.of(), area);
         assertEquals(original, area.getFont());
 
