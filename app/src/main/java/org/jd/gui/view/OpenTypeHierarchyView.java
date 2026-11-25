@@ -8,6 +8,7 @@
 
 package org.jd.gui.view;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
@@ -493,7 +494,7 @@ public class OpenTypeHierarchyView {
 
         TreeNodeBean(Type type) {
             String packaze = type.getDisplayPackageName();
-            this.label = packaze == null || packaze.isEmpty() ? type.getDisplayTypeName() : type.getDisplayTypeName() + " - " + packaze;
+            this.label = StringUtils.isEmpty(packaze) ? type.getDisplayTypeName() : type.getDisplayTypeName() + " - " + packaze;
             this.icon = type.getIcon();
         }
 

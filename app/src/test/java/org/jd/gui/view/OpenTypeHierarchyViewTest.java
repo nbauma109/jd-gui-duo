@@ -10,6 +10,7 @@ package org.jd.gui.view;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
+import org.jd.gui.model.container.entry.path.FileEntryPath;
 import org.jd.gui.service.type.ClassFileTypeFactoryProvider;
 import org.jd.gui.spi.TypeFactory;
 import org.jd.gui.view.component.CompiledEntries;
@@ -88,11 +89,15 @@ class OpenTypeHierarchyViewTest {
     }
 
     private static JTree show(OpenTypeHierarchyView view, Collection<Future<Indexes>> indexes, String type) throws Exception {
+        return show(view, indexes, entry(type));
+    }
+
+    private static JTree show(OpenTypeHierarchyView view, Collection<Future<Indexes>> indexes, Container.Entry entry) throws Exception {
         Field field = OpenTypeHierarchyView.class.getDeclaredField("collectionOfFutureIndexes");
         field.setAccessible(true);
         SwingUtilities.invokeAndWait(() -> { });
         field.set(view, indexes);
-        SwingUtilities.invokeAndWait(() -> view.updateTree(entry(type), type));
+        SwingUtilities.invokeAndWait(() -> view.updateTree(entry, entry.getPath().replace(".class", "")));
         return tree(view);
     }
 
@@ -149,6 +154,26 @@ class OpenTypeHierarchyViewTest {
         SwingUtilities.invokeAndWait(() -> { });
 
         assertThat(rows(tree)).containsExactly("Object - java.lang", "  Base - demo", "    Middle - demo *");
+    }
+
+    @Test
+    void aSubtypeOfTheSameArchiveIsPreferred() throws Exception {
+        Container.Entry base = entry("demo/Base");
+        Container.Entry sameArchive = base.getParent().getChildren().get(new FileEntryPath("demo/Middle.class"));
+        Map<String, Object> declarations = new HashMap<>();
+        declarations.put("demo/Base", List.of(base));
+        declarations.put("demo/Middle", List.of(entry("demo/Middle"), sameArchive));
+        Map<String, Object> subTypes = new HashMap<>(Map.of("demo/Base", List.of("demo/Middle")));
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        Indexes indexes = name -> (Map) ("typeDeclarations".equals(name) ? declarations : subTypes);
+        OpenTypeHierarchyView view = view();
+        JTree tree = show(view, List.of(CompletableFuture.completedFuture(indexes)), base);
+
+        assertThat(rows(tree)).containsExactly("Object - java.lang", "  Base - demo *", "    Middle - demo");
+        Object middle = tree.getPathForRow(2).getLastPathComponent();
+        Field field = middle.getClass().getDeclaredField("entry");
+        field.setAccessible(true);
+        assertThat(field.get(middle)).isSameAs(sameArchive);
     }
 
     @Test
