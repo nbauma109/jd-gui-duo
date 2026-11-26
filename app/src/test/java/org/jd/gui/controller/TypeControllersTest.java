@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
@@ -120,6 +121,8 @@ class TypeControllersTest {
             "W?n    | other/Window",
             "*get   | demo/Widget",
             "Nothing | ''",
+            "*      | other/Thing,demo/Widget,other/Window,other/walker",
+            "?      | other/Thing,demo/Widget,other/Window,other/walker",
             "''     | ''"})
     void theTypesAreFoundByTheStartOfTheirName(String pattern, String expected) throws Exception {
         OpenTypeController controller = new OpenTypeController(api, executor, null);
@@ -145,6 +148,41 @@ class TypeControllersTest {
         set(controller, "collectionOfFutureIndexes", indexes("java/lang/NullPointerException", "java/io/IOException", "demo/ArrayBuilder", "demo/Nothing"));
 
         assertThat(found(controller, pattern)).containsExactlyElementsOf(expected.isEmpty() ? List.of() : List.of(expected.split(",")));
+    }
+
+    /** Typing goes on: each search looks among the results of the one before, and gives what a search from scratch gives. */
+    @ParameterizedTest
+    @ValueSource(strings = {"*get", "?indow", "Wid", "wIN", "W?n", "NPE", "*P*n", "A|B", "W+i", "W\\i", "W[i", "Outer$In", "a.c"})
+    void aSearchThatGoesOnFindsWhatASearchFromScratchFinds(String pattern) throws Exception {
+        String[] types = {"demo/Widget", "other/Window", "other/walker", "java/lang/NullPointerException", "demo/Outer$Inner", "demo/ArrayBuilder",
+                "demo/abc", "demo/AB"};
+        OpenTypeController typed = new OpenTypeController(api, executor, null);
+        Collection<Future<Indexes>> indexes = indexes(types);
+        set(typed, "collectionOfFutureIndexes", indexes);
+        List<String> found = List.of();
+        for (int length = 1; length <= pattern.length(); length++) {
+            found = found(typed, pattern.substring(0, length));
+        }
+        OpenTypeController fresh = new OpenTypeController(api, executor, null);
+        set(fresh, "collectionOfFutureIndexes", indexes(types));
+
+        assertThat(found).containsExactlyElementsOf(found(fresh, pattern));
+    }
+
+    @Test
+    void aSearchThatGoesOnLooksAmongTheResultsOfTheOneBefore() throws Exception {
+        OpenTypeController controller = new OpenTypeController(api, executor, null);
+        Map<String, Collection<Object>> declarations = new HashMap<>();
+        declarations.put("demo/Widget", List.of(entry("demo/Widget")));
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        Indexes index = name -> (Map) declarations;
+        set(controller, "collectionOfFutureIndexes", List.of(CompletableFuture.completedFuture(index)));
+        assertThat(found(controller, "Wi")).containsExactly("demo/Widget");
+
+        // a type that appeared since the shorter search is not looked at
+        declarations.put("demo/Wizard", List.of(entry("demo/Widget")));
+
+        assertThat(found(controller, "Wiz")).isEmpty();
     }
 
     @Test
