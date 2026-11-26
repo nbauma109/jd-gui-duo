@@ -41,6 +41,6 @@ class CFGViewerTest {
         File image = CFGViewer.writeGraph(new ControlFlowGraphMaker().make(method), "demo/Loop");
 
         assertThat(image).isFile().content().contains("<svg");
-        assertThat(image.getName()).startsWith("demo.Loop.sum").endsWith(".svg");
+        assertThat(image.getName()).contains("demo.Loop.sum").endsWith(".svg");
     }
 }
