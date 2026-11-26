@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
@@ -40,6 +41,8 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.HashSet;
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Objects;
 import java.util.List;
 import java.util.Map;
 
@@ -504,14 +507,18 @@ public abstract class AbstractJavaListener extends ASTVisitor {
         }
 
         String identifier = simpleName.getIdentifier();
+        // the types between the use and the parameter, which may have a member type of that name
+        List<AbstractTypeDeclaration> within = new ArrayList<>();
 
         for (ASTNode node = type.getParent(); node != null; node = node.getParent()) {
-            if (node instanceof AbstractTypeDeclaration declaration && declaresType(declaration, identifier)) {
-                return null;
+            if (node instanceof AbstractTypeDeclaration declaration) {
+                within.add(declaration);
             }
             for (Object parameter : typeParametersOf(node)) {
                 if (((TypeParameter) parameter).getName().getIdentifier().equals(identifier)) {
-                    return (TypeParameter) parameter;
+                    Set<AbstractTypeDeclaration> seen = new HashSet<>();
+                    boolean hidden = within.stream().anyMatch(declaration -> hasMemberType(declaration, identifier, false, seen));
+                    return hidden ? null : (TypeParameter) parameter;
                 }
             }
         }
@@ -519,13 +526,59 @@ public abstract class AbstractJavaListener extends ASTVisitor {
         return null;
     }
 
-    private static boolean declaresType(AbstractTypeDeclaration declaration, String identifier) {
+    /**
+     * Whether a type declares a member type of that name, or inherits one from a super type that is declared in the same source: a
+     * private member type is not inherited.
+     */
+    private static boolean hasMemberType(AbstractTypeDeclaration declaration, String identifier, boolean inherited,
+            Set<AbstractTypeDeclaration> seen) {
+        if (!seen.add(declaration)) {
+            return false;
+        }
         for (Object member : declaration.bodyDeclarations()) {
-            if (member instanceof AbstractTypeDeclaration type && type.getName().getIdentifier().equals(identifier)) {
+            if (member instanceof AbstractTypeDeclaration type && type.getName().getIdentifier().equals(identifier)
+                    && !(inherited && Modifier.isPrivate(type.getModifiers()))) {
                 return true;
             }
         }
-        return false;
+        return superTypesOf(declaration).stream()
+                .map(superType -> declarationNamed(declaration.getRoot(), superType))
+                .anyMatch(superType -> superType != null && hasMemberType(superType, identifier, true, seen));
+    }
+
+    /** The simple names of the super class and of the interfaces of a type. */
+    private static List<String> superTypesOf(AbstractTypeDeclaration declaration) {
+        List<Object> superTypes = new ArrayList<>();
+
+        if (declaration instanceof TypeDeclaration type) {
+            superTypes.add(type.getSuperclassType());
+            superTypes.addAll(type.superInterfaceTypes());
+        } else if (declaration instanceof EnumDeclaration enumDeclaration) {
+            superTypes.addAll(enumDeclaration.superInterfaceTypes());
+        } else if (declaration instanceof RecordDeclaration recordDeclaration) {
+            superTypes.addAll(recordDeclaration.superInterfaceTypes());
+        }
+
+        return superTypes.stream().filter(Objects::nonNull).map(superType -> {
+            String name = typeToString((Type) superType);
+            return name.substring(name.lastIndexOf('/') + 1);
+        }).toList();
+    }
+
+    /** The type that a source declares with that simple name; null when it declares none. */
+    private static AbstractTypeDeclaration declarationNamed(ASTNode source, String name) {
+        AbstractTypeDeclaration[] found = new AbstractTypeDeclaration[1];
+
+        source.accept(new ASTVisitor() {
+            @Override
+            public void preVisit(ASTNode node) {
+                if (found[0] == null && node instanceof AbstractTypeDeclaration declaration && declaration.getName().getIdentifier().equals(name)) {
+                    found[0] = declaration;
+                }
+            }
+        });
+
+        return found[0];
     }
 
     private static List<?> typeParametersOf(ASTNode node) {

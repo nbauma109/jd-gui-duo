@@ -80,7 +80,20 @@ class GenericLinksTest {
                     void other(T item) {}
                 }
 
-                void use(Box<String, Integer, String, Integer> box, Other<String> other, Inner inner) {
+                class Base { class T {} }
+                class Derived extends Base { void hidden(T item) {} }
+                class Further extends Derived { void further(T item) {} }
+                interface Marked { class N {} }
+                class Implementer implements Marked { void marked(N item) {} }
+                class Secret { private class C {} }
+                class Heir extends Secret { void heir(C key) {} }
+
+                void use(Box<String, Integer, String, Integer> box, Other<String> other, Inner inner, Derived derived, Further further,
+                        Implementer implementer, Heir heir) {
+                    derived.hidden(null);
+                    further.further(null);
+                    implementer.marked(null);
+                    heir.heir(null);
                     box.put("a");
                     box.add(1);
                     box.sort("b");
@@ -149,6 +162,6 @@ class GenericLinksTest {
 
         assertThat(dead).isEmpty();
         assertThat(followed).contains("put", "add", "sort", "deep", "all", "get", "generic", "text", "shadow", "chain", "list", "forward", "inner",
-                "other", "value", "number", "values", "Box");
+                "other", "value", "number", "values", "Box", "hidden", "further", "marked", "heir");
     }
 }
