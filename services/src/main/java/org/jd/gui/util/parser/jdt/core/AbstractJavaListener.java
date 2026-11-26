@@ -9,6 +9,8 @@
 package org.jd.gui.util.parser.jdt.core;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jdt.core.dom.TypeParameter;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
@@ -34,6 +36,9 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.model.Container;
 
+import java.util.Set;
+import java.util.function.Supplier;
+import java.util.HashSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +50,7 @@ import static org.apache.bcel.Const.ACC_INTERFACE;
 public abstract class AbstractJavaListener extends ASTVisitor {
     protected final Container.Entry entry;
     protected String packageName = "";
+    private boolean typeVariablesAsWritten;
     protected final Map<String, String> nameToInternalTypeName = new HashMap<>();
     private final Map<String, String> typeNameCache = new HashMap<>();
 
@@ -428,7 +434,9 @@ public abstract class AbstractJavaListener extends ASTVisitor {
 
         PrimitiveType primitive = getPrimitiveTypeContext(type);
         if (primitive == null) {
-            name = "L" + resolveInternalTypeName(type) + ";";
+            String erasure = typeVariablesAsWritten ? null
+                    : erasureOfTypeVariable(type instanceof ArrayType arrayType ? arrayType.getElementType() : type);
+            name = "L" + (erasure != null ? erasure : resolveInternalTypeName(type)) + ";";
         } else {
             // Search primitive
             name = switch (primitive.getPrimitiveTypeCode().toString()) {
@@ -451,6 +459,86 @@ public abstract class AbstractJavaListener extends ASTVisitor {
         case 2 -> "[[" + name;
         default -> new String(new char[dimension]).replace('\0', '[') + name;
         };
+    }
+
+    /** The descriptor that is built with the type variables named as in the source, to show a member as it is written. */
+    protected String asWritten(Supplier<String> descriptor) {
+        typeVariablesAsWritten = true;
+        try {
+            return descriptor.get();
+        } finally {
+            typeVariablesAsWritten = false;
+        }
+    }
+
+    /**
+     * In a descriptor, as in a class file and in the binding of a call, a type variable stands for its erasure: its first bound, or
+     * Object when it has none. Null when the type is not a type variable. This is read from the source: a pass may have no bindings.
+     */
+    private String erasureOfTypeVariable(Type type) {
+        TypeParameter parameter = typeParameterNamedBy(type);
+
+        if (parameter == null) {
+            return null;
+        }
+
+        Set<TypeParameter> seen = new HashSet<>();
+
+        while (seen.add(parameter) && !parameter.typeBounds().isEmpty()) {
+            Type bound = (Type) parameter.typeBounds().get(0);
+            TypeParameter boundParameter = typeParameterNamedBy(bound);
+
+            if (boundParameter == null) {
+                return resolveInternalTypeName(bound);
+            }
+            parameter = boundParameter;
+        }
+
+        return "java/lang/Object";
+    }
+
+    /** The type parameter of an enclosing method or type that a type names, unless a member type of that name hides it. */
+    private static TypeParameter typeParameterNamedBy(Type type) {
+        if (!(type instanceof SimpleType simpleType) || !(simpleType.getName() instanceof SimpleName simpleName)) {
+            return null;
+        }
+
+        String identifier = simpleName.getIdentifier();
+
+        for (ASTNode node = type.getParent(); node != null; node = node.getParent()) {
+            if (node instanceof AbstractTypeDeclaration declaration && declaresType(declaration, identifier)) {
+                return null;
+            }
+            for (Object parameter : typeParametersOf(node)) {
+                if (((TypeParameter) parameter).getName().getIdentifier().equals(identifier)) {
+                    return (TypeParameter) parameter;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static boolean declaresType(AbstractTypeDeclaration declaration, String identifier) {
+        for (Object member : declaration.bodyDeclarations()) {
+            if (member instanceof AbstractTypeDeclaration type && type.getName().getIdentifier().equals(identifier)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static List<?> typeParametersOf(ASTNode node) {
+        if (node instanceof MethodDeclaration method) {
+            return method.typeParameters();
+        }
+        if (node instanceof TypeDeclaration type) {
+            return type.typeParameters();
+        }
+        if (node instanceof RecordDeclaration recordDeclaration) {
+            return recordDeclaration.typeParameters();
+        }
+        return List.of();
     }
 
     protected String createParamDescriptors(List<SingleVariableDeclaration> formalParameterList) {

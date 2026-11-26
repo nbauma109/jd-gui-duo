@@ -270,7 +270,8 @@ public class ReferenceListener extends AbstractJavaListener {
      */
     private static StringBuilder getParametersDescriptor(IMethodBinding binding, List<Expression> arguments) {
         if (isResolution(binding, arguments)) {
-            return getParametersDescriptor(binding.getParameterTypes());
+            // as the declaration has them: the type arguments of a call do not change what it calls
+            return getErasedParametersDescriptor(binding);
         }
         StringBuilder sb = new StringBuilder("(");
         if (arguments != null) {
