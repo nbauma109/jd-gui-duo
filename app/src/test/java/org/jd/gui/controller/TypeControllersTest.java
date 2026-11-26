@@ -130,6 +130,23 @@ class TypeControllersTest {
         assertThat(found(controller, pattern)).hasSize(expected.isEmpty() ? 0 : expected.split(",").length);
     }
 
+    @ParameterizedTest(name = "{0} finds {1}")
+    @CsvSource(delimiter = '|', value = {
+            "NPE    | java/lang/NullPointerException",
+            "NP     | java/lang/NullPointerException",
+            "NuPoE  | java/lang/NullPointerException",
+            "NPointer | java/lang/NullPointerException",
+            "IOE    | java/io/IOException",
+            "AB     | demo/ArrayBuilder",
+            "*B     | demo/ArrayBuilder",
+            "PE     | ''"})
+    void theCapitalsOfAPatternAreTheStartsOfTheWordsOfAName(String pattern, String expected) throws Exception {
+        OpenTypeController controller = new OpenTypeController(api, executor, null);
+        set(controller, "collectionOfFutureIndexes", indexes("java/lang/NullPointerException", "java/io/IOException", "demo/ArrayBuilder", "demo/Nothing"));
+
+        assertThat(found(controller, pattern)).containsExactlyElementsOf(expected.isEmpty() ? List.of() : List.of(expected.split(",")));
+    }
+
     @Test
     void aTypeThatIsInOnePlaceIsOpenedAtOnce() throws Exception {
         OpenTypeController controller = new OpenTypeController(api, executor, null);

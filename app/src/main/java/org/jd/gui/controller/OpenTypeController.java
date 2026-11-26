@@ -202,7 +202,8 @@ public class OpenTypeController implements IndexesChangeListener {
             char c = pattern.charAt(i);
 
             if (Character.isUpperCase(c)) {
-                if (i > 1) {
+                // a capital after the start begins a word: anything may come before it
+                if (i > 0) {
                     sbPattern.append(".*");
                 }
                 sbPattern.append(c);
