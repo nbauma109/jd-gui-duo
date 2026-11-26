@@ -201,8 +201,11 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
         private int access;
         private String name;
         private String descriptor;
+        /** The descriptor with the type variables named as in the source. */
+        private final String written;
 
-        public JavaField(int access, String name, String descriptor) {
+        public JavaField(int access, String name, String descriptor, String written) {
+            this.written = written;
             this.access = access;
             this.name = name;
             this.descriptor = descriptor;
@@ -232,7 +235,7 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
         public String getDisplayName() {
             StringBuilder sb = new StringBuilder();
             sb.append(name).append(" : ");
-            writeSignature(sb, descriptor, descriptor.length(), 0, false);
+            writeSignature(sb, written, written.length(), 0, false);
             return sb.toString();
         }
     }
@@ -242,8 +245,11 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
         private int access;
         private String name;
         private String descriptor;
+        /** The descriptor with the type variables named as in the source. */
+        private final String written;
 
-        public JavaMethod(JavaType type, int access, String name, String descriptor) {
+        public JavaMethod(JavaType type, int access, String name, String descriptor, String written) {
+            this.written = written;
             this.type = type;
             this.access = access;
             this.name = name;
@@ -280,7 +286,7 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
 
             StringBuilder sb = new StringBuilder();
             // no synthetic parameter for the outer instance in the descriptors of a source: none of the parameters of a constructor is skipped
-            writeMethodSignature(sb, type.getFlags(), access, false, constructorName, name, descriptor);
+            writeMethodSignature(sb, type.getFlags(), access, false, constructorName, name, written);
             return sb.toString();
         }
     }
@@ -390,7 +396,8 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
             // the components are private final fields
             for (Object component : node.recordComponents()) {
                 SingleVariableDeclaration declaration = (SingleVariableDeclaration) component;
-                currentType.getFields().add(new JavaField(ACC_PRIVATE | ACC_FINAL, declaration.getName().getIdentifier(), createComponentDescriptor(declaration)));
+                currentType.getFields().add(new JavaField(ACC_PRIVATE | ACC_FINAL, declaration.getName().getIdentifier(), createComponentDescriptor(declaration),
+                        asWritten(() -> createComponentDescriptor(declaration))));
             }
             return visited;
         }
@@ -403,13 +410,15 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
                 String name = declaration.getName().getIdentifier();
                 String accessor = "()" + createComponentDescriptor(declaration);
                 if (!declaresMethod(name, accessor)) {
-                    currentType.getMethods().add(new JavaMethod(currentType, ACC_PUBLIC, name, accessor));
+                    String written = "()" + asWritten(() -> createComponentDescriptor(declaration));
+                    currentType.getMethods().add(new JavaMethod(currentType, ACC_PUBLIC, name, accessor, written));
                 }
             }
             String canonical = createRecordParamDescriptors(node) + "V";
             if (!declaresMethod(StringConstants.INSTANCE_CONSTRUCTOR, canonical)) {
                 int visibility = currentType.getFlags() & (ACC_PUBLIC | ACC_PROTECTED | ACC_PRIVATE);
-                currentType.getMethods().add(new JavaMethod(currentType, visibility, StringConstants.INSTANCE_CONSTRUCTOR, canonical));
+                String written = asWritten(() -> createRecordParamDescriptors(node)) + "V";
+                currentType.getMethods().add(new JavaMethod(currentType, visibility, StringConstants.INSTANCE_CONSTRUCTOR, canonical, written));
             }
             super.endVisit(node);
         }
@@ -420,7 +429,7 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
 
         @Override
         public boolean visit(Initializer node) {
-            currentType.getMethods().add(new JavaMethod(currentType, ACC_STATIC, "<clinit>", "()V"));
+            currentType.getMethods().add(new JavaMethod(currentType, ACC_STATIC, "<clinit>", "()V", "()V"));
             return true;
         }
 
@@ -433,7 +442,8 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
                 String name = fragment.getName().getIdentifier();
                 int dimensionOnVariable = fragment.getExtraDimensions();
                 String descriptor = createDescriptor(node.getType(), dimensionOnVariable);
-                currentType.getFields().add(new JavaField(access, name, descriptor));
+                String written = asWritten(() -> createDescriptor(node.getType(), dimensionOnVariable));
+                currentType.getFields().add(new JavaField(access, name, descriptor, written));
             }
             return true;
         }
@@ -442,11 +452,10 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
         public boolean visit(MethodDeclaration node) {
             int access = node.getModifiers();
             String name = node.isConstructor() ? StringConstants.INSTANCE_CONSTRUCTOR : node.getName().getIdentifier();
-            String paramDescriptors = createParamDescriptors(node);
-            String returnDescriptor = createDescriptor(node.getReturnType2(), 0);
-            String descriptor = paramDescriptors + returnDescriptor;
+            String descriptor = createParamDescriptors(node) + createDescriptor(node.getReturnType2(), 0);
+            String written = asWritten(() -> createParamDescriptors(node) + createDescriptor(node.getReturnType2(), 0));
 
-            currentType.getMethods().add(new JavaMethod(currentType, access, name, descriptor));
+            currentType.getMethods().add(new JavaMethod(currentType, access, name, descriptor, written));
             return true;
         }
     }

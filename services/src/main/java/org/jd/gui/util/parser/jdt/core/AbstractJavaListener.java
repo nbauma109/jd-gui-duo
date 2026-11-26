@@ -9,6 +9,8 @@
 package org.jd.gui.util.parser.jdt.core;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jdt.core.dom.TypeParameter;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
@@ -18,6 +20,10 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
@@ -34,7 +40,13 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.jd.core.v1.util.StringConstants;
 import org.jd.gui.api.model.Container;
 
+import java.util.Set;
+import java.util.function.Supplier;
+import java.util.HashSet;
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -45,6 +57,7 @@ import static org.apache.bcel.Const.ACC_INTERFACE;
 public abstract class AbstractJavaListener extends ASTVisitor {
     protected final Container.Entry entry;
     protected String packageName = "";
+    private boolean typeVariablesAsWritten;
     protected final Map<String, String> nameToInternalTypeName = new HashMap<>();
     private final Map<String, String> typeNameCache = new HashMap<>();
 
@@ -428,7 +441,9 @@ public abstract class AbstractJavaListener extends ASTVisitor {
 
         PrimitiveType primitive = getPrimitiveTypeContext(type);
         if (primitive == null) {
-            name = "L" + resolveInternalTypeName(type) + ";";
+            Type elementType = type instanceof ArrayType arrayType ? arrayType.getElementType() : type;
+            String erasure = typeVariablesAsWritten ? null : erasureOfTypeVariable(elementType);
+            name = "L" + (erasure != null ? erasure : resolveInternalTypeName(type)) + ";";
         } else {
             // Search primitive
             name = switch (primitive.getPrimitiveTypeCode().toString()) {
@@ -451,6 +466,196 @@ public abstract class AbstractJavaListener extends ASTVisitor {
         case 2 -> "[[" + name;
         default -> new String(new char[dimension]).replace('\0', '[') + name;
         };
+    }
+
+    /** The descriptor that is built with the type variables named as in the source, to show a member as it is written. */
+    protected String asWritten(Supplier<String> descriptor) {
+        typeVariablesAsWritten = true;
+        try {
+            return descriptor.get();
+        } finally {
+            typeVariablesAsWritten = false;
+        }
+    }
+
+    /**
+     * In a descriptor, as in a class file and in the binding of a call, a type variable stands for its erasure: its first bound, or
+     * Object when it has none. A member type of the same name hides the variable: it is then the one that the descriptor names. Null when
+     * the type is neither. This is read from the source: a pass may have no bindings.
+     */
+    private String erasureOfTypeVariable(Type type) {
+        ASTNode named = namedByVariableName(type);
+
+        if (named == null) {
+            return null;
+        }
+
+        Set<ASTNode> seen = new HashSet<>();
+
+        while (named instanceof TypeParameter parameter) {
+            if (!seen.add(parameter) || parameter.typeBounds().isEmpty()) {
+                return StringConstants.JAVA_LANG_OBJECT;
+            }
+            Type bound = (Type) parameter.typeBounds().get(0);
+            named = namedByVariableName(bound);
+
+            if (named == null) {
+                return resolveInternalTypeName(bound);
+            }
+        }
+
+        return internalNameOf((AbstractTypeDeclaration) named);
+    }
+
+    /**
+     * What a simple name that an enclosing method or type gives to a type parameter stands for: that parameter, or the member type of
+     * the same name that hides it. Null for another name.
+     */
+    private static ASTNode namedByVariableName(Type type) {
+        if (!(type instanceof SimpleType simpleType) || !(simpleType.getName() instanceof SimpleName simpleName)) {
+            return null;
+        }
+
+        String identifier = simpleName.getIdentifier();
+        // the types between the use and the parameter, which may have a member type of that name
+        List<AbstractTypeDeclaration> within = new ArrayList<>();
+
+        for (ASTNode node = type.getParent(); node != null; node = node.getParent()) {
+            if (node instanceof AbstractTypeDeclaration declaration) {
+                within.add(declaration);
+            }
+            for (Object parameter : typeParametersOf(node)) {
+                if (((TypeParameter) parameter).getName().getIdentifier().equals(identifier)) {
+                    return within.stream()
+                            .<ASTNode>map(declaration -> memberType(declaration, identifier, false, new HashSet<>()))
+                            .filter(Objects::nonNull).findFirst().orElse((TypeParameter) parameter);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /** The internal name of a top level type or of a member type; null for a local one, which the source does not name by itself. */
+    private static String internalNameOf(AbstractTypeDeclaration declaration) {
+        StringBuilder name = new StringBuilder(declaration.getName().getIdentifier());
+        ASTNode node = declaration.getParent();
+
+        for (; node instanceof AbstractTypeDeclaration outer; node = node.getParent()) {
+            name.insert(0, '$').insert(0, outer.getName().getIdentifier());
+        }
+        if (!(node instanceof CompilationUnit unit)) {
+            return null;
+        }
+        if (unit.getPackage() != null) {
+            name.insert(0, '/').insert(0, unit.getPackage().getName().getFullyQualifiedName().replace('.', '/'));
+        }
+
+        return name.toString();
+    }
+
+    /**
+     * The member type of that name that a type declares, or inherits from a super type of the same source: a private member type is not
+     * inherited. The path holds the types that are being searched, which a source that does not compile may lead back to.
+     */
+    private static AbstractTypeDeclaration memberType(AbstractTypeDeclaration declaration, String identifier, boolean inherited,
+            Set<AbstractTypeDeclaration> path) {
+        if (!path.add(declaration)) {
+            return null;
+        }
+        AbstractTypeDeclaration found = null;
+        for (Object member : declaration.bodyDeclarations()) {
+            if (member instanceof AbstractTypeDeclaration type && type.getName().getIdentifier().equals(identifier)
+                    && !(inherited && Modifier.isPrivate(type.getModifiers()))) {
+                found = type;
+            }
+        }
+        for (Iterator<String> superTypes = superTypesOf(declaration).iterator(); found == null && superTypes.hasNext();) {
+            AbstractTypeDeclaration superType = declarationOf(declaration, superTypes.next(), path);
+            if (superType != null) {
+                found = memberType(superType, identifier, true, path);
+            }
+        }
+        path.remove(declaration);
+        return found;
+    }
+
+    /** The names of the super class and of the interfaces of a type, as they are written, with slashes. */
+    private static List<String> superTypesOf(AbstractTypeDeclaration declaration) {
+        List<Object> superTypes = new ArrayList<>();
+
+        if (declaration instanceof TypeDeclaration type) {
+            superTypes.add(type.getSuperclassType());
+            superTypes.addAll(type.superInterfaceTypes());
+        } else if (declaration instanceof EnumDeclaration enumDeclaration) {
+            superTypes.addAll(enumDeclaration.superInterfaceTypes());
+        } else if (declaration instanceof RecordDeclaration recordDeclaration) {
+            superTypes.addAll(recordDeclaration.superInterfaceTypes());
+        }
+
+        return superTypes.stream().filter(Objects::nonNull).map(superType -> typeToString((Type) superType)).toList();
+    }
+
+    /**
+     * The type of the source that the name of a super type stands for, where the type that has it is declared: its first part is looked
+     * for in the enclosing scopes, from the closest one, and each next part among the member types. Null for a type of another source.
+     */
+    private static AbstractTypeDeclaration declarationOf(AbstractTypeDeclaration subType, String name, Set<AbstractTypeDeclaration> path) {
+        String relativeName = name;
+
+        if (subType.getRoot() instanceof CompilationUnit unit && unit.getPackage() != null) {
+            String prefix = unit.getPackage().getName().getFullyQualifiedName().replace('.', '/') + '/';
+            relativeName = name.startsWith(prefix) ? name.substring(prefix.length()) : name;
+        }
+
+        String[] parts = relativeName.split("/");
+        AbstractTypeDeclaration found = null;
+
+        for (ASTNode scope = subType.getParent(); found == null && scope != null; scope = scope.getParent()) {
+            found = typeDeclaredIn(scope, parts[0], path);
+        }
+        for (int i = 1; found != null && i < parts.length; i++) {
+            found = memberType(found, parts[i], false, path);
+        }
+
+        return found;
+    }
+
+    /** The type of that name that a scope declares: a member type, a top level type or a local type. */
+    private static AbstractTypeDeclaration typeDeclaredIn(ASTNode scope, String identifier, Set<AbstractTypeDeclaration> path) {
+        if (scope instanceof AbstractTypeDeclaration declaration) {
+            return memberType(declaration, identifier, false, path);
+        }
+
+        List<?> declared = List.of();
+
+        if (scope instanceof CompilationUnit unit) {
+            declared = unit.types();
+        } else if (scope instanceof Block block) {
+            declared = ((List<?>) block.statements()).stream()
+                    .map(statement -> statement instanceof TypeDeclarationStatement local ? local.getDeclaration() : statement).toList();
+        }
+
+        for (Object type : declared) {
+            if (type instanceof AbstractTypeDeclaration declaration && declaration.getName().getIdentifier().equals(identifier)) {
+                return declaration;
+            }
+        }
+
+        return null;
+    }
+
+    private static List<?> typeParametersOf(ASTNode node) {
+        if (node instanceof MethodDeclaration method) {
+            return method.typeParameters();
+        }
+        if (node instanceof TypeDeclaration type) {
+            return type.typeParameters();
+        }
+        if (node instanceof RecordDeclaration recordDeclaration) {
+            return recordDeclaration.typeParameters();
+        }
+        return List.of();
     }
 
     protected String createParamDescriptors(List<SingleVariableDeclaration> formalParameterList) {
