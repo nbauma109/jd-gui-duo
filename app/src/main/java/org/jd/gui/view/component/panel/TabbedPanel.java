@@ -160,8 +160,7 @@ public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel impl
         tab.setBorder(BorderFactory.createEmptyBorder(2, 0, 3, 0));
         tab.setOpaque(false);
         tab.setToolTipText(tip);
-        JLabel tabLabel = new JLabel(title, iconSupplier.get(), SwingConstants.LEADING);
-        new Timer(200, e -> tabLabel.setIcon(iconSupplier.get())).start();
+        JLabel tabLabel = new TabLabel(title, iconSupplier);
         tab.add(tabLabel, BorderLayout.CENTER);
         tab.add(tabCloseButton, BorderLayout.EAST);
         ToolTipManager.sharedInstance().unregisterComponent(tab);
@@ -172,6 +171,38 @@ public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel impl
         setSelectedIndex(index);
 
         cardLayout.show(this, "tabs");
+    }
+
+    /**
+     * The title of a tab, whose icon follows the state of its page. The icon is only refreshed while the tab is displayed: a timer that
+     * runs keeps what it refreshes in memory, so a closed tab would never be released.
+     */
+    static final class TabLabel extends JLabel {
+
+        private static final long serialVersionUID = 1L;
+
+        private final transient Timer refresh;
+
+        TabLabel(String title, Supplier<Icon> iconSupplier) {
+            super(title, iconSupplier.get(), SwingConstants.LEADING);
+            refresh = new Timer(200, e -> setIcon(iconSupplier.get()));
+        }
+
+        boolean isRefreshing() {
+            return refresh.isRunning();
+        }
+
+        @Override
+        public void addNotify() {
+            super.addNotify();
+            refresh.start();
+        }
+
+        @Override
+        public void removeNotify() {
+            refresh.stop();
+            super.removeNotify();
+        }
     }
 
     protected void setSelectedIndex(int index) {

@@ -33,6 +33,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.Icon;
 import javax.swing.JComponent;
@@ -219,6 +222,57 @@ class TabbedPanelsTest {
             assertThat(tabs.getSelectedIndex()).isZero();
             panel.preferencesChanged(Map.of(SINGLE_LINE_TABS, "false"));
             assertThat(tabs.getTabLayoutPolicy()).isEqualTo(JTabbedPane.WRAP_TAB_LAYOUT);
+        });
+    }
+
+    private static TabbedPanel.TabLabel label(TabbedPanel<Page> panel, int index) {
+        return (TabbedPanel.TabLabel) ((JPanel) panel.getTabbedPane().getTabComponentAt(index)).getComponent(0);
+    }
+
+    @Test
+    void theIconOfATabIsOnlyRefreshedWhileTheTabIsDisplayed() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            TabbedPanel<Page> panel = panelWith(api(), "a", "b", "c");
+            TabbedPanel.TabLabel a = label(panel, 0);
+            TabbedPanel.TabLabel b = label(panel, 1);
+            TabbedPanel.TabLabel c = label(panel, 2);
+            assertThat(a.isRefreshing()).isFalse();
+
+            // as when the window that holds the panel is displayed
+            panel.addNotify();
+            assertThat(List.of(a, b, c)).allMatch(TabbedPanel.TabLabel::isRefreshing);
+            panel.removeComponent(panel.getTabbedPane().getComponentAt(0));
+            assertThat(a.isRefreshing()).isFalse();
+            assertThat(b.isRefreshing()).isTrue();
+            // a tab added to a displayed panel is refreshed at once
+            panel.addPage("d", () -> null, "tip", new Page("/d"));
+            assertThat(label(panel, 2).isRefreshing()).isTrue();
+            // as when the panel of a whole archive is closed with its tabs
+            panel.removeNotify();
+            assertThat(List.of(b, c, label(panel, 2))).noneMatch(TabbedPanel.TabLabel::isRefreshing);
+        });
+    }
+
+    @Test
+    void theIconOfADisplayedTabFollowsItsSupplier() throws Exception {
+        Icon later = new javax.swing.ImageIcon(new java.awt.image.BufferedImage(2, 2, java.awt.image.BufferedImage.TYPE_INT_ARGB));
+        AtomicReference<Icon> icon = new AtomicReference<>();
+        CountDownLatch changed = new CountDownLatch(1);
+        AtomicReference<TabbedPanel<Page>> shown = new AtomicReference<>();
+        SwingUtilities.invokeAndWait(() -> {
+            TabbedPanel<Page> panel = new TabbedPanel<>(api());
+            panel.addPage("a", icon::get, "tip", new Page("/a"));
+            label(panel, 0).addPropertyChangeListener("icon", change -> changed.countDown());
+            panel.addNotify();
+            shown.set(panel);
+        });
+
+        icon.set(later);
+
+        assertThat(changed.await(30, TimeUnit.SECONDS)).isTrue();
+        SwingUtilities.invokeAndWait(() -> {
+            assertThat(label(shown.get(), 0).getIcon()).isSameAs(later);
+            shown.get().removeNotify();
         });
     }
 
