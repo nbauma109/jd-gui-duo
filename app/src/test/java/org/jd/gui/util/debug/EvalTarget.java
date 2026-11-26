@@ -42,6 +42,16 @@ public class EvalTarget implements Comparable<EvalTarget> {
     public static class Other implements Tag {
     }
 
+    /** The program never names this class: the debugger can only see it once the evaluator has loaded it. */
+    public static class Unused {
+        public static int answer = 42;
+    }
+
+    /** The program loads this class but never links it. */
+    public static class Loaded {
+        public static String word = "seen";
+    }
+
     /** Reading a static field of this class makes the evaluator run its initializer, which fails. */
     public static class Boom {
         public static int x;
@@ -182,6 +192,7 @@ public class EvalTarget implements Comparable<EvalTarget> {
         Left left = new Left();
         Right right = new Right();
         Other other = new Other();
+        Class<?> loadedClass = Loaded.class; // loaded, not linked
         Class<?> boomClass = Boom.class; // loads the class without initializing it
         int boomFields = boomClass.getDeclaredFields().length; // and links it, so that the debugger sees it
         Left[] lefts = {left};
@@ -194,7 +205,7 @@ public class EvalTarget implements Comparable<EvalTarget> {
         }
         System.out.println(i + l + d + f + c + b + sh + s + nul + arr.length + grid.length + words.length + list + map + boxed
                 + boxedNull + longNull + boxedLong + boxedDouble + boxedFlag + boxedChar + o + sb + obj + color + left + right + other
-                + lefts.length + rights.length + boomClass + boomFields);
+                + lefts.length + rights.length + boomClass + boomFields + loadedClass);
     }
 
     public static void breakHere() {
