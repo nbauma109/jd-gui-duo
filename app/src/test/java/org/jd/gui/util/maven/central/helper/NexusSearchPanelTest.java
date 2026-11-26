@@ -218,8 +218,9 @@ class NexusSearchPanelTest {
         assertThat(snippets.get("SBT")).contains("classifier \"linux\"");
         assertThat(snippets.get("Leiningen")).contains(":classifier \"linux\" :extension \"war\"");
         assertThat(snippets.get("Grape")).contains("classifier='linux', type='war'");
-        assertThat(snippets).containsEntry("Buildr", "compile 'org.demo:tool:war:linux:1.3'\n");
-        assertThat(snippets).containsEntry("bld", "dependency(\"org.demo\", \"tool\", \"1.3\", \"linux\", \"war\");\n");
+        assertThat(snippets)
+                .containsEntry("Buildr", "compile 'org.demo:tool:war:linux:1.3'\n")
+                .containsEntry("bld", "dependency(\"org.demo\", \"tool\", \"1.3\", \"linux\", \"war\");\n");
         SwingUtilities.invokeAndWait(() -> table().clearSelection());
         assertThat(snippets().values()).containsOnly("");
     }
