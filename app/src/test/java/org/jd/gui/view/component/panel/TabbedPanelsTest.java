@@ -19,6 +19,8 @@ import org.jd.gui.model.debug.DebugThread;
 import org.jd.gui.util.decompiler.GuiPreferences;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.awt.Component;
 import java.awt.event.InputEvent;
@@ -79,7 +81,7 @@ class TabbedPanelsTest {
         private boolean closed;
 
         Page(String path) {
-            uri = URI.create("file:" + path);
+            uri = path.isEmpty() ? URI.create("memory://pasted") : URI.create("file:" + path);
         }
 
         @Override
@@ -124,6 +126,32 @@ class TabbedPanelsTest {
             assertThat(tabs.getSelectedIndex()).isZero();
             assertThat(panel.showPage(URI.create("file:/other"))).isNull();
             assertThat(((JComponent) tabs.getTabComponentAt(0)).getToolTipText()).isEqualTo("tip of a");
+        });
+    }
+
+    @ParameterizedTest(name = "{0} is shown by the tab of {1}")
+    @CsvSource(delimiter = '|', value = {
+            "/x.jar                  | /x.jar",
+            "/x.jar!/demo/A.class    | /x.jar",
+            "/folder/A.class         | /folder/",
+            "/folder/A.class         | /folder",
+            "/clipboard-10.log       | /clipboard-10.log",
+            "/x.jarred               | ",
+            "/y.jar!/demo/A.class    | "})
+    void anAddressIsShownByTheTabThatIsItOrHoldsIt(String path, String tab) throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            TabbedPanel<Page> panel = new TabbedPanel<>(api());
+            // a page without a path holds nothing, and the one whose path only starts the same is another one
+            for (String name : new String[] {"/x.jar", "/folder/", "/clipboard-10.log", "/clipboard-1.log", ""}) {
+                if (name.equals("/folder/") && tab != null && tab.equals("/folder")) {
+                    name = "/folder";
+                }
+                panel.addPage(name, () -> null, "tip", new Page(name));
+            }
+
+            Page found = panel.showPage(URI.create("file:" + path));
+
+            assertThat(found == null ? null : found.getUri().getPath()).isEqualTo(tab);
         });
     }
 
