@@ -83,6 +83,25 @@ class JdiExpressionEvaluatorRound4Test {
     }
 
     @Test
+    void aNullBoxThatAnOperatorUnboxesIsANullPointerException() {
+        for (String expression : new String[] {"-boxedNull", "+boxedNull", "1 + boxedNull", "1 > boxedNull", "boxedNull < 1", "arr[boxedNull]",
+                "longNull - 1", "true ? -boxedNull : 0"}) {
+            assertThat(eval(expression, session.mainFrame())).as(expression).isEqualTo("ERROR: NullPointerException: a null cannot be unboxed");
+        }
+        assertThat(eval("-null", session.mainFrame())).isEqualTo("ERROR: A number is required");
+        assertThat(eval("true > 1", session.mainFrame())).startsWith("ERROR: ");
+    }
+
+    @Test
+    void aMemberClassThatTheProgramHasNotUsedYetCanBeRead() {
+        assertThat(eval("EvalTarget.Loaded.word", session.mainFrame())).contains("seen");
+        assertThat(eval("EvalTarget.Unused.answer", session.mainFrame())).isEqualTo("42");
+        // what does not exist is still reported, and a branch that is not evaluated loads nothing
+        assertThat(eval("EvalTarget.Missing.x", session.mainFrame())).startsWith("ERROR: No static field 'Missing' in ");
+        assertThat(eval("false ? EvalTarget.Missing.x : 1", session.mainFrame())).doesNotContain("Exception");
+    }
+
+    @Test
     void aFailingInitializerIsReportedWithItsException() {
         String result = eval("EvalTarget.Boom.x", session.mainFrame());
 

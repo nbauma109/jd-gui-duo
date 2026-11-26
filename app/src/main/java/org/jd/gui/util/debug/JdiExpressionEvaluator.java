@@ -592,7 +592,7 @@ public final class JdiExpressionEvaluator {
                 left = skippedBoolean(leftOperand, right, () -> compare(op, value(leftOperand), value(right)));
                 continue;
             }
-            left = constantIf(left, right, vm.mirrorOf(compare(op, value(left), value(right))));
+            left = constantIf(left, right, vm.mirrorOf(compare(op, unboxedOperand(left), unboxedOperand(right))));
         }
     }
 
@@ -735,7 +735,7 @@ public final class JdiExpressionEvaluator {
             Value negated = negate(skipped);
             return operandResult instanceof Constant ? new Constant(negated) : negated;
         }
-        Value operand = unbox(value(operandResult)); // unary operators unbox: -boxed, +boxed
+        Value operand = unboxedOperand(operandResult); // unary operators unbox: -boxed, +boxed
         Value negated = negate(operand);
         return operandResult instanceof Constant ? new Constant(negated) : negated; // the negation of a constant is a constant
     }
@@ -771,7 +771,7 @@ public final class JdiExpressionEvaluator {
             }
             return operandResult instanceof Constant ? operandResult : skipped;
         }
-        Value operand = unbox(value(operandResult)); // unary operators unbox: -boxed, +boxed
+        Value operand = unboxedOperand(operandResult); // unary operators unbox: -boxed, +boxed
         if (operand instanceof com.sun.jdi.ByteValue || operand instanceof com.sun.jdi.ShortValue || operand instanceof CharValue) {
             return promotedToInt((PrimitiveValue) operand, operandResult instanceof Constant); // unary numeric promotion
         }
@@ -818,7 +818,7 @@ public final class JdiExpressionEvaluator {
         if (!(value(target) instanceof ArrayReference arrayReference)) {
             throw new EvaluationException("Not an array");
         }
-        Value indexValue = unbox(value(index));
+        Value indexValue = unboxedOperand(index);
         if ((!(indexValue instanceof com.sun.jdi.IntegerValue) && !(indexValue instanceof com.sun.jdi.ShortValue) && !(indexValue instanceof com.sun.jdi.ByteValue)
                 && !(indexValue instanceof CharValue))) {
             throw new EvaluationException("An array index must be an int, short, byte or char"); // a long or a double does not index an array in Java
@@ -1275,12 +1275,41 @@ public final class JdiExpressionEvaluator {
         if (field == null || !field.isStatic()) {
             ReferenceType nested = findClass(type.name() + "$" + name);
             if (nested == null) {
+                nested = loadMemberType(type, name);
+            }
+            if (nested == null) {
                 throw new EvaluationException("No static field '" + name + "' in " + type.name());
             }
             return new ClassRef(nested);
         }
         ensureInitialized(field);
         return fieldResult(field, type.getValue(field));
+    }
+
+    /**
+     * A member type that the program has not used yet is not visible to the debugger: it is loaded by the loader of its outer type and
+     * linked, which does not run its initializer. Null when there is no such type (a branch that is not evaluated runs nothing).
+     */
+    private ReferenceType loadMemberType(ReferenceType outer, String name) {
+        if (skipping > 0) {
+            return null;
+        }
+        try {
+            ReferenceType type = invokeForName(outer.name() + "$" + name, false, outer.classLoader()).reflectedType();
+            prepare(type);
+            return type;
+        } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException | InvocationException | RuntimeException _) {
+            return null; // no member type of that name
+        }
+    }
+
+    /** Class.forName(name, initialize, loader) in the debugged program, which always has that class and that method. */
+    private com.sun.jdi.ClassObjectReference invokeForName(String name, boolean initialize, com.sun.jdi.ClassLoaderReference loader)
+            throws InvalidTypeException, ClassNotLoadedException, IncompatibleThreadStateException, InvocationException {
+        ClassType classClass = (ClassType) vm.classesByName("java.lang.Class").get(0);
+        Method forName = classClass.concreteMethodByName("forName", "(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;");
+        return (com.sun.jdi.ClassObjectReference) classClass.invokeMethod(thread, forName,
+            java.util.Arrays.<Value>asList(vm.mirrorOf(name), vm.mirrorOf(initialize), loader), ObjectReference.INVOKE_SINGLE_THREADED);
     }
 
     /**
@@ -1326,15 +1355,8 @@ public final class JdiExpressionEvaluator {
 
     /** Class.forName(name, true, loader): runs the initializer, like the first active use in Java. */
     private void initialize(ReferenceType type) throws EvaluationException {
-        List<ReferenceType> classClasses = vm.classesByName("java.lang.Class");
-        Method forName = !classClasses.isEmpty() && classClasses.get(0) instanceof ClassType classClass
-            ? classClass.concreteMethodByName("forName", "(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;") : null;
-        if (forName == null) {
-            return;
-        }
         try {
-            ((ClassType) classClasses.get(0)).invokeMethod(thread, forName,
-                java.util.Arrays.<Value>asList(vm.mirrorOf(type.name()), vm.mirrorOf(true), type.classLoader()), ObjectReference.INVOKE_SINGLE_THREADED);
+            invokeForName(type.name(), true, type.classLoader());
         } catch (InvocationException e) {
             throw new EvaluationException("Exception in the initializer of " + type.name() + ": " + e.exception().referenceType().name());
         } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException | RuntimeException e) {
@@ -1671,21 +1693,13 @@ public final class JdiExpressionEvaluator {
 
     /** Class.forName(type, false, loader) for the parameter types: afterwards JDI sees them as loaded by that loader. */
     private void preloadParameterTypes(Method method) {
-        List<ReferenceType> classClasses = vm.classesByName("java.lang.Class");
-        if (classClasses.isEmpty() || !(classClasses.get(0) instanceof ClassType classClass)) {
-            return;
-        }
-        Method forName = classClass.concreteMethodByName("forName", "(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;");
-        if (forName == null) {
-            return;
-        }
         com.sun.jdi.ClassLoaderReference loader = method.declaringType().classLoader();
         for (String typeName : method.argumentTypeNames()) {
             if (isPrimitiveName(typeName) || typeName.endsWith("[]")) {
                 continue;
             }
             try {
-                classClass.invokeMethod(thread, forName, java.util.Arrays.<Value>asList(vm.mirrorOf(typeName), vm.mirrorOf(false), loader), ObjectReference.INVOKE_SINGLE_THREADED);
+                invokeForName(typeName, false, loader);
             } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException | InvocationException | RuntimeException _) {
                 // not loadable that way: the retry reports the original failure
             }
@@ -1890,15 +1904,24 @@ public final class JdiExpressionEvaluator {
         return (Value) result;
     }
 
+    /** The value of an operand that an operator unboxes: for a null of a wrapper type, Java throws a NullPointerException. */
+    private static Value unboxedOperand(Object operand) throws EvaluationException {
+        Value value = value(operand);
+        if (value == null && isWrapper(declaredTypeOf(operand))) {
+            throw new EvaluationException("NullPointerException: a null cannot be unboxed");
+        }
+        return unbox(value);
+    }
+
     private static boolean asBoolean(Object result) throws EvaluationException {
-        if (unbox(value(result)) instanceof BooleanValue booleanValue) {
+        if (unboxedOperand(result) instanceof BooleanValue booleanValue) {
             return booleanValue.value();
         }
         throw new EvaluationException("A boolean is required");
     }
 
     private static double number(Object result) throws EvaluationException {
-        if (unbox(value(result)) instanceof PrimitiveValue primitive && !(primitive instanceof BooleanValue)) {
+        if (unboxedOperand(result) instanceof PrimitiveValue primitive && !(primitive instanceof BooleanValue)) {
             return primitive.doubleValue();
         }
         throw new EvaluationException("A number is required");
@@ -2024,7 +2047,7 @@ public final class JdiExpressionEvaluator {
             String concatenated = (leftText != null ? leftText : text(left)) + text(right);
             return constant ? internedLiteral(concatenated) : pin(vm.mirrorOf(concatenated));
         }
-        return numericArithmetic(op, unbox(left), unbox(right));
+        return numericArithmetic(op, unboxedOperand(leftResult), unboxedOperand(rightResult));
     }
 
     private Value numericArithmetic(String op, Value left, Value right) throws EvaluationException {
