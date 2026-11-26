@@ -12,6 +12,7 @@ import org.jd.gui.api.model.Indexes;
 import org.jd.gui.model.container.entry.path.DirectoryEntryPath;
 import org.jd.gui.model.container.entry.path.FileEntryPath;
 import org.jd.gui.spi.Indexer;
+import org.jd.gui.util.decompiler.GuiPreferences;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -57,6 +58,7 @@ class JavaModuleFileIndexerProviderTest {
     }
 
     private final List<String> indexed = new ArrayList<>();
+    private final Map<String, String> preferences = new HashMap<>();
 
     @SuppressWarnings("rawtypes")
     private final Map<String, Collection> packages = new HashMap<>() {
@@ -75,7 +77,11 @@ class JavaModuleFileIndexerProviderTest {
             }
             return null;
         });
-        return (API) Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] {API.class}, (proxy, method, args) -> "getIndexer".equals(method.getName()) ? recorder : null);
+        return (API) Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] {API.class}, (proxy, method, args) -> switch (method.getName()) {
+            case "getIndexer" -> recorder;
+            case "getPreferences" -> preferences;
+            default -> null;
+        });
     }
 
     private void index(FakeEntry jmod) {
@@ -97,6 +103,20 @@ class JavaModuleFileIndexerProviderTest {
         // the packages are the directories of classes/, without their "classes/" prefix and not META-INF
         assertThat(packages).containsOnlyKeys("demo", "demo/sub");
         assertThat(indexed).containsExactlyInAnyOrder("classes/module-info.class", "classes/demo/A.class", "classes/demo/sub/B.class", "classes/META-INF/services");
+    }
+
+    @Test
+    void theFoldersAreIndexedDownToTheDepthOfThePreferences() {
+        preferences.put(GuiPreferences.MAXIMUM_DEPTH_KEY, "1");
+        FakeEntry classes = new FakeEntry("classes", true)
+                .add(new FakeEntry("classes/demo", true)
+                        .add(new FakeEntry("classes/demo/A.class", false))
+                        .add(new FakeEntry("classes/demo/sub", true).add(new FakeEntry("classes/demo/sub/B.class", false))));
+
+        index(new FakeEntry("", true).add(classes));
+
+        assertThat(packages).containsOnlyKeys("demo");
+        assertThat(indexed).containsExactly("classes/demo/A.class");
     }
 
     @Test

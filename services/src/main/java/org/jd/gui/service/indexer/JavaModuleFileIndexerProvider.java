@@ -34,21 +34,24 @@ public class JavaModuleFileIndexerProvider extends AbstractIndexerProvider {
             Map<String, Collection> packageDeclarationIndex = indexes.getIndex("packageDeclarations");
 
             // Index module-info, packages and CLASS files
-            index(api, e, indexes, getProgressFunction, setProgressFunction, isCancelledFunction, packageDeclarationIndex);
+            index(api, e, indexes, getProgressFunction, setProgressFunction, isCancelledFunction, packageDeclarationIndex, maximumDepth(api));
         }
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected static void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction, Map<String, Collection> packageDeclarationIndex) {
+    protected static void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction, Map<String, Collection> packageDeclarationIndex, int depth) {
         for (Container.Entry e : entry.getChildren().values()) {
             if (e.isDirectory()) {
+                if (depth <= 0) {
+                    continue;
+                }
                 String path = e.getPath();
 
                 if (!path.startsWith("classes/META-INF")) {
                     packageDeclarationIndex.get(path.substring(8)).add(e); // 8 = "classes/".length()
                 }
 
-                index(api, e, indexes, getProgressFunction, setProgressFunction, isCancelledFunction, packageDeclarationIndex);
+                index(api, e, indexes, getProgressFunction, setProgressFunction, isCancelledFunction, packageDeclarationIndex, depth - 1);
             } else {
                 Indexer indexer = api.getIndexer(e);
 

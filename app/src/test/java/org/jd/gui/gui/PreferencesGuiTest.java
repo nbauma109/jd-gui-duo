@@ -42,7 +42,7 @@ class PreferencesGuiTest extends GuiTestBase {
         clickMenu("Help", "Preferences...");
         DialogFixture dialog = dialog("Preferences");
 
-        dialog.label(org.assertj.swing.core.matcher.JLabelMatcher.withText("Maximum depth for directory exploration (1..30): ")).requireVisible();
+        dialog.label(org.assertj.swing.core.matcher.JLabelMatcher.withText("Maximum depth of the folders indexed in archives (1..30): ")).requireVisible();
         dialog.label(org.assertj.swing.core.matcher.JLabelMatcher.withText("Font Size Of Text Area (2..40): ")).requireVisible();
         dialog.checkBox(new GenericTypeMatcher<JCheckBox>(JCheckBox.class) {
             @Override

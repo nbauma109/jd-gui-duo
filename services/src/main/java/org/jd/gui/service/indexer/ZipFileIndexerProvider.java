@@ -24,9 +24,16 @@ public class ZipFileIndexerProvider extends AbstractIndexerProvider {
 
     @Override
     public void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
+        index(api, entry, indexes, getProgressFunction, setProgressFunction, isCancelledFunction, maximumDepth(api));
+    }
+
+    /** Indexes the files of the entry, and of its folders down to the depth. */
+    private static void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction, int depth) {
         for (Container.Entry e : entry.getChildren().values()) {
             if (e.isDirectory()) {
-                index(api, e, indexes, getProgressFunction, setProgressFunction, isCancelledFunction);
+                if (depth > 0) {
+                    index(api, e, indexes, getProgressFunction, setProgressFunction, isCancelledFunction, depth - 1);
+                }
             } else {
                 Indexer indexer = api.getIndexer(e);
 
