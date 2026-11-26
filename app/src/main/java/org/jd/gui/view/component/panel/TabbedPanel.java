@@ -198,13 +198,25 @@ public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel impl
         while (i-- > 0) {
             T page = (T) tabbedPane.getComponentAt(i);
             String u2 = page.getUri().getPath();
-            if (u1.startsWith(u2)) {
+            if (isSameOrInside(u1, u2)) {
                 tabbedPane.setSelectedIndex(i);
                 return page;
             }
         }
 
         return null;
+    }
+
+    /** Whether a path is the one of a page, or of something inside it: a file of its folder, or an entry of its archive. */
+    private static boolean isSameOrInside(String path, String pagePath) {
+        if (pagePath == null || pagePath.isEmpty() || !path.startsWith(pagePath)) {
+            return false;
+        }
+        if (path.length() == pagePath.length() || pagePath.endsWith("/")) {
+            return true;
+        }
+        char next = path.charAt(pagePath.length());
+        return next == '/' || next == '!';
     }
 
     protected class PopupTabMenu extends JPopupMenu {

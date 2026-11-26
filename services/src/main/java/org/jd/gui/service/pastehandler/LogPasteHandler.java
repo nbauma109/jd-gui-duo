@@ -28,7 +28,8 @@ public class LogPasteHandler implements PasteHandler { // NO_UCD (unused code)
     @Override
     public void paste(API api, Object obj) {
         String title = "clipboard-" + counter.incrementAndGet() + ".log";
-        URI uri = URI.create("memory://" + title);
+        // the title is the path: an address without a path would be the start of every other one
+        URI uri = URI.create("memory:///" + title);
         String content = obj == null ? "" : obj.toString();
         api.addPanel(null, title, () -> ICON, null, new LogPage(api, uri, content));
     }
