@@ -434,8 +434,8 @@ public abstract class AbstractJavaListener extends ASTVisitor {
 
         PrimitiveType primitive = getPrimitiveTypeContext(type);
         if (primitive == null) {
-            String erasure = typeVariablesAsWritten ? null
-                    : erasureOfTypeVariable(type instanceof ArrayType arrayType ? arrayType.getElementType() : type);
+            Type elementType = type instanceof ArrayType arrayType ? arrayType.getElementType() : type;
+            String erasure = typeVariablesAsWritten ? null : erasureOfTypeVariable(elementType);
             name = "L" + (erasure != null ? erasure : resolveInternalTypeName(type)) + ";";
         } else {
             // Search primitive
