@@ -9,9 +9,11 @@
 package org.jd.gui.service.indexer;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.spi.Indexer;
+import org.jd.gui.util.decompiler.GuiPreferences;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +26,8 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 public abstract class AbstractIndexerProvider implements Indexer {
+    private static final int DEFAULT_MAXIMUM_DEPTH = 15;
+
     private List<String> externalSelectors;
     protected Pattern externalPathPattern;
 
@@ -81,6 +85,16 @@ public abstract class AbstractIndexerProvider implements Indexer {
 
     @Override
     public Pattern getPathPattern() { return externalPathPattern; }
+
+    /** How many folders deep the files are indexed, as set in the preferences. */
+    protected static int maximumDepth(API api) {
+        try {
+            return Integer.parseInt(api.getPreferences().get(GuiPreferences.MAXIMUM_DEPTH_KEY));
+        } catch (NumberFormatException e) {
+            assert ExceptionUtil.printStackTrace(e);
+            return DEFAULT_MAXIMUM_DEPTH;
+        }
+    }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected static void addToIndexes(Indexes indexes, String indexName, Set<String> set, Container.Entry entry) {

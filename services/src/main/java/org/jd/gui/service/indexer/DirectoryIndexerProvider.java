@@ -8,12 +8,10 @@
 
 package org.jd.gui.service.indexer;
 
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 import org.jd.gui.api.model.Indexes;
 import org.jd.gui.spi.Indexer;
-import org.jd.gui.util.decompiler.GuiPreferences;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleConsumer;
@@ -26,15 +24,7 @@ public class DirectoryIndexerProvider extends AbstractIndexerProvider {
 
     @Override
     public void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
-        int depth = 15;
-
-        try {
-            depth = Integer.parseInt(api.getPreferences().get(GuiPreferences.MAXIMUM_DEPTH_KEY));
-        } catch (NumberFormatException e) {
-            assert ExceptionUtil.printStackTrace(e);
-        }
-
-        index(api, entry, indexes, getProgressFunction, setProgressFunction, isCancelledFunction, depth);
+        index(api, entry, indexes, getProgressFunction, setProgressFunction, isCancelledFunction, maximumDepth(api));
     }
 
     public void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction, int depth) {
