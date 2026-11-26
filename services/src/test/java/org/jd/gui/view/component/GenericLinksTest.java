@@ -80,8 +80,18 @@ class GenericLinksTest {
                     void other(T item) {}
                 }
 
+                static class Elsewhere {
+                    // other types of the same names, which come first in the source
+                    class Base {}
+                    class Marked {}
+                    static class Holder { class T {} }
+                }
+
                 class Base { class T {} }
                 class Derived extends Base { void hidden(T item) {} }
+                class Qualified extends demo.Box.Base { void qualified(T item) {} }
+                class Nested extends Elsewhere.Holder { void nested(T item) {} }
+                class Looping extends Looping.Missing { void looping(T item) {} }
                 class Further extends Derived { void further(T item) {} }
                 interface Marked { class N {} }
                 class Implementer implements Marked { void marked(N item) {} }
@@ -89,7 +99,10 @@ class GenericLinksTest {
                 class Heir extends Secret { void heir(C key) {} }
 
                 void use(Box<String, Integer, String, Integer> box, Other<String> other, Inner inner, Derived derived, Further further,
-                        Implementer implementer, Heir heir) {
+                        Implementer implementer, Heir heir, Qualified qualified, Nested nested, Looping looping) {
+                    qualified.qualified(null);
+                    nested.nested(null);
+                    looping.looping(null);
                     derived.hidden(null);
                     further.further(null);
                     implementer.marked(null);
@@ -162,6 +175,6 @@ class GenericLinksTest {
 
         assertThat(dead).isEmpty();
         assertThat(followed).contains("put", "add", "sort", "deep", "all", "get", "generic", "text", "shadow", "chain", "list", "forward", "inner",
-                "other", "value", "number", "values", "Box", "hidden", "further", "marked", "heir");
+                "other", "value", "number", "values", "Box", "hidden", "further", "marked", "heir", "qualified", "nested", "looping");
     }
 }
