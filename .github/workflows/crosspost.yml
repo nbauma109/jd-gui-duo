@@ -82,7 +82,7 @@ jobs:
           EOF
           fi
       - name: Publish to Dev.to
-        uses: sinedied/publish-devto@c713cc0934b35cb3df9fca759b98e36e6a540a85 # v2
+        uses: sinedied/publish-devto@1493aff0bfc2db00c40f9da60424742fcebfa0ea # v2
         with:
           devto_key: ${{ secrets.DEVTO_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
