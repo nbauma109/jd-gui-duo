@@ -857,14 +857,18 @@ public final class NexusSearchPanel extends JPanel {
         return sb.toString();
     }
 
+    /** In bld, the classifier and the type are the fourth and the fifth argument: Java has no named arguments. */
     private static String buildBldSnippet(String g, String a, String v, String c, String p) {
         StringBuilder sb = new StringBuilder();
         sb.append("dependency(\"").append(g).append("\", \"").append(a).append("\", \"").append(v).append("\"");
+        boolean otherType = StringUtils.isNotBlank(p) && !"jar".equalsIgnoreCase(p);
         if (StringUtils.isNotBlank(c)) {
-            sb.append(", classifier=\"").append(c).append("\"");
+            sb.append(", \"").append(c).append("\"");
+        } else if (otherType) {
+            sb.append(", null");
         }
-        if (StringUtils.isNotBlank(p) && !"jar".equalsIgnoreCase(p)) {
-            sb.append(", type=\"").append(p).append("\"");
+        if (otherType) {
+            sb.append(", \"").append(p).append("\"");
         }
         sb.append(");\n");
         return sb.toString();

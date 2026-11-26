@@ -218,8 +218,9 @@ class NexusSearchPanelTest {
         assertThat(snippets.get("SBT")).contains("classifier \"linux\"");
         assertThat(snippets.get("Leiningen")).contains(":classifier \"linux\" :extension \"war\"");
         assertThat(snippets.get("Grape")).contains("classifier='linux', type='war'");
-        assertThat(snippets).containsEntry("Buildr", "compile 'org.demo:tool:war:linux:1.3'\n");
-        assertThat(snippets.get("bld")).contains("classifier=\"linux\", type=\"war\"");
+        assertThat(snippets)
+                .containsEntry("Buildr", "compile 'org.demo:tool:war:linux:1.3'\n")
+                .containsEntry("bld", "dependency(\"org.demo\", \"tool\", \"1.3\", \"linux\", \"war\");\n");
         SwingUtilities.invokeAndWait(() -> table().clearSelection());
         assertThat(snippets().values()).containsOnly("");
     }
@@ -232,6 +233,21 @@ class NexusSearchPanelTest {
         search(0, "tool");
 
         assertThat(snippets().get("Gradle")).contains("\"" + expected + "\"");
+    }
+
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', quoteCharacter = '~', value = {
+            "~~      | war | , null, 'war'",
+            "sources | jar | , 'sources'",
+            "sources | ~~  | , 'sources'",
+            "~~      | jar | ~~",
+            "~~      | ~~  | ~~"})
+    void theBldSnippetPassesTheClassifierAndTheTypeInTheirPlaces(String classifier, String extension, String rest) throws Exception {
+        firstPage = List.of(new NexusArtifact("org.demo", "tool", "2", null, classifier, extension, "releases", ""));
+
+        search(0, "tool");
+
+        assertThat(snippets()).containsEntry("bld", ("dependency('org.demo', 'tool', '2'" + rest + ");\n").replace('\'', '"'));
     }
 
     @Test
