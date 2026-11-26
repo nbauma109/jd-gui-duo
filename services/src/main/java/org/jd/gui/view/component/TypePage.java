@@ -185,7 +185,7 @@ public abstract class TypePage extends CustomLineNumbersPage
         if (!ranges.isEmpty()) {
             setSelectionHighlightColor();
             textArea.markAll(ranges);
-            Collections.sort(ranges);
+            ranges.sort(null);
             setCaretPositionAndCenter(fragmentRanges.isEmpty() ? ranges.get(0) : Collections.min(fragmentRanges));
         }
 
@@ -543,8 +543,8 @@ public abstract class TypePage extends CustomLineNumbersPage
         URI jarURI = entry.getContainer().getRoot().getParent().getUri();
         String unitName = entry.getPath();
         // 1st pass for declarations
-        ASTParser astParser = ASTParserFactory.getInstance().newASTParser(api, source, unitName, jarURI);
-        astParser.createAST(null).accept(listener.getDeclarationListener());
+        ASTParser declarationParser = ASTParserFactory.getInstance().newASTParser(api, source, unitName, jarURI);
+        declarationParser.createAST(null).accept(listener.getDeclarationListener());
         listener.init();
         // 2nd pass for references
         ASTParser astParserWithBindings = ASTParserFactory.getInstanceWithBindings().newASTParser(api, source, unitName, jarURI);

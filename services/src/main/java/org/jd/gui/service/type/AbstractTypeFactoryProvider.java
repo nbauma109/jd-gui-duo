@@ -175,10 +175,9 @@ public abstract class AbstractTypeFactoryProvider implements TypeFactory {
                 index++;
                 break;
             case 'T':
-                index++;
-                beginIndex = index;
-                index = descriptor.substring(beginIndex, length).indexOf(';');
-                sb.append(descriptor, beginIndex, index);
+                int variableStart = index + 1;
+                index = descriptor.indexOf(';', variableStart);
+                sb.append(descriptor, variableStart, index);
                 index++;
                 break;
             case 'V':

@@ -78,6 +78,7 @@ class SelectLocationGuiTest extends GuiTestBase {
             }
         }).withTimeout(TIMEOUT_MS).using(robot);
         diff.requireVisible();
+        assertThat(diff.target().getTitle()).startsWith("Comparison view for class Greeter.class");
     }
 
     @Test

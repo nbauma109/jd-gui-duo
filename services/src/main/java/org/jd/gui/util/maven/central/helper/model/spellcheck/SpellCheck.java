@@ -20,13 +20,13 @@ package org.jd.gui.util.maven.central.helper.model.spellcheck;
 import java.util.List;
 
 public class SpellCheck {
-    private List<?> suggestions;
+    private List<Object> suggestions;
 
-    public List<?> getSuggestions() {
+    public List<Object> getSuggestions() {
         return suggestions;
     }
 
-    public void setSuggestions(List<?> suggestions) {
+    public void setSuggestions(List<Object> suggestions) {
         this.suggestions = suggestions;
     }
 

@@ -516,17 +516,6 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
                 sbPattern.append('M');
             }
 
-            // TODO In a future release, add 'highlightScope' to display search results in
-            // correct type and inner-type
-            // def type = TypeFactoryService.instance.get(entry)?.make(api, entry, null)
-            // if (type) {
-            // sbPattern.append('&highlightScope=')
-            // sbPattern.append(type.name)
-            // def query = sbPattern.toString()
-            // def outerPath = UriUtil.getOuterPath(collectionOfFutureIndexes, entry, type)
-            // openClosure(new URI(entry.uri.scheme, entry.uri.host, outerPath, query,
-            // null))
-            // } else {
             String query = sbPattern.toString();
             URI u = entry.getUri();
 
@@ -535,7 +524,6 @@ public class SearchInConstantPoolsController implements IndexesChangeListener {
             } catch (URISyntaxException e) {
                 assert ExceptionUtil.printStackTrace(e);
             }
-            // }
         }
     }
 

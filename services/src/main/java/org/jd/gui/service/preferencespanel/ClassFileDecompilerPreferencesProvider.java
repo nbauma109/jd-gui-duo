@@ -45,7 +45,7 @@ public class ClassFileDecompilerPreferencesProvider extends JPanel implements Pr
 
     private static final String[] DECOMPILERS = { ENGINE_JD_CORE_V1, ENGINE_JD_CORE_V0, ENGINE_CFR, ENGINE_PROCYON, ENGINE_FERNFLOWER, ENGINE_VINEFLOWER, ENGINE_JADX };
 
-    private transient Map<String, PreferencesPanel> decompilerPreferencesProviders = new HashMap<>();
+    private final transient Map<String, PreferencesPanel> decompilerPreferencesProviders = new HashMap<>();
 
     public ClassFileDecompilerPreferencesProvider() {
         super(new GridLayout(0, 2));

@@ -55,7 +55,7 @@ public class ContextualActionsFactoryService {
 
             // Sort by group names
             List<String> groupNames = new ArrayList<>(mapActions.keySet());
-            Collections.sort(groupNames);
+            groupNames.sort(null);
 
             for (String groupName : groupNames) {
                 if (! result.isEmpty()) {
@@ -64,7 +64,7 @@ public class ContextualActionsFactoryService {
                 }
                 // Sort by names
                 List<Action> actions = mapActions.get(groupName);
-                Collections.sort(actions, Comparator.comparing(ContextualActionsFactoryService::getActionName));
+                actions.sort(Comparator.comparing(ContextualActionsFactoryService::getActionName));
                 result.addAll(actions);
             }
 

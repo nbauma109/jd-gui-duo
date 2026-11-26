@@ -346,7 +346,7 @@ public class ClassFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
     }
 
     protected static class InnerClassVisitor extends ClassVisitor {
-        private String name;
+        private final String name;
         private String outerName;
         private String innerName;
 

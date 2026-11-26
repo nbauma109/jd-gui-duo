@@ -131,6 +131,9 @@ class OpenTypeHierarchyViewTest {
                 "    Middle - demo *",
                 "      Leaf - demo",
                 "    Other - demo");
+        DefaultMutableTreeNode root = (DefaultMutableTreeNode) tree.getPathForRow(0).getLastPathComponent();
+        OpenTypeHierarchyView.TreeNodeBean bean = (OpenTypeHierarchyView.TreeNodeBean) root.getUserObject();
+        assertThat(bean.getTip()).isEqualTo(bean.getLabel());
     }
 
     @Test

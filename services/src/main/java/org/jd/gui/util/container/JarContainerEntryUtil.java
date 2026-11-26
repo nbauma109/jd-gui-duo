@@ -68,36 +68,30 @@ public final class JarContainerEntryUtil {
 
             for (Map.Entry<Container.EntryPath, Container.Entry> entry : entries.entrySet()) {
                 Container.Entry e = entry.getValue();
-                if (!e.isDirectory()) {
-                    String p = e.getPath();
-
-                    if (p.toLowerCase().endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
-                        int indexDollar = p.lastIndexOf('$');
-
-                        if (indexDollar != -1) {
-                            int indexSeparator = p.lastIndexOf('/');
-
-                            if (indexDollar > indexSeparator) {
-                                if (innerTypePaths.contains(p)) {
-                                    // Inner class found -> Skip
-                                    continue;
-                                }
-                                populateInnerTypePaths(innerTypePaths, e);
-
-                                if (innerTypePaths.contains(p)) {
-                                    // Inner class found -> Skip
-                                    continue;
-                                }
-                            }
-                        }
-                    }
+                if (e.isDirectory() || !isInnerType(innerTypePaths, e)) {
+                    // Valid path
+                    filteredSubEntries.put(entry.getKey(), e);
                 }
-                // Valid path
-                filteredSubEntries.put(entry.getKey(), e);
             }
         }
 
         return filteredSubEntries.values();
+    }
+
+    /** Whether a file is the class of an inner type, which is shown as part of its outer type; reads the inner types of the class. */
+    private static boolean isInnerType(Set<String> innerTypePaths, Container.Entry entry) {
+        String path = entry.getPath();
+        int indexDollar = path.lastIndexOf('$');
+
+        if (!path.toLowerCase().endsWith(StringConstants.CLASS_FILE_SUFFIX) || indexDollar == -1 || indexDollar <= path.lastIndexOf('/')) {
+            return false;
+        }
+        if (innerTypePaths.contains(path)) {
+            return true;
+        }
+        populateInnerTypePaths(innerTypePaths, entry);
+
+        return innerTypePaths.contains(path);
     }
 
     private static void populateInnerTypePaths(final Set<String> innerTypePaths, Container.Entry entry) {

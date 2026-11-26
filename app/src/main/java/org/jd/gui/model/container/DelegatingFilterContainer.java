@@ -148,15 +148,15 @@ public class DelegatingFilterContainer implements Container {
     }
 
     protected class DelegatedContainer implements Container {
-        private final Container container;
+        private final Container delegate;
 
-        public DelegatedContainer(Container container) {
-            this.container = container;
+        public DelegatedContainer(Container delegate) {
+            this.delegate = delegate;
         }
 
         @Override
-        public String getType() { return container.getType(); }
+        public String getType() { return delegate.getType(); }
         @Override
-        public Entry getRoot() { return getDelegatedEntry(container.getRoot()); }
+        public Entry getRoot() { return getDelegatedEntry(delegate.getRoot()); }
     }
 }

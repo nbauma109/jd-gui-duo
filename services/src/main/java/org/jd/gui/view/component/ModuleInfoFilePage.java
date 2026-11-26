@@ -32,7 +32,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -218,7 +217,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
         if (!ranges.isEmpty()) {
             setSelectionHighlightColor();
             textArea.markAll(ranges);
-            Collections.sort(ranges);
+            ranges.sort(null);
             setCaretPositionAndCenter(ranges.get(0));
         }
 
@@ -303,7 +302,9 @@ public class ModuleInfoFilePage extends ClassFilePage {
         private final Map<String, ReferenceData> referencesCache = new HashMap<>();
 
         @Override
-        public void start(int maxLineNumber, int majorVersion, int minorVersion) {}
+        public void start(int maxLineNumber, int majorVersion, int minorVersion) {
+            // a module descriptor has no line numbers to prepare
+        }
 
         @Override
         public void end() {

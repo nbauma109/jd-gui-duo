@@ -24,7 +24,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -95,7 +94,7 @@ public class PreferencesView implements PreferencesPanel.PreferencesPanelChangeL
                 pps.add(pp);
             }
 
-            Collections.sort(sortedGroupNames);
+            sortedGroupNames.sort(null);
 
             // Add preferences panels
             for (String groupName : sortedGroupNames) {
@@ -105,7 +104,7 @@ public class PreferencesView implements PreferencesPanel.PreferencesPanelChangeL
                 vbox.setBorder(titledBorder);
 
                 List<PreferencesPanel> sortedPreferencesPanels = groups.get(groupName);
-                Collections.sort(sortedPreferencesPanels, Comparator.comparing(PreferencesPanel::getPreferencesPanelTitle));
+                sortedPreferencesPanels.sort(Comparator.comparing(PreferencesPanel::getPreferencesPanelTitle));
 
                 for (PreferencesPanel pp : sortedPreferencesPanels) {
                     if (!pp.useCompactDisplay()) {

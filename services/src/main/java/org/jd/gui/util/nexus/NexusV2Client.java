@@ -24,6 +24,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -68,7 +69,7 @@ final class NexusV2Client extends AbstractNexusClient implements NexusSearch {
     }
 
     @Override
-    public NexusSearchResult searchByKeyword(String keyword, int pageNo) throws Exception {
+    public NexusSearchResult searchByKeyword(String keyword, int pageNo) throws IOException {
         int from = Math.max(0, pageNo) * PAGE_SIZE;
         String path = "/service/local/lucene/search?q=" + enc(keyword)
                 + FROM + from
@@ -78,7 +79,7 @@ final class NexusV2Client extends AbstractNexusClient implements NexusSearch {
     }
 
     @Override
-    public NexusSearchResult searchBySha1(String sha1, int pageNo) throws Exception {
+    public NexusSearchResult searchBySha1(String sha1, int pageNo) throws IOException {
         int from = Math.max(0, pageNo) * PAGE_SIZE;
         String path = "/service/local/lucene/search?sha1=" + enc(sha1)
                 + FROM + from
@@ -88,7 +89,7 @@ final class NexusV2Client extends AbstractNexusClient implements NexusSearch {
     }
 
     @Override
-    public NexusSearchResult searchByGav(String groupId, String artifactId, String version, String classifier, String packaging, int pageNo) throws Exception {
+    public NexusSearchResult searchByGav(String groupId, String artifactId, String version, String classifier, String packaging, int pageNo) throws IOException {
         int from = Math.max(0, pageNo) * PAGE_SIZE;
         StringBuilder path = new StringBuilder("/service/local/lucene/search?g=")
                 .append(enc(groupId)).append("&a=").append(enc(artifactId));
@@ -115,7 +116,7 @@ final class NexusV2Client extends AbstractNexusClient implements NexusSearch {
     }
 
     @Override
-    public NexusSearchResult searchByClassName(String className, boolean fullyQualified, int pageNo) throws Exception {
+    public NexusSearchResult searchByClassName(String className, boolean fullyQualified, int pageNo) throws IOException {
         int from = Math.max(0, pageNo) * PAGE_SIZE;
         String param = "cn";
         String path = "/service/local/lucene/search?" + param + "=" + enc(className)
@@ -206,6 +207,7 @@ final class NexusV2Client extends AbstractNexusClient implements NexusSearch {
                 }
             }
         } catch (Exception _) {
+            // a response that cannot be read adds nothing: what was read before is returned
         }
         return new NexusSearchResult(list);
     }

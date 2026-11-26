@@ -20,7 +20,6 @@ import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Map;
-import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -195,7 +194,7 @@ public final class SearchUIOptions {
     private static String getMessage(String key, String fallback) {
         try {
             return ResourceBundle.getBundle(NETBEANS_BUNDLE).getString(key);
-        } catch (MissingResourceException e) {
+        } catch (MissingResourceException _) {
             return fallback;
         }
     }

@@ -277,7 +277,9 @@ public class SearchInConstantPoolsView<T extends DefaultMutableTreeNode & Contai
                     searchInConstantPoolsTree.setSelectionPath(new TreePath(node.getPath()));
                 }
                 @Override
-                public void treeCollapsed(TreeExpansionEvent e) {}
+                public void treeCollapsed(TreeExpansionEvent e) {
+                    // nothing to do when a node is collapsed
+                }
             });
             scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
             scrollPane.setPreferredSize(new Dimension(400, 150));

@@ -309,14 +309,14 @@ public class MainController implements API {
                 mainView.updateRecentFilesMenu(configuration.getRecentFiles());
                 // Background controller creation
                 JFrame mainFrame = mainView.getMainFrame();
-                saveAllSourcesController = new SaveAllSourcesController(MainController.this, mainFrame);
-                openTypeController = new OpenTypeController(MainController.this, executor, mainFrame);
+                saveAllSourcesController = new SaveAllSourcesController(this, mainFrame);
+                openTypeController = new OpenTypeController(this, executor, mainFrame);
                 containerChangeListeners.add(openTypeController);
-                openTypeHierarchyController = new OpenTypeHierarchyController(MainController.this, executor, mainFrame);
+                openTypeHierarchyController = new OpenTypeHierarchyController(this, executor, mainFrame);
                 containerChangeListeners.add(openTypeHierarchyController);
-                quickOutlineController = new QuickOutlineController(MainController.this, mainFrame);
+                quickOutlineController = new QuickOutlineController(this, mainFrame);
                 goToController = new GoToController(configuration, mainFrame);
-                searchInConstantPoolsController = new SearchInConstantPoolsController(MainController.this, executor, mainFrame);
+                searchInConstantPoolsController = new SearchInConstantPoolsController(this, executor, mainFrame);
                 containerChangeListeners.add(searchInConstantPoolsController);
                 preferencesController = new PreferencesController(configuration, mainFrame, PreferencesPanelService.getInstance().getProviders());
                 if (keyBindingsController == null) {
@@ -326,7 +326,7 @@ public class MainController implements API {
                 eclipsePreferencesController = new EclipsePreferencesController(configuration, mainFrame, EclipsePreferencesPanelService.getInstance().getProviders());
                 installDebugCallbacks(mainFrame);
                 checkDebuggablePage(currentPage);
-                selectLocationController = new SelectLocationController(MainController.this, mainFrame);
+                selectLocationController = new SelectLocationController(this, mainFrame);
                 aboutController = new AboutController(mainFrame, isDarkMode());
                 sourceLoaderService = new SourceLoaderService();
                 // Add listeners
@@ -353,7 +353,7 @@ public class MainController implements API {
         StringBuilder sb = new StringBuilder();
         List<String> extensions = new ArrayList<>(loaders.keySet());
 
-        Collections.sort(extensions);
+        extensions.sort(null);
 
         for (String extension : extensions) {
             sb.append("*.").append(extension).append(", ");
@@ -1267,10 +1267,10 @@ public class MainController implements API {
 
     // --- ComponentListener --- //
     protected class MainFrameListener extends ComponentAdapter {
-        private final Configuration configuration;
+        private final Configuration windowConfiguration;
 
-        public MainFrameListener(Configuration configuration) {
-            this.configuration = configuration;
+        public MainFrameListener(Configuration windowConfiguration) {
+            this.windowConfiguration = windowConfiguration;
         }
 
         @Override
@@ -1278,10 +1278,10 @@ public class MainController implements API {
             JFrame mainFrame = mainView.getMainFrame();
 
             if ((mainFrame.getExtendedState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH) {
-                configuration.setMainWindowMaximize(true);
+                windowConfiguration.setMainWindowMaximize(true);
             } else {
-                configuration.setMainWindowLocation(mainFrame.getLocation());
-                configuration.setMainWindowMaximize(false);
+                windowConfiguration.setMainWindowLocation(mainFrame.getLocation());
+                windowConfiguration.setMainWindowMaximize(false);
             }
         }
 
@@ -1290,10 +1290,10 @@ public class MainController implements API {
             JFrame mainFrame = mainView.getMainFrame();
 
             if ((mainFrame.getExtendedState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH) {
-                configuration.setMainWindowMaximize(true);
+                windowConfiguration.setMainWindowMaximize(true);
             } else {
-                configuration.setMainWindowSize(mainFrame.getSize());
-                configuration.setMainWindowMaximize(false);
+                windowConfiguration.setMainWindowSize(mainFrame.getSize());
+                windowConfiguration.setMainWindowMaximize(false);
             }
         }
     }
@@ -1421,7 +1421,7 @@ public class MainController implements API {
 
         if (component instanceof ContentIndexable ci && file != null) {
             UIManager.put("ProgressMonitor.progressText", title);
-            SwingWorker<Indexes, Void> worker = new IndexerWorker(MainController.this, component, ci);
+            SwingWorker<Indexes, Void> worker = new IndexerWorker(this, component, ci);
             worker.execute();
 
             component.putClientProperty(INDEXES, worker);

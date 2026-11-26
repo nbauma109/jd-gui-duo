@@ -17,6 +17,8 @@
  ******************************************************************************/
 package org.jd.gui.util.maven.central.helper;
 
+import java.io.IOException;
+import java.util.concurrent.Future;
 import org.apache.commons.lang3.StringUtils;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -516,8 +518,6 @@ public final class NexusSearchPanel extends JPanel {
         private final NexusSearch search;
         private final SearchRequest request;
 
-        private volatile Throwable error;
-
         SearchWorker(NexusSearchPanel panel, NexusSearch search, SearchRequest request) {
             this.panel = panel;
             this.search = search;
@@ -525,61 +525,58 @@ public final class NexusSearchPanel extends JPanel {
         }
 
         @Override
-        protected Void doInBackground() {
-            try {
-                setProgress(5);
+        protected Void doInBackground() throws IOException {
+            setProgress(5);
 
-                if (request.mode() == 1) {
-                    if (isCancelled()) {
-                        return null;
-                    }
-                    setProgress(25);
-                    NexusSearchResult page = search.searchBySha1(request.sha1(), 0);
-                    if (!isCancelled() && page != null && page.artifacts() != null && !page.artifacts().isEmpty()) {
-                        publish(page.artifacts());
-                    }
-                    setProgress(100);
-                    return null;
+            if (request.mode() == 1) {
+                if (!isCancelled()) {
+                    searchByHash();
                 }
-
-                for (int page = 0; page < MAX_PAGES && !isCancelled(); page++) {
-                    int baseProgress = 10;
-                    int pageRange = 80;
-                    int pageProgress = baseProgress + (pageRange * page) / MAX_PAGES;
-                    setProgress(pageProgress);
-
-                    if (isCancelled()) {
-                        break;
-                    }
-
-                    NexusSearchResult pageResult;
-                    switch (request.mode()) {
-                        case 0 -> pageResult = search.searchByKeyword(request.keyword(), page);
-                        case 2 -> pageResult = search.searchByGav(request.groupId(), request.artifactId(), request.version(), page);
-                        case 3 -> {
-                            boolean fullyQualified = request.className() != null && request.className().contains(".");
-                            pageResult = search.searchByClassName(request.className(), fullyQualified, page);
-                        }
-                        default -> pageResult = null;
-                    }
-
-                    if (pageResult == null || pageResult.artifacts() == null) {
-                        break;
-                    }
-
-                    List<NexusArtifact> pageArtifacts = pageResult.artifacts();
-                    if (pageArtifacts.isEmpty()) {
-                        break;
-                    }
-
-                    publish(pageArtifacts);
-                }
-
-                setProgress(100);
-            } catch (Throwable t) {
-                this.error = t;
+            } else {
+                searchPages();
             }
             return null;
+        }
+
+        private void searchByHash() throws IOException {
+            setProgress(25);
+            NexusSearchResult page = search.searchBySha1(request.sha1(), 0);
+            if (!isCancelled() && page != null && page.artifacts() != null && !page.artifacts().isEmpty()) {
+                publish(page.artifacts());
+            }
+            setProgress(100);
+        }
+
+        /** Publishes the pages of results, one after the other, until there is nothing more or the search is cancelled. */
+        private void searchPages() throws IOException {
+            boolean more = true;
+
+            for (int page = 0; more && page < MAX_PAGES && !isCancelled(); page++) {
+                int baseProgress = 10;
+                int pageRange = 80;
+                setProgress(baseProgress + (pageRange * page) / MAX_PAGES);
+
+                NexusSearchResult pageResult = isCancelled() ? null : searchPage(page);
+                more = pageResult != null && pageResult.artifacts() != null && !pageResult.artifacts().isEmpty();
+
+                if (more) {
+                    publish(pageResult.artifacts());
+                }
+            }
+
+            setProgress(100);
+        }
+
+        private NexusSearchResult searchPage(int page) throws IOException {
+            return switch (request.mode()) {
+                case 0 -> search.searchByKeyword(request.keyword(), page);
+                case 2 -> search.searchByGav(request.groupId(), request.artifactId(), request.version(), page);
+                case 3 -> {
+                    boolean fullyQualified = request.className() != null && request.className().contains(".");
+                    yield search.searchByClassName(request.className(), fullyQualified, page);
+                }
+                default -> null;
+            };
         }
 
         @Override
@@ -601,7 +598,7 @@ public final class NexusSearchPanel extends JPanel {
 
         @Override
         protected void done() {
-            panel.onSearchCompleted(error);
+            panel.onSearchCompleted(state() == Future.State.FAILED ? exceptionNow() : null);
         }
 
         @Override

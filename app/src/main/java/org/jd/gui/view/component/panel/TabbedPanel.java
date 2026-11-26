@@ -127,10 +127,12 @@ public class TabbedPanel<T extends JComponent & UriGettable> extends JPanel impl
         tabCloseButton.addMouseListener(new MouseListener() {
             @Override
             public void mousePressed(MouseEvent e) {
+                // only a complete click closes the tab
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
+                // only a complete click closes the tab
             }
 
             @Override

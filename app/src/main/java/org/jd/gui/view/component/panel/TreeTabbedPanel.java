@@ -122,7 +122,9 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
                 }
             }
             @Override
-            public void treeCollapsed(TreeExpansionEvent e) {}
+            public void treeCollapsed(TreeExpansionEvent e) {
+                // nothing to do when a node is collapsed
+            }
         });
         tree.addMouseListener(new MouseAdapter() {
             @Override
@@ -341,7 +343,7 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
 
     protected void updateTreeNodeFontSize(int delta) {
         int currentFontSize = tree.getFont().getSize();
-        int newFontSize = Math.max(MIN_TREE_NODE_FONT_SIZE, Math.min(MAX_TREE_NODE_FONT_SIZE, currentFontSize + delta));
+        int newFontSize = Math.clamp(currentFontSize + (long) delta, MIN_TREE_NODE_FONT_SIZE, MAX_TREE_NODE_FONT_SIZE);
 
         if (newFontSize != currentFontSize) {
             setTreeNodeFontSize(newFontSize);
@@ -364,7 +366,7 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
         if (fontSize != null) {
             try {
                 int parsed = Integer.parseInt(fontSize);
-                int bounded = Math.max(MIN_TREE_NODE_FONT_SIZE, Math.min(MAX_TREE_NODE_FONT_SIZE, parsed));
+                int bounded = Math.clamp(parsed, MIN_TREE_NODE_FONT_SIZE, MAX_TREE_NODE_FONT_SIZE);
                 setTreeNodeFontSize(bounded);
             } catch (NumberFormatException e) {
                 assert ExceptionUtil.printStackTrace(e);
@@ -526,6 +528,18 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
         return false;
     }
 
+    /** Whether the URI of a node is the one searched, or the one of a folder or an archive that holds it. */
+    private static boolean isSameOrAbove(String nodeUri, String uri) {
+        if (uri.length() <= nodeUri.length()) {
+            return uri.equals(nodeUri);
+        }
+        if (!uri.startsWith(nodeUri)) {
+            return false;
+        }
+        char next = uri.charAt(nodeUri.length());
+        return next == '/' || next == '!';
+    }
+
     @SuppressWarnings("unchecked")
     protected DefaultMutableTreeNode searchTreeNode(URI uri, DefaultMutableTreeNode node) {
         if (node instanceof TreeNodeExpandable tne) {
@@ -537,21 +551,11 @@ public class TreeTabbedPanel<T extends DefaultMutableTreeNode & ContainerEntryGe
         @SuppressWarnings("all")
         Enumeration enumeration = node.children();
 
-        while (enumeration.hasMoreElements()) {
+        while (child == null && enumeration.hasMoreElements()) {
             T element = (T)enumeration.nextElement();
-            String childU = element.getUri().toString();
 
-            if (u.length() > childU.length()) {
-                if (u.startsWith(childU)) {
-                    char c = u.charAt(childU.length());
-                    if (c == '/' || c == '!') {
-                        child = element;
-                        break;
-                    }
-                }
-            } else if (u.equals(childU)) {
+            if (isSameOrAbove(element.getUri().toString(), u)) {
                 child = element;
-                break;
             }
         }
 

@@ -117,6 +117,7 @@ public class OpenTypeHierarchyView {
 
                 @Override
                 public void treeCollapsed(TreeExpansionEvent e) {
+                    // nothing to do when a node is collapsed
                 }
             });
             openTypeHierarchyTree.addKeyListener(new KeyAdapter() {
@@ -510,7 +511,7 @@ public class OpenTypeHierarchyView {
 
         @Override
         public String getTip() {
-            return label;
+            return getLabel();
         }
 
         @Override
@@ -520,7 +521,7 @@ public class OpenTypeHierarchyView {
 
         @Override
         public Icon getOpenIcon() {
-            return icon;
+            return getIcon();
         }
     }
 

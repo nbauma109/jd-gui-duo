@@ -252,22 +252,13 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
 
         Rectangle visible = textArea.getVisibleRect();
 
-        // visible.x = r.x - (visible.width - r.width) / 2;
         visible.y = (int) Math.round(rec.getY() - (visible.height - rec.getHeight()) / 2);
 
         Rectangle bounds = textArea.getBounds();
         Insets i = textArea.getInsets();
-        // bounds.x = i.left;
         bounds.y = i.top;
-        // bounds.width -= i.left + i.right;
         bounds.height -= i.top + i.bottom;
 
-        // if (visible.x < bounds.x) {
-        // visible.x = bounds.x;
-        // }
-        // if (visible.x + visible.width > bounds.x + bounds.width) {
-        // visible.x = bounds.x + bounds.width - visible.width;
-        // }
         if (visible.y < bounds.y) {
             visible.y = bounds.y;
         }

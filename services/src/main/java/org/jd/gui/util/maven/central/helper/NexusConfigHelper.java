@@ -57,13 +57,6 @@ public final class NexusConfigHelper {
         if (userEnc != null || passEnc != null) {
             final char[] master = SecureSession.get().requireForLoad(component);
 
-            if (master == null || master.length == 0) {
-                // Optional stricter behaviour:
-                // If encrypted values exist but the user refuses to unlock them,
-                // we can consider the configuration unusable.
-                // return null;
-            }
-
             if (master != null && master.length > 0) {
                 try {
                     if (userEnc != null) {

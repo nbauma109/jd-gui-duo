@@ -142,49 +142,59 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
 
             switch (tag) {
             case CONSTANT_Class:
-                String className = classReader.readUTF8(startIndex, buffer);
-                if (className.startsWith("[")) {
-                    new SignatureReader(className).acceptType(signatureIndexer);
-                } else {
-                    typeReferenceSet.add(className);
-                }
+                indexClass(classReader.readUTF8(startIndex, buffer));
                 break;
             case CONSTANT_String:
-                String str = classReader.readUTF8(startIndex, buffer);
-                stringSet.add(str);
+                stringSet.add(classReader.readUTF8(startIndex, buffer));
                 break;
             case CONSTANT_Fieldref:
-                int nameAndTypeItem = classReader.readUnsignedShort(startIndex + 2);
-                int nameAndTypeIndex = classReader.getItem(nameAndTypeItem);
-                tag = classReader.readByte(nameAndTypeIndex - 1);
-                if (tag == CONSTANT_NameAndType) {
-                    String fieldName = classReader.readUTF8(nameAndTypeIndex, buffer);
+                String fieldName = memberName(classReader, buffer, startIndex);
+                if (fieldName != null) {
                     fieldReferenceSet.add(fieldName);
                 }
                 break;
             case CONSTANT_Methodref, CONSTANT_InterfaceMethodref:
-                nameAndTypeItem = classReader.readUnsignedShort(startIndex + 2);
-                nameAndTypeIndex = classReader.getItem(nameAndTypeItem);
-                tag = classReader.readByte(nameAndTypeIndex - 1);
-                if (tag == CONSTANT_NameAndType) {
-                    String methodName = classReader.readUTF8(nameAndTypeIndex, buffer);
-                    if (StringConstants.INSTANCE_CONSTRUCTOR.equals(methodName)) {
-                        int classItem = classReader.readUnsignedShort(startIndex);
-                        int classIndex = classReader.getItem(classItem);
-                        className = classReader.readUTF8(classIndex, buffer);
-                        constructorReferenceSet.add(className);
-                    } else {
-                        methodReferenceSet.add(methodName);
-                    }
-                }
+                indexMethodReference(classReader, buffer, startIndex);
+                break;
+            default:
+                // the other constants refer to nothing that is searched
                 break;
             }
         }
 
+        private void indexClass(String className) {
+            if (className.startsWith("[")) {
+                new SignatureReader(className).acceptType(signatureIndexer);
+            } else {
+                typeReferenceSet.add(className);
+            }
+        }
+
+        /** The name of the member that a reference to a field or to a method names; null when it has no name and type. */
+        private static String memberName(ClassReader classReader, char[] buffer, int startIndex) {
+            int nameAndTypeIndex = classReader.getItem(classReader.readUnsignedShort(startIndex + 2));
+
+            if (classReader.readByte(nameAndTypeIndex - 1) != CONSTANT_NameAndType) {
+                return null;
+            }
+            return classReader.readUTF8(nameAndTypeIndex, buffer);
+        }
+
+        private void indexMethodReference(ClassReader classReader, char[] buffer, int startIndex) {
+            String methodName = memberName(classReader, buffer, startIndex);
+
+            if (StringConstants.INSTANCE_CONSTRUCTOR.equals(methodName)) {
+                int classIndex = classReader.getItem(classReader.readUnsignedShort(startIndex));
+                constructorReferenceSet.add(classReader.readUTF8(classIndex, buffer));
+            } else if (methodName != null) {
+                methodReferenceSet.add(methodName);
+            }
+        }
+
         protected class ClassIndexer extends ClassVisitor {
-            private AnnotationIndexer annotationIndexer = new AnnotationIndexer();
-            private FieldIndexer fieldIndexer = new FieldIndexer(annotationIndexer);
-            private MethodIndexer methodIndexer = new MethodIndexer(annotationIndexer);
+            private final AnnotationIndexer annotationIndexer = new AnnotationIndexer();
+            private final FieldIndexer fieldIndexer = new FieldIndexer(annotationIndexer);
+            private final MethodIndexer methodIndexer = new MethodIndexer(annotationIndexer);
 
             private String name;
 
@@ -271,7 +281,7 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
         }
 
         protected class FieldIndexer extends FieldVisitor {
-            private AnnotationIndexer annotationIndexer;
+            private final AnnotationIndexer annotationIndexer;
 
             public FieldIndexer(AnnotationIndexer annotationIndexer) {
                 super(Opcodes.ASM9);
@@ -292,7 +302,7 @@ public class ClassFileIndexerProvider extends AbstractIndexerProvider {
         }
 
         protected class MethodIndexer extends MethodVisitor {
-            private AnnotationIndexer annotationIndexer;
+            private final AnnotationIndexer annotationIndexer;
 
             public MethodIndexer(AnnotationIndexer annotationIndexer) {
                 super(Opcodes.ASM9);

@@ -35,7 +35,7 @@ public class CFRDecompilerPreferencesProvider extends AbstractDecompilerPreferen
 
     private static final String AUTO = "auto";
 
-    private Map<String, String> defaults = new HashMap<>();
+    private final Map<String, String> defaults = new HashMap<>();
 
     public CFRDecompilerPreferencesProvider() {
         super(6, "true", "false");

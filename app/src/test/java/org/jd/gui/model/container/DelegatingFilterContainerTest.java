@@ -39,6 +39,8 @@ class DelegatingFilterContainerTest {
     private final Container.Entry fooBar = entry(FOO_BAR, dir, false, Map.of());
     private final Container.Entry other = entry(OTHER, dir, false, Map.of());
 
+    private Container delegate;
+
     DelegatingFilterContainerTest() {
         for (Container.Entry e : List.of(foo, fooBar, other)) {
             children.put(new SimpleEntryPath(e.getPath(), false), e);
@@ -66,8 +68,16 @@ class DelegatingFilterContainerTest {
         assertFalse(container.getUris().contains(fooBar.getUri()));
     }
 
+    @Test
+    void theContainerOfAnEntryHasTheFilteredRoot() {
+        DelegatingFilterContainer container = filtered(Set.of(fooBar.getUri()));
+        Container.Entry filteredDir = container.getEntry(dir.getUri());
+
+        assertEquals(root.getUri(), filteredDir.getContainer().getRoot().getUri());
+    }
+
     private DelegatingFilterContainer filtered(Set<URI> extraUris) {
-        Container delegate = (Container) Proxy.newProxyInstance(Container.class.getClassLoader(), new Class<?>[] { Container.class }, (p, m, a) -> switch (m.getName()) {
+        delegate = (Container) Proxy.newProxyInstance(Container.class.getClassLoader(), new Class<?>[] { Container.class }, (p, m, a) -> switch (m.getName()) {
             case "getRoot" -> root;
             case "getType" -> "generic";
             case "hashCode" -> System.identityHashCode(p);
@@ -79,12 +89,13 @@ class DelegatingFilterContainerTest {
         return container;
     }
 
-    private static Container.Entry entry(String path, Container.Entry parent, boolean directory, Map<Container.EntryPath, Container.Entry> kids) {
+    private Container.Entry entry(String path, Container.Entry parent, boolean directory, Map<Container.EntryPath, Container.Entry> kids) {
         URI uri = URI.create("file:///lib.jar!/" + path);
         return (Container.Entry) Proxy.newProxyInstance(Container.Entry.class.getClassLoader(), new Class<?>[] { Container.Entry.class }, (p, m, a) -> switch (m.getName()) {
             case "getUri" -> uri;
             case "getPath" -> path;
             case "getParent" -> parent;
+            case "getContainer" -> delegate;
             case "isDirectory" -> directory;
             case "getChildren" -> kids;
             case "hashCode" -> System.identityHashCode(p);

@@ -71,15 +71,15 @@ public final class NexusPreferencesProvider extends JPanel implements SecuredPre
     public static final String VAULT_PRESENT = "NexusPreferencesProvider.vault.present";
 
     // User interface
-    private JTextField urlField;
-    private JTextField userField;
-    private JPasswordField passField;
-    private JButton clearButton;
+    private final JTextField urlField;
+    private final JTextField userField;
+    private final JPasswordField passField;
+    private final JButton clearButton;
 
     // State
     private Color errorBackground = new Color(255, 210, 210);
-    private Color urlDefaultBackground;
-    private Color passDefaultBackground;
+    private final Color urlDefaultBackground;
+    private final Color passDefaultBackground;
 
     private transient PreferencesPanelChangeListener listener;
 

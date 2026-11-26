@@ -82,10 +82,13 @@ public class CompareWindow {
     private static final Color YELLOW = new Color(255, 255, 200);
     private static final Color DARK_GRAY = new Color(0x2A2A2A);
 
+    private static final String INVALID_FILE_TYPE = "Invalid File Type";
+    private static final String ERROR_TITLE = "Error";
+
     /** Main window object */
-    private JFrame mainWindow;
+    private final JFrame mainWindow;
     /** Two files to compare */
-    private File[] files = new File[2];
+    private final File[] files = new File[2];
     /** Displays for jar file details */
     private JarDetailsDisplay[] detailsDisplays;
     /** Label for compare status */
@@ -99,7 +102,7 @@ public class CompareWindow {
     /** Refresh button to repeat comparison */
     private JButton refreshButton;
 
-    private API api;
+    private final API api;
 
     /**
      * Constructor
@@ -258,7 +261,7 @@ public class CompareWindow {
         if (inFile1 == null || inFile2 == null) {
 	        // Open the unified selection dialog
 	        File[] selected = selectTwoFiles(mainWindow, inFile1, inFile2);
-	        if (selected == null) {
+	        if (selected.length == 0) {
 	            return;
 	        }
 	        files[0] = selected[0];
@@ -308,7 +311,7 @@ public class CompareWindow {
      * @param parentFrame parent frame for the dialog
      * @param default1    optional default file for the first selector
      * @param default2    optional default file for the second selector
-     * @return an array of two selected files, or null if cancelled or invalid
+     * @return an array of two selected files, empty if cancelled or invalid
      */
     private File[] selectTwoFiles(JFrame parentFrame, File default1, File default2) {
         JPanel panel = new JPanel();
@@ -344,7 +347,7 @@ public class CompareWindow {
             if (fileChooser.showOpenDialog(parentFrame) == JFileChooser.APPROVE_OPTION) {
                 File chosen = fileChooser.getSelectedFile();
                 if (!isArchiveFile(chosen)) {
-                    JOptionPane.showMessageDialog(parentFrame, "Please choose a .jar, .zip, .war, or .ear file.", "Invalid File Type", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(parentFrame, "Please choose a .jar, .zip, .war, or .ear file.", INVALID_FILE_TYPE, JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 field1.setText(chosen.getAbsolutePath());
@@ -368,7 +371,7 @@ public class CompareWindow {
             if (fileChooser.showOpenDialog(parentFrame) == JFileChooser.APPROVE_OPTION) {
                 File chosen = fileChooser.getSelectedFile();
                 if (!isArchiveFile(chosen)) {
-                    JOptionPane.showMessageDialog(parentFrame, "Please choose a .jar, .zip, .war, or .ear file.", "Invalid File Type", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(parentFrame, "Please choose a .jar, .zip, .war, or .ear file.", INVALID_FILE_TYPE, JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 field2.setText(chosen.getAbsolutePath());
@@ -395,21 +398,21 @@ public class CompareWindow {
             File file2 = field2.getText().isEmpty() ? null : new File(field2.getText());
 
             if (file1 == null || !file1.exists() || !file1.canRead() || !isArchiveFile(file1)) {
-                JOptionPane.showMessageDialog(parentFrame, "First file is invalid. Please select a readable .jar, .zip, .war, or .ear file.", "Error", JOptionPane.ERROR_MESSAGE);
-                return null;
+                JOptionPane.showMessageDialog(parentFrame, "First file is invalid. Please select a readable .jar, .zip, .war, or .ear file.", ERROR_TITLE, JOptionPane.ERROR_MESSAGE);
+                return new File[0];
             }
             if (file2 == null || !file2.exists() || !file2.canRead() || !isArchiveFile(file2)) {
-                JOptionPane.showMessageDialog(parentFrame, "Second file is invalid. Please select a readable .jar, .zip, .war, or .ear file.", "Error", JOptionPane.ERROR_MESSAGE);
-                return null;
+                JOptionPane.showMessageDialog(parentFrame, "Second file is invalid. Please select a readable .jar, .zip, .war, or .ear file.", ERROR_TITLE, JOptionPane.ERROR_MESSAGE);
+                return new File[0];
             }
             if (file1.equals(file2)) {
-                JOptionPane.showMessageDialog(parentFrame, "The two files are the same. Please select different files.", "Error", JOptionPane.ERROR_MESSAGE);
-                return null;
+                JOptionPane.showMessageDialog(parentFrame, "The two files are the same. Please select different files.", ERROR_TITLE, JOptionPane.ERROR_MESSAGE);
+                return new File[0];
             }
             return new File[]{file1, file2};
         }
 
-        return null;
+        return new File[0];
     }
 
     /**
@@ -446,13 +449,13 @@ public class CompareWindow {
                         return false;
                     }
                     if (!isArchiveFile(f)) {
-                        JOptionPane.showMessageDialog(parentFrame, "Please drop a .jar, .zip, .war, or .ear file.", "Invalid File Type", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(parentFrame, "Please drop a .jar, .zip, .war, or .ear file.", INVALID_FILE_TYPE, JOptionPane.ERROR_MESSAGE);
                         return false;
                     }
                     field.setText(f.getAbsolutePath());
                     return true;
                 } catch (Exception _) {
-                    JOptionPane.showMessageDialog(parentFrame, "Could not import the dropped file.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(parentFrame, "Could not import the dropped file.", ERROR_TITLE, JOptionPane.ERROR_MESSAGE);
                     return false;
                 }
             }

@@ -14,7 +14,6 @@ import org.jd.gui.api.API;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -101,7 +100,7 @@ public abstract class TypeReferencePage extends HyperlinkPage {
         if (!ranges.isEmpty()) {
             setSelectionHighlightColor();
             textArea.markAll(ranges);
-            Collections.sort(ranges);
+            ranges.sort(null);
             setCaretPositionAndCenter(ranges.get(0));
         }
 

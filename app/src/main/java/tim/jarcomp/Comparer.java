@@ -7,6 +7,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 
 /**
  * Class to do the actual comparison of jar files, populating a list of
@@ -45,9 +46,7 @@ public final class Comparer {
         return results;
     }
 
-    // TODO: Maybe we need to add an option to ignore path, just look at filenames?
-
-    /**
+        /**
      * Make entrydetails objects for each entry in the given file and put in list
      *
      * @param inList  list of entries so far
@@ -80,7 +79,7 @@ public final class Comparer {
                 details.setSize(inIndex, ze.getSize());
             }
         } catch (IOException ioe) {
-            System.err.println(ioe);
+            assert ExceptionUtil.printStackTrace(ioe);
         }
         return numFiles;
     }
@@ -116,15 +115,14 @@ public final class Comparer {
                 if (entry.getStatus() == EntryDetails.EntryStatus.SAME_SIZE) {
                     // Must be present in both archives if size is the same
                     ZipEntry zipEntry = zip.getEntry(entry.getName());
-                    if (zipEntry == null) {
-                        System.err.println("zipEntry for " + entry.getName() + " shouldn't be null!");
-                    } else {
+                    // an entry that has a size in this archive is in it
+                    if (zipEntry != null) {
                         entry.setCRCChecksum(inIndex, zipEntry.getCrc());
                     }
                 }
             }
         } catch (Exception e) {
-            System.err.println(e);
+            assert ExceptionUtil.printStackTrace(e);
         }
     }
 }

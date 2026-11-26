@@ -8,13 +8,13 @@ public class EntryDetails {
     /** Name of entry, including full path */
     private String name;
     /** Flag to show if it's present or not (might be zero length) */
-    private boolean[] present = new boolean[2];
+    private final boolean[] present = new boolean[2];
     /** Sizes of this file, in bytes, in archives */
-    private long[] sizes = new long[2];
+    private final long[] sizes = new long[2];
     /** CRC checksums in both archives */
-    private long[] crcCheckSums = new long[2];
+    private final long[] crcCheckSums = new long[2];
     /** SizeChange */
-    private SizeChange sizeChange = new SizeChange();
+    private final SizeChange sizeChange = new SizeChange();
 
     /** Constants for entry status */
     public enum EntryStatus {
@@ -31,7 +31,6 @@ public class EntryDetails {
         /** Files really equal */
         EQUAL
     }
-    // TODO: Each of these status flags needs an icon
 
     /**
      * @return name of entry

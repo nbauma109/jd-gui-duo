@@ -41,7 +41,7 @@ public class WebXmlFileIndexerProvider extends XmlBasedFileIndexerProvider {
     }
 
     protected static class WebXmlPathFinder extends AbstractXmlPathFinder {
-        private Container.Entry entry;
+        private final Container.Entry entry;
         private @SuppressWarnings("all")
         Map<String, Collection> index;
 

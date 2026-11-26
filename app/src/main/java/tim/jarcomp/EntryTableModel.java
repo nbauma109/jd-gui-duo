@@ -39,7 +39,6 @@ public class EntryTableModel extends AbstractTableModel {
     @Override
     public int getColumnCount() {
         return 3;
-        // TODO: Columns for size1, size2, status (as icon), size difference
     }
 
     /**

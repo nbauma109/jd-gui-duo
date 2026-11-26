@@ -79,8 +79,8 @@ public abstract class AbstractFileLoaderProvider implements FileLoader {
         };
 
         private Map<Container.EntryPath, Container.Entry> children = Collections.emptyMap();
-        private File file;
-        private URI uri;
+        private final File file;
+        private final URI uri;
         private String path;
 
         public ContainerEntry(File file) {

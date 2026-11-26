@@ -9,7 +9,7 @@ public class CompareResults extends EntryDetails {
     /** list of entries */
     private List<EntryDetails> entries;
     /** Number of files in each archive */
-    private int[] numFiles = new int[2];
+    private final int[] numFiles = new int[2];
 
     /**
      * @param inList list of EntryDetails objects

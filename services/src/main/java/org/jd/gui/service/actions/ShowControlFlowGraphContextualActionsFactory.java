@@ -58,7 +58,7 @@ public class ShowControlFlowGraphContextualActionsFactory implements ContextualA
 
         private final transient ControlFlowGraphReducer controlFlowGraphReducer;
 
-        private int mode;
+        private final int mode;
 
         public ShowControlFlowGraphAction(API api, Container.Entry entry, String fragment, ControlFlowGraphReducer controlFlowGraphReducer, int mode) {
             super(api, entry, fragment);

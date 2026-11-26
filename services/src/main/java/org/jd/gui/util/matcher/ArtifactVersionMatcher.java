@@ -26,12 +26,12 @@ public class ArtifactVersionMatcher {
         int idx = baseFileName.lastIndexOf('-');
         if (idx != -1) {
             artifactId = baseFileName.substring(0, idx);
-            version = baseFileName.substring(idx + 1) + (!version.isEmpty() ? "-" : "") + version;
+            version = baseFileName.substring(idx + 1) + (version.isEmpty() ? "" : "-") + version;
             if (version.matches("[A-Za-z]+") || artifactId.matches(".*-[\\d.]+")) {
                 parse(artifactId);
             }
         } else {
-            artifactId = baseFileName + (!version.isEmpty() ? "-" : "") + version;
+            artifactId = baseFileName + (version.isEmpty() ? "" : "-") + version;
             version = "";
         }
     }

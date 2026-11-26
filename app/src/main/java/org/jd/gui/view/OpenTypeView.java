@@ -116,7 +116,9 @@ public class OpenTypeView {
                 @Override
                 public void focusGained(FocusEvent e) { openTypeList.clearSelection(); }
                 @Override
-                public void focusLost(FocusEvent e) {}
+                public void focusLost(FocusEvent e) {
+                    // the selection is kept when the field loses the focus
+                }
             });
             openTypeEnterTextField.getDocument().addDocumentListener(new DocumentListener() {
                 @Override

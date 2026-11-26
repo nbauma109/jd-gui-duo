@@ -116,27 +116,27 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
                         case XMLStreamConstants.CHARACTERS:
                             switch (name) {
                                 case "/configuration/recentFilePaths/filePath":
-                                    File file = new File(reader.getText().trim());
-                                    if (file.exists()) {
-                                        recentFiles.add(file);
+                                    File recentFile = new File(reader.getText().trim());
+                                    if (recentFile.exists()) {
+                                        recentFiles.add(recentFile);
                                     }
                                     break;
                                 case "/configuration/recentDirectories/loadPath":
-                                    file = new File(reader.getText().trim());
-                                    if (file.exists()) {
-                                        config.setRecentLoadDirectory(file);
+                                    File loadDirectory = new File(reader.getText().trim());
+                                    if (loadDirectory.exists()) {
+                                        config.setRecentLoadDirectory(loadDirectory);
                                     }
                                     break;
                                 case "/configuration/openFilePaths/filePath":
-                                    file = new File(reader.getText().trim());
-                                    if (file.exists()) {
-                                        openFiles.add(file);
+                                    File openFile = new File(reader.getText().trim());
+                                    if (openFile.exists()) {
+                                        openFiles.add(openFile);
                                     }
                                     break;
                                 case "/configuration/recentDirectories/savePath":
-                                    file = new File(reader.getText().trim());
-                                    if (file.exists()) {
-                                        config.setRecentSaveDirectory(file);
+                                    File saveDirectory = new File(reader.getText().trim());
+                                    if (saveDirectory.exists()) {
+                                        config.setRecentSaveDirectory(saveDirectory);
                                     }
                                     break;
                                 case "/configuration/gui/lookAndFeel":
@@ -157,6 +157,9 @@ public class ConfigurationXmlPersisterProvider implements ConfigurationPersister
                                     }
                                     break;
                             }
+                            break;
+                        default:
+                            // the other events hold no setting
                             break;
                     }
                 }
