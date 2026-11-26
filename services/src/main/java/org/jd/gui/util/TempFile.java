@@ -1,5 +1,5 @@
 /*******************************************************************************
- * © 2022 Nicolas Baumann (@nbauma109)
+ * © 2022-2026 Nicolas Baumann (@nbauma109)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
+/** The name of a file that does not exist yet, in a new temporary directory that only its owner can access. */
 public class TempFile extends File implements AutoCloseable {
 
     private static final long serialVersionUID = 1L;
@@ -27,9 +28,15 @@ public class TempFile extends File implements AutoCloseable {
     public static final String TMP_FILE_PREFIX = "jd-gui.tmp.";
 
     public TempFile(String suffix) throws IOException {
-        super(File.createTempFile(TMP_FILE_PREFIX, suffix).toURI());
-        Files.delete(toPath());
+        super(newDirectory(), TMP_FILE_PREFIX + suffix);
         deleteOnExit();
+    }
+
+    private static File newDirectory() throws IOException {
+        File directory = Files.createTempDirectory(TMP_FILE_PREFIX).toFile();
+        // registered before the file: what is registered last is deleted first
+        directory.deleteOnExit();
+        return directory;
     }
 
     @Override

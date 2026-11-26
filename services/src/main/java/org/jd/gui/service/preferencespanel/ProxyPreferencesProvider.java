@@ -427,6 +427,8 @@ public final class ProxyPreferencesProvider extends JPanel implements SecuredPre
                             }
                         }
                     }
+                } catch (InterruptedException _) {
+                    Thread.currentThread().interrupt();
                 } catch (Exception _) {
                     // We ignore and leave fields unchanged
                 } finally {

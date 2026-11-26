@@ -47,7 +47,7 @@ public final class CFGViewer {
             final String svg = new String(os.toByteArray(), StandardCharsets.UTF_8);
             Method method = cfg.getMethod();
             String svgFileName = Utility.pathToPackage(className) + '.' + method.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
-            File svgFile = File.createTempFile(svgFileName, ".svg");
+            File svgFile = Files.createTempFile(svgFileName, ".svg").toFile();
             svgFile.deleteOnExit();
             Files.write(svgFile.toPath(), svg.getBytes(StandardCharsets.UTF_8));
             if (Desktop.isDesktopSupported()) {

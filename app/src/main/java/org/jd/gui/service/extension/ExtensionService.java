@@ -65,7 +65,13 @@ public class ExtensionService {
         if (metaInf.exists() && metaInf.isDirectory()) {
             urls.add(directory.toURI().toURL());
         } else {
-            for (File child : directory.listFiles()) {
+            File[] children = directory.listFiles();
+
+            if (children == null) {
+                // not a directory, or one that cannot be read
+                return;
+            }
+            for (File child : children) {
                 if (child.isDirectory()) {
                     searchJarAndMetaInf(urls, child);
                 } else if (child.getName().toLowerCase().endsWith(".jar")) {
