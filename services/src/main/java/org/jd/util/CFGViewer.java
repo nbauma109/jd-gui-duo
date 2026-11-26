@@ -38,18 +38,7 @@ public final class CFGViewer {
 
     public static void showGraph(ControlFlowGraph cfg, String className) {
         try {
-            SourceStringReader reader = new SourceStringReader(ControlFlowGraphPlantUMLWriter.write(cfg));
-            final ByteArrayOutputStream os = new ByteArrayOutputStream();
-            // Write the first image to "os"
-            reader.outputImage(os, new FileFormatOption(FileFormat.SVG));
-
-            // The XML is stored into svg
-            final String svg = new String(os.toByteArray(), StandardCharsets.UTF_8);
-            Method method = cfg.getMethod();
-            String svgFileName = Utility.pathToPackage(className) + '.' + method.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
-            File svgFile = Files.createTempFile(svgFileName, ".svg").toFile();
-            svgFile.deleteOnExit();
-            Files.write(svgFile.toPath(), svg.getBytes(StandardCharsets.UTF_8));
+            File svgFile = writeGraph(cfg, className);
             if (Desktop.isDesktopSupported()) {
                 Desktop desktop = Desktop.getDesktop();
                 if (desktop.isSupported(Desktop.Action.BROWSE)) {
@@ -59,5 +48,22 @@ public final class CFGViewer {
         } catch (IOException e) {
             assert ExceptionUtil.printStackTrace(e);
         }
+    }
+
+    /** Draws the graph into a temporary image, deleted when the application ends. */
+    static File writeGraph(ControlFlowGraph cfg, String className) throws IOException {
+        SourceStringReader reader = new SourceStringReader(ControlFlowGraphPlantUMLWriter.write(cfg));
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        // Write the first image to "os"
+        reader.outputImage(os, new FileFormatOption(FileFormat.SVG));
+
+        // The XML is stored into svg
+        final String svg = new String(os.toByteArray(), StandardCharsets.UTF_8);
+        Method method = cfg.getMethod();
+        String svgFileName = Utility.pathToPackage(className) + '.' + method.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+        File svgFile = Files.createTempFile(svgFileName, ".svg").toFile();
+        svgFile.deleteOnExit();
+        Files.write(svgFile.toPath(), svg.getBytes(StandardCharsets.UTF_8));
+        return svgFile;
     }
 }

@@ -428,8 +428,6 @@ public final class ProxyPreferencesProvider extends JPanel implements SecuredPre
                             }
                         }
                     }
-                } catch (IllegalStateException _) {
-                    // The detection failed: we leave the fields unchanged
                 } finally {
                     if (detectProgressMonitor != null) {
                         detectProgressMonitor.close();
