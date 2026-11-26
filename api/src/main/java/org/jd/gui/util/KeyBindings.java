@@ -105,6 +105,10 @@ public final class KeyBindings {
         private static DefaultShortcutProvider shortcut(int keyCode, int modifiers) {
             return _ -> KeyStroke.getKeyStroke(keyCode, modifiers);
         }
+
+        private static boolean isMac() {
+            return System.getProperty("os.name", "").toLowerCase().contains("mac");
+        }
     }
 
     public static void apply(Map<String, String> preferences, Map<Binding, Action> actions) {
@@ -178,10 +182,6 @@ public final class KeyBindings {
         }
 
         builder.append(label);
-    }
-
-    private static boolean isMac() {
-        return System.getProperty("os.name", "").toLowerCase().contains("mac");
     }
 
     @FunctionalInterface
