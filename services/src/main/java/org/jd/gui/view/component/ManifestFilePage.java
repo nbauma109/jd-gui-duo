@@ -76,7 +76,7 @@ public class ManifestFilePage extends HyperlinkPage implements UriGettable, Inde
                 dumpManifestHeaders(manifest, printWriter);
                 text = stringWriter.toString();
             } catch (IOException e) {
-                e.printStackTrace();
+                assert ExceptionUtil.printStackTrace(e);
             }
         }
         // the links of the text shown before (the checkbox rebuilds the text) are not those of this one

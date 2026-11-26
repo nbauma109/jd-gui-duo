@@ -13,6 +13,7 @@ import org.apache.bcel.classfile.Utility;
 import org.jd.core.v1.cfg.ControlFlowGraphPlantUMLWriter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.util.TempFile;
 
 import java.awt.Desktop;
 import java.io.ByteArrayOutputStream;
@@ -38,18 +39,7 @@ public final class CFGViewer {
 
     public static void showGraph(ControlFlowGraph cfg, String className) {
         try {
-            SourceStringReader reader = new SourceStringReader(ControlFlowGraphPlantUMLWriter.write(cfg));
-            final ByteArrayOutputStream os = new ByteArrayOutputStream();
-            // Write the first image to "os"
-            reader.outputImage(os, new FileFormatOption(FileFormat.SVG));
-
-            // The XML is stored into svg
-            final String svg = new String(os.toByteArray(), StandardCharsets.UTF_8);
-            Method method = cfg.getMethod();
-            String svgFileName = Utility.pathToPackage(className) + '.' + method.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
-            File svgFile = File.createTempFile(svgFileName, ".svg");
-            svgFile.deleteOnExit();
-            Files.write(svgFile.toPath(), svg.getBytes(StandardCharsets.UTF_8));
+            File svgFile = writeGraph(cfg, className);
             if (Desktop.isDesktopSupported()) {
                 Desktop desktop = Desktop.getDesktop();
                 if (desktop.isSupported(Desktop.Action.BROWSE)) {
@@ -59,5 +49,22 @@ public final class CFGViewer {
         } catch (IOException e) {
             assert ExceptionUtil.printStackTrace(e);
         }
+    }
+
+    /** Draws the graph into a temporary image, deleted when the application ends. */
+    static File writeGraph(ControlFlowGraph cfg, String className) throws IOException {
+        SourceStringReader reader = new SourceStringReader(ControlFlowGraphPlantUMLWriter.write(cfg));
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        // Write the first image to "os"
+        reader.outputImage(os, new FileFormatOption(FileFormat.SVG));
+
+        // The XML is stored into svg
+        final String svg = new String(os.toByteArray(), StandardCharsets.UTF_8);
+        Method method = cfg.getMethod();
+        String svgFileName = Utility.pathToPackage(className) + '.' + method.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+        // in a directory of its own that only its owner can access, deleted when the application ends
+        File svgFile = new TempFile("." + svgFileName + ".svg");
+        Files.write(svgFile.toPath(), svg.getBytes(StandardCharsets.UTF_8));
+        return svgFile;
     }
 }

@@ -416,7 +416,8 @@ public final class ProxyPreferencesProvider extends JPanel implements SecuredPre
             protected void done() {
                 try {
                     if (!isCancelled() && detectProgressMonitor != null && !detectProgressMonitor.isCanceled()) {
-                        DetectedProxy detected = get();
+                        // the worker is done: nothing is waited for, and nothing can be interrupted
+                        DetectedProxy detected = resultNow();
                         if (detected != null) {
                             // Only overwrite empty fields
                             if (!hasText(hostField.getText())) {
@@ -427,8 +428,6 @@ public final class ProxyPreferencesProvider extends JPanel implements SecuredPre
                             }
                         }
                     }
-                } catch (Exception _) {
-                    // We ignore and leave fields unchanged
                 } finally {
                     if (detectProgressMonitor != null) {
                         detectProgressMonitor.close();

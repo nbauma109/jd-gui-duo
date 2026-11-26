@@ -9,6 +9,7 @@
 package org.jd.gui.service.sourcesaver;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
+import org.jd.gui.util.TempFile;
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
 
@@ -45,10 +46,7 @@ public class ZipFileSourceSaverProvider extends DirectorySourceSaverProvider {
             if (tmpSourceFile != null) {
                 Files.copy(tmpSourceFile.toPath(), path);
             } else {
-                File tmpFile = File.createTempFile("jd-gui.", ".tmp.zip");
-
-                Files.delete(tmpFile.toPath());
-                tmpFile.deleteOnExit();
+                File tmpFile = new TempFile(".zip");
 
                 URI tmpFileUri = tmpFile.toURI();
                 URI tmpArchiveUri = new URI("jar:" + tmpFileUri.getScheme(), tmpFileUri.getHost(), tmpFileUri.getPath() + "!/", null);
