@@ -35,6 +35,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
@@ -95,37 +96,12 @@ public final class SolrCentralSearchClient implements NexusSearch, ProxyCapable 
         if (groupId == null && artifactId == null) {
             throw new IllegalArgumentException("Either groupId or artifactId must be provided");
         }
-        StringBuilder expr = new StringBuilder();
-        boolean hasPrevious = false;
-        if (StringUtils.isNotBlank(groupId)) {
-            expr.append("g:").append(groupId.trim());
-            hasPrevious = true;
-        }
-        if (StringUtils.isNotBlank(artifactId)) {
-            if (hasPrevious) {
-                expr.append(AND);
-            }
-            expr.append("a:").append(artifactId.trim());
-            hasPrevious = true;
-        }
-        if (StringUtils.isNotBlank(version)) {
-            if (hasPrevious) {
-                expr.append(AND);
-            }
-            expr.append("v:").append(version.trim());
-        }
-        if (StringUtils.isNotBlank(classifier)) {
-        	if (hasPrevious) {
-        		expr.append(AND);
-        	}
-        	expr.append("l:").append(classifier.trim());
-        }
-        if (StringUtils.isNotBlank(packaging)) {
-        	if (hasPrevious) {
-        		expr.append(AND);
-        	}
-        	expr.append("p:").append(packaging.trim());
-        }
+        StringJoiner expr = new StringJoiner(AND);
+        addTerm(expr, "g:", groupId);
+        addTerm(expr, "a:", artifactId);
+        addTerm(expr, "v:", version);
+        addTerm(expr, "l:", classifier);
+        addTerm(expr, "p:", packaging);
         NexusSearchResult nexusSearchResult = executeQuery(expr.toString(), pageNo, true);
         // a blank classifier or packaging is no constraint, as in the query (it is not sent): it must not drop every artifact
         if (classifier != null && !classifier.isBlank()) {
@@ -135,6 +111,12 @@ public final class SolrCentralSearchClient implements NexusSearch, ProxyCapable 
         	nexusSearchResult.artifacts().removeIf(a -> !packaging.trim().equals(a.extension()));
         }
 		return nexusSearchResult;
+    }
+
+    private static void addTerm(StringJoiner expression, String field, String value) {
+        if (StringUtils.isNotBlank(value)) {
+            expression.add(field + value.trim());
+        }
     }
 
     @Override

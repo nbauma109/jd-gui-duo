@@ -169,6 +169,21 @@ class ManifestFilePageTest {
     }
 
     @Test
+    void onlyAFullLineIsContinuedByTheLineThatStartsWithASpace() {
+        ManifestFilePage page = page();
+        String full = "x".repeat(70);
+
+        for (String continuation : List.of("\r\n yz", "\n yz", "\r yz")) {
+            String text = full + continuation;
+            assertThat(page.searchEndIndexOfValue(text, 0, 0)).isEqualTo(text.length());
+        }
+        for (String end : List.of("\r\nName", "\r\n", "\n", "\nName", "\r")) {
+            assertThat(page.searchEndIndexOfValue(full + end, 0, 0)).isEqualTo(70);
+        }
+        assertThat(page.searchEndIndexOfValue("short\r\n yz", 0, 0)).isEqualTo(5);
+    }
+
+    @Test
     void theValueOfALinkIgnoresTheSpacesAndEndsAtTheEndOfTheLine() {
         ManifestFilePage page = page();
 
