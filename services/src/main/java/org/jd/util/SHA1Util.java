@@ -40,9 +40,10 @@ public final class SHA1Util {
         try (BufferedReader br = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
             String line;
             while ((line = br.readLine()) != null) {
-                String[] tokens = line.split("\s++\\*");
-                if (tokens != null && tokens.length == 2) {
-                    sha1Map.put(new File(tokens[1]), tokens[0]);
+                // "<hash> *<file>"
+                int separator = line.indexOf(" *");
+                if (separator >= 0 && separator + 2 < line.length()) {
+                    sha1Map.put(new File(line.substring(separator + 2)), line.substring(0, separator).stripTrailing());
                 }
             }
         } catch (IOException e) {

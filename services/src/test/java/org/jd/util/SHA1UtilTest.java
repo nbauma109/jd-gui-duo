@@ -26,7 +26,7 @@ class SHA1UtilTest {
     @Test
     void theHashesOfAChecksumFileAreReadByFileAndOtherLinesAreIgnored() throws IOException {
         Path checksums = Files.writeString(directory.resolve("checksums.sha1"),
-                "da39a3ee *lib/a.jar\n0beec7b5    *b c.jar\nno hash here\n");
+                "da39a3ee *lib/a.jar\n0beec7b5    *b c.jar\nno hash here\nabc *\n");
 
         assertThat(SHA1Util.readSHA1File(checksums.toFile())).isEqualTo(Map.of(
                 new File("lib/a.jar"), "da39a3ee",

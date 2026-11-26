@@ -137,7 +137,7 @@ public class MavenOrgSourceLoaderProvider implements SourceLoader {
         return null;
     }
 
-    public static NexusArtifact buildArtifactFromURI(API api, String sha1, boolean sources) throws Exception {
+    public static NexusArtifact buildArtifactFromURI(API api, String sha1, boolean sources) throws IOException {
     	NexusSearch nexusSearch = NexusSearchFactory.create(api, null);
     	NexusSearchResult nexusSearchResult = nexusSearch.searchBySha1(sha1, 0);
 		if (nexusSearchResult.artifacts() != null && !nexusSearchResult.artifacts().isEmpty()) {
