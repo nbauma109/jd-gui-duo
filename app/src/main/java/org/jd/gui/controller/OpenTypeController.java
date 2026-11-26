@@ -109,7 +109,8 @@ public class OpenTypeController implements IndexesChangeListener {
                                     if (patternLength == 1) {
                                         match(pattern.charAt(0), index, matchingEntries);
                                     } else {
-                                        String lastKey = key.substring(0, patternLength - 1);
+                                        // what matches the pattern is among what matched it one character earlier
+                                        String lastKey = key.substring(0, key.length() - 1);
                                         Map<String, Collection> lastResult = cache.get(lastKey);
 
                                         if (lastResult != null) {
@@ -150,7 +151,16 @@ public class OpenTypeController implements IndexesChangeListener {
     @SuppressWarnings({ "rawtypes" })
     protected static void match(char c, Map<String, Collection> index, Map<String, Collection> result) {
         // Filter
-        if (Character.isLowerCase(c)) {
+        if (c == '*' || c == '?') {
+            // a wildcard alone: any name that has a character
+            for (Map.Entry<String, Collection> mapEntry : index.entrySet()) {
+                String typeName = mapEntry.getKey();
+
+                if (Math.max(typeName.lastIndexOf('/'), typeName.lastIndexOf('$')) + 1 < typeName.length()) {
+                    add(result, typeName, mapEntry.getValue());
+                }
+            }
+        } else if (Character.isLowerCase(c)) {
             char upperCase = Character.toUpperCase(c);
 
             for (Map.Entry<String, Collection> mapEntry : index.entrySet()) {
@@ -214,7 +224,8 @@ public class OpenTypeController implements IndexesChangeListener {
             } else if (c == '?') {
                 sbPattern.append(".");
             } else {
-                sbPattern.append(c);
+                // any other character stands for itself, so that a longer pattern only ever matches less
+                sbPattern.append(Pattern.quote(String.valueOf(c)));
             }
         }
 
