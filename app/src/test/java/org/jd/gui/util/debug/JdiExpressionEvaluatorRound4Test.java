@@ -89,6 +89,7 @@ class JdiExpressionEvaluatorRound4Test {
             assertThat(eval(expression, session.mainFrame())).as(expression).isEqualTo("ERROR: NullPointerException: a null cannot be unboxed");
         }
         assertThat(eval("-null", session.mainFrame())).isEqualTo("ERROR: A number is required");
+        assertThat(eval("true > 1", session.mainFrame())).startsWith("ERROR: ");
     }
 
     @Test

@@ -1295,30 +1295,21 @@ public final class JdiExpressionEvaluator {
             return null;
         }
         try {
-            if (invokeForName(outer.name() + "$" + name, false, outer.classLoader()) instanceof com.sun.jdi.ClassObjectReference loaded) {
-                ReferenceType type = loaded.reflectedType();
-                prepare(type);
-                return type;
-            }
+            ReferenceType type = invokeForName(outer.name() + "$" + name, false, outer.classLoader()).reflectedType();
+            prepare(type);
+            return type;
         } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException | InvocationException | RuntimeException _) {
-            // no member type of that name
+            return null; // no member type of that name
         }
-        return null;
     }
 
-    /** Class.forName(name, initialize, loader) in the debugged program; null when it cannot be called. */
-    private Value invokeForName(String name, boolean initialize, com.sun.jdi.ClassLoaderReference loader)
+    /** Class.forName(name, initialize, loader) in the debugged program, which always has that class and that method. */
+    private com.sun.jdi.ClassObjectReference invokeForName(String name, boolean initialize, com.sun.jdi.ClassLoaderReference loader)
             throws InvalidTypeException, ClassNotLoadedException, IncompatibleThreadStateException, InvocationException {
-        List<ReferenceType> classClasses = vm.classesByName("java.lang.Class");
-        if (classClasses.isEmpty() || !(classClasses.get(0) instanceof ClassType classClass)) {
-            return null;
-        }
+        ClassType classClass = (ClassType) vm.classesByName("java.lang.Class").get(0);
         Method forName = classClass.concreteMethodByName("forName", "(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;");
-        if (forName == null) {
-            return null;
-        }
-        return classClass.invokeMethod(thread, forName, java.util.Arrays.<Value>asList(vm.mirrorOf(name), vm.mirrorOf(initialize), loader),
-            ObjectReference.INVOKE_SINGLE_THREADED);
+        return (com.sun.jdi.ClassObjectReference) classClass.invokeMethod(thread, forName,
+            java.util.Arrays.<Value>asList(vm.mirrorOf(name), vm.mirrorOf(initialize), loader), ObjectReference.INVOKE_SINGLE_THREADED);
     }
 
     /**
