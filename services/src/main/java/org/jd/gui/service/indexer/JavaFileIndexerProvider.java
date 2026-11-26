@@ -84,18 +84,18 @@ public class JavaFileIndexerProvider extends AbstractIndexerProvider {
     }
 
     protected static class Listener extends AbstractJavaListener {
-        private Set<String> typeDeclarationSet = new HashSet<>();
-        private Set<String> constructorDeclarationSet = new HashSet<>();
-        private Set<String> methodDeclarationSet = new HashSet<>();
-        private Set<String> fieldDeclarationSet = new HashSet<>();
-        private Set<String> typeReferenceSet = new HashSet<>();
-        private Set<String> constructorReferenceSet = new HashSet<>();
-        private Set<String> methodReferenceSet = new HashSet<>();
-        private Set<String> fieldReferenceSet = new HashSet<>();
-        private Set<String> stringSet = new HashSet<>();
-        private Map<String, Set<String>> superTypeNamesMap = new HashMap<>();
+        private final Set<String> typeDeclarationSet = new HashSet<>();
+        private final Set<String> constructorDeclarationSet = new HashSet<>();
+        private final Set<String> methodDeclarationSet = new HashSet<>();
+        private final Set<String> fieldDeclarationSet = new HashSet<>();
+        private final Set<String> typeReferenceSet = new HashSet<>();
+        private final Set<String> constructorReferenceSet = new HashSet<>();
+        private final Set<String> methodReferenceSet = new HashSet<>();
+        private final Set<String> fieldReferenceSet = new HashSet<>();
+        private final Set<String> stringSet = new HashSet<>();
+        private final Map<String, Set<String>> superTypeNamesMap = new HashMap<>();
 
-        private StringBuilder sbTypeDeclaration = new StringBuilder();
+        private final StringBuilder sbTypeDeclaration = new StringBuilder();
 
         public Listener(Container.Entry entry) {
             super(entry);

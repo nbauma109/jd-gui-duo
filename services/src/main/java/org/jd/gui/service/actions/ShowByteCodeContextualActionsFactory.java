@@ -167,7 +167,7 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
 
             try {
                 return Color.decode(configuredColor != null ? configuredColor : DEFAULT_SEARCH_HIGHLIGHT_COLOR);
-            } catch (RuntimeException e) {
+            } catch (RuntimeException _) {
                 return Color.decode(DEFAULT_SEARCH_HIGHLIGHT_COLOR);
             }
         }
@@ -238,7 +238,7 @@ public class ShowByteCodeContextualActionsFactory implements ContextualActionsFa
 
             private static final long serialVersionUID = 1L;
 
-            private final SearchUIOptions searchUIOptions;
+            private final transient SearchUIOptions searchUIOptions;
             private final JTextArea textArea;
             private final JTextField searchField;
 

@@ -8,7 +8,7 @@ import javax.swing.filechooser.FileFilter;
  */
 public class GenericFileFilter extends FileFilter {
     /** Filter description for display */
-    private String filterDesc;
+    private final String filterDesc;
     /** Array of allowed three-character suffixes */
     private String[] threeCharSuffixes;
     /** Array of allowed four-character suffixes */

@@ -18,7 +18,7 @@ import jd.core.links.HyperlinkReferenceData;
 import jd.core.links.ReferenceData;
 import jd.core.links.StringData;
 
-public class ClassFilePageTest {
+class ClassFilePageTest {
 
     public HashMap<String, DeclarationData> initDeclarations() {
         DeclarationData data = new DeclarationData(0, 1, "Test", "test", "I");
@@ -71,7 +71,7 @@ public class ClassFilePageTest {
     }
 
     @Test
-    public void testMatchFragmentAndAddDocumentRange() {
+    void testMatchFragmentAndAddDocumentRange() {
         HashMap<String, DeclarationData> declarations = initDeclarations();
         ArrayList<DocumentRange> ranges = new ArrayList<>();
 
@@ -105,7 +105,7 @@ public class ClassFilePageTest {
     }
 
     @Test
-    public void testMatchQueryAndAddDocumentRange() {
+    void testMatchQueryAndAddDocumentRange() {
         HashMap<String, String> parameters = new HashMap<>();
         HashMap<String, DeclarationData> declarations = initDeclarations();
         TreeMap<Integer, HyperlinkData> hyperlinks = initHyperlinks();
@@ -132,7 +132,7 @@ public class ClassFilePageTest {
     }
 
     @Test
-    public void testMatchScope() {
+    void testMatchScope() {
         assertTrue(ClassFilePage.matchScope(null, "java/lang/String"));
         assertTrue(ClassFilePage.matchScope("", "java/lang/String"));
 
@@ -148,7 +148,7 @@ public class ClassFilePageTest {
     }
 
     @Test
-    public void testComputePreferencesHashIgnoresIrrelevantViewerPreferences() {
+    void testComputePreferencesHashIgnoresIrrelevantViewerPreferences() {
         HashMap<String, String> preferences = new HashMap<>();
         preferences.put("ClassFileDecompilerPreferences.decompileEngine", "jd-core");
         preferences.put("ViewerPreferences.selectedWordHighlight.enabled", "true");
@@ -165,7 +165,7 @@ public class ClassFilePageTest {
     }
 
     @Test
-    public void testComputePreferencesHashTracksRelevantDecompilerPreferences() {
+    void testComputePreferencesHashTracksRelevantDecompilerPreferences() {
         HashMap<String, String> preferences = new HashMap<>();
         preferences.put("ClassFileDecompilerPreferences.decompileEngine", "jd-core");
         preferences.put("ClassFileDecompilerPreferences.removeUnnecessaryCasts", "false");

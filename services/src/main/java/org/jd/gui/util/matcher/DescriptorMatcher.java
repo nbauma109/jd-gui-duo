@@ -8,7 +8,7 @@
 
 package org.jd.gui.util.matcher;
 
-/*
+/**
  * Descriptor format : @see jd.gui.api.feature.UriOpenable
  */
 public final class DescriptorMatcher {

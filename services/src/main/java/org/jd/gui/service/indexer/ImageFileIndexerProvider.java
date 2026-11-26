@@ -13,7 +13,6 @@ import org.jd.gui.api.model.Indexes;
 import org.jd.gui.util.ProgressUtil;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
@@ -30,7 +29,7 @@ public class ImageFileIndexerProvider extends AbstractIndexerProvider {
     @SuppressWarnings("unchecked")
     @Override
     public void index(API api, Container.Entry entry, Indexes indexes, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction, BooleanSupplier isCancelledFunction) {
-        try (InputStream inputStream = entry.getInputStream()) {
+        try {
             String entryPath = entry.getPath();
             int startIndex = entryPath.lastIndexOf('/');
             int endIndex = entryPath.lastIndexOf('.');

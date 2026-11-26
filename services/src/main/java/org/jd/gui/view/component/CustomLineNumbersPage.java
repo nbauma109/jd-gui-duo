@@ -612,7 +612,7 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
                     Fold fold = fm.getFoldForLine(line - 1);
                     int hiddenLineCount;
                     // Skip to next line to paint, taking extra care for lines with
-                    // block ends and begins together, e.g. "} else {"
+                    // a block that ends and one that begins on the same line, such as an else.
                     while (fold != null && fold.isCollapsed()) {
                         hiddenLineCount = fold.getLineCount();
                         if (hiddenLineCount == 0) {

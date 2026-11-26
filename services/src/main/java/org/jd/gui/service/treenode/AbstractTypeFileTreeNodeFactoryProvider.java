@@ -118,7 +118,7 @@ public abstract class AbstractTypeFileTreeNodeFactoryProvider extends AbstractTr
 
         private static final long serialVersionUID = 1L;
         private boolean initialized;
-        private transient Type type;
+        private final transient Type type;
 
         public TypeTreeNode(Container.Entry entry, Type type, Object userObject, PageAndTipFactory factory) {
             super(entry, type.getName(), userObject, factory);

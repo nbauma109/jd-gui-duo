@@ -25,8 +25,8 @@ import org.jd.gui.util.parser.jdt.ASTParserFactory;
 
 public final class RemoveUnnecessaryCasts {
 
-    private Container.Entry entry;
-    private API api;
+    private final Container.Entry entry;
+    private final API api;
 
     public RemoveUnnecessaryCasts(API api, Container.Entry entry) {
         this.api = api;

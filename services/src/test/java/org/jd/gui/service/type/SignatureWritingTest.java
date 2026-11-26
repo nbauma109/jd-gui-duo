@@ -28,7 +28,7 @@ class SignatureWritingTest {
             "[I | int[]", "[[Ljava/lang/String; | String[][]", "Ljava/util/Map$Entry; | Map.Entry", "LPlain; | Plain",
             "Ljava/util/List<Ljava/lang/String;>; | List<String>", "Ljava/util/Map<Ljava/lang/String;[I>; | Map<String, int[]>",
             "Ljava/util/List<+Ljava/lang/Number;>; | List<? extends Number>", "Ljava/util/List<-Ljava/lang/Integer;>; | List<? super Integer>",
-            "Ljava/lang/Class<*>; | Class<?>", "La/Outer<*>.Inner; | Outer<?>.Inner"})
+            "Ljava/lang/Class<*>; | Class<?>", "La/Outer<*>.Inner; | Outer<?>.Inner", "TElement; | Element", "Ljava/util/Map<TK;TV;>; | Map<K, V>"})
     void aDescriptorIsWrittenAsInTheSource(String descriptor, String expected) {
         StringBuilder written = new StringBuilder();
 

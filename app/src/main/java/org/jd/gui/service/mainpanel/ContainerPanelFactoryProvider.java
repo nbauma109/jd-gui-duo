@@ -60,8 +60,8 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
     @SuppressWarnings("rawtypes")
     protected static class ContainerPanel extends TreeTabbedPanel implements ContentIndexable, SourcesSavable, Closeable {
         private static final long serialVersionUID = 1L;
-        private transient Container.Entry entry;
-        private transient Container container;
+        private final transient Container.Entry entry;
+        private final transient Container container;
 
         public ContainerPanel(API api, Container container) {
             super(api, container.getRoot().getParent().getUri());
@@ -130,19 +130,24 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
                 URI uri = path.toUri();
                 URI archiveUri = new URI("jar:" + uri.getScheme(), uri.getHost(), uri.getPath() + "!/", null);
 
-                try (FileSystem archiveFs = FileSystems.newFileSystem(archiveUri, Collections.singletonMap("create", "true"))) {
-                    Path archiveRootPath = archiveFs.getPath("/");
-                    SourceSaver saver = api.getSourceSaver(entry);
-
-                    if (saver != null) {
-                        saver.saveContent(api, archiveRootPath, archiveRootPath, entry, getProgressFunction, setProgressFunction, isCancelledFunction);
-                    }
-                } catch (AccessDeniedException e) {
-                    assert ExceptionUtil.printStackTrace(e);
-                    JOptionPane.showMessageDialog(getParent(), "Not authorized to save to this destination. Please restart as administrator or choose another location.", "Access denied", JOptionPane.ERROR_MESSAGE);
-                }
+                saveInto(archiveUri, api, getProgressFunction, setProgressFunction, isCancelledFunction);
             } catch (URISyntaxException|IOException e) {
                 assert ExceptionUtil.printStackTrace(e);
+            }
+        }
+
+        private void saveInto(URI archiveUri, API api, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction,
+                BooleanSupplier isCancelledFunction) throws IOException {
+            try (FileSystem archiveFs = FileSystems.newFileSystem(archiveUri, Collections.singletonMap("create", "true"))) {
+                Path archiveRootPath = archiveFs.getPath("/");
+                SourceSaver saver = api.getSourceSaver(entry);
+
+                if (saver != null) {
+                    saver.saveContent(api, archiveRootPath, archiveRootPath, entry, getProgressFunction, setProgressFunction, isCancelledFunction);
+                }
+            } catch (AccessDeniedException e) {
+                assert ExceptionUtil.printStackTrace(e);
+                JOptionPane.showMessageDialog(getParent(), "Not authorized to save to this destination. Please restart as administrator or choose another location.", "Access denied", JOptionPane.ERROR_MESSAGE);
             }
         }
 
@@ -156,7 +161,7 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
 
     protected static class DelegatedMap<K, V> implements Map<K, V> {
 
-        private Map<K, V> map;
+        private final Map<K, V> map;
 
         public DelegatedMap(Map<K, V> map) { this.map = map; }
 
@@ -210,7 +215,7 @@ public class ContainerPanelFactoryProvider implements PanelFactory {
     @SuppressWarnings("rawtypes")
     protected static class DelegatedMapMapWithDefault extends DelegatedMap<String, Map<String, Collection>> {
 
-        private Map<String, Map<String, Collection>> wrappers = new HashMap<>();
+        private final Map<String, Map<String, Collection>> wrappers = new HashMap<>();
 
         public DelegatedMapMapWithDefault(Map<String, Map<String, Collection>> map) { super(map); }
 

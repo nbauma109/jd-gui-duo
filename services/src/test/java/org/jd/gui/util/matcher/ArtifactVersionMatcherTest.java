@@ -20,12 +20,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ArtifactVersionMatcherTest {
+class ArtifactVersionMatcherTest {
 
     private ArtifactVersionMatcher artifactVersionMatcher;
 
     @Test
-    public void testArtifactVersion() {
+    void testArtifactVersion() {
         checkArtifactVersion("xbean-spring-3.11.1", "xbean-spring", "3.11.1");
         checkArtifactVersion("adapter-rxjava2-2.7.1", "adapter-rxjava2", "2.7.1");
         checkArtifactVersion("antlr4-runtime-4.5.3", "antlr4-runtime", "4.5.3");
@@ -42,6 +42,10 @@ public class ArtifactVersionMatcherTest {
         checkArtifactVersion("jsr305-3.0.2", "jsr305", "3.0.2");
         checkArtifactVersion("javassist-3.27.0-GA", "javassist", "3.27.0-GA");
         checkArtifactVersion("jboss-msc-1.0.4.GA", "jboss-msc", "1.0.4.GA");
+    }
+
+    @Test
+    void testArtifactVersionFurtherCases() {
         checkArtifactVersion("javacup-0.10k", "javacup", "0.10k");
         checkArtifactVersion("jaxb1-impl-2.2", "jaxb1-impl", "2.2");
         checkArtifactVersion("jackson-datatype-jsr310-2.11.4", "jackson-datatype-jsr310", "2.11.4");

@@ -34,7 +34,7 @@ public final class ProgressUtil {
         if (file.exists()) {
             double totalSize = Files.size(file.toPath());
             long entryLength = entry.compressedLength();
-            double progress = 100 * entryLength / totalSize;
+            double progress = (double) (100 * entryLength) / totalSize;
             double cumulativeProgress = getProgressFunction.getAsDouble() + progress;
             if (cumulativeProgress <= 100) {
                 setProgressFunction.accept(cumulativeProgress);

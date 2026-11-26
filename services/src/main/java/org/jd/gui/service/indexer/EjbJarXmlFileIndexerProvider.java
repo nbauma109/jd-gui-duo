@@ -41,7 +41,7 @@ public class EjbJarXmlFileIndexerProvider extends XmlBasedFileIndexerProvider {
     }
 
     public static class EjbJarXmlPathFinder extends AbstractXmlPathFinder {
-        private Container.Entry entry;
+        private final Container.Entry entry;
         @SuppressWarnings("rawtypes")
         private Map<String, Collection> index;
 

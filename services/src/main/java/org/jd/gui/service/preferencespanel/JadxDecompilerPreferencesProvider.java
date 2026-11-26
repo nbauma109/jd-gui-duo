@@ -29,7 +29,7 @@ public class JadxDecompilerPreferencesProvider extends AbstractDecompilerPrefere
     private static final Class<?>[] BOOLEAN_PARAM = { boolean.class };
     private static final Class<?>[] INT_PARAM = { int.class };
 
-    private Map<String, String> defaults = new HashMap<>();
+    private final Map<String, String> defaults = new HashMap<>();
 
     public JadxDecompilerPreferencesProvider() {
         super(4, "true", "false");

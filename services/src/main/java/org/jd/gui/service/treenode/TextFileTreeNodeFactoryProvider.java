@@ -65,7 +65,7 @@ public class TextFileTreeNodeFactoryProvider extends FileTreeNodeFactoryProvider
     protected static class Page extends TextPage implements UriGettable {
 
         private static final long serialVersionUID = 1L;
-        private transient Container.Entry entry;
+        private final transient Container.Entry entry;
 
         public Page(API api, Container.Entry entry) {
         	super(api);

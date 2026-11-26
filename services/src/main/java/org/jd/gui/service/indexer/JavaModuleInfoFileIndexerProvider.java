@@ -64,7 +64,7 @@ public class JavaModuleInfoFileIndexerProvider extends AbstractIndexerProvider {
         }
 
         protected class ClassIndexer extends ClassVisitor {
-            private ModuleIndexer moduleIndexer = new ModuleIndexer();
+            private final ModuleIndexer moduleIndexer = new ModuleIndexer();
 
             public ClassIndexer() { super(Opcodes.ASM9); }
 

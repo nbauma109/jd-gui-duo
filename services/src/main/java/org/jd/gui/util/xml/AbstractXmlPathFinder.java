@@ -87,6 +87,9 @@ public abstract class AbstractXmlPathFinder {
                         }
                     }
                     break;
+                default:
+                    // the other events are not part of a path
+                    break;
                 }
             }
         } catch (XMLStreamException e) {

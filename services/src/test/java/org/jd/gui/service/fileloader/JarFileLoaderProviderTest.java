@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class JarFileLoaderProviderTest {
     @Test
-    void loadAspectjweaver1813() throws Exception {
+    void loadAspectjweaver1813() {
         TestJarFileLoaderProvider loader = new TestJarFileLoaderProvider();
         File jar = Path.of("target/test-jars/aspectjweaver-1.8.13.jar").toFile();
 

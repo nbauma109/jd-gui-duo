@@ -192,8 +192,8 @@ public class ReferenceListener extends AbstractJavaListener {
                 qualifierType = typeBinding;
             }
             IVariableBinding variableBinding = null;
-            if (binding instanceof IVariableBinding) {
-                variableBinding = (IVariableBinding) binding;
+            if (binding instanceof IVariableBinding foundVariable) {
+                variableBinding = foundVariable;
                 ITypeBinding typeBinding = qualifier.resolveTypeBinding();
                 if (typeBinding != null) {
                     qualifierDescriptor = typeBinding.getKey();
@@ -253,15 +253,6 @@ public class ReferenceListener extends AbstractJavaListener {
             sb.append(erased != null ? erased : parameterType.getErasure().getKey());
         }
         return sb.append(')');
-    }
-
-    private static StringBuilder getParametersDescriptor(ITypeBinding[] argTypes) {
-        StringBuilder sb = new StringBuilder("(");
-        for (ITypeBinding argType : argTypes) {
-            sb.append(argType.getKey());
-        }
-        sb.append(')');
-        return sb;
     }
 
     /**

@@ -17,6 +17,8 @@
  ******************************************************************************/
 package org.jd.gui.util.nexus;
 
+import java.io.IOException;
+
 import org.jd.gui.util.nexus.model.NexusSearchResult;
 
 /**
@@ -28,18 +30,18 @@ public interface NexusSearch {
     /**
      * We search by a freeform keyword.
      */
-    NexusSearchResult searchByKeyword(String keyword, int pageNo) throws Exception;
+    NexusSearchResult searchByKeyword(String keyword, int pageNo) throws IOException;
 
     /**
      * We search by SHA-1 content hash.
      */
-    NexusSearchResult searchBySha1(String sha1, int pageNo) throws Exception;
+    NexusSearchResult searchBySha1(String sha1, int pageNo) throws IOException;
 
     /**
      * We search by group, artifact, and optional version.
      * A null version means we search across versions.
      */
-    default NexusSearchResult searchByGav(String groupId, String artifactId, String version, int pageNo) throws Exception {
+    default NexusSearchResult searchByGav(String groupId, String artifactId, String version, int pageNo) throws IOException {
     	return searchByGav(groupId, artifactId, version, null, null, pageNo);
     }
 
@@ -47,14 +49,14 @@ public interface NexusSearch {
      * We search by group, artifact, version, classifier
      * A null version means we search across versions.
      */
-    NexusSearchResult searchByGav(String groupId, String artifactId, String version, String classifier, String packaging, int pageNo) throws Exception;
+    NexusSearchResult searchByGav(String groupId, String artifactId, String version, String classifier, String packaging, int pageNo) throws IOException;
 
     /**
      * We search by class name.
      * If fullyQualified is true, we treat the input as a fully qualified class name.
      * Otherwise we treat it as a simple class name.
      */
-    NexusSearchResult searchByClassName(String className, boolean fullyQualified, int pageNo) throws Exception;
+    NexusSearchResult searchByClassName(String className, boolean fullyQualified, int pageNo) throws IOException;
 
     boolean supportsVersionDate();
 

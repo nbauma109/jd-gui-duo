@@ -86,6 +86,9 @@ public final class ProxyPreferencesProvider extends JPanel implements SecuredPre
 
     private static final long serialVersionUID = 1L;
 
+    /** The address that the system proxy is looked up for. */
+    private static final String DETECTION_URL = "http://www.google.com";
+
     // Preference keys
     public static final String PROXY_HOST = "ProxyPreferencesProvider.proxy.host";
     public static final String PROXY_PORT = "ProxyPreferencesProvider.proxy.port";
@@ -382,7 +385,7 @@ public final class ProxyPreferencesProvider extends JPanel implements SecuredPre
                         return null;
                     }
 
-                    URI uri = new URI("http://www.google.com");
+                    URI uri = new URI(DETECTION_URL);
                     List<Proxy> proxies = selector.select(uri);
                     if (proxies == null || proxies.isEmpty()) {
                         return null;

@@ -98,8 +98,6 @@ public class SelectLocationController {
         for (Map.Entry<Container, List<Container.Entry>> mapEntry : map.entrySet()) {
             Container container = mapEntry.getKey();
             // Create a filtered container
-            // TODO In a future release, display matching types and inner-types, not only
-            // matching files
             delegatingFilterContainers.add(new DelegatingFilterContainer(container, getOuterEntries(mapEntry.getValue())));
         }
 

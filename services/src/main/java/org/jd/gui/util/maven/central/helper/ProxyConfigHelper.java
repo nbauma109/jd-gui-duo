@@ -56,6 +56,7 @@ public final class ProxyConfigHelper {
                     port = p;
                 }
             } catch (NumberFormatException _) {
+                // a port that is no number is left out
             }
         }
 

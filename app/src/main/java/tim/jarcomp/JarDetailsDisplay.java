@@ -16,7 +16,7 @@ public class JarDetailsDisplay extends JPanel {
     private static final long serialVersionUID = 1L;
 
     /** Array of four labels for details */
-    private JLabel[] labels;
+    private final JLabel[] labels;
     /** Number of labels */
     private static final int NUM_LABELS = 4;
 

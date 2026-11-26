@@ -102,6 +102,9 @@ public class XmlFileIndexerProvider extends AbstractIndexerProvider {
                         stringSet.add(reader.getNamespaceURI(i));
                     }
                     break;
+                default:
+                    // the other events hold no word
+                    break;
                 }
             }
         } catch (Exception e) {

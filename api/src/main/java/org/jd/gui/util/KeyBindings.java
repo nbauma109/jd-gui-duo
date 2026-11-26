@@ -86,6 +86,25 @@ public final class KeyBindings {
         public KeyStroke getDefaultKeyStroke() {
             return defaultShortcutProvider.get(Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
         }
+
+        private static DefaultShortcutProvider menuShortcut(int keyCode) {
+            return menuShortcut(keyCode, 0);
+        }
+
+        private static DefaultShortcutProvider menuShortcut(int keyCode, int extraModifiers) {
+            return menuShortcutMask -> KeyStroke.getKeyStroke(keyCode, menuShortcutMask | extraModifiers);
+        }
+
+        private static DefaultShortcutProvider searchOptionShortcut(int keyCode) {
+            return menuShortcutMask -> {
+                int modifiers = isMac() ? InputEvent.CTRL_DOWN_MASK | InputEvent.META_DOWN_MASK : InputEvent.ALT_DOWN_MASK;
+                return KeyStroke.getKeyStroke(keyCode, modifiers);
+            };
+        }
+
+        private static DefaultShortcutProvider shortcut(int keyCode, int modifiers) {
+            return _ -> KeyStroke.getKeyStroke(keyCode, modifiers);
+        }
     }
 
     public static void apply(Map<String, String> preferences, Map<Binding, Action> actions) {
@@ -159,25 +178,6 @@ public final class KeyBindings {
         }
 
         builder.append(label);
-    }
-
-    private static DefaultShortcutProvider menuShortcut(int keyCode) {
-        return menuShortcut(keyCode, 0);
-    }
-
-    private static DefaultShortcutProvider menuShortcut(int keyCode, int extraModifiers) {
-        return menuShortcutMask -> KeyStroke.getKeyStroke(keyCode, menuShortcutMask | extraModifiers);
-    }
-
-    private static DefaultShortcutProvider searchOptionShortcut(int keyCode) {
-        return menuShortcutMask -> {
-            int modifiers = isMac() ? InputEvent.CTRL_DOWN_MASK | InputEvent.META_DOWN_MASK : InputEvent.ALT_DOWN_MASK;
-            return KeyStroke.getKeyStroke(keyCode, modifiers);
-        };
-    }
-
-    private static DefaultShortcutProvider shortcut(int keyCode, int modifiers) {
-        return _ -> KeyStroke.getKeyStroke(keyCode, modifiers);
     }
 
     private static boolean isMac() {

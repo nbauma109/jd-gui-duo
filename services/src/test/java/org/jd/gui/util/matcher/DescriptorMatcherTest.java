@@ -6,10 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class DescriptorMatcherTest {
+class DescriptorMatcherTest {
 
     @Test
-    public void testMatchFieldDescriptors() {
+    void testMatchFieldDescriptors() {
         assertTrue(DescriptorMatcher.matchFieldDescriptors("?", "?"));
 
         assertTrue(DescriptorMatcher.matchFieldDescriptors("I", "I"));
@@ -44,7 +44,7 @@ public class DescriptorMatcherTest {
     }
 
     @Test
-    public void testMatchMethodDescriptors() {
+    void testMatchMethodDescriptors() {
         assertFalse(DescriptorMatcher.matchMethodDescriptors("I", "I"));
 
         assertTrue(DescriptorMatcher.matchMethodDescriptors("()I", "()I"));
@@ -64,7 +64,10 @@ public class DescriptorMatcherTest {
         assertTrue(DescriptorMatcher.matchMethodDescriptors("(Ltest/Test;)Ltest/Test;", "(*)?"));
         assertTrue(DescriptorMatcher.matchMethodDescriptors("([[Ltest/Test;[[Ltest/Test;)Ltest/Test;", "([[L*/Test;[[L*/Test;)L*/Test;"));
         assertTrue(DescriptorMatcher.matchMethodDescriptors("([[L*/Test;[[L*/Test;)L*/Test;", "([[Ltest/Test;[[Ltest/Test;)Ltest/Test;"));
+    }
 
+    @Test
+    void testMatchMethodDescriptorsFurtherCases() {
         assertTrue(DescriptorMatcher.matchMethodDescriptors("(Ltest/Test;Ltest/Test;)Ltest/Test;", "(Ltest/Test;Ltest/Test;)Ltest/Test;"));
         assertTrue(DescriptorMatcher.matchMethodDescriptors("(*)?", "(Ltest/Test;Ltest/Test;)Ltest/Test;"));
         assertTrue(DescriptorMatcher.matchMethodDescriptors("(Ltest/Test;Ltest/Test;)Ltest/Test;", "(*)?"));
@@ -89,7 +92,7 @@ public class DescriptorMatcherTest {
     }
 
     @Test
-    public void testHints() {
+    void testHints() {
         assertTrue(DescriptorMatcher.hasHints("(~I?)V"));
         assertFalse(DescriptorMatcher.hasHints("(I?)V"));
         assertFalse(DescriptorMatcher.hasHints(null));
@@ -110,7 +113,7 @@ public class DescriptorMatcherTest {
     }
 
     @Test
-    public void testFieldDescriptorsOfArraysAndClasses() {
+    void testFieldDescriptorsOfArraysAndClasses() {
         assertTrue(DescriptorMatcher.matchFieldDescriptors("[I", "[I"));
         assertFalse(DescriptorMatcher.matchFieldDescriptors("[I", "[J"));
         assertTrue(DescriptorMatcher.matchFieldDescriptors("[[Ljava/lang/String;", "[[Ljava/lang/String;"));
@@ -126,7 +129,7 @@ public class DescriptorMatcherTest {
     }
 
     @Test
-    public void testFieldDescriptorsWithAnUnknownPackage() {
+    void testFieldDescriptorsWithAnUnknownPackage() {
         // L*/Name; stands for a class of that name in any package, on either side
         assertTrue(DescriptorMatcher.matchFieldDescriptors("L*/A;", "Lfoo/A;"));
         assertTrue(DescriptorMatcher.matchFieldDescriptors("Lfoo/A;", "L*/A;"));
@@ -148,7 +151,7 @@ public class DescriptorMatcherTest {
     }
 
     @Test
-    public void testFieldDescriptorsWithAnUnknownType() {
+    void testFieldDescriptorsWithAnUnknownType() {
         assertTrue(DescriptorMatcher.matchFieldDescriptors("?", "[I"));
         assertTrue(DescriptorMatcher.matchFieldDescriptors("[[Ljava/lang/String;", "?"));
         assertTrue(DescriptorMatcher.matchFieldDescriptors("?", "Lfoo/A;"));
@@ -163,7 +166,7 @@ public class DescriptorMatcherTest {
     }
 
     @Test
-    public void testMethodDescriptorsParametersAndReturnType() {
+    void testMethodDescriptorsParametersAndReturnType() {
         assertTrue(DescriptorMatcher.matchMethodDescriptors("()V", "()V"));
         assertTrue(DescriptorMatcher.matchMethodDescriptors("(I[Ljava/lang/String;)Z", "(I[Ljava/lang/String;)Z"));
         assertFalse(DescriptorMatcher.matchMethodDescriptors("(I)V", "(J)V"));
@@ -177,7 +180,7 @@ public class DescriptorMatcherTest {
     }
 
     @Test
-    public void testMethodDescriptorsWithUnknownParts() {
+    void testMethodDescriptorsWithUnknownParts() {
         // ? is an unknown parameter or return type; (*) is any parameters
         assertTrue(DescriptorMatcher.matchMethodDescriptors("(I)V", "(?)V"));
         assertTrue(DescriptorMatcher.matchMethodDescriptors("(?I)V", "(JI)?"));
@@ -190,7 +193,7 @@ public class DescriptorMatcherTest {
     }
 
     @Test
-    public void testIncompleteMethodDescriptorsEndWithoutLooping() {
+    void testIncompleteMethodDescriptorsEndWithoutLooping() {
         org.junit.jupiter.api.Assertions.assertTimeoutPreemptively(java.time.Duration.ofSeconds(5), () -> {
             assertFalse(DescriptorMatcher.matchMethodDescriptors("(I)V", "(I"));
             assertFalse(DescriptorMatcher.matchMethodDescriptors("(I", "(I)V"));
@@ -201,7 +204,7 @@ public class DescriptorMatcherTest {
     }
 
     @Test
-    public void testNestedClassWildcardAgainstOtherSeparators() {
+    void testNestedClassWildcardAgainstOtherSeparators() {
         // the '/' after the wildcard is the boundary of the nested class only: not a '.', not another character
         assertFalse(DescriptorMatcher.matchFieldDescriptors("L*/Inner;", "Ldemo/Over.Inner;"));
         assertFalse(DescriptorMatcher.matchFieldDescriptors("Ldemo/Over.Inner;", "L*/Inner;"));
@@ -209,7 +212,7 @@ public class DescriptorMatcherTest {
     }
 
     @Test
-    public void testCharBuffer() {
+    void testCharBuffer() {
         DescriptorMatcher.CharBuffer buffer = new DescriptorMatcher.CharBuffer("(I)V");
 
         assertFalse(buffer.unread());
@@ -229,7 +232,7 @@ public class DescriptorMatcherTest {
     }
 
     @Test
-    public void testSkipType() {
+    void testSkipType() {
         assertTrue(new DescriptorMatcher.CharBuffer("I").skipType());
         assertTrue(new DescriptorMatcher.CharBuffer("[[J").skipType());
         assertTrue(new DescriptorMatcher.CharBuffer("[Lfoo/A;I").skipType());

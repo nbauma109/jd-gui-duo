@@ -9,7 +9,6 @@ package org.jd.gui.view.component;
 
 import org.jd.gui.api.API;
 import org.jd.gui.api.model.Container;
-import org.jd.gui.api.model.Type;
 import org.jd.gui.service.type.ClassFileTypeFactoryProvider;
 import org.jd.gui.spi.TypeFactory;
 import org.junit.jupiter.api.BeforeAll;

@@ -40,11 +40,11 @@ public class MavenOrgSourceLoaderPreferencesProvider extends JPanel implements P
 
     protected static final Pattern CONTROL_PATTERN = Pattern.compile("([+-][a-zA-Z0-9$_.]+(\\s+[+-][a-zA-Z0-9$_.]+)*+)?\\s*");
 
-    private JCheckBox enableCheckBox;
-    private JTextArea filtersTextArea;
-    private JButton resetButton;
+    private final JCheckBox enableCheckBox;
+    private final JTextArea filtersTextArea;
+    private final JButton resetButton;
     private Color errorBackgroundColor = Color.RED;
-    private Color defaultBackgroundColor;
+    private final Color defaultBackgroundColor;
 
     private transient PreferencesPanel.PreferencesPanelChangeListener listener;
 

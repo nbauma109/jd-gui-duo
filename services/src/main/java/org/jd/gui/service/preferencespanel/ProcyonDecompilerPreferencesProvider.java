@@ -32,7 +32,7 @@ public class ProcyonDecompilerPreferencesProvider extends AbstractDecompilerPref
     private static final Class<?>[] BOOLEAN_PARAM = { boolean.class };
     private static final Class<?>[] INT_PARAM = { int.class };
 
-    private Map<String, String> defaults = new HashMap<>();
+    private final Map<String, String> defaults = new HashMap<>();
 
     public ProcyonDecompilerPreferencesProvider() {
         super(2, "true", "false");
@@ -42,12 +42,9 @@ public class ProcyonDecompilerPreferencesProvider extends AbstractDecompilerPref
         Method[] methods = CommandLineOptions.class.getMethods();
         Arrays.sort(methods, Comparator.comparing(Method::getName));
         for (Method method : methods) {
-            if (method.getName().startsWith("set")) {
-                String optionKey = method.getName().substring(3);
-                Method getter = getters.get(optionKey);
-                if (getter == null) {
-                    continue;
-                }
+            String optionKey = method.getName().startsWith("set") ? method.getName().substring(3) : null;
+            Method getter = getters.get(optionKey);
+            if (getter != null) {
                 try {
                     JComponent component = null;
                     if (Arrays.equals(method.getParameterTypes(), BOOLEAN_PARAM)) {
@@ -63,10 +60,7 @@ public class ProcyonDecompilerPreferencesProvider extends AbstractDecompilerPref
                         JLabel label = addOption(optionKey, component);
                         String fieldName = '_' + optionKey.substring(0, 1).toLowerCase() + optionKey.substring(1);
                         Field field = fields.get(fieldName);
-                        if (field == null) {
-                            continue;
-                        }
-                        Parameter parameterAnnotation = field.getAnnotation(Parameter.class);
+                        Parameter parameterAnnotation = field == null ? null : field.getAnnotation(Parameter.class);
                         if (parameterAnnotation != null) {
                             component.setToolTipText(parameterAnnotation.description());
                             label.setToolTipText(parameterAnnotation.description());

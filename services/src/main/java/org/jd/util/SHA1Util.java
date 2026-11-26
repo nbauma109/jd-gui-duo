@@ -40,7 +40,7 @@ public final class SHA1Util {
         try (BufferedReader br = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
             String line;
             while ((line = br.readLine()) != null) {
-                String[] tokens = line.split("\s+\\*");
+                String[] tokens = line.split("\s++\\*");
                 if (tokens != null && tokens.length == 2) {
                     sha1Map.put(new File(tokens[1]), tokens[0]);
                 }

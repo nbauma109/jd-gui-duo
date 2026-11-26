@@ -27,6 +27,7 @@ import org.jd.gui.util.nexus.dto.Nexus3Response;
 import org.jd.gui.util.nexus.model.NexusArtifact;
 import org.jd.gui.util.nexus.model.NexusSearchResult;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -88,21 +89,21 @@ final class NexusV3Client extends AbstractNexusClient implements NexusSearch {
     }
 
     @Override
-    public NexusSearchResult searchByKeyword(String keyword, int pageNo) throws Exception {
+    public NexusSearchResult searchByKeyword(String keyword, int pageNo) throws IOException {
         String path = "/service/rest/v1/search?q=" + enc(keyword);
         String body = get(buildUrl(config.baseUrl, path), CONNECTION_TIMEOUT, READ_TIMEOUT);
         return parseComponents(body);
     }
 
     @Override
-    public NexusSearchResult searchBySha1(String sha1, int pageNo) throws Exception {
+    public NexusSearchResult searchBySha1(String sha1, int pageNo) throws IOException {
         String path = "/service/rest/v1/search/assets?sha1=" + enc(sha1);
         String body = get(buildUrl(config.baseUrl, path), CONNECTION_TIMEOUT, READ_TIMEOUT);
         return parseAssets(body);
     }
 
     @Override
-    public NexusSearchResult searchByGav(String groupId, String artifactId, String version, String classifier, String packaging, int pageNo) throws Exception {
+    public NexusSearchResult searchByGav(String groupId, String artifactId, String version, String classifier, String packaging, int pageNo) throws IOException {
         StringBuilder path = new StringBuilder("/service/rest/v1/search?");
 
         boolean first = true;
@@ -137,7 +138,7 @@ final class NexusV3Client extends AbstractNexusClient implements NexusSearch {
     }
 
     @Override
-    public NexusSearchResult searchByClassName(String className, boolean fullyQualified, int pageNo) throws Exception {
+    public NexusSearchResult searchByClassName(String className, boolean fullyQualified, int pageNo) throws IOException {
         throw new UnsupportedOperationException();
     }
 
@@ -164,6 +165,7 @@ final class NexusV3Client extends AbstractNexusClient implements NexusSearch {
                 }
             }
         } catch (Exception _) {
+            // a response that cannot be read adds nothing: what was read before is returned
         }
 
         return new NexusSearchResult(list);
@@ -187,6 +189,7 @@ final class NexusV3Client extends AbstractNexusClient implements NexusSearch {
                 }
             }
         } catch (Exception _) {
+            // a response that cannot be read adds nothing: what was read before is returned
         }
 
         return new NexusSearchResult(list);

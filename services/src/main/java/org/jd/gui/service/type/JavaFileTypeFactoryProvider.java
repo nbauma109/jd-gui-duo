@@ -106,20 +106,20 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
     }
 
     protected static class JavaType implements Type {
-        private int access;
-        private String name;
-        private String superName;
-        private String outerName;
+        private final int access;
+        private final String name;
+        private final String superName;
+        private final String outerName;
 
-        private String displayTypeName;
-        private String displayInnerTypeName;
-        private String displayPackageName;
+        private final String displayTypeName;
+        private final String displayInnerTypeName;
+        private final String displayPackageName;
 
-        private List<Type> innerTypes = new ArrayList<>();
-        private List<Field> fields = new ArrayList<>();
-        private List<Method> methods = new ArrayList<>();
+        private final List<Type> innerTypes = new ArrayList<>();
+        private final List<Field> fields = new ArrayList<>();
+        private final List<Method> methods = new ArrayList<>();
 
-        private JavaType outerType;
+        private final JavaType outerType;
 
         public JavaType(int access, String name, String superName, String outerName, String displayTypeName,
                 String displayInnerTypeName, String displayPackageName, JavaType outerType) {
@@ -198,9 +198,9 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
     }
 
     protected static class JavaField implements Type.Field {
-        private int access;
-        private String name;
-        private String descriptor;
+        private final int access;
+        private final String name;
+        private final String descriptor;
         /** The descriptor with the type variables named as in the source. */
         private final String written;
 
@@ -241,10 +241,10 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
     }
 
     protected static class JavaMethod implements Type.Method {
-        private JavaType type;
-        private int access;
-        private String name;
-        private String descriptor;
+        private final JavaType type;
+        private final int access;
+        private final String name;
+        private final String descriptor;
         /** The descriptor with the type variables named as in the source. */
         private final String written;
 
@@ -297,8 +297,8 @@ public class JavaFileTypeFactoryProvider extends AbstractTypeFactoryProvider {
 
         private JavaType mainType;
         private JavaType currentType;
-        private List<Type> rootTypes = new ArrayList<>();
-        private Map<String, Type> types = new HashMap<>();
+        private final List<Type> rootTypes = new ArrayList<>();
+        private final Map<String, Type> types = new HashMap<>();
 
         public Listener(Container.Entry entry) {
             super(entry);

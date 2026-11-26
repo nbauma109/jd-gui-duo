@@ -27,6 +27,7 @@ import org.jd.gui.util.nexus.NexusSearch;
 import org.jd.gui.util.nexus.model.NexusArtifact;
 import org.jd.gui.util.nexus.model.NexusSearchResult;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
@@ -52,6 +53,9 @@ import jakarta.json.bind.JsonbBuilder;
  */
 public final class SolrCentralSearchClient implements NexusSearch, ProxyCapable {
 
+    /** Reads the responses: it is thread safe, and used as long as the application runs. */
+    private static final Jsonb JSONB = JsonbBuilder.create();
+
     private static final String DEFAULT_SELECT_ENDPOINT = "https://search.maven.org/solrsearch/select";
     private static final String DEFAULT_REMOTE_CONTENT_ENDPOINT = "https://search.maven.org/remotecontent?filepath=";
     private static final int ROWS = 200;
@@ -73,21 +77,21 @@ public final class SolrCentralSearchClient implements NexusSearch, ProxyCapable 
     }
 
     @Override
-    public NexusSearchResult searchByKeyword(String keyword, int pageNo) throws Exception {
+    public NexusSearchResult searchByKeyword(String keyword, int pageNo) throws IOException {
         Objects.requireNonNull(keyword, "keyword must not be null");
         String qExpr = keyword.trim();
         return executeQuery(qExpr, pageNo);
     }
 
     @Override
-    public NexusSearchResult searchBySha1(String sha1, int pageNo) throws Exception {
+    public NexusSearchResult searchBySha1(String sha1, int pageNo) throws IOException {
         Objects.requireNonNull(sha1, "sha1 must not be null");
         String qExpr = "1:" + sha1.trim();
         return executeQuery(qExpr, pageNo);
     }
 
     @Override
-    public NexusSearchResult searchByGav(String groupId, String artifactId, String version, String classifier, String packaging, int pageNo) throws Exception {
+    public NexusSearchResult searchByGav(String groupId, String artifactId, String version, String classifier, String packaging, int pageNo) throws IOException {
         if (groupId == null && artifactId == null) {
             throw new IllegalArgumentException("Either groupId or artifactId must be provided");
         }
@@ -134,18 +138,18 @@ public final class SolrCentralSearchClient implements NexusSearch, ProxyCapable 
     }
 
     @Override
-    public NexusSearchResult searchByClassName(String className, boolean fullyQualified, int pageNo) throws Exception {
+    public NexusSearchResult searchByClassName(String className, boolean fullyQualified, int pageNo) throws IOException {
         Objects.requireNonNull(className, "className must not be null");
         String prefix = fullyQualified ? "fc:" : "c:";
         String qExpr = prefix + className.trim();
         return executeQuery(qExpr, pageNo);
     }
 
-    private NexusSearchResult executeQuery(String qExpr, int pageNo) throws Exception {
+    private NexusSearchResult executeQuery(String qExpr, int pageNo) throws IOException {
 		return executeQuery(qExpr, pageNo, false);
 	}
 
-	private NexusSearchResult executeQuery(String queryExpression, int pageNo, boolean gav) throws Exception {
+	private NexusSearchResult executeQuery(String queryExpression, int pageNo, boolean gav) throws IOException {
         int safePage = Math.max(0, pageNo);
         int start = safePage * ROWS;
 
@@ -167,15 +171,14 @@ public final class SolrCentralSearchClient implements NexusSearch, ProxyCapable 
         HttpURLConnection connection = open(url, "GET", proxyConfig);
         int code = connection.getResponseCode();
 
-        try (InputStream in = code < 300 ? connection.getInputStream() : connection.getErrorStream();
-             Jsonb jsonb = JsonbBuilder.create()) {
+        try (InputStream in = code < 300 ? connection.getInputStream() : connection.getErrorStream()) {
 
             String json = IOUtils.toString(in, StandardCharsets.UTF_8);
             if (code >= 300) {
                 throw new IllegalStateException("HTTP " + code + " from " + url + ": " + json);
             }
 
-            ResponseRoot root = jsonb.fromJson(json, ResponseRoot.class);
+            ResponseRoot root = JSONB.fromJson(json, ResponseRoot.class);
             return mapResponse(root);
         }
     }
@@ -221,25 +224,11 @@ public final class SolrCentralSearchClient implements NexusSearch, ProxyCapable 
             // Additional artifacts: one per classifier token in ec
             if (doc.getEc() != null) {
                 for (String token : doc.getEc()) {
-                    if (token == null) {
-                        continue;
-                    }
-                    String trimmed = token.trim();
-                    if (trimmed.isEmpty()) {
-                        continue;
-                    }
+                    // Tokens of the form "-sources.jar", "-javadoc.jar", etc. (one of the form ".jar" is the main artifact)
+                    String trimmed = token == null ? "" : token.trim();
+                    int dot = trimmed.lastIndexOf('.');
 
-                    // Tokens of the form ".jar" are already represented by the main artifact
-                    if (trimmed.startsWith(".") && trimmed.length() > 1) {
-                        continue;
-                    }
-
-                    // Tokens of the form "-sources.jar", "-javadoc.jar", etc.
-                    if (trimmed.startsWith("-")) {
-                        int dot = trimmed.lastIndexOf('.');
-                        if (dot <= 1 || dot == trimmed.length() - 1) {
-                            continue;
-                        }
+                    if (trimmed.startsWith("-") && dot > 1 && dot < trimmed.length() - 1) {
                         String classifier = trimmed.substring(1, dot);
                         String ext = trimmed.substring(dot + 1);
                         String link = buildRemoteContentUrl(groupId, artifactId, version, classifier, ext);
