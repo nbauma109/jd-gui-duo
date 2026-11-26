@@ -153,6 +153,16 @@ class ManifestFilePageTest {
     }
 
     @Test
+    void aManifestThatCannotBeReadIsShownAsItIsWhenBeautified() throws Exception {
+        String broken = "no header here\r\n";
+        ManifestFilePage page = new ManifestFilePage(api(), entry("META-INF/MANIFEST.MF", broken));
+
+        SwingUtilities.invokeAndWait(() -> page.beautifyCheckbox.setSelected(true));
+
+        assertThat(page.getText()).isEqualTo(broken);
+    }
+
+    @Test
     void thePageIsNamedAfterItsFile() {
         assertThat(page().getFileName()).isEqualTo("MANIFEST.MF");
         assertThat(page().getUri()).isEqualTo(URI.create("file:/x.jar!/META-INF/MANIFEST.MF"));

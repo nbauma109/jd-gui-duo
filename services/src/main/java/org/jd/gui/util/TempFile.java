@@ -18,7 +18,10 @@ package org.jd.gui.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermissions;
 
 /** The name of a file that does not exist yet, in a new temporary directory that only its owner can access. */
 public class TempFile extends File implements AutoCloseable {
@@ -33,7 +36,11 @@ public class TempFile extends File implements AutoCloseable {
     }
 
     private static File newDirectory() throws IOException {
-        File directory = Files.createTempDirectory(TMP_FILE_PREFIX).toFile();
+        // the permissions of other systems than the POSIX ones already keep the temporary directory of a user to that user
+        FileAttribute<?>[] ownerOnly = FileSystems.getDefault().supportedFileAttributeViews().contains("posix")
+                ? new FileAttribute<?>[] { PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------")) }
+                : new FileAttribute<?>[0];
+        File directory = Files.createTempDirectory(TMP_FILE_PREFIX, ownerOnly).toFile();
         // registered before the file: what is registered last is deleted first
         directory.deleteOnExit();
         return directory;
