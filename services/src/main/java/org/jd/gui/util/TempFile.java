@@ -18,6 +18,7 @@ package org.jd.gui.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.attribute.FileAttribute;
@@ -30,9 +31,31 @@ public class TempFile extends File implements AutoCloseable {
 
     public static final String TMP_FILE_PREFIX = "jd-gui.tmp.";
 
+    private static final int MAX_SUFFIX_BYTES = 150;
+
     public TempFile(String suffix) throws IOException {
-        super(newDirectory(), TMP_FILE_PREFIX + suffix);
+        super(newDirectory(), TMP_FILE_PREFIX + endOf(suffix));
         deleteOnExit();
+    }
+
+    /**
+     * The end of a suffix, with its extension, that is short enough for the name of a file: file systems limit it, mostly to 255 bytes,
+     * and the suffix may hold the name of a class and of a method.
+     */
+    private static String endOf(String suffix) {
+        int start = suffix.length();
+        int bytes = 0;
+
+        while (start > 0) {
+            int codePoint = suffix.codePointBefore(start);
+            bytes += Character.toString(codePoint).getBytes(StandardCharsets.UTF_8).length;
+            if (bytes > MAX_SUFFIX_BYTES) {
+                break;
+            }
+            start -= Character.charCount(codePoint);
+        }
+
+        return suffix.substring(start);
     }
 
     private static File newDirectory() throws IOException {
