@@ -29,8 +29,13 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class SHA1Util {
+
+    /** A line of sha1sum: the hash, white space, an asterisk in binary mode only, and the name of the file. */
+    private static final Pattern CHECKSUM_LINE = Pattern.compile("(\\p{XDigit}{40})\\s++\\*?+(.++)");
 
     private SHA1Util() {
     }
@@ -40,10 +45,9 @@ public final class SHA1Util {
         try (BufferedReader br = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
             String line;
             while ((line = br.readLine()) != null) {
-                // "<hash> *<file>"
-                int separator = line.indexOf(" *");
-                if (separator >= 0 && separator + 2 < line.length()) {
-                    sha1Map.put(new File(line.substring(separator + 2)), line.substring(0, separator).stripTrailing());
+                Matcher matcher = CHECKSUM_LINE.matcher(line);
+                if (matcher.matches()) {
+                    sha1Map.put(new File(matcher.group(2)), matcher.group(1));
                 }
             }
         } catch (IOException e) {
