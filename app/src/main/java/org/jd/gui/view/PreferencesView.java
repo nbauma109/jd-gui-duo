@@ -94,7 +94,7 @@ public class PreferencesView implements PreferencesPanel.PreferencesPanelChangeL
                 pps.add(pp);
             }
 
-            sortedGroupNames.sort(null);
+            sortedGroupNames.sort(Comparator.naturalOrder());
 
             // Add preferences panels
             for (String groupName : sortedGroupNames) {

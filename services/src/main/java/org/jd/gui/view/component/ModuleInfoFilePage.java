@@ -32,6 +32,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -217,7 +218,7 @@ public class ModuleInfoFilePage extends ClassFilePage {
         if (!ranges.isEmpty()) {
             setSelectionHighlightColor();
             textArea.markAll(ranges);
-            ranges.sort(null);
+            ranges.sort(Comparator.naturalOrder());
             setCaretPositionAndCenter(ranges.get(0));
         }
 

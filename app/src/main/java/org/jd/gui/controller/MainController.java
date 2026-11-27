@@ -101,6 +101,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -353,7 +354,7 @@ public class MainController implements API {
         StringBuilder sb = new StringBuilder();
         List<String> extensions = new ArrayList<>(loaders.keySet());
 
-        extensions.sort(null);
+        extensions.sort(Comparator.naturalOrder());
 
         for (String extension : extensions) {
             sb.append("*.").append(extension).append(", ");
