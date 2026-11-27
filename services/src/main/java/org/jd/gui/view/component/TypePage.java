@@ -31,6 +31,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -185,7 +186,7 @@ public abstract class TypePage extends CustomLineNumbersPage
         if (!ranges.isEmpty()) {
             setSelectionHighlightColor();
             textArea.markAll(ranges);
-            ranges.sort(null);
+            ranges.sort(Comparator.naturalOrder());
             setCaretPositionAndCenter(fragmentRanges.isEmpty() ? ranges.get(0) : Collections.min(fragmentRanges));
         }
 

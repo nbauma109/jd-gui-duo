@@ -55,7 +55,7 @@ public class ContextualActionsFactoryService {
 
             // Sort by group names
             List<String> groupNames = new ArrayList<>(mapActions.keySet());
-            groupNames.sort(null);
+            groupNames.sort(Comparator.naturalOrder());
 
             for (String groupName : groupNames) {
                 if (! result.isEmpty()) {

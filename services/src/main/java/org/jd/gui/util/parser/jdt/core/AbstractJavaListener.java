@@ -566,7 +566,7 @@ public abstract class AbstractJavaListener extends ASTVisitor {
         AbstractTypeDeclaration found = null;
         for (Object member : declaration.bodyDeclarations()) {
             if (member instanceof AbstractTypeDeclaration type && type.getName().getIdentifier().equals(identifier)
-                    && !(inherited && Modifier.isPrivate(type.getModifiers()))) {
+                    && (!inherited || !Modifier.isPrivate(type.getModifiers()))) {
                 found = type;
             }
         }
