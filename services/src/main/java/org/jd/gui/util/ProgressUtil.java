@@ -32,9 +32,9 @@ public final class ProgressUtil {
     public static void updateProgress(Container.Entry root, Container.Entry entry, DoubleSupplier getProgressFunction, DoubleConsumer setProgressFunction) throws IOException {
         File file = new File(root.getUri());
         if (file.exists()) {
-            double totalSize = (double) Files.size(file.toPath());
-            double entryLength = (double) entry.compressedLength();
-            double progress = 100 * entryLength / totalSize;
+            long totalSize = Files.size(file.toPath());
+            long entryLength = entry.compressedLength();
+            double progress = 100.0 * entryLength / totalSize;
             double cumulativeProgress = getProgressFunction.getAsDouble() + progress;
             if (cumulativeProgress <= 100) {
                 setProgressFunction.accept(cumulativeProgress);

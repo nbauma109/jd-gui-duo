@@ -54,10 +54,7 @@ public class ContextualActionsFactoryService {
             List<Action> result = new ArrayList<>();
 
             // Sort by group names
-            List<String> groupNames = new ArrayList<>(mapActions.keySet());
-            groupNames.sort(Comparator.naturalOrder());
-
-            for (String groupName : groupNames) {
+            for (String groupName : mapActions.keySet().stream().sorted().toList()) {
                 if (! result.isEmpty()) {
                     // Add 'null' to mark a separator
                     result.add(null);
