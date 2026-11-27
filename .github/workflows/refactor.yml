@@ -21,7 +21,7 @@ jobs:
           persist-credentials: false
 
       - name: Run refactoring action
-        uses: nbauma109/refactoring-cleanup-action@v4
+        uses: nbauma109/refactoring-cleanup-action@v5
         with:
           project_root: services/src/main
           source_level: "25"
@@ -262,7 +262,7 @@ jobs:
           cleanup_make_type_abstract_if_missing_method: false
 
       - name: Run refactoring action
-        uses: nbauma109/refactoring-cleanup-action@v4
+        uses: nbauma109/refactoring-cleanup-action@v5
         with:
           project_root: api/src/main
           source_level: "25"
@@ -503,7 +503,7 @@ jobs:
           cleanup_make_type_abstract_if_missing_method: false
 
       - name: Run refactoring action
-        uses: nbauma109/refactoring-cleanup-action@v4
+        uses: nbauma109/refactoring-cleanup-action@v5
         with:
           project_root: app/src/main
           source_level: "25"
