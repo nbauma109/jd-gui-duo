@@ -268,6 +268,46 @@ class CustomLineNumbersPageTest {
         });
     }
 
+    @Test
+    void gutterWidthTracksChangesToOriginalSourceNumbers() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            TestPage page = new TestPage(SOURCE);
+            page.initLineNumbers();
+            int initialWidth = paint(page).getWidth();
+
+            page.setLineNumber(2, 12345);
+            BufferedImage expanded = paint(page);
+            assertThat(expanded.getWidth()).isGreaterThan(initialWidth);
+            assertNumber(row(page, expanded, 2), Color.RED, 2);
+
+            page.setLineNumber(2, 2);
+            assertThat(paint(page).getWidth()).isEqualTo(initialWidth);
+
+            page.setLineNumber(2, 12345);
+            assertThat(paint(page).getWidth()).isGreaterThan(initialWidth);
+            page.clearLineNumbers();
+            assertThat(paint(page).getWidth()).isEqualTo(initialWidth);
+        });
+    }
+
+    @Test
+    void gutterWidthTracksLineNumberFontChanges() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            TestPage page = new TestPage(SOURCE);
+            page.initLineNumbers();
+            int initialWidth = paint(page).getWidth();
+
+            Font largerFont = NUMBER_FONT.deriveFont(30f);
+            page.textArea.setFont(largerFont);
+            page.scrollPane.getGutter().setLineNumberFont(largerFont);
+            assertThat(paint(page).getWidth()).isGreaterThan(initialWidth);
+
+            page.textArea.setFont(NUMBER_FONT);
+            page.scrollPane.getGutter().setLineNumberFont(NUMBER_FONT);
+            assertThat(paint(page).getWidth()).isEqualTo(initialWidth);
+        });
+    }
+
     private static BufferedImage paint(TestPage page) {
         return paint(page, null);
     }
