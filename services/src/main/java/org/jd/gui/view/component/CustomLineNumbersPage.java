@@ -11,7 +11,6 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaEditorKit;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaUI;
 import org.fife.ui.rsyntaxtextarea.RSyntaxUtilities;
-import org.fife.ui.rsyntaxtextarea.folding.Fold;
 import org.fife.ui.rsyntaxtextarea.folding.FoldManager;
 import org.fife.ui.rtextarea.Gutter;
 import org.fife.ui.rtextarea.LineNumberList;
@@ -29,6 +28,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -43,9 +43,7 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.EditorKit;
-import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
-import javax.swing.text.View;
 
 public abstract class CustomLineNumbersPage extends HyperlinkPage {
     private static final long serialVersionUID = 1L;
@@ -59,15 +57,19 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
 
     protected void setErrorForeground(Color color) {
         errorForeground = color;
+        scrollPane.getGutter().repaint();
     }
 
     protected void setShowMisalignment(boolean b) {
         showMisalignment = b;
+        scrollPane.getGutter().repaint();
     }
 
     /** Map[textarea line number] = original line number. */
     private int[] lineNumberMap;
     private int maxLineNumber;
+    private int maximumMappedLineNumber;
+    private boolean mappedLineNumberWidthDirty;
     private final Set<Integer> breakpointLineNumbers = new HashSet<>();
 
     private final transient API debugApi;
@@ -201,6 +203,7 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
         if (maxLineNumber > 0) {
             if (lineNumberMap == null) {
                 lineNumberMap = new int[maxLineNumber+1];
+                lineNumbersChanged();
             } else if (lineNumberMap.length <= maxLineNumber) {
                 int[] tmp = new int[maxLineNumber+1];
                 System.arraycopy(lineNumberMap, 0, tmp, 0, lineNumberMap.length);
@@ -229,6 +232,7 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
             for (int i=1; i<=maxLineNumber; i++) {
                 lineNumberMap[i] = i;
             }
+            lineNumbersChanged();
         }
     }
 
@@ -236,13 +240,37 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
         if (originalLineNumber > 0) {
             setMaxLineNumber(textAreaLineNumber);
             lineNumberMap[textAreaLineNumber] = originalLineNumber;
+            lineNumbersChanged();
         }
     }
 
     protected void clearLineNumbers() {
         if (lineNumberMap != null) {
             Arrays.fill(lineNumberMap, 0);
+            lineNumbersChanged();
         }
+    }
+
+    private void lineNumbersChanged() {
+        if (!mappedLineNumberWidthDirty) {
+            mappedLineNumberWidthDirty = true;
+            scrollPane.getGutter().revalidate();
+        }
+        scrollPane.getGutter().repaint();
+    }
+
+    private int getMaximumDisplayedLineNumber() {
+        if (lineNumberMap == null) {
+            return textArea.getLineCount();
+        }
+        if (mappedLineNumberWidthDirty) {
+            maximumMappedLineNumber = 0;
+            for (int lineNumber : lineNumberMap) {
+                maximumMappedLineNumber = Math.max(maximumMappedLineNumber, lineNumber);
+            }
+            mappedLineNumberWidthDirty = false;
+        }
+        return maximumMappedLineNumber;
     }
 
     public int getMaximumSourceLineNumber() { return maxLineNumber; }
@@ -417,13 +445,10 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
         protected RTextAreaUI createRTextAreaUI() { return new SourceSyntaxTextAreaUI(this); }
     }
 
-    /** A lot of code to replace the default LineNumberList... */
     public class SourceSyntaxTextAreaUI extends RSyntaxTextAreaUI {
         public SourceSyntaxTextAreaUI(JComponent rSyntaxTextArea) { super(rSyntaxTextArea); }
         @Override
         public EditorKit getEditorKit(JTextComponent tc) { return new SourceSyntaxTextAreaEditorKit(); }
-        @Override
-        public Rectangle getVisibleEditorRect() { return super.getVisibleEditorRect(); }
 
         /**
          * Paint the execution-line highlight AFTER super.paintBackground() so it
@@ -464,173 +489,97 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
     }
 
     /**
-     * Why 'LineNumberList' is so unexpandable ? Too many private fields & methods and too many package scope.
+     * Paints original source numbers and debugger markers using the text area's row geometry.
      */
     public class SourceLineNumberList extends LineNumberList {
         private static final long serialVersionUID = 1L;
-        private final RTextArea rTextArea;
-        private transient Map<?,?> aaHints;
-        private Rectangle visibleRect;
-        private Insets textAreaInsets;
-        private Dimension preferredSize;
+        private static final int MARKER_WIDTH = 24;
+        private final transient Map<?, ?> antiAliasHints = RSyntaxUtilities.getDesktopAntiAliasHints();
 
         public SourceLineNumberList(RTextArea textArea) {
             super(textArea, null);
-            this.rTextArea = textArea;
-            addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
-                        toggleBreakpointAt(e);
-                    }
-                }
-            });
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            super.mousePressed(e);
+            if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
+                toggleBreakpointAt(e);
+            }
         }
 
         private void toggleBreakpointAt(MouseEvent e) {
             try {
-                int offset = rTextArea.viewToModel2D(new java.awt.Point(0, e.getY()));
-                int textAreaLineNumber = rTextArea.getLineOfOffset(offset) + 1;
-                int sourceLineNumber = getSourceLineNumber(textAreaLineNumber);
-                if (sourceLineNumber > 0) {
-                    toggleBreakpointLineNumber(sourceLineNumber);
+                int offset = textArea.viewToModel2D(new Point(0, e.getY()));
+                if (offset >= 0) {
+                    int sourceLineNumber = getSourceLineNumber(textArea.getLineOfOffset(offset) + 1);
+                    if (sourceLineNumber > 0) {
+                        toggleBreakpointLineNumber(sourceLineNumber);
+                    }
                 }
-            } catch (Exception _) {
+            } catch (BadLocationException _) {
                 // Ignore clicks outside valid text rows.
             }
         }
 
         @Override
-        protected void init() {
-            super.init();
-            visibleRect = new Rectangle();
-            aaHints = RSyntaxUtilities.getDesktopAntiAliasHints();
-            textAreaInsets = null;
-        }
-
-        /**
-         * @see org.fife.ui.rtextarea.LineNumberList#paintComponent(java.awt.Graphics)
-         */
-        @Override
         protected void paintComponent(Graphics g) {
-            visibleRect = g.getClipBounds(visibleRect);
-
-            if (visibleRect == null) {
-                visibleRect = getVisibleRect();
-            }
-            if (visibleRect == null) {
+            if (!(textArea instanceof RSyntaxTextArea area)) {
                 return;
             }
-
-            int cellWidth = getPreferredSize().width;
-            int cellHeight = rTextArea.getLineHeight();
-            int ascent = rTextArea.getMaxAscent();
-            FoldManager fm = ((RSyntaxTextArea)rTextArea).getFoldManager();
-            int rhsBorderWidth = ((RSyntaxTextArea)rTextArea).isCodeFoldingEnabled() ? 0 : 4;
-            FontMetrics metrics = g.getFontMetrics();
-            int rhs = getWidth() - rhsBorderWidth;
-
-            if (getParent() instanceof Gutter) { // Should always be true
-                g.setColor(getParent().getBackground());
-            } else {
-                g.setColor(getBackground());
+            Graphics2D graphics = (Graphics2D) g.create();
+            try {
+                Rectangle clip = graphics.getClipBounds();
+                if (clip == null) {
+                    clip = getVisibleRect();
+                }
+                Gutter gutter = getGutter();
+                Color background = getBackground();
+                if (gutter != null) {
+                    background = gutter.getBackground();
+                }
+                graphics.setColor(background);
+                graphics.fillRect(0, clip.y, getWidth(), clip.height);
+                graphics.setFont(getFont());
+                if (antiAliasHints != null) {
+                    graphics.addRenderingHints(antiAliasHints);
+                }
+                paintVisibleLineNumbers(graphics, area, clip);
+            } finally {
+                graphics.dispose();
             }
+        }
 
-            g.fillRect(0, visibleRect.y, cellWidth, visibleRect.height);
-            g.setFont(getFont());
-
-            if (aaHints != null) {
-                ((Graphics2D)g).addRenderingHints(aaHints);
+        private void paintVisibleLineNumbers(Graphics2D graphics, RSyntaxTextArea area, Rectangle clip) {
+            int offset = area.viewToModel2D(new Point(0, clip.y));
+            if (offset < 0) {
+                return;
             }
-
-            if (rTextArea.getLineWrap()) {
-                SourceSyntaxTextAreaUI ui = (SourceSyntaxTextAreaUI)rTextArea.getUI();
-                View v = ui.getRootView(rTextArea).getView(0);
-                Element root = rTextArea.getDocument().getDefaultRootElement();
-                int lineCount = root.getElementCount();
-                int topPosition = rTextArea.viewToModel2D(visibleRect.getLocation());
-                int topLine = root.getElementIndex(topPosition);
-                Rectangle visibleEditorRect = ui.getVisibleEditorRect();
-                @SuppressWarnings("all")
-                Rectangle r = LineNumberList.getChildViewBounds(v, topLine, visibleEditorRect);
-                int y = r.y;
-
-                int visibleBottom =  visibleRect.y + visibleRect.height;
-
-                // Keep painting lines until our y-coordinate is past the visible
-                // end of the text area.
-
-                while (y < visibleBottom) {
-                    r = getChildViewBounds(v, topLine, visibleEditorRect);
-
-                    // Paint the line number.
-                    paintLineNumber(g, metrics, rhs, y+ascent, topLine + 1);
-
-                    // The next possible y-coordinate is just after the last line
-                    // painted.
-                    y += r.height;
-
-                    // Update topLine (we're actually using it for our "current line"
-                    // variable now).
-                    if (fm != null) {
-                        Fold fold = fm.getFoldForLine(topLine);
-                        if (fold != null && fold.isCollapsed()) {
-                            topLine += fold.getCollapsedLineCount();
-                        }
-                    }
-
-                    topLine++;
-                    if (topLine >= lineCount) {
+            FontMetrics metrics = graphics.getFontMetrics();
+            int right = getWidth();
+            if (!area.isCodeFoldingEnabled()) {
+                right -= 4;
+            }
+            int ascent = area.getMaxAscent();
+            int bottom = clip.y + clip.height;
+            FoldManager foldManager = area.getFoldManager();
+            try {
+                int line = area.getLineOfOffset(offset);
+                while (line >= 0) {
+                    int y = area.yForLine(line);
+                    if (y < 0 || y >= bottom) {
                         break;
                     }
+                    paintLineNumber(graphics, metrics, right, y + ascent, line + 1);
+                    line = foldManager.getVisibleLineBelow(line);
                 }
-            } else {
-                textAreaInsets = rTextArea.getInsets(textAreaInsets);
-
-                if (visibleRect.y < textAreaInsets.top) {
-                    visibleRect.height -= textAreaInsets.top - visibleRect.y;
-                    visibleRect.y = textAreaInsets.top;
-                }
-
-                int topLine = (visibleRect.y - textAreaInsets.top) / cellHeight;
-                int actualTopY = topLine * cellHeight + textAreaInsets.top;
-                int y = actualTopY + ascent;
-
-                // Get the actual first line to paint, taking into account folding.
-                topLine += fm.getHiddenLineCountAbove(topLine, true);
-
-                // Paint line numbers
-                g.setColor(getForeground());
-
-                int line = topLine + 1;
-
-                while (y < visibleRect.y + visibleRect.height + ascent && line <= rTextArea.getLineCount()) {
-                    paintLineNumber(g, metrics, rhs, y, line);
-
-                    y += cellHeight;
-
-                    Fold fold = fm.getFoldForLine(line - 1);
-                    int hiddenLineCount;
-                    // Skip to next line to paint, taking extra care for lines with
-                    // a block that ends and one that begins on the same line, such as an else.
-                    while (fold != null && fold.isCollapsed()) {
-                        hiddenLineCount = fold.getLineCount();
-                        if (hiddenLineCount == 0) {
-                            // Fold parser identified a 0-line fold region... This
-                            // is really a bug, but we'll handle it gracefully.
-                            break;
-                        }
-                        line += hiddenLineCount;
-                        fold = fm.getFoldForLine(line - 1);
-                    }
-
-                    line++;
-                }
+            } catch (BadLocationException _) {
+                // The document may have changed before painting.
             }
         }
 
         protected void paintLineNumber(Graphics g, FontMetrics metrics, int x, int y, int lineNumber) {
-            int originalLineNumber = originalLineNumberOf(lineNumber);
+            int originalLineNumber = getSourceLineNumber(lineNumber);
 
             if (originalLineNumber != 0) {
                 String number = Integer.toString(originalLineNumber);
@@ -644,13 +593,6 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
                 g.setColor(showMisalignment && lineNumber != originalLineNumber ? errorForeground : getForeground());
                 g.drawString(number, x-strWidth, y);
             }
-        }
-
-        private int originalLineNumberOf(int lineNumber) {
-            if (lineNumberMap == null) {
-                return lineNumber;
-            }
-            return lineNumber < lineNumberMap.length ? lineNumberMap[lineNumber] : 0; // an unmapped row stays unnumbered: a source line is not a text row
         }
 
         private void paintBreakpointMarker(Graphics g, FontMetrics metrics, int y) {
@@ -682,27 +624,14 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
 
         @Override
         public Dimension getPreferredSize() {
-            if (preferredSize == null) {
-                int lineCount = getMaximumSourceLineNumber();
-
-                if (lineCount > 0) {
-                    Font font = getFont();
-                    FontMetrics fontMetrics = getFontMetrics(font);
-                    int count = 1;
-
-                    while (lineCount >= 10) {
-                        lineCount = lineCount / 10;
-                        count++;
-                    }
-
-                    int preferredWidth = fontMetrics.charWidth('9') * count + 24;
-                    preferredSize = new Dimension(preferredWidth, 0);
-                } else {
-                    preferredSize = new Dimension(0, 0);
-                }
+            Dimension size = super.getPreferredSize();
+            Font font = getFont();
+            if (font != null && textArea != null) {
+                FontMetrics metrics = getFontMetrics(font);
+                int digits = Integer.toString(getMaximumDisplayedLineNumber()).length();
+                size.width = metrics.charWidth('9') * digits + MARKER_WIDTH;
             }
-
-            return preferredSize;
+            return size;
         }
     }
 }
