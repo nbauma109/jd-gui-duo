@@ -5,4 +5,4 @@ sdk use java 25.0.1-oracle
 export JAVA_HOME=~/.sdkman/candidates/java/current
 export M3_VERSION=$(curl -Ls -o /dev/null -w %{url_effective} https://github.com/apache/maven/releases/latest | sed 's,https://github.com/apache/maven/releases/tag/maven-,,g')
 export MVNW_REPOURL=https://maven-central.storage-download.googleapis.com/maven2
-mvn -B -s .ci/settings.xml wrapper:wrapper -Dmaven=${M3_VERSION} --no-transfer-progress
+mvn -B -s .github/maven-settings.xml wrapper:wrapper -Dmaven=${M3_VERSION} --no-transfer-progress
