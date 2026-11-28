@@ -259,20 +259,6 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
         scrollPane.getGutter().repaint();
     }
 
-    private int getMaximumDisplayedLineNumber() {
-        if (lineNumberMap == null) {
-            return textArea.getLineCount();
-        }
-        if (mappedLineNumberWidthDirty) {
-            maximumMappedLineNumber = 0;
-            for (int lineNumber : lineNumberMap) {
-                maximumMappedLineNumber = Math.max(maximumMappedLineNumber, lineNumber);
-            }
-            mappedLineNumberWidthDirty = false;
-        }
-        return maximumMappedLineNumber;
-    }
-
     public int getMaximumSourceLineNumber() { return maxLineNumber; }
 
     protected int getTextAreaLineNumber(int originalLineNumber) {
@@ -620,6 +606,20 @@ public abstract class CustomLineNumbersPage extends HyperlinkPage {
             int[] px = {ax, ax + ah, ax};
             int[] py = {mid - ah / 2, mid, mid + ah / 2};
             g.fillPolygon(px, py, 3);
+        }
+
+        private int getMaximumDisplayedLineNumber() {
+            if (lineNumberMap == null) {
+                return CustomLineNumbersPage.this.textArea.getLineCount();
+            }
+            if (mappedLineNumberWidthDirty) {
+                maximumMappedLineNumber = 0;
+                for (int lineNumber : lineNumberMap) {
+                    maximumMappedLineNumber = Math.max(maximumMappedLineNumber, lineNumber);
+                }
+                mappedLineNumberWidthDirty = false;
+            }
+            return maximumMappedLineNumber;
         }
 
         @Override
