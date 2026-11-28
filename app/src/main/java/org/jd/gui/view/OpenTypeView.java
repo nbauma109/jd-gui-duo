@@ -264,14 +264,9 @@ public class OpenTypeView {
             int count = typeNames.size();
 
             switch (count) {
-                case 0:
-                    openTypeMatchLabel.setText("Matching types:");
-                    break;
-                case 1:
-                    openTypeMatchLabel.setText("1 matching type:");
-                    break;
-                default:
-                    openTypeMatchLabel.setText(count + " matching types:");
+                case 0 -> openTypeMatchLabel.setText("Matching types:");
+                case 1 -> openTypeMatchLabel.setText("1 matching type:");
+                default -> openTypeMatchLabel.setText(count + " matching types:");
             }
         });
     }

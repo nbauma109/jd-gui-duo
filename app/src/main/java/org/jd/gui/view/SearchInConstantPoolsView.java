@@ -483,14 +483,9 @@ public class SearchInConstantPoolsView<T extends DefaultMutableTreeNode & Contai
             }
             // Update matching item counter
             switch (matchingTypeCount) {
-                case 0:
-                    searchInConstantPoolsLabel.setText("Matching entries:");
-                    break;
-                case 1:
-                    searchInConstantPoolsLabel.setText("1 matching entry:");
-                    break;
-                default:
-                    searchInConstantPoolsLabel.setText(matchingTypeCount + " matching entries:");
+                case 0 -> searchInConstantPoolsLabel.setText("Matching entries:");
+                case 1 -> searchInConstantPoolsLabel.setText("1 matching entry:");
+                default -> searchInConstantPoolsLabel.setText(matchingTypeCount + " matching entries:");
             }
         });
     }

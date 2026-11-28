@@ -446,18 +446,10 @@ public class AbstractTextPage extends JPanel implements LineNumberNavigable, Con
             char c = pattern.charAt(i);
 
             switch (c) {
-            case '*':
-                sbPattern.append(".*");
-                break;
-            case '?':
-                sbPattern.append('.');
-                break;
-            case '.':
-                sbPattern.append("\\.");
-                break;
-            default:
-                sbPattern.append(c);
-                break;
+                case '*' -> sbPattern.append(".*");
+                case '?' -> sbPattern.append('.');
+                case '.' -> sbPattern.append("\\.");
+                default -> sbPattern.append(c);
             }
         }
 
