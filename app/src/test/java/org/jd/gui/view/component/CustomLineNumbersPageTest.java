@@ -2,9 +2,11 @@ package org.jd.gui.view.component;
 
 import jd.core.links.HyperlinkData;
 
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.folding.Fold;
 import org.fife.ui.rtextarea.Gutter;
+import org.fife.ui.rtextarea.RTextArea;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -16,6 +18,7 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
@@ -269,6 +272,170 @@ class CustomLineNumbersPageTest {
     }
 
     @Test
+    void gutterClicksPreserveCaretNavigationAndOnlyLeftDoubleClicksToggleMappedBreakpoints() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            TestPage page = new TestPage(SOURCE);
+            page.setLineNumber(2, 42);
+            paint(page);
+            CustomLineNumbersPage.SourceLineNumberList numbers = lineNumbers(page);
+
+            pressLineNumber(page, numbers, 2, MouseEvent.BUTTON1, 1);
+            assertThat(page.getCaretSourceLine()).isEqualTo(42);
+            assertThat(page.getBreakpointLines()).isEmpty();
+
+            pressLineNumber(page, numbers, 2, MouseEvent.BUTTON3, 2);
+            assertThat(page.getBreakpointLines()).isEmpty();
+
+            pressLineNumber(page, numbers, 1, MouseEvent.BUTTON1, 2);
+            assertThat(page.getCaretSourceLine()).isZero();
+            assertThat(page.getBreakpointLines()).isEmpty();
+
+            pressLineNumber(page, numbers, 2, MouseEvent.BUTTON1, 2);
+            assertThat(page.getBreakpointLines()).containsExactly(42);
+            assertThat(page.getCaretSourceLine()).isEqualTo(42);
+
+            pressLineNumber(page, numbers, 2, MouseEvent.BUTTON1, 2);
+            assertThat(page.getBreakpointLines()).isEmpty();
+        });
+    }
+
+    @Test
+    void executionArrowAndBreakpointCanShareAMappedSourceRow() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            TestPage page = new TestPage(SOURCE);
+            page.setLineNumber(1, 1);
+            page.setLineNumber(2, 42);
+            page.setLineNumber(3, 3);
+            page.setBreakpointLineNumber(42, true);
+            BufferedImage before = paint(page);
+
+            page.setCurrentExecutionLine(42);
+            BufferedImage executing = paint(page);
+            Color executionArrow = new Color(0, 128, 0);
+            assertThat(hasColor(row(page, executing, 2), executionArrow)).isTrue();
+            assertThat(hasColor(row(page, executing, 2), Color.RED)).isTrue();
+            assertThat(hasColor(row(page, executing, 1), executionArrow)).isFalse();
+            assertThat(hasColor(row(page, executing, 3), executionArrow)).isFalse();
+            assertThat(page.getBreakpointLines()).containsExactly(42);
+
+            page.setCurrentExecutionLine(0);
+            assertThat(row(page, paint(page), 2)).containsExactly(row(page, before, 2));
+        });
+    }
+
+    @Test
+    void gutterWidthWithoutMappingsTracksPhysicalLineCount() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            TestPage page = new TestPage(SOURCE);
+            BufferedImage before = paint(page);
+            assertNumber(row(page, before, 2), FOREGROUND, 2);
+
+            page.setText("statement();\n".repeat(15));
+            BufferedImage expanded = paint(page);
+            assertThat(expanded.getWidth()).isGreaterThan(before.getWidth());
+            assertNumber(row(page, expanded, 10), FOREGROUND, 10);
+
+            page.setText(SOURCE);
+            assertThat(paint(page).getWidth()).isEqualTo(before.getWidth());
+        });
+    }
+
+    @Test
+    void detachedLineNumberListPaintsWithItsOwnBackgroundAndPreservesGraphicsState() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            TestPage page = new TestPage(SOURCE);
+            page.initLineNumbers();
+            paint(page);
+            CustomLineNumbersPage.SourceLineNumberList numbers = page.new SourceLineNumberList(page.textArea);
+            numbers.setFont(NUMBER_FONT);
+            numbers.setForeground(FOREGROUND);
+            numbers.setBackground(BACKGROUND);
+            numbers.setSize(numbers.getPreferredSize().width, page.textArea.getHeight());
+            BufferedImage image = new BufferedImage(numbers.getWidth(), numbers.getHeight(),
+                    BufferedImage.TYPE_INT_ARGB);
+            Graphics2D graphics = image.createGraphics();
+            try {
+                graphics.setColor(Color.MAGENTA);
+                Font originalFont = NUMBER_FONT.deriveFont(12f);
+                graphics.setFont(originalFont);
+                assertThat(graphics.getClip()).isNull();
+                numbers.paintComponent(graphics);
+                assertThat(graphics.getColor()).isEqualTo(Color.MAGENTA);
+                assertThat(graphics.getFont()).isEqualTo(originalFont);
+                assertThat(graphics.getClip()).isNull();
+                assertThat(image.getRGB(0, 0)).isEqualTo(BACKGROUND.getRGB());
+                assertThat(hasColor(pixels(image, 0, image.getHeight()), FOREGROUND)).isTrue();
+            } finally {
+                graphics.dispose();
+            }
+        });
+    }
+
+    @Test
+    void paintingAndDoubleClickingBeforeTextAreaLayoutAreSafe() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            TestPage page = new TestPage(SOURCE);
+            RSyntaxTextArea area = new RSyntaxTextArea(SOURCE);
+            area.setSize(0, 0);
+            CustomLineNumbersPage.SourceLineNumberList numbers = page.new SourceLineNumberList(area);
+            numbers.setFont(NUMBER_FONT);
+            numbers.setBackground(BACKGROUND);
+            numbers.setSize(80, 80);
+
+            BufferedImage image = new BufferedImage(80, 80, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D graphics = image.createGraphics();
+            try {
+                graphics.setClip(0, 0, 80, 80);
+                assertThat(area.viewToModel2D(new Point(0, 0))).isNegative();
+                numbers.paintComponent(graphics);
+                assertBlank(pixels(image, 0, image.getHeight()));
+            } finally {
+                graphics.dispose();
+            }
+
+            numbers.mousePressed(new MouseEvent(numbers, MouseEvent.MOUSE_PRESSED, 0L,
+                    0, 2, 0, 2, false, MouseEvent.BUTTON1));
+            assertThat(page.getBreakpointLines()).isEmpty();
+        });
+    }
+
+    @Test
+    void paintingWithAPlainTextAreaDoesNotAttemptSyntaxRowRendering() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            TestPage page = new TestPage(SOURCE);
+            RTextArea area = new RTextArea(SOURCE);
+            CustomLineNumbersPage.SourceLineNumberList numbers = page.new SourceLineNumberList(area);
+            numbers.setSize(80, 80);
+            BufferedImage image = new BufferedImage(80, 80, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D graphics = image.createGraphics();
+            try {
+                graphics.setClip(0, 0, 80, 80);
+                numbers.paintComponent(graphics);
+                assertThat(pixels(image, 0, 80)).containsOnly(0);
+            } finally {
+                graphics.dispose();
+            }
+        });
+    }
+
+    private static CustomLineNumbersPage.SourceLineNumberList lineNumbers(TestPage page) {
+        for (Component child : page.scrollPane.getGutter().getComponents()) {
+            if (child instanceof CustomLineNumbersPage.SourceLineNumberList numbers) {
+                return numbers;
+            }
+        }
+        throw new AssertionError("Source line number list not found");
+    }
+
+    private static void pressLineNumber(TestPage page, CustomLineNumbersPage.SourceLineNumberList numbers,
+            int physicalLine, int button, int clickCount) {
+        Point point = SwingUtilities.convertPoint(page.scrollPane.getGutter(),
+                new Point(2, rowTop(page, physicalLine) + page.textArea.getLineHeight() / 2), numbers);
+        numbers.mousePressed(new MouseEvent(numbers, MouseEvent.MOUSE_PRESSED, 0L,
+                0, point.x, point.y, clickCount, false, button));
+    }
+
+    @Test
     void gutterWidthTracksChangesToOriginalSourceNumbers() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             TestPage page = new TestPage(SOURCE);
@@ -408,6 +575,11 @@ class CustomLineNumbersPageTest {
             gutter.setFoldIndicatorEnabled(false);
             gutter.setIconRowHeaderEnabled(false);
             gutter.setLineNumbersEnabled(true);
+        }
+
+        @Override
+        protected void toggleBreakpointLineNumber(int sourceLineNumber) {
+            setBreakpointLineNumber(sourceLineNumber, !isBreakpointLineNumber(sourceLineNumber));
         }
 
         @Override
